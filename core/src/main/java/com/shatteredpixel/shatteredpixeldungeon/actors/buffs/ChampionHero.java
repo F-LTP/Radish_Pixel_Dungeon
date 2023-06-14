@@ -29,6 +29,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EliteBadge;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Wayward;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -136,6 +138,15 @@ public abstract class ChampionHero extends Buff {
     };
     public static void rollForElite(Hero hero,float dur){
         getElite(hero, Random.Int(6),dur);
+    }
+    public static void getElite(Hero hero, int el, float dur, Item s){
+        if (el!=5){
+            getElite(hero,el,dur);
+        }else {
+            Buff.affect(hero,Growing.class).set(dur);
+            Growing g=hero.buff(Growing.class);
+            g.control(s);
+        }
     }
     public static void getElite(Hero hero,int el,float dur){
         Class<?extends ChampionHero> buffCls;
@@ -275,20 +286,35 @@ public abstract class ChampionHero extends Buff {
             color = 0xFF0000;
         }
 
-        private static float multiplier = 1.19f;
-        private float multiplier_read = 1.19f;
+        public float multiplier = 1.19f;
+        Item source;
+        public void control(Item s){
+            source=s;
+            if (s instanceof EliteBadge)
+            multiplier=((EliteBadge) s).growing_mul;
+        }
         private int count=0;
         @Override
         public boolean act() {
             count++;
             if (count>=3) {
                 multiplier += 0.01f;
-                multiplier_read = multiplier;
                 count-=3;
             }
             return super.act();
         }
-
+        void updateSource(){
+            if (source!=null){
+                if (source instanceof EliteBadge){
+                    ((EliteBadge) source).record_growing(multiplier);
+                }
+            }
+        }
+        @Override
+        public void detach(){
+            super.detach();
+            updateSource();
+        }
         @Override
         public float meleeDamageFactor() {
             return multiplier;
@@ -314,15 +340,13 @@ public abstract class ChampionHero extends Buff {
         @Override
         public void storeInBundle(Bundle bundle) {
             super.storeInBundle(bundle);
-            bundle.put(MULTIPLIER, multiplier_read);
-            multiplier=1.19f;
+            bundle.put(MULTIPLIER, multiplier);
         }
 
         @Override
         public void restoreFromBundle(Bundle bundle) {
             super.restoreFromBundle(bundle);
-            multiplier_read = bundle.getFloat(MULTIPLIER);
-            multiplier=multiplier_read;
+            multiplier = bundle.getFloat(MULTIPLIER);
         }
     }
 

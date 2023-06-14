@@ -79,12 +79,14 @@ public class EliteBadge extends Artifact{
     }
 
     int randthree[]= {0,0};
-
+    public float growing_mul=1.19f;
     private static final String RT = "randomthree";
+    private static final String GM = "growingmul";
     @Override
     public void storeInBundle(Bundle bundle) {
         super.storeInBundle(bundle);
         bundle.put( RT, randthree );
+        bundle.put(GM,growing_mul);
     }
 
     @Override
@@ -96,6 +98,10 @@ public class EliteBadge extends Artifact{
             randthree[0]=0;
             randthree[1]=0;
         }
+        if (bundle.contains(GM)){
+            growing_mul= bundle.getFloat(GM);
+        }
+        else growing_mul=1.19f;
     }
     @Override
     public ArrayList<String> actions(Hero hero) {
@@ -198,7 +204,15 @@ public class EliteBadge extends Artifact{
         }
         return desc;
     }
-
+    public void giveElite(int i){
+        ChampionHero.getElite(hero,randthree[i],10f+level()*2f, this);
+        Sample.INSTANCE.play( Assets.Sounds.BURNING );
+        Talent.onArtifactUsed( hero );
+        ActionIndicator.updateIcon();
+    }
+    public void record_growing(float m){
+        growing_mul=m;
+    }
     public class badgeRecharge extends ArtifactBuff{
         public void gainExp( int amount ) {
             if (cursed || target.buff(MagicImmune.class) != null ) return;
@@ -250,10 +264,12 @@ public class EliteBadge extends Artifact{
                 charge-=(5+level()/5);
                 updateQuickslot();
                 if (index < 2) {
-                    ChampionHero.getElite(hero,randthree[index],10f+level()*2f);
-                    Sample.INSTANCE.play( Assets.Sounds.BURNING );
-                    Talent.onArtifactUsed( hero );
-                    ActionIndicator.updateIcon();
+                    if (Dungeon.hero.belongings.getItem(EliteBadge.class)!=null){
+                        EliteBadge eb=Dungeon.hero.belongings.getItem(EliteBadge.class);
+                        if (eb.isEquipped(Dungeon.hero)){
+                            eb.giveElite(index);
+                        }
+                    }
                 }
                 randthree[0]=0;
                 randthree[1]=0;
