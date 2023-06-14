@@ -87,6 +87,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfElements;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRetribution;
@@ -538,7 +539,14 @@ public abstract class Char extends Actor {
 		}
 
 		float acuRoll = Random.Float( acuStat );
-		if (attacker.buff(Bless.class) != null) acuRoll *= 1.25f;
+		float bless_adj_a=1.25f,bless_adj_d=1.25f;
+		if (Dungeon.hero.buff(RingOfBenediction.Benediction.class) != null) {
+			if (attacker == Dungeon.hero)
+				bless_adj_a *= RingOfBenediction.periodMultiplier(attacker);
+			else if (defender == Dungeon.hero)
+				bless_adj_d *= RingOfBenediction.periodMultiplier(attacker);
+		}
+		if (attacker.buff(Bless.class) != null) acuRoll *= bless_adj_a;
 		if (attacker.buff(  Hex.class) != null) acuRoll *= 0.8f;
 		for (ChampionEnemy buff : attacker.buffs(ChampionEnemy.class)){
 			acuRoll *= buff.evasionAndAccuracyFactor();
@@ -549,7 +557,7 @@ public abstract class Char extends Actor {
 		acuRoll *= AscensionChallenge.statModifier(attacker);
 		
 		float defRoll = Random.Float( defStat );
-		if (defender.buff(Bless.class) != null) defRoll *= 1.25f;
+		if (defender.buff(Bless.class) != null) defRoll *= bless_adj_d;
 		if (defender.buff(  Hex.class) != null) defRoll *= 0.8f;
 		for (ChampionEnemy buff : defender.buffs(ChampionEnemy.class)){
 			defRoll *= buff.evasionAndAccuracyFactor();

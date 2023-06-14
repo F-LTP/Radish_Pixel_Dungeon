@@ -21,7 +21,9 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.watabou.utils.Bundle;
 
 public abstract class ShieldBuff extends Buff {
@@ -49,6 +51,12 @@ public abstract class ShieldBuff extends Buff {
 	}
 	
 	public void setShield( int shield ) {
+		if (target == Dungeon.hero){
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				shield*=RingOfBenediction.periodMultiplier(target);
+			}
+		}
 		if (this.shielding <= shield) this.shielding = shield;
 		if (target != null) target.needsShieldUpdate = true;
 	}
