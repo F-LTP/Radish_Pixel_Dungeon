@@ -7,9 +7,9 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
 public class Darksword extends MeleeWeapon {
-    private static ItemSprite.Glowing BLACK = new ItemSprite.Glowing( 0x000000 );
+    //private static ItemSprite.Glowing BLACK = new ItemSprite.Glowing( 0x000000 );
     {
-        image = ItemSpriteSheet.LONGSWORD;
+        image = ItemSpriteSheet.DARKSWORD;
         hitSound = Assets.Sounds.HIT_SLASH;
         hitSoundPitch = 1f;
 
@@ -35,8 +35,4 @@ public class Darksword extends MeleeWeapon {
         return super.proc(attacker,defender,damage+dmgbonus);
     }
 
-    @Override
-    public ItemSprite.Glowing glowing() {
-        return BLACK;
-    }
 }

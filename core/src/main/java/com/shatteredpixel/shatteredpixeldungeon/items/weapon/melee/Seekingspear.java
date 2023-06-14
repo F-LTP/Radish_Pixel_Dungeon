@@ -8,9 +8,9 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
 public class Seekingspear extends MeleeWeapon{
-    private static ItemSprite.Glowing RED = new ItemSprite.Glowing( 0x660022 );
+    //private static ItemSprite.Glowing RED = new ItemSprite.Glowing( 0x660022 );
     {
-        image = ItemSpriteSheet.SPEAR;
+        image = ItemSpriteSheet.SEEKING;
         hitSound = Assets.Sounds.HIT_STAB;
         hitSoundPitch = 0.9f;
 
@@ -25,9 +25,5 @@ public class Seekingspear extends MeleeWeapon{
     public int max(int lvl) {
         return  4*(tier+1) +    //20 base, down from 25
                 lvl*(tier);   //scaling down
-    }
-    @Override
-    public ItemSprite.Glowing glowing() {
-        return RED;
     }
 }

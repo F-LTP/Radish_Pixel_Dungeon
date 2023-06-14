@@ -29,7 +29,7 @@ public class Beecomb extends MeleeWeapon{
     public boolean bee_charged=false;
     public static final String AC_SUMMON	= "SUMMON";
     {
-        image = ItemSpriteSheet.HONEYPOT;
+        image = ItemSpriteSheet.BEECOMB;
         hitSound = Assets.Sounds.HIT_CRUSH;
         hitSoundPitch = 1f;
 

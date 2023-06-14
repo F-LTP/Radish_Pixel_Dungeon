@@ -213,6 +213,7 @@ public class ItemSpriteSheet {
 	public static final int SPEAR           = WEP_TIER2+2;
 	public static final int QUARTERSTAFF    = WEP_TIER2+3;
 	public static final int DIRK            = WEP_TIER2+4;
+
 	static{
 		assignItemRect(SHORTSWORD,      13, 13);
 		assignItemRect(HAND_AXE,        12, 14);
@@ -244,6 +245,7 @@ public class ItemSpriteSheet {
 	public static final int RUNIC_BLADE     = WEP_TIER4+3;
 	public static final int ASSASSINS_BLADE = WEP_TIER4+4;
 	public static final int CROSSBOW        = WEP_TIER4+5;
+	public static final int HOLYANKH		= WEP_TIER4+6;
 	static{
 		assignItemRect(LONGSWORD,       15, 15);
 		assignItemRect(BATTLE_AXE,      16, 16);
@@ -251,6 +253,7 @@ public class ItemSpriteSheet {
 		assignItemRect(RUNIC_BLADE,     14, 14);
 		assignItemRect(ASSASSINS_BLADE, 14, 15);
 		assignItemRect(CROSSBOW,        15, 15);
+		assignItemRect(HOLYANKH,		16,14);
 	}
 
 	private static final int WEP_TIER5      =                               xy(1, 9);   //8 slots
@@ -260,6 +263,13 @@ public class ItemSpriteSheet {
 	public static final int GREATAXE        = WEP_TIER5+3;
 	public static final int GREATSHIELD     = WEP_TIER5+4;
 	public static final int GAUNTLETS       = WEP_TIER5+5;
+	public static final int BLOODBLADE1		= WEP_TIER5+8;
+	public static final int BLOODBLADE2		= WEP_TIER5+9;
+	public static final int BLOODBLADE3		= WEP_TIER5+10;
+	public static final int DARKSWORD		= WEP_TIER5+11;
+	public static final int CUTTERHEAD		= WEP_TIER5+12;
+	public static final int BEECOMB			= WEP_TIER5+13;
+	public static final int SEEKING			= WEP_TIER5+14;
 	static{
 		assignItemRect(GREATSWORD,  16, 16);
 		assignItemRect(WAR_HAMMER,  16, 16);
@@ -267,6 +277,13 @@ public class ItemSpriteSheet {
 		assignItemRect(GREATAXE,    12, 16);
 		assignItemRect(GREATSHIELD, 12, 16);
 		assignItemRect(GAUNTLETS,   13, 15);
+		assignItemRect(BLOODBLADE1,  15, 15);
+		assignItemRect(BLOODBLADE2,  15, 15);
+		assignItemRect(BLOODBLADE3,  14, 15);
+		assignItemRect(DARKSWORD,    16, 16);
+		assignItemRect(CUTTERHEAD,    16, 16);
+		assignItemRect(BEECOMB,    15, 16);
+		assignItemRect(SEEKING,    16, 16);
 	}
 
 	                                                                                    //8 free slots
@@ -342,10 +359,12 @@ public class ItemSpriteSheet {
 	public static final int ARMOR_MAIL      = ARMOR+2;
 	public static final int ARMOR_SCALE     = ARMOR+3;
 	public static final int ARMOR_PLATE     = ARMOR+4;
-	public static final int ARMOR_WARRIOR   = ARMOR+5;
-	public static final int ARMOR_MAGE      = ARMOR+6;
-	public static final int ARMOR_ROGUE     = ARMOR+7;
-	public static final int ARMOR_HUNTRESS  = ARMOR+8;
+
+	public static final int ARMOR_CRAB      = ARMOR+5;
+	public static final int ARMOR_WARRIOR   = ARMOR+6;
+	public static final int ARMOR_MAGE      = ARMOR+7;
+	public static final int ARMOR_ROGUE     = ARMOR+8;
+	public static final int ARMOR_HUNTRESS  = ARMOR+9;
 	static{
 		assignItemRect(ARMOR_CLOTH,     15, 12);
 		assignItemRect(ARMOR_LEATHER,   14, 13);
@@ -421,6 +440,8 @@ public class ItemSpriteSheet {
 	public static final int ARTIFACT_ROSE1      = ARTIFACTS+20;
 	public static final int ARTIFACT_ROSE2      = ARTIFACTS+21;
 	public static final int ARTIFACT_ROSE3      = ARTIFACTS+22;
+
+	public static final int ARTIFACT_CONCEAL    = ARTIFACTS+24;
 	static{
 		assignItemRect(ARTIFACT_CLOAK,      9,  15);
 		assignItemRect(ARTIFACT_ARMBAND,    16, 13);
@@ -580,6 +601,8 @@ public class ItemSpriteSheet {
 	public static final int ELIXIR_TOXIC    = ELIXIRS+4;
 	public static final int ELIXIR_ICY      = ELIXIRS+5;
 	public static final int ELIXIR_ARCANE   = ELIXIRS+6;
+
+	public static final int ELIXIR_WEAK     = ELIXIRS+7;
 	static{
 		for (int i = BREWS; i < BREWS+16; i++)
 			assignItemRect(i, 12, 14);

@@ -22,11 +22,11 @@ import java.util.ArrayList;
 import javax.lang.model.util.AbstractAnnotationValueVisitor6;
 
 public class Bloodblade extends MeleeWeapon{
-    private static ItemSprite.Glowing RED = new ItemSprite.Glowing( 0x660022 );
+    //private static ItemSprite.Glowing RED = new ItemSprite.Glowing( 0x660022 );
     public static final String AC_SAC	= "SAC";
     public int sac=0;
     {
-        image = ItemSpriteSheet.LONGSWORD;
+        image = ItemSpriteSheet.BLOODBLADE1;
         hitSound = Assets.Sounds.HIT_SLASH;
         hitSoundPitch = 1f;
 
@@ -38,6 +38,17 @@ public class Bloodblade extends MeleeWeapon{
         ArrayList<String> actions = super.actions( hero );
         actions.add( AC_SAC );
         return actions;
+    }
+    private void updateImage(){
+        int oldimage=image;
+        if (sac>=30){
+            image =ItemSpriteSheet.BLOODBLADE3;
+        }
+        else if (sac>=15){
+            image =ItemSpriteSheet.BLOODBLADE2;
+        }
+        else image = ItemSpriteSheet.BLOODBLADE1;
+        updateQuickslot();
     }
     @Override
     public void execute( Hero hero, String action ) {
@@ -56,6 +67,7 @@ public class Bloodblade extends MeleeWeapon{
                 hero.updateHT(false);
                 sac+=3;
                 GLog.i(Messages.get(this,"sac"));
+                updateImage();
             }
         }
     }
@@ -65,10 +77,7 @@ public class Bloodblade extends MeleeWeapon{
                 lvl*(tier+1)   //scaling unchanged
                 +sac;
     }
-    @Override
-    public ItemSprite.Glowing glowing() {
-        return RED;
-    }
+
     @Override
     public String statsInfo() {
         String d=Messages.get(this, "stats_desc");

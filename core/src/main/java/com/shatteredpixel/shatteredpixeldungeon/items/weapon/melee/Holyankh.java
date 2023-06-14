@@ -14,9 +14,9 @@ import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
 public class Holyankh extends MeleeWeapon{
-    private static ItemSprite.Glowing YELLOW = new ItemSprite.Glowing( 0xFFFF00 );
+    //private static ItemSprite.Glowing YELLOW = new ItemSprite.Glowing( 0xFFFF00 );
     {
-        image = ItemSpriteSheet.ANKH;
+        image = ItemSpriteSheet.HOLYANKH;
         hitSound = Assets.Sounds.HIT_SLASH;
         hitSoundPitch = 0.9f;
 
@@ -45,8 +45,5 @@ public class Holyankh extends MeleeWeapon{
         return super.proc(attacker,defender,damage);
     }
 
-    @Override
-    public ItemSprite.Glowing glowing() {
-        return YELLOW;
-    }
+
 }

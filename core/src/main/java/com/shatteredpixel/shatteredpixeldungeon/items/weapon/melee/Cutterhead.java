@@ -9,9 +9,9 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
 public class Cutterhead  extends MeleeWeapon{
-    private static ItemSprite.Glowing RED = new ItemSprite.Glowing( 0x660022 );
+    //private static ItemSprite.Glowing RED = new ItemSprite.Glowing( 0x660022 );
     {
-        image = ItemSpriteSheet.GREATAXE;
+        image = ItemSpriteSheet.CUTTERHEAD;
         hitSound = Assets.Sounds.HIT_SLASH;
         hitSoundPitch = 1f;
 
@@ -23,16 +23,12 @@ public class Cutterhead  extends MeleeWeapon{
                 lvl*(tier);   //scaling down
     }
     @Override
-    public int proc(Char attacker, Char defender, int damage){
-        int dmgbonus=0;
+    public int proc(Char attacker, Char defender, int damage) {
+        int dmgbonus = 0;
         if (!(defender.properties().contains(Char.Property.INORGANIC))) {
             dmgbonus += damage / 4;
-            Buff.affect( defender, Bleeding.class).set( 3+0.5f*buffedLvl(), this.getClass());
+            Buff.affect(defender, Bleeding.class).set(3 + 0.5f * buffedLvl(), this.getClass());
         }
-        return super.proc(attacker,defender,damage+dmgbonus);
-    }
-    @Override
-    public ItemSprite.Glowing glowing() {
-        return RED;
+        return super.proc(attacker, defender, damage + dmgbonus);
     }
 }
