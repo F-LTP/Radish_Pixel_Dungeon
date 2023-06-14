@@ -261,12 +261,6 @@ public class Hero extends Char {
 	public float critSkill(){
 		if (buff(RingOfTenacity.Tenacity.class)!=null) {return 0;}
 		float critbonus=0;
-		if (belongings.weapon instanceof Seekingspear){
-			Char enemy = this.enemy();
-			if (enemy instanceof Mob && ((Mob) enemy).surprisedBy(this)){
-				critbonus+=25f;
-			}
-		}
 
 		return critSkill+critbonus;
 	}
@@ -279,10 +273,6 @@ public class Hero extends Char {
 	public float critDamage(){
 		float cdbouns=0;
 		cdbouns+=RingOfAccuracy.critDamgeBonus(this);
-		if (belongings.weapon instanceof Seekingspear){
-			Seekingspear ss=(Seekingspear)belongings.weapon;
-			cdbouns+=0.3f+0.05f*ss.buffedLvl();
-		}
 		return Math.min(critDamage+cdbouns,critDamageCap);
 	}
 	public int critDamage_shown(){

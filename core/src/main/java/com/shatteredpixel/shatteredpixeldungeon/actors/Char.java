@@ -75,6 +75,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Elemental;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
@@ -104,6 +105,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kineti
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bloodblade;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.ShockingDart;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
@@ -365,12 +367,22 @@ public abstract class Char extends Actor {
 				dmg = damageRoll();
 			}
 			boolean crit=false;
-			float current_crit=critSkill();
-			if (this == Dungeon.hero && Dungeon.hero.belongings.weapon instanceof Bloodblade){
-				Bloodblade bb=(Bloodblade)Dungeon.hero.belongings.weapon;
-				current_crit+=bb.sac;
+			float current_crit=critSkill(),current_critdamage=critDamage();
+			if (this == Dungeon.hero){
+				if (Dungeon.hero.belongings.weapon instanceof Bloodblade) {
+					Bloodblade bb = (Bloodblade) Dungeon.hero.belongings.weapon;
+					current_crit += bb.sac;
+				}
+				else if (Dungeon.hero.belongings.weapon instanceof Seekingspear){
+					Seekingspear ss=(Seekingspear)Dungeon.hero.belongings.weapon;
+					current_critdamage+=0.3f+0.05f*ss.buffedLvl();
+					if (enemy instanceof Mob && ((Mob) enemy).surprisedBy(this)){
+						current_crit+=25f;
+					}
+				}
 			}
-			if (Random.Float()*100<current_crit) {dmg*=critDamage();crit=true;}
+			current_critdamage=Math.min(current_critdamage,critDamageCap);
+			if (Random.Float()*100<current_crit) {dmg*=current_critdamage;crit=true;}
 			dmg = Math.round(dmg*dmgMulti);
 
 			Berserk berserk = buff(Berserk.class);
