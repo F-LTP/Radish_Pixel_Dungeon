@@ -102,6 +102,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfMight;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfDivineInspiration;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEvasion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
@@ -233,7 +234,12 @@ public class Hero extends Char {
 		HT = Math.round(multiplier * HT);
 		
 		if (buff(ElixirOfMight.HTBoost.class) != null){
-			HT += buff(ElixirOfMight.HTBoost.class).boost();
+			int might_boost=buff(ElixirOfMight.HTBoost.class).boost();
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				might_boost=Math.round(might_boost*RingOfBenediction.periodMultiplier(this));
+			}
+			HT += might_boost;
 		}
 		if (boostHP){
 			HP += Math.max(HT - curHT, 0);
@@ -551,7 +557,12 @@ public class Hero extends Char {
 		}
 
 		if (buff(HoldFast.class) != null){
-			dr += Random.NormalIntRange(0, 2*pointsInTalent(Talent.HOLD_FAST));
+			int most_add=2*pointsInTalent(Talent.HOLD_FAST);
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				most_add=Math.round(most_add*RingOfBenediction.periodMultiplier(this));
+			}
+			dr += Random.NormalIntRange(0, most_add );
 		}
 		
 		return dr;
@@ -1995,9 +2006,13 @@ public class Hero extends Char {
 		if (foresightScan){
 			Dungeon.level.mapped[pos] = true;
 		}
-
+		float buff_mul=1f;
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				buff_mul*=RingOfBenediction.periodMultiplier(this);
+			}
 		if (foresight) {
-			distance = Foresight.DISTANCE;
+			distance = Math.round(Foresight.DISTANCE*buff_mul);
 			circular = true;
 		}
 
@@ -2120,7 +2135,7 @@ public class Hero extends Char {
 		}
 
 		if (foresight){
-			GameScene.updateFog(pos, Foresight.DISTANCE+1);
+			GameScene.updateFog(pos, distance+1);
 		}
 		
 		return smthFound;

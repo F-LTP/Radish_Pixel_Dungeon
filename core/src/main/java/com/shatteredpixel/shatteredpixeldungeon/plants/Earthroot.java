@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.EarthParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -113,6 +114,12 @@ public class Earthroot extends Plant {
 		
 		public void level( int value ) {
 			if (target != null) {
+				if (target == Dungeon.hero){
+					Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+					if (ben!=null){
+						value=Math.round(value*RingOfBenediction.periodMultiplier(target));
+					}
+				}
 				if (level < value) {
 					level = value;
 				}

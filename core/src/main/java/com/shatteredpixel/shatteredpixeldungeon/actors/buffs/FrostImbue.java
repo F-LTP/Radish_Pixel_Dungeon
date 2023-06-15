@@ -21,8 +21,10 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SnowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
@@ -37,7 +39,14 @@ public class FrostImbue extends FlavourBuff {
 	public static final float DURATION	= 50f;
 	
 	public void proc(Char enemy){
-		Buff.affect(enemy, Chill.class, 2f);
+		float chill_time=2f;
+		if (target == Dungeon.hero){
+		Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+		if (ben!=null){
+			chill_time*=RingOfBenediction.periodMultiplier(target);
+		}
+	}
+		Buff.affect(enemy, Chill.class, chill_time);
 		enemy.sprite.emitter().burst( SnowParticle.FACTORY, 2 );
 	}
 	

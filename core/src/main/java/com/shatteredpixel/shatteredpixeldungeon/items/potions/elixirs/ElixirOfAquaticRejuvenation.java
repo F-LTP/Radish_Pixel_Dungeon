@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.GooBlob;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -69,6 +70,12 @@ public class ElixirOfAquaticRejuvenation extends Elixir {
 		private int left;
 		
 		public void set( int amount ){
+			if (target == Dungeon.hero ){
+				Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+				if (ben!=null){
+					amount=Math.round(amount*RingOfBenediction.periodMultiplier(target));
+				}
+			}
 			if (amount > left) left = amount;
 		}
 		
@@ -76,7 +83,14 @@ public class ElixirOfAquaticRejuvenation extends Elixir {
 		public boolean act() {
 			
 			if (!target.flying && Dungeon.level.water[target.pos] && target.HP < target.HT){
-				float healAmt = GameMath.gate( 1, target.HT/50f, left );
+				float healAmt = target.HT/50f;
+				if (target == Dungeon.hero ){
+					Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+					if (ben!=null){
+						healAmt*=RingOfBenediction.periodMultiplier(target);
+					}
+				}
+				healAmt = GameMath.gate(1,healAmt,left);
 				healAmt = Math.min(healAmt, target.HT - target.HP);
 				if (Random.Float() < (healAmt % 1)){
 					healAmt = (float)Math.ceil(healAmt);

@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
@@ -54,6 +56,13 @@ public class Recharging extends FlavourBuff {
 	//if this buff is still attached, must instead directly check its remaining time, and act accordingly.
 	//otherwise this causes inconsistent behaviour where this may detach before, or after, a wand charger acts.
 	public float remainder() {
-		return Math.min(1f, this.cooldown());
+		float my_mul=1f;
+		if (target == Dungeon.hero){
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				my_mul*=Math.pow(1.1f,Dungeon.hero.buff(RingOfBenediction.Benediction.class).buffedLvl());
+			}
+		}
+		return Math.min(1f, this.cooldown())*my_mul;
 	}
 }

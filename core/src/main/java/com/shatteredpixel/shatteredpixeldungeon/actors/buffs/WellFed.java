@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
@@ -38,11 +39,19 @@ public class WellFed extends Buff {
 	
 	@Override
 	public boolean act() {
+		int interval=18;
+		if (target == Dungeon.hero){
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				interval-=Dungeon.hero.buff(RingOfBenediction.Benediction.class).buffedLvl()/2;
+				interval=Math.max(interval,1);
+			}
+		}
 		left --;
 		if (left < 0){
 			detach();
 			return true;
-		} else if (left % 18 == 0){
+		} else if (left % interval == 0){
 			target.HP = Math.min(target.HT, target.HP + 1);
 		}
 		

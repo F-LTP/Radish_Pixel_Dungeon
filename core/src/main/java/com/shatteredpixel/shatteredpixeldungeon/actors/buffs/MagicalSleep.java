@@ -21,9 +21,11 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -32,7 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 public class MagicalSleep extends Buff {
 
 	private static final float STEP = 1f;
-
+	private float partial_heal=0f;
 	@Override
 	public boolean attachTo( Char target ) {
 		if (!target.isImmune(Sleep.class) && super.attachTo( target )) {
@@ -65,7 +67,18 @@ public class MagicalSleep extends Buff {
 			return true;
 		}
 		if (target.alignment == Char.Alignment.ALLY) {
-			target.HP = Math.min(target.HP+1, target.HT);
+			float to_heal=1f;
+			if (target == Dungeon.hero){
+				Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+				if (ben!=null){
+					to_heal*=RingOfBenediction.periodMultiplier(target);
+				}
+			}
+			partial_heal+=to_heal;
+			while (partial_heal>=1f){
+				target.HP = Math.min(target.HP+1, target.HT);
+				partial_heal-=1f;
+			}
 			if (target instanceof  Hero) ((Hero) target).resting = true;
 			if (target.HP == target.HT) {
 				if (target instanceof  Hero) GLog.p(Messages.get(this, "wakeup"));

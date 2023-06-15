@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -43,6 +44,13 @@ public class Light extends FlavourBuff {
 				target.viewDistance = Math.max( Dungeon.level.viewDistance, DISTANCE );
 				Dungeon.observe();
 			}
+			if (target == Dungeon.hero){
+				if (Dungeon.hero.buff(RingOfBenediction.Benediction.class).buffedLvl()>=11){
+					immunities.add(Blindness.class);
+					Buff tb=target.buff(Blindness.class);
+					if (tb!=null) tb.detach();
+				}
+			}
 			return true;
 		} else {
 			return false;
@@ -53,6 +61,7 @@ public class Light extends FlavourBuff {
 	public void detach() {
 		target.viewDistance = Dungeon.level.viewDistance;
 		Dungeon.observe();
+		if (immunities.contains(Blindness.class)) immunities.remove(Blindness.class);
 		super.detach();
 	}
 

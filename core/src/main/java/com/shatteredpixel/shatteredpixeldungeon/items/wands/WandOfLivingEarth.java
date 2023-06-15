@@ -28,12 +28,14 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -90,7 +92,10 @@ public class WandOfLivingEarth extends DamageWand {
 				buff.addArmor( buffedLvl(), armorToAdd);
 			}
 		}
-
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				armorToAdd=Math.round(armorToAdd*RingOfBenediction.periodMultiplier(Dungeon.hero));
+			}
 		//shooting at the guardian
 		if (guardian != null && guardian == ch){
 			guardian.sprite.centerEmitter().burst(MagicMissile.EarthParticle.ATTRACT, 8 + buffedLvl() / 2);
@@ -104,6 +109,9 @@ public class WandOfLivingEarth extends DamageWand {
 			//create a new guardian
 			guardian = new EarthGuardian();
 			guardian.setInfo(curUser, buffedLvl(), buff.armor);
+			int extra=armorToAdd-guardian.HT;
+			if (extra>0)
+				Buff.affect(guardian, Barrier.class).setShield(extra);
 
 			//if the collision pos is occupied (likely will be), then spawn the guardian in the
 			//adjacent cell which is closes to the user of the wand.
@@ -164,6 +172,9 @@ public class WandOfLivingEarth extends DamageWand {
 				} else {
 					guardian.sprite.centerEmitter().burst(MagicMissile.EarthParticle.ATTRACT, 8 + buffedLvl() / 2);
 					guardian.setInfo(curUser, buffedLvl(), armorToAdd);
+					int extra=armorToAdd-guardian.HT;
+					if (extra>0)
+						Buff.affect(guardian, Barrier.class).setShield(extra);
 					if (ch.alignment == Char.Alignment.ENEMY || ch.buff(Amok.class) != null) {
 						guardian.aggro(ch);
 					}
@@ -197,10 +208,16 @@ public class WandOfLivingEarth extends DamageWand {
 		}
 		
 		int armor = Math.round(damage*0.33f*procChanceMultiplier(attacker));
-
+		Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+		if (ben!=null){
+			armor=Math.round(armor*RingOfBenediction.periodMultiplier(Dungeon.hero));
+		}
 		if (guardian != null){
 			guardian.sprite.centerEmitter().burst(MagicMissile.EarthParticle.ATTRACT, 8 + buffedLvl() / 2);
 			guardian.setInfo(Dungeon.hero, buffedLvl(), armor);
+			int extra=armor-guardian.HT;
+			if (extra>0)
+				Buff.affect(guardian, Barrier.class).setShield(extra);
 		} else {
 			attacker.sprite.centerEmitter().burst(MagicMissile.EarthParticle.ATTRACT, 8 + buffedLvl() / 2);
 			Buff.affect(attacker, RockArmor.class).addArmor( buffedLvl(), armor);
