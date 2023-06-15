@@ -45,6 +45,7 @@ public class Light extends FlavourBuff {
 				Dungeon.observe();
 			}
 			if (target == Dungeon.hero){
+				if (target.buff(RingOfBenediction.Benediction.class)!=null)
 				if (Dungeon.hero.buff(RingOfBenediction.Benediction.class).buffedLvl()>=11){
 					immunities.add(Blindness.class);
 					Buff tb=target.buff(Blindness.class);

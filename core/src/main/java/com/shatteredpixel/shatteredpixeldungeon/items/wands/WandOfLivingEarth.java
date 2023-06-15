@@ -80,7 +80,10 @@ public class WandOfLivingEarth extends DamageWand {
 				break;
 			}
 		}
-
+		Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+		if (ben!=null){
+			armorToAdd=Math.round(armorToAdd*RingOfBenediction.periodMultiplier(Dungeon.hero));
+		}
 		RockArmor buff = curUser.buff(RockArmor.class);
 		if (ch == null){
 			armorToAdd = 0;
@@ -92,10 +95,6 @@ public class WandOfLivingEarth extends DamageWand {
 				buff.addArmor( buffedLvl(), armorToAdd);
 			}
 		}
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				armorToAdd=Math.round(armorToAdd*RingOfBenediction.periodMultiplier(Dungeon.hero));
-			}
 		//shooting at the guardian
 		if (guardian != null && guardian == ch){
 			guardian.sprite.centerEmitter().burst(MagicMissile.EarthParticle.ATTRACT, 8 + buffedLvl() / 2);
@@ -166,7 +165,7 @@ public class WandOfLivingEarth extends DamageWand {
 				wandProc(ch, chargesPerCast());
 				ch.damage(damage, this);
 				Sample.INSTANCE.play( Assets.Sounds.HIT_MAGIC, 1, 0.8f * Random.Float(0.87f, 1.15f) );
-				
+
 				if (guardian == null) {
 					curUser.sprite.centerEmitter().burst(MagicMissile.EarthParticle.ATTRACT, 8 + buffedLvl() / 2);
 				} else {

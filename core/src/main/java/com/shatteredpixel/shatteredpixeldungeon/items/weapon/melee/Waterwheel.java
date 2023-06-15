@@ -17,9 +17,9 @@ import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
 
 public class Waterwheel extends MeleeWeapon{
-    private static ItemSprite.Glowing BLUE = new ItemSprite.Glowing( 0x0000FF );
+    //private static ItemSprite.Glowing BLUE = new ItemSprite.Glowing( 0x0000FF );
     {
-        image = ItemSpriteSheet.MACE;
+        image = ItemSpriteSheet.WATERWHEEL;
         hitSound = Assets.Sounds.HIT_CRUSH;
         hitSoundPitch = 1f;
 
@@ -52,9 +52,5 @@ public class Waterwheel extends MeleeWeapon{
             if (active) Sample.INSTANCE.play(Assets.Sounds.GAS, 1f, 0.75f);
         }
         return super.proc(attacker,defender,damage);
-    }
-    @Override
-    public ItemSprite.Glowing glowing() {
-        return BLUE;
     }
 }

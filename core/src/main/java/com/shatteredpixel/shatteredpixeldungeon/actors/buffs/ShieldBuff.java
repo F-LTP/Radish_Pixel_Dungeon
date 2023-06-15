@@ -66,6 +66,12 @@ public abstract class ShieldBuff extends Buff {
 	}
 
 	public void incShield( int amt ){
+		if (target == Dungeon.hero){
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				amt=Math.round(amt*RingOfBenediction.periodMultiplier(target));
+			}
+		}
 		shielding += amt;
 		if (target != null) target.needsShieldUpdate = true;
 	}

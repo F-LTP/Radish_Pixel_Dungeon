@@ -370,11 +370,11 @@ public abstract class Char extends Actor {
 			boolean crit=false;
 			float current_crit=critSkill(),current_critdamage=critDamage();
 			if (this == Dungeon.hero){
-				if (Dungeon.hero.belongings.weapon instanceof Bloodblade) {
+				if (Dungeon.hero.belongings.weapon() instanceof Bloodblade) {
 					Bloodblade bb = (Bloodblade) Dungeon.hero.belongings.weapon;
 					current_crit += bb.sac;
 				}
-				else if (Dungeon.hero.belongings.weapon instanceof Seekingspear){
+				else if (Dungeon.hero.belongings.weapon() instanceof Seekingspear){
 					Seekingspear ss=(Seekingspear)Dungeon.hero.belongings.weapon;
 					current_critdamage+=0.3f+0.05f*ss.buffedLvl();
 					if (enemy instanceof Mob && ((Mob) enemy).surprisedBy(this)){

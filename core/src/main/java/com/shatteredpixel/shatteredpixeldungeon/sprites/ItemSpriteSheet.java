@@ -276,6 +276,8 @@ public class ItemSpriteSheet {
 	public static final int CUTTERHEAD		= WEP_TIER5+12;
 	public static final int BEECOMB			= WEP_TIER5+13;
 	public static final int SEEKING			= WEP_TIER5+14;
+
+	public static final int WATERWHEEL		= WEP_TIER5+15;
 	static{
 		assignItemRect(GREATSWORD,  16, 16);
 		assignItemRect(WAR_HAMMER,  16, 16);
@@ -290,6 +292,7 @@ public class ItemSpriteSheet {
 		assignItemRect(CUTTERHEAD,  16, 16);
 		assignItemRect(BEECOMB,     15, 16);
 		assignItemRect(SEEKING,     16, 16);
+		assignItemRect(WATERWHEEL,  16, 16);
 	}
 
 	                                                                                    //8 free slots
@@ -418,6 +421,10 @@ public class ItemSpriteSheet {
 	public static final int RING_QUARTZ     = RINGS+9;
 	public static final int RING_AGATE      = RINGS+10;
 	public static final int RING_DIAMOND    = RINGS+11;
+	public static final int RING_GOLD		= RINGS+12;
+	public static final int RING_CORAL		= RINGS+13;
+	public static final int RING_PEARL		= RINGS+14;
+	public static final int RING_BLUETOPAZ  = RINGS+15;
 	static {
 		for (int i = RINGS; i < RINGS+16; i++)
 			assignItemRect(i, 8, 10);

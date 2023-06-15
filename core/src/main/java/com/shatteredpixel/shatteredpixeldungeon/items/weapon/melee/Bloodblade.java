@@ -4,8 +4,11 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Bee;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfMight;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -59,7 +62,17 @@ public class Bloodblade extends MeleeWeapon{
             if (!isEquipped( hero )){
                 GLog.w(Messages.get(this,"not_equipped"));
             }
-            else if (Dungeon.hero.HT<=5){
+            else {
+                int true_HT= hero.HT;
+                if (hero.buff(ElixirOfMight.HTBoost.class) != null){
+                    int might_boost=hero.buff(ElixirOfMight.HTBoost.class).boost();
+                    Buff ben=hero.buff(RingOfBenediction.Benediction.class);
+                    if (ben!=null){
+                        might_boost=Math.round(might_boost*RingOfBenediction.periodMultiplier(hero));
+                    }
+                    true_HT-= might_boost;
+                }
+                if (true_HT<=5){
                 GLog.w(Messages.get(this,"low_ht"));
             }
             else {
@@ -68,7 +81,7 @@ public class Bloodblade extends MeleeWeapon{
                 sac+=3;
                 GLog.i(Messages.get(this,"sac"));
                 updateImage();
-            }
+            }}
         }
     }
     @Override
