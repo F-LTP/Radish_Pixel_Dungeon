@@ -28,7 +28,7 @@ public class Glasssword extends MeleeWeapon{
     }
     @Override
     public int max(int lvl) {
-        return  6*(tier+1) +        //16 base, up from 15
+        return  6*(tier+1) +        //18 base, up from 15
                 lvl*(tier+1)-
                 ruin;
     }
@@ -46,6 +46,10 @@ public class Glasssword extends MeleeWeapon{
     @Override
     public String statsInfo() {
         String d=Messages.get(this, "stats_desc");
+        if (ruin>=ruinCap)
+            d+=Messages.get(this,"ruin2");
+        else if (ruin>=3)
+            d+=Messages.get(this,"ruin1");
         if (buffedLvl()>=10) d+=Messages.get(this,"stable");
         return d;
     }

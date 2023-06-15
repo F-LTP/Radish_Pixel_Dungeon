@@ -81,7 +81,12 @@ public class Bloodblade extends MeleeWeapon{
     @Override
     public String statsInfo() {
         String d=Messages.get(this, "stats_desc");
-        d+=Messages.get(this,"cnt",new DecimalFormat("#").format(sac/3));
+        int s=sac/3;
+        d+=Messages.get(this,"cnt",new DecimalFormat("#").format(s));
+        if (s>=10)
+            d+=Messages.get(this,"sac2");
+        else if (s>=5)
+            d+=Messages.get(this,"sac1");
         return d;
     }
     private static final String SACR = "sacr";
