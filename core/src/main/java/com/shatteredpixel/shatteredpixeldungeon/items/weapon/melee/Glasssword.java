@@ -13,8 +13,8 @@ import com.watabou.utils.Random;
 public class Glasssword extends MeleeWeapon{
     private int ruin=0;
     private int ruinCap=8;
-    private static ItemSprite.Glowing TEAL = new ItemSprite.Glowing( 0x88EEFF );
-    private static ItemSprite.Glowing BLACK = new ItemSprite.Glowing( 0x000000 );
+    //private static ItemSprite.Glowing TEAL = new ItemSprite.Glowing( 0x88EEFF );
+    //private static ItemSprite.Glowing BLACK = new ItemSprite.Glowing( 0x000000 );
     {
         image = ItemSpriteSheet.SHORTSWORD;
         hitSound = Assets.Sounds.HIT_SLASH;
@@ -39,6 +39,7 @@ public class Glasssword extends MeleeWeapon{
             GLog.w(Messages.get(this,"broken"));
             if(ruin==ruinCap)
                 GLog.n(Messages.get(this,"ruin"));
+            updateImage();
         }
         return super.proc(attacker,defender,damage);
     }
@@ -48,6 +49,17 @@ public class Glasssword extends MeleeWeapon{
         if (buffedLvl()>=10) d+=Messages.get(this,"stable");
         return d;
     }
+    private void updateImage(){
+        int oldimage=image;
+        if (ruin>=ruinCap){
+            image =ItemSpriteSheet.GLASSSWORD3;
+        }
+        else if (ruin>=3){
+            image =ItemSpriteSheet.GLASSSWORD2;
+        }
+        else image = ItemSpriteSheet.GLASSSWORD1;
+        updateQuickslot();
+    }
     private static final String RUIN = "ruin";
     private static final String RUINCAP = "ruincap";
     @Override
@@ -55,6 +67,7 @@ public class Glasssword extends MeleeWeapon{
         super.restoreFromBundle(bundle);
         ruin = bundle.getInt(RUIN);
         ruinCap = bundle.getInt(RUINCAP);
+        updateImage();
     }
 
     @Override
@@ -63,11 +76,5 @@ public class Glasssword extends MeleeWeapon{
         bundle.put(RUIN, ruin);
         bundle.put(RUINCAP, ruinCap);
     }
-    @Override
-    public ItemSprite.Glowing glowing() {
-        if (ruin<3)
-        return TEAL;
-        else if (ruin>3)return BLACK;
-        else return null;
-    }
+
 }

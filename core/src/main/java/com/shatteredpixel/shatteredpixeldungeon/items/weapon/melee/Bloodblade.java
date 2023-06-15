@@ -89,6 +89,7 @@ public class Bloodblade extends MeleeWeapon{
     public void restoreFromBundle( Bundle bundle ) {
         super.restoreFromBundle(bundle);
         sac = bundle.getInt(SACR);
+        updateImage();
     }
 
     @Override

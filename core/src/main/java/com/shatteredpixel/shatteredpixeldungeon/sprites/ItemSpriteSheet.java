@@ -213,6 +213,9 @@ public class ItemSpriteSheet {
 	public static final int SPEAR           = WEP_TIER2+2;
 	public static final int QUARTERSTAFF    = WEP_TIER2+3;
 	public static final int DIRK            = WEP_TIER2+4;
+	public static final int GLASSSWORD1		= WEP_TIER2+5;
+	public static final int GLASSSWORD2		= WEP_TIER2+6;
+	public static final int GLASSSWORD3		= WEP_TIER2+7;
 
 	static{
 		assignItemRect(SHORTSWORD,      13, 13);
@@ -220,6 +223,9 @@ public class ItemSpriteSheet {
 		assignItemRect(SPEAR,           16, 16);
 		assignItemRect(QUARTERSTAFF,    16, 16);
 		assignItemRect(DIRK,            13, 14);
+		assignItemRect(GLASSSWORD1,     13, 14);
+		assignItemRect(GLASSSWORD2,     13, 14);
+		assignItemRect(GLASSSWORD1,     8, 14);
 	}
 
 	private static final int WEP_TIER3      =                               xy(1, 8);   //8 slots
@@ -253,7 +259,7 @@ public class ItemSpriteSheet {
 		assignItemRect(RUNIC_BLADE,     14, 14);
 		assignItemRect(ASSASSINS_BLADE, 14, 15);
 		assignItemRect(CROSSBOW,        15, 15);
-		assignItemRect(HOLYANKH,		16,14);
+		assignItemRect(HOLYANKH,		13,14);
 	}
 
 	private static final int WEP_TIER5      =                               xy(1, 9);   //8 slots
@@ -277,13 +283,13 @@ public class ItemSpriteSheet {
 		assignItemRect(GREATAXE,    12, 16);
 		assignItemRect(GREATSHIELD, 12, 16);
 		assignItemRect(GAUNTLETS,   13, 15);
-		assignItemRect(BLOODBLADE1,  15, 15);
-		assignItemRect(BLOODBLADE2,  15, 15);
-		assignItemRect(BLOODBLADE3,  14, 15);
-		assignItemRect(DARKSWORD,    16, 16);
-		assignItemRect(CUTTERHEAD,    16, 16);
-		assignItemRect(BEECOMB,    15, 16);
-		assignItemRect(SEEKING,    16, 16);
+		assignItemRect(BLOODBLADE1, 14, 15);
+		assignItemRect(BLOODBLADE2, 14, 15);
+		assignItemRect(BLOODBLADE3, 14, 15);
+		assignItemRect(DARKSWORD,   16, 16);
+		assignItemRect(CUTTERHEAD,  16, 16);
+		assignItemRect(BEECOMB,     15, 16);
+		assignItemRect(SEEKING,     16, 16);
 	}
 
 	                                                                                    //8 free slots
@@ -371,6 +377,7 @@ public class ItemSpriteSheet {
 		assignItemRect(ARMOR_MAIL,      14, 12);
 		assignItemRect(ARMOR_SCALE,     14, 11);
 		assignItemRect(ARMOR_PLATE,     12, 12);
+		assignItemRect(ARMOR_CRAB,      16, 12);
 		assignItemRect(ARMOR_WARRIOR,   12, 12);
 		assignItemRect(ARMOR_MAGE,      15, 15);
 		assignItemRect(ARMOR_ROGUE,     14, 12);
@@ -442,6 +449,13 @@ public class ItemSpriteSheet {
 	public static final int ARTIFACT_ROSE3      = ARTIFACTS+22;
 
 	public static final int ARTIFACT_CONCEAL    = ARTIFACTS+24;
+	public static final int ARTIFACT_ELTIE1     = ARTIFACTS+25;
+	public static final int ARTIFACT_ELTIE2     = ARTIFACTS+26;
+	public static final int ARTIFACT_ELTIE3     = ARTIFACTS+27;
+	public static final int ARTIFACT_ELTIE4     = ARTIFACTS+28;
+	public static final int ARTIFACT_ELTIE5     = ARTIFACTS+29;
+	public static final int ARTIFACT_ELTIE6     = ARTIFACTS+30;
+	public static final int ARTIFACT_ELTIE7     = ARTIFACTS+31;
 	static{
 		assignItemRect(ARTIFACT_CLOAK,      9,  15);
 		assignItemRect(ARTIFACT_ARMBAND,    16, 13);
@@ -466,6 +480,14 @@ public class ItemSpriteSheet {
 		assignItemRect(ARTIFACT_ROSE1,      14, 14);
 		assignItemRect(ARTIFACT_ROSE2,      14, 14);
 		assignItemRect(ARTIFACT_ROSE3,      14, 14);
+		assignItemRect(ARTIFACT_CONCEAL,    13, 14);
+		assignItemRect(ARTIFACT_ELTIE1,     15, 15);
+		assignItemRect(ARTIFACT_ELTIE2,     15, 15);
+		assignItemRect(ARTIFACT_ELTIE3,     15, 15);
+		assignItemRect(ARTIFACT_ELTIE4,     15, 15);
+		assignItemRect(ARTIFACT_ELTIE5,     15, 15);
+		assignItemRect(ARTIFACT_ELTIE6,     15, 15);
+		assignItemRect(ARTIFACT_ELTIE7,     15, 15);
 	}
 
 	                                                                                    //16 free slots
@@ -604,7 +626,7 @@ public class ItemSpriteSheet {
 
 	public static final int ELIXIR_WEAK     = ELIXIRS+7;
 	static{
-		for (int i = BREWS; i < BREWS+16; i++)
+		for (int i = BREWS; i < BREWS+17; i++)
 			assignItemRect(i, 12, 14);
 	}
 	

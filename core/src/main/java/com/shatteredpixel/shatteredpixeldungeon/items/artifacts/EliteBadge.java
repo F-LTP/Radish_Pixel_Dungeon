@@ -67,7 +67,7 @@ public class EliteBadge extends Artifact{
     public static final String AC_ELITE       = "ELITE";
 
     {
-        image = ItemSpriteSheet.SEAL;
+        image = ItemSpriteSheet.ARTIFACT_ELTIE1;
 
         levelCap = 10;
         exp = 0;
@@ -80,13 +80,47 @@ public class EliteBadge extends Artifact{
 
     int randthree[]= {0,0};
     public float growing_mul=1.19f;
+    private void updateImage(){
+        int oldimage=image;
+        switch (level()){
+            case 0:
+                image = ItemSpriteSheet.ARTIFACT_ELTIE1;
+                break;
+            case 1:
+                image = ItemSpriteSheet.ARTIFACT_ELTIE2;
+                break;
+            case 2:
+            case 3:
+                image = ItemSpriteSheet.ARTIFACT_ELTIE3;
+                break;
+            case 4:
+            case 5:
+                image = ItemSpriteSheet.ARTIFACT_ELTIE4;
+                break;
+            case 6:
+            case 7:
+                image = ItemSpriteSheet.ARTIFACT_ELTIE5;
+                break;
+            case 8:
+            case 9:
+                image = ItemSpriteSheet.ARTIFACT_ELTIE6;
+                break;
+            case 10:
+                image = ItemSpriteSheet.ARTIFACT_ELTIE7;
+                break;
+            default:
+                image = ItemSpriteSheet.ARTIFACT_ELTIE1;
+                break;
+        }
+        updateQuickslot();
+    }
     private static final String RT = "randomthree";
     private static final String GM = "growingmul";
     @Override
     public void storeInBundle(Bundle bundle) {
         super.storeInBundle(bundle);
         bundle.put( RT, randthree );
-        bundle.put(GM,growing_mul);
+        bundle.put( GM,growing_mul);
     }
 
     @Override
@@ -116,17 +150,14 @@ public class EliteBadge extends Artifact{
     public Item upgrade() {
         super.upgrade();
         chargeCap = 20+level()*2;
-        /*int oldImage = image;
-                    if (charge >= 8)        image = ItemSpriteSheet.SEAL;
-                    else if (charge >= 5)   image = ItemSpriteSheet.ANKH;
-                    else if (charge >= 2)   image = ItemSpriteSheet.HONEYPOT;
-                    else                    image = ItemSpriteSheet.AMULET;*/
+        updateImage();
         return this;
     }
     @Override
     public void level(int value) {
         super.level(value);
         chargeCap = 20+level()*2;
+        updateImage();
     }
     @Override
     public void execute(Hero hero, String action) {
