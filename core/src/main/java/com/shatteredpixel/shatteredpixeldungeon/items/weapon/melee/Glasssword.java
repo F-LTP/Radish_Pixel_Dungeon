@@ -16,7 +16,7 @@ public class Glasssword extends MeleeWeapon{
     //private static ItemSprite.Glowing TEAL = new ItemSprite.Glowing( 0x88EEFF );
     //private static ItemSprite.Glowing BLACK = new ItemSprite.Glowing( 0x000000 );
     {
-        image = ItemSpriteSheet.SHORTSWORD;
+        image = ItemSpriteSheet.GLASSSWORD1;
         hitSound = Assets.Sounds.HIT_SLASH;
         hitSoundPitch = 1.1f;
 
