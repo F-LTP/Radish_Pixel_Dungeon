@@ -225,7 +225,7 @@ public class ItemSpriteSheet {
 		assignItemRect(DIRK,            13, 14);
 		assignItemRect(GLASSSWORD1,     13, 14);
 		assignItemRect(GLASSSWORD2,     13, 14);
-		assignItemRect(GLASSSWORD1,     8, 14);
+		assignItemRect(GLASSSWORD3,     10, 14);
 	}
 
 	private static final int WEP_TIER3      =                               xy(1, 8);   //8 slots
@@ -259,7 +259,7 @@ public class ItemSpriteSheet {
 		assignItemRect(RUNIC_BLADE,     14, 14);
 		assignItemRect(ASSASSINS_BLADE, 14, 15);
 		assignItemRect(CROSSBOW,        15, 15);
-		assignItemRect(HOLYANKH,		13,14);
+		assignItemRect(HOLYANKH,		16,14);
 	}
 
 	private static final int WEP_TIER5      =                               xy(1, 9);   //8 slots

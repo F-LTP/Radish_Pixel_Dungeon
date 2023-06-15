@@ -80,7 +80,7 @@ public class Beecomb extends MeleeWeapon{
                 if (spawned==0) {
                     GLog.w(Messages.get(this,"no_bee"));
                 }
-                else {bee_charged=false;hero.spend(1f);}
+                else {bee_charged=false;hero.spend(1f);updateQuickslot();}
             }
         }
     }
