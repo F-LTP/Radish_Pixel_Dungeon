@@ -63,25 +63,18 @@ public class Bloodblade extends MeleeWeapon{
                 GLog.w(Messages.get(this,"not_equipped"));
             }
             else {
-                int true_HT= hero.HT;
-                if (hero.buff(ElixirOfMight.HTBoost.class) != null){
-                    int might_boost=hero.buff(ElixirOfMight.HTBoost.class).boost();
-                    Buff ben=hero.buff(RingOfBenediction.Benediction.class);
-                    if (ben!=null){
-                        might_boost=Math.round(might_boost*RingOfBenediction.periodMultiplier(hero));
-                    }
-                    true_HT-= might_boost;
-                }
+                int true_HT = 20 + 5*(hero.lvl-1) + hero.HTBoost;
                 if (true_HT<=5){
-                GLog.w(Messages.get(this,"low_ht"));
+                    GLog.w(Messages.get(this,"low_ht"));
+                }
+                else {
+                    Dungeon.hero.HTBoost-=5;
+                    hero.updateHT(false);
+                    sac+=3;
+                    GLog.i(Messages.get(this,"sac"));
+                    updateImage();
+                }
             }
-            else {
-                Dungeon.hero.HTBoost-=5;
-                hero.updateHT(false);
-                sac+=3;
-                GLog.i(Messages.get(this,"sac"));
-                updateImage();
-            }}
         }
     }
     @Override

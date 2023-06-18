@@ -71,7 +71,7 @@ public class Hunger extends Buff implements Hero.Doom {
 				|| target.buff(WellFed.class) != null
 				|| SPDSettings.intro()
 				|| target.buff(ScrollOfChallenge.ChallengeArena.class) != null
-				|| (target.buff(MagicalSleep.class)!=null && target.buff(RingOfBenediction.Benediction.class).buffedLvl()>=11)){
+				|| (target.buff(MagicalSleep.class)!=null && target.buff(RingOfBenediction.Benediction.class)!=null && target.buff(RingOfBenediction.Benediction.class).buffedLvl()>=11)){
 			spend(STEP);
 			return true;
 		}

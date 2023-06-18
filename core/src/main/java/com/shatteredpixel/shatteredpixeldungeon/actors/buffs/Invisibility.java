@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfConcealment;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -83,7 +84,8 @@ public class Invisibility extends FlavourBuff {
 
 	public static void dispel() {
 		if (Dungeon.hero == null) return;
-
+		if (Dungeon.hero.buff(ArtifactRecharge.class)!= null && Dungeon.hero.buff(CloakOfConcealment.conceal.class)!=null)
+			Buff.affect(Dungeon.hero, CloakOfConcealment.anti_nru_invisibility.class,1f);
 		dispel(Dungeon.hero);
 	}
 

@@ -955,13 +955,13 @@ public abstract class Mob extends Char {
 			if (enemyInFOV) {
 
 				float enemyStealth = enemy.stealth();
-
-				if (enemy instanceof Hero && ((Hero) enemy).hasTalent(Talent.SILENT_STEPS)){
-					if (Dungeon.level.distance(pos, enemy.pos) >= 4 - ((Hero) enemy).pointsInTalent(Talent.SILENT_STEPS)) {
-						enemyStealth = Float.POSITIVE_INFINITY;
+				if (enemyStealth>=0) {
+					if (enemy instanceof Hero && ((Hero) enemy).hasTalent(Talent.SILENT_STEPS)) {
+						if (Dungeon.level.distance(pos, enemy.pos) >= 4 - ((Hero) enemy).pointsInTalent(Talent.SILENT_STEPS)) {
+							enemyStealth = Float.POSITIVE_INFINITY;
+						}
 					}
 				}
-
 				if (Random.Float( distance( enemy ) + enemyStealth ) < 1) {
 					awaken(enemyInFOV);
 					return true;
@@ -1006,10 +1006,21 @@ public abstract class Mob extends Char {
 
 		@Override
 		public boolean act( boolean enemyInFOV, boolean justAlerted ) {
-			if (enemyInFOV && (justAlerted || Random.Float( distance( enemy ) / 2f + enemy.stealth() ) < 1)) {
+			if (enemyInFOV  ) {
+				boolean notice;
+				if (enemy.stealth()<0){
+					notice=true;
+				} else {
+					notice=(Random.Float( distance( enemy ) / 2f + enemy.stealth() ) < 1);
+				}
+				if ((justAlerted || notice)) {
 
-				return noticeEnemy();
+					return noticeEnemy();
+				}else {
 
+					return continueWandering();
+
+				}
 			} else {
 
 				return continueWandering();

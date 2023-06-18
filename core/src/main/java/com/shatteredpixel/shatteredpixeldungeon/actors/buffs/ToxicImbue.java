@@ -58,6 +58,12 @@ public class ToxicImbue extends Buff {
 	}
 
 	public void set( float duration ) {
+		if (target == Dungeon.hero){
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				duration*=RingOfBenediction.periodMultiplier(target);
+			}
+		}
 		this.left = duration;
 	}
 

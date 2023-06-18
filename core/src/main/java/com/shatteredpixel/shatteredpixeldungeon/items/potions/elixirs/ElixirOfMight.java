@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.AlchemicalCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -97,7 +98,14 @@ public class ElixirOfMight extends Elixir {
 		}
 		
 		public int boost(){
-			return Math.round(left*boost(15 + 5*((Hero)target).lvl)/5f);
+			int might_boost=Math.round(left*boost(15 + 5*((Hero)target).lvl)/5f);
+			if (target==Dungeon.hero) {
+				Buff ben = target.buff(RingOfBenediction.Benediction.class);
+				if (ben != null) {
+					might_boost = Math.round(might_boost * RingOfBenediction.periodMultiplier(target));
+				}
+			}
+			return might_boost;
 		}
 		
 		public static int boost(int HT){

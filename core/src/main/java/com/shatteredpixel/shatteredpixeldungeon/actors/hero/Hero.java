@@ -82,6 +82,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.AlchemistsToolkit;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CapeOfThorns;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfConcealment;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EtherealChains;
@@ -234,12 +235,7 @@ public class Hero extends Char {
 		HT = Math.round(multiplier * HT);
 		
 		if (buff(ElixirOfMight.HTBoost.class) != null){
-			int might_boost=buff(ElixirOfMight.HTBoost.class).boost();
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				might_boost=Math.round(might_boost*RingOfBenediction.periodMultiplier(this));
-			}
-			HT += might_boost;
+			HT += buff(ElixirOfMight.HTBoost.class).boost();
 		}
 		if (boostHP){
 			HP += Math.max(HT - curHT, 0);
@@ -1591,7 +1587,10 @@ public class Hero extends Char {
 
 		MasterThievesArmband.Thievery armband = buff(MasterThievesArmband.Thievery.class);
 		if (armband != null) armband.gainCharge(percent);
-		
+
+		CloakOfConcealment.conceal concealment = buff(CloakOfConcealment.conceal.class);
+		if (concealment!=null) concealment.gainExp(exp);
+
 		Berserk berserk = buff(Berserk.class);
 		if (berserk != null) berserk.recover(percent);
 		
@@ -1704,7 +1703,8 @@ public class Hero extends Char {
 		if (belongings.armor() != null){
 			stealth = belongings.armor().stealthFactor(this, stealth);
 		}
-		
+		if (buff(CloakOfConcealment.Disposed.class)!=null)
+			stealth-=4f;
 		return stealth;
 	}
 	
@@ -2006,13 +2006,9 @@ public class Hero extends Char {
 		if (foresightScan){
 			Dungeon.level.mapped[pos] = true;
 		}
-		float buff_mul=1f;
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				buff_mul*=RingOfBenediction.periodMultiplier(this);
-			}
+
 		if (foresight) {
-			distance = Math.round(Foresight.DISTANCE*buff_mul);
+			distance = Math.round(Foresight.DISTANCE);
 			circular = true;
 		}
 

@@ -57,7 +57,9 @@ public class RingOfAccuracy extends Ring {
 	@Override
 	public Item upgrade() {
 		super.upgrade();
-		Dungeon.hero.updateCritSkill();
+		if (buff != null && buff.target instanceof Hero){
+			((Hero) buff.target).updateCritSkill();
+		}
 		return this;
 	}
 	@Override
