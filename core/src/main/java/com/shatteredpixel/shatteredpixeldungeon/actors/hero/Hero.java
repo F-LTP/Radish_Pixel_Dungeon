@@ -77,6 +77,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
@@ -582,6 +583,7 @@ public class Hero extends Char {
 	
 	@Override
 	public float speed() {
+		if (buff(DarkCoat.myPace.class)!=null) return 1f;
 
 		float speed = super.speed();
 
@@ -607,7 +609,6 @@ public class Hero extends Char {
 			speed *= buff.speedFactor();
 		}
 		speed = AscensionChallenge.modifyHeroSpeed(speed);
-		
 		return speed;
 		
 	}

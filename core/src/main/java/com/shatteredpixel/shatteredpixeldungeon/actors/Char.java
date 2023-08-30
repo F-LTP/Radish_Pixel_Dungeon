@@ -81,6 +81,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Potential;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
@@ -338,7 +340,9 @@ public abstract class Char extends Actor {
 			return false;
 
 		} else if (hit( this, enemy, accMulti )) {
-			
+			if (enemy.buff(AfterImage.Blur.class)!=null){
+				enemy.buff(AfterImage.Blur.class).dodges++;
+			}
 			int dr = Math.round(enemy.drRoll() * AscensionChallenge.statModifier(enemy));
 
 			Barkskin bark = enemy.buff(Barkskin.class);
@@ -529,7 +533,10 @@ public abstract class Char extends Actor {
 		if (attacker.invisible > 0 && attacker.canSurpriseAttack()){
 			acuStat = INFINITE_ACCURACY;
 		}
-
+		if (defender.buff(AfterImage.absoluteEvasion.class)!=null){
+			Buff.detach(defender, AfterImage.absoluteEvasion.class);
+			return false;
+		}
 		//if accuracy or evasion are large enough, treat them as infinite.
 		//note that infinite evasion beats infinite accuracy
 		if (defStat >= INFINITE_EVASION){
@@ -614,6 +621,7 @@ public abstract class Char extends Actor {
 	}
 	
 	public float speed() {
+		if (buff(DarkCoat.myPace.class)!=null) return 1f;
 		float speed = baseSpeed;
 		float ben_mul=1f;
 		if (this == Dungeon.hero ){

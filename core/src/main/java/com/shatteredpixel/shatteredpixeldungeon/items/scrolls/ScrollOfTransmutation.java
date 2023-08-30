@@ -26,9 +26,12 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.QuickSlot;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Transmuting;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.BlueWhiteBowl;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.AlchemicalCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
@@ -65,6 +68,7 @@ public class ScrollOfTransmutation extends InventoryScroll {
 	protected boolean usableOnItem(Item item) {
 		return item instanceof MeleeWeapon ||
 				(item instanceof MissileWeapon && (!(item instanceof Dart) || item instanceof TippedDart)) ||
+				item instanceof Armor ||
 				(item instanceof Potion && !(item instanceof Elixir || item instanceof Brew || item instanceof AlchemicalCatalyst)) ||
 				item instanceof Scroll ||
 				item instanceof Ring ||
@@ -123,6 +127,8 @@ public class ScrollOfTransmutation extends InventoryScroll {
 			return changeTippeDart( (TippedDart)item );
 		} else if (item instanceof MeleeWeapon || item instanceof MissileWeapon) {
 			return changeWeapon( (Weapon)item );
+		} else if (item instanceof Armor) {
+			return changeArmor( (Armor)item );
 		} else if (item instanceof Scroll) {
 			return changeScroll( (Scroll)item );
 		} else if (item instanceof Potion) {
@@ -201,7 +207,44 @@ public class ScrollOfTransmutation extends InventoryScroll {
 		return n;
 		
 	}
-	
+
+	private static Armor changeArmor( Armor a ) {
+
+		Armor n;
+		int t= a.tier;
+		if (t == 1){
+			n = new BlueWhiteBowl();
+		}
+		else {
+			Generator.Category c;
+			c = Generator.armTiers[a.tier - 1];
+
+			do {
+				n = (Armor) Reflection.newInstance(c.classes[Random.chances(c.probs)]);
+			} while (Challenges.isItemBlocked(n) || n.getClass() == a.getClass());
+		}
+		int level = a.trueLevel();
+		if (a.checkSeal()!=null){
+			level-=a.checkSeal().level();
+			n.affixSeal(a.checkSeal());
+		}
+		if (level > 0) {
+			n.upgrade( level );
+		} else if (level < 0) {
+			n.degrade( -level );
+		}
+		n.glyph = a.glyph;
+		n.curseInfusionBonus = a.curseInfusionBonus;
+		n.masteryPotionBonus = a.masteryPotionBonus;
+		n.levelKnown = a.levelKnown;
+		n.cursedKnown = a.cursedKnown;
+		n.cursed = a.cursed;
+		n.augment = a.augment;
+
+		return n;
+
+	}
+
 	private static Ring changeRing( Ring r ) {
 		Ring n;
 		do {

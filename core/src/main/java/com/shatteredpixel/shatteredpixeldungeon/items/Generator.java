@@ -22,15 +22,21 @@
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.BlueWhiteBowl;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.EnergyArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.HuntressArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.LeatherArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.MageArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.MailArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PlateArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.RogueArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ScaleArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.SilverScaleArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.WarriorArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.AlchemistsToolkit;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
@@ -202,6 +208,11 @@ public class Generator {
 		WEP_T5	( 0, 0, MeleeWeapon.class),
 		
 		ARMOR	( 2, 1, Armor.class ),
+		ARM_T1	( 0, 0, Armor.class ),
+		ARM_T2	( 0, 0, Armor.class ),
+		ARM_T3	( 0, 0, Armor.class ),
+		ARM_T4	( 0, 0, Armor.class ),
+		ARM_T5	( 0, 0, Armor.class ),
 		
 		MISSILE ( 1, 2, MissileWeapon.class ),
 		MIS_T1  ( 0, 0, MissileWeapon.class ),
@@ -363,28 +374,22 @@ public class Generator {
 			WEP_T2.classes = new Class<?>[]{
 					Shortsword.class,
 					Glasssword.class,
-					HandAxe.class,
 					Spear.class,
-					Quarterstaff.class,
 					Dirk.class
 			};
-			WEP_T2.probs = new float[]{ 6, 5, 5, 5, 4, 4 };
+			WEP_T2.probs = new float[]{ 6, 5, 5, 4 };
 			
 			WEP_T3.classes = new Class<?>[]{
-					Sword.class,
 					Beecomb.class,
-					Mace.class,
 					Scimitar.class,
 					Waterwheel.class,
 					RoundShield.class,
 					Sai.class,
 					Whip.class
 			};
-			WEP_T3.probs = new float[]{ 6, 5, 5, 5, 5, 4, 4, 4 };
+			WEP_T3.probs = new float[]{ 5, 5, 5, 4, 4, 4 };
 			
 			WEP_T4.classes = new Class<?>[]{
-					Longsword.class,
-					BattleAxe.class,
 					Bloodblade.class,
 					Darksword.class,
 					Flail.class,
@@ -394,32 +399,57 @@ public class Generator {
 					AssassinsBlade.class,
 					Crossbow.class
 			};
-			WEP_T4.probs = new float[]{ 6, 5, 5, 5, 5, 5, 5, 4, 4, 4 };
+			WEP_T4.probs = new float[]{ 5, 5, 5, 5, 5, 4, 4, 4 };
 			
 			WEP_T5.classes = new Class<?>[]{
 					Greatsword.class,
 					Cutterhead.class,
-					WarHammer.class,
 					Glaive.class,
 					Greataxe.class,
 					Greatshield.class,
 					Gauntlet.class
 			};
-			WEP_T5.probs = new float[]{ 6, 5, 5, 5, 4, 4, 4 };
+			WEP_T5.probs = new float[]{ 6, 5, 5, 4, 4, 4 };
 			
 			//see Generator.randomArmor
-			ARMOR.classes = new Class<?>[]{
+			ARMOR.classes = new Class<?>[]{};
+			ARMOR.probs = new float[]{};
+
+			ARM_T1.classes = new Class<?>[]{
 					ClothArmor.class,
+					BlueWhiteBowl.class
+			};
+			ARM_T1.probs = new float[]{ 1, 0 };
+
+			ARM_T2.classes = new Class<?>[]{
 					LeatherArmor.class,
+					RatArmor.class
+			};
+			ARM_T2.probs = new float[]{ 1, 1 };
+
+			ARM_T3.classes = new Class<?>[]{
 					MailArmor.class,
+					EnergyArmor.class,
+					SilverScaleArmor.class
+			};
+			ARM_T3.probs = new float[]{ 1, 1, 1 };
+
+			ARM_T4.classes = new Class<?>[]{
 					ScaleArmor.class,
+					DarkCoat.class
+			};
+			ARM_T4.probs = new float[]{ 1, 1 };
+
+			ARM_T5.classes = new Class<?>[]{
 					PlateArmor.class,
+					AfterImage.class,
 					WarriorArmor.class,
 					MageArmor.class,
 					RogueArmor.class,
-					HuntressArmor.class};
-			ARMOR.probs = new float[]{ 1, 1, 1, 1, 1, 0, 0, 0, 0 };
-			
+					HuntressArmor.class
+			};
+			ARM_T5.probs = new float[]{ 1, 1, 0, 0, 0, 0 };
+
 			//see Generator.randomMissile
 			MISSILE.classes = new Class<?>[]{};
 			MISSILE.probs = new float[]{};
@@ -611,8 +641,9 @@ public class Generator {
 	public static Armor randomArmor(int floorSet) {
 
 		floorSet = (int)GameMath.gate(0, floorSet, floorSetTierProbs.length-1);
-		
-		Armor a = (Armor)Reflection.newInstance(Category.ARMOR.classes[Random.chances(floorSetTierProbs[floorSet])]);
+
+		Category c = armTiers[Random.chances(floorSetTierProbs[floorSet])];
+		Armor a = (Armor) Reflection.newInstance(c.classes[Random.chances(c.probs)]);
 		a.random();
 		return a;
 	}
@@ -624,7 +655,13 @@ public class Generator {
 			Category.WEP_T4,
 			Category.WEP_T5
 	};
-
+	public static final Category[] armTiers = new Category[]{
+			Category.ARM_T1,
+			Category.ARM_T2,
+			Category.ARM_T3,
+			Category.ARM_T4,
+			Category.ARM_T5
+	};
 	public static MeleeWeapon randomWeapon(){
 		return randomWeapon(Dungeon.depth / 5);
 	}

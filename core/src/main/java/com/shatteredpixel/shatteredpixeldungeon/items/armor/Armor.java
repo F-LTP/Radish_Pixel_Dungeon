@@ -56,6 +56,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Stone;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Swiftness;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Thorns;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
@@ -76,6 +77,7 @@ import java.util.Arrays;
 
 public class Armor extends EquipableItem {
 
+	protected Buff buff;
 	protected static final String AC_DETACH       = "DETACH";
 	
 	public enum Augment {
@@ -234,6 +236,13 @@ public class Armor extends EquipableItem {
 	@Override
 	public void activate(Char ch) {
 		if (seal != null) Buff.affect(ch, BrokenSeal.WarriorShield.class).setArmor(this);
+		if (buff != null){
+			buff.detach();
+			buff = null;
+		}
+		buff = buff();
+		if (buff!=null)
+			buff.attachTo( ch );
 	}
 
 	public void affixSeal(BrokenSeal seal){
@@ -265,6 +274,10 @@ public class Armor extends EquipableItem {
 	public boolean doUnequip( Hero hero, boolean collect, boolean single ) {
 		if (super.doUnequip( hero, collect, single )) {
 
+			if (buff != null) {
+				buff.detach();
+				buff = null;
+			}
 			hero.belongings.armor = null;
 			((HeroSprite)hero.sprite).updateArmor();
 
@@ -582,6 +595,10 @@ public class Armor extends EquipableItem {
 		return price;
 	}
 
+	protected ArmorBuff buff() {
+		return null;
+	}
+
 	public Armor inscribe( Glyph glyph ) {
 		if (glyph == null || !glyph.curse()) curseInfusionBonus = false;
 		this.glyph = glyph;
@@ -734,5 +751,32 @@ public class Armor extends EquipableItem {
 			}
 		}
 		
+	}
+	public class ArmorBuff extends Buff {
+
+		@Override
+		public boolean attachTo( Char target ) {
+			if (super.attachTo( target )) {
+				//if we're loading in and the hero has partially spent a turn, delay for 1 turn
+				if (now() == 0 && cooldown() == 0 && target.cooldown() > 0) spend(TICK);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public boolean act() {
+			spend( TICK );
+			return true;
+		}
+
+		public int level(){
+			return Armor.this.level();
+		}
+
+		public int buffedLvl(){
+			return Armor.this.buffedLvl();
+		}
+
 	}
 }

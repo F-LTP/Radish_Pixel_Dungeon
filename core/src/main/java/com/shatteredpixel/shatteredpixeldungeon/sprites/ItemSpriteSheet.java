@@ -374,12 +374,29 @@ public class ItemSpriteSheet {
 	public static final int ARMOR_MAGE      = ARMOR+7;
 	public static final int ARMOR_ROGUE     = ARMOR+8;
 	public static final int ARMOR_HUNTRESS  = ARMOR+9;
+	public static final int ARMOR_RAT		= ARMOR+12;
+	public static final int ARMOR_ENERGY1	= TIPPED_DARTS+14;
+	public static final int ARMOR_ENERGY2	= TIPPED_DARTS+12;
+	public static final int ARMOR_SILVERSCALE	= TIPPED_DARTS+13;
+	public static final int ARMOR_BOWL		= ARMOR+10;
+	public static final int ARMOR_BLACKCOAT = TIPPED_DARTS+15;
+	public static final int ARMOR_AFTERIMAGE = ARMOR+14;
+	public static final int ARMOR_GREYFEATHER = ARMOR+13;
+
 	static{
 		assignItemRect(ARMOR_CLOTH,     15, 12);
+		assignItemRect(ARMOR_BOWL,      16, 16);
 		assignItemRect(ARMOR_LEATHER,   14, 13);
+		assignItemRect(ARMOR_RAT,       16, 16);
 		assignItemRect(ARMOR_MAIL,      14, 12);
+		assignItemRect(ARMOR_ENERGY1,   16, 16);
+		assignItemRect(ARMOR_ENERGY2,   16, 16);
+		assignItemRect(ARMOR_SILVERSCALE,16, 16);
 		assignItemRect(ARMOR_SCALE,     14, 11);
+		assignItemRect(ARMOR_BLACKCOAT, 16, 16);
+		assignItemRect(ARMOR_GREYFEATHER,16, 16);
 		assignItemRect(ARMOR_PLATE,     12, 12);
+		assignItemRect(ARMOR_AFTERIMAGE,16, 16);
 		assignItemRect(ARMOR_CRAB,      16, 12);
 		assignItemRect(ARMOR_WARRIOR,   12, 12);
 		assignItemRect(ARMOR_MAGE,      15, 15);
