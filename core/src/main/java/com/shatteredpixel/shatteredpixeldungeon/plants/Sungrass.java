@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -90,6 +91,9 @@ public class Sungrass extends Plant {
 			
 			//for the hero, full heal takes ~50/93/111/120 turns at levels 1/10/20/30
 			partialHeal += (40 + target.HT)/150f;
+			if (target.buff(AfterGlow.Warmth.class)!=null){
+				target.buff(AfterGlow.Warmth.class).getWarmth();
+			}
 			if (target == Dungeon.hero ){
 				Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
 				if (ben!=null){

@@ -111,6 +111,12 @@ public class CloakOfConcealment extends Artifact{
             }
             return true;
         }
+        @Override
+        public void detach(){
+            if (target.buff(Invisibility_neutral.class)!=null)
+                Buff.detach(target, Invisibility_neutral.class);
+            super.detach();
+        }
     }
     public class Disposed extends Buff{
         {

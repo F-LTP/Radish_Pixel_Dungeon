@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -53,6 +54,9 @@ public class WellFed extends Buff {
 			return true;
 		} else if (left % interval == 0){
 			target.HP = Math.min(target.HT, target.HP + 1);
+			if (target.buff(AfterGlow.Warmth.class)!=null){
+				target.buff(AfterGlow.Warmth.class).getWarmth();
+			}
 		}
 		
 		spend(TICK);

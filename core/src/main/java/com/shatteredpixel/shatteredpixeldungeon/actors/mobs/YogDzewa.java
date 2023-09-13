@@ -87,6 +87,7 @@ public class YogDzewa extends Mob {
 		properties.add(Property.BOSS);
 		properties.add(Property.IMMOVABLE);
 		properties.add(Property.DEMONIC);
+		properties.add(Property.HEADLESS);
 	}
 
 	private int phase = 0;
@@ -627,6 +628,7 @@ public class YogDzewa extends Mob {
 			maxLvl = -2;
 
 			properties.add(Property.DEMONIC);
+			properties.add(Property.HEADLESS);
 		}
 
 		@Override

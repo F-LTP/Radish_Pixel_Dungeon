@@ -57,6 +57,9 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EliteBadge;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EtherealChains;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.MasterThievesArmband;
@@ -68,6 +71,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
@@ -120,12 +124,12 @@ public abstract class Mob extends Char {
 	
 	public int EXP = 1;
 	public int maxLvl = Hero.MAX_LEVEL-1;
-	
+
 	protected Char enemy;
 	protected int enemyID = -1; //used for save/restore
 	protected boolean enemySeen;
 	protected boolean alerted = false;
-
+	protected boolean vertical = false;
 	protected static final float TIME_TO_WAKE_UP = 1f;
 	
 	private static final String STATE	= "state";
@@ -543,6 +547,7 @@ public abstract class Mob extends Char {
 			}
 		}
 		if (step != -1) {
+			vertical= step / Dungeon.level.width() != pos / Dungeon.level.width();
 			move( step );
 			return true;
 		} else {
@@ -557,6 +562,7 @@ public abstract class Mob extends Char {
 		
 		int step = Dungeon.flee( this, target, Dungeon.level.passable, fieldOfView, true );
 		if (step != -1) {
+			vertical= step / Dungeon.level.width() != pos / Dungeon.level.width();
 			move( step );
 			return true;
 		} else {
@@ -654,7 +660,12 @@ public abstract class Mob extends Char {
 			}
 			if (restoration > 0) {
 				Buff.affect(Dungeon.hero, Hunger.class).affectHunger(restoration*Dungeon.hero.pointsInTalent(Talent.SOUL_EATER)/3f);
+				int preHp=Dungeon.hero.HP;
 				Dungeon.hero.HP = (int) Math.ceil(Math.min(Dungeon.hero.HT, Dungeon.hero.HP + (restoration * 0.4f)));
+				Dungeon.hero.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", Dungeon.hero.HP-preHp);
+				if (Dungeon.hero.buff(AfterGlow.Warmth.class)!=null){
+					Dungeon.hero.buff(AfterGlow.Warmth.class).getWarmth();
+				}
 				Dungeon.hero.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
 			}
 		}
@@ -751,12 +762,16 @@ public abstract class Mob extends Char {
 				Buff.affect(Dungeon.hero, Talent.LethalMomentumTracker.class, 1f);
 			}
 		}
-		if (cause == Dungeon.hero && Dungeon.hero.belongings.weapon instanceof Beecomb){
-			Beecomb bc=(Beecomb) Dungeon.hero.belongings.weapon;
-			if (Random.Float()*100<5+2*bc.buffedLvl()) {
-				bc.bee_charged = true;
-				GLog.p(Messages.get(Beecomb.class, "ready"));
-				updateQuickslot();
+		if (cause == Dungeon.hero){
+			if (Dungeon.hero.belongings.weapon instanceof Beecomb) {
+				Beecomb bc = (Beecomb) Dungeon.hero.belongings.weapon;
+				if (Random.Float() * 100 < 5 + 2 * bc.buffedLvl()) {
+					bc.bee_charged = true;
+					GLog.p(Messages.get(Beecomb.class, "ready"));
+					updateQuickslot();
+				}
+			} else if (Dungeon.hero.belongings.weapon instanceof Scythe){
+				Buff.affect(Dungeon.hero, Scythe.scytheSac.class,5f);
 			}
 		}
 
@@ -955,6 +970,7 @@ public abstract class Mob extends Char {
 			if (enemyInFOV) {
 
 				float enemyStealth = enemy.stealth();
+				if (enemy.buff(PrisonArmor.myMask.class)!=null &&Mob.this instanceof Guard) enemyStealth+=2;
 				if (enemyStealth>=0) {
 					if (enemy instanceof Hero && ((Hero) enemy).hasTalent(Talent.SILENT_STEPS)) {
 						if (Dungeon.level.distance(pos, enemy.pos) >= 4 - ((Hero) enemy).pointsInTalent(Talent.SILENT_STEPS)) {
@@ -1054,7 +1070,12 @@ public abstract class Mob extends Char {
 			
 			int oldPos = pos;
 			if (target != -1 && getCloser( target )) {
-				spend( 1 / speed() );
+				float speedAdj=1f;
+				if (buff(CrabArmor.likeCrab.class)!= null){
+					if (vertical) speedAdj=0.75f;
+					else speedAdj=2f;
+				}
+				spend( 1 / (speed() * speedAdj));
 				return moveSprite( oldPos, pos );
 			} else {
 				target = Dungeon.level.randomDestination( Mob.this );
@@ -1095,8 +1116,13 @@ public abstract class Mob extends Char {
 				
 				int oldPos = pos;
 				if (target != -1 && getCloser( target )) {
-					
-					spend( 1 / speed() );
+
+					float speedAdj=1f;
+					if (buff(CrabArmor.likeCrab.class)!= null){
+						if (vertical) speedAdj=0.75f;
+						else speedAdj=2f;
+					}
+					spend( 1 / (speed() * speedAdj));
 					return moveSprite( oldPos,  pos );
 
 				} else {
@@ -1147,7 +1173,12 @@ public abstract class Mob extends Char {
 			int oldPos = pos;
 			if (target != -1 && getFurther( target )) {
 
-				spend( 1 / speed() );
+				float speedAdj=1f;
+				if (buff(CrabArmor.likeCrab.class)!= null){
+					if (vertical) speedAdj=0.75f;
+					else speedAdj=2f;
+				}
+				spend( 1 / (speed() * speedAdj));
 				return moveSprite( oldPos, pos );
 
 			} else {

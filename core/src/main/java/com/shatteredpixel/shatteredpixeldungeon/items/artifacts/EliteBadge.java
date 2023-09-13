@@ -273,6 +273,15 @@ public class EliteBadge extends Artifact{
                 partialCharge = 0;
             }
         }
+        @Override
+        public void detach(){
+            for (Buff b:target.buffs()){
+                if (b instanceof ChampionHero){
+                    b.detach();
+                }
+            }
+            super.detach();
+        }
     }
     public class WndElite extends WndOptions {
             //used in PixelScene.restoreWindows

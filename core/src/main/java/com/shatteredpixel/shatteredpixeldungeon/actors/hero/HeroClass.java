@@ -46,17 +46,22 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.TengusMask;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.BlueWhiteBowl;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.EnergyArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.SilverScaleArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfConcealment;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EliteBadge;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.PotionBandolier;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.VelvetPouch;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
@@ -85,13 +90,16 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfMagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bloodblade;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CompositeCrossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Cutterhead;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dagger;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Darksword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Glasssword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gloves;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Holyankh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Waterwheel;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortsword;
@@ -112,7 +120,50 @@ public enum HeroClass {
 	HeroClass( HeroSubClass...subClasses ) {
 		this.subClasses = subClasses;
 	}
-
+private void giveTestThing(boolean yes){
+		if (yes){
+			RingOfBenediction rob=new RingOfBenediction();
+			rob.identify().collect();
+			//ScrollOfMagicMapping smm=new ScrollOfMagicMapping();
+			//smm.identify().quantity(100).collect();
+			RingOfHaste roh =new RingOfHaste();
+			roh.level(12);
+			//roh.collect();
+			PotionOfMindVision pom=new PotionOfMindVision();
+			//pom.quantity(100).identify().collect();
+			ScrollOfUpgrade sou=new ScrollOfUpgrade();
+			sou.quantity(100).identify().collect();
+			PotionOfStrength postr=new PotionOfStrength();
+			//postr.quantity(100).identify().collect();
+			PotionOfExperience poe=new PotionOfExperience();
+			poe.quantity(100).identify().collect();
+			//rot.identify().collect();
+			CloakOfConcealment coc=new CloakOfConcealment();
+			//coc.identify().collect();
+			ScrollOfMysticalEnergy som = new ScrollOfMysticalEnergy();
+			//som.identify().quantity(100).collect();
+			ScrollOfForesight sof =new ScrollOfForesight();
+			//sof.identify().quantity(100).collect();
+			TengusMask tm = new TengusMask();
+			tm.collect();
+			ElixirOfMight eom = new ElixirOfMight();
+			eom.quantity(100).collect();
+			ScrollOfDivination sod =new ScrollOfDivination();
+			//sod.quantity(100).collect();
+			new RatArmor().identify().collect();
+			new EnergyArmor().identify().collect();
+			ScrollOfTransmutation sot = new ScrollOfTransmutation();
+			sot.quantity(100).identify().collect();
+			new DarkCoat().identify().collect();
+			new CloakofGreyFeather().identify().collect();
+			new CrabArmor().identify().collect();
+			new PrisonArmor().identify().collect();
+			new AfterImage().identify().collect();
+			new AfterGlow().identify().collect();
+			HeadCleaver hc = new HeadCleaver();
+			hc.identify().collect();
+		}
+}
 	public void initHero( Hero hero ) {
 
 		hero.heroClass = this;
@@ -129,40 +180,9 @@ public enum HeroClass {
 
 		Waterskin waterskin = new Waterskin();
 		waterskin.collect();
-		RingOfBenediction rob=new RingOfBenediction();
-		rob.identify().collect();
-		//ScrollOfMagicMapping smm=new ScrollOfMagicMapping();
-		//smm.identify().quantity(100).collect();
-		RingOfHaste roh =new RingOfHaste();
-		roh.level(12);
-		//roh.collect();
-		PotionOfMindVision pom=new PotionOfMindVision();
-		//pom.quantity(100).identify().collect();
-		ScrollOfUpgrade sou=new ScrollOfUpgrade();
-		sou.quantity(100).identify().collect();
-		PotionOfStrength postr=new PotionOfStrength();
-		//postr.quantity(100).identify().collect();
-		PotionOfExperience poe=new PotionOfExperience();
-		poe.quantity(100).identify().collect();
-		//rot.identify().collect();
-		CloakOfConcealment coc=new CloakOfConcealment();
-		//coc.identify().collect();
-		ScrollOfMysticalEnergy som = new ScrollOfMysticalEnergy();
-		som.identify().quantity(100).collect();
-		ScrollOfForesight sof =new ScrollOfForesight();
-		sof.identify().quantity(100).collect();
-		TengusMask tm = new TengusMask();
-		tm.collect();
-		ElixirOfMight eom = new ElixirOfMight();
-		eom.quantity(100).collect();
-		ScrollOfDivination sod =new ScrollOfDivination();
-		sod.quantity(100).collect();
-		new RatArmor().identify().collect();
-		new EnergyArmor().identify().collect();
-		ScrollOfTransmutation sot = new ScrollOfTransmutation();
-		sot.quantity(100).identify().collect();
-		new DarkCoat().identify().collect();
-		new AfterImage().identify().collect();
+		//new CompositeCrossbow().identify().collect();
+		//new ScrollOfUpgrade().quantity(100).identify().collect();
+		giveTestThing(false);
 		new ScrollOfIdentify().identify();
 
 		switch (this) {

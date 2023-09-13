@@ -39,6 +39,7 @@ public class DM201 extends DM200 {
 		HP = HT = 120;
 
 		properties.add(Property.IMMOVABLE);
+		properties.add(Property.HEADLESS);
 
 		HUNTING = new Mob.Hunting();
 	}

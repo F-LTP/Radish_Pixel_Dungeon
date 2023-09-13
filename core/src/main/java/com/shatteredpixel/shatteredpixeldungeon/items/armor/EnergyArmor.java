@@ -44,7 +44,7 @@ public class EnergyArmor extends Armor{
     @Override
     public int DRMax(int lvl){
         if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
-            return 2 + lvl + augment.defenseFactor(lvl);
+            return Math.max(2 + lvl + augment.defenseFactor(lvl),1+lvl/2);
         }
 
         return 3 + 2 * lvl + augment.defenseFactor(lvl);
@@ -92,7 +92,7 @@ public class EnergyArmor extends Armor{
                     EnergyArmor.this.updateImage();
             }
             if (chargeCount>=30){
-                Buff.affect(target, myShield.class).incShield(20);
+                Buff.affect(target, myShield.class).incShield(15+buffedLvl());
                 chargeCount-=30;
             }
 

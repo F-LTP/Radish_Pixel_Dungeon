@@ -55,6 +55,7 @@ public class DM100 extends Mob implements Callback {
 		
 		properties.add(Property.ELECTRIC);
 		properties.add(Property.INORGANIC);
+		properties.add(Property.HEADLESS);
 	}
 	
 	@Override

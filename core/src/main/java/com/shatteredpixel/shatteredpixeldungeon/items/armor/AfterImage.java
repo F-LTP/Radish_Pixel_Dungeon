@@ -22,10 +22,10 @@ public class AfterImage extends Armor{
 
     public int DRMax(int lvl){
         if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
-            return 3 + 2 * lvl + augment.defenseFactor(lvl);
+            return Math.max(3 + 2 * lvl + augment.defenseFactor(lvl),2);
         }
 
-        return 8 + 4 * lvl + augment.defenseFactor(lvl);
+        return 8 + 5 * lvl + augment.defenseFactor(lvl);
     }
     @Override
     public int DRMin(int lvl){

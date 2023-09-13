@@ -82,6 +82,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Potential;
@@ -108,6 +110,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kineti
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bloodblade;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.ShockingDart;
@@ -153,7 +156,7 @@ public abstract class Char extends Actor {
 	public boolean rooted		= false;
 	public boolean flying		= false;
 	public int invisible		= 0;
-	
+
 	//these are relative to the hero
 	public enum Alignment{
 		ENEMY,
@@ -249,11 +252,15 @@ public abstract class Char extends Actor {
 
 		moveSprite( pos, c.pos );
 		move( c.pos );
-		
+		float speedAdj=1f;
+		if (c.buff(CrabArmor.likeCrab.class)!=null){
+			if (c.pos/Dungeon.level.width()== curPos/Dungeon.level.width())	speedAdj=2f;
+			else speedAdj=0.75f;
+		}
 		c.sprite.move( c.pos, curPos );
 		c.move( curPos );
 		
-		c.spend( 1 / c.speed() );
+		c.spend( 1 / (c.speed() * speedAdj ));
 
 		if (c == Dungeon.hero){
 			if (Dungeon.hero.subClass == HeroSubClass.FREERUNNER){
@@ -291,6 +298,9 @@ public abstract class Char extends Actor {
 	protected static final String TAG_HT    = "HT";
 	protected static final String TAG_SHLD  = "SHLD";
 	protected static final String BUFFS	    = "buffs";
+	protected static final String CRIT		= "crit";
+	protected static final String CRIT_D		= "crit_d";
+
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -301,6 +311,8 @@ public abstract class Char extends Actor {
 		bundle.put( TAG_HP, HP );
 		bundle.put( TAG_HT, HT );
 		bundle.put( BUFFS, buffs );
+		bundle.put( CRIT, critSkill);
+		bundle.put( CRIT_D, critDamage);
 	}
 	
 	@Override
@@ -316,6 +328,12 @@ public abstract class Char extends Actor {
 			if (b != null) {
 				((Buff)b).attachTo( this );
 			}
+		}
+		if (bundle.contains(CRIT)){
+			critSkill= bundle.getFloat(CRIT);
+		}
+		if (bundle.contains(CRIT_D)){
+			critDamage= bundle.getFloat(CRIT_D);
 		}
 	}
 
@@ -387,6 +405,10 @@ public abstract class Char extends Actor {
 				}
 			}
 			current_critdamage=Math.min(current_critdamage,critDamageCap);
+			if (this.buff(Scythe.scytheSac.class)!=null){
+				current_crit+=10f;
+				current_critdamage+=0.1f;
+			}
 			if (Random.Float()*100<current_crit) {dmg*=current_critdamage;crit=true;}
 			dmg = Math.round(dmg*dmgMulti);
 
@@ -500,7 +522,13 @@ public abstract class Char extends Actor {
 			return true;
 			
 		} else {
-
+			if (enemy.buff(CloakofGreyFeather.hexDodge.class)!=null){
+				for (Char ch : Actor.chars()) {
+					if (ch.alignment != enemy.alignment && enemy.fieldOfView[ch.pos]){
+						Buff.affect(ch, Hex.class,5f+enemy.buff(CloakofGreyFeather.hexDodge.class).buffedLvl());
+					}
+				}
+			}
 			enemy.sprite.showStatus( CharSprite.NEUTRAL, enemy.defenseVerb() );
 			if (visibleFight) {
 				//TODO enemy.defenseSound? currently miss plays for monks/crab even when they parry
@@ -1072,7 +1100,8 @@ public abstract class Char extends Actor {
 		ELECTRIC ( new HashSet<Class>( Arrays.asList(WandOfLightning.class, Shocking.class, Potential.class, Electricity.class, ShockingDart.class, Elemental.ShockElemental.class )),
 				new HashSet<Class>()),
 		LARGE,
-		IMMOVABLE;
+		IMMOVABLE,
+		HEADLESS;
 		
 		private HashSet<Class> resistances;
 		private HashSet<Class> immunities;

@@ -77,6 +77,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
@@ -1479,11 +1480,15 @@ public class Hero extends Char {
 			}
 
 			float speed = speed();
-			
+			float speedAdj=1f;
+			if (buff(CrabArmor.likeCrab.class)!=null){
+				if (pos/Dungeon.level.width()== step/Dungeon.level.width())	speedAdj=2f;
+				else speedAdj=0.75f;
+			}
 			sprite.move(pos, step);
 			move(step);
 
-			spend( 1 / speed );
+			spend( 1 / (speed * speedAdj ));
 			justMoved = true;
 			
 			search(false);

@@ -64,6 +64,7 @@ public class Eye extends Mob {
 		lootChance = 1f;
 
 		properties.add(Property.DEMONIC);
+		properties.add(Property.HEADLESS);
 	}
 
 	@Override

@@ -21,8 +21,10 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
@@ -63,6 +65,12 @@ public class Barkskin extends Buff {
 		if (Math.sqrt(interval)*level <= Math.sqrt(time)*value) {
 			level = value;
 			interval = time;
+			if (target == Dungeon.hero){
+				Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+				if (ben!=null){
+					interval=(int)(interval*RingOfBenediction.periodMultiplier(target));
+				}
+			}
 			spend(time - cooldown() - 1);
 		}
 	}

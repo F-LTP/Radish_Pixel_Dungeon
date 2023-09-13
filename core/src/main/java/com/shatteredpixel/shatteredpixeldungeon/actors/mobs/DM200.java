@@ -52,6 +52,7 @@ public class DM200 extends Mob {
 
 		properties.add(Property.INORGANIC);
 		properties.add(Property.LARGE);
+		properties.add(Property.HEADLESS);
 
 		HUNTING = new Hunting();
 	}

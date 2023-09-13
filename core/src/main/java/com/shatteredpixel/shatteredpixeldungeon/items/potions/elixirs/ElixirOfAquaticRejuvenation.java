@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.GooBlob;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
@@ -99,6 +100,9 @@ public class ElixirOfAquaticRejuvenation extends Elixir {
 				}
 				target.HP += healAmt;
 				left -= healAmt;
+				if (target.buff(AfterGlow.Warmth.class)!=null){
+					target.buff(AfterGlow.Warmth.class).getWarmth();
+				}
 				target.sprite.emitter().burst( Speck.factory( Speck.HEALING ), 1 );
 			}
 			

@@ -500,7 +500,12 @@ public class Item implements Bundlable {
 	public String status() {
 		return quantity != 1 ? Integer.toString( quantity ) : null;
 	}
-
+	public String special(){
+		return null;
+	}
+	public boolean specialColorChange(){
+		return false;
+	}
 	public static void updateQuickslot() {
 		GameScene.updateItemDisplays = true;
 	}

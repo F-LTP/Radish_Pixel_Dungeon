@@ -57,13 +57,13 @@ import java.util.ArrayList;
 public class SpiritBow extends Weapon {
 	
 	public static final String AC_SHOOT		= "SHOOT";
-	
+
 	{
 		image = ItemSpriteSheet.SPIRIT_BOW;
 		
 		defaultAction = AC_SHOOT;
 		usesTargeting = true;
-		
+
 		unique = true;
 		bones = false;
 	}

@@ -48,6 +48,7 @@ public class RotLasher extends Mob {
 
 		properties.add(Property.IMMOVABLE);
 		properties.add(Property.MINIBOSS);
+		properties.add(Property.HEADLESS);
 	}
 
 	@Override

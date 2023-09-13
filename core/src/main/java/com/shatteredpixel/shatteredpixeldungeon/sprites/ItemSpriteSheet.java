@@ -216,6 +216,8 @@ public class ItemSpriteSheet {
 	public static final int GLASSSWORD1		= WEP_TIER2+5;
 	public static final int GLASSSWORD2		= WEP_TIER2+6;
 	public static final int GLASSSWORD3		= WEP_TIER2+7;
+	public static final int KATAR			= xy(1,7)+6;
+	public static final int BLADESHIELD		= xy(1,9)+7;
 
 	static{
 		assignItemRect(SHORTSWORD,      13, 13);
@@ -226,6 +228,8 @@ public class ItemSpriteSheet {
 		assignItemRect(GLASSSWORD1,     13, 14);
 		assignItemRect(GLASSSWORD2,     13, 14);
 		assignItemRect(GLASSSWORD3,     10, 14);
+		assignItemRect(KATAR,           16, 16);
+		assignItemRect(BLADESHIELD,     16, 16);
 	}
 
 	private static final int WEP_TIER3      =                               xy(1, 8);   //8 slots
@@ -235,6 +239,8 @@ public class ItemSpriteSheet {
 	public static final int ROUND_SHIELD    = WEP_TIER3+3;
 	public static final int SAI             = WEP_TIER3+4;
 	public static final int WHIP            = WEP_TIER3+5;
+	public static final int WINGSWORD		= xy(1,7)+7;
+	public static final int CROSSBOW_H		= xy(16,8);
 	static{
 		assignItemRect(SWORD,           14, 14);
 		assignItemRect(MACE,            15, 15);
@@ -242,6 +248,8 @@ public class ItemSpriteSheet {
 		assignItemRect(ROUND_SHIELD,    16, 16);
 		assignItemRect(SAI,             16, 16);
 		assignItemRect(WHIP,            14, 14);
+		assignItemRect(WINGSWORD,       16, 16);
+		assignItemRect(CROSSBOW_H,       16, 16);
 	}
 
 	private static final int WEP_TIER4      =                               xy(9, 8);   //8 slots
@@ -252,6 +260,8 @@ public class ItemSpriteSheet {
 	public static final int ASSASSINS_BLADE = WEP_TIER4+4;
 	public static final int CROSSBOW        = WEP_TIER4+5;
 	public static final int HOLYANKH		= WEP_TIER4+6;
+	public static final int HEADCLEAVER		= WEP_TIER4-1;
+	public static final int CROSSBOW_C		= xy(15,6);
 	static{
 		assignItemRect(LONGSWORD,       15, 15);
 		assignItemRect(BATTLE_AXE,      16, 16);
@@ -260,6 +270,8 @@ public class ItemSpriteSheet {
 		assignItemRect(ASSASSINS_BLADE, 14, 15);
 		assignItemRect(CROSSBOW,        15, 15);
 		assignItemRect(HOLYANKH,		16,14);
+		assignItemRect(HEADCLEAVER,		16,16);
+		assignItemRect(CROSSBOW_C,		16,16);
 	}
 
 	private static final int WEP_TIER5      =                               xy(1, 9);   //8 slots
@@ -278,6 +290,8 @@ public class ItemSpriteSheet {
 	public static final int SEEKING			= WEP_TIER5+14;
 
 	public static final int WATERWHEEL		= WEP_TIER5+15;
+
+	public static final int SCYTHE			= WEP_TIER4-2;
 	static{
 		assignItemRect(GREATSWORD,  16, 16);
 		assignItemRect(WAR_HAMMER,  16, 16);
@@ -293,6 +307,7 @@ public class ItemSpriteSheet {
 		assignItemRect(BEECOMB,     15, 16);
 		assignItemRect(SEEKING,     16, 16);
 		assignItemRect(WATERWHEEL,  16, 16);
+		assignItemRect(SCYTHE,      16, 16);
 	}
 
 	                                                                                    //8 free slots
@@ -382,6 +397,8 @@ public class ItemSpriteSheet {
 	public static final int ARMOR_BLACKCOAT = TIPPED_DARTS+15;
 	public static final int ARMOR_AFTERIMAGE = ARMOR+14;
 	public static final int ARMOR_GREYFEATHER = ARMOR+13;
+	public static final int ARMOR_PRISON	 = ARMOR+15;
+	public static final int ARMOR_AFTERGLOW = ARMOR+11;
 
 	static{
 		assignItemRect(ARMOR_CLOTH,     15, 12);
@@ -392,11 +409,13 @@ public class ItemSpriteSheet {
 		assignItemRect(ARMOR_ENERGY1,   16, 16);
 		assignItemRect(ARMOR_ENERGY2,   16, 16);
 		assignItemRect(ARMOR_SILVERSCALE,16, 16);
+		assignItemRect(ARMOR_PRISON,16, 16);
 		assignItemRect(ARMOR_SCALE,     14, 11);
 		assignItemRect(ARMOR_BLACKCOAT, 16, 16);
 		assignItemRect(ARMOR_GREYFEATHER,16, 16);
 		assignItemRect(ARMOR_PLATE,     12, 12);
 		assignItemRect(ARMOR_AFTERIMAGE,16, 16);
+		assignItemRect(ARMOR_AFTERGLOW,16, 16);
 		assignItemRect(ARMOR_CRAB,      16, 12);
 		assignItemRect(ARMOR_WARRIOR,   12, 12);
 		assignItemRect(ARMOR_MAGE,      15, 15);

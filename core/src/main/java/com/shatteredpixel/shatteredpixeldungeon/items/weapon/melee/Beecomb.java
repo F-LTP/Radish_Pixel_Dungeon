@@ -93,7 +93,7 @@ public class Beecomb extends MeleeWeapon{
     public ItemSprite.Glowing glowing() {
         if (bee_charged)
         return YELLOW;
-        else return null;
+        else return new ItemSprite.Glowing(0x000000);
     }
 
     private static final String BEE_CHARGED = "bee_charged";
