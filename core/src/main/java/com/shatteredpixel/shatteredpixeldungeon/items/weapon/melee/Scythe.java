@@ -79,7 +79,7 @@ public class Scythe extends MeleeWeapon{
                 lvl*2;
     }
 
-    public class scytheSac extends FlavourBuff{
+    public static class scytheSac extends FlavourBuff{
         {
             type = buffType.POSITIVE;
         }

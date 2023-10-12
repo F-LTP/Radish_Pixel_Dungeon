@@ -137,7 +137,19 @@ public class Swiftthistle extends Plant {
 
 			presses = new ArrayList<>();
 		}
-		
+
+		public void disarmPresses(){
+			for (int cell : presses){
+				Trap t = Dungeon.level.traps.get(cell);
+				if (t != null && t.disarmedByActivation) {
+					t.disarm();
+				}
+
+				Dungeon.level.uproot(cell);
+			}
+
+			presses = new ArrayList<>();
+		}
 		@Override
 		public void detach(){
 			super.detach();

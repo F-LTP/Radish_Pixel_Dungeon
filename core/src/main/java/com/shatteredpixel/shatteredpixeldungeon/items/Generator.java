@@ -34,7 +34,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.EnergyArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.HuntressArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.LeatherArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.MageArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.MailArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PlateArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
@@ -44,7 +43,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.SilverScaleArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.WarriorArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.AlchemistsToolkit;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CapeOfThorns;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.ChaliceOfBlood;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfConcealment;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
@@ -52,7 +50,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EliteBadge;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EtherealChains;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HornOfPlenty;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.LloydsBeacon;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.MasterThievesArmband;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.SandalsOfNature;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
@@ -75,7 +72,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfPurity;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfToxicGas;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfConcentration;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfElements;
@@ -129,7 +126,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfRegrowth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfTransfusion;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.AssassinsBlade;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.BattleAxe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.BladeShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bloodblade;
@@ -147,14 +143,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gloves;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Greataxe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Greatshield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Greatsword;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HandAxe;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Holyankh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Katar;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Longsword;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Mace;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Quarterstaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RunicBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sai;
@@ -163,8 +156,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Shortsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Spear;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sword;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WarHammer;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Waterwheel;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Whip;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WingSword;
@@ -197,13 +188,11 @@ import com.shatteredpixel.shatteredpixeldungeon.plants.Starflower;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Stormvine;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Sungrass;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
-import com.watabou.noosa.Game;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -228,6 +217,7 @@ public class Generator {
 		ARM_T3	( 0, 0, Armor.class ),
 		ARM_T4	( 0, 0, Armor.class ),
 		ARM_T5	( 0, 0, Armor.class ),
+		ARM_T5_NATURE(0,0,Armor.class),
 		
 		MISSILE ( 1, 2, MissileWeapon.class ),
 		MIS_T1  ( 0, 0, MissileWeapon.class ),
@@ -433,7 +423,8 @@ public class Generator {
 					CompositeCrossbow.class,
 					Darksword.class,
 					Flail.class,
-					Holyankh.class,
+					HeadCleaver.class,
+					//Holyankh.class,
 					Seekingspear.class,
 					RunicBlade.class,
 					AssassinsBlade.class,
@@ -445,7 +436,8 @@ public class Generator {
 					Bloodblade.class,
 					CompositeCrossbow.class,
 					Darksword.class,
-					Holyankh.class,
+					HeadCleaver.class,
+					//Holyankh.class,
 					Seekingspear.class,
 			};
 			WEP_T4_NEW.probs = new float[]{ 5, 5, 5, 5, 5 };
@@ -508,6 +500,12 @@ public class Generator {
 					HuntressArmor.class
 			};
 			ARM_T5.probs = new float[]{ 1, 1, 1, 0, 0, 0, 0 };
+			ARM_T5_NATURE.classes = new Class<?>[]{
+					PlateArmor.class,
+					AfterImage.class,
+					AfterGlow.class
+			};
+			ARM_T5_NATURE.probs = new float[]{ 1, 1, 1};
 
 			//see Generator.randomMissile
 			MISSILE.classes = new Class<?>[]{};
@@ -554,7 +552,7 @@ public class Generator {
 			FOOD.probs = new float[]{ 4, 1, 0 };
 			
 			RING.classes = new Class<?>[]{
-					RingOfAccuracy.class,
+					RingOfConcentration.class,
 					RingOfArcana.class,
 					RingOfBenediction.class,
 					RingOfEvasion.class,

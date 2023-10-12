@@ -65,7 +65,7 @@ public class ScrollOfPsionicBlast extends ExoticScroll {
 			Buff.prolong(curUser, Blindness.class, Blindness.DURATION);
 			Buff.prolong(curUser, Weakness.class, Weakness.DURATION*5f);
 			Dungeon.observe();
-			readAnimation();
+			readAnimation(true);
 		} else {
 			Badges.validateDeathFromFriendlyMagic();
 			Dungeon.fail( getClass() );

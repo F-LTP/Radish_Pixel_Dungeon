@@ -42,7 +42,7 @@ public class ScrollOfForesight extends ExoticScroll {
 
 		identify();
 		
-		readAnimation();
+		readAnimation(true);
 	}
 	
 }

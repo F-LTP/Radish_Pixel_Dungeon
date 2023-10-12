@@ -79,7 +79,7 @@ public class DM100 extends Mob implements Callback {
 	}
 	
 	//used so resistances can differentiate between melee and magical attacks
-	public static class LightningBolt{}
+	public static class LightningBolt {}
 	
 	@Override
 	protected boolean doAttack( Char enemy ) {

@@ -46,6 +46,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
+import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.SpellQueue;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -384,7 +385,18 @@ public abstract class Wand extends Item {
 		particle.setSize( 1f, 2f );
 		particle.radiateXY(0.5f);
 	}
-
+	public void spellUsed(){
+		curCharges -= 2;
+		if (Dungeon.hero.hasTalent(Talent.SPELL_QUEUE)){
+			SpellQueue mySq=Dungeon.hero.belongings.getItem(SpellQueue.class);
+			if (mySq!=null) mySq.updateImage();
+			if (Dungeon.hero.pointsInTalent(Talent.SPELL_QUEUE)>2){
+				partialCharge+=0.33f;
+			}
+		}
+		Invisibility.dispel();
+		updateQuickslot();
+	}
 	protected void wandUsed() {
 		if (!isIdentified()) {
 			float uses = Math.min( availableUsesToID, Talent.itemIDSpeedFactor(Dungeon.hero, this) );
@@ -405,7 +417,10 @@ public abstract class Wand extends Item {
 		}
 		
 		curCharges -= cursed ? 1 : chargesPerCast();
-
+		if (Dungeon.hero.hasTalent(Talent.SPELL_QUEUE)){
+			SpellQueue mySq=Dungeon.hero.belongings.getItem(SpellQueue.class);
+			if (mySq!=null) mySq.updateImage();
+		}
 		//remove magic charge at a higher priority, if we are benefiting from it are and not the
 		//wand that just applied it
 		WandOfMagicMissile.MagicCharge buff = curUser.buff(WandOfMagicMissile.MagicCharge.class);
@@ -452,8 +467,16 @@ public abstract class Wand extends Item {
 		}
 		Invisibility.dispel();
 		updateQuickslot();
-
-		curUser.spendAndNext( TIME_TO_ZAP );
+		if (Dungeon.hero.hasTalent(Talent.DUEL_DANCE)) {
+			Buff.affect(Dungeon.hero, Talent.DuelDanceMissileTracker.class, 1f);
+			if (Dungeon.hero.buff(Talent.DuelDanceWandTracker.class) != null) {
+				Buff.detach(Dungeon.hero, Talent.DuelDanceWandTracker.class);
+				curUser.spendAndNext( TIME_TO_ZAP *(0.84f - 0.17f * Dungeon.hero.pointsInTalent(Talent.DUEL_DANCE)));
+			}else
+				curUser.spendAndNext( TIME_TO_ZAP );
+		}
+		else
+			curUser.spendAndNext( TIME_TO_ZAP );
 	}
 	
 	@Override

@@ -25,7 +25,7 @@ import com.watabou.utils.Random;
 import java.util.ArrayList;
 
 public class Beecomb extends MeleeWeapon{
-    private static ItemSprite.Glowing YELLOW = new ItemSprite.Glowing( 0xFFFF00 );
+    public int bee_charge=0;
     public boolean bee_charged=false;
     public static final String AC_SUMMON	= "SUMMON";
     {
@@ -35,12 +35,20 @@ public class Beecomb extends MeleeWeapon{
 
         tier = 3;
         defaultAction=AC_SUMMON;
+        bee_charge=Random.IntRange(30,50);
     }
     @Override
     public ArrayList<String> actions(Hero hero ) {
         ArrayList<String> actions = super.actions( hero );
         actions.add( AC_SUMMON );
         return actions;
+    }
+    public void getCharge(){
+        bee_charge+=buffedLvl()*2+6;
+        bee_charge=Math.min(100,bee_charge);
+        if (bee_charge == 100){
+            GLog.p(Messages.get(Beecomb.class, "ready"));
+        }
     }
     @Override
     public void execute( Hero hero, String action ) {
@@ -51,7 +59,7 @@ public class Beecomb extends MeleeWeapon{
             if (!isEquipped( hero )){
                 GLog.w(Messages.get(this,"not_equipped"));
             }
-            else if (!bee_charged){
+            else if (bee_charge<100){
                 GLog.w(Messages.get(this,"not_ready"));
             }
             else {
@@ -80,32 +88,30 @@ public class Beecomb extends MeleeWeapon{
                 if (spawned==0) {
                     GLog.w(Messages.get(this,"no_bee"));
                 }
-                else {bee_charged=false;hero.spend(1f);updateQuickslot();}
+                else {bee_charge=0;hero.spend(1f);updateQuickslot();}
             }
         }
     }
     @Override
     public int max(int lvl) {
-        return  4*(tier+1) +    //16 base, down from 20
+        return  2+4*(tier+1) +    //18 base, down from 20
                 lvl*(tier+1);   //scaling unchanged
     }
-    @Override
-    public ItemSprite.Glowing glowing() {
-        if (bee_charged)
-        return YELLOW;
-        else return new ItemSprite.Glowing(0x000000);
-    }
-
-    private static final String BEE_CHARGED = "bee_charged";
+@Override
+public String special(){
+        return bee_charge+"%";
+}
+    private static final String BEE_CHARGE = "bee_charge";
     @Override
     public void restoreFromBundle( Bundle bundle ) {
         super.restoreFromBundle(bundle);
-        bee_charged = bundle.getBoolean(BEE_CHARGED);
+        if (bundle.contains(BEE_CHARGE))
+            bee_charge = bundle.getInt(BEE_CHARGE);
     }
 
     @Override
     public void storeInBundle( Bundle bundle ) {
         super.storeInBundle(bundle);
-        bundle.put(BEE_CHARGED, bee_charged);
+        bundle.put(BEE_CHARGE, bee_charge);
     }
 }

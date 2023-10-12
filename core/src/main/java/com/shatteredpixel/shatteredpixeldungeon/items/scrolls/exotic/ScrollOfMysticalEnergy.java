@@ -48,7 +48,7 @@ public class ScrollOfMysticalEnergy extends ExoticScroll {
 		identify();
 		ScrollOfRecharging.charge(curUser);
 		
-		readAnimation();
+		readAnimation(true);
 	}
 	
 }

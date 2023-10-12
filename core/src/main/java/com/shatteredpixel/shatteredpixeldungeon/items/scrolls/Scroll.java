@@ -49,6 +49,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFlock;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfIntuition;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfShock;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
@@ -181,15 +182,23 @@ public abstract class Scroll extends Item {
 	
 	public abstract void doRead();
 
-	protected void readAnimation() {
+	protected void readAnimation(){
+		readAnimation(false);
+	}
+	protected void readAnimation( boolean toDouble) {
 		Invisibility.dispel();
 		curUser.spend( TIME_TO_READ );
 		curUser.busy();
 		((HeroSprite)curUser.sprite).read();
 
-		if (curUser.hasTalent(Talent.EMPOWERING_SCROLLS)){
+		/*if (curUser.hasTalent(Talent.SPELL_QUEUE)){
 			Buff.affect(curUser, ScrollEmpower.class).reset();
 			updateQuickslot();
+		}*/
+		if (curUser.hasTalent(Talent.ENERGIZING_UPGRADE)){
+			for (Wand.Charger c : curUser.buffs(Wand.Charger.class)){
+				c.gainCharge((toDouble?2:1)*(0.34f+0.33f*curUser.pointsInTalent(Talent.ENERGIZING_UPGRADE)));
+			}
 		}
 
 	}

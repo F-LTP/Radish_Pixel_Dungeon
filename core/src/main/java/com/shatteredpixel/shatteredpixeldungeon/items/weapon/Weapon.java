@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.CustomWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
@@ -210,6 +211,9 @@ abstract public class Weapon extends KindOfWeapon {
 	@Override
 	public int reachFactor(Char owner) {
 		if (hasEnchant(Projecting.class, owner)){
+			if (this instanceof CustomWeapon) {
+				return RCH + 1;
+			}
 			return RCH + Math.round(RingOfArcana.enchantPowerMultiplier(owner));
 		} else {
 			return RCH;

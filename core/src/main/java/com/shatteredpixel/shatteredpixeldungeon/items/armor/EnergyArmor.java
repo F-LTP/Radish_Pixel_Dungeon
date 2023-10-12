@@ -92,7 +92,7 @@ public class EnergyArmor extends Armor{
                     EnergyArmor.this.updateImage();
             }
             if (chargeCount>=30){
-                Buff.affect(target, myShield.class).incShield(15+buffedLvl());
+                Buff.affect(target, myShield.class).incShield(12+buffedLvl());
                 chargeCount-=30;
             }
 

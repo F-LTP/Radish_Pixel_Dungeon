@@ -44,6 +44,7 @@ public class Messages {
 
 	private static ArrayList<I18NBundle> bundles;
 	private static Languages lang;
+	private static Locale locale;
 
 	public static final String NO_TEXT_FOUND = "!!!NO TEXT FOUND!!!";
 
@@ -52,6 +53,9 @@ public class Messages {
 	}
 
 
+	public static Locale locale(){
+		return locale;
+	}
 
 	/**
 	 * Setup Methods
@@ -66,7 +70,11 @@ public class Messages {
 			Assets.Messages.PLANTS,
 			Assets.Messages.SCENES,
 			Assets.Messages.UI,
-			Assets.Messages.WINDOWS
+			Assets.Messages.WINDOWS,
+
+			Assets.Messages.CUSTOM,
+			Assets.Messages.EXPANSION,
+			Assets.Messages.TEXT
 	};
 
 	static{

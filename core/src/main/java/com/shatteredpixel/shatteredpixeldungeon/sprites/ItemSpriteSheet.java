@@ -589,9 +589,13 @@ public class ItemSpriteSheet {
 	public static final int STONE_FLOCK         = STONES+9;
 	public static final int STONE_INTUITION     = STONES+10;
 	public static final int STONE_SHOCK         = STONES+11;
+	public static final int SPELL_QUEUE_OFF		= xy(14,21);
+	public static final int SPELL_QUEUE_ON		=xy(14,20);
 	static {
 		for (int i = STONES; i < STONES+16; i++)
 			assignItemRect(i, 14, 12);
+		assignItemRect(SPELL_QUEUE_OFF,     14, 16);
+		assignItemRect(SPELL_QUEUE_ON,     14, 16);
 	}
 
 	private static final int POTIONS        =                               xy(1, 22);  //16 slots

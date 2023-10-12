@@ -760,14 +760,16 @@ public abstract class Mob extends Char {
 					&& Dungeon.hero.hasTalent(Talent.LETHAL_MOMENTUM)
 					&& Random.Float() < 0.34f + 0.33f* Dungeon.hero.pointsInTalent(Talent.LETHAL_MOMENTUM)){
 				Buff.affect(Dungeon.hero, Talent.LethalMomentumTracker.class, 1f);
+				if (Dungeon.hero.hasTalent(Talent.GIGANTIC) && Dungeon.hero.attackDelay()>1f && Dungeon.hero.buff(Talent.GiganticInvalidTracker.class)==null){
+					Buff.affect(Dungeon.hero,Talent.GiganticInvalidTracker.class,50f);
+				}
 			}
 		}
 		if (cause == Dungeon.hero){
 			if (Dungeon.hero.belongings.weapon instanceof Beecomb) {
 				Beecomb bc = (Beecomb) Dungeon.hero.belongings.weapon;
 				if (Random.Float() * 100 < 5 + 2 * bc.buffedLvl()) {
-					bc.bee_charged = true;
-					GLog.p(Messages.get(Beecomb.class, "ready"));
+					bc.getCharge();
 					updateQuickslot();
 				}
 			} else if (Dungeon.hero.belongings.weapon instanceof Scythe){
@@ -797,7 +799,7 @@ public abstract class Mob extends Char {
 			}
 		}
 		EliteBadge.badgeRecharge bad = Dungeon.hero.buff(EliteBadge.badgeRecharge.class);
-		if (bad != null ) {
+		if (bad != null && this.alignment==Alignment.ENEMY) {
 			int ge=10;
 			float gc=0.5f+bad.itemLevel()*0.1f;
 			boolean iselite=false;

@@ -273,6 +273,15 @@ abstract public class MissileWeapon extends Weapon {
 	
 	@Override
 	public float castDelay(Char user, int dst) {
+		if (user instanceof Hero) {
+			if (Dungeon.hero.hasTalent(Talent.DUEL_DANCE)) {
+				Buff.affect(Dungeon.hero, Talent.DuelDanceWandTracker.class, 1f);
+			if (Dungeon.hero.buff(Talent.DuelDanceMissileTracker.class) != null) {
+				Buff.detach(Dungeon.hero, Talent.DuelDanceMissileTracker.class);
+				return (0.84f - 0.17f * Dungeon.hero.pointsInTalent(Talent.DUEL_DANCE)) * delayFactor(user);
+			}
+			}
+		}
 		return delayFactor( user );
 	}
 	

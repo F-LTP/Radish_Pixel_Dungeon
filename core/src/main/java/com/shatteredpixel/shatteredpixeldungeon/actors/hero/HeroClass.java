@@ -39,69 +39,50 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.Smok
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.HeroicLeap;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Shockwave;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Bee;
-import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
+import com.shatteredpixel.shatteredpixeldungeon.custom.ch.ChallengeBag;
+import com.shatteredpixel.shatteredpixeldungeon.custom.dict.DictBook;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.BackpackCleaner;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.CustomWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.EnemyAttributeModifier;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.ImmortalShieldAffecter;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.LevelTeleporter;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.MobAttributeViewer;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.MobPlacer;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TerrainPlacer;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TestBag;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TimeReverser;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TrapPlacer;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.LazyTest;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestArmor;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestArtifact;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestMelee;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestMissile;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestPotion;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestRing;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
-import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.TengusMask;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.BlueWhiteBowl;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.EnergyArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.SilverScaleArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfConcealment;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EliteBadge;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.PotionBandolier;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.ScrollHolder;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.VelvetPouch;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfInvisibility;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLiquidFlame;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfMindVision;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfMight;
-import com.shatteredpixel.shatteredpixeldungeon.items.quest.MetalShard;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfHaste;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfIdentify;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfLullaby;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRage;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTransmutation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfDivination;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfForesight;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfMysticalEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfMagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bloodblade;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CompositeCrossbow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Cutterhead;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dagger;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Darksword;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Glasssword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gloves;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Holyankh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Waterwheel;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingKnife;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingStone;
@@ -120,50 +101,72 @@ public enum HeroClass {
 	HeroClass( HeroSubClass...subClasses ) {
 		this.subClasses = subClasses;
 	}
-private void giveTestThing(boolean yes){
-		if (yes){
-			RingOfBenediction rob=new RingOfBenediction();
-			rob.identify().collect();
-			//ScrollOfMagicMapping smm=new ScrollOfMagicMapping();
-			//smm.identify().quantity(100).collect();
-			RingOfHaste roh =new RingOfHaste();
-			roh.level(12);
-			//roh.collect();
-			PotionOfMindVision pom=new PotionOfMindVision();
-			//pom.quantity(100).identify().collect();
-			ScrollOfUpgrade sou=new ScrollOfUpgrade();
-			sou.quantity(100).identify().collect();
-			PotionOfStrength postr=new PotionOfStrength();
-			//postr.quantity(100).identify().collect();
-			PotionOfExperience poe=new PotionOfExperience();
-			poe.quantity(100).identify().collect();
-			//rot.identify().collect();
-			CloakOfConcealment coc=new CloakOfConcealment();
-			//coc.identify().collect();
-			ScrollOfMysticalEnergy som = new ScrollOfMysticalEnergy();
-			//som.identify().quantity(100).collect();
-			ScrollOfForesight sof =new ScrollOfForesight();
-			//sof.identify().quantity(100).collect();
-			TengusMask tm = new TengusMask();
-			tm.collect();
-			ElixirOfMight eom = new ElixirOfMight();
-			eom.quantity(100).collect();
-			ScrollOfDivination sod =new ScrollOfDivination();
-			//sod.quantity(100).collect();
-			new RatArmor().identify().collect();
-			new EnergyArmor().identify().collect();
-			ScrollOfTransmutation sot = new ScrollOfTransmutation();
-			sot.quantity(100).identify().collect();
-			new DarkCoat().identify().collect();
-			new CloakofGreyFeather().identify().collect();
-			new CrabArmor().identify().collect();
-			new PrisonArmor().identify().collect();
-			new AfterImage().identify().collect();
-			new AfterGlow().identify().collect();
-			HeadCleaver hc = new HeadCleaver();
-			hc.identify().collect();
+	private static void doChallengeSpawn(Hero hero) {
+		new ChallengeBag().collect();
+
+		new DictBook().collect();
+		//new NewDictBook().collect();
+			/*
+			Mana mana = new Mana();
+			mana.maxMana = 200;
+			mana.curMana = 0;
+			mana.manaRegen = 0.514f;
+			mana.attachTo(hero);
+			 */
+			//new WandOfScanningBeam().identify().collect();
+
+			new MobPlacer().collect();
+
+
+			CustomWeapon customWeapon = new CustomWeapon();
+			customWeapon.adjustStatus();
+			customWeapon.identify().collect();
+
+			new TestBag().collect();
+
+			new TrapPlacer().collect();
+
+			new TimeReverser().collect();
+
+			new ImmortalShieldAffecter().collect();
+
+			new BackpackCleaner().collect();
+
+			new LevelTeleporter().collect();
+
+			new LazyTest().collect();
+
+			new TestArmor().collect();
+			new TestArtifact().collect();
+			new TestMelee().collect();
+			new TestMissile().collect();
+			new TestRing().collect();
+			new TestPotion().collect();
+			//new PotionBag().collect();
+
+			new ScrollHolder().collect();
+			Dungeon.LimitedDrops.SCROLL_HOLDER.drop();
+
+			new PotionBandolier().collect();
+			Dungeon.LimitedDrops.POTION_BANDOLIER.drop();
+
+			if (!Dungeon.LimitedDrops.VELVET_POUCH.dropped()) {
+				new VelvetPouch().collect();
+				Dungeon.LimitedDrops.VELVET_POUCH.drop();
+			}
+
+			new MagicalHolster().collect();
+			Dungeon.LimitedDrops.MAGICAL_HOLSTER.drop();
+
+			//	new WandOfReflectDisintegration().identify().collect();
+
+			new EnemyAttributeModifier().collect();
+
+			new MobAttributeViewer().collect();
+
+			new TerrainPlacer().collect();
+
 		}
-}
 	public void initHero( Hero hero ) {
 
 		hero.heroClass = this;
@@ -180,9 +183,7 @@ private void giveTestThing(boolean yes){
 
 		Waterskin waterskin = new Waterskin();
 		waterskin.collect();
-		//new CompositeCrossbow().identify().collect();
-		//new ScrollOfUpgrade().quantity(100).identify().collect();
-		giveTestThing(false);
+		if (Dungeon.isChallenged(Challenges.TEST_MODE))doChallengeSpawn(hero);
 		new ScrollOfIdentify().identify();
 
 		switch (this) {

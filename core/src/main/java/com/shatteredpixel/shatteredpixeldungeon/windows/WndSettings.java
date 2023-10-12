@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.SeedFindScene;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.News;
 import com.shatteredpixel.shatteredpixeldungeon.services.updates.Updates;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -398,6 +399,7 @@ public class WndSettings extends WndTabbed {
 		CheckBox chkFlipTags;
 		ColorBlock sep2;
 		CheckBox chkFont;
+		OptionSlider seedFindMaxDepth;
 
 		@Override
 		protected void createChildren() {
@@ -615,6 +617,17 @@ public class WndSettings extends WndTabbed {
 			};
 			chkFont.checked(SPDSettings.systemFont());
 			add(chkFont);
+
+			seedFindMaxDepth = new OptionSlider(Messages.get(SeedFindScene.class, "depth"),"1","24",1,24 ) {
+				@Override
+				protected void onChange() {
+					if (getSelectedValue() != SPDSettings.getKeySeedDepth()) {
+						SPDSettings.setKeySeeddepth(getSelectedValue());
+					}
+				}
+			};
+			seedFindMaxDepth.setSelectedValue(SPDSettings.getKeySeedDepth());
+			add(seedFindMaxDepth);
 		}
 
 		@Override
@@ -653,7 +666,10 @@ public class WndSettings extends WndTabbed {
 			sep2.y = height + GAP;
 
 			chkFont.setRect(0, sep2.y + 1 + GAP, width, BTN_HEIGHT);
-			height = chkFont.bottom();
+
+			seedFindMaxDepth.setRect(0,chkFont.bottom()+GAP,width,SLIDER_HEIGHT);
+
+			height = seedFindMaxDepth.bottom();
 		}
 
 	}

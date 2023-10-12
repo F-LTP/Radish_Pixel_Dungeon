@@ -40,6 +40,6 @@ public class ScrollOfAntiMagic extends ExoticScroll {
 
 		identify();
 		
-		readAnimation();
+		readAnimation(true);
 	}
 }

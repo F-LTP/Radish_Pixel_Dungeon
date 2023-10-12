@@ -109,6 +109,9 @@ public class Assets {
 		public static final String SCENES   = "messages/scenes/scenes";
 		public static final String UI       = "messages/ui/ui";
 		public static final String WINDOWS  = "messages/windows/windows";
+		public static final String CUSTOM   = "messages/custom/custom";
+		public static final String EXPANSION    = "messages/expansion/expansion";
+		public static final String TEXT  = "messages/text/text";
 	}
 
 	public static class Music {
@@ -296,5 +299,6 @@ public class Assets {
 		public static final String NINJA_LOG= "sprites/ninja_log.png";
 		public static final String SPIRIT_HAWK= "sprites/spirit_hawk.png";
 		public static final String RED_SENTRY= "sprites/red_sentry.png";
+		public static final String NEW_NPC="sprites/new_npc.png";
 	}
 }

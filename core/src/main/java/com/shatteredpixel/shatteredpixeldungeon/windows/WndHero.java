@@ -21,19 +21,25 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.custom.buffs.GameTracker;
+import com.shatteredpixel.shatteredpixeldungeon.custom.messages.M;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
+import com.shatteredpixel.shatteredpixeldungeon.text.HeroStat;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.StatusPane;
@@ -48,11 +54,12 @@ import com.watabou.noosa.ui.Component;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class WndHero extends WndTabbed {
 	
 	private static final int WIDTH		= 120;
-	private static final int HEIGHT		= 120;
+	private static final int HEIGHT		= 160;
 	
 	private StatsTab stats;
 	private TalentsTab talents;
@@ -201,6 +208,22 @@ public class WndHero extends WndTabbed {
 			}
 
 			pos += GAP;
+			Hunger hunger = Dungeon.hero.buff(Hunger.class);
+			String hunger_str = "null";
+			if(hunger != null){
+				hunger_str = hunger.hunger() + "/" + Hunger.STARVING;
+			}
+			statSlot( M.L(HeroStat.class, "hunger"), hunger_str);
+			if (Dungeon.isChallenged(Challenges.TEST_MODE)) {
+				statSlot(M.L(HeroStat.class, "turns"), String.format(Locale.ENGLISH, "%.2f", Statistics.turnsPassed));
+				int t_all_sec = Math.round(Statistics.real_seconds);
+				int t_hour = t_all_sec / 3600;
+				int t_minute = (t_all_sec - t_hour * 3600) / 60;
+				int t_second = t_all_sec - t_hour * 3600 - t_minute * 60;
+				statSlot(M.L(HeroStat.class, "playtime"), String.format(Locale.ENGLISH, "%dd %dm %ds", t_hour, t_minute, t_second));
+			}
+			pos += GAP;
+
 		}
 
 		private void statSlot( String label, String value ) {

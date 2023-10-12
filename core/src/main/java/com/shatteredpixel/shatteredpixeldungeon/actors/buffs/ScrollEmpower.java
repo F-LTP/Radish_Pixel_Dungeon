@@ -39,7 +39,7 @@ public class ScrollEmpower extends Buff {
 	private int left;
 
 	public void reset(){
-		int to_left=Dungeon.hero.pointsInTalent(Talent.EMPOWERING_SCROLLS);
+		int to_left=Dungeon.hero.pointsInTalent(Talent.SPELL_QUEUE);
 		if (target == Dungeon.hero){
 			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
 			if (ben!=null){
@@ -85,7 +85,7 @@ public class ScrollEmpower extends Buff {
 
 	@Override
 	public String desc() {
-		return Messages.get(this, "desc", Dungeon.hero.pointsInTalent(Talent.EMPOWERING_SCROLLS), left);
+		return Messages.get(this, "desc", Dungeon.hero.pointsInTalent(Talent.SPELL_QUEUE), left);
 	}
 
 	private static final String LEFT = "left";

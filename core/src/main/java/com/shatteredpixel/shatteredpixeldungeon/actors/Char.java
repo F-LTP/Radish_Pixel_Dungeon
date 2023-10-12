@@ -79,6 +79,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.ImmortalShieldAffecter;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
@@ -390,6 +391,7 @@ public abstract class Char extends Actor {
 				dmg = damageRoll();
 			}
 			boolean crit=false;
+			boolean surprise =enemy instanceof Mob && ((Mob) enemy).surprisedBy(this);
 			float current_crit=critSkill(),current_critdamage=critDamage();
 			if (this == Dungeon.hero){
 				if (Dungeon.hero.belongings.weapon() instanceof Bloodblade) {
@@ -399,9 +401,12 @@ public abstract class Char extends Actor {
 				else if (Dungeon.hero.belongings.weapon() instanceof Seekingspear){
 					Seekingspear ss=(Seekingspear)Dungeon.hero.belongings.weapon;
 					current_critdamage+=0.3f+0.05f*ss.buffedLvl();
-					if (enemy instanceof Mob && ((Mob) enemy).surprisedBy(this)){
+					if (surprise){
 						current_crit+=25f;
 					}
+				}
+				if (Dungeon.hero.hasTalent(Talent.DEATHBLOW)){
+					current_crit+=25f;
 				}
 			}
 			current_critdamage=Math.min(current_critdamage,critDamageCap);
@@ -409,6 +414,16 @@ public abstract class Char extends Actor {
 				current_crit+=10f;
 				current_critdamage+=0.1f;
 			}
+			if (this instanceof Hero) {
+				if (Dungeon.hero.hasTalent(Talent.DEATHBLOW) && surprise){
+					if (Dungeon.hero.pointsInTalent(Talent.DEATHBLOW) >= 2) {
+						current_critdamage += 0.25f;
+						if (Dungeon.hero.pointsInTalent(Talent.DEATHBLOW) == 3)
+							dmg *= 1.15f;
+					}
+				}
+			}
+			if (this.buff(RingOfTenacity.Tenacity.class)!=null) {current_crit=0;}
 			if (Random.Float()*100<current_crit) {dmg*=current_critdamage;crit=true;}
 			dmg = Math.round(dmg*dmgMulti);
 
@@ -779,9 +794,10 @@ public abstract class Char extends Actor {
 				if (dmg == 0) break;
 			}
 		}
-		shielded -= dmg;
-		HP -= dmg;
-
+		if (this.buff(ImmortalShieldAffecter.ImmortalShield.class)==null) {
+			shielded -= dmg;
+			HP -= dmg;
+		}
 		if (HP < 0 && src instanceof Char){
 			if (((Char) src).buff(Kinetic.KineticTracker.class) != null){
 				int dmgToAdd = -HP;

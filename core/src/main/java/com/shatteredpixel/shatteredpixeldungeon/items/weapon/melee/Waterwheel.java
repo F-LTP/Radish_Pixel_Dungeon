@@ -28,14 +28,14 @@ public class Waterwheel extends MeleeWeapon{
     }
     @Override
     public int max(int lvl) {
-        return  4*(tier+1) +    //16 base, down from 20
+        return  2+4*(tier+1) +    //18 base, down from 20
                 lvl*(tier+1);   //scaling unchanged
     }
     @Override
     public int proc(Char attacker, Char defender, int damage){
         if (Dungeon.level.water[attacker.pos]){
             boolean active=false;
-            if (Random.Float()*100<10+5*buffedLvl()){
+            if (Random.Float()*100<20+10*buffedLvl()){
                 active=true;
                 for (int i  : PathFinder.NEIGHBOURS8){
                     Char ch = Actor.findChar(attacker.pos + i);

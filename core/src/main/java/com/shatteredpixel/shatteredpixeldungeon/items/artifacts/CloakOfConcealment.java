@@ -98,16 +98,18 @@ public class CloakOfConcealment extends Artifact{
         @Override
         public boolean act(){
             spend(TICK);
-            if (cursed){
-                Invisibility.dispel();
-                Buff.affect(target,Disposed.class);
-            }else if (target.invisible==0){
-                Buff.detach(target,Disposed.class);
-                charge+= Math.round(RingOfEnergy.artifactChargeMultiplier(target));
-                if (charge>=chargeCap){
-                    giveInvisibility();
+            if (target!=null) {
+                if (cursed) {
+                    Buff.affect(target, Disposed.class);
+                    Invisibility.dispel();
+                } else if (target.invisible == 0) {
+                    Buff.detach(target, Disposed.class);
+                    charge += Math.round(RingOfEnergy.artifactChargeMultiplier(target));
+                    if (charge >= chargeCap) {
+                        giveInvisibility();
+                    }
+                    updateQuickslot();
                 }
-                updateQuickslot();
             }
             return true;
         }
@@ -118,7 +120,7 @@ public class CloakOfConcealment extends Artifact{
             super.detach();
         }
     }
-    public class Disposed extends Buff{
+    public static class Disposed extends Buff{
         {
             immunities.add(Invisibility.class);
             immunities.add(Invisibility_neutral.class);

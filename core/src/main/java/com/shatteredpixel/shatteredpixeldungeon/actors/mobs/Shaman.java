@@ -106,7 +106,7 @@ public abstract class Shaman extends Mob {
 	}
 	
 	//used so resistances can differentiate between melee and magical attacks
-	public static class EarthenBolt{}
+	public static class EarthenBolt {}
 	
 	private void zap() {
 		spend( 1f );

@@ -42,9 +42,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionHero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.DeferredShield;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Drowsy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Foresight;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HoldFast;
@@ -63,6 +63,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.En
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Monk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
+import com.shatteredpixel.shatteredpixeldungeon.custom.buffs.GameTracker;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CheckedCell;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -104,8 +105,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfMight;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfDivineInspiration;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfConcentration;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfElements;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEvasion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
@@ -119,10 +121,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bloodblade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
@@ -133,7 +133,6 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.plants.Earthroot;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.AlchemyScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -255,9 +254,9 @@ public class Hero extends Char {
 			strBonus += buff.boost();
 		}
 
-		if (hasTalent(Talent.STRONGMAN)){
-			strBonus += (int)Math.floor(STR * (0.03f + 0.05f*pointsInTalent(Talent.STRONGMAN)));
-		}
+		/*if (hasTalent(Talent.GIGANTIC)){
+			strBonus += (int)Math.floor(STR * (0.03f + 0.05f*pointsInTalent(Talent.GIGANTIC)));
+		}*/
 
 		return STR + strBonus;
 	}
@@ -270,13 +269,13 @@ public class Hero extends Char {
 	}
 	public void updateCritSkill(){
 		critSkill = 5 + 0.5f*(lvl-1) + csBoost;
-		float bonus=RingOfAccuracy.critBonus(this);
+		float bonus= RingOfConcentration.critBonus(this);
 		critSkill+=bonus;
 	}
 	@Override
 	public float critDamage(){
 		float cdbouns=0;
-		cdbouns+=RingOfAccuracy.critDamgeBonus(this);
+		cdbouns+= RingOfConcentration.critDamgeBonus(this);
 		return Math.min(critDamage+cdbouns,critDamageCap);
 	}
 	public int critDamage_shown(){
@@ -442,6 +441,7 @@ public class Hero extends Char {
 		}
 		Buff.affect( this, Regeneration.class );
 		Buff.affect( this, Hunger.class );
+		Buff.affect(this, GameTracker.class);
 	}
 	
 	public int tier() {
@@ -479,7 +479,7 @@ public class Hero extends Char {
 		KindOfWeapon wep = belongings.weapon();
 		
 		float accuracy = 1;
-		accuracy *= RingOfAccuracy.accuracyMultiplier( this );
+		accuracy *= RingOfConcentration.accuracyMultiplier( this );
 		
 		if (wep instanceof MissileWeapon){
 			if (Dungeon.level.adjacent( pos, target.pos )) {
@@ -488,7 +488,14 @@ public class Hero extends Char {
 				accuracy *= 1.5f;
 			}
 		}
-		
+		float ex_acc=1f;
+		if (hasTalent(Talent.GIGANTIC)&& buff(Talent.GiganticInvalidTracker.class)==null){
+			float ex_dly=attackDelay()-1f;
+			if (ex_dly>0) {
+				ex_acc+=0.5f*pointsInTalent(Talent.GIGANTIC)*ex_dly;
+			}
+		}
+		accuracy*=ex_acc;
 		if (wep != null) {
 			return (int)(attackSkill * accuracy * wep.accuracyFactor( this, target ));
 		} else {
@@ -570,13 +577,31 @@ public class Hero extends Char {
 	public int damageRoll() {
 		KindOfWeapon wep = belongings.weapon();
 		int dmg;
-
+		float ex_atk_max=0;
+		if (hasTalent(Talent.GIGANTIC) && buff(Talent.GiganticInvalidTracker.class)==null){
+			float ex_dly=attackDelay()-1f;
+			if (ex_dly>0) {
+				ex_atk_max=(0.33f*pointsInTalent(Talent.GIGANTIC)+(pointsInTalent(Talent.GIGANTIC)>1?0.01f:0))*ex_dly;
+			}
+		}
 		if (wep != null) {
-			dmg = wep.damageRoll( this );
+			dmg = Random.NormalIntRange(wep.min(), (int) (wep.max()*(1+ex_atk_max)));
 			if (!(wep instanceof MissileWeapon)) dmg += RingOfForce.armedDamageBonus(this);
 		} else {
-			dmg = RingOfForce.damageRoll(this);
+			if (buff(RingOfForce.Force.class) != null) {
+				int level = RingOfForce.getBuffedBonus(this, RingOfForce.Force.class);
+				float tier = Math.max(1, (STR() - 8)/2f);
+				//each str point after 18 is half as effective
+				if (tier > 5){
+					tier = 5 + (tier - 5) / 2f;
+				}
+				dmg=Random.NormalIntRange(RingOfForce.min(level, tier),(int)(RingOfForce.max(level, tier)*(1+ex_atk_max)));
+			} else {
+				//attack without any ring of force influence
+				dmg= Random.NormalIntRange(1, (int)(Math.max(STR()-8, 1)*(1+ex_atk_max)));
+			}
 		}
+
 		if (dmg < 0) dmg = 0;
 		
 		return dmg;
@@ -1081,7 +1106,7 @@ public class Hero extends Char {
 			return false;
 		} else if (transition != null && transition.inside(pos)) {
 
-			if (transition.type == LevelTransition.Type.SURFACE){
+			if (transition.type == LevelTransition.Type.SURFACE  ||  Dungeon.depth==1){
 				if (belongings.getItem( Amulet.class ) == null) {
 					Game.runOnRenderThread(new Callback() {
 						@Override
@@ -1308,12 +1333,17 @@ public class Hero extends Char {
 		}
 
 		int preHP = HP + shielding();
+		int preTrueHP = HP;
 		super.damage( dmg, src );
 		int postHP = HP + shielding();
 		int effectiveDamage = preHP - postHP;
-
+		int trueDamage=preTrueHP-HP;
 		if (effectiveDamage <= 0) return;
-
+		if (trueDamage>0){
+			if (this.hasTalent(Talent.EMERGENCY_PROTECTION) && !RingOfElements.RESISTS.contains(src)){
+				Buff.affect(this, DeferredShield.class,1f).inc(2*pointsInTalent(Talent.EMERGENCY_PROTECTION));
+			}
+		}
 		//flash red when hit for serious damage.
 		float percentDMG = effectiveDamage / (float)preHP; //percent of current HP that was taken
 		float percentHP = 1 - ((HT - postHP) / (float)HT); //percent health after damage was taken

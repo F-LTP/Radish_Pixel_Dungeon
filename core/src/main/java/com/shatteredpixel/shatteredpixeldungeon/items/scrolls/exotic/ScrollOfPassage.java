@@ -42,7 +42,7 @@ public class ScrollOfPassage extends ExoticScroll {
 	public void doRead() {
 
 		identify();
-		readAnimation();
+		readAnimation(true);
 		
 		if (!Dungeon.interfloorTeleportAllowed()) {
 			

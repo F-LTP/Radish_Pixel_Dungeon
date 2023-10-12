@@ -67,7 +67,7 @@ public class RingOfForce extends Ring {
 	}
 
 	//same as equivalent tier weapon
-	private static int min(int lvl, float tier){
+	public static int min(int lvl, float tier){
 		if (lvl <= 0) tier = 1; //tier is forced to 1 if cursed
 
 		return Math.max( 0, Math.round(
@@ -77,7 +77,7 @@ public class RingOfForce extends Ring {
 	}
 
 	//same as equivalent tier weapon
-	private static int max(int lvl, float tier){
+	public static int max(int lvl, float tier){
 		if (lvl <= 0) tier = 1; //tier is forced to 1 if cursed
 
 		return Math.max( 0, Math.round(

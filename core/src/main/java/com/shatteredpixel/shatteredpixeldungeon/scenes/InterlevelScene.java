@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.scenes;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
@@ -121,7 +122,7 @@ public class InterlevelScene extends PixelScene {
 				break;
 			case DESCEND:
 				if (Dungeon.hero == null){
-					loadingDepth = 1;
+					loadingDepth = 0;
 					fadeTime = SLOW_FADE;
 				} else {
 					if (curTransition != null)  loadingDepth = curTransition.destDepth;
@@ -169,7 +170,7 @@ public class InterlevelScene extends PixelScene {
 		if (Updates.isInstallable()){
 			fadeTime += 0.5f; //adds 1 second total
 		//speed up transition when debugging
-		} else if (DeviceCompat.isDebug()){
+		} else if (DeviceCompat.isDebug() || Dungeon.isChallenged(Challenges.TEST_MODE)){
 			fadeTime = 0f;
 		}
 		

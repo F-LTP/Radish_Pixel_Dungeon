@@ -101,7 +101,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public abstract class Level implements Bundlable {
-	
+
 	public static enum Feeling {
 		NONE,
 		CHASM,
@@ -182,6 +182,7 @@ public abstract class Level implements Bundlable {
 	private static final String MOBS		= "mobs";
 	private static final String BLOBS		= "blobs";
 	private static final String FEELING		= "feeling";
+
 
 	public void create() {
 
@@ -356,7 +357,7 @@ public abstract class Level implements Bundlable {
 				transitions.add(new LevelTransition(
 						this,
 						bundle.getInt("entrance"),
-						Dungeon.depth == 1 ? LevelTransition.Type.SURFACE : LevelTransition.Type.REGULAR_ENTRANCE));
+						(Dungeon.depth == 0) ? LevelTransition.Type.SURFACE : LevelTransition.Type.REGULAR_ENTRANCE));
 			}
 			if (bundle.contains("exit")){
 				transitions.add(new LevelTransition(this, bundle.getInt("exit"), LevelTransition.Type.REGULAR_EXIT));

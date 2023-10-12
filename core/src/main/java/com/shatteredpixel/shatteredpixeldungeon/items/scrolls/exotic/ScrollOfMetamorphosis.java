@@ -67,7 +67,7 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 	}
 
 	public static void onMetamorph( Talent oldTalent, Talent newTalent ){
-		((ScrollOfMetamorphosis) curItem).readAnimation();
+		((ScrollOfMetamorphosis) curItem).readAnimation(true);
 		Sample.INSTANCE.play( Assets.Sounds.READ );
 		curUser.sprite.emitter().start(Speck.factory(Speck.CHANGE), 0.2f, 10);
 		Transmuting.show(curUser, oldTalent, newTalent);
