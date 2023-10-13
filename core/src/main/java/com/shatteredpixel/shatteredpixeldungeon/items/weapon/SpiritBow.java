@@ -311,7 +311,14 @@ public class SpiritBow extends Weapon {
 		public int damageRoll(Char owner) {
 			return SpiritBow.this.damageRoll(owner);
 		}
-		
+		@Override
+		public int max(){
+			return SpiritBow.this.max();
+		}
+		@Override
+		public int min(){
+			return SpiritBow.this.min();
+		}
 		@Override
 		public boolean hasEnchant(Class<? extends Enchantment> type, Char owner) {
 			return SpiritBow.this.hasEnchant(type, owner);

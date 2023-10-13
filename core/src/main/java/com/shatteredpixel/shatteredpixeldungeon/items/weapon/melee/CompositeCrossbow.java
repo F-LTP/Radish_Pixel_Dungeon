@@ -2,6 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.QuickSlot;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
@@ -74,7 +75,8 @@ public class CompositeCrossbow extends MeleeWeapon{
     @Override
     public ArrayList<String> actions(Hero hero) {
         ArrayList<String> actions = super.actions(hero);
-        actions.add(AC_SHOOT);
+        if (curAmmo>0)
+            actions.add(AC_SHOOT);
         return actions;
     }
     @Override
@@ -121,7 +123,14 @@ public class CompositeCrossbow extends MeleeWeapon{
         public int damageRoll(Char owner) {
             return Random.NormalIntRange(10,15)+5*buffedLvl();
         }
-
+        @Override
+        public int max(){
+            return CompositeCrossbow.this.max();
+        }
+        @Override
+        public int min(){
+            return CompositeCrossbow.this.min();
+        }
         @Override
         public boolean hasEnchant(Class<? extends Enchantment> type, Char owner) {
             return CompositeCrossbow.this.hasEnchant(type, owner);
@@ -164,6 +173,10 @@ public class CompositeCrossbow extends MeleeWeapon{
         public void cast(final Hero user, final int dst) {
             super.cast(user, dst);
             curAmmo--;
+            if (curAmmo==0){
+                Dungeon.quickslot.clearItem(CompositeCrossbow.this);
+                CompositeCrossbow.this.defaultAction=null;
+            }
             updateQuickslot();
         }
     }

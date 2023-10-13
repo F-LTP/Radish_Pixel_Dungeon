@@ -79,6 +79,7 @@ public class EnergyArmor extends Armor{
             energyLeft = bundle.getInt(ENERGY_LEFT);
         else
             energyLeft =450;
+        updateImage();
     }
     public class chargeShield extends ArmorBuff {
         int chargeCount = 0;

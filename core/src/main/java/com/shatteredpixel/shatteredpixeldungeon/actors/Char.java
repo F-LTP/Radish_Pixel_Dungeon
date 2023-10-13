@@ -612,7 +612,7 @@ public abstract class Char extends Actor {
 		for (ChampionEnemy buff : defender.buffs(ChampionEnemy.class)){
 			defRoll *= buff.evasionAndAccuracyFactor();
 		}
-		for (ChampionHero buff : attacker.buffs(ChampionHero.class)){
+		for (ChampionHero buff : defender.buffs(ChampionHero.class)){
 			defRoll *= buff.evasionAndAccuracyFactor();
 		}
 		defRoll *= AscensionChallenge.statModifier(defender);
@@ -794,8 +794,8 @@ public abstract class Char extends Actor {
 				if (dmg == 0) break;
 			}
 		}
+		shielded -= dmg;
 		if (this.buff(ImmortalShieldAffecter.ImmortalShield.class)==null) {
-			shielded -= dmg;
 			HP -= dmg;
 		}
 		if (HP < 0 && src instanceof Char){

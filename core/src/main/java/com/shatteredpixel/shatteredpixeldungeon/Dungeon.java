@@ -495,6 +495,7 @@ public class Dungeon {
 	}
 	
 	public static boolean souNeeded() {
+		if (depth==0) return false;
 		int souLeftThisSet;
 		//3 SOU each floor set, 1.5 (rounded) on forbidden runes challenge
 		if (isChallenged(Challenges.NO_SCROLLS)){

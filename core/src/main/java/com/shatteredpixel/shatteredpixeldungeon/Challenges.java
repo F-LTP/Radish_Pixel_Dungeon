@@ -62,6 +62,7 @@ public class Challenges {
 	};
 
 	public static int activeChallenges(){
+		if (Dungeon.isChallenged(TEST_MODE)) return 0;
 		int chCount = 0;
 		for (int ch : Challenges.MASKS){
 			if ((Dungeon.challenges & ch) != 0) chCount++;

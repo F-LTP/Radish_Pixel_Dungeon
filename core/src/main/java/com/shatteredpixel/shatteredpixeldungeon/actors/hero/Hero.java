@@ -574,31 +574,19 @@ public class Hero extends Char {
 	}
 	
 	@Override
-	public int damageRoll() {
+	public int damageRoll() {  //TODO FIX
 		KindOfWeapon wep = belongings.weapon();
 		int dmg;
-		float ex_atk_max=0;
+		if (wep!=null){
+			dmg = wep.damageRoll( this );
+			if (!(wep instanceof MissileWeapon)) dmg += RingOfForce.armedDamageBonus(this);
+		} else {
+			dmg = RingOfForce.damageRoll(this);
+		}
 		if (hasTalent(Talent.GIGANTIC) && buff(Talent.GiganticInvalidTracker.class)==null){
 			float ex_dly=attackDelay()-1f;
 			if (ex_dly>0) {
-				ex_atk_max=(0.33f*pointsInTalent(Talent.GIGANTIC)+(pointsInTalent(Talent.GIGANTIC)>1?0.01f:0))*ex_dly;
-			}
-		}
-		if (wep != null) {
-			dmg = Random.NormalIntRange(wep.min(), (int) (wep.max()*(1+ex_atk_max)));
-			if (!(wep instanceof MissileWeapon)) dmg += RingOfForce.armedDamageBonus(this);
-		} else {
-			if (buff(RingOfForce.Force.class) != null) {
-				int level = RingOfForce.getBuffedBonus(this, RingOfForce.Force.class);
-				float tier = Math.max(1, (STR() - 8)/2f);
-				//each str point after 18 is half as effective
-				if (tier > 5){
-					tier = 5 + (tier - 5) / 2f;
-				}
-				dmg=Random.NormalIntRange(RingOfForce.min(level, tier),(int)(RingOfForce.max(level, tier)*(1+ex_atk_max)));
-			} else {
-				//attack without any ring of force influence
-				dmg= Random.NormalIntRange(1, (int)(Math.max(STR()-8, 1)*(1+ex_atk_max)));
+				dmg+=(0.33f*pointsInTalent(Talent.GIGANTIC)+(pointsInTalent(Talent.GIGANTIC)>1?0.01f:0))*ex_dly*dmg;
 			}
 		}
 
@@ -1106,7 +1094,7 @@ public class Hero extends Char {
 			return false;
 		} else if (transition != null && transition.inside(pos)) {
 
-			if (transition.type == LevelTransition.Type.SURFACE  ||  Dungeon.depth==1){
+			if (transition.type == LevelTransition.Type.SURFACE  ||  (Dungeon.depth==1 && transition.type == LevelTransition.Type.REGULAR_ENTRANCE)){
 				if (belongings.getItem( Amulet.class ) == null) {
 					Game.runOnRenderThread(new Callback() {
 						@Override
