@@ -86,6 +86,8 @@ public abstract class Wand extends Item {
 	private float availableUsesToID = USES_TO_ID/2f;
 
 	protected int collisionProperties = Ballistica.MAGIC_BOLT;
+
+	public int spellSelected = 0;
 	
 	{
 		defaultAction = AC_ZAP;
@@ -349,7 +351,7 @@ public abstract class Wand extends Item {
 			}
 
 			WandOfMagicMissile.MagicCharge buff = charger.target.buff(WandOfMagicMissile.MagicCharge.class);
-			if (buff != null && buff.level() > lvl){
+			if (buff != null && buff.level() > lvl && charger.target.buff(SpellQueue.tmpTracker.class)==null){
 				return buff.level();
 			}
 		}
@@ -427,7 +429,8 @@ public abstract class Wand extends Item {
 		if (buff != null
 				&& buff.wandJustApplied() != this
 				&& buff.level() == buffedLvl()
-				&& buffedLvl() > super.buffedLvl()){
+				&& buffedLvl() > super.buffedLvl()
+				&& curUser.buff(SpellQueue.tmpTracker.class)==null){
 			buff.detach();
 		} else {
 			ScrollEmpower empower = curUser.buff(ScrollEmpower.class);
@@ -468,7 +471,6 @@ public abstract class Wand extends Item {
 		Invisibility.dispel();
 		updateQuickslot();
 		if (Dungeon.hero.hasTalent(Talent.DUEL_DANCE)) {
-			Buff.affect(Dungeon.hero, Talent.DuelDanceMissileTracker.class, 1f);
 			if (Dungeon.hero.buff(Talent.DuelDanceWandTracker.class) != null) {
 				Buff.detach(Dungeon.hero, Talent.DuelDanceWandTracker.class);
 				curUser.spendAndNext( TIME_TO_ZAP *(0.84f - 0.17f * Dungeon.hero.pointsInTalent(Talent.DUEL_DANCE)));
@@ -477,6 +479,8 @@ public abstract class Wand extends Item {
 		}
 		else
 			curUser.spendAndNext( TIME_TO_ZAP );
+		if (Dungeon.hero.cooldown()>=0)
+			Buff.affect(Dungeon.hero, Talent.DuelDanceMissileTracker.class, Dungeon.hero.cooldown());
 	}
 	
 	@Override
@@ -546,6 +550,7 @@ public abstract class Wand extends Item {
 		bundle.put( PARTIALCHARGE , partialCharge );
 		bundle.put( CURSE_INFUSION_BONUS, curseInfusionBonus );
 		bundle.put( RESIN_BONUS, resinBonus );
+		bundle.put("spellselected",spellSelected);
 	}
 	
 	@Override
@@ -561,6 +566,9 @@ public abstract class Wand extends Item {
 		curCharges = bundle.getInt( CUR_CHARGES );
 		curChargeKnown = bundle.getBoolean( CUR_CHARGE_KNOWN );
 		partialCharge = bundle.getFloat( PARTIALCHARGE );
+		if (bundle.contains("spellselected")){
+			spellSelected=bundle.getInt("spellselected");
+		}
 	}
 	
 	@Override

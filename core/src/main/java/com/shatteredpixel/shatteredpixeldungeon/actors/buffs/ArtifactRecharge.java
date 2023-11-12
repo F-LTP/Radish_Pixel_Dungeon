@@ -81,6 +81,12 @@ public class ArtifactRecharge extends Buff {
 	}
 	
 	public ArtifactRecharge prolong( float amount ){
+		if (target == Dungeon.hero){
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				amount*=RingOfBenediction.periodMultiplier(target);
+			}
+		}
 		left += amount;
 		return this;
 	}

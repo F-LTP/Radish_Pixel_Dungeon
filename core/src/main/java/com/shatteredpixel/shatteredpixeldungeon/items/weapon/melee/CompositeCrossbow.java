@@ -36,7 +36,6 @@ public class CompositeCrossbow extends MeleeWeapon{
         image = ItemSpriteSheet.CROSSBOW_C;
 
         defaultAction = AC_SHOOT;
-        usesTargeting = true;
         tier = 4;
     }
     private static final String AMMO = "ammo";
@@ -56,7 +55,10 @@ public class CompositeCrossbow extends MeleeWeapon{
     }
     @Override
     public String special() {
-        return String.valueOf(curAmmo);
+        if (curAmmo>0)
+            return String.valueOf(curAmmo);
+        else
+            return null;
     }
     @Override
     public boolean specialColorChange() {
@@ -85,22 +87,26 @@ public class CompositeCrossbow extends MeleeWeapon{
         super.execute(hero, action);
 
         if (action.equals(AC_SHOOT)) {
-            if (!isEquipped(hero)) {
+            curUser = hero;
+            if (!isEquipped(Dungeon.hero)) {
                 GLog.w(Messages.get(this, "not_equipped"));
-            } else {
-                if (curAmmo > 0) {
-                    curUser = hero;
-                    curItem = this;
-                    GameScene.selectCell(shooter);
-                } else {
-                    GLog.w(Messages.get(this, "no_ammo"));
-                }
+                usesTargeting = false;
             }
+            else if (curAmmo > 0) {
+                    usesTargeting = true;
+                    GameScene.selectCell(shooter);
+            } else {
+                    GLog.w(Messages.get(this, "no_ammo"));
+                usesTargeting = false;
+                }
         }
     }
     @Override
     public String statsInfo(){
-        return Messages.get(this, "stats_desc",curAmmo);
+        if (curAmmo>0)
+            return Messages.get(this, "stats_desc",combinedArrow().min(),combinedArrow().max(),curAmmo);
+        else
+            return Messages.get(this,"extra_desc");
     }
     @Override
     public int targetingPos(Hero user, int dst) {
@@ -121,15 +127,22 @@ public class CompositeCrossbow extends MeleeWeapon{
 
         @Override
         public int damageRoll(Char owner) {
-            return Random.NormalIntRange(10,15)+5*buffedLvl();
+            int dmg=Random.NormalIntRange(min(),max());
+            if (owner instanceof Hero) {
+                int exStr = ((Hero)owner).STR() - STRReq();
+                if (exStr > 0) {
+                    dmg += Random.IntRange( 0, exStr );
+                }
+            }
+            return dmg;
         }
         @Override
         public int max(){
-            return CompositeCrossbow.this.max();
+            return 15+5*CompositeCrossbow.this.buffedLvl();
         }
         @Override
         public int min(){
-            return CompositeCrossbow.this.min();
+            return 10+3*CompositeCrossbow.this.buffedLvl();
         }
         @Override
         public boolean hasEnchant(Class<? extends Enchantment> type, Char owner) {
@@ -143,7 +156,7 @@ public class CompositeCrossbow extends MeleeWeapon{
 
         @Override
         public float delayFactor(Char user) {
-            return CompositeCrossbow.this.delayFactor(user);
+            return (1f/speedMultiplier(user));
         }
 
         @Override
@@ -173,19 +186,15 @@ public class CompositeCrossbow extends MeleeWeapon{
         public void cast(final Hero user, final int dst) {
             super.cast(user, dst);
             curAmmo--;
-            if (curAmmo==0){
-                Dungeon.quickslot.clearItem(CompositeCrossbow.this);
-                CompositeCrossbow.this.defaultAction=null;
-            }
             updateQuickslot();
         }
     }
     private CellSelector.Listener shooter = new CellSelector.Listener() {
         @Override
         public void onSelect( Integer target ) {
-            if (target != null) {
+             if (target != null) {
                 combinedArrow().cast(curUser, target);
-            }
+             }
         }
         @Override
         public String prompt() {

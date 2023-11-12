@@ -108,6 +108,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFear;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFlock;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfIntuition;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfShock;
+import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.MagicRoot;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.AdrenalineDart;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.BlindingDart;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.ChillingDart;
@@ -472,7 +473,8 @@ public class TestPotion extends TestGenerator {
             case 9: return LiquidMetal.class;
             case 10: return ArcaneResin.class;
             case 11: return Embers.class;
-            case 12: return CorpseDust.class;
+            case 12: return MagicRoot.class;
+            case 13: return CorpseDust.class;
         }
     }
 
@@ -480,7 +482,7 @@ public class TestPotion extends TestGenerator {
         if(cate == 7) return 10;
         if(cate == 9) return 12;
         if(cate == 10) return 9;
-        if(cate == 11) return 12;
+        if(cate == 11) return 13;
         return 11;
     }
 

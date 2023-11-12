@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 public class MagicRoot extends Item {
     {
-        image = ItemSpriteSheet.REGROWTH_BOMB;
+        image = ItemSpriteSheet.MAGIC_ROOT;
 
         defaultAction = AC_THROW;
         usesTargeting = true;

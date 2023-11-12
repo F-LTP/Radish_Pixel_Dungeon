@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.BruteSprite;
@@ -74,7 +75,7 @@ public class Brute extends Mob {
 	public void die(Object cause) {
 		super.die(cause);
 
-		if (cause == Chasm.class){
+		if (cause == Chasm.class || buff(HeadCleaver.headCleaverTracker.class)!=null){
 			hasRaged = true; //don't let enrage trigger for chasm deaths
 		}
 	}

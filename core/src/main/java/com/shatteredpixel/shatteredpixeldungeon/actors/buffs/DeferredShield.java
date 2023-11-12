@@ -1,11 +1,11 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
 
 public class DeferredShield extends FlavourBuff{
     {
-        type = buffType.POSITIVE;
         actPriority = HERO_PRIO+1;
     }
     int amount = 0;

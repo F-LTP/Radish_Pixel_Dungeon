@@ -21,7 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.rings;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -65,7 +64,9 @@ public class RingOfConcentration extends Ring {
 	@Override
 	public void level(int value) {
 		super.level(value);
-		Dungeon.hero.updateCritSkill();
+		if (buff != null && buff.target instanceof Hero){
+			((Hero) buff.target).updateCritSkill();
+		}
 	}
 	public String statsInfo() {
 		if (isIdentified()){
@@ -77,18 +78,18 @@ public class RingOfConcentration extends Ring {
 	
 	@Override
 	protected RingBuff buff( ) {
-		return new Accuracy();
+		return new Concentration();
 	}
 	
 	public static float accuracyMultiplier( Char target ){
-		return (float)Math.pow(1.2f, getBuffedBonus(target, Accuracy.class));
+		return (float)Math.pow(1.2f, getBuffedBonus(target, Concentration.class));
 	}
 	public static float critBonus( Char target ){
-		return 5f*getBuffedBonus(target, Accuracy.class);
+		return 5f*getBuffedBonus(target, Concentration.class);
 	}
 	public static float critDamgeBonus( Char target ){
-		return 0.1f*getBuffedBonus(target, Accuracy.class);
+		return 0.1f*getBuffedBonus(target, Concentration.class);
 	}
-	public class Accuracy extends RingBuff {
+	public class Concentration extends RingBuff {
 	}
 }

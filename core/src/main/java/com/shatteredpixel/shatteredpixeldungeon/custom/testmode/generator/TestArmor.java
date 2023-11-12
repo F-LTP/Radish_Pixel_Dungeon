@@ -130,9 +130,9 @@ public class TestArmor extends TestGenerator {
         }
         else if (category == 2) switch (id) {
             case 0:
-                return Brimstone.class;
-            case 1:
                 return Stone.class;
+            case 1:
+                return Brimstone.class;
             case 2:
                 return Entanglement.class;
             case 3:
@@ -146,11 +146,11 @@ public class TestArmor extends TestGenerator {
         }
         else if (category == 3) switch (id) {
             case 0:
-                return Affection.class;
-            case 1:
                 return AntiMagic.class;
-            case 2:
+            case 1:
                 return Thorns.class;
+            case 2:
+                return Affection.class;
             default:
                 return null;
         }
@@ -158,19 +158,19 @@ public class TestArmor extends TestGenerator {
             case 0:
                 return AntiEntropy.class;
             case 1:
-                return Corrosion.class;
+                return Bulk.class;
             case 2:
-                return Displacement.class;
+                return Corrosion.class;
             case 3:
-                return Metabolism.class;
+                return Displacement.class;
             case 4:
-                return Multiplicity.class;
+                return Metabolism.class;
             case 5:
-                return Stench.class;
+                return Multiplicity.class;
             case 6:
                 return Overgrowth.class;
             case 7:
-                return Bulk.class;
+                return Stench.class;
             default:
                 return null;
         }
@@ -206,7 +206,7 @@ public class TestArmor extends TestGenerator {
 
     private int maxSlots(int t){
         switch (t){
-            case 1:return 2;
+            case 1:return 1;
             case 2: case 4:
             case 3: case 5: default:return 3;
         }

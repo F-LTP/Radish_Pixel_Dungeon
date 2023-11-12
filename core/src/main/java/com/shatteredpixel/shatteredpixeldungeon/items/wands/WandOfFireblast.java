@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.WildMagic;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
+import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.SpellQueue;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
@@ -190,7 +191,7 @@ public class WandOfFireblast extends DamageWand {
 
 	@Override
 	protected int chargesPerCast() {
-		if (charger != null && charger.target.buff(WildMagic.WildMagicTracker.class) != null){
+		if (charger != null && (charger.target.buff(WildMagic.WildMagicTracker.class) != null || charger.target.buff(SpellQueue.tmpTracker.class) != null) ){
 			return 1;
 		}
 		//consumes 30% of current charges, rounded up, with a min of 1 and a max of 3.

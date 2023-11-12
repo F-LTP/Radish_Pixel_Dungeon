@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
@@ -106,6 +107,11 @@ public class KingsCrown extends Item {
 			if (hero.belongings.armor == armor) {
 
 				hero.belongings.armor = classArmor;
+				for (Buff b :hero.buffs()){
+					if (b instanceof Armor.ArmorBuff){
+						b.detach();
+					}
+				}
 				((HeroSprite) hero.sprite).updateArmor();
 				classArmor.activate(hero);
 

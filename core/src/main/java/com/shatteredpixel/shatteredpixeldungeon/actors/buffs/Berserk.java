@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal.WarriorShield;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
@@ -174,7 +175,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				&& state == State.NORMAL
 				&& power >= 1f
 				&& target.buff(WarriorShield.class) != null
-				&& ((Hero)target).hasTalent(Talent.DEATHLESS_FURY)){
+				&& ((Hero)target).hasTalent(Talent.DEATHLESS_FURY)
+				&& (target).buff(HeadCleaver.headCleaverTracker.class)==null){
 			startBerserking();
 			ActionIndicator.clearAction(this);
 		}

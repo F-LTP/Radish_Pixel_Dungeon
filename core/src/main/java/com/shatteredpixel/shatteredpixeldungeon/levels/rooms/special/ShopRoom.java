@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.MerchantsBeacon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Stylus;
 import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.LeatherArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.MailArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PlateArmor;
@@ -52,6 +53,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurs
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.Alchemize;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAugmentation;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
@@ -147,46 +149,75 @@ public class ShopRoom extends SpecialRoom {
 		}
 
 	}
-	
+	private static void dealWithMeleeToShop(MeleeWeapon w){
+		if (w.hasCurseEnchant()){
+			w.enchant(null);
+		}
+		if ( w.enchantment==null&& Random.Int(3)==0){
+			w.enchant();
+		}
+		w.cursed = false;
+		if (Random.Int(4)!=0){
+			w.upgrade();
+		}
+		w.identify(false);
+	}
+	private static void dealWithArmorToShop(Armor a){
+		if (a.hasCurseGlyph()){
+			a.inscribe(null);
+		}
+		if (a.glyph==null && Random.Int(3)==0){
+			a.inscribe();
+		}
+		a.cursed=false;
+		if (Random.Int(4)!=0){
+			a.upgrade();
+		}
+		a.identify(false);
+	}
 	protected static ArrayList<Item> generateItems() {
 
 		ArrayList<Item> itemsToSpawn = new ArrayList<>();
 
 		MeleeWeapon w;
-		switch (Dungeon.depth) {
-		case 6: default:
-			w = (MeleeWeapon) Generator.random(Generator.wepTiers[1]);
-			itemsToSpawn.add( Generator.random(Generator.misTiers[1]).quantity(2).identify(false) );
-			itemsToSpawn.add( new LeatherArmor().identify(false) );
-			break;
-			
-		case 11:
-			w = (MeleeWeapon) Generator.random(Generator.wepTiers[2]);
-			itemsToSpawn.add( Generator.random(Generator.misTiers[2]).quantity(2).identify(false) );
-			itemsToSpawn.add( new MailArmor().identify(false) );
-			break;
-			
-		case 16:
-			w = (MeleeWeapon) Generator.random(Generator.wepTiers[3]);
-			itemsToSpawn.add( Generator.random(Generator.misTiers[3]).quantity(2).identify(false) );
-			itemsToSpawn.add( new ScaleArmor().identify(false) );
-			break;
+		Armor a;
+		MissileWeapon m;
+		int the_shop_num=Dungeon.depth/5;
+		w = (MeleeWeapon) Generator.random(Generator.wepTiers[the_shop_num]);
+		dealWithMeleeToShop(w);
+		itemsToSpawn.add(w);
+		a = (Armor) Generator.random(Generator.armTiers[the_shop_num]);
+		dealWithArmorToShop(a);
+		itemsToSpawn.add(a);
+		m=(MissileWeapon)Generator.random(Generator.misTiers[the_shop_num]).quantity(2).identify(false);
+		int eup=0;
+		if (Random.Int(2)==0){
+			eup++;
+			if (Random.Int(4)==0){
+				eup++;
+			}
+		}
+		m.level(m.level()+eup);
+		itemsToSpawn.add(m);
 
-		case 20: case 21:
-			w = (MeleeWeapon) Generator.random(Generator.wepTiers[4]);
-			itemsToSpawn.add( Generator.random(Generator.misTiers[4]).quantity(2).identify(false) );
-			itemsToSpawn.add( new PlateArmor().identify(false) );
-			itemsToSpawn.add( new Torch() );
-			itemsToSpawn.add( new Torch() );
-			itemsToSpawn.add( new Torch() );
+		switch (Random.Int(4)){
+			case 0:MeleeWeapon w2;
+			w2 = (MeleeWeapon) Generator.random(Generator.wepTiers[the_shop_num]);
+			dealWithMeleeToShop(w2);
+			itemsToSpawn.add(w2);
+			break;
+			case 3:Armor a2;
+			a2 = (Armor) Generator.random(Generator.armTiers[the_shop_num]);
+			dealWithArmorToShop(a2);
+			itemsToSpawn.add(a2);
 			break;
 		}
-		w.enchant(null);
-		w.cursed = false;
-		w.level(0);
-		w.identify(false);
-		itemsToSpawn.add(w);
-		
+		if (the_shop_num >= 4) {
+			itemsToSpawn.add(new Torch());
+			itemsToSpawn.add(new Torch());
+			itemsToSpawn.add(new Torch());
+		}
+
 		itemsToSpawn.add( TippedDart.randomTipped(2) );
 
 		itemsToSpawn.add( new Alchemize().quantity(Random.IntRange(2, 3)));

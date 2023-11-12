@@ -236,10 +236,10 @@ public class ItemSlot extends Button {
 		}
 
 		if (item == null){
-			status.visible = extra.visible = level.visible = false;
+			status.visible = extra.visible = level.visible = special.visible = false;
 			return;
 		} else {
-			status.visible = extra.visible = level.visible = true;
+			status.visible = extra.visible = level.visible = special.visible = true;
 		}
 
 		status.text( item.status() );

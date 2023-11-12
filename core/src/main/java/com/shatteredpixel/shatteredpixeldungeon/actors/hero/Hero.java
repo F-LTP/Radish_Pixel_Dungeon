@@ -164,6 +164,7 @@ import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 public class Hero extends Char {
@@ -470,7 +471,13 @@ public class Hero extends Char {
 		if (hit && subClass == HeroSubClass.GLADIATOR && wasEnemy){
 			Buff.affect( this, Combo.class ).hit( enemy );
 		}
-
+		Talent.HoldBreathTracker hb=buff(Talent.HoldBreathTracker.class);
+		if (hb!=null){
+			if (hit){
+				hb.clear_cb();
+			}
+			hb.reduce();
+		}
 		return hit;
 	}
 	
@@ -483,14 +490,20 @@ public class Hero extends Char {
 		
 		if (wep instanceof MissileWeapon){
 			if (Dungeon.level.adjacent( pos, target.pos )) {
-				accuracy *= (0.5f + 0.2f*pointsInTalent(Talent.POINT_BLANK));
+				accuracy *= 0.5f;
 			} else {
 				accuracy *= 1.5f;
 			}
 		}
 		float ex_acc=1f;
-		if (hasTalent(Talent.GIGANTIC)&& buff(Talent.GiganticInvalidTracker.class)==null){
-			float ex_dly=attackDelay()-1f;
+		if (hasTalent(Talent.GIGANTIC)){
+			float ad;
+			if (belongings.weapon!=null){
+				ad=wep.delayFactor(this);
+			}
+			else
+				ad=1f/RingOfFuror.attackSpeedMultiplier(this);
+			float ex_dly=ad-1f;
 			if (ex_dly>0) {
 				ex_acc+=0.5f*pointsInTalent(Talent.GIGANTIC)*ex_dly;
 			}
@@ -562,12 +575,12 @@ public class Hero extends Char {
 		}
 
 		if (buff(HoldFast.class) != null){
-			int most_add=2*pointsInTalent(Talent.HOLD_FAST);
+			int bas_add=pointsInTalent(Talent.HOLD_FAST);
 			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
 			if (ben!=null){
-				most_add=Math.round(most_add*RingOfBenediction.periodMultiplier(this));
+				bas_add=Math.round(bas_add*RingOfBenediction.periodMultiplier(this));
 			}
-			dr += Random.NormalIntRange(0, most_add );
+			dr += Random.NormalIntRange(bas_add, bas_add*3 );
 		}
 		
 		return dr;
@@ -583,8 +596,14 @@ public class Hero extends Char {
 		} else {
 			dmg = RingOfForce.damageRoll(this);
 		}
-		if (hasTalent(Talent.GIGANTIC) && buff(Talent.GiganticInvalidTracker.class)==null){
-			float ex_dly=attackDelay()-1f;
+		if (hasTalent(Talent.GIGANTIC)){
+			float ad;
+			if (belongings.weapon!=null){
+				ad=wep.delayFactor(this);
+			}
+			else
+				ad=1f/RingOfFuror.attackSpeedMultiplier(this);
+			float ex_dly=ad-1f;
 			if (ex_dly>0) {
 				dmg+=(0.33f*pointsInTalent(Talent.GIGANTIC)+(pointsInTalent(Talent.GIGANTIC)>1?0.01f:0))*ex_dly*dmg;
 			}
@@ -597,7 +616,6 @@ public class Hero extends Char {
 	
 	@Override
 	public float speed() {
-		if (buff(DarkCoat.myPace.class)!=null) return 1f;
 
 		float speed = super.speed();
 
@@ -623,6 +641,7 @@ public class Hero extends Char {
 			speed *= buff.speedFactor();
 		}
 		speed = AscensionChallenge.modifyHeroSpeed(speed);
+		if (buff(DarkCoat.myPace.class)!=null) speed=Math.max(1f,speed);
 		return speed;
 		
 	}
@@ -660,20 +679,24 @@ public class Hero extends Char {
 	}
 	
 	public float attackDelay() {
+		float dec_dly=0f;
 		if (buff(Talent.LethalMomentumTracker.class) != null){
 			buff(Talent.LethalMomentumTracker.class).detach();
-			return 0;
+			switch (pointsInTalent(Talent.LETHAL_MOMENTUM)){
+				case 1: default: dec_dly=1f;
+				case 2:dec_dly=1.5f;
+			}
 		}
 
 		if (belongings.weapon() != null) {
 			
-			return belongings.weapon().delayFactor( this );
+			return Math.max(0f,belongings.weapon().delayFactor( this )-dec_dly);
 			
 		} else {
 			//Normally putting furor speed on unarmed attacks would be unnecessary
 			//But there's going to be that one guy who gets a furor+force ring combo
 			//This is for that one guy, you shall get your fists of fury!
-			return 1f/RingOfFuror.attackSpeedMultiplier(this);
+			return Math.max(1f/RingOfFuror.attackSpeedMultiplier(this)-dec_dly,0f);
 		}
 	}
 
@@ -1328,8 +1351,17 @@ public class Hero extends Char {
 		int trueDamage=preTrueHP-HP;
 		if (effectiveDamage <= 0) return;
 		if (trueDamage>0){
-			if (this.hasTalent(Talent.EMERGENCY_PROTECTION) && !RingOfElements.RESISTS.contains(src)){
-				Buff.affect(this, DeferredShield.class,1f).inc(2*pointsInTalent(Talent.EMERGENCY_PROTECTION));
+			if (this.hasTalent(Talent.EMERGENCY_PROTECTION) ){
+				Class<?> srcClass = src.getClass();
+				HashSet<Class> resists = new HashSet<>(RingOfElements.RESISTS);
+				boolean flag = true;
+				for (Class c : resists){
+					if (c.isAssignableFrom(srcClass)){
+						flag=false;
+						break;
+					}
+				}
+				if (flag) Buff.append(this, DeferredShield.class,1f).inc(2*pointsInTalent(Talent.EMERGENCY_PROTECTION));
 			}
 		}
 		//flash red when hit for serious damage.
@@ -1500,8 +1532,8 @@ public class Hero extends Char {
 			float speed = speed();
 			float speedAdj=1f;
 			if (buff(CrabArmor.likeCrab.class)!=null){
-				if (pos/Dungeon.level.width()== step/Dungeon.level.width())	speedAdj=2f;
-				else speedAdj=0.75f;
+				if (pos/Dungeon.level.width()== step/Dungeon.level.width())	speedAdj=1.75f;
+				else speedAdj=5f/6f;
 			}
 			sprite.move(pos, step);
 			move(step);
@@ -2191,6 +2223,7 @@ public class Hero extends Char {
 		}
 
 		updateHT(false);
+		updateCritSkill();
 	}
 
 	@Override

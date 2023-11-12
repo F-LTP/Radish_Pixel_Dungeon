@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class CureHerb extends Item {
     private static final String AC_EAT = "EAT";
     {
-        image = ItemSpriteSheet.LIQUID_METAL;
+        image = ItemSpriteSheet.HERB;
 
         defaultAction = AC_EAT;
 

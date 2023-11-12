@@ -52,6 +52,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLightning;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
 import com.shatteredpixel.shatteredpixeldungeon.levels.CityBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -456,7 +457,7 @@ public class DwarfKing extends Mob {
 		if (isInvulnerable(src.getClass())){
 			super.damage(dmg, src);
 			return;
-		} else if (phase == 3 && !(src instanceof Viscosity.DeferedDamage)){
+		} else if (phase == 3 && !(src instanceof Viscosity.DeferedDamage || src instanceof HeadCleaver.headCleaverTracker)){
 			if (dmg >= 0) {
 				Viscosity.DeferedDamage deferred = Buff.affect( this, Viscosity.DeferedDamage.class );
 				deferred.prolong( dmg );
@@ -470,7 +471,10 @@ public class DwarfKing extends Mob {
 
 		LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
 		if (lock != null && !isImmune(src.getClass())) lock.addTime(dmg/3);
-
+		if (buff(HeadCleaver.headCleaverTracker.class)!=null){
+			phase=3;
+			die(new HeadCleaver.headCleaverTracker());
+		}
 		if (phase == 1) {
 			int dmgTaken = preHP - HP;
 			abilityCooldown -= dmgTaken/8f;

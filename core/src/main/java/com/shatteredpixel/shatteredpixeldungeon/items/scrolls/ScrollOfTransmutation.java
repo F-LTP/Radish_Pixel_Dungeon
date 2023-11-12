@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.BlueWhiteBowl;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.AlchemicalCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
@@ -68,7 +69,7 @@ public class ScrollOfTransmutation extends InventoryScroll {
 	protected boolean usableOnItem(Item item) {
 		return item instanceof MeleeWeapon ||
 				(item instanceof MissileWeapon && (!(item instanceof Dart) || item instanceof TippedDart)) ||
-				item instanceof Armor ||
+				(item instanceof Armor && !(item instanceof ClothArmor))||
 				(item instanceof Potion && !(item instanceof Elixir || item instanceof Brew || item instanceof AlchemicalCatalyst)) ||
 				item instanceof Scroll ||
 				item instanceof Ring ||
@@ -213,7 +214,8 @@ public class ScrollOfTransmutation extends InventoryScroll {
 		Armor n;
 		int t= a.tier;
 		if (t == 1){
-			n = new BlueWhiteBowl();
+			GLog.w(Messages.get(ScrollOfTransmutation.class,"nothing"));
+			return a;
 		}
 		else {
 			Generator.Category c;

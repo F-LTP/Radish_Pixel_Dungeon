@@ -18,7 +18,7 @@ public class SilverScaleArmor extends Armor {
         if (seal != null) return 0;
 
         int price = 5;
-        if (hasGoodGlyph()) {
+        /*if (hasGoodGlyph()) {
             price *= 1.5;
         }
         if (cursedKnown && (cursed || hasCurseGlyph())) {
@@ -29,7 +29,7 @@ public class SilverScaleArmor extends Armor {
         }
         if (price < 1) {
             price = 1;
-        }
+        }*/
         return price;
     }
 

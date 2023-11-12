@@ -43,7 +43,10 @@ public class Degrade extends FlavourBuff {
 	public boolean attachTo(Char target) {
 		if (super.attachTo(target)){
 			Item.updateQuickslot();
-			if (target == Dungeon.hero) ((Hero) target).updateHT(false);
+			if (target == Dungeon.hero){
+				((Hero) target).updateHT(false);
+				((Hero) target).updateCritSkill();
+			}
 			return true;
 		}
 		return false;
@@ -52,7 +55,10 @@ public class Degrade extends FlavourBuff {
 	@Override
 	public void detach() {
 		super.detach();
-		if (target == Dungeon.hero) ((Hero) target).updateHT(false);
+		if (target == Dungeon.hero) {
+			((Hero) target).updateHT(false);
+			((Hero) target).updateCritSkill();
+		}
 		Item.updateQuickslot();
 	}
 

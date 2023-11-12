@@ -44,6 +44,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.Dewdrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.SpellQueue;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
@@ -277,7 +278,7 @@ public class WandOfRegrowth extends Wand {
 
 	@Override
 	protected int chargesPerCast() {
-		if (charger != null && charger.target.buff(WildMagic.WildMagicTracker.class) != null){
+		if (charger != null && (charger.target.buff(WildMagic.WildMagicTracker.class) != null || charger.target.buff(SpellQueue.tmpTracker.class) != null) ){
 			return 1;
 		}
 		//consumes 30% of current charges, rounded up, with a min of 1 and a max of 3.

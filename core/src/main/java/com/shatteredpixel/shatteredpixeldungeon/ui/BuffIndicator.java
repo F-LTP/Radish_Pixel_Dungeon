@@ -111,6 +111,10 @@ public class BuffIndicator extends Component {
 	public static final int INVERT_MARK = 57;
 	public static final int NATURE_POWER= 58;
 	public static final int AMULET      = 59;
+	public static final int HOLD_BREATH = 71;
+	public static final int A_EVA	    = 72;
+	public static final int DUEL_DANCE  = 73;
+	public static final int SCYTHE_S    = 78;
 
 	public static final int SIZE_SMALL  = 7;
 	public static final int SIZE_LARGE  = 16;

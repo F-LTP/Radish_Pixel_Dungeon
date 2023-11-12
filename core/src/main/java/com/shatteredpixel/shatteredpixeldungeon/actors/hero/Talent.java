@@ -40,7 +40,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.Ratmogrify
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
-import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
@@ -51,7 +50,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.HerbMaker;
 import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.SpellQueue;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -125,7 +123,7 @@ public enum Talent {
 	//Huntress T2
 	INVIGORATING_MEAL(100), HERB_MIXTURE(101), REJUVENATING_STEPS(102), HEIGHTENED_SENSES(103), DURABLE_PROJECTILES(104),
 	//Huntress T3
-	POINT_BLANK(105, 3), SEER_SHOT(106, 3),
+	HOLD_BREATH(105, 3), SEER_SHOT(106, 3),
 	//Sniper T3
 	FARSIGHT(107, 3), SHARED_ENCHANTMENT(108, 3), SHARED_UPGRADES(109, 3),
 	//Warden T3
@@ -148,9 +146,12 @@ public enum Talent {
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 50); }
 	};
 	public static class LethalMomentumTracker extends FlavourBuff{};
-	public static class GiganticInvalidTracker extends FlavourBuff{};
-	public static class DuelDanceMissileTracker extends FlavourBuff{};
-	public static class DuelDanceWandTracker extends FlavourBuff{};
+	public static class DuelDanceMissileTracker extends FlavourBuff{
+		public int icon() { return BuffIndicator.DUEL_DANCE; }
+	};
+	public static class DuelDanceWandTracker extends FlavourBuff{
+		public int icon() { return BuffIndicator.DUEL_DANCE;}
+	};
 	public static class StrikingWaveTracker extends FlavourBuff{};
 	public static class WandPreservationCounter extends CounterBuff{{revivePersists = true;}};
 	public static class EmpoweredStrikeTracker extends FlavourBuff{};
@@ -204,7 +205,70 @@ public enum Talent {
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 20); }
 	};
 	public static class SpiritBladesTracker extends FlavourBuff{};
+	public static class HoldBreathTracker extends Buff{
+		{
+			actPriority=HERO_PRIO+1;
+			type=buffType.POSITIVE;
+		}
 
+		@Override
+		public int icon() {
+			return BuffIndicator.HOLD_BREATH;
+		}
+
+		@Override
+		public String desc() {
+			return Messages.get(this, "desc", crit_b,cd_b);
+		}
+
+		public int crit_b=0;
+		public float cd_b=0f;
+		public boolean canreduce=true;
+
+		public void reduce(){
+			if (!canreduce) return;
+			crit_b=Math.max(0,crit_b-(1+((Hero)target).pointsInTalent(HOLD_BREATH)));
+			cd_b=Math.max(0,cd_b-(1+((Hero)target).pointsInTalent(HOLD_BREATH))*0.005f);
+			canreduce=false;
+		}
+		public void clear_cb(){
+			crit_b=0;
+			cd_b=0;
+		}
+		@Override
+		public void storeInBundle( Bundle bundle ) {
+			bundle.put("CRIT_B_HB",crit_b);
+			bundle.put("CD_B_HB",cd_b);
+			bundle.put("CAN_REDUCE",canreduce);
+			super.storeInBundle(bundle);
+		}
+
+		@Override
+		public void restoreFromBundle( Bundle bundle ) {
+			super.restoreFromBundle(bundle);
+			if (bundle.contains("CRIT_B_HB"))
+				crit_b = bundle.getInt("CRIT_B_HB");
+			else
+				crit_b =0;
+			if (bundle.contains("CD_B_HB"))
+				cd_b = bundle.getFloat("CD_B_HB");
+			else
+				cd_b =0;
+			if (bundle.contains("CAN_REDUCE"))
+				canreduce=bundle.getBoolean("CAN_REDUCE");
+			else
+				canreduce=true;
+		}
+		@Override
+		public boolean act(){
+			if (!((Hero)target).hasTalent(Talent.HOLD_BREATH)) detach();
+			canreduce=true;
+			crit_b=Math.min(100,crit_b+(1+((Hero)target).pointsInTalent(HOLD_BREATH)));
+			cd_b=Math.min(3,cd_b+(1+((Hero)target).pointsInTalent(HOLD_BREATH))*0.005f);
+			spend(TICK);
+			return true;
+		}
+	}
 	int icon;
 	int maxPoints;
 
@@ -268,9 +332,6 @@ public enum Talent {
 
 	public static void onTalentUpgraded( Hero hero, Talent talent ){
 		//for metamorphosis
-		if (talent == IRON_WILL && hero.heroClass != HeroClass.WARRIOR){
-			Buff.affect(hero, BrokenSeal.WarriorShield.class);
-		}
 
 		if (talent == ARMSMASTERS_INTUITION && hero.pointsInTalent(ARMSMASTERS_INTUITION) == 2){
 			if (hero.belongings.weapon() != null) hero.belongings.weapon().identify();
@@ -303,19 +364,21 @@ public enum Talent {
 		if (talent == HEIGHTENED_SENSES || talent == FARSIGHT){
 			Dungeon.observe();
 		}
-		if (talent == HERB_MIXTURE  &&hero.pointsInTalent(HERB_MIXTURE) == 1){
+		if (talent == HERB_MIXTURE  &&hero.belongings.getItem(HerbMaker.class)==null){
 			Dungeon.level.drop(new HerbMaker(),Dungeon.hero.pos);
 		}
 		if (talent == SPELL_QUEUE){
-			if (hero.pointsInTalent(SPELL_QUEUE) == 1) {
-				SpellQueue sq = new SpellQueue();
-				sq.collect();
-			}else {
+			if (hero.belongings.getItem(SpellQueue.class)==null && hero.buff(SpellQueue.imageListner.class)==null){
+				Dungeon.level.drop(new SpellQueue(),Dungeon.hero.pos);
+				Buff.affect(hero, SpellQueue.imageListner.class);
+			}
 				SpellQueue mySq= hero.belongings.getItem(SpellQueue.class);
 				if (mySq!=null){
 					mySq.updateImage();
 				}
-			}
+		}
+		if (talent == HOLD_BREATH){
+			Buff.affect(hero, HoldBreathTracker.class);
 		}
 	}
 
@@ -440,7 +503,7 @@ public enum Talent {
 	}
 
 	public static void onUpgradeScrollUsed( Hero hero ){
-		if (hero.hasTalent(ENERGIZING_UPGRADE)){
+		/*if (hero.hasTalent(ENERGIZING_UPGRADE)){
 			if (hero.heroClass == HeroClass.MAGE) {
 				MagesStaff staff = hero.belongings.getItem(MagesStaff.class);
 				if (staff != null) {
@@ -451,7 +514,7 @@ public enum Talent {
 			} else {
 				Buff.affect(hero, Recharging.class, 4 + 8 * hero.pointsInTalent(ENERGIZING_UPGRADE));
 			}
-		}
+		}*/
 		/*if (hero.hasTalent(DUEL_DANCE)){
 			if (hero.heroClass == HeroClass.ROGUE) {
 				CloakOfShadows cloak = hero.belongings.getItem(CloakOfShadows.class);
@@ -611,7 +674,7 @@ public enum Talent {
 				Collections.addAll(tierTalents, DEATHBLOW, LIGHT_CLOAK);
 				break;
 			case HUNTRESS:
-				Collections.addAll(tierTalents, POINT_BLANK, SEER_SHOT);
+				Collections.addAll(tierTalents, HOLD_BREATH, SEER_SHOT);
 				break;
 		}
 		for (Talent talent : tierTalents){

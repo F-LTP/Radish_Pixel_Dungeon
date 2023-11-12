@@ -23,9 +23,10 @@ import java.util.ArrayList;
 
 public class HerbMaker extends Item {
     private static final String AC_MAKE = "MAKE";
+    private static final String AC_NONE = "NONE";
     int current_seed = 0;
     {
-        image = ItemSpriteSheet.POUCH;
+        image = ItemSpriteSheet.HERB_MAKER;
 
         defaultAction = AC_MAKE;
 
@@ -34,10 +35,12 @@ public class HerbMaker extends Item {
     @Override
     public ArrayList<String> actions(Hero hero) {
         ArrayList<String> actions = super.actions( hero );
-        if (hero.hasTalent(Talent.HERB_MIXTURE))
-            actions.add ( AC_MAKE );
+        if (hero.hasTalent(Talent.HERB_MIXTURE)) {
+            actions.add(AC_MAKE);
+            defaultAction = AC_MAKE;
+        }
         else
-            defaultAction=null;
+            defaultAction=AC_NONE;
         return actions;
     }
 

@@ -464,10 +464,9 @@ public class Generator {
 			ARMOR.probs = new float[]{};
 
 			ARM_T1.classes = new Class<?>[]{
-					ClothArmor.class,
-					BlueWhiteBowl.class
+					ClothArmor.class
 			};
-			ARM_T1.probs = new float[]{ 1, 0 };
+			ARM_T1.probs = new float[]{ 1 };
 
 			ARM_T2.classes = new Class<?>[]{
 					LeatherArmor.class,

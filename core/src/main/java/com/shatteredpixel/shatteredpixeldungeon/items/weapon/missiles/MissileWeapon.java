@@ -187,11 +187,7 @@ abstract public class MissileWeapon extends Weapon {
 
 	protected float adjacentAccFactor(Char owner, Char target){
 		if (Dungeon.level.adjacent( owner.pos, target.pos )) {
-			if (owner instanceof Hero){
-				return (0.5f + 0.2f*((Hero) owner).pointsInTalent(Talent.POINT_BLANK));
-			} else {
-				return 0.5f;
-			}
+			return 0.5f;
 		} else {
 			return 1.5f;
 		}
@@ -275,8 +271,7 @@ abstract public class MissileWeapon extends Weapon {
 	public float castDelay(Char user, int dst) {
 		if (user instanceof Hero) {
 			if (Dungeon.hero.hasTalent(Talent.DUEL_DANCE)) {
-				Buff.affect(Dungeon.hero, Talent.DuelDanceWandTracker.class, 1f);
-			if (Dungeon.hero.buff(Talent.DuelDanceMissileTracker.class) != null) {
+				if (Dungeon.hero.buff(Talent.DuelDanceMissileTracker.class) != null) {
 				Buff.detach(Dungeon.hero, Talent.DuelDanceMissileTracker.class);
 				return (0.84f - 0.17f * Dungeon.hero.pointsInTalent(Talent.DUEL_DANCE)) * delayFactor(user);
 			}

@@ -57,6 +57,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.LloydsBeacon;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.PrisonBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -170,9 +171,44 @@ public class Tengu extends Mob {
 			int multiple = state == PrisonBossLevel.State.FIGHT_START ? 1 : 4;
 			lock.addTime(dmg*multiple);
 		}
+		if (HP==0 && buff(HeadCleaver.headCleaverTracker.class)!=null){
+			if (state == PrisonBossLevel.State.FIGHT_ARENA){
+				Actor.add(new Actor() {
+
+					{
+						actPriority = VFX_PRIO;
+					}
+
+					@Override
+					protected boolean act() {
+						Actor.remove(this);
+						((PrisonBossLevel)Dungeon.level).progress();
+						return true;
+					}
+				});
+				return;
+			}else if (state == PrisonBossLevel.State.FIGHT_START){
+				Actor.add(new Actor() {
+
+					{
+						actPriority = VFX_PRIO;
+					}
+
+					@Override
+					protected boolean act() {
+						Actor.remove(this);
+						((PrisonBossLevel)Dungeon.level).progress();
+						((PrisonBossLevel)Dungeon.level).progress();
+						((PrisonBossLevel)Dungeon.level).progress();
+						return true;
+					}
+				});
+				return;
+			}
+		}
 		
 		//phase 2 of the fight is over
-		if (HP == 0 && state == PrisonBossLevel.State.FIGHT_ARENA) {
+		if (HP == 0 && (state == PrisonBossLevel.State.FIGHT_ARENA)) {
 			//let full attack action complete first
 			Actor.add(new Actor() {
 				

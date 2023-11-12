@@ -255,8 +255,8 @@ public abstract class Char extends Actor {
 		move( c.pos );
 		float speedAdj=1f;
 		if (c.buff(CrabArmor.likeCrab.class)!=null){
-			if (c.pos/Dungeon.level.width()== curPos/Dungeon.level.width())	speedAdj=2f;
-			else speedAdj=0.75f;
+			if (c.pos/Dungeon.level.width()== curPos/Dungeon.level.width())	speedAdj=1.75f;
+			else speedAdj=5f/6f;
 		}
 		c.sprite.move( c.pos, curPos );
 		c.move( curPos );
@@ -360,7 +360,7 @@ public abstract class Char extends Actor {
 
 		} else if (hit( this, enemy, accMulti )) {
 			if (enemy.buff(AfterImage.Blur.class)!=null){
-				enemy.buff(AfterImage.Blur.class).dodges++;
+				enemy.buff(AfterImage.Blur.class).gainDodge();
 			}
 			int dr = Math.round(enemy.drRoll() * AscensionChallenge.statModifier(enemy));
 
@@ -403,6 +403,12 @@ public abstract class Char extends Actor {
 					current_critdamage+=0.3f+0.05f*ss.buffedLvl();
 					if (surprise){
 						current_crit+=25f;
+					}
+				}else if (Dungeon.hero.belongings.weapon() instanceof MissileWeapon){
+					Talent.HoldBreathTracker hb=buff(Talent.HoldBreathTracker.class);
+					if (hb!=null){
+						current_crit+=hb.crit_b;
+						current_critdamage+=hb.cd_b;
 					}
 				}
 				if (Dungeon.hero.hasTalent(Talent.DEATHBLOW)){
@@ -539,8 +545,8 @@ public abstract class Char extends Actor {
 		} else {
 			if (enemy.buff(CloakofGreyFeather.hexDodge.class)!=null){
 				for (Char ch : Actor.chars()) {
-					if (ch.alignment != enemy.alignment && enemy.fieldOfView[ch.pos]){
-						Buff.affect(ch, Hex.class,5f+enemy.buff(CloakofGreyFeather.hexDodge.class).buffedLvl());
+					if (ch.alignment != enemy.alignment && enemy.fieldOfView[ch.pos] && ch.alignment!= Alignment.NEUTRAL){
+						Buff.affect(ch, Hex.class,2f+0.75f*enemy.buff(CloakofGreyFeather.hexDodge.class).buffedLvl());
 					}
 				}
 			}
@@ -664,7 +670,6 @@ public abstract class Char extends Actor {
 	}
 	
 	public float speed() {
-		if (buff(DarkCoat.myPace.class)!=null) return 1f;
 		float speed = baseSpeed;
 		float ben_mul=1f;
 		if (this == Dungeon.hero ){
@@ -678,6 +683,7 @@ public abstract class Char extends Actor {
 		if ( buff( Adrenaline.class ) != null) speed *= 2f;
 		if ( buff( Haste.class ) != null) speed *= 3f;
 		if ( buff( Dread.class ) != null) speed *= 2f;
+		if (buff(DarkCoat.myPace.class)!=null) speed=Math.max(1f,speed);
 		return speed;
 	}
 

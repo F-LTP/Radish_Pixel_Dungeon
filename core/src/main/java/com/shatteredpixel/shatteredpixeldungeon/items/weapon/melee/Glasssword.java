@@ -3,6 +3,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -36,9 +37,11 @@ public class Glasssword extends MeleeWeapon{
     public int proc(Char attacker, Char defender, int damage){
         if (ruin<ruinCap && Random.Float()*100<10-buffedLvl()) {
             ruin++;
-            GLog.w(Messages.get(this,"broken"));
-            if(ruin==ruinCap)
-                GLog.n(Messages.get(this,"ruin"));
+            if (attacker instanceof Hero) {
+                GLog.w(Messages.get(this, "broken"));
+                if (ruin == ruinCap)
+                    GLog.n(Messages.get(this, "ruin"));
+            }
             updateImage();
         }
         return super.proc(attacker,defender,damage);

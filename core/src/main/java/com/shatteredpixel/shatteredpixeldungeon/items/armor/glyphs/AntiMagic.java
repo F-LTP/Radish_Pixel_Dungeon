@@ -102,6 +102,7 @@ public class AntiMagic extends Armor.Glyph {
 		RESISTS.add( Blazing.class );
 		RESISTS.add( Shocking.class );
 		RESISTS.add( Grim.class );
+		RESISTS.add(Viscosity.DeferedDamage.class);
 
 		RESISTS.add( WarpBeacon.class );
 		

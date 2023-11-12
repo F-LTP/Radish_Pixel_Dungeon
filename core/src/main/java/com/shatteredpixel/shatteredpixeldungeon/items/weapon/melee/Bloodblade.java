@@ -5,6 +5,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Bee;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfMight;
@@ -73,6 +74,10 @@ public class Bloodblade extends MeleeWeapon{
                     sac+=3;
                     GLog.i(Messages.get(this,"sac"));
                     updateImage();
+                    Regeneration r=hero.buff(Regeneration.class);
+                    if (r!=null){
+                        r.reduce_regen+=0.04f;
+                    }
                 }
             }
         }

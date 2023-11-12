@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionHero;
@@ -756,22 +757,21 @@ public abstract class Mob extends Char {
 		if (alignment == Alignment.ENEMY){
 			rollToDropLoot();
 
-			if (cause == Dungeon.hero
-					&& Dungeon.hero.hasTalent(Talent.LETHAL_MOMENTUM)
-					&& Random.Float() < 0.34f + 0.33f* Dungeon.hero.pointsInTalent(Talent.LETHAL_MOMENTUM)){
-				Buff.affect(Dungeon.hero, Talent.LethalMomentumTracker.class, 1f);
-				if (Dungeon.hero.hasTalent(Talent.GIGANTIC) && Dungeon.hero.attackDelay()>1f && Dungeon.hero.buff(Talent.GiganticInvalidTracker.class)==null){
-					Buff.affect(Dungeon.hero,Talent.GiganticInvalidTracker.class,50f);
+			if (cause == Dungeon.hero){
+				if (Dungeon.hero.hasTalent(Talent.LETHAL_MOMENTUM))
+				{
+					Buff.affect(Dungeon.hero, Talent.LethalMomentumTracker.class, 1f);
+				}
+				if (Dungeon.hero.hasTalent(Talent.IRON_WILL)){
+					Buff.affect(Dungeon.hero, Barrier.class).setShield (1+Dungeon.hero.pointsInTalent(Talent.IRON_WILL));
 				}
 			}
 		}
 		if (cause == Dungeon.hero){
 			if (Dungeon.hero.belongings.weapon instanceof Beecomb) {
 				Beecomb bc = (Beecomb) Dungeon.hero.belongings.weapon;
-				if (Random.Float() * 100 < 5 + 2 * bc.buffedLvl()) {
 					bc.getCharge();
 					updateQuickslot();
-				}
 			} else if (Dungeon.hero.belongings.weapon instanceof Scythe){
 				Buff.affect(Dungeon.hero, Scythe.scytheSac.class,5f);
 			}
@@ -1074,8 +1074,8 @@ public abstract class Mob extends Char {
 			if (target != -1 && getCloser( target )) {
 				float speedAdj=1f;
 				if (buff(CrabArmor.likeCrab.class)!= null){
-					if (vertical) speedAdj=0.75f;
-					else speedAdj=2f;
+					if (vertical) speedAdj=5f/6f;
+					else speedAdj=1.75f;
 				}
 				spend( 1 / (speed() * speedAdj));
 				return moveSprite( oldPos, pos );
@@ -1121,8 +1121,8 @@ public abstract class Mob extends Char {
 
 					float speedAdj=1f;
 					if (buff(CrabArmor.likeCrab.class)!= null){
-						if (vertical) speedAdj=0.75f;
-						else speedAdj=2f;
+						if (vertical) speedAdj=5f/6f;
+						else speedAdj=1.75f;
 					}
 					spend( 1 / (speed() * speedAdj));
 					return moveSprite( oldPos,  pos );
@@ -1177,8 +1177,8 @@ public abstract class Mob extends Char {
 
 				float speedAdj=1f;
 				if (buff(CrabArmor.likeCrab.class)!= null){
-					if (vertical) speedAdj=0.75f;
-					else speedAdj=2f;
+					if (vertical) speedAdj=5f/6f;
+					else speedAdj=1.75f;
 				}
 				spend( 1 / (speed() * speedAdj));
 				return moveSprite( oldPos, pos );

@@ -203,7 +203,7 @@ public class ItemSpriteSheet {
 	static{
 		assignItemRect(WORN_SHORTSWORD, 13, 13);
 		assignItemRect(GLOVES,          12, 16);
-		assignItemRect(DAGGER,          12, 13);
+		assignItemRect(DAGGER,          16, 16);
 		assignItemRect(MAGES_STAFF,     15, 16);
 	}
 
@@ -224,10 +224,10 @@ public class ItemSpriteSheet {
 		assignItemRect(HAND_AXE,        12, 14);
 		assignItemRect(SPEAR,           16, 16);
 		assignItemRect(QUARTERSTAFF,    16, 16);
-		assignItemRect(DIRK,            13, 14);
-		assignItemRect(GLASSSWORD1,     13, 14);
-		assignItemRect(GLASSSWORD2,     13, 14);
-		assignItemRect(GLASSSWORD3,     10, 14);
+		assignItemRect(DIRK,            16, 16);
+		assignItemRect(GLASSSWORD1,     16, 16);
+		assignItemRect(GLASSSWORD2,     16, 16);
+		assignItemRect(GLASSSWORD3,     16, 16);
 		assignItemRect(KATAR,           16, 16);
 		assignItemRect(BLADESHIELD,     16, 16);
 	}
@@ -247,7 +247,7 @@ public class ItemSpriteSheet {
 		assignItemRect(SCIMITAR,        13, 16);
 		assignItemRect(ROUND_SHIELD,    16, 16);
 		assignItemRect(SAI,             16, 16);
-		assignItemRect(WHIP,            14, 14);
+		assignItemRect(WHIP,            16, 16);
 		assignItemRect(WINGSWORD,       16, 16);
 		assignItemRect(CROSSBOW_H,       16, 16);
 	}
@@ -299,9 +299,9 @@ public class ItemSpriteSheet {
 		assignItemRect(GREATAXE,    12, 16);
 		assignItemRect(GREATSHIELD, 12, 16);
 		assignItemRect(GAUNTLETS,   13, 15);
-		assignItemRect(BLOODBLADE1, 14, 15);
-		assignItemRect(BLOODBLADE2, 14, 15);
-		assignItemRect(BLOODBLADE3, 14, 15);
+		assignItemRect(BLOODBLADE1, 16, 16);
+		assignItemRect(BLOODBLADE2, 16, 16);
+		assignItemRect(BLOODBLADE3, 16, 16);
 		assignItemRect(DARKSWORD,   16, 16);
 		assignItemRect(CUTTERHEAD,  16, 16);
 		assignItemRect(BEECOMB,     15, 16);
@@ -416,7 +416,7 @@ public class ItemSpriteSheet {
 		assignItemRect(ARMOR_PLATE,     12, 12);
 		assignItemRect(ARMOR_AFTERIMAGE,16, 16);
 		assignItemRect(ARMOR_AFTERGLOW,16, 16);
-		assignItemRect(ARMOR_CRAB,      16, 12);
+		assignItemRect(ARMOR_CRAB,      16, 16);
 		assignItemRect(ARMOR_WARRIOR,   12, 12);
 		assignItemRect(ARMOR_MAGE,      15, 15);
 		assignItemRect(ARMOR_ROGUE,     14, 12);
@@ -523,7 +523,7 @@ public class ItemSpriteSheet {
 		assignItemRect(ARTIFACT_ROSE1,      14, 14);
 		assignItemRect(ARTIFACT_ROSE2,      14, 14);
 		assignItemRect(ARTIFACT_ROSE3,      14, 14);
-		assignItemRect(ARTIFACT_CONCEAL,    13, 14);
+		assignItemRect(ARTIFACT_CONCEAL,    13, 16);
 		assignItemRect(ARTIFACT_ELTIE1,     15, 15);
 		assignItemRect(ARTIFACT_ELTIE2,     15, 15);
 		assignItemRect(ARTIFACT_ELTIE3,     15, 15);
@@ -661,6 +661,7 @@ public class ItemSpriteSheet {
 	public static final int BREW_BLIZZARD   = BREWS+1;
 	public static final int BREW_SHOCKING   = BREWS+2;
 	public static final int BREW_CAUSTIC    = BREWS+3;
+	public static final int MAGIC_ROOT    = BREWS+4;
 	
 	private static final int ELIXIRS        =                               xy(9, 25);  //8 slots
 	public static final int ELIXIR_HONEY    = ELIXIRS+0;
@@ -675,6 +676,7 @@ public class ItemSpriteSheet {
 	static{
 		for (int i = BREWS; i < BREWS+17; i++)
 			assignItemRect(i, 12, 14);
+		assignItemRect(MAGIC_ROOT,15,16);
 	}
 	
 	                                                                                    //16 free slots
@@ -753,6 +755,7 @@ public class ItemSpriteSheet {
 	public static final int TOKEN   = QUEST+6;
 	public static final int BLOB    = QUEST+7;
 	public static final int SHARD   = QUEST+8;
+	public static final int HERB	= QUEST+9;
 	static{
 		assignItemRect(SKULL,   16, 11);
 		assignItemRect(DUST,    12, 11);
@@ -763,6 +766,7 @@ public class ItemSpriteSheet {
 		assignItemRect(TOKEN,   12, 12);
 		assignItemRect(BLOB,    10,  9);
 		assignItemRect(SHARD,    8, 10);
+		assignItemRect(HERB,    16, 13);
 	}
 
 	private static final int BAGS       =                                   xy(1, 31);  //16 slots
@@ -773,6 +777,7 @@ public class ItemSpriteSheet {
 	public static final int BANDOLIER   = BAGS+4;
 	public static final int HOLSTER     = BAGS+5;
 	public static final int VIAL        = BAGS+6;
+	public static final int HERB_MAKER        = BAGS+7;
 	static{
 		assignItemRect(WATERSKIN,   16, 14);
 		assignItemRect(BACKPACK,    16, 16);
@@ -781,6 +786,7 @@ public class ItemSpriteSheet {
 		assignItemRect(BANDOLIER,   15, 16);
 		assignItemRect(HOLSTER,     15, 16);
 		assignItemRect(VIAL,        12, 12);
+		assignItemRect(HERB_MAKER,        16, 15);
 	}
 
 	private static final int DOCUMENTS  =                                   xy(1, 32);  //16 slots

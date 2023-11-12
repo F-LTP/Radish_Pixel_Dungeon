@@ -22,7 +22,7 @@ public class CrabArmor extends Armor{
             return Math.max(1 + lvl + augment.defenseFactor(lvl),1);
         }
 
-        return 2 + 2 * lvl + augment.defenseFactor(lvl);
+        return 2 + Math.max( 2 * lvl + augment.defenseFactor(lvl), lvl);
     }
     @Override
     public int DRMin(int lvl){

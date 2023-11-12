@@ -62,6 +62,7 @@ public class DemonSpawner extends Mob {
 		properties.add(Property.IMMOVABLE);
 		properties.add(Property.MINIBOSS);
 		properties.add(Property.DEMONIC);
+		properties.add(Property.HEADLESS);
 	}
 
 	@Override
