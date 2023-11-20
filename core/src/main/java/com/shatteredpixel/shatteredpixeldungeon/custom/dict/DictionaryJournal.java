@@ -248,7 +248,7 @@ public enum DictionaryJournal {
         WEAPONS.d.put("melee_scimitar",     ItemSpriteSheet.SCIMITAR);
         WEAPONS.d.put("melee_roundshield",  ItemSpriteSheet.ROUND_SHIELD);
         WEAPONS.d.put("melee_sai",          ItemSpriteSheet.SAI);
-        WEAPONS.d.put("melee_whip",         ItemSpriteSheet.WHIP);
+        WEAPONS.d.put("melee_whip",         ItemSpriteSheet.SNAKE_SPEAR);
         WEAPONS.d.put("melee_longsword",    ItemSpriteSheet.LONGSWORD);
         WEAPONS.d.put("melee_battleaxe",    ItemSpriteSheet.BATTLE_AXE);
         WEAPONS.d.put("melee_flail",        ItemSpriteSheet.FLAIL);

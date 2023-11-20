@@ -17,8 +17,8 @@ public class WingSword extends MeleeWeapon{
     }
     @Override
     public int proc(Char attacker, Char defender, int damage){
-        if (Random.Float()<0.25+0.04*buffedLvl())
-            Buff.affect(attacker, Levitation.class,4+buffedLvl()*0.5f);
+        if (Random.Float()<0.4+0.04*buffedLvl())
+            Buff.affect(attacker, Levitation.class,8+buffedLvl());
         return super.proc(attacker,defender,damage);
     }
 }

@@ -61,6 +61,7 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.Random;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -218,7 +219,7 @@ public enum Talent {
 
 		@Override
 		public String desc() {
-			return Messages.get(this, "desc", crit_b,cd_b);
+			return Messages.get(this, "desc", crit_b,new DecimalFormat("#.###").format(cd_b));
 		}
 
 		public int crit_b=0;

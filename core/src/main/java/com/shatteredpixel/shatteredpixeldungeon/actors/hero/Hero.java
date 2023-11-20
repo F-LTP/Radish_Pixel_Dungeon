@@ -80,6 +80,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
@@ -117,6 +118,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.SpellQueue;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
@@ -443,19 +445,34 @@ public class Hero extends Char {
 		Buff.affect( this, Regeneration.class );
 		Buff.affect( this, Hunger.class );
 		Buff.affect(this, GameTracker.class);
+
+		if (hasTalent(Talent.SPELL_QUEUE)) Buff.affect(this,SpellQueue.imageListner.class);
+		if (hasTalent(Talent.HOLD_BREATH)) Buff.affect(this, Talent.HoldBreathTracker.class);
 	}
 	
 	public int tier() {
 		Armor armor = belongings.armor();
 		if (armor instanceof ClassArmor){
 			return 6;
-		} else if (armor != null){
+		}
+		else if (armor != null){
 			return armor.tier;
 		} else {
 			return 0;
 		}
 	}
-	
+	public int tier_for_image(){
+		Armor armor = belongings.armor();
+		if (armor == null ){
+			return 0;
+		}else if (armor instanceof ClassArmor){
+			return 6;
+		}else if (armor instanceof PrisonArmor){
+			return 7;
+		}else if (armor instanceof CrabArmor){
+			return 8;
+		}else return armor.tier;
+	}
 	public boolean shoot( Char enemy, MissileWeapon wep ) {
 
 		this.enemy = enemy;
@@ -473,7 +490,7 @@ public class Hero extends Char {
 		}
 		Talent.HoldBreathTracker hb=buff(Talent.HoldBreathTracker.class);
 		if (hb!=null){
-			if (hit){
+			if (hit && enemy.alignment==Alignment.ENEMY){
 				hb.clear_cb();
 			}
 			hb.reduce();
@@ -683,7 +700,7 @@ public class Hero extends Char {
 		if (buff(Talent.LethalMomentumTracker.class) != null){
 			buff(Talent.LethalMomentumTracker.class).detach();
 			switch (pointsInTalent(Talent.LETHAL_MOMENTUM)){
-				case 1: default: dec_dly=1f;
+				case 1: default: dec_dly=1f;break;
 				case 2:dec_dly=1.5f;
 			}
 		}

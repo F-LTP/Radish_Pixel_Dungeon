@@ -71,7 +71,7 @@ public class Barkskin extends Buff {
 					interval=(int)(interval*RingOfBenediction.periodMultiplier(target));
 				}
 			}
-			spend(time - cooldown() - 1);
+			spend(interval - cooldown() - 1);
 		}
 	}
 	

@@ -2,9 +2,12 @@ package com.shatteredpixel.shatteredpixeldungeon.items.talentitem;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Healing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
@@ -34,7 +37,11 @@ public class CureHerb extends Item {
             hero.spend( Actor.TICK );
             detach(hero.belongings.backpack);
             hero.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
-            hero.HP+=Math.min(20,hero.HT-hero.HP);
+            hero.HP+=Math.min(15,hero.HT-hero.HP);
+            if (hero.buff(AfterGlow.Warmth.class)!=null){
+                hero.buff(AfterGlow.Warmth.class).getWarmth();
+            }
+            Buff.affect(hero, Healing.class).setHeal(10, 0, 1);
         }
 
         super.execute(hero, action);

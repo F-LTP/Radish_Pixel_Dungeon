@@ -410,6 +410,7 @@ public class Dungeon {
 	}
 
 	public static boolean interfloorTeleportAllowed(){
+		if (depth==0) return false;
 		if (Dungeon.level.locked || (Dungeon.hero != null && Dungeon.hero.belongings.getItem(Amulet.class) != null)){
 			return false;
 		}

@@ -26,7 +26,7 @@ import com.watabou.noosa.TextureFilm;
 
 public class ItemSpriteSheet {
 
-	private static final int WIDTH = 16;
+	public static final int WIDTH = 32;
 	public static final int SIZE = 16;
 
 	public static TextureFilm film = new TextureFilm( Assets.Sprites.ITEMS, SIZE, SIZE );
@@ -213,9 +213,11 @@ public class ItemSpriteSheet {
 	public static final int SPEAR           = WEP_TIER2+2;
 	public static final int QUARTERSTAFF    = WEP_TIER2+3;
 	public static final int DIRK            = WEP_TIER2+4;
+	public static final int SILVER_STING    = WEP_TIER2+4;
 	public static final int GLASSSWORD1		= WEP_TIER2+5;
 	public static final int GLASSSWORD2		= WEP_TIER2+6;
 	public static final int GLASSSWORD3		= WEP_TIER2+7;
+	public static final int BONE_CLAW		= WEP_TIER2+16;
 	public static final int KATAR			= xy(1,7)+6;
 	public static final int BLADESHIELD		= xy(1,9)+7;
 
@@ -225,6 +227,7 @@ public class ItemSpriteSheet {
 		assignItemRect(SPEAR,           16, 16);
 		assignItemRect(QUARTERSTAFF,    16, 16);
 		assignItemRect(DIRK,            16, 16);
+		assignItemRect(SILVER_STING,    16, 16);
 		assignItemRect(GLASSSWORD1,     16, 16);
 		assignItemRect(GLASSSWORD2,     16, 16);
 		assignItemRect(GLASSSWORD3,     16, 16);
@@ -238,7 +241,7 @@ public class ItemSpriteSheet {
 	public static final int SCIMITAR        = WEP_TIER3+2;
 	public static final int ROUND_SHIELD    = WEP_TIER3+3;
 	public static final int SAI             = WEP_TIER3+4;
-	public static final int WHIP            = WEP_TIER3+5;
+	public static final int SNAKE_SPEAR     = WEP_TIER3+5;
 	public static final int WINGSWORD		= xy(1,7)+7;
 	public static final int CROSSBOW_H		= xy(16,8);
 	static{
@@ -247,7 +250,7 @@ public class ItemSpriteSheet {
 		assignItemRect(SCIMITAR,        13, 16);
 		assignItemRect(ROUND_SHIELD,    16, 16);
 		assignItemRect(SAI,             16, 16);
-		assignItemRect(WHIP,            16, 16);
+		assignItemRect(SNAKE_SPEAR,            16, 16);
 		assignItemRect(WINGSWORD,       16, 16);
 		assignItemRect(CROSSBOW_H,       16, 16);
 	}
@@ -483,22 +486,22 @@ public class ItemSpriteSheet {
 	public static final int ARTIFACT_CHALICE1   = ARTIFACTS+13;
 	public static final int ARTIFACT_CHALICE2   = ARTIFACTS+14;
 	public static final int ARTIFACT_CHALICE3   = ARTIFACTS+15;
-	public static final int ARTIFACT_SANDALS    = ARTIFACTS+16;
-	public static final int ARTIFACT_SHOES      = ARTIFACTS+17;
-	public static final int ARTIFACT_BOOTS      = ARTIFACTS+18;
-	public static final int ARTIFACT_GREAVES    = ARTIFACTS+19;
-	public static final int ARTIFACT_ROSE1      = ARTIFACTS+20;
-	public static final int ARTIFACT_ROSE2      = ARTIFACTS+21;
-	public static final int ARTIFACT_ROSE3      = ARTIFACTS+22;
+	public static final int ARTIFACT_SANDALS    = ARTIFACTS+16+16;
+	public static final int ARTIFACT_SHOES      = ARTIFACTS+17+16;
+	public static final int ARTIFACT_BOOTS      = ARTIFACTS+18+16;
+	public static final int ARTIFACT_GREAVES    = ARTIFACTS+19+16;
+	public static final int ARTIFACT_ROSE1      = ARTIFACTS+20+16;
+	public static final int ARTIFACT_ROSE2      = ARTIFACTS+21+16;
+	public static final int ARTIFACT_ROSE3      = ARTIFACTS+22+16;
 
-	public static final int ARTIFACT_CONCEAL    = ARTIFACTS+24;
-	public static final int ARTIFACT_ELTIE1     = ARTIFACTS+25;
-	public static final int ARTIFACT_ELTIE2     = ARTIFACTS+26;
-	public static final int ARTIFACT_ELTIE3     = ARTIFACTS+27;
-	public static final int ARTIFACT_ELTIE4     = ARTIFACTS+28;
-	public static final int ARTIFACT_ELTIE5     = ARTIFACTS+29;
-	public static final int ARTIFACT_ELTIE6     = ARTIFACTS+30;
-	public static final int ARTIFACT_ELTIE7     = ARTIFACTS+31;
+	public static final int ARTIFACT_CONCEAL    = ARTIFACTS+24+16;
+	public static final int ARTIFACT_ELTIE1     = ARTIFACTS+25+16;
+	public static final int ARTIFACT_ELTIE2     = ARTIFACTS+26+16;
+	public static final int ARTIFACT_ELTIE3     = ARTIFACTS+27+16;
+	public static final int ARTIFACT_ELTIE4     = ARTIFACTS+28+16;
+	public static final int ARTIFACT_ELTIE5     = ARTIFACTS+29+16;
+	public static final int ARTIFACT_ELTIE6     = ARTIFACTS+30+16;
+	public static final int ARTIFACT_ELTIE7     = ARTIFACTS+31+16;
 	static{
 		assignItemRect(ARTIFACT_CLOAK,      9,  15);
 		assignItemRect(ARTIFACT_ARMBAND,    16, 13);

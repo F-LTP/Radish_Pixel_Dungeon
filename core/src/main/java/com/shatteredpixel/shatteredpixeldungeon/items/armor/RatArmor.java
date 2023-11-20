@@ -68,19 +68,19 @@ public class RatArmor extends Armor{
                 switch (Random.Int(5)) {
                     case 0:
                     default:
-                        Buff.affect(target, Hex.class, 5f);
+                        Buff.affect(target, Hex.class, 2f);
                         break;
                     case 1:
-                        Buff.affect(target, Vertigo.class, 5f);
+                        Buff.affect(target, Vertigo.class, 2f);
                         break;
                     case 2:
-                        Buff.affect(target, Weakness.class, 5f);
+                        Buff.affect(target, Weakness.class, 2f);
                         break;
                     case 3:
-                        Buff.affect(target, Vulnerable.class, 5f);
+                        Buff.affect(target, Vulnerable.class, 2f);
                         break;
                     case 4:
-                        Buff.affect(target, Poison.class).set(3f);
+                        Buff.affect(target, Poison.class).set(2f);
                         break;
                 }
                 debuffCount-=30;

@@ -129,6 +129,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.AssassinsBlad
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.BladeShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bloodblade;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.BoneClaw;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CompositeCrossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Cutterhead;
@@ -155,6 +156,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scimitar;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Shortsword;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SilverSting;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SnakeSpear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Spear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Waterwheel;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Whip;
@@ -387,18 +390,21 @@ public class Generator {
 					Shortsword.class,
 					Glasssword.class,
 					Spear.class,
-					Dirk.class,
+					SilverSting.class,
 					Katar.class,
-					BladeShield.class
+					BladeShield.class,
+					BoneClaw.class
 			};
-			WEP_T2.probs = new float[]{ 6, 5, 5, 4, 5, 5 };
+			WEP_T2.probs = new float[]{ 6, 5, 5, 5, 5, 5, 5 };
 
 			WEP_T2_NEW.classes = new Class<?>[]{
 					Glasssword.class,
 					Katar.class,
-					BladeShield.class
+					BladeShield.class,
+					SilverSting.class,
+					BoneClaw.class
 			};
-			WEP_T2_NEW.probs = new float[]{ 5, 5, 5 };
+			WEP_T2_NEW.probs = new float[]{ 5, 5, 5, 5, 5 };
 
 			WEP_T3.classes = new Class<?>[]{
 					Beecomb.class,
@@ -406,17 +412,18 @@ public class Generator {
 					Waterwheel.class,
 					RoundShield.class,
 					Sai.class,
-					Whip.class,
+					SnakeSpear.class,
 					WingSword.class
 			};
-			WEP_T3.probs = new float[]{ 5, 5, 5, 4, 4, 4, 6 };
+			WEP_T3.probs = new float[]{ 5, 5, 5, 4, 4, 5, 6 };
 
 			WEP_T3_NEW.classes = new Class<?>[]{
 					Beecomb.class,
 					Waterwheel.class,
-					WingSword.class
+					WingSword.class,
+					SnakeSpear.class
 			};
-			WEP_T3_NEW.probs = new float[]{ 5, 5, 6 };
+			WEP_T3_NEW.probs = new float[]{ 5, 5, 6, 5 };
 
 			WEP_T4.classes = new Class<?>[]{
 					Bloodblade.class,

@@ -103,6 +103,9 @@ public class CompositeCrossbow extends MeleeWeapon{
     }
     @Override
     public String statsInfo(){
+        if (!isIdentified()){
+            return Messages.get(this,"typical_stats",10,15,curAmmo);
+        }
         if (curAmmo>0)
             return Messages.get(this, "stats_desc",combinedArrow().min(),combinedArrow().max(),curAmmo);
         else

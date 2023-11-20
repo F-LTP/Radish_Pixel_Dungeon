@@ -27,7 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 public class Whip extends MeleeWeapon {
 
 	{
-		image = ItemSpriteSheet.WHIP;
+		image = ItemSpriteSheet.SNAKE_SPEAR;
 		hitSound = Assets.Sounds.HIT;
 		hitSoundPitch = 1.1f;
 

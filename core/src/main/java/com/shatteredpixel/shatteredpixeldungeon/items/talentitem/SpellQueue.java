@@ -139,10 +139,17 @@ public class SpellQueue extends Item {
         }
         else if (action.equals(AC_ZAP)){
             curUser = hero;
-            curItem = this;
-
-            GameScene.selectCell(zapper);
-
+            //curItem = this;
+            if (curUser.buff(MagicImmune.class) != null){
+                GLog.w( Messages.get(SpellQueue.class, "no_magic") );
+                usesTargeting = false;
+            }else if (!checkCharge()) {
+                GLog.w(Messages.get(SpellQueue.class,"not_ready"));
+                usesTargeting = false;
+            }else {
+                usesTargeting=true;
+                GameScene.selectCell(zapper);
+            }
         }
         else if (action.equals(AC_REMAKE)){
             GameScene.show(new WndOptions(Messages.get(this,"title"),Messages.get(this,"inform"),Messages.get(Chasm.class, "yes"),
@@ -329,13 +336,14 @@ public class SpellQueue extends Item {
     protected CellSelector.Listener zapper = new  CellSelector.Listener() {
         private void afterZap( Wand cur, ArrayList<Wand> wands, Hero hero, int target){
             cur.curCharges-=2f;
+            cur.partialCharge+=0.5f;
             if (hero.pointsInTalent(Talent.SPELL_QUEUE)>2){
-                cur.partialCharge+=0.33f;
-                if (cur.partialCharge>=1f)
-                {
-                    cur.partialCharge-=1f;
-                    cur.curCharges+=1f;
-                }
+                cur.partialCharge+=0.25f;
+            }
+            if (cur.partialCharge>=1f)
+            {
+                cur.partialCharge-=1f;
+                cur.curCharges+=1f;
             }
             if (spellActor != null){
                 spellActor.next();
@@ -434,12 +442,7 @@ public class SpellQueue extends Item {
         public void onSelect( Integer target ) {
 
             if (target != null) {
-                if (curUser.buff(MagicImmune.class) != null){
-                    GLog.w( Messages.get(SpellQueue.class, "no_magic") );
-                }else if (!checkCharge()) {
-                    GLog.w(Messages.get(SpellQueue.class,"not_ready"));
-                }
-                else doZap(target);
+                doZap(target);
             }
         }
         @Override

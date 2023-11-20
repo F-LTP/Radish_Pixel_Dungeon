@@ -605,7 +605,7 @@ public class Item implements Bundlable {
 								float dec_dly=0f;
 								user.buff(Talent.LethalMomentumTracker.class).detach();
 								switch (user.pointsInTalent(Talent.LETHAL_MOMENTUM)){
-									case 1: default: dec_dly=1f;
+									case 1: default: dec_dly=1f;break;
 									case 2:dec_dly=1.5f;
 								}
 								user.spendAndNext(Math.max(0f,delay-dec_dly));

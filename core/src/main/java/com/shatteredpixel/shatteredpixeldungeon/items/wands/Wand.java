@@ -67,6 +67,11 @@ import java.util.ArrayList;
 public abstract class Wand extends Item {
 
 	public static final String AC_ZAP	= "ZAP";
+	public String customName = "";
+
+	public String name() {
+		return this.customName.equals("") ? super.name() : this.customName;
+	}
 
 	private static final float TIME_TO_ZAP	= 1f;
 	
@@ -476,12 +481,12 @@ public abstract class Wand extends Item {
 				curUser.spendAndNext( TIME_TO_ZAP *(0.84f - 0.17f * Dungeon.hero.pointsInTalent(Talent.DUEL_DANCE)));
 			}else
 				curUser.spendAndNext( TIME_TO_ZAP );
+			if (Dungeon.hero.cooldown()>=0)
+				Buff.affect(Dungeon.hero, Talent.DuelDanceMissileTracker.class, Dungeon.hero.cooldown());
 		}
 		else
 			curUser.spendAndNext( TIME_TO_ZAP );
-		if (Dungeon.hero.cooldown()>=0)
-			Buff.affect(Dungeon.hero, Talent.DuelDanceMissileTracker.class, Dungeon.hero.cooldown());
-	}
+		}
 	
 	@Override
 	public Item random() {
@@ -551,6 +556,9 @@ public abstract class Wand extends Item {
 		bundle.put( CURSE_INFUSION_BONUS, curseInfusionBonus );
 		bundle.put( RESIN_BONUS, resinBonus );
 		bundle.put("spellselected",spellSelected);
+		if (!this.customName.equals("")) {
+			bundle.put("customName", this.customName);
+		}
 	}
 	
 	@Override
@@ -568,6 +576,9 @@ public abstract class Wand extends Item {
 		partialCharge = bundle.getFloat( PARTIALCHARGE );
 		if (bundle.contains("spellselected")){
 			spellSelected=bundle.getInt("spellselected");
+		}
+		if (bundle.contains("customName")) {
+			this.customName = bundle.getString("customName");
 		}
 	}
 	

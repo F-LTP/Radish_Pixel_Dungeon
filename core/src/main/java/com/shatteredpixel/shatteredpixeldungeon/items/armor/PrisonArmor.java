@@ -8,7 +8,6 @@ public class PrisonArmor extends Armor{
     {
         image = ItemSpriteSheet.ARMOR_PRISON;
     }
-
     public PrisonArmor() {
         super( 3 );
     }
@@ -21,7 +20,6 @@ public class PrisonArmor extends Armor{
         if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
             return Math.max(3 + lvl + augment.defenseFactor(lvl),1+lvl/2);
         }
-
         return 5 + 2 * lvl + augment.defenseFactor(lvl);
     }
     @Override
@@ -29,7 +27,6 @@ public class PrisonArmor extends Armor{
         if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
             return 1 + lvl / 2;
         }
-
         return 2 + 3 * lvl / 2;
     }
     public class myMask extends ArmorBuff {
