@@ -67,7 +67,7 @@ public class SpellQueue extends Item {
                 actions.add(AC_MAKE);
             }else actions.add(AC_REMAKE);
         }else {
-            defaultAction=null;
+            defaultAction="NOT_EXIST";
         }
         return actions;
     }

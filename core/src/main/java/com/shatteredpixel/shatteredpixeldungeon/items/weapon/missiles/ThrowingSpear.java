@@ -22,7 +22,14 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ScorpionCrossbow;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Random;
 
 public class ThrowingSpear extends MissileWeapon {
 	
@@ -33,5 +40,65 @@ public class ThrowingSpear extends MissileWeapon {
 		
 		tier = 3;
 	}
-	
+	private static ScorpionCrossbow bow;
+	@Override
+	public int max(int lvl){
+		int sm=super.max(lvl);
+		if (bow !=null){
+			sm+=15+bow.buffedLvl()*5;
+		}
+		return sm;
+	}
+	@Override
+	public int min(int lvl){
+		int sm=super.min(lvl);
+		if (bow !=null){
+			sm+=3+bow.buffedLvl();
+		}
+		return sm;
+	}
+	@Override
+	public float accuracyFactor(Char owner, Char target){
+		return super.accuracyFactor(owner,target)*(bow!=null?1.5f:1f);
+	}
+	private void updateCrossbow(){
+		if (Dungeon.hero.belongings.weapon() instanceof ScorpionCrossbow){
+			bow = (ScorpionCrossbow) Dungeon.hero.belongings.weapon();
+		} else {
+			bow = null;
+		}
+	}
+	@Override
+	public int throwPos(Hero user, int dst) {
+		updateCrossbow();
+		return super.throwPos(user, dst);
+	}
+	@Override
+	protected void onThrow(int cell) {
+		updateCrossbow();
+		super.onThrow(cell);
+	}
+	@Override
+	public void throwSound() {
+		updateCrossbow();
+		if (bow != null) {
+			Sample.INSTANCE.play(Assets.Sounds.ATK_CROSSBOW, 1, Random.Float(0.87f, 1.15f));
+		} else {
+			super.throwSound();
+		}
+	}
+	@Override
+	public String info() {
+		updateCrossbow();
+		if (bow != null && !bow.isIdentified()){
+			int level = bow.level();
+			//temporarily sets the level of the bow to 0 for IDing purposes
+			bow.level(0);
+			String info = super.info();
+			bow.level(level);
+			return info;
+		} else {
+			return super.info();
+		}
+	}
 }

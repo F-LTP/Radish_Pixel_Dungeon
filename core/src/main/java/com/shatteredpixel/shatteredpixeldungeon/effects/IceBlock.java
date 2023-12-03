@@ -43,7 +43,11 @@ public class IceBlock extends Gizmo {
 	@Override
 	public void update() {
 		super.update();
-
+		/*if ((phase += Game.elapsed * 2) < 1) {
+			target.tint( 0.5f, 0.5f, 0.5f, phase * 0.6f );
+		} else {
+			target.tint( 0.5f, 0.5f, 0.5f, 0.6f );
+		}*/    //the color is for petrifaction
 		if ((phase += Game.elapsed * 2) < 1) {
 			target.tint( 0.83f, 1.17f, 1.33f, phase * 0.6f );
 		} else {

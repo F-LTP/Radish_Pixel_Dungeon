@@ -26,7 +26,7 @@ import java.util.ArrayList;
 
 public class Beecomb extends MeleeWeapon{
     public int bee_charge=0;
-    public boolean bee_charged=false;
+    //public boolean bee_charged=false;
     public static final String AC_SUMMON	= "SUMMON";
     {
         image = ItemSpriteSheet.BEECOMB;

@@ -73,6 +73,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SufferingDagger;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
@@ -682,10 +683,10 @@ public abstract class Mob extends Char {
 	public final boolean surprisedBy( Char enemy ){
 		return surprisedBy( enemy, true);
 	}
-
 	public boolean surprisedBy( Char enemy, boolean attacking ){
+		boolean sd=(enemy == Dungeon.hero && Dungeon.hero.belongings.weapon() instanceof SufferingDagger && has_debuff());
 		return enemy == Dungeon.hero
-				&& (enemy.invisible > 0 || !enemySeen)
+				&& (enemy.invisible > 0 || !enemySeen || sd)
 				&& (!attacking || ((Hero)enemy).canSurpriseAttack());
 	}
 

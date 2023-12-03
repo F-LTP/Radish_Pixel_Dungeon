@@ -217,6 +217,9 @@ public class ItemSpriteSheet {
 	public static final int GLASSSWORD1		= WEP_TIER2+5;
 	public static final int GLASSSWORD2		= WEP_TIER2+6;
 	public static final int GLASSSWORD3		= WEP_TIER2+7;
+	public static final int CROSSBOW_S		= WEP_TIER2+11;
+	public static final int DIRK_B		    = WEP_TIER2+12;
+	public static final int DAGGER_S		= WEP_TIER2+13;
 	public static final int BONE_CLAW		= WEP_TIER2+16;
 	public static final int KATAR			= xy(1,7)+6;
 	public static final int BLADESHIELD		= xy(1,9)+7;
@@ -231,6 +234,10 @@ public class ItemSpriteSheet {
 		assignItemRect(GLASSSWORD1,     16, 16);
 		assignItemRect(GLASSSWORD2,     16, 16);
 		assignItemRect(GLASSSWORD3,     16, 16);
+		assignItemRect(CROSSBOW_S,          16, 16);
+		assignItemRect(DIRK_B,          16, 16);
+		assignItemRect(DAGGER_S,          16, 16);
+		assignItemRect(BONE_CLAW,       16, 16);
 		assignItemRect(KATAR,           16, 16);
 		assignItemRect(BLADESHIELD,     16, 16);
 	}
@@ -293,6 +300,8 @@ public class ItemSpriteSheet {
 	public static final int SEEKING			= WEP_TIER5+14;
 
 	public static final int WATERWHEEL		= WEP_TIER5+15;
+	public static final int AXE_D		= WEP_TIER5+16;
+	public static final int TONFA		= WEP_TIER5+17;
 
 	public static final int SCYTHE			= WEP_TIER4-2;
 	static{
@@ -310,6 +319,8 @@ public class ItemSpriteSheet {
 		assignItemRect(BEECOMB,     15, 16);
 		assignItemRect(SEEKING,     16, 16);
 		assignItemRect(WATERWHEEL,  16, 16);
+		assignItemRect(AXE_D,     16, 16);
+		assignItemRect(TONFA,     16, 16);
 		assignItemRect(SCYTHE,      16, 16);
 	}
 
