@@ -100,7 +100,7 @@ abstract public class Weapon extends KindOfWeapon {
 	private float availableUsesToID = USES_TO_ID/2f;
 	
 	public Enchantment enchantment;
-	public boolean curseInfusionBonus = false;
+	//public boolean curseInfusionBonus = false;
 	public boolean masteryPotionBonus = false;
 	
 	@Override

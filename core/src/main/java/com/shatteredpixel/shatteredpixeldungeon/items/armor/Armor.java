@@ -105,7 +105,7 @@ public class Armor extends EquipableItem {
 	public Augment augment = Augment.NONE;
 	
 	public Glyph glyph;
-	public boolean curseInfusionBonus = false;
+	//public boolean curseInfusionBonus = false;
 	public boolean masteryPotionBonus = false;
 	
 	protected BrokenSeal seal;

@@ -83,7 +83,7 @@ public abstract class Wand extends Item {
 	
 	public boolean curChargeKnown = false;
 	
-	public boolean curseInfusionBonus = false;
+	//public boolean curseInfusionBonus = false;
 	public int resinBonus = 0;
 
 	private static final int USES_TO_ID = 10;
