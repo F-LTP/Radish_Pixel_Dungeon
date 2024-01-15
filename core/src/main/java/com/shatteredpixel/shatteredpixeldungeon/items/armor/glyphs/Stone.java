@@ -39,7 +39,7 @@ public class Stone extends Armor.Glyph {
 		float accuracy = attacker.attackSkill(defender);
 		testing = false;
 
-		evasion *= RingOfArcana.enchantPowerMultiplier(defender);
+		evasion *= RingOfArcana.enchantPowerMultiplier(defender)*defender.talentProc();
 		
 		float hitChance;
 		if (evasion >= accuracy){

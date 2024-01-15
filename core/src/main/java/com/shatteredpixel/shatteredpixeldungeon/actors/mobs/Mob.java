@@ -769,7 +769,7 @@ public abstract class Mob extends Char {
 			}
 		}
 		if (cause == Dungeon.hero){
-			if (Dungeon.hero.belongings.weapon instanceof Beecomb) {
+			if (Dungeon.hero.belongings.weapon() instanceof Beecomb) {
 				Beecomb bc = (Beecomb) Dungeon.hero.belongings.weapon;
 					bc.getCharge();
 					updateQuickslot();

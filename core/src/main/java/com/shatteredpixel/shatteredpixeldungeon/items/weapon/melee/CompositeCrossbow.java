@@ -12,6 +12,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.NaturesPower;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -31,7 +32,7 @@ import java.util.ArrayList;
 
 public class CompositeCrossbow extends MeleeWeapon{
     public static final String AC_SHOOT		= "SHOOT";
-    private int curAmmo = 50;
+    private int curAmmo = 75;
     {
         image = ItemSpriteSheet.CROSSBOW_C;
 
@@ -45,7 +46,7 @@ public class CompositeCrossbow extends MeleeWeapon{
         if (bundle.contains(AMMO))
             curAmmo = bundle.getInt(AMMO);
         else
-            curAmmo=50;
+            curAmmo=75;
     }
 
     @Override
@@ -141,11 +142,11 @@ public class CompositeCrossbow extends MeleeWeapon{
         }
         @Override
         public int max(){
-            return 15+5*CompositeCrossbow.this.buffedLvl();
+            return 15+5*(CompositeCrossbow.this.buffedLvl()+ RingOfSharpshooting.levelDamageBonus(Dungeon.hero));
         }
         @Override
         public int min(){
-            return 10+3*CompositeCrossbow.this.buffedLvl();
+            return 10+3*(CompositeCrossbow.this.buffedLvl()+ RingOfSharpshooting.levelDamageBonus(Dungeon.hero));
         }
         @Override
         public boolean hasEnchant(Class<? extends Enchantment> type, Char owner) {

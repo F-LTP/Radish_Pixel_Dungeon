@@ -184,17 +184,9 @@ public class Armor extends EquipableItem {
 			if (detaching.level() > 0){
 				degrade();
 			}
-			if (detaching.getGlyph() != null){
-				if (hero.hasTalent(Talent.RUNIC_TRANSFERENCE)
-						&& (Arrays.asList(Glyph.common).contains(detaching.getGlyph().getClass())
-							|| Arrays.asList(Glyph.uncommon).contains(detaching.getGlyph().getClass()))){
-					inscribe(null);
-				} else if (hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) == 2){
-					inscribe(null);
-				} else {
-					detaching.setGlyph(null);
-				}
-			}
+			/*if (detaching.getGlyph() != null){
+				detaching.setGlyph(null);
+			}*/
 			GLog.i( Messages.get(Armor.class, "detach_seal") );
 			hero.sprite.operate(hero.pos);
 			if (!detaching.collect()){
@@ -253,9 +245,9 @@ public class Armor extends EquipableItem {
 			level(newLevel);
 			Badges.validateItemLevelAquired(this);
 		}
-		if (seal.getGlyph() != null){
+		/*if (seal.getGlyph() != null){
 			inscribe(seal.getGlyph());
-		}
+		}*/
 		if (isEquipped(Dungeon.hero)){
 			Buff.affect(Dungeon.hero, BrokenSeal.WarriorShield.class).setArmor(this);
 		}
@@ -367,9 +359,10 @@ public class Armor extends EquipableItem {
 					break;
 				}
 			}
-			if (!enemyNear) speed *= (1.2f + 0.04f * buffedLvl()) * RingOfArcana.enchantPowerMultiplier(owner);
-		} else if (hasGlyph(Flow.class, owner) && Dungeon.level.water[owner.pos]){
-			speed *= (2f + 0.25f*buffedLvl()) * RingOfArcana.enchantPowerMultiplier(owner);
+			if (!enemyNear) speed *= (1.2f + 0.04f * procLvl()) * RingOfArcana.enchantPowerMultiplier(owner)*owner.talentProc();
+		}
+		if (hasGlyph(Flow.class, owner) && Dungeon.level.water[owner.pos]){
+			speed *= (2f + 0.25f*procLvl()) * RingOfArcana.enchantPowerMultiplier(owner)*owner.talentProc();
 		}
 		
 		if (hasGlyph(Bulk.class, owner) &&
@@ -385,7 +378,7 @@ public class Armor extends EquipableItem {
 	public float stealthFactor( Char owner, float stealth ){
 		
 		if (hasGlyph(Obfuscation.class, owner)){
-			stealth += (1 + buffedLvl()/3f) * RingOfArcana.enchantPowerMultiplier(owner);
+			stealth += (1 + procLvl()/3f) * RingOfArcana.enchantPowerMultiplier(owner)*owner.talentProc();
 		}
 		
 		return stealth;
@@ -439,6 +432,9 @@ public class Armor extends EquipableItem {
 		
 		if (glyph != null && defender.buff(MagicImmune.class) == null) {
 			damage = glyph.proc( this, attacker, defender, damage );
+		}
+		if (seal!=null&&seal.getGlyph()!=null && seal.getGlyph()!=glyph&& defender.buff(MagicImmune.class) == null){
+			damage = seal.getGlyph().proc( this, attacker, defender, damage);
 		}
 		
 		if (!levelKnown && defender == Dungeon.hero) {
@@ -511,6 +507,11 @@ public class Armor extends EquipableItem {
 			info += "\n\n" + Messages.get(Armor.class, "cursed");
 		} else if (seal != null) {
 			info += "\n\n" + Messages.get(Armor.class, "seal_attached", seal.maxShield(tier, level()));
+			Glyph g=seal.getGlyph();
+			if (g!=null){
+				info+="\n\n" +  Messages.capitalize(Messages.get(Armor.class, "inscribed", g.name()));
+				info += " " + g.desc();
+			}
 		} else if (!isIdentified() && cursedKnown){
 			if (glyph != null && glyph.curse()) {
 				info += "\n\n" + Messages.get(Armor.class, "weak_cursed");
@@ -626,7 +627,9 @@ public class Armor extends EquipableItem {
 	}
 
 	public boolean hasGlyph(Class<?extends Glyph> type, Char owner) {
-		return glyph != null && glyph.getClass() == type && owner.buff(MagicImmune.class) == null;
+		boolean armorHasGlyph=glyph != null && glyph.getClass() == type && owner.buff(MagicImmune.class) == null;
+		boolean sealHasGlyph=seal != null&&seal.getGlyph()!=null && seal.getGlyph().getClass() == type && owner.buff(MagicImmune.class) == null;
+		return armorHasGlyph||sealHasGlyph;
 	}
 
 	//these are not used to process specific glyph effects, so magic immune doesn't affect them
@@ -660,13 +663,14 @@ public class Armor extends EquipableItem {
 				40, //6.67% each
 				10  //3.33% each
 		};
+		public boolean onSeal=false;
 
 		private static final Class<?>[] curses = new Class<?>[]{
 				AntiEntropy.class, Corrosion.class, Displacement.class, Metabolism.class,
 				Multiplicity.class, Stench.class, Overgrowth.class, Bulk.class
 		};
-		
-		public abstract int proc( Armor armor, Char attacker, Char defender, int damage );
+
+		public abstract int proc( Armor armor, Char attacker, Char defender, int damage);
 
 		protected float procChanceMultiplier( Char defender ){
 			return RingOfArcana.enchantPowerMultiplier(defender);
@@ -693,10 +697,14 @@ public class Armor extends EquipableItem {
 		
 		@Override
 		public void restoreFromBundle( Bundle bundle ) {
+			if (bundle.contains("onseal")){
+				onSeal=bundle.getBoolean("onseal");
+			}
 		}
 
 		@Override
 		public void storeInBundle( Bundle bundle ) {
+			bundle.put("onseal",onSeal);
 		}
 		
 		public abstract ItemSprite.Glowing glowing();
@@ -784,5 +792,22 @@ public class Armor extends EquipableItem {
 			return Armor.this.buffedLvl();
 		}
 
+	}
+	@Override
+	public void getCurse(boolean extraEffect) {
+		if(extraEffect){
+			if(glyph != null){
+				inscribe(Glyph.randomCurse(glyph.getClass()));
+			}else {
+				inscribe(Glyph.randomCurse());
+			}
+		}
+		super.getCurse(extraEffect);
+	}
+	public int procLvl(){
+		if (glyph!=null && seal!=null && seal.getGlyph()!=null && seal.getGlyph()==glyph){
+			return buffedLvl()+1;
+		}
+		return buffedLvl();
 	}
 }

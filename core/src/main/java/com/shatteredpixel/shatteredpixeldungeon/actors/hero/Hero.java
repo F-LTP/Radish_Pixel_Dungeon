@@ -1352,7 +1352,7 @@ public class Hero extends Char {
 		//TODO improve this when I have proper damage source logic
 		if (belongings.armor() != null && belongings.armor().hasGlyph(AntiMagic.class, this)
 				&& AntiMagic.RESISTS.contains(src.getClass())){
-			dmg -= AntiMagic.drRoll(this, belongings.armor().buffedLvl());
+			dmg -= AntiMagic.drRoll(this, belongings.armor().procLvl());
 		}
 
 		if (buff(Talent.WarriorFoodImmunity.class) != null){
@@ -2251,5 +2251,10 @@ public class Hero extends Char {
 
 	public static interface Doom {
 		public void onDeath();
+	}
+	@Override
+	public float talentProc(){
+		if (hasTalent(Talent.RUNIC_TRANSFERENCE) && (pointsInTalent(Talent.RUNIC_TRANSFERENCE)>1)) return 1.25f;
+		return super.talentProc();
 	}
 }

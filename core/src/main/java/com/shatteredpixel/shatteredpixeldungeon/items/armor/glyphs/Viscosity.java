@@ -49,7 +49,7 @@ public class Viscosity extends Glyph {
 	public int proc( Armor armor, Char attacker, Char defender, int damage ) {
 
 		//we use a tracker so that this glyph can apply after armor
-		Buff.affect(defender, ViscosityTracker.class).level = armor.buffedLvl();
+		Buff.affect(defender, ViscosityTracker.class).level = armor.procLvl();
 
 		return damage;
 		
@@ -77,7 +77,7 @@ public class Viscosity extends Glyph {
 			int level = Math.max( 0, this.level );
 
 			float percent = (level+1)/(float)(level+6);
-			percent *= RingOfArcana.enchantPowerMultiplier(target);
+			percent *= RingOfArcana.enchantPowerMultiplier(target)*target.talentProc();
 
 			int amount;
 			if (percent > 1f){

@@ -41,7 +41,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.SandalsOfNature;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Berry;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
+import com.shatteredpixel.shatteredpixeldungeon.plants.VineTrap;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Random;
 
 public class HighGrass {
@@ -118,8 +120,15 @@ public class HighGrass {
 
 				}
 				if (ch instanceof Hero && ((Hero) ch).hasTalent(Talent.UNDERESTIMATED)){
-					if (Random.Float()*100<5f+2.5f* ((Hero) ch).pointsInTalent(Talent.UNDERESTIMATED)){
-						level.drop(new MagicRoot(),pos).sprite.drop();
+					int berriesAvailable = 2 + 4*((Hero) ch).pointsInTalent(Talent.UNDERESTIMATED);
+
+					Talent.MagicRootDropped dropped = Buff.affect(ch, Talent.MagicRootDropped.class);
+					berriesAvailable -= dropped.count();
+					if (berriesAvailable > 0) {
+						if (Random.Float()*100<15f) {
+							dropped.countUp(1);
+							level.drop(new MagicRoot(), pos).sprite.drop();
+						}
 					}
 				}
 			}
@@ -140,18 +149,23 @@ public class HighGrass {
 			if (ch instanceof Hero) {
 				Hero hero = (Hero) ch;
 				if (hero.belongings.armor() != null && hero.belongings.armor().hasGlyph(Camouflage.class, hero)) {
-					Camouflage.activate(hero, hero.belongings.armor.buffedLvl());
+					Camouflage.activate(hero, hero.belongings.armor.procLvl());
 				}
 			} else if (ch instanceof DriedRose.GhostHero){
 				DriedRose.GhostHero ghost = (DriedRose.GhostHero) ch;
 				if (ghost.armor() != null && ghost.armor().hasGlyph(Camouflage.class, ghost)){
-					Camouflage.activate(ghost, ghost.armor().buffedLvl());
+					Camouflage.activate(ghost, ghost.armor().procLvl());
 				}
 			} else if (ch instanceof ArmoredStatue){
 				ArmoredStatue statue = (ArmoredStatue) ch;
 				if (statue.armor() != null && statue.armor().hasGlyph(Camouflage.class, statue)){
-					Camouflage.activate(statue, statue.armor().buffedLvl());
+					Camouflage.activate(statue, statue.armor().procLvl());
 				}
+			}
+			if (ch instanceof Hero && ((Hero) ch).hasTalent(Talent.VINE_TRAP)){
+				//GLog.p("create trap!");
+				Buff.affect(ch, VineTrap.PlantBuff.class,ch.cooldown()).set(pos);
+				//Dungeon.plantVineTrap(pos);
 			}
 			
 		}

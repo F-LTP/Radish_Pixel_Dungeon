@@ -775,4 +775,10 @@ public abstract class Wand extends Item {
 			this.scalingFactor = value;
 		}
 	}
+
+	@Override
+	public void getCurse(boolean extraEffect) {
+		super.getCurse(extraEffect);
+		updateLevel();
+	}
 }

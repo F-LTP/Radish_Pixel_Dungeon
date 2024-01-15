@@ -77,6 +77,7 @@ import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
+import com.shatteredpixel.shatteredpixeldungeon.plants.VineTrap;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.CustomTilemap;
@@ -917,7 +918,7 @@ public abstract class Level implements Bundlable {
 		
 		return heap;
 	}
-	
+
 	public Plant plant( Plant.Seed seed, int pos ) {
 		
 		if (Dungeon.isChallenged(Challenges.NO_HERBALISM)){
@@ -947,7 +948,7 @@ public abstract class Level implements Bundlable {
 			if (ch instanceof WandOfRegrowth.Lotus
 					&& ((WandOfRegrowth.Lotus) ch).inRange(pos)
 					&& Actor.findChar(pos) != null){
-				plant.trigger();
+					plant.trigger();
 				return null;
 			}
 		}
@@ -999,7 +1000,11 @@ public abstract class Level implements Bundlable {
 				}
 			}
 		}
-
+		Plant plant = Dungeon.level.plants.get( cell );
+		if (plant != null){
+			if (plant instanceof VineTrap)
+				plant.wither();
+		}
 		int terr = map[cell];
 		if (terr == Terrain.EMPTY || terr == Terrain.GRASS ||
 				terr == Terrain.EMBERS || terr == Terrain.EMPTY_SP ||
@@ -1150,8 +1155,7 @@ public abstract class Level implements Bundlable {
 				timeFreeze.setDelayedPress(cell);
 
 			} else {
-				plant.trigger();
-
+					plant.trigger();
 			}
 		}
 

@@ -56,6 +56,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazin
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Holyankh;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Tonfa;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ForceCube;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.DisintegrationTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GrimTrap;
@@ -98,6 +99,7 @@ public class AntiMagic extends Armor.Glyph {
 		RESISTS.add( WandOfPrismaticLight.class );
 		RESISTS.add( WandOfTransfusion.class );
 		RESISTS.add( WandOfWarding.Ward.class );
+		RESISTS.add(Tonfa.TonfaBolt.class);
 
 		RESISTS.add( Blazing.class );
 		RESISTS.add( Shocking.class );
@@ -127,8 +129,8 @@ public class AntiMagic extends Armor.Glyph {
 	
 	public static int drRoll( Char ch, int level ){
 		return Random.NormalIntRange(
-				Math.round(level * RingOfArcana.enchantPowerMultiplier(ch)),
-				Math.round((3 + (level*1.5f)) * RingOfArcana.enchantPowerMultiplier(ch)));
+				Math.round(level * RingOfArcana.enchantPowerMultiplier(ch)*ch.talentProc()),
+				Math.round((3 + (level*1.5f)) * RingOfArcana.enchantPowerMultiplier(ch)*ch.talentProc()));
 	}
 
 	@Override

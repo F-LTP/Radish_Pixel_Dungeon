@@ -59,18 +59,24 @@ public abstract class Plant implements Bundlable {
 	public void trigger(){
 
 		Char ch = Actor.findChar(pos);
-
-		if (ch instanceof Hero){
-			((Hero) ch).interrupt();
-		}
+		if (!(this instanceof VineTrap)) {
+			if (ch instanceof Hero) {
+				((Hero) ch).interrupt();
+			}
 
 		/*if (Dungeon.level.heroFOV[pos] && Dungeon.hero.hasTalent(Talent.UNDERESTIMATED)){
 			// 3/5 turns based on talent points spent
 			Buff.affect(Dungeon.hero, Barkskin.class).set(2, 1 + 2*(Dungeon.hero.pointsInTalent(Talent.UNDERESTIMATED)));
 		}*/
 
-		wither();
-		activate( ch );
+			wither();
+			activate(ch);
+		}else {
+			if (ch == null || ch.alignment == Char.Alignment.ENEMY){
+				wither();
+				activate(ch);
+			}
+		}
 	}
 	
 	public abstract void activate( Char ch );

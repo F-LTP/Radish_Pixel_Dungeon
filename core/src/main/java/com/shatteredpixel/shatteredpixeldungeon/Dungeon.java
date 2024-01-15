@@ -68,6 +68,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.plants.VineTrap;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Toolbar;
@@ -480,6 +481,7 @@ public class Dungeon {
 	}
 
 	public static boolean posNeeded() {
+		if (depth==0) return false;
 		//2 POS each floor set
 		int posLeftThisSet = 2 - (LimitedDrops.STRENGTH_POTIONS.count - (depth / 5) * 2);
 		if (posLeftThisSet <= 0) return false;
@@ -512,6 +514,7 @@ public class Dungeon {
 	}
 	
 	public static boolean asNeeded() {
+		if (depth==0) return false;
 		//1 AS each floor set
 		int asLeftThisSet = 1 - (LimitedDrops.ARCANE_STYLI.count - (depth / 5));
 		if (asLeftThisSet <= 0) return false;
@@ -819,7 +822,12 @@ public class Dungeon {
 			Statistics.floorsExplored.put( depth, level.isLevelExplored(depth));
 		}
 	}
-
+	public static void plantVineTrap(int pos){
+		VineTrap v=new VineTrap();
+		v.pos=pos;
+		level.plants.put(pos,v);
+		GameScene.plantSeed( pos );
+	}
 	//default to recomputing based on max hero vision, in case vision just shrank/grew
 	public static void observe(){
 		int dist = Math.max(Dungeon.hero.viewDistance, 8);

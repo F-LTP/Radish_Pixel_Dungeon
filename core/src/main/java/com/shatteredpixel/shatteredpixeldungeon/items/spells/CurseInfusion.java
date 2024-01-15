@@ -23,11 +23,15 @@ package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.Brew;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.MetalShard;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfMight;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurse;
@@ -48,7 +52,7 @@ public class CurseInfusion extends InventorySpell {
 
 	@Override
 	protected boolean usableOnItem(Item item) {
-		return ((item instanceof EquipableItem && !(item instanceof MissileWeapon)) || item instanceof Wand);
+		return ((item instanceof EquipableItem && !(item instanceof MissileWeapon)) || item instanceof Wand || (item instanceof BrokenSeal && Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)));
 	}
 
 	@Override
@@ -56,33 +60,9 @@ public class CurseInfusion extends InventorySpell {
 		
 		CellEmitter.get(curUser.pos).burst(ShadowParticle.UP, 5);
 		Sample.INSTANCE.play(Assets.Sounds.CURSED);
-		
-		item.cursed = true;
-		if (item instanceof MeleeWeapon || item instanceof SpiritBow) {
-			Weapon w = (Weapon) item;
-			if (w.enchantment != null) {
-				w.enchant(Weapon.Enchantment.randomCurse(w.enchantment.getClass()));
-			} else {
-				w.enchant(Weapon.Enchantment.randomCurse());
-			}
-			w.curseInfusionBonus = true;
-			if (w instanceof MagesStaff){
-				((MagesStaff) w).updateWand(true);
-			}
-		} else if (item instanceof Armor){
-			Armor a = (Armor) item;
-			if (a.glyph != null){
-				a.inscribe(Armor.Glyph.randomCurse(a.glyph.getClass()));
-			} else {
-				a.inscribe(Armor.Glyph.randomCurse());
-			}
-			a.curseInfusionBonus = true;
-		} else if (item instanceof Wand){
-			((Wand) item).curseInfusionBonus = true;
-			((Wand) item).updateLevel();
-		} else if (item instanceof RingOfMight){
-			curUser.updateHT(false);
-		}
+
+		item.getCurse(true);
+		item.curseInfusionBonus=true;
 		Badges.validateItemLevelAquired(item);
 		updateQuickslot();
 	}

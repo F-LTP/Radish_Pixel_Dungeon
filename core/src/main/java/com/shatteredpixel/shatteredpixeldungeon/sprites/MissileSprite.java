@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CompositeCrossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ScorpionCrossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.Bolas;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.FishingSpear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.HeavyBoomerang;
@@ -151,7 +152,12 @@ public class MissileSprite extends ItemSprite implements Tweener.Listener {
 		}
 		
 		float speed = SPEED;
-		if (item instanceof Dart && Dungeon.hero.belongings.weapon() instanceof Crossbow){
+		if ((item instanceof Dart && Dungeon.hero.belongings.weapon() instanceof Crossbow)
+		||(Dungeon.hero.belongings.weapon() instanceof ScorpionCrossbow && (
+			item instanceof Javelin
+		||  item instanceof ThrowingSpear
+		||  item instanceof Trident
+				))){
 			speed *= 3f;
 			
 		} else if (item instanceof SpiritBow.SpiritArrow

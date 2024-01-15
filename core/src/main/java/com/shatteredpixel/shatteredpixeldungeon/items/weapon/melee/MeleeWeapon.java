@@ -135,5 +135,15 @@ public class MeleeWeapon extends Weapon {
 		}
 		return price;
 	}
-
+	@Override
+	public void getCurse(boolean extraEffect){
+		if(extraEffect){
+			if(enchantment!=null){
+				enchant(Enchantment.randomCurse(enchantment.getClass()));
+			}else {
+				enchant(Enchantment.randomCurse());
+			}
+		}
+		super.getCurse( extraEffect);
+	}
 }

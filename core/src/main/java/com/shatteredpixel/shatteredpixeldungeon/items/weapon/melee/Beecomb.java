@@ -44,6 +44,11 @@ public class Beecomb extends MeleeWeapon{
         return actions;
     }
     public void getCharge(){
+        if (cursed) {
+            cursedKnown=true;
+            GLog.n(Messages.get(this, "cursed"));
+            return;
+        }
         bee_charge+=buffedLvl()*2+6;
         bee_charge=Math.min(100,bee_charge);
         if (bee_charge == 100){
@@ -62,7 +67,7 @@ public class Beecomb extends MeleeWeapon{
             else if (bee_charge<100){
                 GLog.w(Messages.get(this,"not_ready"));
             }
-            else {
+            else if (!cursed) {
                 ArrayList<Integer> respawnPoints = new ArrayList<>();
                 for (int i = 0; i < PathFinder.NEIGHBOURS8.length; i++) {
                     int p = hero.pos + PathFinder.NEIGHBOURS8[i];
@@ -89,6 +94,9 @@ public class Beecomb extends MeleeWeapon{
                     GLog.w(Messages.get(this,"no_bee"));
                 }
                 else {bee_charge=0;hero.spendAndNext(1f);updateQuickslot();}
+            }else {
+                cursedKnown=true;
+                updateQuickslot();
             }
         }
     }

@@ -56,7 +56,8 @@ public class Tonfa extends MeleeWeapon{
 
     @Override
     public int proc(Char attacker, Char defender, int damage) {
-        energy_charge+=5;
+        if (!cursed)
+            energy_charge+=5;
         if (energy_charge>100) energy_charge=100;
         updateQuickslot();
         return super.proc(attacker, defender, damage);
@@ -77,14 +78,15 @@ public class Tonfa extends MeleeWeapon{
 
         if (Dungeon.hero.belongings.weapon == this) {
             if (action.equals(AC_ZAP) && energy_charge >= 20) {
-                if (this.cursed != true) {
+                if (!this.cursed) {
                     usesTargeting = true;
                     curItem=this;
                     cursedKnown = true;
                     GameScene.selectCell(zapper);
                 } else {
                     cursedKnown = true;
-                    energy_charge -= 20;
+                    updateQuickslot();
+                    GLog.n(Messages.get(this, "cursed"));
                 }
             }
         }
@@ -109,7 +111,6 @@ public class Tonfa extends MeleeWeapon{
 
             if (target != null) {
                 Tonfa ss= (Tonfa)curItem;
-                    Sample.INSTANCE.play( Assets.Sounds.HIT_MAGIC, 1f);
 
                     Ballistica shot = new Ballistica(curUser.pos, target, Ballistica.PROJECTILE);
                     int cell = shot.collisionPos;
@@ -146,6 +147,7 @@ public class Tonfa extends MeleeWeapon{
                 curUser.sprite,
                 bolt.collisionPos,
                 callback);
+        Sample.INSTANCE.play( Assets.Sounds.ZAP );
     }
 
 
@@ -153,8 +155,9 @@ public class Tonfa extends MeleeWeapon{
         Char ch = Actor.findChar( bolt.collisionPos );
         if (ch != null) {
             int dmg = Random.Int(2+buffedLvl(), 8+buffedLvl() * 2);
-            ch.damage(dmg, this);
-            ch.damage(dmg, this);
+            ch.damage(dmg, new TonfaBolt());
+            ch.damage(dmg, new TonfaBolt());
+            Sample.INSTANCE.play( Assets.Sounds.HIT_MAGIC, 1, Random.Float(0.87f, 1.15f) );
             ch.sprite.burst(0xFFFFFFFF, buffedLvl() / 2 + 2);
 
         } else {
@@ -164,4 +167,5 @@ public class Tonfa extends MeleeWeapon{
         updateQuickslot();
     }
 
+    public static class TonfaBolt {}
 }

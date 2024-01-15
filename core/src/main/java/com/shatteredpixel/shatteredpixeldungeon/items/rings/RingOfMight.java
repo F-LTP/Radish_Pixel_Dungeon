@@ -98,5 +98,11 @@ public class RingOfMight extends Ring {
 
 	public class Might extends RingBuff {
 	}
+
+	@Override
+	public void getCurse(boolean extraEffect) {
+		super.getCurse(extraEffect);
+		curUser.updateHT(false);
+	}
 }
 

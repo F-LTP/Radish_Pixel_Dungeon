@@ -555,4 +555,11 @@ public class MagesStaff extends MeleeWeapon {
 			size(minSize + (left / lifespan)*(maxSize-minSize) + Random.Float(sizeJitter));
 		}
 	}
+
+
+	@Override
+	public void getCurse(boolean extraEffect) {
+		super.getCurse(extraEffect);
+		updateWand(true);
+	}
 }

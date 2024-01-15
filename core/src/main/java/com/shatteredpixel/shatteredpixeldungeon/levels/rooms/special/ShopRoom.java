@@ -296,6 +296,7 @@ public class ShopRoom extends SpecialRoom {
 			default:
 				rare = new Stylus();
 		}
+		rare.identify(false);
 		rare.cursed = false;
 		rare.cursedKnown = true;
 		itemsToSpawn.add( rare );

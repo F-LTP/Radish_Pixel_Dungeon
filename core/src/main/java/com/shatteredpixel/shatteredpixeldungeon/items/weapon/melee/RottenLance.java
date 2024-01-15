@@ -15,8 +15,10 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
 
+import java.util.ArrayList;
+
 public class RottenLance extends MeleeWeapon{// idea is from relic pd
-    private static final String AC_WEAPONSKILL="AC_WS";
+    private static final String AC_WEAPONSKILL="WS";
     {
         image = ItemSpriteSheet.SPEAR;
         hitSound = Assets.Sounds.HIT_STAB;
@@ -30,35 +32,50 @@ public class RottenLance extends MeleeWeapon{// idea is from relic pd
     public int max(int lvl) {
         return  14 +
                 lvl*2+
-                (isRoot?11+2*lvl:0);
+                (isRoot(Dungeon.hero)?11+2*lvl:0);
     }
-    boolean isRoot=false;
+    public boolean isRoot(Hero hero){
+        return hero.buff(Root.class)!=null;
+    }
+    @Override public ArrayList<String> actions(Hero hero ) {
+        ArrayList<String> actions = super.actions(hero);
+        actions.add(AC_WEAPONSKILL);
+        return actions;
+    }
     @Override
     public void execute(Hero hero, String action) {
         super.execute(hero, action);
-        if(action.equals(AC_WEAPONSKILL)){
-            if(isRoot){
-                if(hero.buff(Root.class)!=null){
-                    hero.buff(Root.class).detach();
+        if(action.equals(AC_WEAPONSKILL)) {
+            if (!isEquipped(hero)) {
+                GLog.w(Messages.get(this, "not_equipped"));
+            } else {
+                if (!this.cursed) {
+                    if (isRoot(hero)) {
+                        if (hero.buff(Root.class) != null) {
+                            hero.buff(Root.class).detach();
+                        }
+                        hero.sprite.operate(hero.pos);
+                        hero.spendAndNext(Actor.TICK);
+                    } else {
+                        if ((Dungeon.level.map[hero.pos] != Terrain.GRASS && Dungeon.level.map[hero.pos] != Terrain.HIGH_GRASS && Dungeon.level.map[hero.pos] != Terrain.FURROWED_GRASS) || hero.buff(Levitation.class) != null) {
+                            GLog.w(Messages.get(this, "need"));
+                            return;
+                        }
+                        onRoot(hero);
+                    }
+                    modeSwitch();
+                } else {
+                    cursedKnown = true;
+                    updateQuickslot();
+                    GLog.n(Messages.get(this, "cursed"));
                 }
-                hero.sprite.operate( hero.pos );
-                isRoot=false;
-                hero.spendAndNext(Actor.TICK);
-            }else {
-                if((Dungeon.level.map[hero.pos] != Terrain.GRASS &&Dungeon.level.map[hero.pos] != Terrain.HIGH_GRASS && Dungeon.level.map[hero.pos] != Terrain.FURROWED_GRASS) || hero.buff(Levitation.class)!=null){
-                    GLog.w(Messages.get(this,"need"));
-                    return;
-                }
-                onRoot(hero);
-                isRoot=true;
             }
-            modeSwitch();
         }
     }
 
     @Override
     public boolean doUnequip(Hero hero, boolean collect, boolean single) {
-        if(isRoot){
+        if(isRoot(hero)){
             GLog.n(Messages.get(this,"root"));
             return false;
         }
@@ -84,12 +101,14 @@ public class RottenLance extends MeleeWeapon{// idea is from relic pd
         }
     }
     public void modeSwitch() {
-        if(isRoot){
-            DLY=1.5f;
-            RCH=3;
-        }else {
-            DLY=1f;
-            RCH=2;
+        if (Dungeon.hero!=null) {
+            if (isRoot(Dungeon.hero)) {
+                DLY = 1.5f;
+                RCH = 3;
+            } else {
+                DLY = 1f;
+                RCH = 2;
+            }
         }
     }
     @Override
@@ -104,9 +123,6 @@ public class RottenLance extends MeleeWeapon{// idea is from relic pd
     public static class Root extends Buff{
         {
             announced = true;
-        }
-        {
-            immunities.add( Levitation.class );
         }
         @Override
         public int icon() {
@@ -136,18 +152,9 @@ public class RottenLance extends MeleeWeapon{// idea is from relic pd
             super.detach();
         }
     }
-    private static final String ISROOT	        = "isroot";
-
-    @Override
-    public void storeInBundle( Bundle bundle ) {
-        super.storeInBundle( bundle );
-        bundle.put( ISROOT,isRoot );
-    }
-
     @Override
     public void restoreFromBundle(Bundle bundle) {
         super.restoreFromBundle(bundle);
-        isRoot=bundle.getBoolean(ISROOT);
         modeSwitch();
     }
 }

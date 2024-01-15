@@ -63,12 +63,39 @@ public class BrokenSeal extends Item {
 	private Armor.Glyph glyph;
 
 	public Armor.Glyph getGlyph(){
+		if (!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE))
+			setGlyph(null);
 		return glyph;
 	}
 
 	public void setGlyph( Armor.Glyph glyph ){
 		this.glyph = glyph;
+		if (this.glyph!=null){
+			this.glyph.onSeal=true;
+		}
 	}
+	public boolean hasCurseGlyph(){
+		return glyph != null && glyph.curse();
+	}
+	public void inscribe() {
+
+		Class<? extends Armor.Glyph> oldGlyphClass = glyph != null ? glyph.getClass() : null;
+		Armor.Glyph gl = Armor.Glyph.random( oldGlyphClass );
+		inscribe( gl );
+	}
+
+	public void inscribe( Armor.Glyph glyph ) {
+		if (glyph == null || !glyph.curse()) curseInfusionBonus = false;
+		setGlyph(glyph);
+		updateQuickslot();
+	}
+	@Override
+	public void getCurse(boolean extraEffect) {
+		Class<? extends Armor.Glyph> oldGlyphClass = glyph != null ? glyph.getClass() : null;
+		Armor.Glyph gl = Armor.Glyph.randomCurse( oldGlyphClass );
+		setGlyph(gl);
+	}
+
 
 	public int maxShield( int armTier, int armLvl ){
 		return armTier + armLvl ;
@@ -125,33 +152,13 @@ public class BrokenSeal extends Item {
 		@Override
 		public void onSelect( Item item ) {
 			BrokenSeal seal = (BrokenSeal) curItem;
-			if (item != null && item instanceof Armor) {
+			if (item instanceof Armor) {
 				Armor armor = (Armor)item;
 				if (!armor.levelKnown){
 					GLog.w(Messages.get(BrokenSeal.class, "unknown_armor"));
 
 				} else if (armor.cursed && (seal.getGlyph() == null || !seal.getGlyph().curse())){
 					GLog.w(Messages.get(BrokenSeal.class, "cursed_armor"));
-
-				} else if (armor.glyph != null && seal.getGlyph() != null
-						&& armor.glyph.getClass() != seal.getGlyph().getClass()) {
-					GameScene.show(new WndOptions(new ItemSprite(seal),
-							Messages.get(BrokenSeal.class, "choose_title"),
-							Messages.get(BrokenSeal.class, "choose_desc"),
-							armor.glyph.name(),
-							seal.getGlyph().name()){
-						@Override
-						protected void onSelect(int index) {
-							if (index == 0) seal.setGlyph(null);
-							//if index is 1, then the glyph transfer happens in affixSeal
-
-							GLog.p(Messages.get(BrokenSeal.class, "affix"));
-							Dungeon.hero.sprite.operate(Dungeon.hero.pos);
-							Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-							armor.affixSeal(seal);
-							seal.detach(Dungeon.hero.belongings.backpack);
-						}
-					});
 
 				} else {
 					GLog.p(Messages.get(BrokenSeal.class, "affix"));
@@ -163,7 +170,19 @@ public class BrokenSeal extends Item {
 			}
 		}
 	};
-
+	@Override
+	public String name() {
+		return glyph != null ? glyph.name( super.name() ) : super.name();
+	}
+	@Override
+	public String info() {
+		String info = desc();
+		if (glyph!=null ) {
+			info+="\n\n" +  Messages.capitalize(Messages.get(Armor.class, "inscribed", glyph.name()));
+			info += " " + glyph.desc();
+		}
+		return info;
+	}
 	private static final String GLYPH = "glyph";
 
 	@Override

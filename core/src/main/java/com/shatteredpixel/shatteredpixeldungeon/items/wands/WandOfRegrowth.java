@@ -53,6 +53,7 @@ import com.shatteredpixel.shatteredpixeldungeon.mechanics.ConeAOE;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Sungrass;
+import com.shatteredpixel.shatteredpixeldungeon.plants.VineTrap;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.LotusSprite;
@@ -114,7 +115,7 @@ public class WandOfRegrowth extends Wand {
 				i.remove();
 			} else if (Char.hasProp(Actor.findChar(cell), Char.Property.IMMOVABLE)) {
 				i.remove();
-			} else if (Dungeon.level.plants.get(cell) != null){
+			} else if (Dungeon.level.plants.get(cell) != null && !(Dungeon.level.plants.get(cell) instanceof VineTrap)){
 				i.remove();
 			} else {
 				if (terr != Terrain.HIGH_GRASS && terr != Terrain.FURROWED_GRASS) {
