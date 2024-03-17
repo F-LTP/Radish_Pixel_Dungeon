@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Recharging;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ScrollEmpower;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SoulMark;
@@ -46,8 +47,10 @@ import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.TelekineticGrab;
 import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.SpellQueue;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
@@ -211,6 +214,19 @@ public abstract class Wand extends Item {
 				//standard 1 - 0.92^x chance, plus 7%. Starts at 15%
 				Random.Float() > (Math.pow(0.92f, (wandLevel*chargesUsed)+1) - 0.07f)){
 			SoulMark.prolong(target, SoulMark.class, SoulMark.DURATION + wandLevel);
+		}
+		if (Dungeon.hero.pointsInTalent(Talent.PHASE_FILLING)>2){
+			if (target.buff(PinCushion.class) != null){
+
+				Item item = target.buff(PinCushion.class).grabOne();
+
+				if (item.doPickUpInstantly(Dungeon.hero, target.pos)) {
+					GLog.i( Messages.capitalize(Messages.get(Dungeon.hero, "you_now_have", item.name())) );
+				} else {
+					GLog.w(Messages.get(TelekineticGrab.class, "cant_grab"));
+					Dungeon.level.drop(item, target.pos).sprite.drop();
+				}
+			}
 		}
 	}
 
@@ -475,6 +491,15 @@ public abstract class Wand extends Item {
 		}
 		Invisibility.dispel();
 		updateQuickslot();
+
+		if (Dungeon.hero.pointsInTalent(Talent.PHASE_FILLING)>3 && Random.Float()<0.5f){
+			for (Item item : Dungeon.hero.belongings){
+				if (item instanceof MissileWeapon && ((MissileWeapon) item).durabilityLeft()< MissileWeapon.MAX_DURABILITY){
+					((MissileWeapon) item).repair(((MissileWeapon) item).durabilityPerUse());
+					break;
+				}
+			}
+		}
 		if (Dungeon.hero.hasTalent(Talent.DUEL_DANCE)) {
 			if (Dungeon.hero.buff(Talent.DuelDanceWandTracker.class) != null) {
 				Buff.detach(Dungeon.hero, Talent.DuelDanceWandTracker.class);

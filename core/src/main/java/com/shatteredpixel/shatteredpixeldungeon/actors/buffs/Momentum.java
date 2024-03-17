@@ -69,7 +69,8 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 
 		if (freerunTurns > 0){
 			if (target.invisible == 0 || Dungeon.hero.pointsInTalent(Talent.SPEEDY_STEALTH) < 2) {
-				freerunTurns--;
+				if(Dungeon.hero.pointsInTalent(Talent.STORM_RUSH)<2 || (target.buff(Haste.class)==null && target.buff(Adrenaline.class)==null && target.buff(Stamina.class)==null))
+					freerunTurns--;
 			}
 		} else if (!movedLastTurn){
 			momentumStacks = (int)GameMath.gate(0, momentumStacks-1, Math.round(momentumStacks * 0.667f));

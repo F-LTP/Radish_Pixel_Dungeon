@@ -325,9 +325,11 @@ public class Armor extends EquipableItem {
 	}
 	
 	public float evasionFactor( Char owner, float evasion ){
-		
-		if (hasGlyph(Stone.class, owner) && !((Stone)glyph).testingEvasion()){
-			return 0;
+
+		if (hasGlyph(Stone.class, owner) ){
+			if((glyph instanceof Stone && !((Stone)glyph).testingEvasion())
+					|| (seal != null&&seal.getGlyph()!=null && seal.getGlyph() instanceof Stone))
+				return 0;
 		}
 		
 		if (owner instanceof Hero){

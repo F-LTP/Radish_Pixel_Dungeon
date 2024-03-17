@@ -42,12 +42,19 @@ public class WndInfoSubclass extends WndTitledMessage {
 		ArrayList<LinkedHashMap<Talent, Integer>> talentList = new ArrayList<>();
 		Talent.initClassTalents(cls, talentList);
 		Talent.initSubclassTalents(subCls, talentList);
+		Talent.initT4Talents(cls,subCls,talentList);
 
-		TalentsPane.TalentTierPane talentPane = new TalentsPane.TalentTierPane(talentList.get(2), 3, TalentButton.Mode.INFO);
-		talentPane.title.text( Messages.titleCase(Messages.get(WndHeroInfo.class, "talents")));
-		talentPane.setRect(0, height + 5, width, talentPane.height());
-		add(talentPane);
-		resize(width, (int) talentPane.bottom());
+		TalentsPane.TalentTierPane T3talentPane = new TalentsPane.TalentTierPane(talentList.get(2), 3, TalentButton.Mode.INFO);
+		//T3talentPane.title.text( Messages.titleCase(Messages.get(TalentsPane.class, "tier",3)));
+		T3talentPane.setRect(0, height + 5, width, T3talentPane.height());
+		add(T3talentPane);
+
+		TalentsPane.TalentTierPane T4talentPane = new TalentsPane.TalentTierPane(talentList.get(3), 4, TalentButton.Mode.INFO);
+		//T4talentPane.title.text( Messages.titleCase(Messages.get(TalentsPane.class, "tier",4)));
+		T4talentPane.setRect(0, T3talentPane.bottom() + 5, width, T4talentPane.height());
+		add(T4talentPane);
+
+		resize(width, (int) T4talentPane.bottom());
 
 	}
 

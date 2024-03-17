@@ -26,7 +26,9 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.Ratmogrify;
+import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.KingsCrown;
+import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.SpellQueue;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RatKingSprite;
@@ -135,9 +137,16 @@ public class RatKing extends NPC {
 							@Override
 							protected void onSelect(int index) {
 								if (index == 0){
-									crown.upgradeArmor(Dungeon.hero, Dungeon.hero.belongings.armor(), new Ratmogrify());
-									((RatKingSprite)sprite).resetAnims();
-									yell(Messages.get(RatKing.class, "crown_thankyou"));
+									if (!Dungeon.hero.powerOfImp) {
+										crown.upgradeArmor(Dungeon.hero, Dungeon.hero.belongings.armor(), new Ratmogrify());
+										((RatKingSprite) sprite).resetAnims();
+										yell(Messages.get(RatKing.class, "crown_thankyou"));
+									}else {
+										crown.detach(Dungeon.hero.belongings.backpack);
+										yell(Messages.get(RatKing.class,"crown_gold"));
+										((RatKingSprite) sprite).resetAnims();
+										Dungeon.level.drop(new Gold(10000),Dungeon.hero.pos);
+									}
 								} else if (index == 1) {
 									GameScene.show(new WndInfoArmorAbility(Dungeon.hero.heroClass, new Ratmogrify()));
 								} else {

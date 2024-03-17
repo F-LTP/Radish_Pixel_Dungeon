@@ -23,8 +23,11 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal.WarriorShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
@@ -34,6 +37,8 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndBerserk;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndCombo;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
@@ -47,6 +52,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		type = buffType.POSITIVE;
 	}
 
+	static float need[]={0.75f,0.75f,0.65f,0.5f,0.5f};
 	private enum State{
 		NORMAL, BERSERK, RECOVERING
 	}
@@ -87,7 +93,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		levelRecovery = bundle.getFloat(LEVEL_RECOVERY);
 		turnRecovery = bundle.getInt(TURN_RECOVERY);
 
-		if (power >= 1f && state == State.NORMAL){
+		if (power >= 0.5f && state == State.NORMAL){
 			ActionIndicator.setAction(this);
 		}
 	}
@@ -113,7 +119,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 				if (target.shielding() <= 0){
 					state = State.RECOVERING;
-					power = 0f;
+					power=Math.max(power-1f,0);
 					BuffIndicator.refreshHero();
 					if (!target.isAlive()){
 						target.die(this);
@@ -123,7 +129,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 			} else {
 				state = State.RECOVERING;
-				power = 0f;
+				power=Math.max(power-1f,0);
 				if (!target.isAlive()){
 					target.die(this);
 					if (!target.isAlive()) Dungeon.fail(this.getClass());
@@ -136,7 +142,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 			} else {
 				power -= GameMath.gate(0.1f, power, 1f) * 0.067f * Math.pow((target.HP / (float) target.HT), 2);
 
-				if (power < 1f){
+				if (power < 0.5f){
 					ActionIndicator.clearAction(this);
 				}
 
@@ -183,7 +189,14 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 		return state == State.BERSERK && target.shielding() > 0;
 	}
-
+	public boolean canActivateBerserk(){
+		return (state == State.NORMAL
+				&& power >= 1f
+				&& target.buff(WarriorShield.class) != null);
+	}
+	public void toStartBerserking(){
+		startBerserking();
+	}
 	private void startBerserking(){
 		state = State.BERSERK;
 		SpellSprite.show(target, SpellSprite.BERSERK);
@@ -221,7 +234,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		power = Math.min(maxPower, power + (damage/(float)target.HT)/3f );
 		BuffIndicator.refreshHero(); //show new power immediately
 		powerLossBuffer = 3; //2 turns until rage starts dropping
-		if (power >= 1f){
+		if (power >= 0.5f){
 			ActionIndicator.setAction(this);
 		}
 	}
@@ -253,8 +266,9 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	public void doAction() {
 		WarriorShield shield = target.buff(WarriorShield.class);
 		if (shield != null) {
-			startBerserking();
-			ActionIndicator.clearAction(this);
+			GameScene.show(new WndBerserk(this));
+			/*startBerserking();
+			ActionIndicator.clearAction(this);*/
 		} else {
 			GLog.w(Messages.get(this, "no_seal"));
 		}
@@ -339,5 +353,37 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				}
 		}
 		
+	}
+	public boolean canRoar(){
+		if (state==State.BERSERK) return false;
+		if (!(target instanceof Hero))return false;
+		if (!((Hero) target).hasTalent(Talent.REVENGE_ROAR)) return false;
+		switch (((Hero) target).pointsInTalent(Talent.REVENGE_ROAR)){
+			case 1: return power>=0.75f;
+			case 2: return power>=0.65f;
+			case 3:	case 4:return power>=0.5f;
+		}
+		return false;
+	}
+	public void roar (){
+		int p=Dungeon.hero.pointsInTalent(Talent.REVENGE_ROAR);
+		for (Mob mob : Dungeon.level.mobs.toArray( new Mob[0] )) {
+			if (Dungeon.level.heroFOV[mob.pos] && mob.alignment!= Char.Alignment.ALLY) {
+				Buff.affect( mob, Cripple.class,5f);
+				if (p>1){
+					Buff.affect( mob, Blindness.class,5f);
+					if (p>3){
+						mob.damage(Dungeon.hero.damageRoll(),Dungeon.hero);
+					}
+				}
+			}
+		}
+
+		target.sprite.centerEmitter().start( Speck.factory( Speck.SCREAM ), 0.3f, 3 );
+		Sample.INSTANCE.play( Assets.Sounds.CHALLENGE );
+		power-=need[p];
+		BuffIndicator.refreshHero();
+		if (power<need[p]) ActionIndicator.clearAction(this);
+		if (p<2) Dungeon.hero.spend(1f);
 	}
 }

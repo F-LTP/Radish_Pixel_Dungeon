@@ -36,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bleeding;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
@@ -387,11 +388,20 @@ public abstract class Char extends Actor {
 			Preparation prep = buff(Preparation.class);
 			if (prep != null){
 				dmg = prep.damageRoll(this);
-				if (this == Dungeon.hero && Dungeon.hero.hasTalent(Talent.BOUNTY_HUNTER)) {
-					Buff.affect(Dungeon.hero, Talent.BountyHunterTracker.class, 0.0f);
+				if (this == Dungeon.hero) {
+					if (Dungeon.hero.hasTalent(Talent.BOUNTY_HUNTER))
+						Buff.affect(Dungeon.hero, Talent.BountyHunterTracker.class, 0.0f);
+					if (Dungeon.hero.hasTalent(Talent.POWER_RECYCLE))
+						Buff.affect(this, Talent.PowerRecycleTracker.class,0.0f);
 				}
 			} else {
 				dmg = damageRoll();
+				if (this == Dungeon.hero) {
+					if (Dungeon.hero.hasTalent(Talent.POWER_RECYCLE))
+						if (Dungeon.hero.pointsInTalent(Talent.POWER_RECYCLE)==4)
+							if (Random.Int(2)==0)
+								Buff.affect(this, Talent.PowerRecycleTracker.class,0.0f);
+				}
 			}
 			boolean crit=false;
 			boolean surprise =enemy instanceof Mob && ((Mob) enemy).surprisedBy(this);
@@ -1148,6 +1158,19 @@ public abstract class Char extends Actor {
 		for (Class c : resists){
 			if (c.isAssignableFrom(effect)){
 				result *= 0.5f;
+			}
+		}
+
+		if (this instanceof Hero && ((Hero)this).hasTalent(Talent.IRON_MUSCLE)){
+			int lvl=((Hero)this).pointsInTalent(Talent.IRON_MUSCLE);
+			if (Bleeding.class.isAssignableFrom(effect)){
+				result*=0.5f;
+			}
+			if (Cripple.class.isAssignableFrom(effect) && lvl>1){
+				result*=0.5f;
+			}
+			if (Blindness.class.isAssignableFrom(effect) && lvl>2){
+				result*=0.5f;
 			}
 		}
 		return result * RingOfElements.resist(this, effect);

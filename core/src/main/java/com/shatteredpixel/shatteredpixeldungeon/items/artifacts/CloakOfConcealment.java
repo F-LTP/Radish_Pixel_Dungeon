@@ -9,6 +9,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility_neutral;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MoveCount;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
@@ -104,7 +105,10 @@ public class CloakOfConcealment extends Artifact{
                     Invisibility.dispel();
                 } else if (target.invisible == 0) {
                     Buff.detach(target, Disposed.class);
-                    charge += Math.round(RingOfEnergy.artifactChargeMultiplier(target));
+                    float toGain=RingOfEnergy.artifactChargeMultiplier(target);
+                    if (target.buff(MoveCount.class)!=null)
+                        toGain*=target.buff(MoveCount.class).chargeMultiplier(Dungeon.hero);
+                    charge += Math.round(toGain);
                     if (charge >= chargeCap) {
                         giveInvisibility();
                     }

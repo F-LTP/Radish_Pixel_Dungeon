@@ -38,23 +38,30 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AnkhInvulnerability
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awareness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionHero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.DeferredShield;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Drowsy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Foresight;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HoldFast;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Levitation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LostInventory;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Momentum;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MoveCount;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Slow;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SnipersMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
@@ -141,6 +148,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.InterlevelScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.SurfaceScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.FistSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -150,10 +158,12 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.StatusPane;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndHero;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndImp;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndResurrect;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTradeItem;
+import com.sun.tools.javac.jvm.PoolWriter;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Sample;
@@ -202,7 +212,9 @@ public class Hero extends Char {
 	private Char enemy;
 	
 	public boolean resting = false;
-	
+
+	public boolean powerOfImp = false;
+
 	public Belongings belongings;
 	
 	public int STR;
@@ -287,6 +299,7 @@ public class Hero extends Char {
 	private static final String CLASS       = "class";
 	private static final String SUBCLASS    = "subClass";
 	private static final String ABILITY     = "armorAbility";
+	private static final String IMP_POWER     = "imp_power";
 
 	private static final String ATTACK		= "attackSkill";
 	private static final String DEFENSE		= "defenseSkill";
@@ -303,6 +316,7 @@ public class Hero extends Char {
 		bundle.put( CLASS, heroClass );
 		bundle.put( SUBCLASS, subClass );
 		bundle.put( ABILITY, armorAbility );
+		bundle.put( IMP_POWER, powerOfImp);
 		Talent.storeTalentsInBundle( bundle, this );
 		
 		bundle.put( ATTACK, attackSkill );
@@ -331,6 +345,7 @@ public class Hero extends Char {
 		heroClass = bundle.getEnum( CLASS, HeroClass.class );
 		subClass = bundle.getEnum( SUBCLASS, HeroSubClass.class );
 		armorAbility = (ArmorAbility)bundle.get( ABILITY );
+		powerOfImp = bundle.getBoolean(IMP_POWER);
 		Talent.restoreTalentsFromBundle( bundle, this );
 		
 		attackSkill = bundle.getInt( ATTACK );
@@ -386,7 +401,7 @@ public class Hero extends Char {
 	public int talentPointsAvailable(int tier){
 		if (lvl < (Talent.tierLevelThresholds[tier] - 1)
 			|| (tier == 3 && subClass == HeroSubClass.NONE)
-			|| (tier == 4 && armorAbility == null)) {
+			|| (tier == 4 && (armorAbility == null && !powerOfImp))) {
 			return 0;
 		} else if (lvl >= Talent.tierLevelThresholds[tier+1]){
 			return Talent.tierLevelThresholds[tier+1] - Talent.tierLevelThresholds[tier] - talentPointsSpent(tier) + bonusTalentPoints(tier);
@@ -396,15 +411,17 @@ public class Hero extends Char {
 	}
 
 	public int bonusTalentPoints(int tier){
+		int powerget=0;
+		if (powerOfImp && tier ==4) powerget=2;
 		if (lvl < (Talent.tierLevelThresholds[tier]-1)
 				|| (tier == 3 && subClass == HeroSubClass.NONE)
-				|| (tier == 4 && armorAbility == null)) {
+				|| (tier == 4 && (armorAbility == null && !powerOfImp))) {
 			return 0;
 		} else if (buff(PotionOfDivineInspiration.DivineInspirationTracker.class) != null
 					&& buff(PotionOfDivineInspiration.DivineInspirationTracker.class).isBoosted(tier)) {
-			return 2;
+			return 2+powerget;
 		} else {
-			return 0;
+			return 0+powerget;
 		}
 	}
 	
@@ -471,7 +488,10 @@ public class Hero extends Char {
 			return 7;
 		}else if (armor instanceof CrabArmor){
 			return 8;
-		}else return armor.tier;
+		}else if (armor instanceof DarkCoat){
+			return 9;
+		}
+		else return armor.tier;
 	}
 	public boolean shoot( Char enemy, MissileWeapon wep ) {
 
@@ -544,7 +564,7 @@ public class Hero extends Char {
 		}
 		
 		float evasion = defenseSkill;
-		
+		evasion +=RingOfEvasion.extraEvasion(this);
 		evasion *= RingOfEvasion.evasionMultiplier( this );
 		
 		if (paralysed > 0) {
@@ -599,7 +619,21 @@ public class Hero extends Char {
 			}
 			dr += Random.NormalIntRange(bas_add, bas_add*3 );
 		}
-		
+		if (hasTalent(Talent.MOVING_DEFENSE) && pointsInTalent(Talent.MOVING_DEFENSE)>3)
+			if (shielding()>0)
+				dr+=Random.NormalIntRange(2,8);
+		if (hasTalent(Talent.DARK_ARMOR)) {
+			for (Item item : Dungeon.hero.belongings.backpack) {
+				if (item instanceof CloakOfShadows) {
+					if (item.isEquipped(this)) {
+						int em=((CloakOfShadows) item).emptyCharge();
+						int p=pointsInTalent(Talent.DARK_ARMOR);
+						float fl[]={-1f,0,0.5f,0.5f,1f},ce[]={-1f,1f,1f,1.5f,2f};
+						dr += Random.NormalIntRange(Math.round(fl[p]*em),Math.round(ce[p]*em));
+					}
+				}
+			}
+		}
 		return dr;
 	}
 	
@@ -609,7 +643,15 @@ public class Hero extends Char {
 		int dmg;
 		if (wep!=null){
 			dmg = wep.damageRoll( this );
-			if (!(wep instanceof MissileWeapon)) dmg += RingOfForce.armedDamageBonus(this);
+			if (!(wep instanceof MissileWeapon)) {
+				dmg += RingOfForce.armedDamageBonus(this);
+				if (hasTalent(Talent.DEVASTATE)){
+					if (buff(Combo.class)!=null){
+						int c=Math.min(buff(Combo.class).getComboCount(),10);
+						dmg+=Random.NormalIntRange(0,pointsInTalent(Talent.DEVASTATE)*c);
+					}
+				}
+			}
 		} else {
 			dmg = RingOfForce.damageRoll(this);
 		}
@@ -656,6 +698,9 @@ public class Hero extends Char {
 		}
 		for (ChampionHero buff : buffs(ChampionHero.class)){
 			speed *= buff.speedFactor();
+		}
+		if (hasTalent(Talent.BRISK_PACE)){
+			speed*=(1+0.025f*pointsInTalent(Talent.BRISK_PACE)*visibleEnemies());
 		}
 		speed = AscensionChallenge.modifyHeroSpeed(speed);
 		if (buff(DarkCoat.myPace.class)!=null) speed=Math.max(1f,speed);
@@ -1303,7 +1348,11 @@ public class Hero extends Char {
 			Berserk berserk = Buff.affect(this, Berserk.class);
 			berserk.damage(damage);
 		}
-		
+
+		if (subClass == HeroSubClass.GLADIATOR && hasTalent(Talent.DEFENSIVE_STRIKE)){
+			if (Random.Float()<0.25F*pointsInTalent(Talent.DEFENSIVE_STRIKE))
+				Buff.affect( this, Combo.class ).hit( enemy );
+		}
 		if (belongings.armor() != null) {
 			damage = belongings.armor().proc( enemy, this, damage );
 		}
@@ -1359,7 +1408,9 @@ public class Hero extends Char {
 			if (pointsInTalent(Talent.IRON_STOMACH) == 1)       dmg = Math.round(dmg*0.25f);
 			else if (pointsInTalent(Talent.IRON_STOMACH) == 2)  dmg = Math.round(dmg*0.00f);
 		}
-
+		if (hasTalent(Talent.IRON_MUSCLE) && pointsInTalent(Talent.IRON_MUSCLE)>3){
+			if (HP*2<HT)  dmg = Math.round(dmg*0.75f);
+		}
 		int preHP = HP + shielding();
 		int preTrueHP = HP;
 		super.damage( dmg, src );
@@ -1447,6 +1498,13 @@ public class Hero extends Char {
 		}
 
 		visibleEnemies = visible;
+
+		if (hasTalent(Talent.HIDE_IN_CROWD) && buff(Talent.HideInCrowdCoolDown.class)==null){
+			if (visible.size()>=7-pointsInTalent(Talent.HIDE_IN_CROWD)){
+				Buff.affect(this, Talent.HideInCrowdCoolDown.class,50f);
+				Buff.affect(this,Invisibility.class,8f);
+			}
+		}
 	}
 	
 	public int visibleEnemies() {
@@ -1544,14 +1602,24 @@ public class Hero extends Char {
 
 			if (subClass == HeroSubClass.FREERUNNER){
 				Buff.affect(this, Momentum.class).gainStack();
+				Buff.affect(this, MoveCount.class).gainStack();
 			}
-
+			if (hasTalent(Talent.MOVING_DEFENSE)){
+				if (Random.Float()<0.33f*pointsInTalent(Talent.MOVING_DEFENSE)+0.01f){
+					if (buff(Barrier.class)==null || buff(Barrier.class).shielding()<lvl)
+						Buff.affect(this, Barrier.class).incShield(1);
+				}
+			}
+			if (buff(Preparation.class)!=null){
+				buff(Preparation.class).stay=false;
+			}
 			float speed = speed();
 			float speedAdj=1f;
 			if (buff(CrabArmor.likeCrab.class)!=null){
 				if (pos/Dungeon.level.width()== step/Dungeon.level.width())	speedAdj=1.75f;
 				else speedAdj=5f/6f;
 			}
+			if (speedAdj*speed>4f && pointsInTalent(Talent.STORM_RUSH)>3 ) Buff.affect(this, Levitation.class,1f);
 			sprite.move(pos, step);
 			move(step);
 
@@ -2054,6 +2122,9 @@ public class Hero extends Char {
 				&& belongings.armor() != null
 				&& belongings.armor().hasGlyph(Brimstone.class, this)){
 			return true;
+		}
+		if (hasTalent(Talent.STORM_RUSH) && pointsInTalent(Talent.STORM_RUSH)>2){
+			if (effect == Cripple.class || effect == Chill.class || effect == Slow.class) return true;
 		}
 		return super.isImmune(effect);
 	}

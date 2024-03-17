@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.watabou.gltextures.SmartTexture;
@@ -75,6 +76,7 @@ public class HeroSprite extends CharSprite {
 		else if (armor != null){
 			if (armor instanceof PrisonArmor) t=7;
 			else if (armor instanceof CrabArmor) t=8;
+			else if (armor instanceof DarkCoat) t=9;
 			else t= armor.tier;
 		}
 		TextureFilm film = new TextureFilm( tiers(), t, FRAME_WIDTH, FRAME_HEIGHT );

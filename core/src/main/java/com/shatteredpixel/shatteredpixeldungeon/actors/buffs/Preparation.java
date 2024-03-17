@@ -38,6 +38,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.sun.jdi.PrimitiveValue;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
@@ -78,11 +79,18 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 				{.20f, .27f, .33f, .40f},
 				{.50f, .67f, .83f, 1.0f}
 		};
-
+		private static final float[][] braceYourselfExtraDmgs=new float[][]{
+				{0,.15f,.20f,.25f,.30f},
+				{0,.30f,.40f,.50f,.60f},
+				{0,.45f,.60f,.75f,.90f},
+				{0,.60f,.80f,1.0f,1.2f}
+		};
 		public float KOThreshold(){
 			return KOThresholds[ordinal()][Dungeon.hero.pointsInTalent(Talent.ENHANCED_LETHALITY)];
 		}
-
+		public float  braceYourselfExtraDmg(){
+			return braceYourselfExtraDmgs[ordinal()][Dungeon.hero.pointsInTalent(Talent.BRACE_YOURSELF)];
+		}
 		//1st index is prep level, 2nd is talent level
 		private static final int[][] blinkRanges = new int[][]{
 				{1, 1, 2, 2},
@@ -110,7 +118,7 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 				int newDmg = attacker.damageRoll();
 				if (newDmg > dmg) dmg = newDmg;
 			}
-			return Math.round(dmg * (1f + baseDmgBonus));
+			return Math.round(dmg * (1f + baseDmgBonus+braceYourselfExtraDmg()));
 		}
 		
 		public static AttackLevel getLvl(int turnsInvis){
@@ -126,6 +134,8 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	}
 	
 	private int turnsInvis = 0;
+
+	public boolean stay = true;
 	
 	@Override
 	public boolean act() {
@@ -206,9 +216,9 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 		String desc = Messages.get(this, "desc");
 		
 		AttackLevel lvl = AttackLevel.getLvl(turnsInvis);
-
+		float bdb=lvl.baseDmgBonus+ lvl.braceYourselfExtraDmg();
 		desc += "\n\n" + Messages.get(this, "desc_dmg",
-				(int)(lvl.baseDmgBonus*100),
+				(int)(bdb*100),
 				(int)(lvl.KOThreshold()*100),
 				(int)(lvl.KOThreshold()*20));
 		
@@ -236,6 +246,7 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		turnsInvis = bundle.getInt(TURNS);
+		stay=bundle.getBoolean("do_you_stay");
 		ActionIndicator.setAction(this);
 	}
 	
@@ -243,6 +254,7 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(TURNS, turnsInvis);
+		bundle.put("do_you_stay",stay);
 	}
 
 	@Override

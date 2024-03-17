@@ -66,14 +66,16 @@ public class KingsCrown extends Item {
 		super.execute( hero, action );
 
 		if (action.equals(AC_WEAR)) {
-
-			curUser = hero;
-			if (hero.belongings.armor() != null){
-				GameScene.show( new WndChooseAbility(this, hero.belongings.armor(), hero));
-			} else {
-				GLog.w( Messages.get(this, "naked"));
+			if (!hero.powerOfImp) {
+				curUser = hero;
+				if (hero.belongings.armor() != null) {
+					GameScene.show(new WndChooseAbility(this, hero.belongings.armor(), hero));
+				} else {
+					GLog.w(Messages.get(this, "naked"));
+				}
+			}else {
+				GLog.n(Messages.get(this,"deny"));
 			}
-			
 		}
 	}
 	

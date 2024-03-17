@@ -128,7 +128,18 @@ public class Item implements Bundlable {
 			return false;
 		}
 	}
-	
+	public final boolean doPickUpInstantly(Hero hero){return doPickUpInstantly(hero,hero.pos);}
+	public boolean doPickUpInstantly (Hero hero,int pos){
+		if (collect( hero.belongings.backpack )) {
+
+			GameScene.pickUp( this, pos );
+			Sample.INSTANCE.play( Assets.Sounds.ITEM );
+			return true;
+
+		} else {
+			return false;
+		}
+	}
 	public void doDrop( Hero hero ) {
 		hero.spendAndNext(TIME_TO_DROP);
 		int pos = hero.pos;

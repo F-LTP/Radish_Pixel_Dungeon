@@ -13,6 +13,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.ArcaneResin;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.ArcaneCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.CursedWand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
@@ -33,7 +34,7 @@ import com.watabou.utils.Callback;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
-//TODO ZAP,MAKE &BIND, HOW TO DEAL WITH THROW&DROP&TRANSFORM image change, buff?
+
 public class SpellQueue extends Item {
 
     private static final String AC_MAKE = "MAKE";
@@ -170,15 +171,15 @@ public class SpellQueue extends Item {
                 }
                 @Override
                 protected void onSelect(int index){
-                    ArcaneResin ar = null;
+                    ArcaneCatalyst ac = null;
                 if (index==0 && elapsed > 0.2f){
-                    for (ArcaneResin i : Dungeon.hero.belongings.getAllItems(ArcaneResin.class)){
-                        if (ar == null ) {
-                            ar = i;
+                    for (ArcaneCatalyst i : Dungeon.hero.belongings.getAllItems(ArcaneCatalyst.class)){
+                        if (ac == null ) {
+                            ac = i;
                         }
                     }
-                    if (ar!=null) {
-                        ar.detach(Dungeon.hero.belongings.backpack);
+                    if (ac!=null) {
+                        ac.detach(Dungeon.hero.belongings.backpack);
                         firstWand=null;
                         secondWand=null;
                         thirdWand=null;

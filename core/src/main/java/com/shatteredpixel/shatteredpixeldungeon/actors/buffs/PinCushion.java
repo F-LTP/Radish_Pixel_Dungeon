@@ -22,11 +22,15 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.TelekineticGrab;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,8 +63,17 @@ public class PinCushion extends Buff {
 
 	@Override
 	public void detach() {
-		for (Item item : items)
-			Dungeon.level.drop( item, target.pos).sprite.drop();
+		for (Item item : items) {
+			if (Dungeon.hero!=null && Dungeon.hero.hasTalent(Talent.PHASE_FILLING)) {
+				if (Random.Float() < Dungeon.hero.pointsInTalent(Talent.PHASE_FILLING) * 0.5f) {
+					if (item.doPickUpInstantly(Dungeon.hero, target.pos)) {
+						GLog.i(Messages.capitalize(Messages.get(Dungeon.hero, "you_now_have", item.name())));
+						continue;
+					}
+				}
+			}
+			Dungeon.level.drop(item, target.pos).sprite.drop();
+		}
 		super.detach();
 	}
 

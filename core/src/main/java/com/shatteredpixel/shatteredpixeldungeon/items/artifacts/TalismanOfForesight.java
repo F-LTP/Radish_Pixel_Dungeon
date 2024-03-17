@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MoveCount;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CheckedCell;
@@ -320,6 +321,8 @@ public class TalismanOfForesight extends Artifact {
 				//fully charges in 2000 turns at +0, scaling to 1000 turns at +10.
 				float chargeGain = (0.05f+(level()*0.005f));
 				chargeGain *= RingOfEnergy.artifactChargeMultiplier(target);
+				if (target.buff(MoveCount.class)!=null)
+					chargeGain*=target.buff(MoveCount.class).chargeMultiplier(Dungeon.hero);
 				partialCharge += chargeGain;
 
 				if (partialCharge > 1 && charge < chargeCap) {

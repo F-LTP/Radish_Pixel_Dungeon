@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.Ratmogrify
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoTalent;
 import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.Image;
@@ -62,7 +63,7 @@ public class TalentsPane extends ScrollPane {
 				tiersAvailable = 1;
 			} else if (!Badges.isUnlocked(Badges.Badge.LEVEL_REACHED_2) || !Badges.isUnlocked(Badges.Badge.BOSS_SLAIN_2)){
 				tiersAvailable = 2;
-			} else if (!Badges.isUnlocked(Badges.Badge.BOSS_SLAIN_4)){
+			} else if (!Badges.isUnlocked(Badges.Badge.BOSS_SLAIN_4) ){
 				tiersAvailable = 3;
 			} else {
 				tiersAvailable = Talent.MAX_TALENT_TIERS;
@@ -74,11 +75,10 @@ public class TalentsPane extends ScrollPane {
 			}
 			if (tiersAvailable > 2 && Dungeon.hero.subClass == HeroSubClass.NONE){
 				tiersAvailable = 2;
-			} else if (tiersAvailable > 3 && Dungeon.hero.armorAbility == null){
+			} else if (tiersAvailable > 3 && (Dungeon.hero.armorAbility == null && !Dungeon.hero.powerOfImp)){
 				tiersAvailable = 3;
 			}
 		}
-
 		tiersAvailable = Math.min(tiersAvailable, talents.size());
 
 		for (int i = 0; i < Math.min(tiersAvailable, talents.size()); i++){

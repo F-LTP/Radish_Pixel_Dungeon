@@ -54,7 +54,9 @@ public class Artifact extends KindofMisc {
 
 	//used by some artifacts to keep track of duration of effects or cooldowns to use.
 	protected int cooldown = 0;
-
+	public int emptyCharge(){
+		return chargeCap-charge;
+	}
 	@Override
 	public boolean doEquip( final Hero hero ) {
 
