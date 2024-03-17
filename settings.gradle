@@ -4,7 +4,8 @@ include ':core'
 
 //platform modules
 include ':android'
-include ':ios'
+//屏蔽IOS端同步
+//include ':ios'
 include ':desktop'
 
 //service modules
