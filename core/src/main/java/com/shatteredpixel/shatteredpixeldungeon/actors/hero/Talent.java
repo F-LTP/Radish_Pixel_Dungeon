@@ -31,7 +31,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CounterBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LostInventory;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Recharging;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
@@ -42,7 +41,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HornOfPlenty;
@@ -100,6 +98,8 @@ public enum Talent {
 	ENERGIZING_MEAL(36), ENERGIZING_UPGRADE(37), WAND_PRESERVATION(38), ARCANE_VISION(39), SHIELD_BATTERY(40),
 	//Mage T3
 	SPELL_QUEUE(41, 3), ALLY_WARP(42, 3),
+	//TODO MAGE T4
+	MAGIC_REFINING(160,4 ),MAGIC_TACTICS(161,4),
 	//Battlemage T3
 	EMPOWERED_STRIKE(43, 3), MYSTICAL_CHARGE(44, 3), EXCESS_CHARGE(45, 3),
 	//Warlock T3
@@ -110,7 +110,6 @@ public enum Talent {
 	WILD_POWER(52, 4), FIRE_EVERYTHING(53, 4), CONSERVED_MAGIC(54, 4),
 	//Warp Beacon T4
 	TELEFRAG(55, 4), REMOTE_BEACON(56, 4), LONGRANGE_WARP(57, 4),
-
 	//Rogue T1
 	CACHED_RATIONS(64), THIEFS_INTUITION(65), SUCKER_PUNCH(66), PROTECTIVE_SHADOWS(67),
 	//Rogue T2
@@ -800,13 +799,15 @@ public enum Talent {
 			case WARRIOR: default:
 				Collections.addAll(tierTalents, IRON_MUSCLE, MOVING_DEFENSE);
 				break;
-				case ROGUE:
+			case ROGUE:
 				Collections.addAll(tierTalents, HIDE_IN_CROWD,DARK_ARMOR);
 				break;
-			/*case MAGE:
-				Collections.addAll(tierTalents, ENERGIZING_MEAL, ENERGIZING_UPGRADE, WAND_PRESERVATION, ARCANE_VISION, SHIELD_BATTERY);
+
+			//TODO: Mage T4 Is Not Complete, Should Maybe the more time
+			case MAGE:
+				Collections.addAll(tierTalents, MAGIC_REFINING,MAGIC_TACTICS);
 				break;
-*/
+
 			case HUNTRESS:
 				Collections.addAll(tierTalents, BRISK_PACE,PHASE_FILLING);
 				break;
