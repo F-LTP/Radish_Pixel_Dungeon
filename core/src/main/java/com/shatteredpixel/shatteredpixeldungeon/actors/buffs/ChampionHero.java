@@ -288,6 +288,7 @@ public abstract class ChampionHero extends Buff {
 
         public float multiplier = 1.19f;
         Item source;
+        @SuppressWarnings("SuspiciousIndentation")
         public void control(Item s){
             source=s;
             if (s instanceof EliteBadge)

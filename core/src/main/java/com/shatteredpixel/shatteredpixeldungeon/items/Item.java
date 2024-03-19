@@ -41,7 +41,6 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
-import com.shatteredpixel.shatteredpixeldungeon.ui.InventoryPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
@@ -100,7 +99,28 @@ public class Item implements Bundlable {
 			return Generator.Category.order( lhs ) - Generator.Category.order( rhs );
 		}
 	};
-	
+
+	/**
+	 * 2024-3-20
+	 * Author:JDSALing & Evan
+	 * 快捷行动方法化
+	 * 使用方法:重写
+	 * */
+	public String defaultAction(){
+		return defaultAction;
+	}
+
+//	public void execute( Hero hero ) {
+//		execute( hero, defaultAction );
+//	}
+
+	public void execute( Hero hero ) {
+		String action = defaultAction();
+		if (action != null) {
+			execute(hero, defaultAction());
+		}
+	}
+
 	public ArrayList<String> actions( Hero hero ) {
 		ArrayList<String> actions = new ArrayList<>();
 		actions.add( AC_DROP );
@@ -176,9 +196,7 @@ public class Item implements Bundlable {
 		}
 	}
 	
-	public void execute( Hero hero ) {
-		execute( hero, defaultAction );
-	}
+
 	
 	protected void onThrow( int cell ) {
 		Heap heap = Dungeon.level.drop( this, cell );
