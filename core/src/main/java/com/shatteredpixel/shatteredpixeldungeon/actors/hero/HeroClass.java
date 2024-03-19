@@ -59,6 +59,7 @@ import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestMe
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestMissile;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestPotion;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestRing;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestTalentOFTerminalBook;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
@@ -142,7 +143,8 @@ public enum HeroClass {
 			new TestMissile().collect();
 			new TestRing().collect();
 			new TestPotion().collect();
-			//new PotionBag().collect();
+
+			new TestTalentOFTerminalBook().collect();
 
 			new ScrollHolder().collect();
 			Dungeon.LimitedDrops.SCROLL_HOLDER.drop();
