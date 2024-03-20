@@ -166,10 +166,10 @@ public abstract class Scroll extends Item {
 	 */
 	public void MagicStone(boolean log,boolean original){
 		if(original) {
-			boolean isNotDouble = !(curItem instanceof ScrollOfRemoveCurse || curItem instanceof ScrollOfUpgrade || curItem instanceof ScrollOfIdentify || curItem instanceof ScrollOfTransmutation || curItem instanceof ScrollOfTeleportation);
+			boolean isNotDouble = !(curItem instanceof ScrollOfRemoveCurse || curItem instanceof ScrollOfUpgrade || curItem instanceof ScrollOfIdentify || curItem instanceof ScrollOfTransmutation);
 			if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 1 && isNotDouble && Random.Int(0,100)>=50) {
 				Item MagicStone = Reflection.newInstance(stones.get(curItem.getClass()));
-				if(log)GLog.w(Messages.get(Scroll.class,"scrollToStone",MagicStone.name()));
+				if(log)GLog.p(Messages.get(Scroll.class,"scrollToStone",MagicStone.name()));
 				Dungeon.level.drop(MagicStone, curUser.pos);
 			}
 		}

@@ -89,16 +89,6 @@ public abstract class InventoryScroll extends Scroll {
 	
 	protected abstract void onItemSelected( Item item );
 
-	@Override
-	public void MagicStone(boolean log,boolean original){
-		super.MagicStone(log,original);
-		if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 1 && Random.Int(0,100)>=50){
-			Item MagicStone = Reflection.newInstance(stones.get(curItem.getClass()));
-			if(log) GLog.w(Messages.get(Scroll.class,"scrollToStone",MagicStone.name()));
-			Dungeon.level.drop( MagicStone, curUser.pos );
-		}
-	}
-	
 	protected WndBag.ItemSelector itemSelector = new WndBag.ItemSelector() {
 
 		@Override
@@ -126,12 +116,16 @@ public abstract class InventoryScroll extends Scroll {
 			}
 			
 			if (item != null) {
-				
+
 				((InventoryScroll)curItem).onItemSelected( item );
 				((InventoryScroll)curItem).readAnimation();
-				MagicStone(true,false);
+
 				Sample.INSTANCE.play( Assets.Sounds.READ );
-				
+				if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 1 && Random.Int(0,100)>=50 ){
+					Item MagicStone = Reflection.newInstance(stones.get(curItem.getClass()));
+					GLog.p(Messages.get(Scroll.class,"scrollToStone",MagicStone.name()));
+					Dungeon.level.drop( MagicStone, curUser.pos );
+				}
 			} else if (identifiedByUse && !((Scroll)curItem).anonymous) {
 				
 				((InventoryScroll)curItem).confirmCancelation();

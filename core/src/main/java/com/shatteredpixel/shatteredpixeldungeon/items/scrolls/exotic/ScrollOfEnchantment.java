@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.InventoryScroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
@@ -40,13 +41,13 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
-import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Random;
+import com.watabou.utils.Reflection;
 
 public class ScrollOfEnchantment extends ExoticScroll {
 	
@@ -57,7 +58,20 @@ public class ScrollOfEnchantment extends ExoticScroll {
 	}
 
 	protected static boolean identifiedByUse = false;
-	
+
+	@Override
+	public void MagicStone(boolean log,boolean original){
+		//注魔秘卷很特殊 需要特判
+	}
+
+	protected void MagicStoneScroll(){
+		Scroll recoveredScroll = (Scroll) Reflection.newInstance(exoToReg.get(this.getClass()));
+		if(Random.Int(4)==0 && Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 2){
+			Dungeon.level.drop(recoveredScroll, curUser.pos);
+			GLog.i(Messages.get(Scroll.class, "exscrollToscroll", recoveredScroll.name()));
+		}
+	}
+
 	@Override
 	public void doRead() {
 		if (!isKnown()) {
@@ -190,10 +204,10 @@ public class ScrollOfEnchantment extends ExoticScroll {
 				wep.enchant(enchantments[index]);
 				GLog.p(Messages.get(StoneOfEnchantment.class, "weapon"));
 				((ScrollOfEnchantment)curItem).readAnimation(true);
-
 				Sample.INSTANCE.play( Assets.Sounds.READ );
 				Enchanting.show(curUser, wep);
 				Talent.onUpgradeScrollUsed( Dungeon.hero );
+				((ScrollOfEnchantment)curItem).MagicStoneScroll();
 			}
 
 			wep = null;
@@ -258,6 +272,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 				Sample.INSTANCE.play( Assets.Sounds.READ );
 				Enchanting.show(curUser, arm);
 				Talent.onUpgradeScrollUsed( Dungeon.hero );
+				((ScrollOfEnchantment)curItem).MagicStoneScroll();
 			}
 
 			arm = null;
@@ -321,6 +336,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 				Sample.INSTANCE.play( Assets.Sounds.READ );
 				Enchanting.show(curUser, seal);
 				Talent.onUpgradeScrollUsed( Dungeon.hero );
+				((ScrollOfEnchantment)curItem).MagicStoneScroll();
 			}
 
 			seal = null;

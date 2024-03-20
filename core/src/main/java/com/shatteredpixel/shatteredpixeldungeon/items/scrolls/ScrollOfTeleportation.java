@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -61,12 +63,6 @@ public class ScrollOfTeleportation extends Scroll {
 		Sample.INSTANCE.play( Assets.Sounds.READ );
 		
 		if (teleportPreferringUnseen( curUser )){
-			//Mage T4-INSERT Teleportation is Special
-			if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 1 && Random.Int(0,100)>=50){
-				Item MagicStone = new StoneOfBlink();
-				GLog.w(Messages.get(Scroll.class,"scrollToStone",MagicStone.name()));
-				Dungeon.level.drop( MagicStone, curUser.pos );
-			}
 			readAnimation();
 		}
 		identify();
@@ -78,7 +74,7 @@ public class ScrollOfTeleportation extends Scroll {
 		if (PathFinder.distance[ch.pos] == Integer.MAX_VALUE
 				|| (!Dungeon.level.passable[pos] && !Dungeon.level.avoid[pos])
 				|| Actor.findChar(pos) != null){
-			if (ch == Dungeon.hero){
+			if (ch == hero){
 				GLog.w( Messages.get(ScrollOfTeleportation.class, "cant_reach") );
 			}
 			return false;
@@ -87,7 +83,7 @@ public class ScrollOfTeleportation extends Scroll {
 		appear( ch, pos );
 
 		Dungeon.level.occupyCell( ch );
-		if (ch == Dungeon.hero) {
+		if (ch == hero) {
 			Dungeon.observe();
 			GameScene.updateFog();
 		}
@@ -129,12 +125,11 @@ public class ScrollOfTeleportation extends Scroll {
 			appear( ch, pos );
 			Dungeon.level.occupyCell( ch );
 			
-			if (ch == Dungeon.hero) {
+			if (ch == hero) {
 				GLog.i( Messages.get(ScrollOfTeleportation.class, "tele") );
-				
 				Dungeon.observe();
 				GameScene.updateFog();
-				Dungeon.hero.interrupt();
+				hero.interrupt();
 			}
 			return true;
 			
@@ -265,12 +260,12 @@ public class ScrollOfTeleportation extends Scroll {
 		appear( ch, pos );
 		Dungeon.level.occupyCell( ch );
 
-		if (ch == Dungeon.hero) {
+		if (ch == hero) {
 			GLog.i( Messages.get(ScrollOfTeleportation.class, "tele") );
 
 			Dungeon.observe();
 			GameScene.updateFog();
-			Dungeon.hero.interrupt();
+			hero.interrupt();
 		}
 
 		return true;
@@ -285,11 +280,19 @@ public class ScrollOfTeleportation extends Scroll {
 			Sample.INSTANCE.play(Assets.Sounds.TELEPORT);
 		}
 
-		if (Dungeon.level.heroFOV[ch.pos] && ch != Dungeon.hero ) {
+		if (Dungeon.level.heroFOV[ch.pos] && ch != hero ) {
 			CellEmitter.get(ch.pos).start(Speck.factory(Speck.LIGHT), 0.2f, 3);
 		}
 
 		ch.move( pos, false );
+
+		//Mage T4-INSERT Teleportation is Special
+		if (hero.pointsInTalent(Talent.MAGIC_REFINING) >= 1 && Random.Int(0,100)>=50){
+			Item MagicStone = new StoneOfBlink();
+			GLog.p(Messages.get(Scroll.class,"scrollToStone",MagicStone.name()));
+			Dungeon.level.drop( MagicStone, pos );
+		}
+
 		if (ch.pos == pos) ch.sprite.place( pos );
 
 		if (ch.invisible == 0) {
@@ -297,7 +300,7 @@ public class ScrollOfTeleportation extends Scroll {
 			ch.sprite.parent.add( new AlphaTweener( ch.sprite, 1, 0.4f ) );
 		}
 
-		if (Dungeon.level.heroFOV[pos] || ch == Dungeon.hero ) {
+		if (Dungeon.level.heroFOV[pos] || ch == hero ) {
 			ch.sprite.emitter().start(Speck.factory(Speck.LIGHT), 0.2f, 3);
 		}
 	}
