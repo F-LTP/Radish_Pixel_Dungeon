@@ -1,5 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator;
 
+import static com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass.NONE;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
@@ -28,7 +30,7 @@ public class TestTalentOFTerminalBook extends TestItem {
     @Override
     public ArrayList<String> actions(Hero hero ) {
         ArrayList<String> actions = super.actions(hero);
-        if (hero.isAlive()) actions.add(AC_READ);
+        if (hero.isAlive() && hero.subClass != NONE) actions.add(AC_READ);
         return actions;
     }
 

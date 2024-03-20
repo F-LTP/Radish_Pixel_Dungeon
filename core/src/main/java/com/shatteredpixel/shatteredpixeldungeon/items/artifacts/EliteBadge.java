@@ -196,6 +196,10 @@ public class EliteBadge extends Artifact{
                 randthree[0] = Random.Int(6);
                 while ((randthree[1] = Random.Int(6)) == randthree[0]) ;
             }
+
+            //FIXED Elite Badges Restart Game Bug
+            charge-=(5+level()/5);
+
             GameScene.show(new WndElite(ChampionHero.elitenames[randthree[0]],ChampionHero.elitenames[randthree[1]]));
         }
         else
@@ -298,7 +302,7 @@ public class EliteBadge extends Artifact{
 
             @Override
             protected void onSelect(int index) {
-                charge-=(5+level()/5);
+
                 updateQuickslot();
                 if (index < 2) {
                     if (Dungeon.hero.belongings.getItem(EliteBadge.class)!=null){
