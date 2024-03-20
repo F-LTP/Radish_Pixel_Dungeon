@@ -21,12 +21,12 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls;
 
+import static com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll.ScrollToStone.stones;
+
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ScrollEmpower;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -37,7 +37,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.UnstableSpellboo
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfAntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.Runestone;
-import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFear;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAggression;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAugmentation;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfBlast;
@@ -46,6 +45,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfClairvoyance
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfDeepSleep;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfDisarming;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFear;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFlock;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfIntuition;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfShock;
@@ -56,6 +56,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
@@ -155,6 +156,24 @@ public abstract class Scroll extends Item {
 		actions.add( AC_READ );
 		return actions;
 	}
+
+	/**
+	 * 重写获得更好的维护<br>
+	 * Author:JDSALing<br>
+	 * 奥术精炼-T4-1实现<br>
+	 * @param log 消息输出
+	 * @param original 原始输出
+	 */
+	public void MagicStone(boolean log,boolean original){
+		if(original) {
+			boolean isNotDouble = !(curItem instanceof ScrollOfRemoveCurse || curItem instanceof ScrollOfUpgrade || curItem instanceof ScrollOfIdentify || curItem instanceof ScrollOfTransmutation || curItem instanceof ScrollOfTeleportation);
+			if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 1 && isNotDouble && Random.Int(0,100)>=50) {
+				Item MagicStone = Reflection.newInstance(stones.get(curItem.getClass()));
+				if(log)GLog.w(Messages.get(Scroll.class,"scrollToStone",MagicStone.name()));
+				Dungeon.level.drop(MagicStone, curUser.pos);
+			}
+		}
+	}
 	
 	@Override
 	public void execute( Hero hero, String action ) {
@@ -172,6 +191,7 @@ public abstract class Scroll extends Item {
 					&& !(this instanceof ScrollOfRemoveCurse || this instanceof ScrollOfAntiMagic)){
 				GLog.n( Messages.get(this, "cursed") );
 			} else {
+				MagicStone(true,true);
 				curUser = hero;
 				curItem = detach( hero.belongings.backpack );
 				doRead();
@@ -297,7 +317,7 @@ public abstract class Scroll extends Item {
 	
 	public static class ScrollToStone extends Recipe {
 		
-		private static HashMap<Class<?extends Scroll>, Class<?extends Runestone>> stones = new HashMap<>();
+		protected static HashMap<Class<?extends Scroll>, Class<?extends Runestone>> stones = new HashMap<>();
 		static {
 			stones.put(ScrollOfIdentify.class,      StoneOfIntuition.class);
 			stones.put(ScrollOfLullaby.class,       StoneOfDeepSleep.class);

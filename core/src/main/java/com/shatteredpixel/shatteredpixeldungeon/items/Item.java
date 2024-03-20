@@ -101,18 +101,19 @@ public class Item implements Bundlable {
 	};
 
 	/**
-	 * 2024-3-20
-	 * Author:JDSALing & Evan
-	 * 快捷行动方法化
-	 * 使用方法:重写
+	 * 2024-3-20<br>
+	 * Author:JDSALing & Evan<br>
+	 * 快捷行动方法化<br>
+	 * 使用方法:重写<br>
 	 * */
 	public String defaultAction(){
 		return defaultAction;
 	}
 
-//	public void execute( Hero hero ) {
-//		execute( hero, defaultAction );
-//	}
+	//TODO 原始方法弃用
+	//	public void execute( Hero hero ) {
+	//		execute( hero, defaultAction );
+	//	}
 
 	public void execute( Hero hero ) {
 		String action = defaultAction();
