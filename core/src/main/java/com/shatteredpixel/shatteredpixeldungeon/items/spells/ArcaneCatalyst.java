@@ -21,7 +21,9 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfIdentify;
@@ -37,12 +39,19 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTerror;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTransmutation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.Runestone;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class ArcaneCatalyst extends Spell {
@@ -71,11 +80,17 @@ public class ArcaneCatalyst extends Spell {
 		
 		detach( curUser.belongings.backpack );
 		updateQuickslot();
-		
-		Scroll s = Reflection.newInstance(Random.chances(scrollChances));
-		s.anonymize();
-		curItem = s;
-		s.doRead();
+
+		if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 3){
+			GameScene.show(new ScrollSelectionWindow());
+		} else {
+			Scroll s = Reflection.newInstance(Random.chances(scrollChances));
+			s.anonymize();
+			curItem = s;
+			s.doRead();
+		}
+
+
 	}
 	
 	@Override
@@ -87,6 +102,82 @@ public class ArcaneCatalyst extends Spell {
 	public int energyVal() {
 		return 8 * quantity;
 	}
+
+
+	public static class ScrollSelectionWindow extends WndOptions {
+		private final Class<? extends Scroll>[] scrollOptions;
+
+		public ScrollSelectionWindow() {
+			super(new ItemSprite(ItemSpriteSheet.SCROLL_CATALYST),
+					Messages.get(ArcaneCatalyst.class,"title"),
+					Messages.get(ArcaneCatalyst.class,"descx"),
+					Messages.get(ArcaneCatalyst.class,"scroll1"),
+					Messages.get(ArcaneCatalyst.class,"scroll2"),
+					Messages.get(ArcaneCatalyst.class,"scroll3"),
+					Messages.get(ArcaneCatalyst.class,"cancel"));
+
+			scrollOptions = new Class[]{
+					ScrollOfIdentify.class,
+					ScrollOfRemoveCurse.class,
+					ScrollOfMagicMapping.class,
+					ScrollOfMirrorImage.class,
+					ScrollOfRecharging.class,
+					ScrollOfLullaby.class,
+					ScrollOfRetribution.class,
+					ScrollOfRage.class,
+					ScrollOfTeleportation.class,
+					ScrollOfTerror.class,
+					ScrollOfTransmutation.class,
+			};
+			Random.shuffle(Arrays.asList(scrollOptions));
+		}
+
+		@Override
+		protected void onSelect(int index) {
+			if (index < 3) {
+				useRandomScroll(scrollOptions[index]);
+			}
+			hide();
+		}
+
+		private void useRandomScroll(Class<? extends Scroll> scrollClass) {
+			Scroll scroll = Reflection.newInstance(scrollClass);
+			scroll.anonymize();
+			scroll.doRead();
+		}
+
+		@Override
+		protected boolean hasInfo(int index) {
+			return index < 3;
+		}
+
+		@Override
+		protected void onInfo(int index) {
+			try {
+				Class<? extends Scroll> scrollClass = scrollOptions[index];
+				// 创建卷轴类的实例
+				Scroll scrollInstance = scrollClass.getDeclaredConstructor().newInstance();
+				// 获取 name 方法
+				String title = (String) scrollClass.getMethod("name").invoke(scrollInstance);
+				// 获取 desc 方法
+				String desc = (String) scrollClass.getMethod("desc").invoke(scrollInstance);
+				GameScene.show(new WndTitledMessage(
+						Icons.get(Icons.INFO),
+						Messages.titleCase(title),
+						desc));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+
+
+		@Override
+		public void onBackPressed() {
+			// Handle back press if needed
+		}
+	}
+
 
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe {
 		
@@ -135,4 +226,5 @@ public class ArcaneCatalyst extends Spell {
 			return new ArcaneCatalyst();
 		}
 	}
+
 }
