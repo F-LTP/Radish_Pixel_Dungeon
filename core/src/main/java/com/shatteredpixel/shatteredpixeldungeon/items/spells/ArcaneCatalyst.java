@@ -142,6 +142,8 @@ public class ArcaneCatalyst extends Spell {
 
 		private void useRandomScroll(Class<? extends Scroll> scrollClass) {
 			Scroll scroll = Reflection.newInstance(scrollClass);
+			//Fixed 2024-3-22 添加实体以传递鉴定 驱邪这类二次确认
+			curItem = scroll;
 			scroll.anonymize();
 			scroll.doRead();
 		}

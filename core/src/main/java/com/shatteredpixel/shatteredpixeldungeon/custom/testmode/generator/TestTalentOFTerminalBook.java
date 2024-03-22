@@ -38,7 +38,7 @@ public class TestTalentOFTerminalBook extends TestItem {
     public void execute(final Hero hero, String action) {
         super.execute(hero, action);
         if (action.equals( AC_READ )) {
-            if ( !hero.powerOfImp ) {
+            if ( !hero.powerOfImp & hero.subClass != NONE ) {
                 hero.powerOfImp = true;
                 Buff.affect(hero, WndImp.powerGainTracker.class);
                 hero.spend(Actor.TICK);
@@ -55,6 +55,8 @@ public class TestTalentOFTerminalBook extends TestItem {
                 GLog.p(Messages.get(this,"power_mode_on",hero.name()));
                 hero.sprite.operate( hero.pos );
                 detach( hero.belongings.backpack );
+            } else {
+                GLog.w(Messages.get(this,"power_mode_bad"));
             }
 
         }

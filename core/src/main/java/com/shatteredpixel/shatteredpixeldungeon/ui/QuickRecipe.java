@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.ui;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArcaneResin;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -58,7 +59,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.spells.BeaconOfReturning;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.CurseInfusion;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.FeatherFall;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.MagicalInfusion;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.MagicalPorter;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.PhaseShift;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.ReclaimTrap;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.Recycle;
@@ -165,7 +165,7 @@ public class QuickRecipe extends Component {
 		
 		layout();
 	}
-	
+
 	@Override
 	protected void layout() {
 		
@@ -347,11 +347,25 @@ public class QuickRecipe extends Component {
 				result.add(new QuickRecipe( new LiquidMetal.Recipe(),
 						new ArrayList<Item>(Arrays.asList(new MissileWeapon.PlaceHolder().quantity(3))),
 						new LiquidMetal()));
-				result.add(null);
-				result.add(null);
+				//奥术精炼T4-4 实现
+				if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) < 4) {
+					result.add(null);
+					result.add(null);
+				}
 				result.add(new QuickRecipe( new ArcaneResin.Recipe(),
 						new ArrayList<Item>(Arrays.asList(new Wand.PlaceHolder())),
 						new ArcaneResin()));
+				//奥术精炼T4-4 实现
+				if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 4) {
+					result.add(null);
+					result.add(null);
+					result.add(new QuickRecipe( new ArcaneResin.TalentRecipe(),
+							new ArrayList<Item>(Arrays.asList(
+							new ArcaneCatalyst(),
+							new ArcaneCatalyst(),
+							new ArcaneCatalyst())),
+							new ArcaneResin()));
+				}
 				return result;
 			case 7:
 				result.add(new QuickRecipe(new AlchemicalCatalyst.Recipe(), new ArrayList<>(Arrays.asList(new Potion.PlaceHolder(), new Plant.Seed.PlaceHolder())), new AlchemicalCatalyst()));

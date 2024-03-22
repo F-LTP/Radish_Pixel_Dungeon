@@ -63,6 +63,12 @@ public class ScrollOfTeleportation extends Scroll {
 		Sample.INSTANCE.play( Assets.Sounds.READ );
 		
 		if (teleportPreferringUnseen( curUser )){
+			//Mage T4-INSERT Teleportation is Special
+			if (hero.pointsInTalent(Talent.MAGIC_REFINING) >= 1 && Random.Int(0,100)>=50){
+				Item MagicStone = new StoneOfBlink();
+				GLog.p(Messages.get(Scroll.class,"scrollToStone",MagicStone.name()));
+				Dungeon.level.drop( MagicStone, curUser.pos );
+			}
 			readAnimation();
 		}
 		identify();
@@ -285,13 +291,6 @@ public class ScrollOfTeleportation extends Scroll {
 		}
 
 		ch.move( pos, false );
-
-		//Mage T4-INSERT Teleportation is Special
-		if (hero.pointsInTalent(Talent.MAGIC_REFINING) >= 1 && Random.Int(0,100)>=50){
-			Item MagicStone = new StoneOfBlink();
-			GLog.p(Messages.get(Scroll.class,"scrollToStone",MagicStone.name()));
-			Dungeon.level.drop( MagicStone, pos );
-		}
 
 		if (ch.pos == pos) ch.sprite.place( pos );
 
