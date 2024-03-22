@@ -28,9 +28,11 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfDragonsBreath;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfLullaby;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -39,6 +41,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Random;
 
 public class ScrollOfSirensSong extends ExoticScroll {
 	
@@ -50,6 +53,11 @@ public class ScrollOfSirensSong extends ExoticScroll {
 	public void doRead() {
 		if (!anonymous) curItem.collect(); //we detach it later
 		GameScene.selectCell(targeter);
+	}
+
+	@Override
+	public void MagicStone(boolean log,boolean original){
+		//特殊卷轴 特殊处理
 	}
 
 	private CellSelector.Listener targeter = new CellSelector.Listener() {
@@ -96,6 +104,14 @@ public class ScrollOfSirensSong extends ExoticScroll {
 
 					}
 					target.sprite.centerEmitter().burst( Speck.factory( Speck.HEART ), 10 );
+
+					/**MAGIC_REFINING +2 Talent Special Method*/
+					Scroll recoveredScroll = new ScrollOfLullaby();
+					if(Random.Int(4)==0 && Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 2){
+						Dungeon.level.drop(recoveredScroll, curUser.pos);
+						GLog.p(Messages.get(Scroll.class, "exscrollToscroll", recoveredScroll.name()));
+					}
+
 				} else {
 					GLog.w(Messages.get(ScrollOfSirensSong.class, "no_target"));
 				}
