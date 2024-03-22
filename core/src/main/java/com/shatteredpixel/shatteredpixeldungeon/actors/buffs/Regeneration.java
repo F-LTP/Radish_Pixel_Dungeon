@@ -76,9 +76,10 @@ public class Regeneration extends Buff {
 
 			float delay = REGENERATION_DELAY;
 
-			if (target.buff(MoveCount.class)!=null) {
-				delay *= target.buff(MoveCount.class).chargeMultiplier(Dungeon.hero);
-			}
+			//暂时关闭效果
+//			if (target.buff(MoveCount.class)!=null) {
+//				delay *= target.buff(MoveCount.class).chargeMultiplier(Dungeon.hero);
+//			}
 
 			if (regenBuff != null && target.buff(MagicImmune.class) == null) {
 				if (regenBuff.isCursed()) {
