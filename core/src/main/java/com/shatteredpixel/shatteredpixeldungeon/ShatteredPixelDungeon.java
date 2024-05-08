@@ -181,4 +181,10 @@ public class ShatteredPixelDungeon extends Game {
 	public static void updateSystemUI() {
 		platform.updateSystemUI();
 	}
+
+	private static String log = "";
+	public static void appendLog(String string) {
+		log += "\n\n" + string;
+	}
+
 }
