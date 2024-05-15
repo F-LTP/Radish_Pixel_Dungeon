@@ -274,6 +274,12 @@ public class ItemSpriteSheet {
 	public static final int HOLYANKH		= WEP_TIER4+6;
 	public static final int HEADCLEAVER		= WEP_TIER4-1;
 	public static final int CROSSBOW_C		= xy(15,6);
+
+	public static final int REPAIRV2 = WEP_TIER4+14;
+
+	public static final int SKYSPS = WEP_TIER4+18;
+	public static final int FOGSWORD = WEP_TIER4+19;
+
 	static{
 		assignItemRect(LONGSWORD,       15, 15);
 		assignItemRect(BATTLE_AXE,      16, 16);
@@ -284,6 +290,8 @@ public class ItemSpriteSheet {
 		assignItemRect(HOLYANKH,		16,14);
 		assignItemRect(HEADCLEAVER,		16,16);
 		assignItemRect(CROSSBOW_C,		16,16);
+
+		assignItemRect(REPAIRV2,		14,15);
 	}
 
 	private static final int WEP_TIER5      =                               xy(1, 9);   //8 slots
@@ -304,6 +312,8 @@ public class ItemSpriteSheet {
 	public static final int WATERWHEEL		= WEP_TIER5+15;
 	public static final int AXE_D		= WEP_TIER5+16;
 	public static final int TONFA		= WEP_TIER5+17;
+	public static final int CALLHAMR		= WEP_TIER5+19;
+	public static final int GIANTKILL		= WEP_TIER5+23;
 
 	public static final int SCYTHE			= WEP_TIER4-2;
 	static{
