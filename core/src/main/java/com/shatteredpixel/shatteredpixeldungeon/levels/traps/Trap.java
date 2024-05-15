@@ -23,8 +23,6 @@ package com.shatteredpixel.shatteredpixeldungeon.levels.traps;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
-import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.watabou.noosa.audio.Sample;
@@ -60,6 +58,10 @@ public abstract class Trap implements Bundlable {
 
 	public boolean visible;
 	public boolean active = true;
+
+	//Only Repair 一次性修复陷阱
+	public boolean onlyRepair = true;
+
 	public boolean disarmedByActivation = true;
 	
 	public boolean canBeHidden = true;
@@ -118,12 +120,17 @@ public abstract class Trap implements Bundlable {
 	private static final String VISIBLE	= "visible";
 	private static final String ACTIVE = "active";
 
+	private static final String ONLYREPAIR = "onlyRepair";
+
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		pos = bundle.getInt( POS );
 		visible = bundle.getBoolean( VISIBLE );
 		if (bundle.contains(ACTIVE)){
 			active = bundle.getBoolean(ACTIVE);
+		}
+		if(bundle.contains(ONLYREPAIR)){
+			onlyRepair = bundle.getBoolean(ONLYREPAIR);
 		}
 	}
 
@@ -132,5 +139,6 @@ public abstract class Trap implements Bundlable {
 		bundle.put( POS, pos );
 		bundle.put( VISIBLE, visible );
 		bundle.put( ACTIVE, active );
+		bundle.put( ONLYREPAIR,onlyRepair);
 	}
 }
