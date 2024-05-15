@@ -32,7 +32,7 @@ public class Albino extends Rat {
 
 	{
 		spriteClass = AlbinoSprite.class;
-		
+		properties.add(Property.ELITES);
 		HP = HT = 15;
 		EXP = 2;
 		

@@ -40,7 +40,7 @@ public class DM201 extends DM200 {
 
 		properties.add(Property.IMMOVABLE);
 		properties.add(Property.HEADLESS);
-
+		properties.add(Property.ELITES);
 		HUNTING = new Mob.Hunting();
 	}
 

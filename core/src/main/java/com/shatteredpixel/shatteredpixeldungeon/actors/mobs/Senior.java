@@ -29,7 +29,7 @@ public class Senior extends Monk {
 
 	{
 		spriteClass = SeniorSprite.class;
-
+		properties.add(Property.ELITES);
 		loot = new Pasty();
 		lootChance = 1f;
 	}

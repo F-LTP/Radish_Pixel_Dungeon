@@ -35,7 +35,7 @@ public class Acidic extends Scorpio {
 		spriteClass = AcidicSprite.class;
 		
 		properties.add(Property.ACIDIC);
-
+		properties.add(Property.ELITES);
 		loot = new PotionOfExperience();
 		lootChance = 1f;
 	}
