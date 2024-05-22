@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Recipe;
@@ -38,6 +39,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportat
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTerror;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTransmutation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -48,8 +50,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public abstract class ExoticScroll extends Scroll {
-	
-	
+
 	public static final HashMap<Class<?extends Scroll>, Class<?extends ExoticScroll>> regToExo = new HashMap<>();
 	public static final HashMap<Class<?extends ExoticScroll>, Class<?extends Scroll>> exoToReg = new HashMap<>();
 	static{
@@ -92,11 +93,47 @@ public abstract class ExoticScroll extends Scroll {
 
 	@Override
 	public void MagicStone(boolean log,boolean original){
-		Scroll recoveredScroll = (Scroll) Reflection.newInstance(exoToReg.get(this.getClass()));
+		Scroll recoveredScroll = Reflection.newInstance(exoToReg.get(this.getClass()));
 		if(Random.Int(4)==0 && Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 2){
 			Dungeon.level.drop(recoveredScroll, curUser.pos);
 			if (log) {
 				GLog.p(Messages.get(Scroll.class, "exscrollToscroll", recoveredScroll.name()));
+			}
+		}
+	}
+
+	public static HashMap<Class<? extends ExoticScroll>, Float> scrollChances = new HashMap<>();
+	static{
+		scrollChances.put( ScrollOfDivination.class,      3f );
+		scrollChances.put( ScrollOfEnchantment.class,   2f );
+		scrollChances.put( ScrollOfAntiMagic.class,  2f );
+		scrollChances.put( ScrollOfSirensSong.class,   2f );
+		scrollChances.put( ScrollOfChallenge.class,    2f );
+		scrollChances.put( ScrollOfDread.class,       2f );
+		scrollChances.put( ScrollOfMysticalEnergy.class,   2f );
+		scrollChances.put( ScrollOfForesight.class,          2f );
+		scrollChances.put( ScrollOfPassage.class, 2f );
+		scrollChances.put( ScrollOfPsionicBlast.class,        2f );
+		scrollChances.put( ScrollOfPrismaticImage.class, 1f );
+		scrollChances.put( ScrollOfMetamorphosis.class, 1f );
+	}
+
+	@Override
+	public void ShadowBooks(Hero hero){
+		//确保是装备了 ShadowBooks
+		if(hero.belongings.weapon instanceof ShadowBooks){
+			ShadowBooks sos = (ShadowBooks) hero.belongings.weapon;
+			//获取概率 成功进行
+			// keptThoughLostInvent 检查如果未祝福十字架后是否存在 （即玩家是否保留）
+			if(sos.aloneDoubleChance() && !sos.keptThoughLostInvent){
+				ExoticScroll s = Reflection.newInstance(Random.chances(scrollChances));
+				s.anonymize();
+				curItem = s;
+				sos.AloneChance *= 2;
+				s.doRead();
+			} else {
+				//失败即可恢复为正常概率
+				sos.AloneChance = 1;
 			}
 		}
 	}

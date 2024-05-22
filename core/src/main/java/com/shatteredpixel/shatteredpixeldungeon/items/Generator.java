@@ -136,6 +136,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Cutterhead;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dagger;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Darksword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EchoplexHammer;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EndGuard;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GiantKiller;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Grimtooth;
@@ -150,6 +151,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Katar;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RottenLance;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RunicBlade;
@@ -158,6 +160,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scimitar;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ScorpionCrossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Shortsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SilverSting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SnakeSpear;
@@ -399,8 +402,9 @@ public class Generator {
 					BladeShield.class,
 					BoneClaw.class,
 					Spanner.class,
+					Rlyeh.class
 			};
-			WEP_T2.probs = new float[]{ 6, 5, 5, 5, 5, 5, 5, 5 };
+			WEP_T2.probs = new float[]{ 6, 5, 5, 5, 5, 5, 5, 5, 5 };
 
 			WEP_T2_NEW.classes = new Class<?>[]{
 					Glasssword.class,
@@ -444,9 +448,11 @@ public class Generator {
 					RunicBlade.class,
 					Grimtooth.class,
 					Crossbow.class,
-					CelestialSphere.class
+					CelestialSphere.class,
+					EndGuard.class,
+					ShadowBooks.class,
 			};
-			WEP_T4.probs = new float[]{ 5, 5, 5, 5, 5, 5, 4, 5, 4, 5 };
+			WEP_T4.probs = new float[]{ 5, 5, 5, 5, 5, 5, 4, 5, 4, 5, 5, 5 };
 
 			WEP_T4_NEW.classes = new Class<?>[]{
 					Bloodblade.class,

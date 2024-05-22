@@ -84,10 +84,13 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CelestialSphere;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dagger;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EchoplexHammer;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EndGuard;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GiantKiller;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gloves;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Spanner;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingKnife;
@@ -126,8 +129,10 @@ public enum HeroClass {
 			new GiantKiller().collect();
 			new FogSword().collect();
 			new EchoplexHammer().collect();
+			new ShadowBooks().collect();
 			new CelestialSphere().collect();
-			//new Crowbar().collect();
+			new Rlyeh().collect();
+			new EndGuard().collect();
 
 			new MobPlacer().collect();
 

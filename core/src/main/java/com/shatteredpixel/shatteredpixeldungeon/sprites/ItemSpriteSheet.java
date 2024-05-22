@@ -315,6 +315,8 @@ public class ItemSpriteSheet {
 	public static final int CALLHAMR		= WEP_TIER5+19;
 	public static final int GIANTKILL		= WEP_TIER5+23;
 
+	public static final int ENDDAY_KILL		= WEP_TIER5+29;
+
 	public static final int SCYTHE			= WEP_TIER4-2;
 	static{
 		assignItemRect(GREATSWORD,  16, 16);
@@ -416,6 +418,12 @@ public class ItemSpriteSheet {
 	public static final int ARMOR_ROGUE     = ARMOR+8;
 	public static final int ARMOR_HUNTRESS  = ARMOR+9;
 	public static final int ARMOR_RAT		= ARMOR+12;
+
+	public static final int RLYEH_BOOK		= ARMOR+25;
+
+	public static final int SHADOW_BOOK		= ARMOR+27;
+
+	//TIP-DARTS
 	public static final int ARMOR_ENERGY1	= TIPPED_DARTS+14;
 	public static final int ARMOR_ENERGY2	= TIPPED_DARTS+12;
 	public static final int ARMOR_SILVERSCALE	= TIPPED_DARTS+13;

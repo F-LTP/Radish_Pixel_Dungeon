@@ -22,6 +22,9 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls;
 
 import static com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll.ScrollToStone.stones;
+import static com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll.exoToReg;
+import static com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll.regToExo;
+import static com.shatteredpixel.shatteredpixeldungeon.items.spells.ArcaneCatalyst.scrollChances;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
@@ -50,6 +53,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFlock;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfIntuition;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfShock;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
@@ -109,8 +113,8 @@ public abstract class Scroll extends Item {
 		ArrayList<Class<?extends Item>> classes = new ArrayList<>();
 		for (Item i : items){
 			if (i instanceof ExoticScroll){
-				if (!classes.contains(ExoticScroll.exoToReg.get(i.getClass()))){
-					classes.add(ExoticScroll.exoToReg.get(i.getClass()));
+				if (!classes.contains(exoToReg.get(i.getClass()))){
+					classes.add(exoToReg.get(i.getClass()));
 				}
 			} else if (i instanceof Scroll){
 				if (!classes.contains(i.getClass())){
@@ -174,14 +178,49 @@ public abstract class Scroll extends Item {
 			}
 		}
 	}
-	
+
+	public void ShadowBooks(Hero hero){
+		//确保是装备了 ShadowBooks
+		if(hero.belongings.weapon instanceof ShadowBooks){
+			ShadowBooks sos = (ShadowBooks) hero.belongings.weapon;
+			//获取概率 成功进行
+			// keptThoughLostInvent 检查如果未祝福十字架后是否存在 （即玩家是否保留）
+			if(sos.aloneToChance() && !sos.keptThoughLostInvent){
+				Scroll s = Reflection.newInstance(Random.chances(scrollChances));
+				s.anonymize();
+				sos.AloneChance *= 2;
+				curItem = s;
+				s.doRead();
+			} else {
+				//失败即可恢复为正常概率
+				sos.AloneChance = 1;
+			}
+		}
+	}
+
+	public void ShadowExBooks(Hero hero){
+		//确保是装备了 ShadowBooks
+		if(hero.belongings.weapon instanceof ShadowBooks){
+			ShadowBooks sos = (ShadowBooks) hero.belongings.weapon;
+			//获取概率 成功进行
+			// keptThoughLostInvent 检查如果未祝福十字架后是否存在 （即玩家是否保留）
+			if(sos.aloneToChance() && !sos.keptThoughLostInvent){
+				Scroll s= Reflection.newInstance(regToExo.get(this.getClass()));
+				s.anonymize();
+				curItem = s;
+				sos.AloneChance *= 2;
+				s.doRead();
+			} else {
+				//失败即可恢复为正常概率
+				sos.AloneChance = 1;
+			}
+		}
+	}
+
 	@Override
 	public void execute( Hero hero, String action ) {
-
 		super.execute( hero, action );
-
 		if (action.equals( AC_READ )) {
-			
 			if (hero.buff(MagicImmune.class) != null){
 				GLog.w( Messages.get(this, "no_magic") );
 			} else if (hero.buff( Blindness.class ) != null) {
@@ -193,6 +232,7 @@ public abstract class Scroll extends Item {
 			} else {
 				MagicStone(true,true);
 				curUser = hero;
+				ShadowBooks(hero);
 				curItem = detach( hero.belongings.backpack );
 				doRead();
 			}
@@ -302,8 +342,8 @@ public abstract class Scroll extends Item {
 		
 		@Override
 		public boolean isSimilar(Item item) {
-			return ExoticScroll.regToExo.containsKey(item.getClass())
-					|| ExoticScroll.regToExo.containsValue(item.getClass());
+			return regToExo.containsKey(item.getClass())
+					|| regToExo.containsValue(item.getClass());
 		}
 		
 		@Override

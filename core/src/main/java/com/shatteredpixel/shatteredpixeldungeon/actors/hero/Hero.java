@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Bones;
@@ -71,6 +73,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Monk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.custom.buffs.GameTracker;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CheckedCell;
@@ -133,7 +136,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CelestialSphere;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
@@ -579,6 +584,11 @@ public class Hero extends Char {
 
 	@Override
 	public String defenseVerb() {
+
+		if (belongings.weapon() instanceof FogSword) {
+			Buff.affect(this, Invisibility.class,2f);
+		}
+
 		Combo.ParryTracker parry = buff(Combo.ParryTracker.class);
 		if (parry == null){
 			return super.defenseVerb();
@@ -1295,19 +1305,66 @@ public class Hero extends Char {
 		}
 		resting = fullRest;
 	}
-	
+
+	/**
+	 * 拉莱耶文本 自相残杀伤害 英雄<br>
+	 * @param enemy 敌人<br>
+	 * @param damage 伤害
+	 */
+	public void RlyehHeroDamage (Char enemy,int damage){
+		if(hero.belongings.weapon() instanceof Rlyeh){
+			Rlyeh w2 = (Rlyeh) hero.belongings.weapon;
+			if(w2.HeroChance()){
+				damage(hero.belongings.weapon.damageRoll(hero),new Rlyeh());
+				//因为再处理无伤害会更麻烦，所以这里改成打多少回多少
+				enemy.HP += Math.min(enemy.HT, damage);
+				//一个神奇的特性会导致满血额外+1点血量，所以-1
+				if(enemy.HP == enemy.HT){
+					enemy.damage(1,new Rlyeh());
+				}
+				if(!isAlive()){
+					Badges.validateDeathFromFriendlyMagic();
+				}
+			}
+		} else {
+			for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])){
+				if (mob instanceof Statue) {
+					if(((Statue) mob).weapon instanceof Rlyeh){
+						Rlyeh w2 =(Rlyeh) ((Statue) mob).weapon;
+						if(w2.HeroChance()){
+							damage(damage, new Rlyeh());
+							enemy.HP += Math.min(enemy.HT, damage);
+							if(!enemy.isAlive() && enemy == hero){
+								Badges.validateDeathFromEnemyMagic();
+							}
+							if(enemy.HP == enemy.HT){
+								enemy.damage(1,new Rlyeh());
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	@Override
 	public int attackProc( final Char enemy, int damage ) {
 		damage = super.attackProc( enemy, damage );
 		KindOfWeapon wep = belongings.weapon();
 
-		//天球仪 法伤
+
+		if(Dungeon.level.distance(enemy.pos,pos)<=1) {
+			RlyehHeroDamage(enemy, damage);
+		}
+
+
 		if (wep instanceof CelestialSphere) {
 			int magicDamage;
 			magicDamage = Random.NormalIntRange(wep.min(wep.level()),wep.max(wep.level()));
 			enemy.damage(magicDamage, new DM100.LightningBolt());
-			return 0;
+			damage = wep.proc( this, enemy,0 );
 		}
+
 
 		if(wep != null){
 			damage = wep.proc( this, enemy, damage );
@@ -2296,6 +2353,15 @@ public class Hero extends Char {
 		MagicalHolster holster = belongings.getItem(MagicalHolster.class);
 
 		Buff.affect(this, LostInventory.class);
+
+		//重生后验证 幻影之书 拉莱耶 合理性
+		Rlyeh w2 = (Rlyeh) hero.belongings.weapon;
+		if(w2.keptThoughLostInvent && hero.buff(LostInventory.class) != null){
+			Buff.affect(hero, Rlyeh.StateProject.class);
+		}
+
+
+
 		Buff.affect(this, Invisibility.class, 3f);
 		//lost inventory is dropped in interlevelscene
 

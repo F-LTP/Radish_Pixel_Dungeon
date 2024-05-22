@@ -352,7 +352,7 @@ public abstract class Char extends Actor {
 	public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
 
 		if (enemy == null) return false;
-		
+
 		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos];
 
 		if (enemy.isInvulnerable(getClass())) {
@@ -638,6 +638,7 @@ public abstract class Char extends Actor {
 				}
 			}
 		}
+
 		float acuRoll = Random.Float( acuStat );
 		float bless_adj_a=1.25f,bless_adj_d=1.25f;
 		if (hero.buff(RingOfBenediction.Benediction.class) != null) {
@@ -707,6 +708,7 @@ public abstract class Char extends Actor {
 	// atm attack is always post-armor and defence is already pre-armor
 	
 	public int attackProc( Char enemy, int damage ) {
+
 		for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
 			buff.onAttackProc( enemy );
 		}

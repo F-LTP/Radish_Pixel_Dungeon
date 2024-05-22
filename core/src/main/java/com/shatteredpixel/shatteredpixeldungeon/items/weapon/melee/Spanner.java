@@ -30,24 +30,16 @@ public class Spanner extends MeleeWeapon {
     }
 
     @Override
-    public String defaultAction() {
-       if(isEquipped(hero)){
-           return defaultAction = AC_REPAIR;
-       }
-       return AC_THROW;
-    }
-
-    @Override
     public ArrayList<String> actions(Hero hero) {
         ArrayList<String> actions = super.actions(hero);
-        if(isEquipped(hero))actions.add(AC_REPAIR);
+        actions.add(AC_REPAIR);
         return actions;
     }
 
     @Override
     public void execute(Hero hero, String action) {
         super.execute(hero, action);
-        if(action.equals(AC_REPAIR) && !cursed){
+        if(action.equals(AC_REPAIR) && !cursed && isEquipped(hero)){
             GameScene.selectCell(porter);
         }
 
@@ -77,6 +69,10 @@ public class Spanner extends MeleeWeapon {
                 if (target == curUser.pos) {
                     GLog.i(Messages.get(this, "select_cannot"));
                     return;
+                }
+
+                if(!curItem.isEquipped(hero)){
+                    GLog.n(Messages.get(this,"youmus"));
                 }
 
                 try {

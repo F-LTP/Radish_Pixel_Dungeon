@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.wands;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -49,6 +51,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.TelekineticGrab;
 import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.SpellQueue;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EndGuard;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -204,24 +207,24 @@ public abstract class Wand extends Item {
 
 	//TODO Consider externalizing char awareness buff
 	protected static void wandProc(Char target, int wandLevel, int chargesUsed){
-		if (Dungeon.hero.hasTalent(Talent.ARCANE_VISION)) {
-			int dur = 5 + 5*Dungeon.hero.pointsInTalent(Talent.ARCANE_VISION);
-			Buff.append(Dungeon.hero, TalismanOfForesight.CharAwareness.class, dur).charID = target.id();
+		if (hero.hasTalent(Talent.ARCANE_VISION)) {
+			int dur = 5 + 5* hero.pointsInTalent(Talent.ARCANE_VISION);
+			Buff.append(hero, TalismanOfForesight.CharAwareness.class, dur).charID = target.id();
 		}
 
-		if (target != Dungeon.hero &&
-				Dungeon.hero.subClass == HeroSubClass.WARLOCK &&
+		if (target != hero &&
+				hero.subClass == HeroSubClass.WARLOCK &&
 				//standard 1 - 0.92^x chance, plus 7%. Starts at 15%
 				Random.Float() > (Math.pow(0.92f, (wandLevel*chargesUsed)+1) - 0.07f)){
 			SoulMark.prolong(target, SoulMark.class, SoulMark.DURATION + wandLevel);
 		}
-		if (Dungeon.hero.pointsInTalent(Talent.PHASE_FILLING)>2){
+		if (hero.pointsInTalent(Talent.PHASE_FILLING)>2){
 			if (target.buff(PinCushion.class) != null){
 
 				Item item = target.buff(PinCushion.class).grabOne();
 
-				if (item.doPickUpInstantly(Dungeon.hero, target.pos)) {
-					GLog.i( Messages.capitalize(Messages.get(Dungeon.hero, "you_now_have", item.name())) );
+				if (item.doPickUpInstantly(hero, target.pos)) {
+					GLog.i( Messages.capitalize(Messages.get(hero, "you_now_have", item.name())) );
 				} else {
 					GLog.w(Messages.get(TelekineticGrab.class, "cant_grab"));
 					Dungeon.level.drop(item, target.pos).sprite.drop();
@@ -284,7 +287,7 @@ public abstract class Wand extends Item {
 			desc += "\n\n" + Messages.get(Wand.class, "not_cursed");
 		}
 
-		if (Dungeon.hero.subClass == HeroSubClass.BATTLEMAGE){
+		if (hero.subClass == HeroSubClass.BATTLEMAGE){
 			desc += "\n\n" + Messages.get(this, "bmage_desc");
 		}
 
@@ -410,10 +413,10 @@ public abstract class Wand extends Item {
 	}
 	public void spellUsed(){
 		curCharges -= 2;
-		if (Dungeon.hero.hasTalent(Talent.SPELL_QUEUE)){
-			SpellQueue mySq=Dungeon.hero.belongings.getItem(SpellQueue.class);
+		if (hero.hasTalent(Talent.SPELL_QUEUE)){
+			SpellQueue mySq= hero.belongings.getItem(SpellQueue.class);
 			if (mySq!=null) mySq.updateImage();
-			if (Dungeon.hero.pointsInTalent(Talent.SPELL_QUEUE)>2){
+			if (hero.pointsInTalent(Talent.SPELL_QUEUE)>2){
 				partialCharge+=0.33f;
 			}
 		}
@@ -422,10 +425,10 @@ public abstract class Wand extends Item {
 	}
 	protected void wandUsed() {
 		if (!isIdentified()) {
-			float uses = Math.min( availableUsesToID, Talent.itemIDSpeedFactor(Dungeon.hero, this) );
+			float uses = Math.min( availableUsesToID, Talent.itemIDSpeedFactor(hero, this) );
 			availableUsesToID -= uses;
 			usesLeftToID -= uses;
-			if (usesLeftToID <= 0 || Dungeon.hero.pointsInTalent(Talent.SCHOLARS_INTUITION) == 2) {
+			if (usesLeftToID <= 0 || hero.pointsInTalent(Talent.SCHOLARS_INTUITION) == 2) {
 				identify();
 				GLog.p( Messages.get(Wand.class, "identify") );
 				Badges.validateItemLevelAquired( this );
@@ -433,15 +436,22 @@ public abstract class Wand extends Item {
 		}
 
 		//inside staff
-		if (charger != null && charger.target == Dungeon.hero && !Dungeon.hero.belongings.contains(this)){
-			if (Dungeon.hero.hasTalent(Talent.EXCESS_CHARGE) && curCharges >= maxCharges){
-				Buff.affect(Dungeon.hero, Barrier.class).setShield(Math.round(buffedLvl()*0.67f*Dungeon.hero.pointsInTalent(Talent.EXCESS_CHARGE)));
+		if (charger != null && charger.target == hero && !hero.belongings.contains(this)){
+			if (hero.hasTalent(Talent.EXCESS_CHARGE) && curCharges >= maxCharges){
+				if(hero.belongings.weapon() instanceof EndGuard) {
+					EndGuard w2 = (EndGuard) hero.belongings.weapon;
+					if (w2 != null) {
+						Buff.affect(hero, Barrier.class).setShield(Math.round(buffedLvl() * 0.67f * hero.pointsInTalent(Talent.EXCESS_CHARGE) + (0.05f + 0.025f * w2.level())));
+					}
+				}
+			} else {
+				Buff.affect(hero, Barrier.class).setShield(Math.round(buffedLvl()*0.67f* hero.pointsInTalent(Talent.EXCESS_CHARGE)));
 			}
 		}
 		
 		curCharges -= cursed ? 1 : chargesPerCast();
-		if (Dungeon.hero.hasTalent(Talent.SPELL_QUEUE)){
-			SpellQueue mySq=Dungeon.hero.belongings.getItem(SpellQueue.class);
+		if (hero.hasTalent(Talent.SPELL_QUEUE)){
+			SpellQueue mySq= hero.belongings.getItem(SpellQueue.class);
 			if (mySq!=null) mySq.updateImage();
 		}
 		//remove magic charge at a higher priority, if we are benefiting from it are and not the
@@ -461,53 +471,72 @@ public abstract class Wand extends Item {
 		}
 
 		if (charger != null
-				&& charger.target == Dungeon.hero){
+				&& charger.target == hero){
 
 			//if the wand is owned by the hero, but not in their inventory, it must be in the staff
-			if (!Dungeon.hero.belongings.contains(this)) {
-				if (curCharges == 0 && Dungeon.hero.hasTalent(Talent.BACKUP_BARRIER)) {
+			if (!hero.belongings.contains(this)) {
+				if (curCharges == 0 && hero.hasTalent(Talent.BACKUP_BARRIER)) {
+					if(hero.belongings.weapon() instanceof EndGuard) {
+						EndGuard w2 = (EndGuard) hero.belongings.weapon;
+						if (w2 != null) {
+							//grants 3/5 shielding
+							Buff.affect(hero, Barrier.class).setShield((int) (1 + 2 * hero.pointsInTalent(Talent.BACKUP_BARRIER) + (0.05f + 0.025f * w2.level())));
+						}
+					} else {
 					//grants 3/5 shielding
-					Buff.affect(Dungeon.hero, Barrier.class).setShield(1 + 2 * Dungeon.hero.pointsInTalent(Talent.BACKUP_BARRIER));
+					Buff.affect(hero, Barrier.class).setShield(1 + 2 * hero.pointsInTalent(Talent.BACKUP_BARRIER));
 				}
-				if (Dungeon.hero.hasTalent(Talent.EMPOWERED_STRIKE)) {
-					Buff.prolong(Dungeon.hero, Talent.EmpoweredStrikeTracker.class, 10f);
+
+
+				}
+				if (hero.hasTalent(Talent.EMPOWERED_STRIKE)) {
+					Buff.prolong(hero, Talent.EmpoweredStrikeTracker.class, 10f);
 				}
 
 			//otherwise process logic for metamorphed backup barrier
 			} else if (curCharges == 0
-					&& Dungeon.hero.heroClass != HeroClass.MAGE
-					&& Dungeon.hero.hasTalent(Talent.BACKUP_BARRIER)){
+					&& hero.heroClass != HeroClass.MAGE
+					&& hero.hasTalent(Talent.BACKUP_BARRIER)){
 				boolean highest = true;
-				for (Item i : Dungeon.hero.belongings.getAllItems(Wand.class)){
+				for (Item i : hero.belongings.getAllItems(Wand.class)){
 					if (i.level() > level()){
 						highest = false;
 					}
 				}
 				if (highest){
-					//grants 3/5 shielding
-					Buff.affect(Dungeon.hero, Barrier.class).setShield(1 + 2 * Dungeon.hero.pointsInTalent(Talent.BACKUP_BARRIER));
+					if(hero.belongings.weapon() instanceof EndGuard) {
+						EndGuard w2 = (EndGuard) hero.belongings.weapon;
+						if (w2 != null) {
+							//grants 3/5 shielding
+							Buff.affect(hero, Barrier.class).setShield((int) (1 + 2 * hero.pointsInTalent(Talent.BACKUP_BARRIER) + (0.05f + 0.025f * w2.level())));
+						}
+					} else {
+						//grants 3/5 shielding
+						Buff.affect(hero, Barrier.class).setShield(1 + 2 * hero.pointsInTalent(Talent.BACKUP_BARRIER));
+					}
+
 				}
 			}
 		}
 		Invisibility.dispel();
 		updateQuickslot();
 
-		if (Dungeon.hero.pointsInTalent(Talent.PHASE_FILLING)>3 && Random.Float()<0.5f){
-			for (Item item : Dungeon.hero.belongings){
+		if (hero.pointsInTalent(Talent.PHASE_FILLING)>3 && Random.Float()<0.5f){
+			for (Item item : hero.belongings){
 				if (item instanceof MissileWeapon && ((MissileWeapon) item).durabilityLeft()< MissileWeapon.MAX_DURABILITY){
 					((MissileWeapon) item).repair(((MissileWeapon) item).durabilityPerUse());
 					break;
 				}
 			}
 		}
-		if (Dungeon.hero.hasTalent(Talent.DUEL_DANCE)) {
-			if (Dungeon.hero.buff(Talent.DuelDanceWandTracker.class) != null) {
-				Buff.detach(Dungeon.hero, Talent.DuelDanceWandTracker.class);
-				curUser.spendAndNext( TIME_TO_ZAP *(0.84f - 0.17f * Dungeon.hero.pointsInTalent(Talent.DUEL_DANCE)));
+		if (hero.hasTalent(Talent.DUEL_DANCE)) {
+			if (hero.buff(Talent.DuelDanceWandTracker.class) != null) {
+				Buff.detach(hero, Talent.DuelDanceWandTracker.class);
+				curUser.spendAndNext( TIME_TO_ZAP *(0.84f - 0.17f * hero.pointsInTalent(Talent.DUEL_DANCE)));
 			}else
 				curUser.spendAndNext( TIME_TO_ZAP );
-			if (Dungeon.hero.cooldown()>=0)
-				Buff.affect(Dungeon.hero, Talent.DuelDanceMissileTracker.class, Dungeon.hero.cooldown());
+			if (hero.cooldown()>=0)
+				Buff.affect(hero, Talent.DuelDanceMissileTracker.class, hero.cooldown());
 		}
 		else
 			curUser.spendAndNext( TIME_TO_ZAP );
@@ -663,7 +692,16 @@ public abstract class Wand extends Item {
 					if (target == curUser.pos && curUser.hasTalent(Talent.SHIELD_BATTERY)){
 						float shield = curUser.HT * (0.04f*curWand.curCharges);
 						if (curUser.pointsInTalent(Talent.SHIELD_BATTERY) == 2) shield *= 1.5f;
-						Buff.affect(curUser, Barrier.class).setShield(Math.round(shield));
+
+						if(hero.belongings.weapon() instanceof EndGuard) {
+							EndGuard w2 = (EndGuard) hero.belongings.weapon;
+							if (w2 != null) {
+								Buff.affect(curUser, Barrier.class).setShield((int) (Math.round(shield) + ((0.05f + 0.025f * w2.level()) * shield)));
+							}
+						} else {
+							Buff.affect(curUser, Barrier.class).setShield(Math.round(shield));
+						}
+
 						curWand.curCharges = 0;
 						curUser.sprite.operate(curUser.pos);
 						Sample.INSTANCE.play(Assets.Sounds.CHARGEUP);

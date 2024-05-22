@@ -45,8 +45,18 @@ public class EchoplexHammer extends MeleeWeapon {
         return super.proc(attacker, defender, damage);
     }
 
+    @Override
     public String desc() {
-        return Messages.get(this, "desc",10+3*level());
+
+        String desc;
+
+        if(isIdentified()){
+            desc = Messages.get(this, "desc",10+3*level());
+        } else {
+            desc = Messages.get(this, "normal_desc",10);
+        }
+
+        return desc;
     }
 
 }
