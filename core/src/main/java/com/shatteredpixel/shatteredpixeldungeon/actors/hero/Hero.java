@@ -2354,13 +2354,13 @@ public class Hero extends Char {
 
 		Buff.affect(this, LostInventory.class);
 
-		//重生后验证 幻影之书 拉莱耶 合理性
-		Rlyeh w2 = (Rlyeh) hero.belongings.weapon;
-		if(w2.keptThoughLostInvent && hero.buff(LostInventory.class) != null){
-			Buff.affect(hero, Rlyeh.StateProject.class);
+		//重生后验证 拉莱耶 合理性
+		Weapon w2 = (Weapon) hero.belongings.weapon;
+		if(w2 instanceof Rlyeh){
+			if(w2.keptThoughLostInvent && hero.buff(LostInventory.class) != null){
+				Buff.affect(this, Rlyeh.StateProject.class);
+			}
 		}
-
-
 
 		Buff.affect(this, Invisibility.class, 3f);
 		//lost inventory is dropped in interlevelscene

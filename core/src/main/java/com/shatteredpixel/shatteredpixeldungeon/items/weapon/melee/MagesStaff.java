@@ -25,12 +25,13 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ElmoParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArcaneResin;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -38,6 +39,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfEnchantment;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorrosion;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorruption;
@@ -49,9 +52,11 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndUseItem;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
@@ -67,6 +72,7 @@ public class MagesStaff extends MeleeWeapon {
 
 	public static final String AC_IMBUE = "IMBUE";
 	public static final String AC_ZAP	= "ZAP";
+	public static final String AC_UPDATE = "UPDATE";
 
 	private static final float STAFF_SCALE_FACTOR = 0.75f;
 
@@ -110,6 +116,9 @@ public class MagesStaff extends MeleeWeapon {
 		if (wand!= null && wand.curCharges > 0) {
 			actions.add( AC_ZAP );
 		}
+		if (Dungeon.hero.pointsInTalent(Talent.MAGIC_WORKMAN) > 0 ){
+			actions.add( AC_UPDATE );
+		}
 		return actions;
 	}
 
@@ -134,10 +143,42 @@ public class MagesStaff extends MeleeWeapon {
 				GameScene.show(new WndUseItem(null, this));
 				return;
 			}
-
-			if (cursed || hasCurseEnchant()) wand.cursed = true;
-			else                             wand.cursed = false;
+            wand.cursed = (cursed || hasCurseEnchant()) && Dungeon.hero.pointsInTalent(Talent.MAGIC_WORKMAN) < 3;
 			wand.execute(hero, AC_ZAP);
+		} else if (action.equals(AC_UPDATE)) {
+			ArcaneResinUse();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void ArcaneResinUse() {
+
+		ArcaneResin arcaneResin = Dungeon.hero.belongings.getItem(ArcaneResin.class);
+
+		int chance = Dungeon.hero.pointsInTalent(Talent.MAGIC_WORKMAN);
+
+		// Need AR must not null
+		if(arcaneResin != null){
+			switch (chance){
+				case 1:
+					Weapon item = this;
+					item.enchant();
+					curUser.sprite.emitter().start(Speck.factory(Speck.LIGHT), 0.1f, 5);
+					Enchanting.show(curUser, this);
+					GLog.p(Messages.get(MagesStaff.class,"en_ars"));
+				break;
+				case 2: case 3: case 4:
+					Weapon item2 = this;
+					final Weapon.Enchantment[] enchants = new Weapon.Enchantment[3];
+					Class<? extends Weapon.Enchantment> existing = ((Weapon) item2).enchantment != null ? ((Weapon) item2).enchantment.getClass() : null;
+					enchants[0] = Weapon.Enchantment.randomCommon( existing );
+					enchants[1] = Weapon.Enchantment.randomUncommon( existing );
+					enchants[2] = Weapon.Enchantment.random( existing, enchants[0].getClass(), enchants[1].getClass());
+					GameScene.show(new WndEnchantSelect((Weapon) item2, enchants[0], enchants[1], enchants[2]));
+				break;
+			}
+		} else {
+			GLog.w(Messages.get(MagesStaff.class,"need_ars"));
 		}
 	}
 
@@ -562,4 +603,63 @@ public class MagesStaff extends MeleeWeapon {
 		super.getCurse(extraEffect);
 		updateWand(true);
 	}
+
+	@SuppressWarnings("unchecked")
+	public static class WndEnchantSelect extends WndOptions {
+
+		private static Weapon wep;
+		private static Weapon.Enchantment[] enchantments;
+
+		public WndEnchantSelect(Weapon wep, Weapon.Enchantment ench1,
+								Weapon.Enchantment ench2, Weapon.Enchantment ench3){
+			super(new ItemSprite(new ScrollOfEnchantment()),
+					Messages.titleCase(new ScrollOfEnchantment().name()),
+					Messages.get(ScrollOfEnchantment.class, "weapon") +
+							"\n\n" +
+							Messages.get(ScrollOfEnchantment.class, "cancel_warn"),
+					ench1.name(),
+					ench2.name(),
+					ench3.name(),
+					Messages.get(ScrollOfEnchantment.class, "cancel"));
+			this.wep = wep;
+			enchantments = new Weapon.Enchantment[3];
+			enchantments[0] = ench1;
+			enchantments[1] = ench2;
+			enchantments[2] = ench3;
+		}
+
+		@Override
+		protected void onSelect(int index) {
+			if (index < 3) {
+				wep.enchant(enchantments[index]);
+				GLog.p(Messages.get(StoneOfEnchantment.class, "weapon"));
+				Sample.INSTANCE.play( Assets.Sounds.READ );
+				Enchanting.show(curUser, wep);
+				Talent.onUpgradeScrollUsed( Dungeon.hero );
+			}
+
+			wep = null;
+			enchantments = null;
+		}
+
+		@Override
+		protected boolean hasInfo(int index) {
+			return index < 3;
+		}
+
+		@Override
+		protected void onInfo( int index ) {
+			GameScene.show(new WndTitledMessage(
+					Icons.get(Icons.INFO),
+					Messages.titleCase(enchantments[index].name()),
+					enchantments[index].desc()));
+		}
+
+		@Override
+		public void onBackPressed() {
+			//do nothing, reader has to cancel
+		}
+
+	}
+
 }

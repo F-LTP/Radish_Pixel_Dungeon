@@ -437,16 +437,16 @@ public abstract class Wand extends Item {
 
 		//inside staff
 		if (charger != null && charger.target == hero && !hero.belongings.contains(this)){
-			if (hero.hasTalent(Talent.EXCESS_CHARGE) && curCharges >= maxCharges){
-				if(hero.belongings.weapon() instanceof EndGuard) {
+			if (hero.hasTalent(Talent.EXCESS_CHARGE) && curCharges >= maxCharges) {
+				if (hero.belongings.weapon() instanceof EndGuard) {
 					EndGuard w2 = (EndGuard) hero.belongings.weapon;
 					if (w2 != null) {
 						Buff.affect(hero, Barrier.class).setShield(Math.round(buffedLvl() * 0.67f * hero.pointsInTalent(Talent.EXCESS_CHARGE) + (0.05f + 0.025f * w2.level())));
 					}
 				}
-			} else {
-				Buff.affect(hero, Barrier.class).setShield(Math.round(buffedLvl()*0.67f* hero.pointsInTalent(Talent.EXCESS_CHARGE)));
 			}
+//				Buff.affect(hero, Barrier.class).setShield(Math.round(buffedLvl()*0.67f* hero.pointsInTalent(Talent.EXCESS_CHARGE)));
+//			}
 		}
 		
 		curCharges -= cursed ? 1 : chargesPerCast();

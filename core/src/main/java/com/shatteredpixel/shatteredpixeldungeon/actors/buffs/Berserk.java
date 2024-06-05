@@ -38,7 +38,6 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBerserk;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndCombo;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
@@ -52,7 +51,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		type = buffType.POSITIVE;
 	}
 
-	static float need[]={0.75f,0.75f,0.65f,0.5f,0.5f};
+	public static float[] need ={0.75f,0.75f,0.65f,0.5f,0.5f};
 	private enum State{
 		NORMAL, BERSERK, RECOVERING
 	}
@@ -140,7 +139,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 			if (powerLossBuffer > 0){
 				powerLossBuffer--;
 			} else {
-				power -= GameMath.gate(0.1f, power, 1f) * 0.067f * Math.pow((target.HP / (float) target.HT), 2);
+				power -= (float) (GameMath.gate(0.1f, power, 1f) * 0.067f * Math.pow((target.HP / (float) target.HT), 2));
 
 				if (power < 0.5f){
 					ActionIndicator.clearAction(this);
@@ -218,7 +217,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		if (power > 1f){
 			shieldMultiplier *= power;
 			levelRecovery *= 2f - power;
-			turnRecovery *= 2f - power;
+			turnRecovery *= (int) (2f - power);
 		}
 
 		WarriorShield shield = target.buff(WarriorShield.class);

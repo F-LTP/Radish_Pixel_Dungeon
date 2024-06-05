@@ -99,7 +99,7 @@ public enum Talent {
 	//Mage T3
 	SPELL_QUEUE(41, 3), ALLY_WARP(42, 3),
 	//TODO MAGE T4
-	MAGIC_REFINING(160,4 ),MAGIC_TACTICS(161,4),
+	MAGIC_REFINING(160,4 ),MAGIC_TACTICS(161,4),MAGIC_STICK(162,4),MAGIC_WORKMAN(163,4),
 	//Battlemage T3
 	EMPOWERED_STRIKE(43, 3), MYSTICAL_CHARGE(44, 3), EXCESS_CHARGE(45, 3),
 	//Warlock T3
@@ -404,6 +404,13 @@ public enum Talent {
 		if (talent == HOLD_BREATH){
 			Buff.affect(hero, HoldBreathTracker.class);
 		}
+
+		//TODO Need Maybe Buff Affect
+		//Mage T4 Magic-WORKMAN STAR 4
+//		if (talent == MAGIC_WORKMAN && Dungeon.hero.pointsInTalent(Talent.MAGIC_WORKMAN)>3){
+//			MagesStaff magesStaff = hero.belongings.getItem(MagesStaff.class);
+//			magesStaff.wand.maxCharges += 2;
+//		}
 	}
 
 	public static class CachedRationsDropped extends CounterBuff{{revivePersists = true;}};
@@ -829,14 +836,15 @@ public enum Talent {
 			case FREERUNNER:
 				Collections.addAll(tierTalents, KINETIC_ENERGY,STORM_RUSH);
 				break;
-			/*case BATTLEMAGE:
-				Collections.addAll(tierTalents, EMPOWERED_STRIKE, MYSTICAL_CHARGE, EXCESS_CHARGE);
+
+			case BATTLEMAGE:
+				Collections.addAll(tierTalents,MAGIC_STICK,MAGIC_WORKMAN);
 				break;
 			case WARLOCK:
 				Collections.addAll(tierTalents, SOUL_EATER, SOUL_SIPHON, NECROMANCERS_MINIONS);
 				break;
 
-			case SNIPER:
+			/*case SNIPER:
 				Collections.addAll(tierTalents, FARSIGHT, SHARED_ENCHANTMENT, SHARED_UPGRADES);
 				break;
 			case WARDEN:
