@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfKing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -363,7 +364,9 @@ public class Item implements Bundlable {
 	public int buffedLvl(){
 		if (Dungeon.hero.buff( Degrade.class ) != null) {
 			return Degrade.reduceLevel(level());
-		} else {
+		}else if( !( this instanceof RingOfKing ) ){
+			return (int)( level() * RingOfKing.updateMultiplier(Dungeon.hero) );
+		}else {
 			return level();
 		}
 	}
