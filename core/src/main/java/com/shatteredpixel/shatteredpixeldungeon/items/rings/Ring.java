@@ -41,7 +41,6 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 
@@ -64,6 +63,7 @@ public class Ring extends KindofMisc {
 			put("agate",ItemSpriteSheet.RING_AGATE);
 			put("diamond",ItemSpriteSheet.RING_DIAMOND);
 			put("coral",ItemSpriteSheet.RING_CORAL);
+			put("seed",ItemSpriteSheet.RING_PEARL);
 		}
 	};
 	

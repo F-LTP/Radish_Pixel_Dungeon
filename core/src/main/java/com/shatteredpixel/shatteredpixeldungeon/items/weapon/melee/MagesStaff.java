@@ -165,6 +165,7 @@ public class MagesStaff extends MeleeWeapon {
 					item.enchant();
 					curUser.sprite.emitter().start(Speck.factory(Speck.LIGHT), 0.1f, 5);
 					Enchanting.show(curUser, this);
+					arcaneResin.detach(curUser.belongings.backpack);
 					GLog.p(Messages.get(MagesStaff.class,"en_ars"));
 				break;
 				case 2: case 3: case 4:
@@ -175,6 +176,7 @@ public class MagesStaff extends MeleeWeapon {
 					enchants[1] = Weapon.Enchantment.randomUncommon( existing );
 					enchants[2] = Weapon.Enchantment.random( existing, enchants[0].getClass(), enchants[1].getClass());
 					GameScene.show(new WndEnchantSelect((Weapon) item2, enchants[0], enchants[1], enchants[2]));
+					arcaneResin.detach(curUser.belongings.backpack);
 				break;
 			}
 		} else {

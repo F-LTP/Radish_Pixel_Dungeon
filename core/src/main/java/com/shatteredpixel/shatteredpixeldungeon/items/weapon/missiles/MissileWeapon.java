@@ -217,6 +217,18 @@ abstract public class MissileWeapon extends Weapon {
 				}
 			}
 
+//			if (curUser.hasTalent(Talent.WAR_THROW) && curUser.heroClass != HeroClass.MAGE){
+//				if (Actor.findChar(cell) == enemy) {
+//					ArrayList<MagesStaff> ms = hero.belongings.getAllItems(MagesStaff.class);
+//					for (MagesStaff msr : ms.toArray(new MagesStaff[0])){
+//						if(msr != null){
+//							GameScene.add(Blob.seed(cell, 4, Fire.class));
+//						}
+//					}
+//
+//				}
+//			}
+
 			super.onThrow( cell );
 		} else {
 			if (!curUser.shoot( enemy, this )) {
