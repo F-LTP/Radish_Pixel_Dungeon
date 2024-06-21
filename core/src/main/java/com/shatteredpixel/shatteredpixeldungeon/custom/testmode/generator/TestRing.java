@@ -294,7 +294,7 @@ public class TestRing extends TestGenerator {
 
         private void layout() {
             o_category.setRect(0, GAP, WIDTH, 24);
-            t_selected.setPos(0, o_category.bottom() + 3 * GAP + t_row * BTN_SIZE);
+            t_selected.setPos(0, iconButtonsList.get(iconButtonsList.size() - 1).bottom() + GAP + 2 * GAP);
             o_level.setRect(0, t_selected.bottom() + GAP, WIDTH, 24);
             c_curse.setRect(0, o_level.bottom() + GAP, WIDTH, 18);
             b_create.setRect(0, c_curse.bottom()+GAP, WIDTH, 16);
@@ -316,9 +316,8 @@ public class TestRing extends TestGenerator {
         private void createImage() {
             float left;
             float top = GAP + o_category.bottom();
-            int placed = 0;
             int length = (category == RING_CAT ? ringList.size() : (category == WAND_CAT ? wandList.size() : 0));
-            t_row = (length-1)/r_limit+1;
+            int maxImageCount = 6;
             for (int i = 0; i < length; ++i) {
                 final int j = i;
                 IconButton btn = new IconButton() {
@@ -341,11 +340,11 @@ public class TestRing extends TestGenerator {
                     btn.icon(im);
                 }
 
-                left = (WIDTH - BTN_SIZE * ((i/r_limit+1<t_row)?r_limit:length-(t_row-1)*r_limit) )/2f;
-                btn.setRect(left+(placed-r_limit*(i/r_limit))*BTN_SIZE,top+GAP*(i/r_limit)+BTN_SIZE*(i/r_limit),BTN_SIZE,BTN_SIZE);
+                left = (WIDTH - BTN_SIZE * maxImageCount) / 2f;
+                int line = i / maxImageCount;
+                btn.setRect(left + (i - maxImageCount * line) * BTN_SIZE, top + GAP * line + BTN_SIZE * line, BTN_SIZE, BTN_SIZE);
 
                 add(btn);
-                placed++;
                 iconButtonsList.add(btn);
             }
         }
