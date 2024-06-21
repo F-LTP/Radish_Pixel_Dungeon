@@ -625,19 +625,19 @@ public abstract class Char extends Actor {
 		} else if (acuStat >= INFINITE_ACCURACY){
 			return true;
 		}
-		if (defender.buff(Axe_D.Executed.class)!=null){
-			if (defender.HP<defender.HT){
-				if (attacker instanceof Hero){
-					if (((Hero) attacker).belongings.weapon() instanceof Axe_D){
-						return true;
-					}
-				}else if (attacker instanceof Statue){
-					if (((Statue) attacker).weapon instanceof Axe_D){
-						return true;
-					}
+
+		if (defender.HP<defender.HT){
+			if (attacker instanceof Hero){
+				if (((Hero) attacker).belongings.weapon() instanceof Axe_D){
+					return true;
+				}
+			}else if (attacker instanceof Statue){
+				if (((Statue) attacker).weapon instanceof Axe_D){
+					return true;
 				}
 			}
 		}
+
 
 		float acuRoll = Random.Float( acuStat );
 		float bless_adj_a=1.25f,bless_adj_d=1.25f;

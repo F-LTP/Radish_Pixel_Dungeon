@@ -6,6 +6,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.audio.Sample;
@@ -33,16 +34,20 @@ public class EchoplexHammer extends MeleeWeapon {
 
     public int proc(Char attacker, Char defender, int damage ) {
         if (defender.HP <= damage){
-            Sample.INSTANCE.play( Assets.Sounds.DEGRADE );
-
-            for (Mob mob : Dungeon.level.mobs.toArray( new Mob[0] )) {
-                if (mob.alignment != Char.Alignment.ALLY && Dungeon.level.heroFOV[mob.pos]) {
-                    CellEmitter.center( mob.pos ).start( Speck.factory( Speck.SCREAM ), 0.3f, 3 );
-                    mob.damage(10+3*level(),this);
-                }
-            }
+            KillEffect(this);
         }
         return super.proc(attacker, defender, damage);
+    }
+
+    public static void KillEffect( Weapon weapon ){
+        Sample.INSTANCE.play( Assets.Sounds.DEGRADE );
+
+        for (Mob mob : Dungeon.level.mobs.toArray( new Mob[0] )) {
+            if (mob.alignment != Char.Alignment.ALLY && Dungeon.level.heroFOV[mob.pos]) {
+                CellEmitter.center( mob.pos ).start( Speck.factory( Speck.SCREAM ), 0.3f, 3 );
+                mob.damage(10 + 2 * weapon.level() , weapon );
+            }
+        }
     }
 
     @Override
@@ -51,7 +56,7 @@ public class EchoplexHammer extends MeleeWeapon {
         String desc;
 
         if(isIdentified()){
-            desc = Messages.get(this, "desc",10+3*level());
+            desc = Messages.get(this, "desc",10 + 2 * level());
         } else {
             desc = Messages.get(this, "normal_desc",10);
         }
