@@ -20,13 +20,13 @@ public class RingOfKing extends Ring {
         }
     }
 
-    public static float updateMultiplier( Char target ){
-        return (float)Math.pow(1.15, getBuffedBonus(target, KingUpdate.class));
-    }
-
     @Override
     protected RingBuff buff( ) {
-        return new RingOfKing.KingUpdate();
+        return new KingUpdate();
+    }
+
+    public static float updateMultiplier( Char target ){
+        return (float)Math.pow(1.15, getBuffedBonus(target, KingUpdate.class));
     }
 
     public class KingUpdate extends RingBuff {

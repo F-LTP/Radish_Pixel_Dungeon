@@ -209,8 +209,8 @@ public class TestMelee extends TestGenerator {
     private int maxSlots(int t){
         switch (t){
             case 1:return 4;
-            case 4: case 5:return 9;
-            case 2:default:return 7;
+            case 4: case 5:return 12;
+            case 2:default:return 9;
             case 3:return 8;
         }
     }

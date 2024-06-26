@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EndGuard;
 import com.watabou.utils.Bundle;
 
 public abstract class ShieldBuff extends Buff {
@@ -54,7 +55,13 @@ public abstract class ShieldBuff extends Buff {
 		if (target == Dungeon.hero){
 			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
 			if (ben!=null){
-				shield*=RingOfBenediction.periodMultiplier(target);
+				shield *= RingOfBenediction.periodMultiplier(target);
+			}
+			if (Dungeon.hero.belongings.weapon() instanceof EndGuard) {
+				EndGuard w2 = (EndGuard) Dungeon.hero.belongings.weapon;
+				if (w2 != null) {
+					shield = (int) ( shield * ( 1f + 0.5f + ( 0.25f * w2.level() ) ) );
+				}
 			}
 		}
 		if (this.shielding <= shield) this.shielding = shield;

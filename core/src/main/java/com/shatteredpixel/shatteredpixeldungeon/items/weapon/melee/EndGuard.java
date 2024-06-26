@@ -25,9 +25,9 @@ public class EndGuard extends MeleeWeapon {
         String desc;
 
         if(isIdentified()){
-            desc = Messages.get(this, "desc",((5+2*level())));
+            desc = Messages.get(this, "desc",( 50 + 25 * level() ));
         } else {
-            desc = Messages.get(this, "normal_desc",15);
+            desc = Messages.get(this, "normal_desc",50);
         }
 
         return desc;

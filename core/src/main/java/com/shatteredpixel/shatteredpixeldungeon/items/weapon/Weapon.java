@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfKing;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Annoying;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Dazzling;
@@ -239,6 +240,10 @@ abstract public class Weapon extends KindOfWeapon {
 
 	public int STRReq(){
 		int req = STRReq(level());
+		float multi = RingOfKing.updateMultiplier(hero);
+		if( RingOfKing.curItem != null && RingOfKing.curItem.cursed )
+			multi = 1;
+		req = (int)( req * multi );
 		if (masteryPotionBonus){
 			req -= 2;
 		}

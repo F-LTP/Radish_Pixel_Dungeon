@@ -58,6 +58,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Thorns;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfKing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -567,6 +568,10 @@ public class Armor extends EquipableItem {
 
 	public int STRReq(){
 		int req = STRReq(level());
+		float multi = RingOfKing.updateMultiplier(Dungeon.hero);
+		if( RingOfKing.curItem != null && RingOfKing.curItem.cursed )
+			multi = 1;
+		req = (int)( req * multi );
 		if (masteryPotionBonus){
 			req -= 2;
 		}
