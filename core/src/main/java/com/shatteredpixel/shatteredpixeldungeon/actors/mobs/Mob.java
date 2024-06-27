@@ -630,6 +630,10 @@ public abstract class Mob extends Char {
 			return 0;
 		}
 	}
+
+	private static float calculateMultiplier(int level) {
+		return (float) Math.min(1.0 + 0.2 * (level - 1), 1.9);
+	}
 	
 	@Override
 	public int defenseProc( Char enemy, int damage ) {
@@ -672,16 +676,42 @@ public abstract class Mob extends Char {
 			if (enemy != Dungeon.hero){
 				restoration = Math.round(restoration * 0.4f*Dungeon.hero.pointsInTalent(Talent.SOUL_SIPHON)/3f);
 			}
+
 			if (restoration > 0) {
 				Buff.affect(Dungeon.hero, Hunger.class).affectHunger(restoration*Dungeon.hero.pointsInTalent(Talent.SOUL_EATER)/3f);
 				int preHp=Dungeon.hero.HP;
+
+				if(hero.hasTalent(Talent.DESPERATE_POWER)){
+					switch (hero.pointsInTalent(Talent.DESPERATE_POWER)) {
+						case 1:
+							if (enemy.HP <= enemy.HT * 0.12) restoration = (int) (restoration * calculateMultiplier(1));
+							break;
+						case 2:
+							if (enemy.HP <= enemy.HT * 0.25) restoration = (int) (restoration * calculateMultiplier(2));
+							break;
+						case 3:
+							if (enemy.HP <= enemy.HT * 0.37) restoration = (int) (restoration * calculateMultiplier(3));
+							break;
+						case 4:
+							if (enemy.HP <= enemy.HT * 0.5)  restoration = (int) (restoration * calculateMultiplier(4));
+							break;
+					}
+				}
+
 				Dungeon.hero.HP = (int) Math.ceil(Math.min(Dungeon.hero.HT, Dungeon.hero.HP + (restoration * 0.4f)));
+
 				Dungeon.hero.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", Dungeon.hero.HP-preHp);
 				if (Dungeon.hero.buff(AfterGlow.Warmth.class)!=null){
 					Dungeon.hero.buff(AfterGlow.Warmth.class).getWarmth();
 				}
+
+
+
 				Dungeon.hero.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
 			}
+
+
+
 		}
 
 		return super.defenseProc(enemy, damage);

@@ -14,9 +14,9 @@ public class RingOfKing extends Ring {
 
     public String statsInfo() {
         if (isIdentified()){
-            return Messages.get(this, "stats", new DecimalFormat("#.##").format(100f * (Math.pow(1.15f, soloBuffedBonus()) - 1f)));
+            return Messages.get(this, "stats", soloBonus(), new DecimalFormat("#.##").format(100f * (Math.pow(1.035, soloBuffedBonus()) - 1f)));
         } else {
-            return Messages.get(this, "typical_stats", new DecimalFormat("#.##").format(15f));
+            return Messages.get(this, "typical_stats", 1, new DecimalFormat("#.##").format(3.5f));
         }
     }
 
@@ -25,8 +25,8 @@ public class RingOfKing extends Ring {
         return new KingUpdate();
     }
 
-    public static float updateMultiplier( Char target ){
-        return (float)Math.pow(1.15, getBuffedBonus(target, KingUpdate.class));
+    public static int updateMultiplier( Char target ){
+        return getBonus( target, KingUpdate.class );
     }
 
     public class KingUpdate extends RingBuff {

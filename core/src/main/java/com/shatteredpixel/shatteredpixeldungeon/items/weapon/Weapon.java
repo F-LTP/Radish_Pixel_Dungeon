@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon;
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
@@ -240,10 +241,10 @@ abstract public class Weapon extends KindOfWeapon {
 
 	public int STRReq(){
 		int req = STRReq(level());
-		float multi = RingOfKing.updateMultiplier(hero);
+		int multi = RingOfKing.updateMultiplier(hero);
 		if( RingOfKing.curItem != null && RingOfKing.curItem.cursed )
 			multi = 1;
-		req = (int)( req * multi );
+		req = req + multi;
 		if (masteryPotionBonus){
 			req -= 2;
 		}
@@ -262,6 +263,13 @@ abstract public class Weapon extends KindOfWeapon {
 	@Override
 	public int level() {
 		int level = super.level();
+
+		if(hero!=null) {
+			if (hero.belongings.ring instanceof RingOfKing || hero.belongings.misc instanceof RingOfKing) {
+				return level + RingOfKing.updateMultiplier(Dungeon.hero);
+			}
+		}
+
 		if (curseInfusionBonus) level += 1 + level/6;
 		return level;
 	}

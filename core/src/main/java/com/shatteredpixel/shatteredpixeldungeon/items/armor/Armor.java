@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -80,6 +82,8 @@ public class Armor extends EquipableItem {
 
 	protected Buff buff;
 	protected static final String AC_DETACH       = "DETACH";
+
+
 	
 	public enum Augment {
 		EVASION (2f , -1f),
@@ -390,6 +394,14 @@ public class Armor extends EquipableItem {
 	@Override
 	public int level() {
 		int level = super.level();
+
+		if(hero!=null){
+			if( hero.belongings.ring instanceof RingOfKing || hero.belongings.misc instanceof RingOfKing ){
+				return level + RingOfKing.updateMultiplier(Dungeon.hero);
+			}
+		}
+
+
 		if (curseInfusionBonus) level += 1 + level/6;
 		return level;
 	}
@@ -568,10 +580,10 @@ public class Armor extends EquipableItem {
 
 	public int STRReq(){
 		int req = STRReq(level());
-		float multi = RingOfKing.updateMultiplier(Dungeon.hero);
+		int multi = RingOfKing.updateMultiplier(Dungeon.hero);
 		if( RingOfKing.curItem != null && RingOfKing.curItem.cursed )
 			multi = 1;
-		req = (int)( req * multi );
+		req = req + multi;
 		if (masteryPotionBonus){
 			req -= 2;
 		}
