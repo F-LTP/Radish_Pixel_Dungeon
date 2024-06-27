@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        //接入FB后 直接打包安卓DEBUG会出错 若要调试请gradlew:desktop:debug
+        //接入FB后 直接打包安卓DEBUG会出错 若要调试请gradlew desktop:debug
         // PowerShell: ./gradlew desktop:debug
         // 打包直接选择release 签名食用MT默认的
         classpath 'com.android.tools.build:gradle:7.3.1'
