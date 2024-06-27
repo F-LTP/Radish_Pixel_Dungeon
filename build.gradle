@@ -4,7 +4,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
+        //接入FB后 直接打包安卓DEBUG会出错 若要调试请gradlew:desktop:debug
+        // PowerShell: ./gradlew desktop:debug
+        // 打包直接选择release 签名食用MT默认的
         classpath 'com.android.tools.build:gradle:7.3.1'
+        classpath 'com.google.gms:google-services:4.3.15'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
     }
 }
 
@@ -19,9 +24,9 @@ allprojects {
 
         appJavaCompatibility = JavaVersion.VERSION_1_8
 
-        appAndroidCompileSDK = 31
-        appAndroidMinSDK = 14
-        appAndroidTargetSDK = 31
+        appAndroidCompileSDK = 33
+        appAndroidMinSDK = 19
+        appAndroidTargetSDK = 33
 
         gdxVersion = '1.11.0'
         gdxControllersVersion = '2.2.3-SNAPSHOT'

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="app_name">萝卜地牢</string>
-	<string name="customactivityoncrash_error_activity_error_occurred_explanation">萝卜地牢崩溃了！，\n\n请点击下方错误日志查看详情</string>
+	<string name="customactivityoncrash_error_activity_error_occurred_explanation">萝卜地牢崩溃了！，\n\n请点击下方错误日志查看详情\n\n错误报告会在联网后自动反馈至后台</string>
 	<string name="customactivityoncrash_error_activity_restart_app">重启应用程序</string>
 	<string name="customactivityoncrash_error_activity_close_app">退出应用程序</string>
 	<string name="customactivityoncrash_error_activity_error_details">错误日志</string>
