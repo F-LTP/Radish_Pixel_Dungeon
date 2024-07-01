@@ -244,7 +244,9 @@ abstract public class Weapon extends KindOfWeapon {
 		int multi = RingOfKing.updateMultiplier(hero);
 		if( RingOfKing.curItem != null && RingOfKing.curItem.cursed )
 			multi = 1;
-		req = req + multi;
+		// 暂时这样吧，先把问题修了
+		if(hero.belongings.getItem(RingOfKing.class) != null)
+			req = req + multi;
 		if (masteryPotionBonus){
 			req -= 2;
 		}

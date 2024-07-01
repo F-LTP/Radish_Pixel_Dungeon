@@ -16,6 +16,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.WandOfScanningBeam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BloodParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.CorrosionParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
@@ -206,7 +207,13 @@ public class TacticalThrowTalen4Battlemage {
         } else if (wand instanceof WandOfScanningBeam) {
             // null
         } else if (wand instanceof WandOfMagicMissile) {
-            // null
+            SpellSprite.show(attacker, SpellSprite.CHARGE);
+            for (Wand.Charger c : attacker.buffs(Wand.Charger.class)){
+                if (!(c.wand() instanceof WandOfMagicMissile)){
+                    c.gainCharge(0.5f * procChanceMultiplier(attacker));
+                }
+            }
+
         }
     }
 
