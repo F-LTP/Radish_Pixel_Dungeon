@@ -664,7 +664,8 @@ public abstract class Char extends Actor {
 		if (defender.buff( Hex.class) != null) defRoll *= 0.8f;
 
 		//雾剑祝福效果
-		if (attacker.buff(FogSword.ActBless.class) != null) {
+		// Change by DoggingDog on 2024-07-01
+		if (attacker.buff(FogSword.ActBless.class) != null && hero.belongings.weapon() instanceof FogSword) {
 			FogSword ks =(FogSword) hero.belongings.weapon;
 			defRoll *= 1 + (20 + (float) (ks.level() * 4) / 100);
 		}
