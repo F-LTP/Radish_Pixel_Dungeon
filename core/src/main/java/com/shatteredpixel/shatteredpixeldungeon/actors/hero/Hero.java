@@ -633,16 +633,34 @@ public class Hero extends Char {
 			if (shielding()>0)
 				dr+=Random.NormalIntRange(2,8);
 		if (hasTalent(Talent.DARK_ARMOR)) {
-			for (Item item : Dungeon.hero.belongings.backpack) {
-				if (item instanceof CloakOfShadows) {
-					if (item.isEquipped(this)) {
-						int em=((CloakOfShadows) item).emptyCharge();
-						int p=pointsInTalent(Talent.DARK_ARMOR);
-						float fl[]={-1f,0,0.5f,0.5f,1f},ce[]={-1f,1f,1f,1.5f,2f};
-						dr += Random.NormalIntRange(Math.round(fl[p]*em),Math.round(ce[p]*em));
-					}
-				}
+			// deprecated on 2024/07/07
+//			for (Item item : Dungeon.hero.belongings.backpack) {
+//				if (item instanceof CloakOfShadows) {
+//					if (item.isEquipped(this)) {
+//						int em=((CloakOfShadows) item).emptyCharge();
+//						int p=pointsInTalent(Talent.DARK_ARMOR);
+//						float fl[]={-1f,0,0.5f,0.5f,1f},ce[]={-1f,1f,1f,1.5f,2f};
+//						dr += Random.NormalIntRange(Math.round(fl[p]*em),Math.round(ce[p]*em));
+//					}
+//				}
+//			}
+
+			// Talent : grace_yourself
+			float fl[]={-1f,0,0.5f,0.5f,1f},ce[]={-1f,1f,1f,1.5f,2f};
+			int p=pointsInTalent(Talent.DARK_ARMOR);
+			int em=0;
+			if(belongings.misc instanceof CloakOfShadows){
+				em = ((CloakOfShadows) belongings.misc).emptyCharge();
+				dr += Random.NormalIntRange(Math.round(fl[p]*em),Math.round(ce[p]*em));
+			} else if (belongings.artifact instanceof CloakOfShadows) {
+				em = ((CloakOfShadows) belongings.artifact).emptyCharge();
+				dr += Random.NormalIntRange(Math.round(fl[p]*em),Math.round(ce[p]*em));
 			}
+			else {
+				// null
+			}
+
+
 		}
 		return dr;
 	}
@@ -1300,7 +1318,7 @@ public class Hero extends Char {
 			Buff.affect(this, HoldFast.class);
 		}
 		// Talent : BraceYourself
-		if(hasTalent(Talent.BRACE_YOURSELF)){
+		if(hasTalent(Talent.BRACE_YOURSELF) && buff(Preparation.class) != null){
 			Buff.affect(this, BraceYourself.class);
 		}
 		if (!fullRest) {
