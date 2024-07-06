@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.TacticalThrowTalen4Battlemage;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
@@ -104,6 +105,12 @@ public class ChaliceOfBlood extends Artifact {
 		WandOfLivingEarth.RockArmor rockArmor = hero.buff(WandOfLivingEarth.RockArmor.class);
 		if (rockArmor != null) {
 			damage = rockArmor.absorb(damage);
+		}
+
+		// Talent: WarThrow
+		TacticalThrowTalen4Battlemage.RockArmor rockArmor4WarThrow = hero.buff(TacticalThrowTalen4Battlemage.RockArmor.class);
+		if(rockArmor4WarThrow != null){
+			damage = rockArmor4WarThrow.absorb(damage);
 		}
 
 		damage -= hero.drRoll();
