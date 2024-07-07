@@ -406,7 +406,7 @@ public class Generator {
 					Spanner.class,
 					Rlyeh.class
 			};
-			WEP_T2.probs = new float[]{ 6, 5, 5, 5, 5, 5, 5, 5, 5 };
+			WEP_T2.probs = new float[]{ 0, 5, 5, 5, 5, 5, 5, 5, 5 };
 
 			WEP_T2_NEW.classes = new Class<?>[]{
 					Glasssword.class,
@@ -428,7 +428,7 @@ public class Generator {
 					WingSword.class,
 					SufferingDagger.class
 			};
-			WEP_T3.probs = new float[]{ 5, 5, 5, 4, 4, 5, 6, 5 };
+			WEP_T3.probs = new float[]{ 5, 0, 5, 0, 0, 5, 6, 5 };
 
 			WEP_T3_NEW.classes = new Class<?>[]{
 					Beecomb.class,
@@ -445,7 +445,6 @@ public class Generator {
 					Darksword.class,
 					Flail.class,
 					HeadCleaver.class,
-					//Holyankh.class,
 					Seekingspear.class,
 					RunicBlade.class,
 					Grimtooth.class,
@@ -454,7 +453,7 @@ public class Generator {
 					EndGuard.class,
 					ShadowBooks.class,
 			};
-			WEP_T4.probs = new float[]{ 5, 5, 5, 5, 5, 5, 4, 5, 4, 5, 5, 5 };
+			WEP_T4.probs = new float[]{ 5, 5, 5, 0, 5, 5, 0, 5, 0, 5, 5, 5 };
 
 			WEP_T4_NEW.classes = new Class<?>[]{
 					Bloodblade.class,
@@ -482,7 +481,7 @@ public class Generator {
 					EchoplexHammer.class,
 					KillBoatSword.class
 			};
-			WEP_T5.probs = new float[]{ 6, 5, 5, 5, 4, 4, 5, 5, 5, 5, 5, 5, 4 };
+			WEP_T5.probs = new float[]{ 0, 5, 0, 5, 0, 0, 5, 5, 5, 5, 5, 5, 4 };
 
 			WEP_T5_NEW.classes = new Class<?>[]{
 					Cutterhead.class,
