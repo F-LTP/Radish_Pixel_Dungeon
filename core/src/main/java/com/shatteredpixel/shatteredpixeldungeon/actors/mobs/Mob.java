@@ -76,6 +76,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EchoplexHammer;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gloves;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SufferingDagger;
@@ -682,20 +683,25 @@ public abstract class Mob extends Char {
 				int preHp=Dungeon.hero.HP;
 
 				if(hero.hasTalent(Talent.DESPERATE_POWER)){
-					switch (hero.pointsInTalent(Talent.DESPERATE_POWER)) {
-						case 1:
-							if (enemy.HP <= enemy.HT * 0.12) restoration = (int) (restoration * calculateMultiplier(1));
-							break;
-						case 2:
-							if (enemy.HP <= enemy.HT * 0.25) restoration = (int) (restoration * calculateMultiplier(2));
-							break;
-						case 3:
-							if (enemy.HP <= enemy.HT * 0.37) restoration = (int) (restoration * calculateMultiplier(3));
-							break;
-						case 4:
-							if (enemy.HP <= enemy.HT * 0.5)  restoration = (int) (restoration * calculateMultiplier(4));
-							break;
-					}
+					// deprecated on 2024/07/07
+//					switch (hero.pointsInTalent(Talent.DESPERATE_POWER)) {
+//						case 1:
+//							if (enemy.HP <= enemy.HT * 0.12) restoration = (int) (restoration * calculateMultiplier(1));
+//							break;
+//						case 2:
+//							if (enemy.HP <= enemy.HT * 0.25) restoration = (int) (restoration * calculateMultiplier(2));
+//							break;
+//						case 3:
+//							if (enemy.HP <= enemy.HT * 0.37) restoration = (int) (restoration * calculateMultiplier(3));
+//							break;
+//						case 4:
+//							if (enemy.HP <= enemy.HT * 0.5)  restoration = (int) (restoration * calculateMultiplier(4));
+//							break;
+//					}
+
+					// Talent : Desperate_Power
+					float mulRate =mul4DesperatePower(this);
+					restoration = (int)(restoration * mulRate);
 				}
 
 				Dungeon.hero.HP = (int) Math.ceil(Math.min(Dungeon.hero.HT, Dungeon.hero.HP + (restoration * 0.4f)));
@@ -1383,6 +1389,18 @@ public abstract class Mob extends Char {
 			}
 		}
 		heldAllies.clear();
+	}
+
+	public float mul4DesperatePower(Char enemy){
+		float lvDesPow = (float) hero.pointsInTalent(Talent.DESPERATE_POWER);
+		float stolenHpRate = ((float) this.HT-(float) this.HP)/(float) this.HT*2f;
+		float howMobDesperateThanBeforeMul = 1/(1-lvDesPow*0.125f) - 1;
+
+		stolenHpRate = stolenHpRate>1?1:stolenHpRate;
+		howMobDesperateThanBeforeMul *= stolenHpRate;
+		howMobDesperateThanBeforeMul = howMobDesperateThanBeforeMul>1?1:howMobDesperateThanBeforeMul;
+
+		return 1+howMobDesperateThanBeforeMul;
 	}
 	
 	public static void clearHeldAllies(){

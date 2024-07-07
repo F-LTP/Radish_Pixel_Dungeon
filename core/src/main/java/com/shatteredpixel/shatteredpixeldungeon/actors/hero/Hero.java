@@ -43,6 +43,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BraceYourself;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionHero;
@@ -632,16 +633,34 @@ public class Hero extends Char {
 			if (shielding()>0)
 				dr+=Random.NormalIntRange(2,8);
 		if (hasTalent(Talent.DARK_ARMOR)) {
-			for (Item item : Dungeon.hero.belongings.backpack) {
-				if (item instanceof CloakOfShadows) {
-					if (item.isEquipped(this)) {
-						int em=((CloakOfShadows) item).emptyCharge();
-						int p=pointsInTalent(Talent.DARK_ARMOR);
-						float fl[]={-1f,0,0.5f,0.5f,1f},ce[]={-1f,1f,1f,1.5f,2f};
-						dr += Random.NormalIntRange(Math.round(fl[p]*em),Math.round(ce[p]*em));
-					}
-				}
+			// deprecated on 2024/07/07
+//			for (Item item : Dungeon.hero.belongings.backpack) {
+//				if (item instanceof CloakOfShadows) {
+//					if (item.isEquipped(this)) {
+//						int em=((CloakOfShadows) item).emptyCharge();
+//						int p=pointsInTalent(Talent.DARK_ARMOR);
+//						float fl[]={-1f,0,0.5f,0.5f,1f},ce[]={-1f,1f,1f,1.5f,2f};
+//						dr += Random.NormalIntRange(Math.round(fl[p]*em),Math.round(ce[p]*em));
+//					}
+//				}
+//			}
+
+			// Talent : grace_yourself
+			float fl[]={-1f,0,0.5f,0.5f,1f},ce[]={-1f,1f,1f,1.5f,2f};
+			int p=pointsInTalent(Talent.DARK_ARMOR);
+			int em=0;
+			if(belongings.misc instanceof CloakOfShadows){
+				em = ((CloakOfShadows) belongings.misc).emptyCharge();
+				dr += Random.NormalIntRange(Math.round(fl[p]*em),Math.round(ce[p]*em));
+			} else if (belongings.artifact instanceof CloakOfShadows) {
+				em = ((CloakOfShadows) belongings.artifact).emptyCharge();
+				dr += Random.NormalIntRange(Math.round(fl[p]*em),Math.round(ce[p]*em));
 			}
+			else {
+				// null
+			}
+
+
 		}
 		return dr;
 	}
@@ -1298,6 +1317,10 @@ public class Hero extends Char {
 		if (hasTalent(Talent.HOLD_FAST)){
 			Buff.affect(this, HoldFast.class);
 		}
+		// Talent : BraceYourself
+		if(hasTalent(Talent.BRACE_YOURSELF) && buff(Preparation.class) != null){
+			Buff.affect(this, BraceYourself.class);
+		}
 		if (!fullRest) {
 			if (sprite != null) {
 				sprite.showStatus(CharSprite.DEFAULT, Messages.get(this, "wait"));
@@ -1425,6 +1448,12 @@ public class Hero extends Char {
 		WandOfLivingEarth.RockArmor rockArmor = buff(WandOfLivingEarth.RockArmor.class);
 		if (rockArmor != null) {
 			damage = rockArmor.absorb(damage);
+		}
+
+		// Talent: WarThrow
+		TacticalThrowTalen4Battlemage.RockArmor rockArmor4WarThrow = buff(TacticalThrowTalen4Battlemage.RockArmor.class);
+		if(rockArmor4WarThrow != null){
+			damage = rockArmor4WarThrow.absorb(damage);
 		}
 		
 		return super.defenseProc( enemy, damage );

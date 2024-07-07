@@ -118,7 +118,11 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 				int newDmg = attacker.damageRoll();
 				if (newDmg > dmg) dmg = newDmg;
 			}
-			return Math.round(dmg * (1f + baseDmgBonus+braceYourselfExtraDmg()));
+			// Talent : brace_yourself
+			if(Dungeon.hero.buff(BraceYourself.class) != null)
+				return Math.round(dmg * (1f + baseDmgBonus+braceYourselfExtraDmg()));
+			else
+				return Math.round(dmg * (1f + baseDmgBonus));
 		}
 		
 		public static AttackLevel getLvl(int turnsInvis){
@@ -216,7 +220,11 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 		String desc = Messages.get(this, "desc");
 		
 		AttackLevel lvl = AttackLevel.getLvl(turnsInvis);
-		float bdb=lvl.baseDmgBonus+ lvl.braceYourselfExtraDmg();
+		//Talent : brace_yourself
+		float bdb=lvl.baseDmgBonus;
+		if(Dungeon.hero.buff(BraceYourself.class)!=null)
+			bdb=lvl.baseDmgBonus+ lvl.braceYourselfExtraDmg();
+
 		desc += "\n\n" + Messages.get(this, "desc_dmg",
 				(int)(bdb*100),
 				(int)(lvl.KOThreshold()*100),
