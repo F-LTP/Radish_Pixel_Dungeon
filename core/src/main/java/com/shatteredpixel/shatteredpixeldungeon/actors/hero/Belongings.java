@@ -28,11 +28,14 @@ import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindofMisc;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
@@ -183,6 +186,9 @@ public class Belongings implements Iterable<Item> {
 				if (armor instanceof PrisonArmor) info.armorTier=7;
 				else if (armor instanceof CrabArmor) info.armorTier=8;
 				else if (armor instanceof DarkCoat) info.armorTier=9;
+				else if (armor instanceof AfterGlow) info.armorTier=10;
+				else if (armor instanceof CloakofGreyFeather) info.armorTier=11;
+				else if (armor instanceof RatArmor) info.armorTier=12;
 				else info.armorTier = armor.tier;
 			}
 		} else {

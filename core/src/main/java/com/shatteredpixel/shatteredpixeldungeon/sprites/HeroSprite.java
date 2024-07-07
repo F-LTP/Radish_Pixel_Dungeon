@@ -25,11 +25,14 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.watabou.gltextures.SmartTexture;
 import com.watabou.gltextures.TextureCache;
@@ -77,6 +80,9 @@ public class HeroSprite extends CharSprite {
 			if (armor instanceof PrisonArmor) t=7;
 			else if (armor instanceof CrabArmor) t=8;
 			else if (armor instanceof DarkCoat) t=9;
+			else if (armor instanceof AfterGlow) t=10;
+			else if (armor instanceof CloakofGreyFeather) t=11;
+			else if (armor instanceof RatArmor) t=12;
 			else t= armor.tier;
 		}
 		TextureFilm film = new TextureFilm( tiers(), t, FRAME_WIDTH, FRAME_HEIGHT );

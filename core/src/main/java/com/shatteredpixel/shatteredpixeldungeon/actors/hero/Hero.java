@@ -88,11 +88,14 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap.Type;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
@@ -489,14 +492,20 @@ public class Hero extends Char {
 		Armor armor = belongings.armor();
 		if (armor == null ){
 			return 0;
-		}else if (armor instanceof ClassArmor){
+		} else if (armor instanceof ClassArmor){
 			return 6;
-		}else if (armor instanceof PrisonArmor){
+		} else if (armor instanceof PrisonArmor){
 			return 7;
-		}else if (armor instanceof CrabArmor){
+		} else if (armor instanceof CrabArmor){
 			return 8;
-		}else if (armor instanceof DarkCoat){
+		} else if (armor instanceof DarkCoat){
 			return 9;
+		} else if (armor instanceof AfterGlow){
+			return 10;
+		} else if (armor instanceof CloakofGreyFeather){
+			return 11;
+		} else if (armor instanceof RatArmor){
+			return 12;
 		}
 		else return armor.tier;
 	}
@@ -941,7 +950,7 @@ public class Hero extends Char {
 	private boolean actMove( HeroAction.Move action ) {
 
 		/** 斩舰刀实现 */
-		MoveBoatSword();
+		if(hero.belongings.weapon instanceof KillBoatSword) MoveBoatSword();
 
 		if (getCloser( action.dst )) {
 			return true;
@@ -1296,27 +1305,27 @@ public class Hero extends Char {
 
 		enemy = action.target;
 
-		KillBoatSword w2 = (KillBoatSword) hero.belongings.weapon;
-
-		if (enemy.isAlive() && canAttack( enemy ) &&
+		//时间差不多咯！
+		if(belongings.weapon instanceof KillBoatSword){
+			KillBoatSword w2 = (KillBoatSword) hero.belongings.weapon;
+			if(hero.belongings.weapon != null){
+                if (!w2.delayAttack) {
+                    sprite.attack(enemy.pos);
+                    w2.delayAttack = true;
+                } else {
+                    spend(1f);
+                    sprite.operate(pos);
+					/** 斩舰刀实现 */
+                    MoveBoatSword();
+                    hero.sprite.showStatus(CharSprite.WARNING, Messages.get(w2, "ready"));
+                }
+            }
+			return false;
+		} else if (enemy.isAlive() && canAttack( enemy ) &&
 				!isCharmedBy( enemy ) && enemy.invisible == 0) {
 
-			if(w2!=null){
-				if(!w2.delayAttack){
-					sprite.attack( enemy.pos );
-					w2.delayAttack = true;
-                } else {
-					spend(1f);
-					sprite.operate( pos );
-					/** 斩舰刀实现 */
-					MoveBoatSword();
-					hero.sprite.showStatus(CharSprite.WARNING,Messages.get(w2,"ready"));
-				}
-                return false;
-            } else {
-				sprite.attack( enemy.pos );
-				return false;
-			}
+            sprite.attack( enemy.pos );
+            return false;
 
         } else {
 
@@ -1351,7 +1360,7 @@ public class Hero extends Char {
 			}
 
 			/** 斩舰刀实现 */
-			MoveBoatSword();
+			if(hero.belongings.weapon instanceof KillBoatSword) MoveBoatSword();
 
 		}
 		resting = fullRest;
