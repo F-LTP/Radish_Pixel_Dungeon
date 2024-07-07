@@ -138,7 +138,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CelestialSphere;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Morello;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
@@ -935,8 +937,11 @@ public class Hero extends Char {
 		return !rooted && !flying &&
 				(Dungeon.level.map[pos] == Terrain.HIGH_GRASS || (heroClass != HeroClass.HUNTRESS && Dungeon.level.map[pos] == Terrain.FURROWED_GRASS));
 	}
-	
+
 	private boolean actMove( HeroAction.Move action ) {
+
+		/** 斩舰刀实现 */
+		MoveBoatSword();
 
 		if (getCloser( action.dst )) {
 			return true;
@@ -950,6 +955,9 @@ public class Hero extends Char {
 			ready();
 			return false;
 		}
+
+
+
 	}
 	
 	private boolean actInteract( HeroAction.Interact action ) {
@@ -1288,13 +1296,29 @@ public class Hero extends Char {
 
 		enemy = action.target;
 
-		if (enemy.isAlive() && canAttack( enemy ) && !isCharmedBy( enemy ) && enemy.invisible == 0) {
-			
-			sprite.attack( enemy.pos );
+		KillBoatSword w2 = (KillBoatSword) hero.belongings.weapon;
 
-			return false;
+		if (enemy.isAlive() && canAttack( enemy ) &&
+				!isCharmedBy( enemy ) && enemy.invisible == 0) {
 
-		} else {
+			if(w2!=null){
+				if(!w2.delayAttack){
+					sprite.attack( enemy.pos );
+					w2.delayAttack = true;
+                } else {
+					spend(1f);
+					sprite.operate( pos );
+					/** 斩舰刀实现 */
+					MoveBoatSword();
+					hero.sprite.showStatus(CharSprite.WARNING,Messages.get(w2,"ready"));
+				}
+                return false;
+            } else {
+				sprite.attack( enemy.pos );
+				return false;
+			}
+
+        } else {
 
 			if (fieldOfView[enemy.pos] && getCloser( enemy.pos )) {
 
@@ -1325,6 +1349,10 @@ public class Hero extends Char {
 			if (sprite != null) {
 				sprite.showStatus(CharSprite.DEFAULT, Messages.get(this, "wait"));
 			}
+
+			/** 斩舰刀实现 */
+			MoveBoatSword();
+
 		}
 		resting = fullRest;
 	}
@@ -2431,4 +2459,10 @@ public class Hero extends Char {
 		if (hasTalent(Talent.RUNIC_TRANSFERENCE) && (pointsInTalent(Talent.RUNIC_TRANSFERENCE)>1)) return 1.25f;
 		return super.talentProc();
 	}
+
+	public void MoveBoatSword(){
+		KillBoatSword w2 = (KillBoatSword) hero.belongings.weapon;
+		if(w2 !=null) w2.delayAttack = false;
+	}
+
 }

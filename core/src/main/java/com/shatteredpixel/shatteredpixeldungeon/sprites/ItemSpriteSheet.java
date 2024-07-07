@@ -225,6 +225,7 @@ public class ItemSpriteSheet {
 	public static final int BONE_CLAW		= WEP_TIER2+16;
 	public static final int KATAR			= xy(1,7)+6;
 	public static final int BLADESHIELD		= xy(1,9)+7;
+	public static final int KILL_BOAT		= WEP_TIER2+18;
 
 	static{
 		assignItemRect(SHORTSWORD,      13, 13);
@@ -420,7 +421,7 @@ public class ItemSpriteSheet {
 	public static final int ARMOR_RAT		= ARMOR+12;
 
 	public static final int RLYEH_BOOK		= ARMOR+25;
-
+	public static final int MORELLO_BOOK		= ARMOR+26;
 	public static final int SHADOW_BOOK		= ARMOR+27;
 
 	//TIP-DARTS

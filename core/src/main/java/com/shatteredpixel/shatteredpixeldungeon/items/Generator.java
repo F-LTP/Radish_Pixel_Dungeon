@@ -150,6 +150,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Greatshield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Greatsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Katar;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
@@ -479,8 +480,9 @@ public class Generator {
 					GiantKiller.class,
 					FogSword.class,
 					EchoplexHammer.class,
+					KillBoatSword.class
 			};
-			WEP_T5.probs = new float[]{ 6, 5, 5, 5, 4, 4, 5, 5, 5, 5, 5, 5 };
+			WEP_T5.probs = new float[]{ 6, 5, 5, 5, 4, 4, 5, 5, 5, 5, 5, 5, 4 };
 
 			WEP_T5_NEW.classes = new Class<?>[]{
 					Cutterhead.class,

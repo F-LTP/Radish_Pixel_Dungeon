@@ -119,6 +119,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Axe_D;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bloodblade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GiantKiller;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
@@ -415,11 +416,12 @@ public abstract class Char extends Actor {
 					Bloodblade bb = (Bloodblade) hero.belongings.weapon;
 					current_crit += bb.sac;
 				}
-				//TODO MUST CRITS METHOD
+
 				else if(hero.belongings.weapon() instanceof GiantKiller){
 					GiantKiller ks =(GiantKiller) hero.belongings.weapon;
                     crit = ks.isMustCrit;
 				}
+
 				else if (hero.belongings.weapon() instanceof Seekingspear){
 					Seekingspear ss=(Seekingspear) hero.belongings.weapon;
 					current_critdamage+=0.3f+0.05f*ss.buffedLvl();
