@@ -29,8 +29,11 @@ import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.DeviceCompat;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.Locale;
@@ -176,6 +179,15 @@ public class Messages {
 			ShatteredPixelDungeon.reportException( e );
 			return format;
 		}
+	}
+
+	private static HashMap<String, DecimalFormat> formatters = new HashMap<>();
+
+	public static String decimalFormat( String format, double number ){
+		if (!formatters.containsKey(format)){
+			formatters.put(format, new DecimalFormat(format, DecimalFormatSymbols.getInstance(Locale.ENGLISH)));
+		}
+		return formatters.get(format).format(number);
 	}
 
 	public static String capitalize( String str ){
