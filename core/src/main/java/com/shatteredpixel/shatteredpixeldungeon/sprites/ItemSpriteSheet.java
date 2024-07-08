@@ -225,7 +225,7 @@ public class ItemSpriteSheet {
 	public static final int BONE_CLAW		= WEP_TIER2+16;
 	public static final int KATAR			= xy(1,7)+6;
 	public static final int BLADESHIELD		= xy(1,9)+7;
-	public static final int KILL_BOAT		= WEP_TIER2+19;
+	public static final int KILL_BOAT		= WEP_TIER2+17;
 
 	static{
 		assignItemRect(SHORTSWORD,      13, 13);
@@ -278,6 +278,7 @@ public class ItemSpriteSheet {
 
 	public static final int REPAIRV2 = WEP_TIER4+14;
 
+	public static final int IAMSB_FLAG = WEP_TIER4+17;
 	public static final int SKYSPS = WEP_TIER4+18;
 	public static final int FOGSWORD = WEP_TIER4+19;
 

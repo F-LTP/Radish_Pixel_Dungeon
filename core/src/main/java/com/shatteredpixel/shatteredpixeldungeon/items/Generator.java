@@ -138,6 +138,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dagger;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Darksword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EchoplexHammer;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EndGuard;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EnemyFlag;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GiantKiller;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Grimtooth;
@@ -420,7 +421,7 @@ public class Generator {
 
 			WEP_T3.classes = new Class<?>[]{
 					Beecomb.class,
-					Scimitar.class,
+					EnemyFlag.class,
 					Waterwheel.class,
 					RoundShield.class,
 					Sai.class,
@@ -428,7 +429,7 @@ public class Generator {
 					WingSword.class,
 					SufferingDagger.class
 			};
-			WEP_T3.probs = new float[]{ 5, 0, 5, 0, 0, 5, 6, 5 };
+			WEP_T3.probs = new float[]{ 5, 5, 5, 0, 0, 5, 6, 5 };
 
 			WEP_T3_NEW.classes = new Class<?>[]{
 					Beecomb.class,
@@ -481,7 +482,7 @@ public class Generator {
 					EchoplexHammer.class,
 					KillBoatSword.class
 			};
-			WEP_T5.probs = new float[]{ 0, 5, 0, 5, 0, 0, 5, 5, 5, 5, 5, 5, 4 };
+			WEP_T5.probs = new float[]{ 0, 5, 0, 5, 0, 0, 5, 5, 5, 5, 5, 5, 7 };
 
 			WEP_T5_NEW.classes = new Class<?>[]{
 					Cutterhead.class,

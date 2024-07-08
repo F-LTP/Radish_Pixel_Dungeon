@@ -86,6 +86,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CelestialSphe
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dagger;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EchoplexHammer;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EndGuard;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EnemyFlag;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GiantKiller;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gloves;
@@ -128,11 +129,12 @@ public enum HeroClass {
 			//new WandOfScanningBeam().identify().collect();
 
 			//Dev Tst
-			new Spanner().collect();
-			new RingOfKing().collect();
-			new GiantKiller().collect();
-			new FogSword().collect();
+//			new Spanner().collect();
+//			new RingOfKing().collect();
+//			new GiantKiller().collect();
+//			new FogSword().collect();
 			new EchoplexHammer().collect();
+			new EnemyFlag().collect();
 			new ShadowBooks().collect();
 			new CelestialSphere().collect();
 			new Rlyeh().collect();
