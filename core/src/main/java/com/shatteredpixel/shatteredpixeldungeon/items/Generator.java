@@ -154,6 +154,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Katar;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Morello;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RottenLance;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
@@ -444,7 +445,7 @@ public class Generator {
 					Bloodblade.class,
 					CompositeCrossbow.class,
 					Darksword.class,
-					Flail.class,
+					Morello.class,
 					HeadCleaver.class,
 					Seekingspear.class,
 					RunicBlade.class,
@@ -454,7 +455,7 @@ public class Generator {
 					EndGuard.class,
 					ShadowBooks.class,
 			};
-			WEP_T4.probs = new float[]{ 5, 5, 5, 0, 5, 5, 0, 5, 0, 5, 5, 5 };
+			WEP_T4.probs = new float[]{ 5, 5, 5, 5, 5, 5, 0, 5, 0, 5, 5, 5 };
 
 			WEP_T4_NEW.classes = new Class<?>[]{
 					Bloodblade.class,
