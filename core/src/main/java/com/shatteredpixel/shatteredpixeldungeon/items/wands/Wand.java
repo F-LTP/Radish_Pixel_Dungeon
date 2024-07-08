@@ -53,6 +53,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.spells.TelekineticGrab;
 import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.SpellQueue;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EndGuard;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Morello;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -374,6 +375,11 @@ public abstract class Wand extends Item {
 				lvl += 3;
 			}
 
+			// Morello func
+			// Date : 2024-07-08
+			// By	: DoggingDog
+			updateLevel();
+
 			WandOfMagicMissile.MagicCharge buff = charger.target.buff(WandOfMagicMissile.MagicCharge.class);
 			if (buff != null && buff.level() > lvl && charger.target.buff(SpellQueue.tmpTracker.class)==null){
 				return buff.level();
@@ -384,6 +390,20 @@ public abstract class Wand extends Item {
 
 	public void updateLevel() {
 		maxCharges = Math.min( initialCharges() + level(), 10 );
+
+		// Morello func
+		// Date : 2024-07-08
+		// By	: DoggingDog
+		if(charger != null){
+			if(charger.target !=null){
+				Morello.MorelloCabala morelloCabala = charger.target.buff(Morello.MorelloCabala.class);
+				if (charger.target == hero && morelloCabala != null){
+					morelloCabala.updateMaxCharge(hero);
+					this.maxCharges += morelloCabala.buffCharge();
+				}
+			}
+		}
+
 		curCharges = Math.min( curCharges, maxCharges );
 	}
 	
