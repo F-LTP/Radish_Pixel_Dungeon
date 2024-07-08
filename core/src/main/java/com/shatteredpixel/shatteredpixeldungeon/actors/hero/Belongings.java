@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.EnergyArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
@@ -189,6 +190,7 @@ public class Belongings implements Iterable<Item> {
 				else if (armor instanceof AfterGlow) info.armorTier=10;
 				else if (armor instanceof CloakofGreyFeather) info.armorTier=11;
 				else if (armor instanceof RatArmor) info.armorTier=12;
+				else if (armor instanceof EnergyArmor) ((EnergyArmor) armor).Energy();
 				else info.armorTier = armor.tier;
 			}
 		} else {

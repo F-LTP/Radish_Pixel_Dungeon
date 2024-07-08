@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.EnergyArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -83,6 +84,11 @@ public class HeroSprite extends CharSprite {
 			else if (armor instanceof AfterGlow) t=10;
 			else if (armor instanceof CloakofGreyFeather) t=11;
 			else if (armor instanceof RatArmor) t=12;
+
+			else if (armor instanceof EnergyArmor){
+				t= ((EnergyArmor) armor).Energy();
+			}
+
 			else t= armor.tier;
 		}
 		TextureFilm film = new TextureFilm( tiers(), t, FRAME_WIDTH, FRAME_HEIGHT );

@@ -1,5 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
@@ -11,13 +13,16 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 public class EnergyArmor extends Armor{
-    private int energyLeft = 450;
+
+    public int energyLeft = 450;
+
     int chargeCount = 0;
     {
         image = ItemSpriteSheet.ARMOR_ENERGY1;
@@ -26,6 +31,22 @@ public class EnergyArmor extends Armor{
     public EnergyArmor() {
         super( 3 );
     }
+
+    public boolean update = false;
+
+    public int Energy() {
+        int energy;
+
+        if (energyLeft<=0){
+            energy = 15;
+            update = true;
+        } else {
+            energy = 14;
+        }
+
+        return energy;
+    }
+
     @Override
     public void level( int value ){
         int oldLvl = level();
@@ -110,7 +131,7 @@ public class EnergyArmor extends Armor{
                 Buff.affect(target, myShield.class).incShield(12+buffedLvl());
                 chargeCount-=30;
             }
-
+            //GLog.h(String.valueOf(update));
             return true;
         }
         @Override
