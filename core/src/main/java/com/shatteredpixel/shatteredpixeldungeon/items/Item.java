@@ -375,8 +375,6 @@ public class Item implements Bundlable {
 	public int buffedLvl(){
 		if (Dungeon.hero.buff( Degrade.class ) != null) {
 			return Degrade.reduceLevel(level());
-//		}else if( !( this instanceof RingOfKing ) ){
-//			return level() + RingOfKing.updateMultiplier(Dungeon.hero);
 		}else {
 			return level();
 		}

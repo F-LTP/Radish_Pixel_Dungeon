@@ -240,13 +240,17 @@ abstract public class Weapon extends KindOfWeapon {
 	}
 
 	public int STRReq(){
+		int req2 = STRReq(buffedLvl());
 		int req = STRReq(level());
+		if(req2 != 0 ){
+			req = req2;
+		}
 		int multi = RingOfKing.updateMultiplier(hero);
 		if( RingOfKing.curItem != null && RingOfKing.curItem.cursed )
 			multi = 1;
 		// 暂时这样吧，先把问题修了
 		if(hero.belongings.getItem(RingOfKing.class) != null)
-			req = req + multi;
+			if(hero.belongings.weapon == this) req = req + multi;
 		if (masteryPotionBonus){
 			req -= 2;
 		}
@@ -265,13 +269,6 @@ abstract public class Weapon extends KindOfWeapon {
 	@Override
 	public int level() {
 		int level = super.level();
-
-		if(hero!=null) {
-			if (hero.belongings.ring instanceof RingOfKing || hero.belongings.misc instanceof RingOfKing) {
-				return level + RingOfKing.updateMultiplier(Dungeon.hero);
-			}
-		}
-
 		if (curseInfusionBonus) level += 1 + level/6;
 		return level;
 	}
@@ -279,6 +276,10 @@ abstract public class Weapon extends KindOfWeapon {
 	//overrides as other things can equip these
 	@Override
 	public int buffedLvl() {
+		if(hero.belongings.weapon == this ) {
+			return hero.belongings.weapon.level() + RingOfKing.updateMultiplier(Dungeon.hero);
+		}
+
 		if (isEquipped( hero ) || hero.belongings.contains( this )){
 			return super.buffedLvl();
 		} else {

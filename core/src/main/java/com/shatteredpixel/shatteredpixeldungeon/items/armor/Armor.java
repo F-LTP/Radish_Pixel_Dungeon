@@ -394,14 +394,6 @@ public class Armor extends EquipableItem {
 	@Override
 	public int level() {
 		int level = super.level();
-
-		if(hero!=null){
-			if( hero.belongings.ring instanceof RingOfKing || hero.belongings.misc instanceof RingOfKing ){
-				return level + RingOfKing.updateMultiplier(Dungeon.hero);
-			}
-		}
-
-
 		if (curseInfusionBonus) level += 1 + level/6;
 		return level;
 	}
@@ -409,6 +401,11 @@ public class Armor extends EquipableItem {
 	//other things can equip these, for now we assume only the hero can be affected by levelling debuffs
 	@Override
 	public int buffedLvl() {
+
+		if(Dungeon.hero.belongings.armor == this ) {
+			return hero.belongings.armor.level() + RingOfKing.updateMultiplier(Dungeon.hero);
+		}
+
 		if (isEquipped( Dungeon.hero ) || Dungeon.hero.belongings.contains( this )){
 			return super.buffedLvl();
 		} else {
@@ -579,13 +576,17 @@ public class Armor extends EquipableItem {
 	}
 
 	public int STRReq(){
+		int req2 = STRReq(buffedLvl());
 		int req = STRReq(level());
+		if(req2 != 0 ){
+			req = req2;
+		}
 		int multi = RingOfKing.updateMultiplier(Dungeon.hero);
 		if( RingOfKing.curItem != null && RingOfKing.curItem.cursed )
 			multi = 1;
 		// 暂时这样吧，先把问题修了
 		if(hero.belongings.getItem(RingOfKing.class) != null)
-			req = req + multi;
+			if(hero.belongings.armor == this) req = req + multi;
 		if (masteryPotionBonus){
 			req -= 2;
 		}

@@ -225,7 +225,7 @@ public class ItemSpriteSheet {
 	public static final int BONE_CLAW		= WEP_TIER2+16;
 	public static final int KATAR			= xy(1,7)+6;
 	public static final int BLADESHIELD		= xy(1,9)+7;
-	public static final int KILL_BOAT		= WEP_TIER2+18;
+	public static final int KILL_BOAT		= WEP_TIER2+19;
 
 	static{
 		assignItemRect(SHORTSWORD,      13, 13);
@@ -791,6 +791,9 @@ public class ItemSpriteSheet {
 	public static final int BLOB    = QUEST+7;
 	public static final int SHARD   = QUEST+8;
 	public static final int HERB	= QUEST+9;
+
+	public static final int BREW_UNSTABLE	= QUEST+17;
+
 	static{
 		assignItemRect(SKULL,   16, 11);
 		assignItemRect(DUST,    12, 11);
@@ -802,6 +805,8 @@ public class ItemSpriteSheet {
 		assignItemRect(BLOB,    10,  9);
 		assignItemRect(SHARD,    8, 10);
 		assignItemRect(HERB,    16, 13);
+
+		assignItemRect(BREW_UNSTABLE,    12, 14);
 	}
 
 	private static final int BAGS       =                                   xy(1, 31);  //16 slots

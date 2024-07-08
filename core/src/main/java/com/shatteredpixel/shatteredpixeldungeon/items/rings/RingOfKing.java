@@ -14,9 +14,9 @@ public class RingOfKing extends Ring {
 
     public String statsInfo() {
         if (isIdentified()){
-            return Messages.get(this, "stats", soloBonus(), new DecimalFormat("#.##").format(100f * (Math.pow(1.035, soloBuffedBonus()) - 1f)));
+            return Messages.get(this, "stats", soloBonus(), soloBonus());
         } else {
-            return Messages.get(this, "typical_stats", 1, new DecimalFormat("#.##").format(3.5f));
+            return Messages.get(this, "typical_stats", 1, new DecimalFormat("#.##").format(1f));
         }
     }
 
