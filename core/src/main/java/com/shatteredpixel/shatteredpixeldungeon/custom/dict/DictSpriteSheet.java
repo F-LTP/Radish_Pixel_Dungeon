@@ -179,6 +179,13 @@ public class DictSpriteSheet {
                     return new Image(Assets.Sprites.RED_SENTRY, 0, 0, 8, 15);
             case HERO:
                 return new Image(Assets.Sprites.ROGUE, 0, 15, 12, 15);
+
+            // Radish new enemy
+            //Zone 1
+            case GIANT_WORM:
+                return new Image(Assets.Sprites.GIANT_WORM, 0, 0, 12, 11);
+
+
             case TRAP_GREEN_RECT:
                 return new Image(Assets.Environment.TERRAIN_FEATURES, 48, 64, 16, 16);
             case LOCKED_FLOOR:
@@ -228,6 +235,13 @@ public class DictSpriteSheet {
     public static final int F_RAT           = 208 + 10000;
     public static final int GNOLL_DARTER    = 209 + 10000;
     public static final int GREAT_CRAB      = 210 + 10000;
+
+    //Radish new Enemy
+    // Zone 1
+    public static final int GIANT_WORM = 211 + 10000;
+    public static final int GOBLIN = 212 + 10000;
+    public static final int DOG = 213 + 10000;
+    public static final int MAYFLY = 214 + 10000;
 
     public static final int THIEF           = 300 + 10000;
     public static final int BANDIT          = 301 + 10000;
@@ -303,4 +317,5 @@ public class DictSpriteSheet {
     public static final int BUFF_NEGATIVE   = 4002 + 10000;
     public static final int BUFF_AMULET_CURSE   = 4003 + 10000;
     public static final int BUFF_SAC_FIRE   = 4004 + 10000;
+
 }

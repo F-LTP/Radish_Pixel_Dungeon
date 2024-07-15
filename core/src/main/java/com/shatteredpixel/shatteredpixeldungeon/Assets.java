@@ -301,5 +301,14 @@ public class Assets {
 		public static final String SPIRIT_HAWK= "sprites/spirit_hawk.png";
 		public static final String RED_SENTRY= "sprites/red_sentry.png";
 		public static final String NEW_NPC="sprites/new_npc.png";
+
+
+		// Radish new Enemy
+		// Zone 1
+		public static final String GIANT_WORM="sprites/RadishEnemySprite/ZoneOne/giant_worm.png";
+		public static final String GOBLIN="sprites/RadishEnemySprite/ZoneOne/goblin.png";
+		public static final String DOG="sprites/RadishEnemySprite/ZoneOne/dog.png";
+		public static final String MAYFLY="sprites/RadishEnemySprite/ZoneOne/mayfly.png";
+
 	}
 }

@@ -32,6 +32,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Monk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Necromancer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Piranha;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Dog;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GiantWorm;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Goblin;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Mayfly;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Rat;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RipperDemon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RotHeart;
@@ -392,6 +396,14 @@ public class MobPlacer extends TestItem{
         C_SLIME(CausticSlime.class, DictSpriteSheet.CAUSTIC_SLIME),
         F_RAT(FetidRat.class, DictSpriteSheet.F_RAT),
         GNOLL_DARTER(GnollTrickster.class, DictSpriteSheet.GNOLL_DARTER),
+
+        // Radish new enemy
+        // Zone 1
+        GIANT_WORM(GiantWorm.class,DictSpriteSheet.GIANT_WORM),
+        GOBLIN(Goblin.class,DictSpriteSheet.GOBLIN),
+        DOG(Dog.class,DictSpriteSheet.DOG),
+        MAYFLY(Mayfly.class,DictSpriteSheet.MAYFLY),
+        // zone 1 end
         GREAT_CRAB(GreatCrab.class, DictSpriteSheet.GREAT_CRAB),
 
         SKELETON(Skeleton.class, DictSpriteSheet.SKELETON),
@@ -434,6 +446,8 @@ public class MobPlacer extends TestItem{
         ARMORED_STATUE(ArmoredStatue.class, DictSpriteSheet.ARMORED_STATUE),
         WRAITH(Wraith.class, DictSpriteSheet.WRAITH),
         PIRANHA(Piranha.class, DictSpriteSheet.FISH);
+
+
 
         private Class<? extends Mob> mobClass;
         private int imageId;
