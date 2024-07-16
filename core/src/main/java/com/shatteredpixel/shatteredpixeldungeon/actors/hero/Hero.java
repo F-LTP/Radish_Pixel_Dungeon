@@ -952,9 +952,6 @@ public class Hero extends Char {
 
 	private boolean actMove( HeroAction.Move action ) {
 
-		/** 斩舰刀实现 */
-		if(hero.belongings.weapon instanceof KillBoatSword) MoveBoatSword();
-
 		if (getCloser( action.dst )) {
 			return true;
 
