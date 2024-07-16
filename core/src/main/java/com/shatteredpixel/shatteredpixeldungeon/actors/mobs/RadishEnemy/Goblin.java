@@ -1,8 +1,16 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingStone;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.GoblinSprite;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Random;
 
 public class Goblin extends Mob {
@@ -17,6 +25,55 @@ public class Goblin extends Mob {
 
     }
 
+    private int StoneRemain = 2;
+    private boolean canZap = true;
+    @Override
+    protected boolean canAttack( Char enemy ) {
+        return new Ballistica( pos, enemy.pos, Ballistica.PROJECTILE).collisionPos == enemy.pos && (canZap || Dungeon.level.adjacent(pos,enemy.pos));
+    }
+    protected boolean doAttack(Char enemy ) {
+        StoneRemain --;
+        StoneRemain = Math.max(StoneRemain, 0);
+        canZap = StoneRemain > 0;
+
+        if (Dungeon.level.adjacent( pos, enemy.pos )) {
+
+            return super.doAttack( enemy );
+
+        } else{
+            if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
+                sprite.zap( enemy.pos );
+                return false;
+            } else {
+                zap();
+                return true;
+            }
+        }
+    }
+
+    private void zap() {
+        spend(1f);
+        Invisibility.dispel(this);
+        if (hit(this, enemy, true)) {
+            int dmg = Random.NormalIntRange(2, 4);
+            dmg = Math.round(dmg * AscensionChallenge.statModifier(this));
+            enemy.damage(dmg, new ThrowingStone());
+
+            if (!enemy.isAlive() && enemy == Dungeon.hero) {
+                Dungeon.fail(getClass());
+                GLog.n(Messages.get(this, "rock_punk_kill"));
+            }
+        } else {
+            enemy.sprite.showStatus(CharSprite.NEUTRAL, enemy.defenseVerb());
+            Dungeon.level.drop(new ThrowingStone(),enemy.pos).sprite.drop();
+        }
+    }
+
+
+    public void onZapComplete() {
+        zap();
+        next();
+    }
 
     public int damageRoll() {
         return Random.NormalIntRange( 2, 5 );
@@ -35,5 +92,12 @@ public class Goblin extends Mob {
     @Override
     public void die( Object cause ) {
         super.die( cause );
+    }
+
+    @Override
+    public String description() {
+        String desc = super.description();
+        desc += Messages.get(this, "stone_remain", StoneRemain );
+        return desc;
     }
 }
