@@ -5,6 +5,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingStone;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -23,6 +24,8 @@ public class Goblin extends Mob {
         EXP = 5;
         maxLvl = 10;
 
+        loot = Generator.Category.MIS_T2;
+        lootChance = 0.1f;
     }
 
     private int StoneRemain = 2;
@@ -91,6 +94,8 @@ public class Goblin extends Mob {
 
     @Override
     public void die( Object cause ) {
+        // Random drop
+        if(Random.Float(0,10)<5) loot=Generator.Category.MIS_T3;
         super.die( cause );
     }
 

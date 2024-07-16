@@ -2,7 +2,6 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -54,7 +53,7 @@ public class Mayfly extends Mob {
 
     @Override
     protected boolean getCloser( int target ) {
-        if (state == HUNTING) {
+        if (state == HUNTING && Dungeon.level.adjacent(pos,enemy.pos)) {
             return enemySeen && getFurther( target );
         } else {
             return super.getCloser( target );
@@ -70,8 +69,8 @@ public class Mayfly extends Mob {
 
     @Override
     protected boolean canAttack( Char enemy ) {
-        Ballistica attack = new Ballistica( pos, enemy.pos, Ballistica.PROJECTILE);
-        return !Dungeon.level.adjacent( pos, enemy.pos ) && attack.collisionPos == enemy.pos;
+        Ballistica attack = new Ballistica( pos, enemy.pos, Ballistica.MAGIC_BOLT);
+        return isInRange(enemy.pos) && attack.collisionPos == enemy.pos && !Dungeon.level.adjacent(pos,enemy.pos);
     }
 
     public int attackProc( Char enemy, int damage ) {
