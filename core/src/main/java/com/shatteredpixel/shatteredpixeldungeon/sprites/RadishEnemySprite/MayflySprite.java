@@ -1,8 +1,12 @@
 package com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Mayfly;
+import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
 import com.watabou.noosa.TextureFilm;
+import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Callback;
 
 public class MayflySprite extends MobSprite {
     public MayflySprite(){
@@ -20,9 +24,27 @@ public class MayflySprite extends MobSprite {
         attack = new Animation( 7, false );
         attack.frames( frames, 8, 9,10);
 
+        zap = attack.clone();
+
         die = new Animation( 7, false );
         die.frames( frames, 11, 12,13,14,15 );
 
         play(idle);
+    }
+    public void zap( int cell ) {
+
+        super.zap( cell );
+
+        MagicMissile.boltFromChar( parent,
+                MagicMissile.FOLIAGE,
+                this,
+                cell,
+                new Callback() {
+                    @Override
+                    public void call() {
+                        ((Mayfly)ch).onZapComplete();
+                    }
+                } );
+        Sample.INSTANCE.play( Assets.Sounds.ZAP );
     }
 }

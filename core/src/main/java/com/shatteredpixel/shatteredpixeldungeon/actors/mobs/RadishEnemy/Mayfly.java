@@ -2,8 +2,10 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -29,7 +31,40 @@ public class Mayfly extends Mob {
         lootChance = 0.5f;
     }
     private ArrayList<Emitter> HealingPos;
+    private boolean isAlone = true;
 
+
+    protected boolean doAttack(Char enemy ) {
+
+        if (Dungeon.level.adjacent( pos, enemy.pos )) {
+
+            return super.doAttack( enemy );
+
+        } else {
+
+            if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
+                sprite.zap( enemy.pos );
+                return false;
+            } else {
+                zap();
+                return true;
+            }
+        }
+    }
+    private void zap() {
+        spend( 1f );
+        attackProc(enemy,damageRoll());
+        Invisibility.dispel(this);
+        if (hit( this, enemy, true )) {
+            enemy.damage( damageRoll(), new MagicMissile());
+        } else {
+            enemy.sprite.showStatus( CharSprite.NEUTRAL,  enemy.defenseVerb() );
+        }
+    }
+    public void onZapComplete() {
+        zap();
+        next();
+    }
 
     public int damageRoll() {
         return Random.NormalIntRange( 2, 4 );
@@ -43,6 +78,14 @@ public class Mayfly extends Mob {
                 e.on = false;
             }
         }
+        // deprecated on 2024/07/16
+//        for(Mob mob:Dungeon.level.mobs){
+//            if(isInRange(mob.pos) && mob != this){
+//                isAlone = false;
+//            }
+//            return isAct;
+//        }
+//        isAlone = true;
         return isAct;
     }
     @Override
