@@ -35,7 +35,11 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Piranha;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Dog;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GiantWorm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Goblin;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Grudge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Jailer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Mayfly;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Prisoner;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Rat;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RipperDemon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RotHeart;
@@ -415,6 +419,12 @@ public class MobPlacer extends TestItem{
         SPECTRAL_NECRO(SpectralNecromancer.class, DictSpriteSheet.SPECTRAL_NECROMANCER),
         ROT_LASHER(RotLasher.class, DictSpriteSheet.ROT_LASHER),
         ROT_HEART(RotHeart.class, DictSpriteSheet.ROT_HEART),
+
+        PRISONER(Prisoner.class,DictSpriteSheet.PRISONER),
+        JAILER(Jailer.class,DictSpriteSheet.JAILER),
+        TORTURER(Torturer.class,DictSpriteSheet.TORTURER),
+        GRUDGE(Grudge.class,DictSpriteSheet.GRUDGE),
+        // Zone 2 end
         NEW_FIRE_ELE(Elemental.NewbornFireElemental.class, DictSpriteSheet.NEW_FIRE_ELE),
 
         BAT(Bat.class, DictSpriteSheet.BAT),

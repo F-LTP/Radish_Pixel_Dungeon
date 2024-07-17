@@ -310,5 +310,11 @@ public class Assets {
 		public static final String DOG="sprites/RadishEnemySprite/ZoneOne/dog.png";
 		public static final String MAYFLY="sprites/RadishEnemySprite/ZoneOne/mayfly.png";
 
+		// Zone 2
+		public static final String GRUDGE = "sprites/RadishEnemySprite/ZoneTwo/grudge.png";
+		public static final String JAILER = "sprites/RadishEnemySprite/ZoneTwo/jailer.png";
+		public static final String PRISONER = "sprites/RadishEnemySprite/ZoneTwo/prisoner.png";
+		public static final String TORTURER = "sprites/RadishEnemySprite/ZoneTwo/torturer.png";
+
 	}
 }

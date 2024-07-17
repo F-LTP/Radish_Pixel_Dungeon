@@ -254,6 +254,13 @@ public class DictSpriteSheet {
     public static final int NEW_FIRE_ELE    = 308 + 10000;
     public static final int SPECTRAL_NECROMANCER = 309 + 10000;
 
+    //Radish new Enemy
+    // Zone 2
+    public static final int PRISONER = 310 + 10000;
+    public static final int JAILER = 311 + 10000;
+    public static final int TORTURER = 312 + 10000;
+    public static final int GRUDGE = 313 + 10000;
+
     public static final int BAT             = 400 + 10000;
     public static final int BRUTE           = 401 + 10000;
     public static final int ARMORED_BRUTE   = 402 + 10000;
