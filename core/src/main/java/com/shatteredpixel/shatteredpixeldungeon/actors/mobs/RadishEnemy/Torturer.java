@@ -1,13 +1,21 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Chains;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.TorturerSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Callback;
 import com.watabou.utils.Random;
 
 public class Torturer extends Mob {
@@ -55,5 +63,29 @@ public class Torturer extends Mob {
     @Override
     public Item createLoot() {
         return super.createLoot().quantity(Random.Int(100,200));
+    }
+    @Override
+    protected boolean canAttack( Char enemy ) {
+        Ballistica chain = new Ballistica(pos, enemy.pos, Ballistica.PROJECTILE);
+        int newPos = -1;
+        for (int i : chain.subPath(1, chain.dist)){
+            if (!Dungeon.level.solid[i] && Actor.findChar(i) == null){
+                newPos = i;
+                break;
+            }
+        }
+        if(chain.collisionPos == enemy.pos && Dungeon.level.distance(pos,enemy.pos)<=2){
+            Sample.INSTANCE.play(Assets.Sounds.CHAINS);
+            sprite.parent.add(new Chains(sprite.center(),
+                    enemy.sprite.destinationCenter(),
+                    Effects.Type.CHAIN,
+                    new Callback() {
+                        public void call() {
+                            next();
+                        }
+                    }));
+
+        }
+        return chain.collisionPos == enemy.pos && Dungeon.level.distance(pos,enemy.pos)<=2;
     }
 }

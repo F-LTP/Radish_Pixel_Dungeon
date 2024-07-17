@@ -2,12 +2,15 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.GrudgeSprite;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Random;
 
@@ -42,6 +45,7 @@ public class Grudge extends Mob {
 
     @Override
     public void die( Object cause ) {
+        Buff.prolong(enemy,Haunted.class, Haunted.DURATION);
         super.die( cause );
     }
     @Override
@@ -55,8 +59,32 @@ public class Grudge extends Mob {
     }
     @Override
     public Item createLoot() {
+        Dungeon.LimitedDrops.GRUDGE_WEP.count++;
         if(super.createLoot() instanceof Weapon)
             super.createLoot().getCurse(true);
         return super.createLoot();
+    }
+    @Override
+    public float lootChance() {
+        return super.lootChance() * ((float) 1 /(1+Dungeon.LimitedDrops.GRUDGE_WEP.count));
+    }
+    public static class Haunted extends FlavourBuff {
+
+        public static final float DURATION = 30f;
+
+        {
+            type = buffType.NEGATIVE;
+            announced = true;
+        }
+
+        @Override
+        public int icon() {
+            return BuffIndicator.TERROR;
+        }
+
+        @Override
+        public float iconFadePercent() {
+            return Math.max(0, (DURATION - visualcooldown()) / DURATION);
+        }
     }
 }
