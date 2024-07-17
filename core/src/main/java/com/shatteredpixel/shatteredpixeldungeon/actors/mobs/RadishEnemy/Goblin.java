@@ -105,4 +105,13 @@ public class Goblin extends Mob {
         desc += Messages.get(this, "stone_remain", StoneRemain );
         return desc;
     }
+    @Override
+    public boolean attack(Char enemy, float dmgMulti, float dmgBonus, float accMulti) {
+        boolean isAttack = super.attack(enemy, dmgMulti, dmgBonus, accMulti);
+        if(!enemy.isAlive() && enemy==Dungeon.hero){
+            Dungeon.fail(getClass());
+            GLog.n('\n'+Messages.get(this, "rankings_desc"));
+        }
+        return isAttack;
+    }
 }
