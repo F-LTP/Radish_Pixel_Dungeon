@@ -53,4 +53,20 @@ public class Jailer extends Mob {
         }
         return isAttack;
     }
+
+    // add if it really hate prisoner
+    @Override
+    protected Char chooseEnemy() {
+        for (Mob mob : Dungeon.level.mobs) {
+            if (!(mob == this)
+                    && mob.alignment != Alignment.NEUTRAL
+                    && !mob.isInvulnerable(getClass())
+                    && !(alignment == Alignment.ALLY && mob.alignment == Alignment.ALLY)
+                    && mob instanceof Prisoner
+                    && fieldOfView[mob.pos]) {
+               return mob;
+            }
+        }
+        return super.chooseEnemy();
+    }
 }
