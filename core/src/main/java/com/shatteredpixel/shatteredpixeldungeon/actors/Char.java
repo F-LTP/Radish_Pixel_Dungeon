@@ -82,6 +82,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.En
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Elemental;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Grudge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
@@ -502,7 +503,11 @@ public abstract class Char extends Actor {
 			}
 			
 			int effectiveDamage = enemy.defenseProc( this, Math.round(dmg) );
-			effectiveDamage = Math.max( effectiveDamage - dr, 0 );
+
+			// created by DoggingDog on 20240718
+			// for Torturer using
+			if(!(this instanceof Torturer))
+				effectiveDamage = Math.max( effectiveDamage - dr, 0 );
 
 			if (enemy.buff(Viscosity.ViscosityTracker.class) != null){
 				effectiveDamage = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(effectiveDamage);

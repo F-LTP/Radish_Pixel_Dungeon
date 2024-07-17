@@ -7,7 +7,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Chains;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -34,7 +33,7 @@ public class Torturer extends Mob {
         lootChance = 0.5f;
     }
     public int damageRoll() {
-        return Random.NormalIntRange( 5, 5 ) + enemy.drRoll();
+        return Random.NormalIntRange( 5, 5 );
     }
 
     @Override

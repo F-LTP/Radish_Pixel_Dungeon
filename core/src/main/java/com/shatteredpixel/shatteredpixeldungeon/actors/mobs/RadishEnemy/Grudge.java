@@ -45,7 +45,8 @@ public class Grudge extends Mob {
 
     @Override
     public void die( Object cause ) {
-        Buff.prolong(enemy,Haunted.class, Haunted.DURATION);
+        if(enemy != null)
+            Buff.prolong(enemy,Haunted.class, Haunted.DURATION);
         super.die( cause );
     }
     @Override
@@ -60,6 +61,7 @@ public class Grudge extends Mob {
     @Override
     public Item createLoot() {
         Dungeon.LimitedDrops.GRUDGE_WEP.count++;
+        loot = Random.oneOf(Generator.Category.WEP_T3,Generator.Category.WEP_T4,Generator.Category.WEP_T5);
         if(super.createLoot() instanceof Weapon)
             super.createLoot().getCurse(true);
         return super.createLoot();

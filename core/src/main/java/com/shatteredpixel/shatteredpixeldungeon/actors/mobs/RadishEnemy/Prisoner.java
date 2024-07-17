@@ -56,7 +56,8 @@ public class Prisoner extends Mob {
     @Override
     public Item createLoot() {
         if(super.createLoot() instanceof Plant.Seed){
-            super.createLoot().quantity((int) (1f/Random.Float(0.4f,1.1f)));
+            int BonusRate = (int)(1f/Random.Float(0.4f,1.0f));
+            return super.createLoot().quantity(BonusRate);
         }
         return super.createLoot();
     }
