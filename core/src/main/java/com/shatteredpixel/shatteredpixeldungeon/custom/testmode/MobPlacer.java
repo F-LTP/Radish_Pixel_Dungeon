@@ -33,12 +33,15 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Monk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Necromancer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Piranha;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Dog;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Drake;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GiantWorm;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GnollZealot;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Goblin;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Grudge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Jailer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Mayfly;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Prisoner;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.StoneSpirit;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Rat;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RipperDemon;
@@ -68,7 +71,6 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CheckBox;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
-import com.shatteredpixel.shatteredpixeldungeon.ui.OptionSlider;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
@@ -77,10 +79,9 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Reflection;
 
-import java.awt.Checkbox;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
+
 
 public class MobPlacer extends TestItem{
     {
@@ -433,6 +434,13 @@ public class MobPlacer extends TestItem{
         SHAMAN(Shaman.random(), DictSpriteSheet.SHAMAN),
         SPINNER(Spinner.class, DictSpriteSheet.SPINNER),
         DM200(DM200.class, DictSpriteSheet.DM200),
+
+
+        GNOLL_ZEALOT(GnollZealot.class,DictSpriteSheet.GNOLL_ZEALOT),
+        DRAKE(Drake.class, DictSpriteSheet.DRAKE),
+        STONE_SPIRIT(StoneSpirit.class,DictSpriteSheet.STONE_SPIRIT),
+        DM175(com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.DM175.class,DictSpriteSheet.DM175),
+        // Zone 3 end
         DM201(DM201.class, DictSpriteSheet.DM201),
 
         GHOUL(Ghoul.class, DictSpriteSheet.GHOUL),

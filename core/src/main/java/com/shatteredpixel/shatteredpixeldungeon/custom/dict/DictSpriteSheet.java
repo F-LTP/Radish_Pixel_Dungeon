@@ -270,6 +270,14 @@ public class DictSpriteSheet {
     public static final int DM201           = 406 + 10000;
     public static final int PYLON           = 407 + 10000;
 
+    //Radish new Enemy
+    // Zone 2
+    public static final int GNOLL_ZEALOT = 408+10000;
+    public static final int DRAKE = 409+10000;
+    public static final int STONE_SPIRIT = 410+10000;
+    public static final int DM175 = 411+10000;
+
+
     public static final int GHOUL           = 500 + 10000;
     public static final int ELEMENTAL_FIRE  = 501 + 10000;
     public static final int ELEMENTAL_FROST = 502 + 10000;
