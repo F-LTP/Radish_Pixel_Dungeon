@@ -65,26 +65,27 @@ public class Torturer extends Mob {
     }
     @Override
     protected boolean canAttack( Char enemy ) {
-        Ballistica chain = new Ballistica(pos, enemy.pos, Ballistica.PROJECTILE);
-        int newPos = -1;
-        for (int i : chain.subPath(1, chain.dist)){
-            if (!Dungeon.level.solid[i] && Actor.findChar(i) == null){
-                newPos = i;
-                break;
-            }
-        }
-        if(chain.collisionPos == enemy.pos && Dungeon.level.distance(pos,enemy.pos)<=2){
-            Sample.INSTANCE.play(Assets.Sounds.CHAINS);
-            sprite.parent.add(new Chains(sprite.center(),
-                    enemy.sprite.destinationCenter(),
-                    Effects.Type.CHAIN,
-                    new Callback() {
-                        public void call() {
-                            next();
-                        }
-                    }));
-
-        }
-        return chain.collisionPos == enemy.pos && Dungeon.level.distance(pos,enemy.pos)<=2;
+//        Ballistica chain = new Ballistica(pos, enemy.pos, Ballistica.PROJECTILE);
+//        int newPos = -1;
+//        for (int i : chain.subPath(1, chain.dist)){
+//            if (!Dungeon.level.solid[i] && Actor.findChar(i) == null){
+//                newPos = i;
+//                break;
+//            }
+//        }
+//        if(chain.collisionPos == enemy.pos && Dungeon.level.distance(pos,enemy.pos)<=2){
+//            Sample.INSTANCE.play(Assets.Sounds.CHAINS);
+//            sprite.parent.add(new Chains(sprite.center(),
+//                    enemy.sprite.destinationCenter(),
+//                    Effects.Type.CHAIN,
+//                    new Callback() {
+//                        public void call() {
+//                            next();
+//                        }
+//                    }));
+//
+//        }
+//        return chain.collisionPos == enemy.pos && Dungeon.level.distance(pos,enemy.pos)<=2;
+        return Dungeon.level.distance(pos,enemy.pos)<=2;
     }
 }

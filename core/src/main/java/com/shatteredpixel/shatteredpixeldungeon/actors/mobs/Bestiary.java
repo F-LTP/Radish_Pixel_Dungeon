@@ -24,7 +24,11 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Dog;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GiantWorm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Goblin;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Grudge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Jailer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Mayfly;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Prisoner;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
@@ -74,27 +78,27 @@ public class Bestiary {
 				//3x skeleton, 1x thief, 1x swarm
 				return new ArrayList<>(Arrays.asList(Skeleton.class, Skeleton.class, Skeleton.class,
 						Thief.class,
-						Swarm.class));
+						Swarm.class, Jailer.class));
 			case 7:
 				//3x skeleton, 1x thief, 1x DM-100, 1x guard
 				return new ArrayList<>(Arrays.asList(Skeleton.class, Skeleton.class, Skeleton.class,
 						Thief.class,
 						DM100.class,
-						Guard.class));
+						Guard.class, Jailer.class, Prisoner.class));
 			case 8:
 				//2x skeleton, 1x thief, 2x DM-100, 2x guard, 1x necromancer
 				return new ArrayList<>(Arrays.asList(Skeleton.class, Skeleton.class,
 						Thief.class,
 						DM100.class, DM100.class,
 						Guard.class, Guard.class,
-						Necromancer.class));
+						Necromancer.class,Prisoner.class, Jailer.class, Torturer.class, Grudge.class));
 			case 9: case 10:
 				//1x skeleton, 1x thief, 2x DM-100, 2x guard, 2x necromancer
 				return new ArrayList<>(Arrays.asList(Skeleton.class,
 						Thief.class,
 						DM100.class, DM100.class,
 						Guard.class, Guard.class,
-						Necromancer.class, Necromancer.class));
+						Necromancer.class, Necromancer.class, Torturer.class, Grudge.class));
 				
 			// Caves
 			case 11:
