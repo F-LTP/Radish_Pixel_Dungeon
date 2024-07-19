@@ -23,11 +23,20 @@ public class Dog extends Mob {
 
         loot = new MysteryMeat();
         lootChance = 0.25f;
+
     }
+
+    protected int loyalty = 0;
 
 
     public int damageRoll() {
-        return Random.NormalIntRange( 2, 5 );
+        for(Mob mob:Dungeon.level.mobs){
+            if(Dungeon.level.adjacent(pos,mob.pos) && mob!=this)
+                loyalty++;
+        }
+        int DamageBoost = loyalty;
+        loyalty = 0;
+        return Random.NormalIntRange( 2, 5 )+DamageBoost;
     }
 
     @Override

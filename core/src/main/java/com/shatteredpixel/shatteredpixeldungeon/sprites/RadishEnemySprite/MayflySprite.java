@@ -15,18 +15,18 @@ public class MayflySprite extends MobSprite {
         texture(Assets.Sprites.MAYFLY);
 
         TextureFilm frames = new TextureFilm( texture, 20, 16 );
-        idle = new Animation( 7, true );
+        idle = new Animation( 9, true );
         idle.frames( frames, 0,1,2,3);
 
-        run = new Animation( 7, true );
+        run = new Animation( 9, true );
         run.frames( frames, 4, 5, 6,7 );
 
-        attack = new Animation( 7, false );
+        attack = new Animation( 9, false );
         attack.frames( frames, 8, 9,10);
 
         zap = attack.clone();
 
-        die = new Animation( 7, false );
+        die = new Animation( 9, false );
         die.frames( frames, 11, 12,13,14,15 );
 
         play(idle);

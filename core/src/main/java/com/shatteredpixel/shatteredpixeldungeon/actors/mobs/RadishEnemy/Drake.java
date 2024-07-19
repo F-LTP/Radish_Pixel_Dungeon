@@ -1,12 +1,29 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
+import static com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave.throwChar;
+
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.DrakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.Camera;
+import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Callback;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
 public class Drake extends Mob {
@@ -20,6 +37,9 @@ public class Drake extends Mob {
 
         EXP = 9;
         maxLvl = 19;
+
+        alignment = Alignment.NEUTRAL;
+        state = PASSIVE;
 
         loot = new MysteryMeat();
         lootChance = 0.25f;
@@ -52,5 +72,116 @@ public class Drake extends Mob {
             GLog.n('\n'+ Messages.get(this, "rankings_desc"));
         }
         return isAttack;
+    }
+
+    @Override
+    protected boolean act() {
+        if (alignment == Alignment.NEUTRAL && state != PASSIVE){
+            alignment = Alignment.ENEMY;
+        }
+        return super.act();
+    }
+    @Override
+    public CharSprite sprite() {
+        DrakeSprite sprite = (DrakeSprite) super.sprite();
+        if (alignment == Alignment.NEUTRAL) sprite.hideDrake();
+        return sprite;
+    }
+    @Override
+    public void onAttackComplete() {
+        super.onAttackComplete();
+        if (alignment == Alignment.NEUTRAL){
+            alignment = Alignment.ENEMY;
+            Dungeon.hero.spendAndNext(1f);
+        }
+    }
+
+    @Override
+    public void damage(int dmg, Object src) {
+        if (state == PASSIVE){
+            alignment = Alignment.ENEMY;
+            stopHiding();
+        }
+        super.damage(dmg, src);
+    }
+    @Override
+    public boolean interact(Char c) {
+        if (alignment != Alignment.NEUTRAL || c != Dungeon.hero){
+            return super.interact(c);
+        }
+        stopHiding();
+
+        Dungeon.hero.busy();
+        if (Dungeon.hero.invisible <= 0
+                && Dungeon.hero.buff(Swiftthistle.TimeBubble.class) == null
+                && Dungeon.hero.buff(TimekeepersHourglass.timeFreeze.class) == null){
+//            return doAttack(Dungeon.hero);
+            sprite.idle();
+            alignment = Alignment.ENEMY;
+            return true;
+        } else {
+            sprite.idle();
+            alignment = Alignment.ENEMY;
+            return true;
+        }
+    }
+
+    @Override
+    public void add(Buff buff) {
+        super.add(buff);
+        if (buff.type == Buff.buffType.NEGATIVE && alignment == Alignment.NEUTRAL){
+            alignment = Alignment.ENEMY;
+            stopHiding();
+            if (sprite != null) sprite.idle();
+        }
+    }
+    public void stopHiding(){
+        state = HUNTING;
+        if (sprite != null) sprite.idle();
+        if (Actor.chars().contains(this) && Dungeon.level.heroFOV[pos]) {
+            enemy = Dungeon.hero;
+            target = pos;
+            enemySeen = true;
+            GLog.w(Messages.get(this, "reveal") );
+            CellEmitter.get(pos).burst(Speck.factory(Speck.ROCK), 10);
+            Mob drake = this;
+            sprite.jump(pos, target, new Callback() {
+                @Override
+                public void call() {
+//                    move(target);
+//                    Dungeon.level.occupyCell(drake);
+                    WandOfBlastWave.BlastWave.blast(pos);
+                    Sample.INSTANCE.play(Assets.Sounds.BLAST);
+                    Camera.main.shake(2, 0.5f);
+                    Dungeon.observe();
+                    GameScene.updateFog();
+
+
+                    //throws other chars around the center.
+                    for (int i  : PathFinder.NEIGHBOURS8){
+                        Char ch = Actor.findChar(target + i);
+
+                        if (ch != null && ch != drake){
+                            if (ch.alignment != Char.Alignment.ALLY) ch.damage(damageRoll(), this);
+
+                            if (ch.pos == target + i || ch.pos == target + 2*i) {
+                                Ballistica trajectory = new Ballistica(ch.pos, ch.pos + i, Ballistica.MAGIC_BOLT);
+                                int strength = 2;
+                                throwChar(ch, trajectory, strength, false, true, getClass());
+                                Dungeon.hero.spendAndNext(1f);
+                                ch.damage(Random.Int(10,25),this);
+                            }
+
+                        }
+                    }
+
+                }
+            });
+        }
+    }
+    @Override
+    public boolean reset() {
+        if (state != PASSIVE) state = WANDERING;
+        return true;
     }
 }

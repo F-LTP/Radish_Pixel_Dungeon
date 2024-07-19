@@ -16,18 +16,18 @@ public class GoblinSprite extends MobSprite {
         texture(Assets.Sprites.GOBLIN);
 
         TextureFilm frames = new TextureFilm( texture, 15, 14 );
-        idle = new Animation( 1, true );
+        idle = new Animation( 3, true );
         idle.frames( frames, 0,1);
 
-        run = new Animation( 8, true );
+        run = new Animation( 10, true );
         run.frames( frames, 2,3, 4, 5 );
 
-        attack = new Animation( 9, false );
+        attack = new Animation( 11, false );
         attack.frames( frames, 6,7, 8, 9);
 
         zap = attack.clone();
 
-        die = new Animation( 7, false );
+        die = new Animation( 9, false );
         die.frames( frames, 10, 11);
 
         play(idle);

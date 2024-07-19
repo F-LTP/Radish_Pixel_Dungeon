@@ -12,16 +12,16 @@ public class GrudgeSprite extends MobSprite {
         texture(Assets.Sprites.GRUDGE);
 
         TextureFilm frames = new TextureFilm( texture, 16, 16 );
-        idle = new MovieClip.Animation( 5, true );
+        idle = new MovieClip.Animation( 7, true );
         idle.frames( frames, 0,1,2,3,4,5,6,7);
 
-        run = new MovieClip.Animation( 7, true );
+        run = new MovieClip.Animation( 9, true );
         run.frames( frames,  8,9,10,11,12,13);
 
-        attack = new MovieClip.Animation( 7, false );
+        attack = new MovieClip.Animation( 9, false );
         attack.frames( frames, 14,15,16);
 
-        die = new MovieClip.Animation( 7, false );
+        die = new MovieClip.Animation( 9, false );
         die.frames( frames, 17,18,19,20,21);
 
         play(idle);

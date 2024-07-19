@@ -53,10 +53,10 @@ public class Mayfly extends Mob {
     }
     private void zap() {
         spend( 1f );
-        attackProc(enemy,damageRoll());
         Invisibility.dispel(this);
         if (hit( this, enemy, true )) {
-            enemy.damage( damageRoll(), new MagicMissile());
+//            enemy.damage( damageRoll(), new MagicMissile());
+            attack(enemy);
         } else {
             enemy.sprite.showStatus( CharSprite.NEUTRAL,  enemy.defenseVerb() );
         }
@@ -86,6 +86,13 @@ public class Mayfly extends Mob {
 //            return isAct;
 //        }
 //        isAlone = true;
+        if(isAlone && HP < HT){
+            int Heal = damageRoll();
+            this.HP += Heal;
+            this.HP = Math.min(HP, HT);
+            this.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
+            this.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", Heal);
+        }
         return isAct;
     }
     @Override
@@ -96,7 +103,7 @@ public class Mayfly extends Mob {
 
     @Override
     protected boolean getCloser( int target ) {
-        if (state == HUNTING && Dungeon.level.adjacent(pos,enemy.pos)) {
+        if (state == HUNTING && Dungeon.level.distance(pos,enemy.pos)<=2) {
             return enemySeen && getFurther( target );
         } else {
             return super.getCloser( target );
@@ -112,8 +119,15 @@ public class Mayfly extends Mob {
 
     @Override
     protected boolean canAttack( Char enemy ) {
+        for(Mob mob:Dungeon.level.mobs){
+            if(isInRange(mob.pos) && mob != this){
+                isAlone = false;
+                break;
+            }
+            isAlone = true;
+        }
         Ballistica attack = new Ballistica( pos, enemy.pos, Ballistica.MAGIC_BOLT);
-        return isInRange(enemy.pos) && attack.collisionPos == enemy.pos && !Dungeon.level.adjacent(pos,enemy.pos);
+        return !isAlone && isInRange(enemy.pos) && attack.collisionPos == enemy.pos && !Dungeon.level.adjacent(pos,enemy.pos);
     }
 
     public int attackProc( Char enemy, int damage ) {
@@ -126,17 +140,18 @@ public class Mayfly extends Mob {
         for (int i = 0; i < Dungeon.level.length(); i++){
             if (!Dungeon.level.solid[i] && Dungeon.level.distance(pos,i) <= 3) {
                 Emitter e = CellEmitter.get(i);
-                e.pour(LeafParticle.LEVEL_SPECIFIC, 1f);
+//                e.pour(LeafParticle.LEVEL_SPECIFIC, 1f);
                 HealingPos.add(e);
             }
         }
         for(Mob mob:Dungeon.level.mobs){
-            if(isInRange(mob.pos)){
+            if(isInRange(mob.pos) && mob != this){
                 int healthHalo = damageRoll();
                 mob.HP += healthHalo;
                 mob.HP = Math.min(mob.HP, mob.HT);
                 mob.sprite.emitter().burst(Speck.factory(Speck.HEALING), healthHalo);
                 mob.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", healthHalo);
+                break;
             }
         }
         return damage;
