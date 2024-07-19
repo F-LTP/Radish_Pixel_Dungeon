@@ -60,6 +60,8 @@ public class Goblin extends Mob {
         if (hit(this, enemy, true)) {
             int dmg = Random.NormalIntRange(2, 4);
             dmg = Math.round(dmg * AscensionChallenge.statModifier(this));
+            dmg = defenseProc(enemy,dmg);
+            dmg -= enemy.drRoll();
             enemy.damage(dmg, new ThrowingStone());
 
             if (!enemy.isAlive() && enemy == Dungeon.hero) {
