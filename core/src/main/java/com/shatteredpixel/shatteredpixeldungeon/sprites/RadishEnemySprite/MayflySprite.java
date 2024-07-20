@@ -36,7 +36,7 @@ public class MayflySprite extends MobSprite {
         super.zap( cell );
 
         MagicMissile.boltFromChar( parent,
-                MagicMissile.FOLIAGE,
+                MagicMissile.BLOOD_CONE,
                 this,
                 cell,
                 new Callback() {
@@ -45,6 +45,6 @@ public class MayflySprite extends MobSprite {
                         ((Mayfly)ch).onZapComplete();
                     }
                 } );
-        Sample.INSTANCE.play( Assets.Sounds.ZAP );
+//        Sample.INSTANCE.play( Assets.Sounds.ZAP );
     }
 }

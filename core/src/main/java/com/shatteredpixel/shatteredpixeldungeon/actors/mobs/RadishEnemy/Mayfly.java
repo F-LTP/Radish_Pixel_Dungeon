@@ -27,6 +27,8 @@ public class Mayfly extends Mob {
         EXP = 2;
         maxLvl = 8;
 
+        flying = true;
+
         loot = Generator.Category.SEED;
         lootChance = 0.5f;
     }
@@ -43,7 +45,7 @@ public class Mayfly extends Mob {
         } else {
 
             if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
-                sprite.zap( enemy.pos );
+                sprite.zap( pos );
                 return false;
             } else {
                 zap();
@@ -54,12 +56,13 @@ public class Mayfly extends Mob {
     private void zap() {
         spend( 1f );
         Invisibility.dispel(this);
-        if (hit( this, enemy, true )) {
-//            enemy.damage( damageRoll(), new MagicMissile());
-            attack(enemy);
-        } else {
-            enemy.sprite.showStatus( CharSprite.NEUTRAL,  enemy.defenseVerb() );
-        }
+//        if (hit( this, enemy, true )) {
+////            enemy.damage( damageRoll(), new MagicMissile());
+//            attack(enemy);
+//        } else {
+//            enemy.sprite.showStatus( CharSprite.NEUTRAL,  enemy.defenseVerb() );
+//        }
+//        attack(this);
     }
     public void onZapComplete() {
         zap();
@@ -67,7 +70,11 @@ public class Mayfly extends Mob {
     }
 
     public int damageRoll() {
-        return Random.NormalIntRange( 2, 4 );
+        return Random.NormalIntRange( 0, 0 );
+    }
+
+    public int HealRoll(){
+        return Random.NormalIntRange(2,4);
     }
 
     @Override
@@ -87,11 +94,25 @@ public class Mayfly extends Mob {
 //        }
 //        isAlone = true;
         if(isAlone && HP < HT){
-            int Heal = damageRoll();
+            int Heal = HealRoll();
             this.HP += Heal;
             this.HP = Math.min(HP, HT);
             this.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
             this.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", Heal);
+        }else{
+            for(Mob mob:Dungeon.level.mobs){
+                if(isInRange(mob.pos) && mob != this){
+                    int healthHalo = HealRoll();
+                    mob.HP += healthHalo;
+                    mob.HP = Math.min(mob.HP, mob.HT);
+                    mob.sprite.emitter().burst(Speck.factory(Speck.HEALING), healthHalo);
+                    mob.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", healthHalo);
+                    if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
+                        sprite.zap(mob.pos);
+                    }
+                    break;
+                }
+            }
         }
         return isAct;
     }
@@ -142,16 +163,6 @@ public class Mayfly extends Mob {
                 Emitter e = CellEmitter.get(i);
 //                e.pour(LeafParticle.LEVEL_SPECIFIC, 1f);
                 HealingPos.add(e);
-            }
-        }
-        for(Mob mob:Dungeon.level.mobs){
-            if(isInRange(mob.pos) && mob != this){
-                int healthHalo = damageRoll();
-                mob.HP += healthHalo;
-                mob.HP = Math.min(mob.HP, mob.HT);
-                mob.sprite.emitter().burst(Speck.factory(Speck.HEALING), healthHalo);
-                mob.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", healthHalo);
-                break;
             }
         }
         return damage;
