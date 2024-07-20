@@ -50,7 +50,7 @@ public class StoneSpirit extends Mob {
         boolean isAttack = super.attack(enemy, dmgMulti, dmgBonus, accMulti);
         if(!enemy.isAlive() && enemy== Dungeon.hero){
             Dungeon.fail(getClass());
-            GLog.n('\n'+ Messages.get(this, "rankings_desc"));
+            GLog.n('\n'+ Messages.get(this, "kill"));
         }
         return isAttack;
     }
