@@ -7,16 +7,14 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM300;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.DrakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -25,6 +23,8 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Callback;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
+
+import java.util.ArrayList;
 
 public class Drake extends Mob {
     {
@@ -82,6 +82,9 @@ public class Drake extends Mob {
         if(Dungeon.hero != null){
             if (alignment == Alignment.NEUTRAL && Dungeon.level.distance(pos,Dungeon.hero.pos)<=2){
                 GLog.n('\n'+ Messages.get(this, "get_close"));
+                Dungeon.hero.interrupt();
+                Camera.main.shake(5, 1f);
+                Buff.append(this, DM300.FallingRockBuff.class, 0f).setRockPositions(new ArrayList<>(Dungeon.hero.pos));
                 if(Dungeon.level.adjacent(pos,Dungeon.hero.pos)){
                     stopHiding();
                 }
@@ -100,7 +103,6 @@ public class Drake extends Mob {
         super.onAttackComplete();
         if (alignment == Alignment.NEUTRAL){
             alignment = Alignment.ENEMY;
-            Dungeon.hero.spendAndNext(1f);
         }
     }
 
@@ -109,31 +111,30 @@ public class Drake extends Mob {
         if (state == PASSIVE){
             alignment = Alignment.ENEMY;
             stopHiding();
-            spend(1f);
         }
         super.damage(dmg, src);
     }
-    @Override
-    public boolean interact(Char c) {
-        if (alignment != Alignment.NEUTRAL || c != Dungeon.hero){
-            return super.interact(c);
-        }
-        stopHiding();
-
-//        Dungeon.hero.busy();
-        if (Dungeon.hero.invisible <= 0
-                && Dungeon.hero.buff(Swiftthistle.TimeBubble.class) == null
-                && Dungeon.hero.buff(TimekeepersHourglass.timeFreeze.class) == null){
-//            return doAttack(Dungeon.hero);
-            sprite.idle();
-            alignment = Alignment.ENEMY;
-            return true;
-        } else {
-            sprite.idle();
-            alignment = Alignment.ENEMY;
-            return true;
-        }
-    }
+//    @Override
+//    public boolean interact(Char c) {
+//        if (alignment != Alignment.NEUTRAL || c != Dungeon.hero){
+//            return super.interact(c);
+//        }
+//        stopHiding();
+//
+////        Dungeon.hero.busy();
+//        if (Dungeon.hero.invisible <= 0
+//                && Dungeon.hero.buff(Swiftthistle.TimeBubble.class) == null
+//                && Dungeon.hero.buff(TimekeepersHourglass.timeFreeze.class) == null){
+////            return doAttack(Dungeon.hero);
+//            sprite.idle();
+//            alignment = Alignment.ENEMY;
+//            return true;
+//        } else {
+//            sprite.idle();
+//            alignment = Alignment.ENEMY;
+//            return true;
+//        }
+//    }
 
     @Override
     public void add(Buff buff) {
@@ -148,9 +149,9 @@ public class Drake extends Mob {
         state = HUNTING;
         if (sprite != null) sprite.idle();
         if (Actor.chars().contains(this) && Dungeon.level.heroFOV[pos]) {
-            enemy = Dungeon.hero;
+//            enemy = Dungeon.hero;
 //            target = pos;
-            enemySeen = true;
+//            enemySeen = true;
             GLog.w("\n"+Messages.get(this, "reveal") );
 //            CellEmitter.get(pos).burst(Speck.factory(Speck.ROCK), 10);
             Mob drake = this;
@@ -161,7 +162,7 @@ public class Drake extends Mob {
 //                    Dungeon.level.occupyCell(drake);
                     WandOfBlastWave.BlastWave.blast(pos);
                     Sample.INSTANCE.play(Assets.Sounds.BLAST);
-                    Camera.main.shake(5, 0.5f);
+//                    Camera.main.shake(100, 0.5f);
                     Dungeon.observe();
 //                    GameScene.updateFog();
 
@@ -170,7 +171,10 @@ public class Drake extends Mob {
                     for (int i  : PathFinder.NEIGNBOURS24){
                         Char ch = Actor.findChar(pos + i);
 
-                        CellEmitter.get(pos+i).burst(Speck.factory(Speck.ROCK), 5);
+                        CellEmitter.get(pos+i).burst(Speck.factory(Speck.ROCK), 10);
+                        WandOfBlastWave.BlastWave.blast(pos+i);
+                        WandOfBlastWave.BlastWave.blast(pos+2*i);
+                        WandOfBlastWave.BlastWave.blast(pos+3*i);
                         if (ch != null && ch != drake){
                             if (ch.alignment != Char.Alignment.ALLY) ch.damage(damageRoll(), this);
 
@@ -180,10 +184,17 @@ public class Drake extends Mob {
                                 throwChar(ch, trajectory, strength, false, true, getClass());
                                 ch.damage(Random.Int(10,25),this);
                                 GLog.w("\n"+Messages.get(Drake.class, "shock",ch.name()) );
+                                if(Dungeon.hero != null){
+                                    if(!Dungeon.hero.isAlive()){
+                                        Dungeon.fail(getClass());
+                                        GLog.n('\n'+ Messages.get(Drake.class, "rock_punk_kill"));
+                                    }
+                                }
                             }
 
                         }
                     }
+                    spend(2f*TICK);
                     Dungeon.hero.spendAndNext(1f);
                 }
             });
