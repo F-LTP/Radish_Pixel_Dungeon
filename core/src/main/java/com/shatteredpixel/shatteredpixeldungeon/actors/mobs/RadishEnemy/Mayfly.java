@@ -2,13 +2,13 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
-import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
-import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfSirensSong;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.MayflySprite;
@@ -99,15 +99,28 @@ public class Mayfly extends Mob {
             this.HP = Math.min(HP, HT);
             this.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
             this.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", Heal);
-        }else{
+        } else if (this.buff(Corruption.class)!=null || this.buff(ScrollOfSirensSong.Enthralled.class)!= null) {
+            if(Dungeon.hero != null){
+                if(isInRange(Dungeon.hero.pos) && fieldOfView[Dungeon.hero.pos]){
+                    int healthHalo = HealRoll();
+                    Dungeon.hero.HP += healthHalo;
+                    Dungeon.hero.HP = Math.min(Dungeon.hero.HP, Dungeon.hero.HT);
+                    Dungeon.hero.sprite.emitter().burst(Speck.factory(Speck.HEALING), healthHalo);
+                    Dungeon.hero.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", healthHalo);
+                    if (sprite != null && (sprite.visible)) {
+                        sprite.zap(Dungeon.hero.pos);
+                    }
+                }
+            }
+        } else{
             for(Mob mob:Dungeon.level.mobs){
-                if(isInRange(mob.pos) && mob != this){
+                if(isInRange(mob.pos) && mob != this && mob.alignment == Alignment.ENEMY && fieldOfView[mob.pos]){
                     int healthHalo = HealRoll();
                     mob.HP += healthHalo;
                     mob.HP = Math.min(mob.HP, mob.HT);
                     mob.sprite.emitter().burst(Speck.factory(Speck.HEALING), healthHalo);
                     mob.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", healthHalo);
-                    if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
+                    if (sprite != null && (sprite.visible)) {
                         sprite.zap(mob.pos);
                     }
                     break;
