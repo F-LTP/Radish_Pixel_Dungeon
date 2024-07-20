@@ -20,6 +20,8 @@ public class Jailer extends Mob {
         EXP = 5;
         maxLvl = 12;
 
+        properties.add(Property.UNDEAD);
+
         state = WANDERING;
 
     }

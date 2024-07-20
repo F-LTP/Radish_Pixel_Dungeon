@@ -26,8 +26,12 @@ public class Grudge extends Mob {
         EXP = 7;
         maxLvl = 15;
 
+        flying = true;
+
         loot = Random.oneOf(Generator.Category.WEP_T3,Generator.Category.WEP_T4,Generator.Category.WEP_T5);
         lootChance = 0.25f;
+
+        properties.add(Property.UNDEAD);
     }
     public int damageRoll() {
         return Random.NormalIntRange( 4, 12 );

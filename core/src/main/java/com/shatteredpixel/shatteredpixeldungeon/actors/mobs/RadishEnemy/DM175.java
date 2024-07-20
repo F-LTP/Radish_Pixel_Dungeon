@@ -20,6 +20,10 @@ public class DM175 extends Mob {
         EXP = 7;
         maxLvl = 17;
 
+        properties.add(Property.INORGANIC);
+        properties.add(Property.LARGE);
+        properties.add(Property.HEADLESS);
+
         loot = Generator.Category.SCROLL;
         lootChance = 0.1f;
     }

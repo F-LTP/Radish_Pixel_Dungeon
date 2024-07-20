@@ -20,6 +20,8 @@ public class StoneSpirit extends Mob {
         EXP = 9;
         maxLvl = 19;
 
+        properties.add(Property.INORGANIC);
+
         loot = new ThrowingStone().quantity(Random.Int(1,5));
         lootChance = 1f;
     }
