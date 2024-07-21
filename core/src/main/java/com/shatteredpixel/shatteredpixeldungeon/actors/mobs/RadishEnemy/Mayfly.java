@@ -94,11 +94,12 @@ public class Mayfly extends Mob {
 //        }
 //        isAlone = true;
         if(isAlone && HP < HT){
-            int Heal = HealRoll();
+            int Heal = Random.NormalIntRange(0,1);
             this.HP += Heal;
             this.HP = Math.min(HP, HT);
             this.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
-            this.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", Heal);
+            if(Heal>0)
+                this.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", Heal);
         } else if (this.buff(Corruption.class)!=null || this.buff(ScrollOfSirensSong.Enthralled.class)!= null) {
             if(Dungeon.hero != null){
                 if(isInRange(Dungeon.hero.pos) && fieldOfView[Dungeon.hero.pos]){
