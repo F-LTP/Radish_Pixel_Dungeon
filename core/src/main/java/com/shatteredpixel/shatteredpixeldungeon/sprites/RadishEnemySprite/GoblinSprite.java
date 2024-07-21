@@ -22,7 +22,7 @@ public class GoblinSprite extends MobSprite {
         run = new Animation( 10, true );
         run.frames( frames, 2,3, 4, 5 );
 
-        attack = new Animation( 11, false );
+        attack = new Animation( 14, false );
         attack.frames( frames, 6,7, 8, 9);
 
         zap = attack.clone();
