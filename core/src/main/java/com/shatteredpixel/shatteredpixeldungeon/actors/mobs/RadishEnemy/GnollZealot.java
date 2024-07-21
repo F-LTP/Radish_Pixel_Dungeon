@@ -1,12 +1,20 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Shaman;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.GnollZealotSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
 
 public class GnollZealot extends Mob {
@@ -51,5 +59,52 @@ public class GnollZealot extends Mob {
             GLog.n('\n'+ Messages.get(this, "kill"));
         }
         return isAttack;
+    }
+
+    @Override
+    protected boolean canAttack( Char enemy ) {
+        return new Ballistica( pos, enemy.pos, Ballistica.MAGIC_BOLT).collisionPos == enemy.pos;
+    }
+
+    protected boolean doAttack(Char enemy ) {
+
+        if (Dungeon.level.adjacent( pos, enemy.pos )) {
+
+            return super.doAttack( enemy );
+
+        } else {
+
+            if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
+                sprite.zap( enemy.pos );
+                return false;
+            } else {
+                zap();
+                return true;
+            }
+        }
+    }
+    public void onZapComplete() {
+        zap();
+        next();
+    }
+
+    private void zap() {
+        spend( 1f );
+
+        Invisibility.dispel(this);
+        if (hit( this, enemy, true )) {
+
+            int dmg = Random.NormalIntRange( 6, 15 );
+            dmg = Math.round(dmg * AscensionChallenge.statModifier(this));
+            enemy.damage( dmg, new Shaman.EarthenBolt() );
+
+            if (!enemy.isAlive() && enemy == Dungeon.hero) {
+                Badges.validateDeathFromEnemyMagic();
+                Dungeon.fail( getClass() );
+                GLog.n( Messages.get(this, "bolt_kill") );
+            }
+        } else {
+            enemy.sprite.showStatus( CharSprite.NEUTRAL,  enemy.defenseVerb() );
+        }
     }
 }
