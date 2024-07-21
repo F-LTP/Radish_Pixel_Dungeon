@@ -18,7 +18,7 @@ public class GrudgeSprite extends MobSprite {
         run = new MovieClip.Animation( 9, true );
         run.frames( frames,  8,9,10,11,12,13);
 
-        attack = new MovieClip.Animation( 9, false );
+        attack = new MovieClip.Animation( 11, false );
         attack.frames( frames, 14,15,16);
 
         die = new MovieClip.Animation( 9, false );

@@ -17,7 +17,7 @@ public class GiantWormSprite  extends MobSprite {
         run = new Animation( 9, true );
         run.frames( frames, 3, 4, 5, 6 );
 
-        attack = new Animation( 9, false );
+        attack = new Animation( 11, false );
         attack.frames( frames, 7, 8, 9);
 
         die = new Animation( 9, false );

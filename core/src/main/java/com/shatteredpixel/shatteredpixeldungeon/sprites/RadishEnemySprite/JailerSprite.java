@@ -18,10 +18,10 @@ public class JailerSprite extends MobSprite {
         run = new MovieClip.Animation( 11, true );
         run.frames( frames,  2,3,4,5,6,7);
 
-        attack = new MovieClip.Animation( 9, false );
+        attack = new MovieClip.Animation( 11, false );
         attack.frames( frames, 8,9,10);
 
-        die = new MovieClip.Animation( 9, false );
+        die = new MovieClip.Animation( 11, false );
         die.frames( frames, 11,12,13);
 
         play(idle);

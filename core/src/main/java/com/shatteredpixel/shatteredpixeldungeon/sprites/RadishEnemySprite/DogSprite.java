@@ -17,10 +17,10 @@ public class DogSprite extends MobSprite {
         run = new Animation( 9, true );
         run.frames( frames,  4, 5, 6 ,7,8,9);
 
-        attack = new Animation( 7, false );
+        attack = new Animation( 11, false );
         attack.frames( frames, 10,11,12,13);
 
-        die = new Animation( 7, false );
+        die = new Animation( 9, false );
         die.frames( frames, 14,15,16,17,18);
 
         play(idle);

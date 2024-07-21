@@ -4,6 +4,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingStone;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.StoneSpiritSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -26,19 +27,19 @@ public class StoneSpirit extends Mob {
         lootChance = 1f;
     }
 
+    private boolean standOnPure = true;
 
     public int damageRoll() {
-        return Random.NormalIntRange( 10, 25 );
+        return standOnPure?Random.NormalIntRange( 10, 25 ):Random.NormalIntRange(4,8);
+    }
+    @Override
+    public int drRoll() {
+        return standOnPure?Random.NormalIntRange(5, 10):Random.NormalIntRange(0,5);
     }
 
     @Override
     public int attackSkill( Char target ) {
         return 25;
-    }
-
-    @Override
-    public int drRoll() {
-        return Random.NormalIntRange(5, 10);
     }
 
     @Override
@@ -53,5 +54,18 @@ public class StoneSpirit extends Mob {
             GLog.n('\n'+ Messages.get(this, "kill"));
         }
         return isAttack;
+    }
+    @Override
+    protected boolean act() {
+        if(Dungeon.level.map[pos]== Terrain.EMPTY){
+            standOnPure = true;
+            if(Dungeon.hero != null && fieldOfView != null)
+                if(fieldOfView[Dungeon.hero.pos])
+                    GLog.n('\n'+ Messages.get(this, "boost"));
+        }
+        else {
+            standOnPure=false;
+        }
+        return super.act();
     }
 }

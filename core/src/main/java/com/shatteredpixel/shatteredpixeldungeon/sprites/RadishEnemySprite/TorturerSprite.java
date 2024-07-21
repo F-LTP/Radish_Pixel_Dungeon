@@ -15,7 +15,7 @@ public class TorturerSprite  extends MobSprite {
         idle = new MovieClip.Animation( 3, true );
         idle.frames( frames, 0,1);
 
-        run = new MovieClip.Animation( 7, true );
+        run = new MovieClip.Animation( 9, true );
         run.frames( frames,  2,3,4,5);
 
         attack = new MovieClip.Animation( 11, false );

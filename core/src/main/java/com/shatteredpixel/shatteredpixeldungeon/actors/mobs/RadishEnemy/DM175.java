@@ -2,6 +2,8 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -55,5 +57,12 @@ public class DM175 extends Mob {
             GLog.n('\n'+ Messages.get(this, "kill"));
         }
         return isAttack;
+    }
+    @Override
+    protected boolean act() {
+        if (state == SLEEPING || state == WANDERING){
+            Buff.affect(this,Barrier.class).setShield(60);
+        }
+        return super.act();
     }
 }
