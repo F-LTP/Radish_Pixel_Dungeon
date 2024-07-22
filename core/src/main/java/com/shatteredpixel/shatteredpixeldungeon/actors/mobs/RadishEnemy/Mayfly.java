@@ -23,7 +23,7 @@ public class Mayfly extends Mob {
     {
         spriteClass = MayflySprite.class;
 
-        HP = HT = 12;
+        HP = HT = 8;
         defenseSkill = 4;
 
         EXP = 2;
