@@ -3,6 +3,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -66,5 +67,15 @@ public class GiantWorm extends Mob{
             GLog.n('\n'+Messages.get(this, "rankings_desc"));
         }
         return isAttack;
+    }
+
+
+    @Override
+    protected boolean act() {
+        Buff giantBuff = buff(ChampionEnemy.Giant.class);
+        if(giantBuff != null){
+           giantBuff.detach();
+        }
+        return super.act();
     }
 }

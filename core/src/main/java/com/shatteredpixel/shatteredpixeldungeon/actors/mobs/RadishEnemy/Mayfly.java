@@ -2,6 +2,8 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
@@ -79,6 +81,10 @@ public class Mayfly extends Mob {
 
     @Override
     protected boolean act() {
+        Buff giantBuff = buff(ChampionEnemy.Giant.class);
+        if(giantBuff != null){
+            giantBuff.detach();
+        }
         boolean isAct = super.act();
         if(this.HealingPos != null){
             for (Emitter e : HealingPos){
