@@ -137,6 +137,13 @@ public class Mayfly extends Mob {
 
 
     @Override
+    public float speed() {
+        if(isAlone)
+            return super.speed() * 0.5f;
+        else
+            return super.speed();
+    }
+    @Override
     protected boolean getCloser( int target ) {
         if (state == HUNTING && Dungeon.level.distance(pos,enemy.pos)<=2) {
             return enemySeen && getFurther( target );

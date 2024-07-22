@@ -14,7 +14,7 @@ public class DogSprite extends MobSprite {
         idle = new Animation( 4, true );
         idle.frames( frames, 0,1,2,3);
 
-        run = new Animation( 9, true );
+        run = new Animation( 11, true );
         run.frames( frames,  4, 5, 6 ,7,8,9);
 
         attack = new Animation( 11, false );
