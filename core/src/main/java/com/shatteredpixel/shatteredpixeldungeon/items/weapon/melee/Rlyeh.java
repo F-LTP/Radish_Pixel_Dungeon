@@ -76,7 +76,9 @@ public class Rlyeh extends MeleeWeapon {
 
         @Override
         public boolean act() {
-            Rlyeh w2 = (Rlyeh) hero.belongings.weapon;
+            Rlyeh w2 = null;
+            if(hero.belongings.weapon instanceof Rlyeh)
+                w2 = (Rlyeh) hero.belongings.weapon;
             if(w2 != null){
                 w2.chance = 0.15f + 0.03f * w2.level();
             }
