@@ -1,21 +1,23 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Healing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Shaman;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.plants.Sungrass;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.GnollZealotSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
+
 
 public class GnollZealot extends Mob {
     {
@@ -30,6 +32,23 @@ public class GnollZealot extends Mob {
 
         loot = new Gold();
         lootChance = 0.25f;
+    }
+
+    private boolean isFirstSeen = false;
+    @Override
+    protected boolean act() {
+        if(Dungeon.hero != null && fieldOfView!= null){
+            if(!isFirstSeen && fieldOfView[Dungeon.hero.pos]){
+                isFirstSeen = true;
+                GLog.n('\n'+ Messages.get(GnollZealot.class, "steal_healing",name()));
+            }
+            if(!Dungeon.hero.buffs(Healing.class).isEmpty() || !Dungeon.hero.buffs(Sungrass.Health.class).isEmpty()){
+                for(Mob mob:Dungeon.level.mobs){
+                    Buff.affect(mob,Healing.class).setHeal(8,1f,0);
+                }
+            }
+        }
+        return super.act();
     }
 
 
@@ -101,7 +120,7 @@ public class GnollZealot extends Mob {
             if (!enemy.isAlive() && enemy == Dungeon.hero) {
                 Badges.validateDeathFromEnemyMagic();
                 Dungeon.fail( getClass() );
-                GLog.n( Messages.get(this, "bolt_kill") );
+                GLog.n( Messages.get(this, "crazy_dance_kill") );
             }
         } else {
             enemy.sprite.showStatus( CharSprite.NEUTRAL,  enemy.defenseVerb() );

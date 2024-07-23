@@ -27,6 +27,8 @@ public class StoneSpirit extends Mob {
         lootChance = 1f;
     }
 
+    private boolean isNoticed = false;
+
     private boolean standOnPure = true;
 
     public int damageRoll() {
@@ -60,8 +62,10 @@ public class StoneSpirit extends Mob {
         if(Dungeon.level.map[pos]== Terrain.EMPTY){
             standOnPure = true;
             if(Dungeon.hero != null && fieldOfView != null)
-                if(fieldOfView[Dungeon.hero.pos])
+                if(fieldOfView[Dungeon.hero.pos] && !isNoticed){
                     GLog.n('\n'+ Messages.get(this, "boost"));
+                    isNoticed = true;
+                }
         }
         else {
             standOnPure=false;

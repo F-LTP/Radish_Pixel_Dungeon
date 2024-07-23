@@ -4,8 +4,11 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.TheGreatDead;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingStone;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -70,7 +73,16 @@ public class Goblin extends Mob {
             }
         } else {
             enemy.sprite.showStatus(CharSprite.NEUTRAL, enemy.defenseVerb());
-            Dungeon.level.drop(new ThrowingStone(),enemy.pos).sprite.drop();
+            Item dropStone = new ThrowingStone();
+            Item greatStone = new TheGreatDead();
+            if(Dungeon.hero != null){
+                if (Dungeon.hero.heroClass == HeroClass.WARRIOR && Random.Int(0,10)>8)
+                    Dungeon.level.drop(greatStone,enemy.pos).sprite.drop();
+                else
+                    Dungeon.level.drop(dropStone,enemy.pos).sprite.drop();
+            }
+            else
+                Dungeon.level.drop(dropStone,enemy.pos).sprite.drop();
         }
     }
 
