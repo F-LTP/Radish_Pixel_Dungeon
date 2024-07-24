@@ -18,6 +18,9 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.GnollZ
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Random;
 
+import java.util.Collections;
+import java.util.Set;
+
 
 public class GnollZealot extends Mob {
     {
@@ -42,15 +45,15 @@ public class GnollZealot extends Mob {
                 isFirstSeen = true;
                 GLog.n('\n'+ Messages.get(GnollZealot.class, "steal_healing",name()));
             }
-            if(!Dungeon.hero.buffs(Healing.class).isEmpty() || !Dungeon.hero.buffs(Sungrass.Health.class).isEmpty()){
-                for(Mob mob:Dungeon.level.mobs){
+            if((!Dungeon.hero.buffs(Healing.class).isEmpty() || !Dungeon.hero.buffs(Sungrass.Health.class).isEmpty()) && fieldOfView[Dungeon.hero.pos]){
+                Set<Mob> mobs = Collections.synchronizedSet(Dungeon.level.mobs);
+                for(Mob mob:mobs){
                     Buff.affect(mob,Healing.class).setHeal(8,1f,0);
                 }
             }
         }
         return super.act();
     }
-
 
     public int damageRoll() {
         return Random.NormalIntRange( 5, 10 );

@@ -18,6 +18,8 @@ import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Set;
 
 public class Mayfly extends Mob {
     {
@@ -120,8 +122,9 @@ public class Mayfly extends Mob {
                 }
             }
         } else{
-            for(Mob mob:Dungeon.level.mobs){
-                if(isInRange(mob.pos) && mob != this && mob.alignment == Alignment.ENEMY && fieldOfView[mob.pos]){
+            Set<Mob> mobs = Collections.synchronizedSet(Dungeon.level.mobs);
+            for(Mob mob:mobs){
+                if(isInRange(mob.pos) && mob != this && mob.alignment == Alignment.ENEMY && fieldOfView[mob.pos] && state == HUNTING){
                     int healthHalo = HealRoll();
                     mob.HP += healthHalo;
                     mob.HP = Math.min(mob.HP, mob.HT);
