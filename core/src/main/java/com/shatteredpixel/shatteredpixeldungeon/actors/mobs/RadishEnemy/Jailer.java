@@ -15,7 +15,7 @@ public class Jailer extends Mob {
         HP = HT = 30;
         defenseSkill = 6;
 
-        baseSpeed = 1f;
+        baseSpeed = 4f;
 
         EXP = 5;
         maxLvl = 12;
@@ -24,6 +24,15 @@ public class Jailer extends Mob {
 
         state = WANDERING;
 
+    }
+    @Override
+    protected boolean act() {
+        if(fieldOfView != null && Dungeon.hero!= null){
+            if(fieldOfView[Dungeon.hero.pos]){
+                baseSpeed = 1f;
+            }
+        }
+        return super.act();
     }
     public int damageRoll() {
         return Random.NormalIntRange( 2, 8 );
