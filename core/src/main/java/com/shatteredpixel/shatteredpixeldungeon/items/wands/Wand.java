@@ -378,7 +378,12 @@ public abstract class Wand extends Item {
 			// Morello func
 			// Date : 2024-07-08
 			// By	: DoggingDog
-			updateLevel();
+			if(hero != null){
+				Morello morello = hero.belongings.getItem(Morello.class);
+				if(morello != null){
+					updateLevel();
+				}
+			}
 
 			WandOfMagicMissile.MagicCharge buff = charger.target.buff(WandOfMagicMissile.MagicCharge.class);
 			if (buff != null && buff.level() > lvl && charger.target.buff(SpellQueue.tmpTracker.class)==null){
