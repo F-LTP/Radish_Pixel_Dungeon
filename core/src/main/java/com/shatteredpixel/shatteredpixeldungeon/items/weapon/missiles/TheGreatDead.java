@@ -23,10 +23,10 @@ public class TheGreatDead  extends MissileWeapon {
 
     @Override
     public int min() {
-        return 10;
+        return 5;
     }
     @Override
     public int max() {
-        return 20;
+        return 10;
     }
 }
