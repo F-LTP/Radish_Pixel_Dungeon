@@ -31,6 +31,8 @@ public class Mayfly extends Mob {
         EXP = 2;
         maxLvl = 8;
 
+        baseSpeed = 0.5f;
+
         flying = true;
 
         loot = Generator.Category.SEED;
@@ -145,13 +147,13 @@ public class Mayfly extends Mob {
     }
 
 
-    @Override
-    public float speed() {
-        if(isAlone)
-            return super.speed() * 0.5f;
-        else
-            return super.speed();
-    }
+//    @Override
+//    public float speed() {
+//        if(isAlone)
+//            return super.speed() * 0.5f;
+//        else
+//            return super.speed();
+//    }
     @Override
     protected boolean getCloser( int target ) {
         if (state == HUNTING && Dungeon.level.distance(pos,enemy.pos)<=2) {
