@@ -6,7 +6,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
@@ -22,47 +21,55 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.DM175_Sprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.ArtilleristSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.GameMath;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
-public class DM175 extends Mob {
+public class Artillerist extends Mob {
     {
-        spriteClass = DM175_Sprite.class;
+        spriteClass = ArtilleristSprite.class;
 
-        HP = HT = 20;
-        defenseSkill = 14;
+        HP = HT = 70;
+        defenseSkill = 22;
 
 
         EXP = 7;
         maxLvl = 17;
 
-        properties.add(Property.INORGANIC);
-        properties.add(Property.HEADLESS);
-
         loot = Generator.Category.SCROLL;
         lootChance = 0.1f;
     }
 
+    @Override
+    protected boolean canAttack( Char enemy ) {
+        return new Ballistica( pos, enemy.pos, Ballistica.PROJECTILE).collisionPos == enemy.pos;
+    }
 
     public int damageRoll() {
-        return Random.NormalIntRange( 4, 15 );
+        return Random.NormalIntRange( 12, 18 );
     }
 
     @Override
     public int attackSkill( Char target ) {
-        return 16;
+        return 26;
     }
 
     @Override
@@ -70,10 +77,6 @@ public class DM175 extends Mob {
         return Random.NormalIntRange(1, 6);
     }
 
-    @Override
-    public void die( Object cause ) {
-        super.die( cause );
-    }
     public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
 
         if (enemy == null) return false;
@@ -249,11 +252,57 @@ public class DM175 extends Mob {
 
         }
     }
-    @Override
-    protected boolean act() {
-        if (state == SLEEPING || state == WANDERING){
-            Buff.affect(this,Barrier.class).setShield(60);
+    public void onZapComplete(int cell) {
+        zap(cell);
+        next();
+    }
+
+    private void zap(int cell) {
+        spend(1f);
+        Invisibility.dispel(this);
+        int dmg = Random.NormalIntRange(25, 35);
+        dmg = Math.round(dmg * AscensionChallenge.statModifier(this));
+        CellEmitter.get(cell).burst(SmokeParticle.FACTORY, 4);
+        if(Dungeon.hero != null){
+            if(Dungeon.hero.pos == cell){
+                Dungeon.hero.damage(dmg,new Bomb());
+            }
         }
-        return super.act();
+        for(int c: PathFinder.NEIGHBOURS4){
+            CellEmitter.get(cell+c).burst(SmokeParticle.FACTORY, 4);
+            Mob mob = Dungeon.level.findMob(cell+c);
+            if(mob != null){
+                mob.damage(dmg,new Bomb());
+            }
+            if(Dungeon.hero != null){
+                if(Dungeon.hero.pos == cell + c){
+                    Dungeon.hero.damage(dmg,new Bomb());
+                }
+            }
+        }
+
+
+        if (!enemy.isAlive() && enemy == Dungeon.hero) {
+            Dungeon.fail(getClass());
+            GLog.n(Messages.get(this, "bomb_party_kill"));
+        }
+    }
+    protected boolean doAttack(Char enemy ) {
+
+        if (Dungeon.level.adjacent( pos, enemy.pos )) {
+
+            return super.doAttack( enemy );
+
+        } else{
+            if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
+                sprite.zap( enemy.pos );
+                return false;
+            } else {
+                spend(GameMath.gate(TICK, enemy.cooldown(), 3*TICK));
+                sprite.parent.addToBack(new TargetedCell(enemy.pos, 0xFF0000));
+                zap(enemy.pos);
+                return true;
+            }
+        }
     }
 }

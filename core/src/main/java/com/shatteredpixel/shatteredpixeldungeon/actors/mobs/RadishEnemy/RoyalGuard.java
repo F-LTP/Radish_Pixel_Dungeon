@@ -6,7 +6,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
@@ -23,57 +22,86 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.Deat
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.DM175_Sprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.RoyalGuardSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
 
-public class DM175 extends Mob {
+public class RoyalGuard extends Mob {
     {
-        spriteClass = DM175_Sprite.class;
+        spriteClass = RoyalGuardSprite.class;
 
-        HP = HT = 20;
-        defenseSkill = 14;
+        HP = HT = 80;
+        defenseSkill = 30;
 
 
-        EXP = 7;
-        maxLvl = 17;
+        EXP = 10;
+        maxLvl = 21;
 
-        properties.add(Property.INORGANIC);
-        properties.add(Property.HEADLESS);
-
-        loot = Generator.Category.SCROLL;
-        lootChance = 0.1f;
+        loot = Generator.Category.WEP_T4;
+        lootChance = 0.2f;
     }
 
+    Item equipment = Generator.randomUsingDefaults(Random.oneOf(Generator.Category.WEP_T4, Generator.Category.WEP_T5));
+    @Override
+    public String description() {
+        String desc = super.description();
+        desc += Messages.get(this, "equipment", equipment.name() );
+        return desc;
+    }
+    @Override
+    public Item createLoot() {
+        Dungeon.LimitedDrops.ROYALGUARD_WEP.count++;
+        int Ug = Random.Int(0,100)<50?0:(Random.Int(0,50)<40?1:2);
+        if(equipment != null && equipment instanceof MeleeWeapon)
+            loot = equipment.upgrade(Ug);
+        return super.createLoot();
+    }
+    @Override
+    public float lootChance() {
+        return (float) (super.lootChance() * ((float) 1 /(Math.pow(2,(double) Dungeon.LimitedDrops.ROYALGUARD_WEP.count))));
+    }
 
     public int damageRoll() {
-        return Random.NormalIntRange( 4, 15 );
+        if (equipment != null && equipment instanceof MeleeWeapon){
+            return Random.NormalIntRange(((MeleeWeapon) equipment).min(),((MeleeWeapon) equipment).max());
+        }
+
+        return Random.NormalIntRange( 8, 8 );
     }
 
     @Override
     public int attackSkill( Char target ) {
-        return 16;
+        int accuracy = 30;
+        if(equipment != null && equipment instanceof MeleeWeapon){
+            accuracy *= ((MeleeWeapon) equipment).ACC;
+        }
+        return accuracy;
     }
 
+    @Override
+    protected boolean canAttack( Char enemy ) {
+        if(equipment != null && equipment instanceof MeleeWeapon)
+            return Dungeon.level.distance(pos,enemy.pos) <= ((MeleeWeapon)equipment).RCH;
+        else
+            return Dungeon.level.adjacent(pos,enemy.pos);
+    }
     @Override
     public int drRoll() {
-        return Random.NormalIntRange(1, 6);
+        return Random.NormalIntRange(1, 8);
     }
 
-    @Override
-    public void die( Object cause ) {
-        super.die( cause );
-    }
     public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
 
         if (enemy == null) return false;
@@ -248,12 +276,5 @@ public class DM175 extends Mob {
             return false;
 
         }
-    }
-    @Override
-    protected boolean act() {
-        if (state == SLEEPING || state == WANDERING){
-            Buff.affect(this,Barrier.class).setShield(60);
-        }
-        return super.act();
     }
 }

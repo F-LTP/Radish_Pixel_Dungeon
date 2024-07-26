@@ -123,6 +123,12 @@ public class Dungeon {
 		// for Grudge in RadishNewEnemy
 		GRUDGE_WEP,
 
+
+		// Date : 2024/07/26
+		// DoggingDog
+		// for RoyalGuard in RadishNewEnemy
+		ROYALGUARD_WEP,
+
 		GUARD_ARM,
 		SHAMAN_WAND,
 		DM200_EQUIP,

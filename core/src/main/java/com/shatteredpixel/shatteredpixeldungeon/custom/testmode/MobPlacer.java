@@ -32,6 +32,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Monk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Necromancer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Piranha;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Artillerist;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.CluteredSkeleton;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Dog;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Drake;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GiantWorm;
@@ -41,6 +43,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Grudge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Jailer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Mayfly;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Prisoner;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.RoyalGuard;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.ShieldMage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.StoneSpirit;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Rat;
@@ -451,6 +455,12 @@ public class MobPlacer extends TestItem{
         ELE_FIRE(Elemental.FireElemental.class, DictSpriteSheet.ELEMENTAL_FIRE),
         ELE_FROST(Elemental.FrostElemental.class, DictSpriteSheet.ELEMENTAL_FROST),
         ELE_LIGHTNING(Elemental.ShockElemental.class, DictSpriteSheet.ELEMENTAL_SHOCK),
+
+        ROYAL_GUARD(RoyalGuard.class,DictSpriteSheet.ROYAL_GUARD),
+        ARTILLERIST(Artillerist.class,DictSpriteSheet.ARTILLERIST),
+        SHIELD_MAGE(ShieldMage.class,DictSpriteSheet.SHIELD_MAGE),
+        CLUSTERED_SKELETON(CluteredSkeleton.class,DictSpriteSheet.CLUSTERED_SKELETON),
+        // Zone 4 end
         ELE_CHAOS(Elemental.ChaosElemental.class, DictSpriteSheet.ELEMENTAL_CHAOS),
 
         RIPPER(RipperDemon.class, DictSpriteSheet.RIPPER),

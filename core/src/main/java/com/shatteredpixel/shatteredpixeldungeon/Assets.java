@@ -322,5 +322,11 @@ public class Assets {
 		public static final String GNOLLZEALOT = "sprites/RadishEnemySprite/ZoneThree/gnoll_zealot.png";
 		public static final String STONESPIRIT = "sprites/RadishEnemySprite/ZoneThree/stone_spirit.png";
 
+		// Zone 4
+		public static final String ARTILLERIST = "sprites/RadishEnemySprite/ZoneFour/artillerist.png";
+		public static final String CLUSTERED_SKELETON = "sprites/RadishEnemySprite/ZoneFour/clustered_skeleton.png";
+		public static final String ROYAL_GUARD  = "sprites/RadishEnemySprite/ZoneFour/royal_guard.png";
+		public static final String SHIELD_MAGE  = "sprites/RadishEnemySprite/ZoneFour/shield_mage.png";
+
 	}
 }

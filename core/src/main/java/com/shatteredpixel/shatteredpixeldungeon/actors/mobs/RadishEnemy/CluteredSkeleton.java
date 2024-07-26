@@ -6,7 +6,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
@@ -32,14 +31,14 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.DM175_Sprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.ClusteredSkeletonSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
 
-public class DM175 extends Mob {
+public class CluteredSkeleton extends Mob {
     {
-        spriteClass = DM175_Sprite.class;
+        spriteClass = ClusteredSkeletonSprite.class;
 
         HP = HT = 20;
         defenseSkill = 14;
@@ -49,6 +48,7 @@ public class DM175 extends Mob {
         maxLvl = 17;
 
         properties.add(Property.INORGANIC);
+        properties.add(Property.LARGE);
         properties.add(Property.HEADLESS);
 
         loot = Generator.Category.SCROLL;
@@ -70,10 +70,6 @@ public class DM175 extends Mob {
         return Random.NormalIntRange(1, 6);
     }
 
-    @Override
-    public void die( Object cause ) {
-        super.die( cause );
-    }
     public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
 
         if (enemy == null) return false;
@@ -248,12 +244,5 @@ public class DM175 extends Mob {
             return false;
 
         }
-    }
-    @Override
-    protected boolean act() {
-        if (state == SLEEPING || state == WANDERING){
-            Buff.affect(this,Barrier.class).setShield(60);
-        }
-        return super.act();
     }
 }
