@@ -21,10 +21,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
-import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfShielding;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
@@ -40,29 +40,29 @@ public class ShieldMage extends Mob {
     {
         spriteClass = ShieldMageSprite.class;
 
-        HP = HT = 20;
-        defenseSkill = 14;
+        HP = HT = 70;
+        defenseSkill = 22;
 
 
-        EXP = 7;
-        maxLvl = 17;
+        EXP = 9;
+        maxLvl = 21;
 
         properties.add(Property.INORGANIC);
         properties.add(Property.LARGE);
         properties.add(Property.HEADLESS);
 
-        loot = Generator.Category.SCROLL;
-        lootChance = 0.1f;
+        loot = new PotionOfShielding();
+        lootChance = 0.15f;
     }
 
 
     public int damageRoll() {
-        return Random.NormalIntRange( 4, 15 );
+        return Random.NormalIntRange( 10, 16 );
     }
 
     @Override
     public int attackSkill( Char target ) {
-        return 16;
+        return 30;
     }
 
     @Override

@@ -40,34 +40,34 @@ public class CluteredSkeleton extends Mob {
     {
         spriteClass = ClusteredSkeletonSprite.class;
 
-        HP = HT = 20;
-        defenseSkill = 14;
+        HP = HT = 100;
+        defenseSkill = 10;
 
 
         EXP = 7;
         maxLvl = 17;
 
-        properties.add(Property.INORGANIC);
-        properties.add(Property.LARGE);
-        properties.add(Property.HEADLESS);
-
         loot = Generator.Category.SCROLL;
         lootChance = 0.1f;
     }
 
+    @Override
+    public float attackDelay() {
+        return super.attackDelay() * 1.5f;
+    }
 
     public int damageRoll() {
-        return Random.NormalIntRange( 4, 15 );
+        return Random.NormalIntRange( 20, 35 );
     }
 
     @Override
     public int attackSkill( Char target ) {
-        return 16;
+        return 35;
     }
 
     @Override
     public int drRoll() {
-        return Random.NormalIntRange(1, 6);
+        return Random.NormalIntRange(2, 6);
     }
 
     public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {

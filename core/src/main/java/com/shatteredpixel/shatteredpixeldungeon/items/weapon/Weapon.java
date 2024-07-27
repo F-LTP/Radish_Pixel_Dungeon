@@ -249,8 +249,12 @@ abstract public class Weapon extends KindOfWeapon {
 		if( RingOfKing.curItem != null && RingOfKing.curItem.cursed )
 			multi = 1;
 		// 暂时这样吧，先把问题修了
-		if(hero.belongings.getItem(RingOfKing.class) != null)
-			if(hero.belongings.weapon == this) req = req + multi;
+		if(hero != null){
+			RingOfKing ringOfKing = hero.belongings.getItem(RingOfKing.class);
+			if(ringOfKing != null){
+				if(hero.belongings.weapon == this && (hero.belongings.misc instanceof RingOfKing || hero.belongings.ring instanceof RingOfKing)) req = req + multi;
+			}
+		}
 		if (masteryPotionBonus){
 			req -= 2;
 		}

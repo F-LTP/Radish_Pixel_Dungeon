@@ -23,6 +23,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.En
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BlastParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
@@ -269,7 +270,7 @@ public class Artillerist extends Mob {
             }
         }
         for(int c: PathFinder.NEIGHBOURS4){
-            CellEmitter.get(cell+c).burst(SmokeParticle.FACTORY, 4);
+            CellEmitter.get(cell+c).burst(BlastParticle.FACTORY, 20);
             Mob mob = Dungeon.level.findMob(cell+c);
             if(mob != null){
                 mob.damage(dmg,new Bomb());

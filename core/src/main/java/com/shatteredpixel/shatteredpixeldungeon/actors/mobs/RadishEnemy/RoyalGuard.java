@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
@@ -52,8 +53,13 @@ public class RoyalGuard extends Mob {
         loot = Generator.Category.WEP_T4;
         lootChance = 0.2f;
     }
+    Weapon equipment;
 
-    Item equipment = Generator.randomUsingDefaults(Random.oneOf(Generator.Category.WEP_T4, Generator.Category.WEP_T5));
+    public RoyalGuard(){
+        super();
+        equipment = (Weapon) Generator.randomUsingDefaults(Random.oneOf(Generator.Category.WEP_T4, Generator.Category.WEP_T5));
+    }
+
     @Override
     public String description() {
         String desc = super.description();
@@ -70,32 +76,37 @@ public class RoyalGuard extends Mob {
     }
     @Override
     public float lootChance() {
-        return (float) (super.lootChance() * ((float) 1 /(Math.pow(2,(double) Dungeon.LimitedDrops.ROYALGUARD_WEP.count))));
+        return (float) (super.lootChance() * ((float) 1 /(Math.pow(2, Dungeon.LimitedDrops.ROYALGUARD_WEP.count))));
     }
 
+    @Override
     public int damageRoll() {
-        if (equipment != null && equipment instanceof MeleeWeapon){
-            return Random.NormalIntRange(((MeleeWeapon) equipment).min(),((MeleeWeapon) equipment).max());
-        }
-
-        return Random.NormalIntRange( 8, 8 );
+        if(equipment != null)
+            return equipment.damageRoll(this);
+        else
+            return Random.Int(8,8);
     }
 
     @Override
     public int attackSkill( Char target ) {
         int accuracy = 30;
         if(equipment != null && equipment instanceof MeleeWeapon){
-            accuracy *= ((MeleeWeapon) equipment).ACC;
+            accuracy *= equipment.accuracyFactor( this, target );
         }
         return accuracy;
     }
 
     @Override
+    public float attackDelay() {
+        return super.attackDelay() * equipment.delayFactor(this);
+    }
+
+    @Override
     protected boolean canAttack( Char enemy ) {
         if(equipment != null && equipment instanceof MeleeWeapon)
-            return Dungeon.level.distance(pos,enemy.pos) <= ((MeleeWeapon)equipment).RCH;
+            return super.canAttack(enemy) || equipment.canReach(this, enemy.pos);
         else
-            return Dungeon.level.adjacent(pos,enemy.pos);
+            return super.canAttack(enemy);
     }
     @Override
     public int drRoll() {
@@ -277,4 +288,17 @@ public class RoyalGuard extends Mob {
 
         }
     }
+
+    @Override
+    public int attackProc( Char enemy, int damage ) {
+        damage = super.attackProc( enemy, damage );
+        damage = equipment.proc( this, enemy, damage );
+        if (!enemy.isAlive() && enemy == Dungeon.hero){
+            Dungeon.fail(getClass());
+            GLog.n( Messages.capitalize(Messages.get(Char.class, "kill", name())) );
+        }
+        return damage;
+    }
+
+
 }
