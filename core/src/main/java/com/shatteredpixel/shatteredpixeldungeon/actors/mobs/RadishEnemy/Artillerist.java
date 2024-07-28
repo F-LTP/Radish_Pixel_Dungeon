@@ -40,7 +40,6 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.ArtilleristSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
-import com.watabou.utils.GameMath;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
@@ -52,12 +51,19 @@ public class Artillerist extends Mob {
         defenseSkill = 22;
 
 
-        EXP = 7;
-        maxLvl = 17;
+        EXP = 9;
+        maxLvl = 20;
+
+        properties.add(Property.UNDEAD);
 
         loot = Generator.Category.SCROLL;
         lootChance = 0.1f;
     }
+
+    private boolean targeting = false;
+    private boolean shot = true;
+
+    private int cellToFire = 0;
 
     @Override
     protected boolean canAttack( Char enemy ) {
@@ -291,17 +297,31 @@ public class Artillerist extends Mob {
     protected boolean doAttack(Char enemy ) {
 
         if (Dungeon.level.adjacent( pos, enemy.pos )) {
+            shot = true;
+            targeting = false;
 
             return super.doAttack( enemy );
 
-        } else{
+        }else if (shot){
+            targeting = true;
+            shot = false;
+            sprite.parent.add(new TargetedCell(enemy.pos, 0xFF0000));
+            for(int c: PathFinder.NEIGHBOURS4){
+                sprite.parent.add(new TargetedCell(enemy.pos + c, 0xFF0000));
+            }
+            cellToFire = enemy.pos;
+            ((ArtilleristSprite)sprite).targeting(cellToFire);
+            spend( attackDelay());
+            return true;
+        }
+        else{
+            shot = true;
+            targeting = false;
             if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
-                sprite.zap( enemy.pos );
+                sprite.zap( cellToFire );
                 return false;
             } else {
-                spend(GameMath.gate(TICK, enemy.cooldown(), 3*TICK));
-                sprite.parent.addToBack(new TargetedCell(enemy.pos, 0xFF0000));
-                zap(enemy.pos);
+                zap(cellToFire);
                 return true;
             }
         }

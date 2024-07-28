@@ -51,4 +51,8 @@ public class ArtilleristSprite  extends MobSprite {
                     }
                 } );
     }
+    public void targeting( int pos ){
+        turnTo(ch.pos, pos);
+        play(idle);
+    }
 }

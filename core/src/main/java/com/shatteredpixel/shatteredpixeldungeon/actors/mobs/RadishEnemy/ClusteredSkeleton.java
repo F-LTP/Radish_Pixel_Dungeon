@@ -16,27 +16,35 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Fury;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
-import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.BoneClaw;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
+import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.ClusteredSkeletonSprite;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
-public class CluteredSkeleton extends Mob {
+public class ClusteredSkeleton extends Mob {
     {
         spriteClass = ClusteredSkeletonSprite.class;
 
@@ -47,9 +55,14 @@ public class CluteredSkeleton extends Mob {
         EXP = 7;
         maxLvl = 17;
 
-        loot = Generator.Category.SCROLL;
-        lootChance = 0.1f;
+        properties.add(Property.UNDEAD);
+
+        loot = new BoneClaw();
+        lootChance = 0.25f;
     }
+
+    private boolean isDead = false;
+
 
     @Override
     public float attackDelay() {
@@ -243,6 +256,103 @@ public class CluteredSkeleton extends Mob {
 
             return false;
 
+        }
+    }
+
+    @Override
+    public Item createLoot() {
+        Dungeon.LimitedDrops.CLUSTERED_SKELETON_WEP.count++;
+        loot = Random.oneOf(new BoneClaw());
+        if(super.createLoot() instanceof Weapon)
+            super.createLoot().getCurse(true);
+        return super.createLoot();
+    }
+    @Override
+    public float lootChance() {
+        return super.lootChance() * ((float) 1 /(1+Dungeon.LimitedDrops.GRUDGE_WEP.count));
+    }
+    @Override
+    public synchronized boolean isAlive() {
+        if (super.isAlive()){
+            return true;
+        } else {
+            if (!isDead){
+                triggerDeathClock();
+            }
+            return !buffs(ClusteredSkeleton.DeathClock.class).isEmpty();
+        }
+    }
+    protected void triggerDeathClock(){
+        Buff.affect(this, ClusteredSkeleton.DeathClock.class).setShield(2);
+        spend( TICK );
+        isDead = true;
+    }
+    @Override
+    public void die( Object cause ) {
+
+        super.die( cause );
+
+        if (cause == Chasm.class) return;
+
+        boolean heroKilled = false;
+        for (int i = 0; i < PathFinder.NEIGHBOURS8.length; i++) {
+            Char ch = findChar( pos + PathFinder.NEIGHBOURS8[i] );
+            if (ch != null && ch.isAlive()) {
+                int damage = Math.round(Random.NormalIntRange(30, 55));
+                if (ch.buff(PrisonArmor.myMask.class)!=null) damage-=2;
+                damage = Math.round( damage * AscensionChallenge.statModifier(this));
+                damage = Math.max( 0,  damage - (ch.drRoll() + ch.drRoll()) );
+                ch.damage( damage, this );
+                if (ch == Dungeon.hero && !ch.isAlive()) {
+                    heroKilled = true;
+                }
+            }
+        }
+
+        if (Dungeon.level.heroFOV[pos]) {
+            Sample.INSTANCE.play( Assets.Sounds.BONES );
+        }
+
+        if (heroKilled) {
+            Dungeon.fail( getClass() );
+            GLog.n( Messages.get(this, "hart_hanson_kill") );
+        }
+    }
+    public static class DeathClock extends ShieldBuff {
+
+        {
+            type = buffType.POSITIVE;
+        }
+
+        @Override
+        public boolean act() {
+
+            if (target.HP > 0){
+                detach();
+                return true;
+            }
+
+            absorbDamage( 1 );
+
+            if (shielding() <= 0){
+                target.die(null);
+            }
+
+            spend( TICK );
+
+            return true;
+        }
+        public String desc () {
+            return Messages.get(this, "desc", shielding());
+        }
+
+        @Override
+        public int icon () {
+            return BuffIndicator.TERROR;
+        }
+
+        {
+            immunities.add(Terror.class);
         }
     }
 }

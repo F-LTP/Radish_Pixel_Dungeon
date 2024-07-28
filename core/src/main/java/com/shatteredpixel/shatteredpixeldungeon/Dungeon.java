@@ -123,6 +123,8 @@ public class Dungeon {
 		// for Grudge in RadishNewEnemy
 		GRUDGE_WEP,
 
+		CLUSTERED_SKELETON_WEP,
+
 
 		// Date : 2024/07/26
 		// DoggingDog

@@ -6,6 +6,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
@@ -29,12 +30,16 @@ import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.ShieldMageSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
+
+import java.util.Collections;
+import java.util.Set;
 
 public class ShieldMage extends Mob {
     {
@@ -47,9 +52,7 @@ public class ShieldMage extends Mob {
         EXP = 9;
         maxLvl = 21;
 
-        properties.add(Property.INORGANIC);
-        properties.add(Property.LARGE);
-        properties.add(Property.HEADLESS);
+        properties.add(Property.UNDEAD);
 
         loot = new PotionOfShielding();
         lootChance = 0.15f;
@@ -244,5 +247,57 @@ public class ShieldMage extends Mob {
             return false;
 
         }
+    }
+    protected boolean canAttack( Char enemy ) {
+        return new Ballistica( pos, enemy.pos, Ballistica.MAGIC_BOLT).collisionPos == enemy.pos;
+    }
+    protected boolean doAttack(Char enemy ) {
+
+        if (Dungeon.level.adjacent( pos, enemy.pos )) {
+
+            return super.doAttack( enemy );
+
+        } else {
+            int zapPos = pos;
+            if(Dungeon.hero != null && fieldOfView != null){
+                if(fieldOfView[Dungeon.hero.pos] && !Dungeon.level.adjacent(pos,Dungeon.hero.pos)){
+                    Set<Mob> mobs = Collections.synchronizedSet(Dungeon.level.mobs);
+                    Mob weakestMob = this;
+                    for(Mob mob:mobs){
+                        if(mob.HP < weakestMob.HP && fieldOfView[mob.pos]){
+                            weakestMob = mob;
+                            zapPos = mob.pos;
+                        }
+                    }
+                }
+            }
+            if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
+                sprite.zap( zapPos );
+                return false;
+            } else {
+                zap(zapPos);
+                return true;
+            }
+        }
+    }
+    public void onZapComplete(int cell) {
+        zap(cell);
+        next();
+    }
+
+    private void zap(int cell) {
+        spend( 1f );
+
+        Char mob = Actor.findChar(cell);
+
+        if (mob != null)
+            Buff.affect(mob, Barrier.class).setShield(15);
+
+        Invisibility.dispel(this);
+    }
+    @Override
+    protected boolean act() {
+        boolean isAct = super.act();
+        return isAct;
     }
 }

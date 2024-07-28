@@ -50,6 +50,8 @@ public class RoyalGuard extends Mob {
         EXP = 10;
         maxLvl = 21;
 
+        properties.add(Property.UNDEAD);
+
         loot = Generator.Category.WEP_T4;
         lootChance = 0.2f;
     }
@@ -63,6 +65,7 @@ public class RoyalGuard extends Mob {
     @Override
     public String description() {
         String desc = super.description();
+        desc += "\n\n";
         desc += Messages.get(this, "equipment", equipment.name() );
         return desc;
     }
@@ -110,7 +113,7 @@ public class RoyalGuard extends Mob {
     }
     @Override
     public int drRoll() {
-        return Random.NormalIntRange(1, 8);
+        return Random.NormalIntRange(1, 8) + equipment.defenseFactor(this);
     }
 
     public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {

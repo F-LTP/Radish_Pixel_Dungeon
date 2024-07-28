@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Artillerist;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.ClusteredSkeleton;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.DM175;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Dog;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Drake;
@@ -31,6 +33,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Grudge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Jailer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Mayfly;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Prisoner;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.RoyalGuard;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.ShieldMage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.StoneSpirit;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
 import com.watabou.utils.Random;
@@ -141,14 +145,14 @@ public class Bestiary {
 				return new ArrayList<>(Arrays.asList(
 						Ghoul.class, Ghoul.class, Ghoul.class,
 						Elemental.random(),
-						Warlock.class));
+						Warlock.class, Artillerist.class, ShieldMage.class));
 			case 17:
 				//1x ghoul, 2x elemental, 1x warlock, 1x monk
 				return new ArrayList<>(Arrays.asList(
 						Ghoul.class,
 						Elemental.random(), Elemental.random(),
 						Warlock.class,
-						Monk.class));
+						Monk.class, Artillerist.class, ShieldMage.class));
 			case 18:
 				//1x ghoul, 1x elemental, 2x warlock, 2x monk, 1x golem
 				return new ArrayList<>(Arrays.asList(
@@ -156,14 +160,14 @@ public class Bestiary {
 						Elemental.random(),
 						Warlock.class, Warlock.class,
 						Monk.class, Monk.class,
-						Golem.class));
+						Golem.class, Artillerist.class, ClusteredSkeleton.class, RoyalGuard.class, ShieldMage.class));
 			case 19: case 20:
 				//1x elemental, 2x warlock, 2x monk, 3x golem
 				return new ArrayList<>(Arrays.asList(
 						Elemental.random(),
 						Warlock.class, Warlock.class,
 						Monk.class, Monk.class,
-						Golem.class, Golem.class, Golem.class));
+						Golem.class, Golem.class, Golem.class, ClusteredSkeleton.class, RoyalGuard.class, ShieldMage.class));
 				
 			// Halls
 			case 21:

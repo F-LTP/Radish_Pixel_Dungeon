@@ -33,7 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Monk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Necromancer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Piranha;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Artillerist;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.CluteredSkeleton;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.ClusteredSkeleton;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Dog;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Drake;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GiantWorm;
@@ -459,7 +459,7 @@ public class MobPlacer extends TestItem{
         ROYAL_GUARD(RoyalGuard.class,DictSpriteSheet.ROYAL_GUARD),
         ARTILLERIST(Artillerist.class,DictSpriteSheet.ARTILLERIST),
         SHIELD_MAGE(ShieldMage.class,DictSpriteSheet.SHIELD_MAGE),
-        CLUSTERED_SKELETON(CluteredSkeleton.class,DictSpriteSheet.CLUSTERED_SKELETON),
+        CLUSTERED_SKELETON(ClusteredSkeleton.class,DictSpriteSheet.CLUSTERED_SKELETON),
         // Zone 4 end
         ELE_CHAOS(Elemental.ChaosElemental.class, DictSpriteSheet.ELEMENTAL_CHAOS),
 
