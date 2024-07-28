@@ -287,6 +287,7 @@ public class ClusteredSkeleton extends Mob {
     }
     protected void triggerDeathClock(){
         Buff.affect(this, ClusteredSkeleton.DeathClock.class).setShield(2);
+        state = PASSIVE;
         spend( TICK );
         isDead = true;
     }
