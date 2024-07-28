@@ -241,6 +241,7 @@ public class Goblin extends Mob {
 
             // created by DoggingDog on 20240718
             // for Torturer using
+            effectiveDamage = Math.max( effectiveDamage - dr, 0 );
 
             if (enemy.buff(Viscosity.ViscosityTracker.class) != null){
                 effectiveDamage = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(effectiveDamage);

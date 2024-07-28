@@ -23,6 +23,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
@@ -177,6 +179,7 @@ public class ClusteredSkeleton extends Mob {
 
             // created by DoggingDog on 20240718
             // for Torturer using
+            effectiveDamage = Math.max( effectiveDamage - dr, 0 );
 
             if (enemy.buff(Viscosity.ViscosityTracker.class) != null){
                 effectiveDamage = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(effectiveDamage);
@@ -294,8 +297,11 @@ public class ClusteredSkeleton extends Mob {
 
         if (cause == Chasm.class) return;
 
+        CellEmitter.get(pos).burst(Speck.factory(Speck.BONE), 10);
+
         boolean heroKilled = false;
         for (int i = 0; i < PathFinder.NEIGHBOURS8.length; i++) {
+            CellEmitter.get(pos + PathFinder.NEIGHBOURS8[i]).burst(Speck.factory(Speck.BONE), 5);
             Char ch = findChar( pos + PathFinder.NEIGHBOURS8[i] );
             if (ch != null && ch.isAlive()) {
                 int damage = Math.round(Random.NormalIntRange(30, 55));

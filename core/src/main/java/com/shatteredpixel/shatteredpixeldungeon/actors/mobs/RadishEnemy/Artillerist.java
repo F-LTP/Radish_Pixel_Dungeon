@@ -84,6 +84,7 @@ public class Artillerist extends Mob {
         return Random.NormalIntRange(1, 6);
     }
 
+    @Override
     public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
 
         if (enemy == null) return false;
@@ -178,6 +179,7 @@ public class Artillerist extends Mob {
 
             // created by DoggingDog on 20240718
             // for Torturer using
+            effectiveDamage = Math.max( effectiveDamage - dr, 0 );
 
             if (enemy.buff(Viscosity.ViscosityTracker.class) != null){
                 effectiveDamage = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(effectiveDamage);
