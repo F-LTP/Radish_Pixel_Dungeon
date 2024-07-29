@@ -60,6 +60,7 @@ public class RoyalGuard extends Mob {
     public RoyalGuard(){
         super();
         equipment = (Weapon) Generator.randomUsingDefaults(Random.oneOf(Generator.Category.WEP_T4, Generator.Category.WEP_T5));
+//        equipment = new FogSword();
     }
 
     @Override
@@ -278,10 +279,8 @@ public class RoyalGuard extends Mob {
             }
             enemy.sprite.showStatus( CharSprite.NEUTRAL, enemy.defenseVerb() );
 
-            if(Dungeon.hero != null){
-                if (Dungeon.hero.belongings.weapon() instanceof FogSword) {
-                    Buff.affect(Dungeon.hero, Invisibility.class,1f);
-                }
+            if (equipment instanceof FogSword) {
+                Buff.affect(this, Invisibility.class,1f);
             }
 
             if (visibleFight) {
