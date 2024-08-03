@@ -38,6 +38,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.GoblinSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 public class Goblin extends Mob {
@@ -54,7 +55,24 @@ public class Goblin extends Mob {
         lootChance = 0.1f;
     }
 
-    private int StoneRemain = 2;
+    private static final String STONEREMAIN	= "StoneRemain";
+    public Goblin(){
+        super();
+        StoneRemain = 2;
+    }
+    @Override
+    public void storeInBundle( Bundle bundle ) {
+        super.storeInBundle( bundle );
+        bundle.put( STONEREMAIN, StoneRemain );
+    }
+
+    @Override
+    public void restoreFromBundle( Bundle bundle ) {
+        super.restoreFromBundle( bundle );
+        StoneRemain = bundle.getInt(STONEREMAIN);
+    }
+
+    private int StoneRemain;
     private boolean canZap = true;
     @Override
     protected boolean canAttack( Char enemy ) {

@@ -37,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.RoyalGuardSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 public class RoyalGuard extends Mob {
@@ -56,6 +57,22 @@ public class RoyalGuard extends Mob {
         lootChance = 0.2f;
     }
     Weapon equipment;
+    private static final String ROYAL_GUARD_WEAPON	= "royal_guard_weapon";
+
+    @Override
+    public void storeInBundle( Bundle bundle ) {
+        super.storeInBundle( bundle );
+        if(equipment != null)
+            bundle.put( ROYAL_GUARD_WEAPON, equipment );
+    }
+
+    @Override
+    public void restoreFromBundle( Bundle bundle ) {
+        super.restoreFromBundle( bundle );
+        equipment = (Weapon)bundle.get( ROYAL_GUARD_WEAPON );
+        if(equipment == null)
+            equipment = (Weapon) Generator.randomUsingDefaults(Random.oneOf(Generator.Category.WEP_T4, Generator.Category.WEP_T5));
+    }
 
     public RoyalGuard(){
         super();
