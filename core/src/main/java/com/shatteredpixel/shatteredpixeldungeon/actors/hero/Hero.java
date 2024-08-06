@@ -1312,13 +1312,17 @@ public class Hero extends Char {
                 if (!w2.delayAttack) {
                     sprite.attack(enemy.pos);
                     w2.delayAttack = true;
+                } else if(Dungeon.level.distance( enemy.pos, pos ) > w2.RCH) {
+					spend(1f);
+					hero.sprite.showStatus(CharSprite.WARNING, Messages.get(w2, "no_rch"));
+					sprite.operate(pos);
                 } else {
-                    spend(1f);
-                    sprite.operate(pos);
+					spend(1f);
+					sprite.operate(pos);
 					/** 斩舰刀实现 */
-                    MoveBoatSword();
-                    hero.sprite.showStatus(CharSprite.WARNING, Messages.get(w2, "ready"));
-                }
+					MoveBoatSword();
+					hero.sprite.showStatus(CharSprite.WARNING, Messages.get(w2, "ready"));
+				}
             }
 			return false;
 		} else if (enemy.isAlive() && canAttack( enemy ) &&
