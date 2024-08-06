@@ -301,5 +301,39 @@ public class Assets {
 		public static final String SPIRIT_HAWK= "sprites/spirit_hawk.png";
 		public static final String RED_SENTRY= "sprites/red_sentry.png";
 		public static final String NEW_NPC="sprites/new_npc.png";
+
+
+		// Radish new Enemy
+		// Zone 1
+		public static final String GIANT_WORM="sprites/RadishEnemySprite/ZoneOne/giant_worm.png";
+		public static final String GOBLIN="sprites/RadishEnemySprite/ZoneOne/goblin.png";
+		public static final String DOG="sprites/RadishEnemySprite/ZoneOne/dog.png";
+		public static final String MAYFLY="sprites/RadishEnemySprite/ZoneOne/mayfly.png";
+
+		// Zone 2
+		public static final String GRUDGE = "sprites/RadishEnemySprite/ZoneTwo/grudge.png";
+		public static final String JAILER = "sprites/RadishEnemySprite/ZoneTwo/jailer.png";
+		public static final String PRISONER = "sprites/RadishEnemySprite/ZoneTwo/prisoner.png";
+		public static final String TORTURER = "sprites/RadishEnemySprite/ZoneTwo/torturer.png";
+
+		// Zone 3
+		public static final String DM175 = "sprites/RadishEnemySprite/ZoneThree/dm-175.png";
+		public static final String DRAKE = "sprites/RadishEnemySprite/ZoneThree/drake.png";
+		public static final String GNOLLZEALOT = "sprites/RadishEnemySprite/ZoneThree/gnoll_zealot.png";
+		public static final String STONESPIRIT = "sprites/RadishEnemySprite/ZoneThree/stone_spirit.png";
+
+		// Zone 4
+		public static final String ARTILLERIST = "sprites/RadishEnemySprite/ZoneFour/artillerist.png";
+		public static final String CLUSTERED_SKELETON = "sprites/RadishEnemySprite/ZoneFour/clustered_skeleton.png";
+		public static final String ROYAL_GUARD  = "sprites/RadishEnemySprite/ZoneFour/royal_guard.png";
+		public static final String SHIELD_MAGE  = "sprites/RadishEnemySprite/ZoneFour/shield_mage.png";
+
+		// Zone 5
+		public static final String DEMINION = "sprites/RadishEnemySprite/deminion.png";
+		public static final String DEMONLORD = "sprites/RadishEnemySprite/demon_lord.png";
+		public static final String DEVILOON = "sprites/RadishEnemySprite/deviloon.png";
+		public static final String GORGON = "sprites/RadishEnemySprite/gorgon.png";
+
+
 	}
 }

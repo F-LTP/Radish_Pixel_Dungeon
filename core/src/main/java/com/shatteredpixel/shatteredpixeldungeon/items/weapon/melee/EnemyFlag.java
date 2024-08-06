@@ -7,6 +7,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
 public class EnemyFlag extends MeleeWeapon {
@@ -61,6 +62,10 @@ public class EnemyFlag extends MeleeWeapon {
             spend( TICK );
             return true;
         }
+    }
+
+    public String statsInfo(){
+        return Messages.get(this, "stats_desc");
     }
 
 }

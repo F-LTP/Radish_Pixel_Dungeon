@@ -81,6 +81,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.Deat
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Elemental;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Grudge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
@@ -501,7 +503,11 @@ public abstract class Char extends Actor {
 			}
 			
 			int effectiveDamage = enemy.defenseProc( this, Math.round(dmg) );
-			effectiveDamage = Math.max( effectiveDamage - dr, 0 );
+
+			// created by DoggingDog on 20240718
+			// for Torturer using
+			if(!(this instanceof Torturer))
+				effectiveDamage = Math.max( effectiveDamage - dr, 0 );
 
 			if (enemy.buff(Viscosity.ViscosityTracker.class) != null){
 				effectiveDamage = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(effectiveDamage);
@@ -664,6 +670,11 @@ public abstract class Char extends Actor {
 		float defRoll = Random.Float( defStat );
 		if (defender.buff(Bless.class) != null) defRoll *= bless_adj_d;
 		if (defender.buff( Hex.class) != null) defRoll *= 0.8f;
+
+		// create by DoggingDog on 2024-07-17
+		// Haunted buff from Grudge if it die
+		if(attacker.buff(Grudge.Haunted.class) != null) acuRoll -= 5;
+		if(defender.buff(Grudge.Haunted.class) != null) defRoll -= 5;
 
 		//雾剑祝福效果
 		// Change by DoggingDog on 2024-07-01
