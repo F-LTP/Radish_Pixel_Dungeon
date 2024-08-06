@@ -58,10 +58,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Stone;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Swiftness;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Thorns;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfKing;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
@@ -585,8 +583,13 @@ public class Armor extends EquipableItem {
 		if( RingOfKing.curItem != null && RingOfKing.curItem.cursed )
 			multi = 1;
 		// 暂时这样吧，先把问题修了
-		if(hero.belongings.getItem(RingOfKing.class) != null)
-			if(hero.belongings.armor == this) req = req + multi;
+		// bug fix 20240727
+		if(hero != null){
+			RingOfKing ringOfKing = hero.belongings.getItem(RingOfKing.class);
+			if(ringOfKing != null){
+				if(hero.belongings.armor == this && (hero.belongings.misc instanceof RingOfKing || hero.belongings.ring instanceof RingOfKing)) req = req + multi;
+			}
+		}
 		if (masteryPotionBonus){
 			req -= 2;
 		}

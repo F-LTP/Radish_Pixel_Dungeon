@@ -33,9 +33,14 @@ public class FogSword extends MeleeWeapon {
     }
 
     public int proc(Char attacker, Char defender, int damage ) {
-        Mob ks =(Mob)defender;
-        if (ks.onlyActDown){
-            ks.onlyActDown = false;
+        if(defender instanceof Mob){
+            Mob ks =(Mob)defender;
+            if (ks.onlyActDown){
+                ks.onlyActDown = false;
+                Buff.affect(attacker, ActBless.class, 2+level());
+            }
+        }
+        else {
             Buff.affect(attacker, ActBless.class, 2+level());
         }
         return super.proc(attacker, defender, damage);

@@ -179,6 +179,13 @@ public class DictSpriteSheet {
                     return new Image(Assets.Sprites.RED_SENTRY, 0, 0, 8, 15);
             case HERO:
                 return new Image(Assets.Sprites.ROGUE, 0, 15, 12, 15);
+
+            // Radish new enemy
+            //Zone 1
+            case GIANT_WORM:
+                return new Image(Assets.Sprites.GIANT_WORM, 0, 0, 12, 11);
+
+
             case TRAP_GREEN_RECT:
                 return new Image(Assets.Environment.TERRAIN_FEATURES, 48, 64, 16, 16);
             case LOCKED_FLOOR:
@@ -229,6 +236,13 @@ public class DictSpriteSheet {
     public static final int GNOLL_DARTER    = 209 + 10000;
     public static final int GREAT_CRAB      = 210 + 10000;
 
+    //Radish new Enemy
+    // Zone 1
+    public static final int GIANT_WORM = 211 + 10000;
+    public static final int GOBLIN = 212 + 10000;
+    public static final int DOG = 213 + 10000;
+    public static final int MAYFLY = 214 + 10000;
+
     public static final int THIEF           = 300 + 10000;
     public static final int BANDIT          = 301 + 10000;
     public static final int SKELETON        = 302 + 10000;
@@ -240,6 +254,13 @@ public class DictSpriteSheet {
     public static final int NEW_FIRE_ELE    = 308 + 10000;
     public static final int SPECTRAL_NECROMANCER = 309 + 10000;
 
+    //Radish new Enemy
+    // Zone 2
+    public static final int PRISONER = 310 + 10000;
+    public static final int JAILER = 311 + 10000;
+    public static final int TORTURER = 312 + 10000;
+    public static final int GRUDGE = 313 + 10000;
+
     public static final int BAT             = 400 + 10000;
     public static final int BRUTE           = 401 + 10000;
     public static final int ARMORED_BRUTE   = 402 + 10000;
@@ -248,6 +269,14 @@ public class DictSpriteSheet {
     public static final int DM200           = 405 + 10000;
     public static final int DM201           = 406 + 10000;
     public static final int PYLON           = 407 + 10000;
+
+    //Radish new Enemy
+    // Zone 3
+    public static final int GNOLL_ZEALOT = 408+10000;
+    public static final int DRAKE = 409+10000;
+    public static final int STONE_SPIRIT = 410+10000;
+    public static final int DM175 = 411+10000;
+
 
     public static final int GHOUL           = 500 + 10000;
     public static final int ELEMENTAL_FIRE  = 501 + 10000;
@@ -258,6 +287,15 @@ public class DictSpriteSheet {
     public static final int MONK            = 506 + 10000;
     public static final int SENIOR          = 507 + 10000;
     public static final int GOLEM           = 508 + 10000;
+
+
+
+    //Radish new Enemy
+    // Zone 4
+    public static final int ROYAL_GUARD = 509 + 10000;
+    public static final int ARTILLERIST = 510 + 10000;
+    public static final int SHIELD_MAGE = 511 + 10000;
+    public static final int CLUSTERED_SKELETON = 512 + 10000;
 
     public static final int RIPPER          = 600 + 10000;
     public static final int SPAWNER         = 601 + 10000;
@@ -303,4 +341,5 @@ public class DictSpriteSheet {
     public static final int BUFF_NEGATIVE   = 4002 + 10000;
     public static final int BUFF_AMULET_CURSE   = 4003 + 10000;
     public static final int BUFF_SAC_FIRE   = 4004 + 10000;
+
 }

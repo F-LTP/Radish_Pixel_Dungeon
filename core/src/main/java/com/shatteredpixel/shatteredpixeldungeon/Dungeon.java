@@ -117,6 +117,20 @@ public class Dungeon {
 		SLIME_WEP,
 		SKELE_WEP,
 		THEIF_MISC,
+
+		// Date : 2024/07/17
+		// DoggingDog
+		// for Grudge in RadishNewEnemy
+		GRUDGE_WEP,
+
+		CLUSTERED_SKELETON_WEP,
+
+
+		// Date : 2024/07/26
+		// DoggingDog
+		// for RoyalGuard in RadishNewEnemy
+		ROYALGUARD_WEP,
+
 		GUARD_ARM,
 		SHAMAN_WAND,
 		DM200_EQUIP,

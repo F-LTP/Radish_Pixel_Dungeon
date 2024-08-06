@@ -21,6 +21,22 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Artillerist;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.ClusteredSkeleton;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.DM175;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Dog;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Drake;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GiantWorm;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GnollZealot;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Goblin;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Grudge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Jailer;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Mayfly;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Prisoner;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.RoyalGuard;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.ShieldMage;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.StoneSpirit;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
@@ -45,52 +61,52 @@ public class Bestiary {
 				//3x rat, 1x snake
 				return new ArrayList<>(Arrays.asList(
 						Rat.class, Rat.class, Rat.class,
-						Snake.class));
+						Snake.class, GiantWorm.class, GiantWorm.class));
 			case 2:
 				//2x rat, 1x snake, 2x gnoll
 				return new ArrayList<>(Arrays.asList(Rat.class, Rat.class,
 						Snake.class,
-						Gnoll.class, Gnoll.class));
+						Gnoll.class, Gnoll.class, GiantWorm.class, Mayfly.class));
 			case 3:
 				//1x rat, 1x snake, 3x gnoll, 1x swarm, 1x crab
 				return new ArrayList<>(Arrays.asList(Rat.class,
 						Snake.class,
 						Gnoll.class, Gnoll.class, Gnoll.class,
 						Swarm.class,
-						Crab.class));
+						Crab.class, Mayfly.class, Dog.class, Goblin.class));
 			case 4: case 5:
 				//1x gnoll, 1x swarm, 2x crab, 2x slime
 				return new ArrayList<>(Arrays.asList(Gnoll.class,
 						Swarm.class,
 						Crab.class, Crab.class,
-						Slime.class, Slime.class));
+						Slime.class, Slime.class, Mayfly.class, Dog.class, Dog.class, Goblin.class, Goblin.class));
 				
 			// Prison
 			case 6:
 				//3x skeleton, 1x thief, 1x swarm
 				return new ArrayList<>(Arrays.asList(Skeleton.class, Skeleton.class, Skeleton.class,
 						Thief.class,
-						Swarm.class));
+						Swarm.class, Jailer.class));
 			case 7:
 				//3x skeleton, 1x thief, 1x DM-100, 1x guard
 				return new ArrayList<>(Arrays.asList(Skeleton.class, Skeleton.class, Skeleton.class,
 						Thief.class,
 						DM100.class,
-						Guard.class));
+						Guard.class, Jailer.class, Prisoner.class));
 			case 8:
 				//2x skeleton, 1x thief, 2x DM-100, 2x guard, 1x necromancer
 				return new ArrayList<>(Arrays.asList(Skeleton.class, Skeleton.class,
 						Thief.class,
 						DM100.class, DM100.class,
 						Guard.class, Guard.class,
-						Necromancer.class));
+						Necromancer.class,Prisoner.class, Jailer.class, Torturer.class, Grudge.class));
 			case 9: case 10:
 				//1x skeleton, 1x thief, 2x DM-100, 2x guard, 2x necromancer
 				return new ArrayList<>(Arrays.asList(Skeleton.class,
 						Thief.class,
 						DM100.class, DM100.class,
 						Guard.class, Guard.class,
-						Necromancer.class, Necromancer.class));
+						Necromancer.class, Necromancer.class, Torturer.class, Grudge.class));
 				
 			// Caves
 			case 11:
@@ -98,14 +114,14 @@ public class Bestiary {
 				return new ArrayList<>(Arrays.asList(
 						Bat.class, Bat.class, Bat.class,
 						Brute.class,
-						Shaman.random()));
+						Shaman.random(), GnollZealot.class, DM175.class));
 			case 12:
 				//2x bat, 2x brute, 1x shaman, 1x spinner
 				return new ArrayList<>(Arrays.asList(
 						Bat.class, Bat.class,
 						Brute.class, Brute.class,
 						Shaman.random(),
-						Spinner.class));
+						Spinner.class, GnollZealot.class, DM175.class, Drake.class));
 			case 13:
 				//1x bat, 2x brute, 2x shaman, 2x spinner, 1x DM-200
 				return new ArrayList<>(Arrays.asList(
@@ -113,7 +129,7 @@ public class Bestiary {
 						Brute.class, Brute.class,
 						Shaman.random(), Shaman.random(),
 						Spinner.class, Spinner.class,
-						DM200.class));
+						DM200.class, GnollZealot.class, Drake.class, StoneSpirit.class));
 			case 14: case 15:
 				//1x bat, 1x brute, 2x shaman, 2x spinner, 2x DM-300
 				return new ArrayList<>(Arrays.asList(
@@ -121,7 +137,7 @@ public class Bestiary {
 						Brute.class,
 						Shaman.random(), Shaman.random(),
 						Spinner.class, Spinner.class,
-						DM200.class, DM200.class));
+						DM200.class, DM200.class, GnollZealot.class, Drake.class, StoneSpirit.class));
 				
 			// City
 			case 16:
@@ -129,14 +145,14 @@ public class Bestiary {
 				return new ArrayList<>(Arrays.asList(
 						Ghoul.class, Ghoul.class, Ghoul.class,
 						Elemental.random(),
-						Warlock.class));
+						Warlock.class, Artillerist.class, ShieldMage.class));
 			case 17:
 				//1x ghoul, 2x elemental, 1x warlock, 1x monk
 				return new ArrayList<>(Arrays.asList(
 						Ghoul.class,
 						Elemental.random(), Elemental.random(),
 						Warlock.class,
-						Monk.class));
+						Monk.class, Artillerist.class, ShieldMage.class));
 			case 18:
 				//1x ghoul, 1x elemental, 2x warlock, 2x monk, 1x golem
 				return new ArrayList<>(Arrays.asList(
@@ -144,14 +160,14 @@ public class Bestiary {
 						Elemental.random(),
 						Warlock.class, Warlock.class,
 						Monk.class, Monk.class,
-						Golem.class));
+						Golem.class, Artillerist.class, ClusteredSkeleton.class, RoyalGuard.class, ShieldMage.class));
 			case 19: case 20:
 				//1x elemental, 2x warlock, 2x monk, 3x golem
 				return new ArrayList<>(Arrays.asList(
 						Elemental.random(),
 						Warlock.class, Warlock.class,
 						Monk.class, Monk.class,
-						Golem.class, Golem.class, Golem.class));
+						Golem.class, Golem.class, Golem.class, ClusteredSkeleton.class, RoyalGuard.class, ShieldMage.class));
 				
 			// Halls
 			case 21:

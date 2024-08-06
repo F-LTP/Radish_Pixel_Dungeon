@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Prisoner;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Chains;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
@@ -186,5 +187,22 @@ public class Guard extends Mob {
 			}
 			
 		}
+	}
+
+
+	// add if it really hate prisoner
+	@Override
+	protected Char chooseEnemy() {
+		for (Mob mob : Dungeon.level.mobs) {
+			if (!(mob == this)
+					&& mob.alignment != Alignment.NEUTRAL
+					&& !mob.isInvulnerable(getClass())
+					&& !(alignment == Alignment.ALLY && mob.alignment == Alignment.ALLY)
+					&& mob instanceof Prisoner
+					&& fieldOfView[mob.pos]) {
+				return mob;
+			}
+		}
+		return super.chooseEnemy();
 	}
 }

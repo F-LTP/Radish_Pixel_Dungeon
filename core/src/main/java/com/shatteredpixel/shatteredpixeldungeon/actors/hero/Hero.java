@@ -144,7 +144,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Morello;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
@@ -1312,7 +1311,7 @@ public class Hero extends Char {
 		if(belongings.weapon instanceof KillBoatSword){
 			KillBoatSword w2 = (KillBoatSword) hero.belongings.weapon;
 			if(hero.belongings.weapon != null){
-                if (!w2.delayAttack) {
+                if (!w2.delayAttack && Dungeon.level.adjacent(enemy.pos,pos)) {
                     sprite.attack(enemy.pos);
                     w2.delayAttack = true;
                 } else {

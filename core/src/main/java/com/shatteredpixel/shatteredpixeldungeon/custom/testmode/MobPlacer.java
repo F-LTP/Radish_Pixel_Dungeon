@@ -32,6 +32,21 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Monk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Necromancer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Piranha;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Artillerist;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.ClusteredSkeleton;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Dog;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Drake;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GiantWorm;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GnollZealot;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Goblin;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Grudge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Jailer;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Mayfly;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Prisoner;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.RoyalGuard;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.ShieldMage;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.StoneSpirit;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Rat;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RipperDemon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RotHeart;
@@ -60,7 +75,6 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CheckBox;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
-import com.shatteredpixel.shatteredpixeldungeon.ui.OptionSlider;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
@@ -69,10 +83,9 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Reflection;
 
-import java.awt.Checkbox;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
+
 
 public class MobPlacer extends TestItem{
     {
@@ -392,6 +405,14 @@ public class MobPlacer extends TestItem{
         C_SLIME(CausticSlime.class, DictSpriteSheet.CAUSTIC_SLIME),
         F_RAT(FetidRat.class, DictSpriteSheet.F_RAT),
         GNOLL_DARTER(GnollTrickster.class, DictSpriteSheet.GNOLL_DARTER),
+
+        // Radish new enemy
+        // Zone 1
+        GIANT_WORM(GiantWorm.class,DictSpriteSheet.GIANT_WORM),
+        GOBLIN(Goblin.class,DictSpriteSheet.GOBLIN),
+        DOG(Dog.class,DictSpriteSheet.DOG),
+        MAYFLY(Mayfly.class,DictSpriteSheet.MAYFLY),
+        // zone 1 end
         GREAT_CRAB(GreatCrab.class, DictSpriteSheet.GREAT_CRAB),
 
         SKELETON(Skeleton.class, DictSpriteSheet.SKELETON),
@@ -403,6 +424,12 @@ public class MobPlacer extends TestItem{
         SPECTRAL_NECRO(SpectralNecromancer.class, DictSpriteSheet.SPECTRAL_NECROMANCER),
         ROT_LASHER(RotLasher.class, DictSpriteSheet.ROT_LASHER),
         ROT_HEART(RotHeart.class, DictSpriteSheet.ROT_HEART),
+
+        PRISONER(Prisoner.class,DictSpriteSheet.PRISONER),
+        JAILER(Jailer.class,DictSpriteSheet.JAILER),
+        TORTURER(Torturer.class,DictSpriteSheet.TORTURER),
+        GRUDGE(Grudge.class,DictSpriteSheet.GRUDGE),
+        // Zone 2 end
         NEW_FIRE_ELE(Elemental.NewbornFireElemental.class, DictSpriteSheet.NEW_FIRE_ELE),
 
         BAT(Bat.class, DictSpriteSheet.BAT),
@@ -411,6 +438,13 @@ public class MobPlacer extends TestItem{
         SHAMAN(Shaman.random(), DictSpriteSheet.SHAMAN),
         SPINNER(Spinner.class, DictSpriteSheet.SPINNER),
         DM200(DM200.class, DictSpriteSheet.DM200),
+
+
+        GNOLL_ZEALOT(GnollZealot.class,DictSpriteSheet.GNOLL_ZEALOT),
+        DRAKE(Drake.class, DictSpriteSheet.DRAKE),
+        STONE_SPIRIT(StoneSpirit.class,DictSpriteSheet.STONE_SPIRIT),
+        DM175(com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.DM175.class,DictSpriteSheet.DM175),
+        // Zone 3 end
         DM201(DM201.class, DictSpriteSheet.DM201),
 
         GHOUL(Ghoul.class, DictSpriteSheet.GHOUL),
@@ -421,6 +455,12 @@ public class MobPlacer extends TestItem{
         ELE_FIRE(Elemental.FireElemental.class, DictSpriteSheet.ELEMENTAL_FIRE),
         ELE_FROST(Elemental.FrostElemental.class, DictSpriteSheet.ELEMENTAL_FROST),
         ELE_LIGHTNING(Elemental.ShockElemental.class, DictSpriteSheet.ELEMENTAL_SHOCK),
+
+        ROYAL_GUARD(RoyalGuard.class,DictSpriteSheet.ROYAL_GUARD),
+        ARTILLERIST(Artillerist.class,DictSpriteSheet.ARTILLERIST),
+        SHIELD_MAGE(ShieldMage.class,DictSpriteSheet.SHIELD_MAGE),
+        CLUSTERED_SKELETON(ClusteredSkeleton.class,DictSpriteSheet.CLUSTERED_SKELETON),
+        // Zone 4 end
         ELE_CHAOS(Elemental.ChaosElemental.class, DictSpriteSheet.ELEMENTAL_CHAOS),
 
         RIPPER(RipperDemon.class, DictSpriteSheet.RIPPER),
@@ -434,6 +474,8 @@ public class MobPlacer extends TestItem{
         ARMORED_STATUE(ArmoredStatue.class, DictSpriteSheet.ARMORED_STATUE),
         WRAITH(Wraith.class, DictSpriteSheet.WRAITH),
         PIRANHA(Piranha.class, DictSpriteSheet.FISH);
+
+
 
         private Class<? extends Mob> mobClass;
         private int imageId;
