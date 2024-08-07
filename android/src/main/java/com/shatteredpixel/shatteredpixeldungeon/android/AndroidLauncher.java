@@ -41,10 +41,10 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.News;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.NewsImpl;
-import com.shatteredpixel.shatteredpixeldungeon.services.updates.UpdateImpl;
-import com.shatteredpixel.shatteredpixeldungeon.services.updates.Updates;
-import com.watabou.noosa.Game;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Button;
+import com.shatteredpixel.shatteredpixeldungeon.update.UpdateImpl;
+import com.shatteredpixel.shatteredpixeldungeon.update.Updates;
+import com.watabou.noosa.Game;
 import com.watabou.utils.FileUtils;
 
 public class AndroidLauncher extends AndroidApplication {
@@ -85,11 +85,11 @@ public class AndroidLauncher extends AndroidApplication {
 				Game.versionCode = 0;
 			}
 
-			if (UpdateImpl.supportsUpdates()) {
-				Updates.service = UpdateImpl.getUpdateService();
-			}
 			if (NewsImpl.supportsNews()) {
 				News.service = NewsImpl.getNewsService();
+
+				Updates.service = UpdateImpl.getUpdateService();
+
 			}
 
 			FileUtils.setDefaultFileProperties(Files.FileType.Local, "");

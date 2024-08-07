@@ -64,6 +64,9 @@ public class Assets {
 	}
 
 	public static class Interfaces {
+
+		public static final String UPBARS  = "interfaces/updatebar.png";
+
 		public static final String ARCS_BG  = "interfaces/arcs1.png";
 		public static final String ARCS_FG  = "interfaces/arcs2.png";
 
