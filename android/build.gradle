@@ -3,7 +3,9 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
 android {
-    compileSdkVersion appAndroidCompileSDK
+    //noinspection GradleDependency
+    compileSdk 33
+
     compileOptions.sourceCompatibility = compileOptions.targetCompatibility = appJavaCompatibility
 
     sourceSets.main.assets.srcDirs = [new File(project(':core').projectDir, "/src/main/assets")]
@@ -11,7 +13,8 @@ android {
     defaultConfig {
         manifestPlaceholders = [appName:appName]
         applicationId appPackageName
-
+        //接入多Dex,解决代码方法超过65535的问题
+        multiDexEnabled true
         versionCode appVersionCode
         versionName appVersionName
 
@@ -25,7 +28,8 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix ".indev"
+            //兼容FireBase Debug调试，因此请在虚拟机上运行！（包名一致）
+            //applicationIdSuffix ".indev"
             versionNameSuffix '-INDEV'
             dependencies {
                 debugImplementation project(':services:updates:debugUpdates')
@@ -67,6 +71,14 @@ dependencies {
     implementation 'cat.ereza:customactivityoncrash:2.3.0'
 
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
+    //接入多DEX
+    implementation 'com.android.support:multidex:1.0.3'
+    //只考虑安卓端 电脑端直接呼出URL
+    //----------AndroidX 版本
+    //app-updater
+    implementation 'com.github.jenly1314.AppUpdater:app-updater:1.2.0'
+    //app-dialog
+    implementation 'com.github.jenly1314.AppUpdater:app-dialog:1.2.0'
 
 
     //android:lintVitalAnalyzeRelease Error可忽略
