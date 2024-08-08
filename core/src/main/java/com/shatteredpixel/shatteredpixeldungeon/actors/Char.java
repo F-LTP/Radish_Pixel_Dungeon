@@ -81,6 +81,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.Deat
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Elemental;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Gorgon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Grudge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
@@ -121,7 +122,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Axe_D;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bloodblade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GiantKiller;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
@@ -1028,6 +1028,12 @@ public abstract class Char extends Actor {
 		}
 		if (buff( Speed.class ) != null) {
 			timeScale *= 2.0f;
+		}
+
+		// change on 20240808 4 Gorgon using, DoggingDog
+		Gorgon.Petrification gorgonBuff = buff(Gorgon.Petrification.class);
+		if(gorgonBuff != null){
+			timeScale *= gorgonBuff.slowRate();
 		}
 		
 		super.spend( time / timeScale );

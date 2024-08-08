@@ -35,8 +35,10 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.GorgonSprite;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 public class Gorgon extends Mob {
@@ -54,6 +56,13 @@ public class Gorgon extends Mob {
 
         loot = new PotionOfCleansing();
         lootChance = 0.25f;
+    }
+    @Override
+    public int attackProc( Char enemy, int damage ) {
+        damage = super.attackProc( enemy, damage );
+        Buff.affect(enemy, Petrification.class).set( Petrification.DURATION );
+
+        return damage;
     }
 
 
@@ -262,7 +271,36 @@ public class Gorgon extends Mob {
     }
 
 
-    public static class petrification extends Buff implements Hero.Doom {
+    public static class Petrification extends Buff implements Hero.Doom {
+        {
+            type = buffType.NEGATIVE;
+            announced = true;
+        }
+
+        private static final String PETRIFICATION_LV = "Petrification_lv";
+
+        public float slowRate(){
+            return 1f-(0.01f*Lv);
+        }
+
+        @Override
+        public void storeInBundle( Bundle bundle ) {
+            super.storeInBundle( bundle );
+            bundle.put( PETRIFICATION_LV, Lv );
+        }
+
+        @Override
+        public void restoreFromBundle( Bundle bundle ) {
+            super.restoreFromBundle(bundle);
+            Lv = bundle.getInt(PETRIFICATION_LV);
+        }
+
+        @Override
+        public int icon() {
+            return BuffIndicator.TERROR;
+        }
+
+        public static final int DURATION = 2;
         private int Lv;
 
         @Override
@@ -271,6 +309,16 @@ public class Gorgon extends Mob {
 
             Dungeon.fail( getClass() );
             GLog.n( Messages.get(this, "ondeath") );
+        }
+
+        @Override
+        public String iconTextDisplay() {
+            return Lv +"/100";
+        }
+
+        @Override
+        public String desc() {
+            return Messages.get(this, "desc", this.Lv);
         }
 
         public void set(int Lv){
