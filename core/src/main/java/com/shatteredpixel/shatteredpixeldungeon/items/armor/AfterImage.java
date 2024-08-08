@@ -5,6 +5,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
 
 public class AfterImage extends Armor{
@@ -74,4 +75,19 @@ public class AfterImage extends Armor{
             return BuffIndicator.A_EVA;
         }
     }
+
+    public static class AnotabsoluteEvasion extends absoluteEvasion {
+
+        @Override
+        public int icon() {
+            return BuffIndicator.A_EVA;
+        }
+
+        @Override
+        public void tintIcon(Image icon) {
+            icon.hardlight(0xFF1493);
+        }
+
+    }
+
 }

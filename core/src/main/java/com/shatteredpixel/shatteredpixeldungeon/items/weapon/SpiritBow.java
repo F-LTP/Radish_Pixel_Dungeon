@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -30,10 +32,13 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.NaturesPower;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Blindweed;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Firebloom;
@@ -53,6 +58,8 @@ import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class SpiritBow extends Weapon {
 	
@@ -99,6 +106,16 @@ public class SpiritBow extends Weapon {
 
 	@Override
 	public int proc(Char attacker, Char defender, int damage) {
+
+		if(hero.pointsInTalent(Talent.LAND_HEART) >= 4){
+			if((Dungeon.level.map[defender.pos] == Terrain.EMBERS) || (Dungeon.level.map[defender.pos] == Terrain.GRASS)){
+				if(Random.Float()<=0.15f){
+					Plant plant = (Plant) Reflection.newInstance(Random.element(harmfulPlants));
+					plant.pos = defender.pos;
+					plant.activate( defender.isAlive() ? defender : null );
+				}
+			}
+		}
 
 		if (attacker.buff(NaturesPower.naturesPowerTracker.class) != null && !sniperSpecial){
 
@@ -285,6 +302,203 @@ public class SpiritBow extends Weapon {
 	public SpiritArrow knockArrow(){
 		return new SpiritArrow();
 	}
+
+	public ALTSpiritArrow altknockArrow(){
+		return new ALTSpiritArrow();
+	}
+
+	public class ALTSpiritArrow extends MissileWeapon {
+
+		{
+			image = ItemSpriteSheet.SPIRIT_ALT_ARROW;
+
+			hitSound = Assets.Sounds.HIT_ARROW;
+		}
+
+		@Override
+		public Emitter emitter() {
+			if (Dungeon.hero.buff(NaturesPower.naturesPowerTracker.class) != null && !sniperSpecial){
+				Emitter e = new Emitter();
+				e.pos(5, 5);
+				e.fillTarget = false;
+				e.pour(LeafParticle.GENERAL, 0.01f);
+				return e;
+			} else {
+				return super.emitter();
+			}
+		}
+
+		@Override
+		public int damageRoll(Char owner) {
+			return SpiritBow.this.damageRoll(owner);
+		}
+		@Override
+		public int max(){
+			int damgeMuilt = 1;
+			if(hero.pointsInTalent(Talent.STORM_ATTACK) == 1){
+				damgeMuilt = 4;
+			} else if(hero.pointsInTalent(Talent.STORM_ATTACK) == 2){
+				damgeMuilt = 2;
+			}
+			return (SpiritBow.this.max()/damgeMuilt);
+		}
+		@Override
+		public int min(){
+			int damgeMuilt = 1;
+			if(hero.pointsInTalent(Talent.STORM_ATTACK) == 1){
+				damgeMuilt = 4;
+			} else if(hero.pointsInTalent(Talent.STORM_ATTACK) == 2){
+				damgeMuilt = 2;
+			}
+			return (SpiritBow.this.min()/damgeMuilt);
+		}
+		@Override
+		public boolean hasEnchant(Class<? extends Enchantment> type, Char owner) {
+			return SpiritBow.this.hasEnchant(type, owner);
+		}
+
+		@Override
+		public int proc(Char attacker, Char defender, int damage) {
+			return SpiritBow.this.proc(attacker, defender, damage);
+		}
+
+		@Override
+		public float delayFactor(Char user) {
+			return SpiritBow.this.delayFactor(user);
+		}
+
+		@Override
+		public float accuracyFactor(Char owner, Char target) {
+			if (sniperSpecial && SpiritBow.this.augment == Augment.DAMAGE){
+				return Float.POSITIVE_INFINITY;
+			} else {
+				return super.accuracyFactor(owner, target);
+			}
+		}
+
+		@Override
+		public int STRReq(int lvl) {
+			return SpiritBow.this.STRReq(lvl);
+		}
+
+		@Override
+		protected void onThrow( int cell ) {
+			Char enemy = Actor.findChar( cell );
+			if (enemy == null || enemy == curUser) {
+				parent = null;
+				Splash.at( cell, 0xCC99FFFF, 1 );
+			} else {
+				if (!curUser.shoot( enemy, this )) {
+					Splash.at(cell, 0xCC99FFFF, 1);
+				}
+				if (sniperSpecial && SpiritBow.this.augment != Augment.SPEED) sniperSpecial = false;
+			}
+		}
+
+		@Override
+		public void throwSound() {
+			Sample.INSTANCE.play( Assets.Sounds.ATK_SPIRITBOW, 1, Random.Float(0.87f, 1.15f) );
+		}
+
+		int flurryCount = -1;
+		Actor flurryActor = null;
+
+		@Override
+		public void cast(final Hero user, final int dst) {
+			final int cell = throwPos( user, dst );
+			SpiritBow.this.targetPos = cell;
+			if (sniperSpecial && SpiritBow.this.augment == Augment.SPEED){
+				if (flurryCount == -1) flurryCount = 3;
+
+				final Char enemy = Actor.findChar( cell );
+
+				if (enemy == null){
+					user.spendAndNext(castDelay(user, dst));
+					sniperSpecial = false;
+					flurryCount = -1;
+
+					if (flurryActor != null){
+						flurryActor.next();
+						flurryActor = null;
+					}
+					return;
+				}
+				QuickSlotButton.target(enemy);
+
+				final boolean last = flurryCount == 1;
+
+				user.busy();
+
+				throwSound();
+
+				((MissileSprite) user.sprite.parent.recycle(MissileSprite.class)).
+						reset(user.sprite,
+								cell,
+								this,
+								new Callback() {
+									@Override
+									public void call() {
+										if (enemy.isAlive()) {
+											curUser = user;
+											onThrow(cell);
+										}
+
+										if (last) {
+											user.spendAndNext(castDelay(user, dst));
+											sniperSpecial = false;
+											flurryCount = -1;
+										}
+
+										if (flurryActor != null){
+											flurryActor.next();
+											flurryActor = null;
+										}
+									}
+								});
+
+				user.sprite.zap(cell, new Callback() {
+					@Override
+					public void call() {
+						flurryCount--;
+						if (flurryCount > 0){
+							Actor.add(new Actor() {
+
+								{
+									actPriority = VFX_PRIO-1;
+								}
+
+								@Override
+								protected boolean act() {
+									flurryActor = this;
+									int target = QuickSlotButton.autoAim(enemy, ALTSpiritArrow.this);
+									if (target == -1) target = cell;
+									cast(user, target);
+									Actor.remove(this);
+									return false;
+								}
+							});
+							curUser.next();
+						}
+					}
+				});
+
+			} else {
+
+				if (user.hasTalent(Talent.SEER_SHOT)
+						&& user.buff(Talent.SeerShotCooldown.class) == null){
+					int shotPos = throwPos(user, dst);
+					if (Actor.findChar(shotPos) == null) {
+						RevealedArea a = Buff.affect(user, RevealedArea.class, 5 * user.pointsInTalent(Talent.SEER_SHOT));
+						a.depth = Dungeon.depth;
+						a.pos = shotPos;
+						Buff.affect(user, Talent.SeerShotCooldown.class, 20f);
+					}
+				}
+
+				super.cast(user, dst);
+			}
+		}
+	}
 	
 	public class SpiritArrow extends MissileWeapon {
 		
@@ -469,9 +683,116 @@ public class SpiritBow extends Weapon {
 	
 	private CellSelector.Listener shooter = new CellSelector.Listener() {
 		@Override
-		public void onSelect( Integer target ) {
+		public void onSelect(Integer target) {
 			if (target != null) {
-				knockArrow().cast(curUser, target);
+				if (hero.pointsInTalent(Talent.STORM_ATTACK) >= 3) {
+					// Main arrow towards the primary target
+					Ballistica mainBall = new Ballistica(curUser.pos, target, Ballistica.PROJECTILE);
+					if (Char.findChar(mainBall.collisionPos) == null || Char.findChar(mainBall.collisionPos).alignment != Char.Alignment.ENEMY) {
+						altknockArrow().cast(curUser, target);
+					} else {
+						// Proceed with primary target logic
+						if (Char.findChar(mainBall.collisionPos) == Char.findChar(target)) {
+							Collection<Mob> mobs = Dungeon.level.mobs;
+							if (!mobs.isEmpty()) {
+								// Filter mobs within hero's FOV
+								List<Mob> visibleMobs = new ArrayList<>();
+								for (Mob mob : mobs) {
+									if (Dungeon.level.heroFOV[mob.pos] && mob.alignment == Char.Alignment.ENEMY) {
+										visibleMobs.add(mob);
+									}
+								}
+								if (!visibleMobs.isEmpty() && !(visibleMobs.size() == 1 && visibleMobs.get(0).equals(Char.findChar(target)))) {
+									// Select the first secondary target (different from primary)
+									Mob secondaryTarget1;
+									int randomIndex1;
+									do {
+										randomIndex1 = (int) (Math.random() * visibleMobs.size());
+										secondaryTarget1 = visibleMobs.get(randomIndex1);
+									} while (secondaryTarget1.equals(Char.findChar(target)));
+
+									// Launch the first secondary arrow
+									Ballistica secondaryBall1 = new Ballistica(curUser.pos, secondaryTarget1.pos, Ballistica.PROJECTILE);
+									if (secondaryBall1.collisionPos.equals(secondaryTarget1.pos)) {
+										altknockArrow().cast(curUser, secondaryTarget1.pos);
+									}
+
+									// Select the second secondary target (different from primary and first secondary)
+									List<Mob> remainingMobs = new ArrayList<>(visibleMobs);
+									remainingMobs.remove(secondaryTarget1); // Remove the first secondary target
+									if (!remainingMobs.isEmpty()) {
+										Mob secondaryTarget2 = remainingMobs.get((int) (Math.random() * remainingMobs.size()));
+
+										// Launch the second secondary arrow
+										Ballistica secondaryBall2 = new Ballistica(curUser.pos, secondaryTarget2.pos, Ballistica.PROJECTILE);
+										if (secondaryBall2.collisionPos.equals(secondaryTarget2.pos)) {
+											altknockArrow().cast(curUser, secondaryTarget2.pos);
+										}
+									}
+								}
+							}
+							// Always shoot the main arrow at the primary target
+							altknockArrow().cast(curUser, target);
+						}
+					}
+				} else if (hero.pointsInTalent(Talent.STORM_ATTACK) <= 2 && hero.pointsInTalent(Talent.STORM_ATTACK) >0) {
+					//for ling code block
+					Ballistica ballForFoe = new Ballistica(curUser.pos, target, Ballistica.PROJECTILE);
+					//if we got the floor or a pal nothin happen
+					if (Char.findChar(ballForFoe.collisionPos) == null || Char.findChar(ballForFoe.collisionPos).alignment != Char.Alignment.ENEMY) {
+						altknockArrow().cast(curUser, target);
+					} else {
+						//if we got not the char we wanted, we act like as it was the TARGET ALL ALONG MUAHAHAHAH
+						if (Char.findChar(ballForFoe.collisionPos) == Char.findChar(target)) {
+							Collection<Mob> mobs = Dungeon.level.mobs;
+							if (!mobs.isEmpty()) {
+								// Filter mobs within hero's FOV
+								List<Mob> visibleMobs = new ArrayList<>();
+								for (Mob mob : mobs) {
+									if (Dungeon.level.heroFOV[mob.pos] && mob.alignment == Char.Alignment.ENEMY) {
+										visibleMobs.add(mob);
+									}
+								}
+								if (!visibleMobs.isEmpty() && !(visibleMobs.size() == 1 && visibleMobs.get(0).equals(Char.findChar(target)))) {
+									// Select a random mob from visibleMobs, who is not an ally and is not the initial target/defender mob
+									Mob randomMob;
+									int randomIndex;
+									do {
+										randomIndex = (int) (Math.random() * visibleMobs.size());
+									} while (visibleMobs.get(randomIndex) == Char.findChar(target));
+									randomMob = visibleMobs.get(randomIndex);
+									Ballistica ballForRan = new Ballistica(curUser.pos, randomMob.pos, Ballistica.PROJECTILE);
+									// ok, our first arrow has a line of sight, we got the main target
+									//now we work with the second mob...
+									if (ballForRan.collisionPos.equals(randomMob.pos)) { //if we got the second mob we got the second mob, hooray
+										altknockArrow().cast(curUser, randomMob.pos);
+									} else if (Dungeon.level.map[ballForRan.collisionPos] == Terrain.SOLID) { //if we got a wall we got a wall, sad
+										altknockArrow().cast(curUser, randomMob.pos);
+									}
+									//if we still somehow got a third smbdy who is not our secondary target, attack the second one directly
+									else if (Char.findChar(ballForRan.collisionPos) != null && Char.findChar(ballForRan.collisionPos) != Char.findChar(randomMob.pos)) {
+										Hero user = curUser;
+										((MissileSprite) user.sprite.parent.recycle(MissileSprite.class)).
+												reset(user.pos,
+														randomMob.pos,
+														new ALTSpiritArrow(),
+                                                        () -> {
+                                                            if (randomMob.isAlive()) {
+                                                                curUser = user;
+                                                                (new ALTSpiritArrow()).onThrow(randomMob.pos);
+                                                            }
+                                                        });
+									}
+									//In other cases we just shoot there and see what happens.
+									else altknockArrow().cast(curUser, randomMob.pos);
+								}
+							}
+							altknockArrow().cast(curUser, target);
+						} else onSelect(ballForFoe.collisionPos);
+					}
+				} else {
+					knockArrow().cast(curUser, target);
+				}
 			}
 		}
 		@Override
