@@ -131,6 +131,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GeyserTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GrimTrap;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Earthroot;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
@@ -142,6 +143,7 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
+import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 
 import java.util.Arrays;
@@ -386,6 +388,45 @@ public abstract class Char extends Actor {
 				}
 				//change from budding
 
+			}
+
+			if(this instanceof Hero){
+				Hero h = (Hero) this;
+				if(h.pointsInTalent(Talent.LAND_HEART)>=3){
+					GLog.n("阶段1");
+					int ePos = enemy.pos;
+
+					Point c = Dungeon.level.cellToPoint(pos);
+					Point ec = Dungeon.level.cellToPoint(ePos);
+
+					for (int y = Math.max(0, c.y - 1); y <= Math.min(Dungeon.level.height()-1, c.y + 1); y++){
+						int left = c.x - 1;
+						int right = Math.min(Dungeon.level.width()-1, c.x + c.x - left);
+						left = Math.max(0, left);
+						int curr;
+						for (curr = left + y * Dungeon.level.width(); curr <= right + y * Dungeon.level.width(); curr++){
+							if(Dungeon.level.map[curr] == Terrain.FURROWED_GRASS){
+								dr = 0;
+								GLog.n("阶段2");
+							}
+						}
+					}
+
+					for (int y = Math.max(0, ec.y - 1); y <= Math.min(Dungeon.level.height()-1, c.y + 1); y++){
+						int left = ec.x - 1;
+						int right = Math.min(Dungeon.level.width()-1, ec.x + ec.x - left);
+						left = Math.max(0, left);
+						int curr;
+						for (curr = left + y * Dungeon.level.width(); curr <= right + y * Dungeon.level.width(); curr++){
+							if(Dungeon.level.map[curr] == Terrain.FURROWED_GRASS){
+								dr = 0;
+								GLog.n("阶段3");
+							}
+						}
+					}
+
+
+				};
 			}
 
 			//we use a float here briefly so that we don't have to constantly round while
@@ -656,13 +697,6 @@ public abstract class Char extends Actor {
 		if (hero.pointsInTalent(Talent.MEDART_SPECIALIST) >= 2 ) {
 			if(hero.belongings.thrownWeapon instanceof TippedDart){
 				return true;
-			}
-		}
-
-		if (hero.pointsInTalent(Talent.MEDART_SPECIALIST) >= 3 ) {
-			if(hero.belongings.thrownWeapon instanceof TippedDart){
-				((TippedDart) hero.belongings.thrownWeapon).baseUses++;
-				GLog.w("33");
 			}
 		}
 
