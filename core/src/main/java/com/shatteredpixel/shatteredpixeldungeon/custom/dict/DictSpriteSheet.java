@@ -308,6 +308,14 @@ public class DictSpriteSheet {
     public static final int FIST_2          = 608 + 10000;
     public static final int FIST_3          = 609 + 10000;
 
+    //Radish new Enemy
+    // Zone 5
+    public static final int DEMINION = 610 + 10000;
+    public static final int DEVILOON = 611 + 10000;
+    public static final int GORGON = 612 + 10000;
+    public static final int DEMONLORD = 613 + 10000;
+
+
     public static final int STATUE          = 700 + 10000;
     public static final int ARMORED_STATUE  = 701 + 10000;
     public static final int FISH            = 702 + 10000;

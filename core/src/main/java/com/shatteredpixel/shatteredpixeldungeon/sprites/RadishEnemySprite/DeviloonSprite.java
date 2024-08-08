@@ -10,7 +10,7 @@ public class DeviloonSprite extends MobSprite {
 
         texture(Assets.Sprites.DEVILOON);
 
-        TextureFilm frames = new TextureFilm( texture, 17, 24 );
+        TextureFilm frames = new TextureFilm( texture, 24, 17 );
         idle = new Animation( 9, true );
         idle.frames( frames, 0,1,2,3);
 
