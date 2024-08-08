@@ -66,7 +66,7 @@ public class GnollZealot extends Mob {
         if(Dungeon.hero != null && fieldOfView!= null){
             if(!isFirstSeen && fieldOfView[Dungeon.hero.pos]){
                 isFirstSeen = true;
-                GLog.n('\n'+ Messages.get(GnollZealot.class, "steal_healing",name()));
+                GLog.n('\n'+ Messages.get(GnollZealot.class, "rage",GnollZealot.this.name()));
             }
             if((!Dungeon.hero.buffs(Healing.class).isEmpty() || !Dungeon.hero.buffs(Sungrass.Health.class).isEmpty()) && fieldOfView[Dungeon.hero.pos]){
                 Set<Mob> mobs = Collections.synchronizedSet(Dungeon.level.mobs);
