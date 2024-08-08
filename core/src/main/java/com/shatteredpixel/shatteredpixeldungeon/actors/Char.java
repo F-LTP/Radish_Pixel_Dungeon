@@ -121,11 +121,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Axe_D;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bloodblade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GiantKiller;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.ShockingDart;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
@@ -626,6 +626,12 @@ public abstract class Char extends Actor {
 			Buff.detach(defender, AfterImage.absoluteEvasion.class);
 			return false;
 		}
+
+		if (defender.buff(AfterImage.AnotabsoluteEvasion.class)!=null){
+			Buff.detach(defender, AfterImage.AnotabsoluteEvasion.class);
+			return false;
+		}
+
 		//if accuracy or evasion are large enough, treat them as infinite.
 		//note that infinite evasion beats infinite accuracy
 		if (defStat >= INFINITE_EVASION){
@@ -646,6 +652,19 @@ public abstract class Char extends Actor {
 			}
 		}
 
+
+		if (hero.pointsInTalent(Talent.MEDART_SPECIALIST) >= 2 ) {
+			if(hero.belongings.thrownWeapon instanceof TippedDart){
+				return true;
+			}
+		}
+
+		if (hero.pointsInTalent(Talent.MEDART_SPECIALIST) >= 3 ) {
+			if(hero.belongings.thrownWeapon instanceof TippedDart){
+				((TippedDart) hero.belongings.thrownWeapon).baseUses++;
+				GLog.w("33");
+			}
+		}
 
 		float acuRoll = Random.Float( acuStat );
 		float bless_adj_a=1.25f,bless_adj_d=1.25f;
@@ -755,6 +774,9 @@ public abstract class Char extends Actor {
 		if ( buff( Stamina.class ) != null) speed *= 1.5f*ben_mul;
 		if ( buff( Adrenaline.class ) != null) speed *= 2f;
 		if ( buff( Haste.class ) != null) speed *= 3f;
+
+		if ( buff( Talent.HIGHGRSS_SPEED.class ) != null) speed *= 1.5f;
+
 		if ( buff( Dread.class ) != null) speed *= 2f;
 		if (buff(DarkCoat.myPace.class)!=null) speed=Math.max(1f,speed);
 		return speed;
@@ -799,6 +821,7 @@ public abstract class Char extends Actor {
 		for (ChampionHero buff : buffs(ChampionHero.class)){
 			dmg = (int) Math.ceil(dmg * buff.damageTakenFactor());
 		}
+
 		dmg = (int)Math.ceil(dmg / AscensionChallenge.statModifier(this));
 
 		if (!(src instanceof LifeLink) && buff(LifeLink.class) != null){
