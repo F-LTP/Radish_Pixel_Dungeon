@@ -15,6 +15,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FrostImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Fury;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
@@ -34,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.DemonLordSprite;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
@@ -56,9 +58,28 @@ public class DemonLord extends Mob {
         lootChance = 0.3f;
     }
 
+    private int buffCnt = 0;
+
+    private float damageBoost(int lv){
+        return lv * 1.15f;
+    }
+    @Override
+    public String description() {
+        String desc = super.description();
+        desc += "\n\n";
+        desc += Messages.get(this, "damage_boost", (int)(damageBoost(buffCnt)*100) );
+        return desc;
+    }
 
     public int damageRoll() {
-        return Random.NormalIntRange( 30, 35 );
+        buffCnt = 0;
+        // accumulate without buff with no icon
+        for(Object i:enemy.buffs(Buff.class).toArray()){
+            if(((Buff) i).icon()!= BuffIndicator.NONE) buffCnt+=1;
+        }
+        if(enemy.buff(Light.class)!=null) buffCnt-=1;
+        buffCnt = Math.max(buffCnt, 0);
+        return Random.NormalIntRange( 30, 35 ) * (int)(1+damageBoost(buffCnt));
     }
 
     @Override
