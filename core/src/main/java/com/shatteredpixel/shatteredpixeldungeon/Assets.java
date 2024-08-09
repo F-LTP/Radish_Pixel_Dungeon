@@ -67,6 +67,8 @@ public class Assets {
 
 		public static final String UPBARS  = "interfaces/updatebar.png";
 
+		public static final String JOIN  = "interfaces/join.png";
+
 		public static final String ARCS_BG  = "interfaces/arcs1.png";
 		public static final String ARCS_FG  = "interfaces/arcs2.png";
 
@@ -76,6 +78,9 @@ public class Assets {
 
 		public static final String CHROME   = "interfaces/chrome.png";
 		public static final String ICONS    = "interfaces/icons.png";
+
+		public static final String DOWNLOAD    = "interfaces/download.png";
+
 		public static final String STATUS   = "interfaces/status_pane.png";
 		public static final String MENU     = "interfaces/menu_pane.png";
 		public static final String MENU_BTN = "interfaces/menu_button.png";

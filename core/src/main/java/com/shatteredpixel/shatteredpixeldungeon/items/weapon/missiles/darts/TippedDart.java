@@ -46,6 +46,7 @@ import com.shatteredpixel.shatteredpixeldungeon.plants.Sungrass;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.utils.Reflection;
 
@@ -198,6 +199,14 @@ public abstract class TippedDart extends Dart {
 		
 		return getTipped(s, quantity );
 		
+	}
+
+	@Override
+	protected void decrementDurability(){
+		if( Dungeon.hero.pointsInTalent(Talent.MEDART_SPECIALIST) >= 3 && Math.random() <= 0.33d){
+			return;
+		}
+		super.decrementDurability();
 	}
 	
 }

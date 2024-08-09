@@ -46,6 +46,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BraceYourself;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Calm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionHero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
@@ -302,7 +303,13 @@ public class Hero extends Char {
 	public float critDamage(){
 		float cdbouns=0;
 		cdbouns+= RingOfConcentration.critDamgeBonus(this);
-		return Math.min(critDamage+cdbouns,critDamageCap);
+
+		float calm_bouns = 0;
+		if(buff(Calm.class)!=null){
+			calm_bouns = 0.02f;
+		}
+
+		return Math.min(critDamage+cdbouns,critDamageCap) * ( 1 + calm_bouns * 100*( 1f -(float) (HT-HP) /HT) );
 	}
 	public int critDamage_shown(){
 		return (int)(100*critDamage());

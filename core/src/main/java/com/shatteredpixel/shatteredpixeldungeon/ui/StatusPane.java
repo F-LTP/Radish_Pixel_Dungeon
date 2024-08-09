@@ -21,6 +21,10 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.ui;
 
+import static com.shatteredpixel.shatteredpixeldungeon.ui.MenuPane.version;
+import static com.shatteredpixel.shatteredpixeldungeon.update.RDChangesButton.downloadSuccess;
+import static com.shatteredpixel.shatteredpixeldungeon.update.RDChangesButton.updateProgress;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
@@ -35,7 +39,6 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndHero;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndKeyBindings;
 import com.watabou.input.GameAction;
-import com.watabou.input.KeyBindings;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Game;
@@ -45,8 +48,6 @@ import com.watabou.noosa.particles.Emitter;
 import com.watabou.noosa.ui.Component;
 import com.watabou.utils.ColorMath;
 import com.watabou.utils.GameMath;
-
-import java.util.ArrayList;
 
 public class StatusPane extends Component {
 
@@ -245,6 +246,16 @@ public class StatusPane extends Component {
 		int health = Dungeon.hero.HP;
 		int shield = Dungeon.hero.shielding();
 		int max = Dungeon.hero.HT;
+
+		if(downloadSuccess) {
+			version.text("Download,Completed");
+			version.alpha(1f);
+			version.x = x + width - version.width();
+		} else if (!updateProgress.isEmpty()) {
+			version.text("Download:" + updateProgress);
+			version.alpha(1f);
+			version.x = x + width - version.width();
+		}
 
 		if (!Dungeon.hero.isAlive()) {
 			avatar.tint(0x000000, 0.5f);
