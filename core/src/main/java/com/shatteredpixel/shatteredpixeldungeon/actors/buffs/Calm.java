@@ -10,7 +10,7 @@ public class Calm extends Buff{
 
     @Override
     public int icon() {
-        return BuffIndicator.BLESS;
+        return BuffIndicator.WEAPON;
     }
 
 }

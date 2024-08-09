@@ -317,6 +317,9 @@ public class ItemSpriteSheet {
 	public static final int AXE_D		= WEP_TIER5+16;
 	public static final int TONFA		= WEP_TIER5+17;
 	public static final int CALLHAMR		= WEP_TIER5+19;
+
+	public static final int TAIKIG		= WEP_TIER5+22;
+
 	public static final int GIANTKILL		= WEP_TIER5+23;
 
 	public static final int ENDDAY_KILL		= WEP_TIER5+29;

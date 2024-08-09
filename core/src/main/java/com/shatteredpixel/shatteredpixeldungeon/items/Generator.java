@@ -484,7 +484,7 @@ public class Generator {
 					KillBoatSword.class
 
 			};
-			WEP_T5.probs = new float[]{ 0, 0, 0, 5, 0, 0, 5, 5, 5, 5, 5, 5, 7, 5 };
+			WEP_T5.probs = new float[]{ 0, 0, 0, 5, 0, 5, 5, 5, 5, 5, 5, 5, 7, 5 };
 
 			WEP_T5_NEW.classes = new Class<?>[]{
 					Cutterhead.class,

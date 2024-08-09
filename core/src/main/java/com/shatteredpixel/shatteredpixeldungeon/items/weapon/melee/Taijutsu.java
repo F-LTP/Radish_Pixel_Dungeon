@@ -10,7 +10,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 public class Taijutsu extends MeleeWeapon {
 
     {
-        image = ItemSpriteSheet.SWORD;
+        image = ItemSpriteSheet.TAIKIG;
         hitSound = Assets.Sounds.HIT_SLASH;
         hitSoundPitch = 1f;
 
