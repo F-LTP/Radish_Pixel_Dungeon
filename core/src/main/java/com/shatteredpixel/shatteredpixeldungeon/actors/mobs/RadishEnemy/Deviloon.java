@@ -1,6 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -15,13 +16,20 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FrostImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Fury;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BlastParticle;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArcaneResin;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
@@ -31,11 +39,23 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.DeviloonSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.noosa.particles.Emitter;
+import com.watabou.noosa.particles.PixelParticle;
+import com.watabou.utils.Bundle;
+import com.watabou.utils.PathFinder;
+import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Deviloon extends Mob {
     {
@@ -44,18 +64,207 @@ public class Deviloon extends Mob {
         HP = HT = 100;
         defenseSkill = 28;
 
+        viewDistance = Light.DISTANCE;
 
         EXP = 12;
         maxLvl = 26;
 
+        HUNTING = new Deviloon.Hunting();
+
         properties.add(Property.DEMONIC);
+        properties.add(Property.HEADLESS);
 
         loot = new ArcaneResin().quantity(Random.Int(1,2));
         lootChance = 0.20f;
     }
+
+    HashSet<BlastRune> blastRunes = new HashSet<>();
+
+    private Ballistica blastRune;
+    private int blastTarget = -1;
+    private int blastCooldown;
+    public boolean blastCharged;
+
     @Override
     protected boolean canAttack( Char enemy ) {
-        return new Ballistica( pos, enemy.pos, Ballistica.MAGIC_BOLT).collisionPos == enemy.pos;
+
+        if (blastCooldown == 0) {
+            Ballistica aim = new Ballistica(pos, enemy.pos, Ballistica.PROJECTILE);
+
+            if (enemy.invisible == 0 && !isCharmedBy(enemy) && fieldOfView[enemy.pos] && aim.subPath(1, aim.dist).contains(enemy.pos)){
+                blastRune = aim;
+                blastTarget = aim.collisionPos;
+                return true;
+            } else
+                //if the beam is charged, it has to attack, will aim at previous location of target.
+                return blastCharged;
+        } else
+            return super.canAttack(enemy);
+    }
+
+
+    @Override
+    protected boolean act() {
+
+        // yep the complexity is O(n^2) , i'll optimize it one day.
+        // Date : 2024-08-10
+        for(Object i:blastRunes.toArray()){
+            int item_cnt = 0;
+            for (Heap heap : Dungeon.level.heaps.valueList()) {
+                if(heap.pos==((BlastRune)i).drop_pos){
+                    item_cnt = heap.size();
+                }
+            }
+            if((Actor.findChar(((BlastRune)i).drop_pos)!=null && !(Actor.findChar(((BlastRune)i).drop_pos)instanceof Deviloon )) || item_cnt>=2){
+                Actor.addDelayed(((BlastRune)i).fuse = ((BlastRune)i).fuse.ignite((BlastRune) i), 0);
+                blastRunes.remove(i);
+            }
+        }
+
+        if (blastCharged && state != HUNTING){
+            blastCharged = false;
+            sprite.idle();
+        }
+        if (blastRune == null && blastTarget != -1) {
+            blastRune = new Ballistica(pos, blastTarget, Ballistica.PROJECTILE);
+            sprite.turnTo(pos, blastTarget);
+        }
+        if (blastCooldown > 0)
+            blastCooldown--;
+        return super.act();
+    }
+
+    public void onZapComplete() {
+        callOfRune();
+        next();
+    }
+
+    @Override
+    protected boolean doAttack( Char enemy ) {
+
+        if (blastCooldown > 0) {
+            return super.doAttack(enemy);
+        } else if (!blastCharged){
+            ((DeviloonSprite)sprite).charge( enemy.pos );
+            spend( attackDelay() );
+            blastCharged = true;
+            return true;
+        } else {
+
+            spend( attackDelay() );
+
+            blastRune = new Ballistica(pos, blastTarget, Ballistica.PROJECTILE);
+            if (Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[blastRune.collisionPos] ) {
+                sprite.zap( blastRune.collisionPos );
+                return false;
+            } else {
+                sprite.idle();
+                callOfRune();
+                return true;
+            }
+        }
+
+    }
+
+    public void callOfRune(){
+        if (!blastCharged || blastCooldown > 0 || blastRune == null)
+            return;
+
+        blastCharged = false;
+        blastCooldown = 10;
+
+        boolean terrainAffected = false;
+
+        Invisibility.dispel(this);
+        for (int pos : blastRune.subPath(1, blastRune.dist)) {
+
+            if (Dungeon.level.flamable[pos]) {
+
+                Dungeon.level.destroy( pos );
+                GameScene.updateMap( pos );
+                terrainAffected = true;
+
+            }
+            Plant plant = Dungeon.level.plants.get( pos );
+            if (plant != null){
+                plant.wither();
+            }
+            Char ch = Actor.findChar( pos );
+            if (ch == null) {
+                continue;
+            }
+
+            if (true) {
+                HashSet<Integer> blast_pos_set = new HashSet<>();
+                while(blast_pos_set.size()<3){
+                    blast_pos_set.add(PathFinder.NEIGHBOURS8[Random.Int(0,8)]);
+                }
+                for(int i:blast_pos_set){
+                    int c =  ch.pos + i;
+                    if (c >= 0 && c < Dungeon.level.length()) {
+                        BlastRune blastRune_tmp = new BlastRune().set_pos(c);
+                        blastRunes.add(blastRune_tmp);
+                        Dungeon.level.drop(blastRune_tmp,c);
+                    }
+                }
+
+
+
+                if (Dungeon.level.heroFOV[pos]) {
+                    ch.sprite.flash();
+                    CellEmitter.center( pos ).burst( MagicMissile.ForceParticle.FACTORY, Random.IntRange( 1, 2 ) );
+                }
+
+                if (!ch.isAlive() && ch == Dungeon.hero) {
+                    Badges.validateDeathFromEnemyMagic();
+                    Dungeon.fail( getClass() );
+                    GLog.n( Messages.get(this, "deathgaze_kill") );
+                }
+            } else {
+                ch.sprite.showStatus( CharSprite.NEUTRAL,  ch.defenseVerb() );
+            }
+        }
+
+        if (terrainAffected) {
+            Dungeon.observe();
+        }
+
+        blastRune = null;
+        blastTarget = -1;
+    }
+
+    private static final String BLAST_TARGET     = "BlastTarget";
+    private static final String BLAST_COOLDOWN   = "BlastCooldown";
+    private static final String BLAST_CHARGED    = "BlastCharged";
+
+    @Override
+    public void storeInBundle(Bundle bundle) {
+        super.storeInBundle(bundle);
+        bundle.put( BLAST_TARGET, blastTarget);
+        bundle.put( BLAST_COOLDOWN, blastCooldown );
+        bundle.put( BLAST_CHARGED, blastCharged );
+    }
+
+    @Override
+    public void restoreFromBundle(Bundle bundle) {
+        super.restoreFromBundle(bundle);
+        if (bundle.contains(BLAST_TARGET))
+            blastTarget = bundle.getInt(BLAST_TARGET);
+        blastCooldown = bundle.getInt(BLAST_COOLDOWN);
+        blastCharged = bundle.getBoolean(BLAST_CHARGED);
+    }
+
+
+    private class Hunting extends Mob.Hunting{
+        @Override
+        public boolean act(boolean enemyInFOV, boolean justAlerted) {
+            //even if enemy isn't seen, attack them if the beam is charged
+            if (blastCharged && enemy != null && canAttack(enemy)) {
+                enemySeen = enemyInFOV;
+                return doAttack(enemy);
+            }
+            return super.act(enemyInFOV, justAlerted);
+        }
     }
 
 
@@ -75,6 +284,9 @@ public class Deviloon extends Mob {
 
     @Override
     public void die( Object cause ) {
+        for(BlastRune i:blastRunes){
+            Actor.addDelayed(((BlastRune)i).fuse = ((BlastRune)i).fuse.ignite((BlastRune) i), 0);
+        }
         super.die( cause );
     }
     public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
@@ -253,8 +465,219 @@ public class Deviloon extends Mob {
 
         }
     }
-    @Override
-    protected boolean act() {
-        return super.act();
+
+
+    public static class DeviloonParticle extends PixelParticle {
+
+        public static final Emitter.Factory ATTRACTING = new Emitter.Factory() {
+            @Override
+            public void emit( Emitter emitter, int index, float x, float y ) {
+                ((DeviloonParticle)emitter.recycle( DeviloonParticle.class )).resetAttract( x, y );
+            }
+            @Override
+            public boolean lightMode() {
+                return true;
+            }
+        };
+
+        public DeviloonParticle() {
+            super();
+
+            color( 0xFFA500 );
+            lifespan = 0.5f;
+
+            speed.set( Random.Float( -10, +10 ), Random.Float( -10, +10 ) );
+        }
+
+        public void reset( float x, float y ) {
+            revive();
+
+            this.x = x;
+            this.y = y;
+
+            left = lifespan;
+        }
+
+        public void resetAttract( float x, float y) {
+            revive();
+
+            //size = 8;
+            left = lifespan;
+
+            speed.polar( Random.Float( PointF.PI2 ), Random.Float( 16, 32 ) );
+            this.x = x - speed.x * lifespan;
+            this.y = y - speed.y * lifespan;
+        }
+
+        @Override
+        public void update() {
+            super.update();
+            // alpha: 1 -> 0; size: 1 -> 4
+            size( 4 - (am = left / lifespan) * 3 );
+        }
     }
+
+    public class BlastRune extends Item{
+        public Fuse fuse;
+
+        public int drop_pos = -1;
+
+        {
+            dropsDownHeap = true;
+            unique = true;
+            fuse = new Fuse();
+            image = ItemSpriteSheet.TIPPED_DARTS+16;
+        }
+
+        public BlastRune set_pos(int pos){
+            drop_pos = pos;
+            return this;
+        }
+
+        public class Fuse extends Actor{
+
+            {
+                actPriority = BLOB_PRIO+1; //after hero, before other actors
+            }
+
+            private BlastRune blastRune;
+            private int fuse_pos = -1;
+
+            public Fuse ignite(BlastRune blastRune){
+                this.blastRune = blastRune;
+                return this;
+            }
+
+            public Fuse set_pos(int pos){
+                this.fuse_pos = pos;
+                return this;
+            }
+
+            @Override
+            protected boolean act() {
+
+                if (blastRune.fuse != this){
+                    Actor.remove( this );
+                    return true;
+                }
+
+                //look for our bomb, remove it from its heap, and blow it up.
+                for (Heap heap : Dungeon.level.heaps.valueList()) {
+                    if (heap.items.contains(blastRune)) {
+
+                        heap.remove(blastRune);
+                        blastRune.explode(heap.pos);
+
+                        diactivate();
+                        Actor.remove(this);
+                        return true;
+                    }
+                }
+
+                //can't find our bomb, something must have removed it, do nothing.
+                blastRune.fuse = null;
+                Actor.remove( this );
+                return true;
+            }
+        }
+
+
+        @Override
+        public ItemSprite.Glowing glowing() {
+            return fuse != null ? new ItemSprite.Glowing( 0xFF0000, 0.6f) : null;
+        }
+
+        public boolean explodesDestructively(){
+            return true;
+        }
+
+        private static final String FUSE = "fuse";
+
+        @Override
+        public void storeInBundle(Bundle bundle) {
+            super.storeInBundle(bundle);
+            bundle.put( FUSE, fuse );
+        }
+
+        @Override
+        public void restoreFromBundle(Bundle bundle) {
+            super.restoreFromBundle(bundle);
+            if (bundle.contains( FUSE ))
+                Actor.add( fuse = ((Fuse)bundle.get(FUSE)).ignite(this) );
+        }
+
+        public void explode(int cell){
+            //We're blowing up, so no need for a fuse anymore.
+            this.fuse = null;
+
+            Sample.INSTANCE.play( Assets.Sounds.BLAST );
+
+            if (explodesDestructively()) {
+
+                ArrayList<Char> affected = new ArrayList<>();
+
+                if (Dungeon.level.heroFOV[cell]) {
+                    CellEmitter.center(cell).burst(BlastParticle.FACTORY, 30);
+                }
+
+                boolean terrainAffected = false;
+                for (int n : PathFinder.NEIGHBOURS9) {
+                    int c = cell + n;
+                    if (c >= 0 && c < Dungeon.level.length()) {
+                        if (Dungeon.level.heroFOV[c]) {
+                            CellEmitter.get(c).burst(SmokeParticle.FACTORY, 4);
+                        }
+
+                        if (Dungeon.level.flamable[c]) {
+                            Dungeon.level.destroy(c);
+                            GameScene.updateMap(c);
+                            terrainAffected = true;
+                        }
+
+                        //destroys items / triggers bombs caught in the blast.
+                        Heap heap = Dungeon.level.heaps.get(c);
+                        if (heap != null){
+                            heap.explode();
+                            for(Object i:heap.items){
+                                if(i instanceof BlastRune){
+                                    Actor.addDelayed(((BlastRune)i).fuse = ((BlastRune)i).fuse.ignite((BlastRune) i), 0);
+                                    blastRunes.remove(i);
+                                }
+                            }
+                        }
+
+                        Plant plant = Dungeon.level.plants.get( c );
+                        if (plant != null){
+                            plant.wither();
+                        }
+                        Char ch = Actor.findChar(c);
+                        if (ch != null) {
+                            affected.add(ch);
+                        }
+                    }
+                }
+
+                for (Char ch : affected){
+
+                    //if they have already been killed by another bomb
+                    if(!ch.isAlive()){
+                        continue;
+                    }
+
+                    int dmg = Random.NormalIntRange(20,40);
+
+                    if (dmg > 0) {
+                        ch.damage(dmg, this);
+                    }
+
+                }
+
+                if (terrainAffected) {
+                    Dungeon.observe();
+                }
+            }
+        }
+    }
+
+
 }
