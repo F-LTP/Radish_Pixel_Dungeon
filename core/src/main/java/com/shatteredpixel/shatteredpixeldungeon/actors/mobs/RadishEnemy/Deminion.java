@@ -12,6 +12,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionHero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FireImbue;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FrostImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Fury;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
@@ -36,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.DeminionSprite;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
@@ -223,7 +225,7 @@ public class Deminion extends Mob {
                 if (enemy == Dungeon.hero) {
 
                     Dungeon.fail( getClass() );
-                    GLog.n( Messages.capitalize(Messages.get(DM175.class, "kill")) );
+                    GLog.n( Messages.capitalize(Messages.get(Deminion.class, "kill")) );
 
                 }
             }
@@ -306,8 +308,21 @@ public class Deminion extends Mob {
         next();
     }
 
-    public static class Sigil extends Vulnerable implements Hero.Doom {
+    public static class Sigil extends FlavourBuff implements Hero.Doom {
         public static final float DURATION = 10f;
+        {
+            type = buffType.NEGATIVE;
+            announced = true;
+        }
+        @Override
+        public int icon() {
+            return BuffIndicator.VULNERABLE;
+        }
+        @Override
+        public float iconFadePercent() {
+            return Math.max(0, (DURATION - visualcooldown()) / DURATION);
+        }
+
         @Override
         public void onDeath() {
             Badges.validateDeathFromPoison();

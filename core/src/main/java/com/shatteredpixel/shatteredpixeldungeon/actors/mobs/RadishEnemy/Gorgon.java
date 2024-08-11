@@ -1,7 +1,6 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -19,7 +18,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
@@ -60,7 +58,10 @@ public class Gorgon extends Mob {
     @Override
     public int attackProc( Char enemy, int damage ) {
         damage = super.attackProc( enemy, damage );
-        Buff.affect(enemy, Petrification.class).set( Petrification.DURATION );
+        if(enemy.buff(Deminion.Sigil.class)!=null)
+            Buff.affect(enemy, Petrification.class).set( 2 * Petrification.DURATION );
+        else
+            Buff.affect(enemy, Petrification.class).set( Petrification.DURATION );
 
         return damage;
     }
@@ -232,7 +233,7 @@ public class Gorgon extends Mob {
                 if (enemy == Dungeon.hero) {
 
                     Dungeon.fail( getClass() );
-                    GLog.n( Messages.capitalize(Messages.get(DM175.class, "kill")) );
+                    GLog.n( Messages.capitalize(Messages.get(Gorgon.class, "kill")) );
 
                 }
             }
@@ -271,7 +272,7 @@ public class Gorgon extends Mob {
     }
 
 
-    public static class Petrification extends Buff implements Hero.Doom {
+    public static class Petrification extends Buff{
         {
             type = buffType.NEGATIVE;
             announced = true;
@@ -304,14 +305,6 @@ public class Gorgon extends Mob {
         private int Lv;
 
         @Override
-        public void onDeath() {
-            Badges.validateDeathFromPoison();
-
-            Dungeon.fail( getClass() );
-            GLog.n( Messages.get(this, "ondeath") );
-        }
-
-        @Override
         public String iconTextDisplay() {
             return Lv +"/100";
         }
@@ -334,6 +327,8 @@ public class Gorgon extends Mob {
 
             if (Lv >= 100){
                 target.die(null);
+                Dungeon.fail( getClass() );
+                GLog.n( Messages.capitalize(Messages.get(Gorgon.Petrification.class, "ondeath")) );
             }
 
             spend( TICK );

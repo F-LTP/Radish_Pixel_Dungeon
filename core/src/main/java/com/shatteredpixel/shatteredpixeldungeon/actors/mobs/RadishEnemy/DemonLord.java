@@ -243,7 +243,7 @@ public class DemonLord extends Mob {
                 if (enemy == Dungeon.hero) {
 
                     Dungeon.fail( getClass() );
-                    GLog.n( Messages.capitalize(Messages.get(DM175.class, "kill")) );
+                    GLog.n( Messages.capitalize(Messages.get(DemonLord.class, "kill")) );
 
                 }
             }

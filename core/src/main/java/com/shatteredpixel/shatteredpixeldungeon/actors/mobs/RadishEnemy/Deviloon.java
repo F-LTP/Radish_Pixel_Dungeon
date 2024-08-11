@@ -1,7 +1,6 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -33,8 +32,10 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFireblast;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -74,8 +75,13 @@ public class Deviloon extends Mob {
         properties.add(Property.DEMONIC);
         properties.add(Property.HEADLESS);
 
+        flying = true;
+
         loot = new ArcaneResin().quantity(Random.Int(1,2));
         lootChance = 0.20f;
+    }
+    {
+        resistances.add( WandOfFireblast.class );
     }
 
     HashSet<BlastRune> blastRunes = new HashSet<>();
@@ -201,7 +207,7 @@ public class Deviloon extends Mob {
                 }
                 for(int i:blast_pos_set){
                     int c =  ch.pos + i;
-                    if (c >= 0 && c < Dungeon.level.length()) {
+                    if (c >= 0 && c < Dungeon.level.length() && !Dungeon.level.solid[c]) {
                         BlastRune blastRune_tmp = new BlastRune().set_pos(c);
                         blastRunes.add(blastRune_tmp);
                         Dungeon.level.drop(blastRune_tmp,c);
@@ -215,11 +221,6 @@ public class Deviloon extends Mob {
                     CellEmitter.center( pos ).burst( MagicMissile.ForceParticle.FACTORY, Random.IntRange( 1, 2 ) );
                 }
 
-                if (!ch.isAlive() && ch == Dungeon.hero) {
-                    Badges.validateDeathFromEnemyMagic();
-                    Dungeon.fail( getClass() );
-                    GLog.n( Messages.get(this, "deathgaze_kill") );
-                }
             } else {
                 ch.sprite.showStatus( CharSprite.NEUTRAL,  ch.defenseVerb() );
             }
@@ -436,7 +437,7 @@ public class Deviloon extends Mob {
                 if (enemy == Dungeon.hero) {
 
                     Dungeon.fail( getClass() );
-                    GLog.n( Messages.capitalize(Messages.get(DM175.class, "kill")) );
+                    GLog.n( Messages.capitalize(Messages.get(Deviloon.class, "kill")) );
 
                 }
             }
@@ -667,7 +668,15 @@ public class Deviloon extends Mob {
                     int dmg = Random.NormalIntRange(20,40);
 
                     if (dmg > 0) {
+                        // Deminion boost
+                        if(ch.buff(Deminion.Sigil.class)!=null){
+                            dmg *= 1.3f;
+                        }
                         ch.damage(dmg, this);
+                    }
+                    if (ch == Dungeon.hero && !ch.isAlive()) {
+                        GLog.n(Messages.get(this, "ondeath"));
+                        Dungeon.fail(Bomb.class);
                     }
 
                 }
