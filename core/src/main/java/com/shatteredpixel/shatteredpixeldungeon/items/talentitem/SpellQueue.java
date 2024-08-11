@@ -13,7 +13,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.ArcaneResin;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.ArcaneCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.CursedWand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
@@ -31,7 +30,6 @@ import com.watabou.noosa.tweeners.Delayer;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
-import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 
@@ -171,9 +169,9 @@ public class SpellQueue extends Item {
                 }
                 @Override
                 protected void onSelect(int index){
-                    ArcaneCatalyst ac = null;
+                    ArcaneResin ac = null;
                 if (index==0 && elapsed > 0.2f){
-                    for (ArcaneCatalyst i : Dungeon.hero.belongings.getAllItems(ArcaneCatalyst.class)){
+                    for (ArcaneResin i : Dungeon.hero.belongings.getAllItems(ArcaneResin.class)){
                         if (ac == null ) {
                             ac = i;
                         }

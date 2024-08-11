@@ -559,7 +559,7 @@ public abstract class Wand extends Item {
 
 		if (hero.belongings.contains(this) && hero.hasTalent(Talent.MAGIC_TACTICS)) {
 			int talentLevel = curUser.pointsInTalent(Talent.MAGIC_TACTICS);
-			int chance = 7 * talentLevel + (int) Math.floor(talentLevel / 2);
+			int chance = 7 * talentLevel + (int) Math.floor(talentLevel / 2f);
 			if (Random.Int(100) <= chance)
 				timeToZap = -hero.cooldown();
 		}

@@ -143,7 +143,13 @@ public enum Talent {
 	//Huntress T3
 	HOLD_BREATH(105, 3), SEER_SHOT(106, 3),
 	//Huntress T4
-	BRISK_PACE(228,4),PHASE_FILLING(229,4),
+	BRISK_PACE(224,4),PHASE_FILLING(225,4),
+
+	//TODO HRt4
+	BOW_DULES(226,4),STORM_ATTACK(227,4),
+
+	MEDART_SPECIALIST(228,4),LAND_HEART(229,4),
+
 	//Sniper T3
 	FARSIGHT(107, 3), SHARED_ENCHANTMENT(108, 3), SHARED_UPGRADES(109, 3),
 	//Warden T3
@@ -171,6 +177,18 @@ public enum Talent {
 	};
 	public static class DuelDanceWandTracker extends FlavourBuff{
 		public int icon() { return BuffIndicator.DUEL_DANCE;}
+	};
+
+	public static class HIGHGRSS_SPEED extends FlavourBuff{
+		public int icon() { return BuffIndicator.HASTE;}
+		public void tintIcon(Image icon) { icon.hardlight(0xFfa500);
+		}
+	};
+
+	public static class EvaKillWand extends FlavourBuff{
+		public int icon() { return BuffIndicator.HASTE; }
+		public void tintIcon(Image icon) { icon.hardlight(0.15f, 0.2f, 0.5f);
+		}
 	};
 
 	public static class StrikingWaveTracker extends FlavourBuff{};
@@ -847,12 +865,13 @@ public enum Talent {
 				Collections.addAll(tierTalents, DESPERATE_POWER,GHOST_ROOT);
 				break;
 
-			/*case SNIPER:
-				Collections.addAll(tierTalents, FARSIGHT, SHARED_ENCHANTMENT, SHARED_UPGRADES);
+			case SNIPER:
+				Collections.addAll(tierTalents, BOW_DULES,STORM_ATTACK);
 				break;
+
 			case WARDEN:
-				Collections.addAll(tierTalents, DURABLE_TIPS, BARKSKIN, VINE_TRAP);
-				break;*/
+				Collections.addAll(tierTalents, MEDART_SPECIALIST, LAND_HEART);
+				break;
 		}
 		for (Talent talent : tierTalents){
 			talents.get(3).put(talent, 0);

@@ -146,6 +146,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
@@ -951,9 +952,6 @@ public class Hero extends Char {
 
 	private boolean actMove( HeroAction.Move action ) {
 
-		/** 斩舰刀实现 */
-		if(hero.belongings.weapon instanceof KillBoatSword) MoveBoatSword();
-
 		if (getCloser( action.dst )) {
 			return true;
 
@@ -1314,13 +1312,17 @@ public class Hero extends Char {
                 if (!w2.delayAttack && Dungeon.level.adjacent(enemy.pos,pos)) {
                     sprite.attack(enemy.pos);
                     w2.delayAttack = true;
+                } else if(Dungeon.level.distance( enemy.pos, pos ) > w2.RCH) {
+					spend(1f);
+					hero.sprite.showStatus(CharSprite.WARNING, Messages.get(w2, "no_rch"));
+					sprite.operate(pos);
                 } else {
-                    spend(1f);
-                    sprite.operate(pos);
+					spend(1f);
+					sprite.operate(pos);
 					/** 斩舰刀实现 */
-                    MoveBoatSword();
-                    hero.sprite.showStatus(CharSprite.WARNING, Messages.get(w2, "ready"));
-                }
+					MoveBoatSword();
+					hero.sprite.showStatus(CharSprite.WARNING, Messages.get(w2, "ready"));
+				}
             }
 			return false;
 		} else if (enemy.isAlive() && canAttack( enemy ) &&
@@ -1413,12 +1415,9 @@ public class Hero extends Char {
 	public int attackProc( final Char enemy, int damage ) {
 		damage = super.attackProc( enemy, damage );
 		KindOfWeapon wep = belongings.weapon();
-
-
 		if(Dungeon.level.distance(enemy.pos,pos)<=1) {
 			RlyehHeroDamage(enemy, damage);
 		}
-
 
 		if (wep instanceof CelestialSphere) {
 			int magicDamage;
@@ -1426,7 +1425,6 @@ public class Hero extends Char {
 			enemy.damage(magicDamage, new DM100.LightningBolt());
 			damage = wep.proc( this, enemy,0 );
 		}
-
 
 		if(wep != null){
 			damage = wep.proc( this, enemy, damage );
@@ -1440,16 +1438,16 @@ public class Hero extends Char {
 		}
 
 		damage = Talent.onAttackProc( this, enemy, damage );
-		
+
 		switch (subClass) {
 		case SNIPER:
 			if (wep instanceof MissileWeapon && !(wep instanceof SpiritBow.SpiritArrow) && enemy != this) {
 				Actor.add(new Actor() {
-					
+
 					{
 						actPriority = VFX_PRIO;
 					}
-					
+
 					@Override
 					protected boolean act() {
 						if (enemy.isAlive()) {
@@ -1506,6 +1504,12 @@ public class Hero extends Char {
 		if (!(src instanceof Hunger || src instanceof Viscosity.DeferedDamage) && damageInterrupt) {
 			interrupt();
 			resting = false;
+		}
+
+		if (hero.pointsInTalent(Talent.MEDART_SPECIALIST) >= 4 ) {
+			if(hero.belongings.thrownWeapon instanceof TippedDart){
+				dmg = dmg*2;
+			}
 		}
 
 		if (this.buff(Drowsy.class) != null){
