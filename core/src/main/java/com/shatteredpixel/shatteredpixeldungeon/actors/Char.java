@@ -47,6 +47,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corrosion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CriticalAttack;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Doom;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FireImbue;
@@ -392,7 +393,7 @@ public abstract class Char extends Actor {
 
 			if(this instanceof Hero){
 				Hero h = (Hero) this;
-				if(h.pointsInTalent(Talent.LAND_HEART)>=3){
+                if(h.pointsInTalent(Talent.LAND_HEART)>=3){
 					GLog.n("阶段1");
 					int ePos = enemy.pos;
 
@@ -400,30 +401,36 @@ public abstract class Char extends Actor {
 					Point ec = Dungeon.level.cellToPoint(ePos);
 
 					for (int y = Math.max(0, c.y - 1); y <= Math.min(Dungeon.level.height()-1, c.y + 1); y++){
+
 						int left = c.x - 1;
-						int right = Math.min(Dungeon.level.width()-1, c.x + c.x - left);
+						int right = Math.min(Dungeon.level.width()-1, c.x ++);
 						left = Math.max(0, left);
 						int curr;
 						for (curr = left + y * Dungeon.level.width(); curr <= right + y * Dungeon.level.width(); curr++){
-							if(Dungeon.level.map[curr] == Terrain.FURROWED_GRASS){
+							GLog.n(""+Dungeon.level.map[curr]);
+							if(Dungeon.level.map[curr] == Terrain.FURROWED_GRASS || Dungeon.level.map[curr] == Terrain.HIGH_GRASS){
 								dr = 0;
 								GLog.n("阶段2");
 							}
 						}
 					}
 
+					/*
 					for (int y = Math.max(0, ec.y - 1); y <= Math.min(Dungeon.level.height()-1, c.y + 1); y++){
+
 						int left = ec.x - 1;
-						int right = Math.min(Dungeon.level.width()-1, ec.x + ec.x - left);
+						int right = Math.min(Dungeon.level.width()-1, ec.x ++);
 						left = Math.max(0, left);
 						int curr;
 						for (curr = left + y * Dungeon.level.width(); curr <= right + y * Dungeon.level.width(); curr++){
-							if(Dungeon.level.map[curr] == Terrain.FURROWED_GRASS){
+							GLog.n(""+Dungeon.level.map[curr]);
+							if(Dungeon.level.map[curr] == Terrain.FURROWED_GRASS || Dungeon.level.map[curr] == Terrain.HIGH_GRASS ){
 								dr = 0;
 								GLog.n("阶段3");
 							}
 						}
 					}
+					*/
 
 
 				};
@@ -453,7 +460,6 @@ public abstract class Char extends Actor {
 			boolean crit=false;
 			boolean surprise =enemy instanceof Mob && ((Mob) enemy).surprisedBy(this);
 			float current_crit=critSkill(),current_critdamage=critDamage();
-
 			if (this == hero){
 				if (hero.belongings.weapon() instanceof Bloodblade) {
 					Bloodblade bb = (Bloodblade) hero.belongings.weapon;
@@ -498,7 +504,7 @@ public abstract class Char extends Actor {
 			}
 
 			if (this.buff(RingOfTenacity.Tenacity.class)!=null) {current_crit=0;}
-			if (Random.Float()*100<current_crit || crit) {
+			if (Random.Float()*100<current_crit || crit || (critDamage >= 3 && ( this instanceof Hero && hero.buff(CriticalAttack.class) != null))) {
 				dmg*=current_critdamage;
 				crit = true;
 			}

@@ -4,6 +4,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Calm;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CriticalAttack;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
@@ -30,12 +31,14 @@ public class Taijutsu extends MeleeWeapon {
     @Override
     public boolean doEquip(Hero hero) {
         Buff.affect(hero, Calm.class);
+        Buff.affect(hero, CriticalAttack.class);
         return super.doEquip(hero);
     }
 
     @Override
     public boolean doUnequip(Hero hero, boolean collect, boolean single){
-        Dungeon.hero.buff(Calm.class).detach();
+        if(hero.buff(Calm.class) != null) hero.buff(Calm.class).detach();
+        if(hero.buff(CriticalAttack.class) != null) hero.buff(CriticalAttack.class).detach();
         return super.doUnequip(hero, collect, single);
     }
 }
