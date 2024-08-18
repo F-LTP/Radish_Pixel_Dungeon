@@ -23,6 +23,8 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero;
 
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
+import static java.lang.Math.min;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Bones;
@@ -54,6 +56,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.DeferredShield;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Drowsy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Foresight;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Frost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HoldFast;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
@@ -66,6 +69,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MoveCount;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Roots;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Slow;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SnipersMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo;
@@ -247,6 +251,9 @@ public class Hero extends Char {
 	
 	public int lvl = 1;
 	public int exp = 0;
+
+	private int resistHealth = 0;
+	private int originalHT = 20;
 	
 	public int HTBoost = 0;
 	public float csBoost=0;
@@ -270,18 +277,24 @@ public class Hero extends Char {
 
 	public void updateHT( boolean boostHP ){
 		int curHT = HT;
-		
+
+		originalHT = 20 + 5*(lvl-1);
+
 		HT = 20 + 5*(lvl-1) + HTBoost;
 		float multiplier = RingOfMight.HTMultiplier(this);
 		HT = Math.round(multiplier * HT);
-		
+
 		if (buff(ElixirOfMight.HTBoost.class) != null){
 			HT += buff(ElixirOfMight.HTBoost.class).boost();
 		}
+
 		if (boostHP){
 			HP += Math.max(HT - curHT, 0);
 		}
-		HP = Math.min(HP, HT);
+
+		HT -= resistHealth;
+
+		HP = min(HP, HT);
 	}
 
 	public int STR() {
@@ -560,10 +573,10 @@ public class Hero extends Char {
 	@Override
 	public int attackSkill( Char target ) {
 		KindOfWeapon wep = belongings.weapon();
-		
+
 		float accuracy = 1;
 		accuracy *= RingOfConcentration.accuracyMultiplier( this );
-		
+
 		if (wep instanceof MissileWeapon){
 			if (Dungeon.level.adjacent( pos, target.pos )) {
 				accuracy *= 0.5f;
@@ -572,18 +585,11 @@ public class Hero extends Char {
 			}
 		}
 		float ex_acc=1f;
-		if (hasTalent(Talent.GIGANTIC)){
-			float ad;
-			if (belongings.weapon!=null){
-				ad=wep.delayFactor(this);
-			}
-			else
-				ad=1f/RingOfFuror.attackSpeedMultiplier(this);
-			float ex_dly=ad-1f;
-			if (ex_dly>0) {
-				ex_acc+=0.5f*pointsInTalent(Talent.GIGANTIC)*ex_dly;
-			}
+
+		if(attackDelay() >1 && hasTalent(Talent.STRONGMAN)){
+			accuracy += accuracy * Math.max((attackDelay()-1f) * ( (0.5f / 3f) * pointsInTalent(Talent.STRONGMAN)),0.5f);
 		}
+
 		accuracy*=ex_acc;
 		if (wep != null) {
 			return (int)(attackSkill * accuracy * wep.accuracyFactor( this, target ));
@@ -655,14 +661,15 @@ public class Hero extends Char {
 			if (wepDr > 0) dr += wepDr;
 		}
 
-		if (buff(HoldFast.class) != null){
-			int bas_add=pointsInTalent(Talent.HOLD_FAST);
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				bas_add=Math.round(bas_add*RingOfBenediction.periodMultiplier(this));
+		if (hasTalent(Talent.HOLD_FAST)){
+			int drBouns = Random.NormalIntRange(0, 2* pointsInTalent(Talent.HOLD_FAST));
+			if(buff(Chill.class) != null || buff(Frost.class) != null || buff(Slow.class) != null || buff(Roots.class) != null || buff(Paralysis.class) != null || buff(Cripple.class) != null){
+				dr += drBouns * 3;
+			}else{
+				dr += drBouns;
 			}
-			dr += Random.NormalIntRange(bas_add, bas_add*3 );
 		}
+
 		if (hasTalent(Talent.MOVING_DEFENSE) && pointsInTalent(Talent.MOVING_DEFENSE)>3)
 			if (shielding()>0)
 				dr+=Random.NormalIntRange(2,8);
@@ -717,17 +724,9 @@ public class Hero extends Char {
 		} else {
 			dmg = RingOfForce.damageRoll(this);
 		}
-		if (hasTalent(Talent.GIGANTIC)){
-			float ad;
-			if (belongings.weapon!=null){
-				ad=wep.delayFactor(this);
-			}
-			else
-				ad=1f/RingOfFuror.attackSpeedMultiplier(this);
-			float ex_dly=ad-1f;
-			if (ex_dly>0) {
-				dmg+=(0.33f*pointsInTalent(Talent.GIGANTIC)+(pointsInTalent(Talent.GIGANTIC)>1?0.01f:0))*ex_dly*dmg;
-			}
+
+		if( attackDelay() >1 && hasTalent(Talent.STRONGMAN) && !(wep instanceof SpiritBow)){
+			dmg += (int) (dmg * Math.max (attackDelay()-1f * ( 1f/3f * pointsInTalent(Talent.STRONGMAN)) ,0.75f));
 		}
 
 		if (dmg < 0) dmg = 0;
@@ -1532,17 +1531,17 @@ public class Hero extends Char {
 		default:
 		}
 
+		if (damage > 0 && subClass == HeroSubClass.BERSERKER){
+			Berserk berserk = Buff.affect(this, Berserk.class);
+			berserk.damage(damage);
+		}
+
 		if(sniperSpecial) sniperSpecial = false;
 		return damage;
 	}
 
 	@Override
 	public int defenseProc( Char enemy, int damage ) {
-		
-		if (damage > 0 && subClass == HeroSubClass.BERSERKER){
-			Berserk berserk = Buff.affect(this, Berserk.class);
-			berserk.damage(damage);
-		}
 
 		if (subClass == HeroSubClass.GLADIATOR && hasTalent(Talent.DEFENSIVE_STRIKE)){
 			if (Random.Float()<0.25F*pointsInTalent(Talent.DEFENSIVE_STRIKE))
@@ -1618,6 +1617,113 @@ public class Hero extends Char {
 		if (hasTalent(Talent.IRON_MUSCLE) && pointsInTalent(Talent.IRON_MUSCLE)>3){
 			if (HP*2<HT)  dmg = Math.round(dmg*0.75f);
 		}
+
+
+		if(hasTalent(Talent.PAIN_SCAR) && HP+ shielding() -dmg<=0){
+			int point = pointsInTalent(Talent.PAIN_SCAR);
+			float ber = 0;
+
+			if(buff(Berserk.class)!=null)
+				ber = buff(Berserk.class).getPower();
+
+			Ankh ankh = null;
+			for (Ankh i : belongings.getAllItems(Ankh.class)) {
+				if (ankh == null || i.isBlessed()) {
+					ankh = i;
+				}
+			}
+
+			boolean canResist = false;
+
+			switch (point){
+
+				case 1:
+					if(ber>=0.2f&&(originalHT-resistHealth)>20) {
+						canResist = true;
+					}
+					break;
+
+				case 2:
+
+					if(ber>=0.15f&&(originalHT-resistHealth)>15) {
+						canResist = true;
+					}
+					break;
+
+				case 3:
+
+					if(ber>=0.1f&&(originalHT-resistHealth)>10) {
+						canResist = true;
+					}
+					break;
+			}
+
+			int RH = resistHealth;
+
+			if(ankh != null && canResist){
+				GameScene.show(new WndOptions(new ItemSprite(ItemSpriteSheet.ANKH),
+						Messages.get(Talent.PAIN_SCAR,"title"),
+						Messages.get(Talent.PAIN_SCAR,"desc"),
+						Messages.get(Talent.PAIN_SCAR,"prompt"),
+						Messages.get(Talent.PAIN_SCAR,"cancel")){
+					@Override
+					protected void onSelect(int index){
+						super.onSelect(index);
+						if( index == 0 ){
+							switch(pointsInTalent(Talent.PAIN_SCAR)){
+								case 1:
+									HT -= 20;
+									buff(Berserk.class).reducePower(0.2f);
+									GLog.n(Messages.get(Talent.PAIN_SCAR,"resistDeath"));
+									resistHealth +=20;
+									return;
+								case 2:
+									HT -= 15;
+									buff(Berserk.class).reducePower(0.15f);
+									GLog.n(Messages.get(Talent.PAIN_SCAR,"resistDeath"));
+									resistHealth += 15;
+									return;
+								case 3:
+									HT -= 10;
+									buff(Berserk.class).reducePower(0.1f);
+									GLog.n(Messages.get(Talent.PAIN_SCAR,"resistDeath"));
+									resistHealth += 10;
+									return;
+							}
+						}else if(index == 1 ){
+							die(src);
+						}
+					}
+				});
+				return;
+			} else if (canResist) {
+				switch(pointsInTalent(Talent.PAIN_SCAR)){
+					case 1:
+						HT -= 20;
+						buff(Berserk.class).reducePower(0.2f);
+						GLog.n(Messages.get(Talent.PAIN_SCAR,"resistDeath"));
+						resistHealth +=20;
+						return;
+					case 2:
+						HT -= 15;
+						buff(Berserk.class).reducePower(0.15f);
+						GLog.n(Messages.get(Talent.PAIN_SCAR,"resistDeath"));
+						resistHealth += 15;
+						return;
+					case 3:
+						HT -= 10;
+						buff(Berserk.class).reducePower(0.1f);
+						GLog.n(Messages.get(Talent.PAIN_SCAR,"resistDeath"));
+						resistHealth += 10;
+						return;
+				}
+			}
+			if(RH < resistHealth) return;
+
+		}
+
+
+
 		int preHP = HP + shielding();
 		int preTrueHP = HP;
 		super.damage( dmg, src );

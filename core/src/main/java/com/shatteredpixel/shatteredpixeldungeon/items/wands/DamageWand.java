@@ -23,7 +23,10 @@ package com.shatteredpixel.shatteredpixeldungeon.items.wands;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.WandEmpower;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
@@ -59,6 +62,14 @@ public abstract class DamageWand extends Wand{
 			}
 			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG, 0.75f, 1.2f);
 		}
+
+		if(Dungeon.hero.hasTalent(Talent.FANATICISM_MAGIC)){
+			if (dmg > 0){
+				Berserk berserk = Buff.affect(Dungeon.hero, Berserk.class);
+				berserk.damage(dmg/2);
+			}
+		}
+
 		return dmg;
 	}
 
