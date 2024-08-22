@@ -29,10 +29,12 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicStick;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Recharging;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ScrollEmpower;
@@ -98,6 +100,7 @@ public abstract class Wand extends Item {
 	private float availableUsesToID = USES_TO_ID/2f;
 
 	protected int collisionProperties = Ballistica.MAGIC_BOLT;
+	public boolean isMagesStaff = false;
 
 	public int spellSelected = 0;
 	
@@ -138,7 +141,14 @@ public abstract class Wand extends Item {
 
 	public abstract void onZap(Ballistica attack);
 
-	public abstract void onHit( MagesStaff staff, Char attacker, Char defender, int damage);
+	public abstract void onHit(MagesStaff staff, Char attacker, Char defender, int damage);
+
+	public void onHit(MagesStaff staff, Char attacker, Char defender, int damage , boolean isMagesStaff) {
+		if(isMagesStaff){
+			this.isMagesStaff = true;
+		}
+		onHit(staff, attacker,defender,damage);
+	}
 
 	//not affected by enchantment proc chance changers
 	public static float procChanceMultiplier( Char attacker ){
@@ -359,6 +369,11 @@ public abstract class Wand extends Item {
 	public int buffedLvl() {
 		int lvl = super.buffedLvl();
 
+		if(Dungeon.hero.buff(Berserk.class) != null){
+			lvl += Dungeon.hero.buff(Berserk.class).WandBuffedLvl();
+			updateQuickslot();
+		}
+
 		if (charger != null && charger.target != null) {
 			if (charger.target.buff(WildMagic.WildMagicTracker.class) != null){
 				int bonus = 4 + ((Hero)charger.target).pointsInTalent(Talent.WILD_POWER);
@@ -449,6 +464,15 @@ public abstract class Wand extends Item {
 		updateQuickslot();
 	}
 	protected void wandUsed() {
+
+		if(hero.hasTalent(Talent.MAGIC_STICK) && hero.pointsInTalent(Talent.MAGIC_STICK) >=4 && ! isMagesStaff){
+			if(hero.buff(MagicStick.class) == null ){
+				Buff.affect(hero , MagicStick.class, 2);
+			}else{
+				hero.buff(MagicStick.class).resetTime();
+			}
+		}
+
 		if (!isIdentified()) {
 			float uses = Math.min(availableUsesToID, Talent.itemIDSpeedFactor(hero, this));
 			availableUsesToID -= uses;
@@ -564,7 +588,13 @@ public abstract class Wand extends Item {
 				timeToZap = -hero.cooldown();
 		}
 
-		curUser.spendAndNext(timeToZap);
+		GLog.n(""+isMagesStaff);
+		if( !(hero.buff(MagicStick.class)!=null && isMagesStaff)) {
+			curUser.spendAndNext(timeToZap);
+		}else{
+			hero.buff(MagicStick.class).detach();
+			curUser.spendAndNext(0);
+		}
 
 		if (hero.hasTalent(Talent.DUEL_DANCE) && hero.cooldown() >= 0)
 			Buff.affect(hero, Talent.DuelDanceMissileTracker.class, hero.cooldown());
@@ -690,6 +720,8 @@ public abstract class Wand extends Item {
 		@Override
 		public void onZap(Ballistica attack) {}
 		public void onHit(MagesStaff staff, Char attacker, Char defender, int damage) {}
+
+
 
 		@Override
 		public String info() {

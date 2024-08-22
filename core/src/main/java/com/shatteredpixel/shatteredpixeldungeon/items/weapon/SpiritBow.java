@@ -51,6 +51,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Callback;
@@ -77,7 +78,16 @@ public class SpiritBow extends Weapon {
 	
 	public boolean sniperSpecial = false;
 	public float sniperSpecialBonusDamage = 0f;
-	
+	//public boolean specialAttack = false;
+	/*
+	@Override
+	public float castDelay(Char user, int dst){
+		if(specialAttack) return 0;
+		return super.castDelay(user, dst);
+	}
+
+	 */
+
 	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions(hero);
@@ -232,6 +242,24 @@ public class SpiritBow extends Weapon {
 			}
 		}
 
+		/*
+		if(specialAttack){
+			switch (hero.pointsInTalent(Talent.STORM_ATTACK)){
+				case 1:
+					damage *= 0.25f;
+					break;
+				case 2:
+					damage *= 0.5f;
+					break;
+				case 3:
+					damage *= 0.25f;
+					break;
+				case 4:
+					damage *= 0.5f;
+					break;
+			}
+		}
+		*/
 		if (sniperSpecial){
 			damage = Math.round(damage * (1f + sniperSpecialBonusDamage));
 
@@ -251,7 +279,9 @@ public class SpiritBow extends Weapon {
 					break;
 			}
 		}
-		
+
+		if(hero.hasTalent(Talent.BOW_DULES) && hero.pointsInTalent(Talent.BOW_DULES)>=4) damage *= 1.35f;
+
 		return damage;
 	}
 	
@@ -607,7 +637,8 @@ public class SpiritBow extends Weapon {
 				QuickSlotButton.target(enemy);
 				
 				final boolean last = flurryCount == 1;
-				
+
+
 				user.busy();
 				
 				throwSound();
@@ -714,6 +745,7 @@ public class SpiritBow extends Weapon {
 									// Launch the first secondary arrow
 									Ballistica secondaryBall1 = new Ballistica(curUser.pos, secondaryTarget1.pos, Ballistica.PROJECTILE);
 									if (secondaryBall1.collisionPos.equals(secondaryTarget1.pos)) {
+										//specialAttack = true;
 										altknockArrow().cast(curUser, secondaryTarget1.pos);
 									}
 
@@ -726,6 +758,7 @@ public class SpiritBow extends Weapon {
 										// Launch the second secondary arrow
 										Ballistica secondaryBall2 = new Ballistica(curUser.pos, secondaryTarget2.pos, Ballistica.PROJECTILE);
 										if (secondaryBall2.collisionPos.equals(secondaryTarget2.pos)) {
+											//specialAttack = true;
 											altknockArrow().cast(curUser, secondaryTarget2.pos);
 										}
 									}
@@ -764,9 +797,11 @@ public class SpiritBow extends Weapon {
 									Ballistica ballForRan = new Ballistica(curUser.pos, randomMob.pos, Ballistica.PROJECTILE);
 									// ok, our first arrow has a line of sight, we got the main target
 									//now we work with the second mob...
-									if (ballForRan.collisionPos.equals(randomMob.pos)) { //if we got the second mob we got the second mob, hooray
+									if (ballForRan.collisionPos.equals(randomMob.pos)) {//if we got the second mob we got the second mob, hooray
+										//specialAttack = true;
 										altknockArrow().cast(curUser, randomMob.pos);
 									} else if (Dungeon.level.map[ballForRan.collisionPos] == Terrain.SOLID) { //if we got a wall we got a wall, sad
+										//specialAttack = true;
 										altknockArrow().cast(curUser, randomMob.pos);
 									}
 									//if we still somehow got a third smbdy who is not our secondary target, attack the second one directly
@@ -779,10 +814,12 @@ public class SpiritBow extends Weapon {
                                                         () -> {
                                                             if (randomMob.isAlive()) {
                                                                 curUser = user;
+																//specialAttack = true;
                                                                 (new ALTSpiritArrow()).onThrow(randomMob.pos);
                                                             }
                                                         });
 									}
+
 									//In other cases we just shoot there and see what happens.
 									else altknockArrow().cast(curUser, randomMob.pos);
 								}
@@ -799,5 +836,7 @@ public class SpiritBow extends Weapon {
 		public String prompt() {
 			return Messages.get(SpiritBow.class, "prompt");
 		}
+
+
 	};
 }

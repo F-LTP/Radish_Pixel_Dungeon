@@ -29,7 +29,7 @@ android {
     buildTypes {
         debug {
             //兼容FireBase Debug调试，因此请在虚拟机上运行！（包名一致）
-            //applicationIdSuffix ".indev"
+            //            applicationIdSuffix ".indev"
             versionNameSuffix '-INDEV'
             dependencies {
                 debugImplementation project(':services:updates:debugUpdates')
