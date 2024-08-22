@@ -168,6 +168,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SilverSting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SnakeSpear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Spanner;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SufferingDagger;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Taijutsu;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Tonfa;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Waterwheel;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WingSword;
@@ -472,6 +473,7 @@ public class Generator {
 					Glaive.class,
 					Scythe.class,
 					Greataxe.class,
+					Taijutsu.class,
 					Greatshield.class,
 					Tonfa.class,
 					Axe_D.class,
@@ -480,8 +482,9 @@ public class Generator {
 					FogSword.class,
 					EchoplexHammer.class,
 					KillBoatSword.class
+
 			};
-			WEP_T5.probs = new float[]{ 0, 0, 0, 5, 0, 0, 5, 5, 5, 5, 5, 5, 7 };
+			WEP_T5.probs = new float[]{ 0, 0, 0, 5, 0, 5, 5, 5, 5, 5, 5, 5, 7, 5 };
 
 			WEP_T5_NEW.classes = new Class<?>[]{
 					Cutterhead.class,

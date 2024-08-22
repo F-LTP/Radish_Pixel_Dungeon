@@ -193,10 +193,20 @@ public class TitleScene extends PixelScene {
 		btnSeedAnalysis.icon(Icons.get(Icons.MAGNIFY));
 		add(btnSeedAnalysis);
 
+		StyledButton seed = new JoinButton(landscape() ? Chrome.Type.GREY_BUTTON_TR : Chrome.Type.BLANK, Messages.get(this, "seed"));
+		seed.icon(Icons.get(Icons.ENERGY));
+		add(seed);
+
 		final int BTN_HEIGHT = 20;
 		int GAP = (int)(h - topRegion - (landscape() ? 3 : 6)*BTN_HEIGHT)/3;
 		GAP /= landscape() ? 3 : 5;
 		GAP = Math.max(GAP, 2);
+
+		BitmapText version = new BitmapText( "v" + Game.version, pixelFont);
+		version.measure();
+		version.alpha( 0.4f);
+		version.x = w - version.width() - 4;
+		version.y = h - version.height() - 2;
 
 		if (landscape()) {
 			btnPlay.setRect(title.x-90, topRegion+GAP, ((title.width()+180)/2)-1, BTN_HEIGHT);
@@ -210,7 +220,9 @@ public class TitleScene extends PixelScene {
 			btnChanges.setRect(btnBadges.right()+2, btnBadges.top(), btnBadges.width(), BTN_HEIGHT);
 			btnSettings.setRect(btnSupport.centerX(), btnSupport.bottom()+ GAP, (btnPlay.width()*.5f)-1, BTN_HEIGHT);
 			btnAbout.setRect(btnChanges.right()+2, btnSettings.bottom() + GAP, btnBadges.width(), BTN_HEIGHT);
+			seed.setRect(10, 0,40,20);
 		} else {
+			seed.setRect(10, version.y-10,40,20);
 			btnPlay.setRect(title.x-5, topRegion+GAP, title.width()+10, BTN_HEIGHT);
 			align(btnPlay);
 			btnSupport.setRect(btnPlay.left(), btnPlay.bottom()+ GAP, btnPlay.width(), BTN_HEIGHT);
@@ -223,13 +235,6 @@ public class TitleScene extends PixelScene {
 			btnSeedTest.setRect(btnSettings.left(), btnSettings.bottom() +GAP, (btnPlay.width()/2)-1, BTN_HEIGHT);
 			btnSeedAnalysis.setRect(btnSeedTest.right()+2, btnSettings.bottom() +GAP, (btnPlay.width()/2)-1, BTN_HEIGHT);
 		}
-
-		BitmapText version = new BitmapText( "v" + Game.version, pixelFont);
-		version.measure();
-		version.hardlight( 0x888888 );
-		version.x = w - version.width() - 4;
-		version.y = h - version.height() - 2;
-		add( version );
 
 		if (DeviceCompat.isDesktop()) {
 			ExitButton btnExit = new ExitButton();
@@ -345,4 +350,18 @@ public class TitleScene extends PixelScene {
 			ShatteredPixelDungeon.switchNoFade(SupporterScene.class);
 		}
 	}
+
+	private static class JoinButton extends StyledButton {
+
+		public JoinButton( Chrome.Type type, String label ){
+			super(type, label);
+		}
+
+		@Override
+		protected void onClick() {
+			ShatteredPixelDungeon.platform.openURI( "https://qm.qq.com/q/Uzy3eiKSC6" );
+		}
+
+	}
+
 }

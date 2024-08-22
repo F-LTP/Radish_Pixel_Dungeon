@@ -251,7 +251,7 @@ public class MagesStaff extends MeleeWeapon {
 		if (wand != null && attacker instanceof Hero && ((Hero)attacker).subClass == HeroSubClass.BATTLEMAGE || hero.pointsInTalent(Talent.MAGIC_STICK) >= 1) {
 			if (wand.curCharges < wand.maxCharges) wand.partialCharge += 0.5f;
 			ScrollOfRecharging.charge(attacker);
-			wand.onHit(this, attacker, defender, damage);
+			wand.onHit(this, attacker, defender, damage, true);
 		}
 
 		if (empoweredStrike != null){

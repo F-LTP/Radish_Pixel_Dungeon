@@ -62,7 +62,7 @@ public class RDChangesButton extends StyledButton {
 		} else if (updateShown && downloadFailure) {
 			textColor(ColorMath.interpolate(0xFFFFFF, Window.RADISH, 0.5f + (float) Math.sin(Game.timeTotal * 5) / 2f));
 		} else if(updateShown) {
-			textColor(ColorMath.interpolate(0xFFFFFF, Window.SHPX_COLOR, 0.5f + (float) Math.sin(Game.timeTotal * 5) / 2f));
+			textColor(ColorMath.interpolate(0xFFFFFF, Window.RADISH, 0.5f + (float) Math.sin(Game.timeTotal * 5) / 2f));
 		}
 	}
 
@@ -174,7 +174,7 @@ public class RDChangesButton extends StyledButton {
 			add(progressText);
 
 
-			Image download = new Image(Assets.Interfaces.STATUS, 0, 49, 54, 5){
+			Image download = new Image(Assets.Interfaces.DOWNLOAD){
 				@Override
 				public synchronized void update() {
 					super.update();
@@ -182,7 +182,13 @@ public class RDChangesButton extends StyledButton {
 					visible = true;
 				}
 			};
-			download.setPos(width/3f-5, pos);
+
+			if(PixelScene.landscape()){
+				download.setPos(width/3f-6, pos);
+			} else {
+				download.setPos(width/3f-5, pos);
+			}
+
 			download.visible = false;
 			add(download);
 
@@ -262,7 +268,7 @@ public class RDChangesButton extends StyledButton {
 				@Override
 				protected void onClick() {
 					if(Objects.equals(update.URL4, "null")){
-						ShatteredPixelDungeon.platform.openURI( "https://www.pd.qinyueqwq.top" );
+						ShatteredPixelDungeon.platform.openURI( "https://qm.qq.com/q/Uzy3eiKSC6" );
 					} else {
 						ShatteredPixelDungeon.platform.openURI( update.URL4 );
 					}

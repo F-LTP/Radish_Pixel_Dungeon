@@ -31,7 +31,6 @@ import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndChallenges;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndGame;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndJournal;
@@ -45,8 +44,6 @@ import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.ui.Component;
 import com.watabou.utils.PointF;
-
-import javax.print.Doc;
 
 public class MenuPane extends Component {
 
@@ -65,7 +62,7 @@ public class MenuPane extends Component {
 
 	private Toolbar.PickedUpItem pickedUp;
 
-	private BitmapText version;
+	public static BitmapText version;
 
 	private DangerIndicator danger;
 
