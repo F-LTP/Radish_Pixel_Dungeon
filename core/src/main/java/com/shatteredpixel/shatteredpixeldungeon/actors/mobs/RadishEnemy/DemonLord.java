@@ -67,9 +67,9 @@ public class DemonLord extends Mob {
         return Dungeon.level.distance(pos,enemy.pos)<=2;
     }
 
-    private float damageBoost(int lv){
+    private double damageBoost(int lv){
         //return lv * 1.15f;
-        return (float) Math.pow(1.15,lv);
+        return Math.pow(1.15,lv)-1;
     }
     @Override
     public String description() {
@@ -87,7 +87,7 @@ public class DemonLord extends Mob {
         }
         if(enemy.buff(Light.class)!=null) buffCnt-=1;
         buffCnt = Math.max(buffCnt, 0);
-        return Random.NormalIntRange( 30, 35 ) * (int)(1+damageBoost(buffCnt));
+        return (int) (Random.NormalIntRange( 30, 35 ) * (1+damageBoost(buffCnt)));
     }
 
     @Override
