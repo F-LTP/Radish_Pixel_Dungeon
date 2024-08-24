@@ -60,8 +60,16 @@ public class DemonLord extends Mob {
 
     private int buffCnt = 0;
 
+
+
+    @Override
+    protected boolean canAttack( Char enemy ) {
+        return Dungeon.level.distance(pos,enemy.pos)<=2;
+    }
+
     private float damageBoost(int lv){
-        return lv * 1.15f;
+        //return lv * 1.15f;
+        return (float) Math.pow(1.15,lv);
     }
     @Override
     public String description() {
