@@ -337,10 +337,10 @@ public class Assets {
 		public static final String SHIELD_MAGE  = "sprites/RadishEnemySprite/ZoneFour/shield_mage.png";
 
 		// Zone 5
-		public static final String DEMINION = "sprites/RadishEnemySprite/deminion.png";
-		public static final String DEMONLORD = "sprites/RadishEnemySprite/demon_lord.png";
-		public static final String DEVILOON = "sprites/RadishEnemySprite/deviloon.png";
-		public static final String GORGON = "sprites/RadishEnemySprite/gorgon.png";
+		public static final String DEMINION = "sprites/RadishEnemySprite/ZoneFive/deminion.png";
+		public static final String DEMONLORD = "sprites/RadishEnemySprite/ZoneFive/demon_lord.png";
+		public static final String DEVILOON = "sprites/RadishEnemySprite/ZoneFive/deviloon.png";
+		public static final String GORGON = "sprites/RadishEnemySprite/ZoneFive/gorgon.png";
 
 
 	}
