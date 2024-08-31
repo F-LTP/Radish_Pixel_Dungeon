@@ -10,7 +10,7 @@ public class GorgonSprite extends MobSprite {
 
         texture(Assets.Sprites.GORGON);
 
-        TextureFilm frames = new TextureFilm( texture, 17, 22 );
+        TextureFilm frames = new TextureFilm( texture, 24, 24 );
         idle = new Animation( 5, true );
         idle.frames( frames, 0,1,2,3,4);
 

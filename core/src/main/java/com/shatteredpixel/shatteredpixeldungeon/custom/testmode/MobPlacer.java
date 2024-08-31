@@ -34,11 +34,15 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Necromancer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Piranha;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Artillerist;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.ClusteredSkeleton;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Deminion;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.DemonLord;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Deviloon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Dog;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Drake;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GiantWorm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GnollZealot;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Goblin;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Gorgon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Grudge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Jailer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Mayfly;
@@ -468,6 +472,14 @@ public class MobPlacer extends TestItem{
         EYE(Eye.class, DictSpriteSheet.EYE),
         SUCCUBUS(Succubus.class, DictSpriteSheet.SUCCUBUS),
         SCORPIO(Scorpio.class, DictSpriteSheet.SCORPIO),
+
+        // Zone 5 start
+        DEMINION(Deminion.class,DictSpriteSheet.DEMINION),
+        DEVILOON(Deviloon.class,DictSpriteSheet.DEVILOON),
+        GORGON(Gorgon.class,DictSpriteSheet.GORGON),
+        DEMONLORD(DemonLord.class,DictSpriteSheet.DEMONLORD),
+        //Zone 5 end
+
         ACIDIC(Acidic.class, DictSpriteSheet.AICDIC),
 
         STATUE(Statue.class, DictSpriteSheet.STATUE),

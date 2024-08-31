@@ -10,7 +10,7 @@ public class DemonLordSprite extends MobSprite {
 
         texture(Assets.Sprites.DEMONLORD);
 
-        TextureFilm frames = new TextureFilm( texture, 20, 22 );
+        TextureFilm frames = new TextureFilm( texture, 22, 20 );
         idle = new Animation( 3, true );
         idle.frames( frames, 0,1,3,4);
 
