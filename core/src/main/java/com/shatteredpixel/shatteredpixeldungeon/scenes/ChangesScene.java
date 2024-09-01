@@ -24,10 +24,13 @@ package com.shatteredpixel.shatteredpixeldungeon.scenes;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Archs;
+import com.shatteredpixel.shatteredpixeldungeon.ui.ChangeSelection;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ExitButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
@@ -193,6 +196,24 @@ public class ChangesScene extends PixelScene {
 		float posY = 0;
 		float nextPosY = 0;
 		boolean second = false;
+
+		if (changesSelected == 0) {
+			ChangeSelection selection1 = new ChangeSelection("RAPD", Messages.get(this, "rapd")) {
+				@Override
+				public void onClick() {
+					NewChangesScene.changesSelected = 0;
+					ShatteredPixelDungeon.switchNoFade(NewChangesScene.class);
+				}
+			};
+			selection1.icon(new Image(new ItemSprite(new Seekingspear())));
+			selection1.hardlight(Window.TITLE_COLOR);
+			selection1.setRect(0, posY, panel.innerWidth(), 0);
+			content.add(selection1);
+			posY = nextPosY = selection1.bottom();
+		}
+
+
+
 		for (ChangeInfo info : changeInfos){
 			if (info.major) {
 				posY = nextPosY;

@@ -46,7 +46,7 @@ import java.util.ArrayList;
 public class v2_X_Changes {
 
 	public static void addAllChanges( ArrayList<ChangeInfo> changeInfos ){
-		add_Coming_Soon(changeInfos);
+		//add_Coming_Soon(changeInfos);
 		add_v2_4_Changes(changeInfos);
 		add_v2_3_Changes(changeInfos);
 		add_v2_2_Changes(changeInfos);
@@ -79,6 +79,7 @@ public class v2_X_Changes {
 	}
 
 	public static void add_v2_4_Changes( ArrayList<ChangeInfo> changeInfos ) {
+
 
 		ChangeInfo changes = new ChangeInfo("v2.4", true, "");
 		changes.hardlight(Window.TITLE_COLOR);
