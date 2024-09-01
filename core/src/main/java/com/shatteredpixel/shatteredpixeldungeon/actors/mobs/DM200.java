@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,10 +28,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
-import com.shatteredpixel.shatteredpixeldungeon.mechanics.ConeAOE;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.DM200Sprite;
-import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
+import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
@@ -52,14 +51,13 @@ public class DM200 extends Mob {
 
 		properties.add(Property.INORGANIC);
 		properties.add(Property.LARGE);
-		properties.add(Property.HEADLESS);
 
 		HUNTING = new Hunting();
 	}
 
 	@Override
 	public int damageRoll() {
-		return Random.NormalIntRange( 10, 25 );
+		return Char.combatRoll( 10, 25 );
 	}
 
 	@Override
@@ -69,7 +67,7 @@ public class DM200 extends Mob {
 
 	@Override
 	public int drRoll() {
-		return Random.NormalIntRange(0, 8);
+		return super.drRoll() + Char.combatRoll(0, 8);
 	}
 
 	@Override
@@ -83,7 +81,7 @@ public class DM200 extends Mob {
 		Dungeon.LimitedDrops.DM200_EQUIP.count++;
 		//uses probability tables for dwarf city
 		if (loot == Generator.Category.WEAPON){
-			return Generator.randomWeapon(4);
+			return Generator.randomWeapon(4, true);
 		} else {
 			return Generator.randomArmor(4);
 		}
@@ -129,7 +127,7 @@ public class DM200 extends Mob {
 
 	}
 
-	private boolean canVent(int target){
+	protected boolean canVent(int target){
 		if (ventCooldown > 0) return false;
 		PathFinder.buildDistanceMap(target, BArray.not(Dungeon.level.solid, null), Dungeon.level.distance(pos, target)+1);
 		//vent can go around blocking terrain, but not through it

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ public class Bandit extends Thief {
 	
 	{
 		spriteClass = BanditSprite.class;
-		properties.add(Property.ELITES);
+
 		//guaranteed first drop, then 1/3, 1/9, etc.
 		lootChance = 1f;
 	}

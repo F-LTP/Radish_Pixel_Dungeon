@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -58,7 +57,7 @@ public class Explosive extends Weapon.Enchantment {
 			attacker.sprite.emitter().burst(SmokeParticle.FACTORY, 4);
 			Item.updateQuickslot();
 		} else if (currentDurability > 10 && durability <= 10){
-			attacker.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(this, "hot"));
+			attacker.sprite.showStatus(CharSprite.WARNING, Messages.get(this, "hot"));
 			GLog.n(Messages.get(this, "desc_hot"));
 			attacker.sprite.emitter().burst(BlastParticle.FACTORY, 5);
 			Item.updateQuickslot();
@@ -73,8 +72,11 @@ public class Explosive extends Weapon.Enchantment {
 					explosionPos = defender.pos+i;
 				}
 			}
+			if (explosionPos == -1) {
+				explosionPos = defender.pos;
+			}
 
-			new Bomb.MagicalBomb().explode(explosionPos);
+			new Bomb.ConjuredBomb().explode(explosionPos);
 
 			durability = 100;
 			Item.updateQuickslot();

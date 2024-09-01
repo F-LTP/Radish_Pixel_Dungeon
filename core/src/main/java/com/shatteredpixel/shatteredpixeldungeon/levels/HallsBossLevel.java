@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,19 +27,27 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.YogDzewa;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlameParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.CustomTilemap;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Group;
 import com.watabou.noosa.Tilemap;
@@ -70,16 +78,17 @@ public class HallsBossLevel extends Level {
 
 	@Override
 	public void playLevelMusic() {
-		if (locked){
-			Music.INSTANCE.play(Assets.Music.HALLS_BOSS, true);
+		if (locked && BossHealthBar.isAssigned()){
+			if (BossHealthBar.isBleeding()){
+				Music.INSTANCE.play(Assets.Music.HALLS_BOSS_FINALE, true);
+			} else {
+				Music.INSTANCE.play(Assets.Music.HALLS_BOSS, true);
+			}
 		//if exit isn't unlocked
-		} else if (map[exit()] != Terrain.EXIT){
+		} else if (map[exit()] != Terrain.EXIT || Statistics.amuletObtained){
 			Music.INSTANCE.end();
 		} else {
-			Music.INSTANCE.playTracks(
-					new String[]{Assets.Music.HALLS_1, Assets.Music.HALLS_2, Assets.Music.HALLS_2},
-					new float[]{1, 1, 0.5f},
-					false);
+			Music.INSTANCE.playTracks(HallsLevel.HALLS_TRACK_LIST, HallsLevel.HALLS_TRACK_CHANCES, false);
 		}
 	}
 
@@ -189,14 +198,18 @@ public class HallsBossLevel extends Level {
 
 	@Override
 	protected void createItems() {
-		Item item = Bones.get();
-		if (item != null) {
-			int pos;
-			do {
-				pos = randomRespawnCell(null);
-			} while (pos == entrance());
-			drop( item, pos ).setHauntedIfCursed().type = Heap.Type.REMAINS;
-		}
+		Random.pushGenerator(Random.Long());
+			ArrayList<Item> bonesItems = Bones.get();
+			if (bonesItems != null) {
+				int pos;
+				do {
+					pos = randomRespawnCell(null);
+				} while (pos == entrance());
+				for (Item i : bonesItems) {
+					drop(i, pos).setHauntedIfCursed().type = Heap.Type.REMAINS;
+				}
+			}
+		Random.popGenerator();
 	}
 
 	@Override
@@ -220,12 +233,12 @@ public class HallsBossLevel extends Level {
 
 	@Override
 	public void occupyCell( Char ch ) {
-		super.occupyCell( ch );
-
 		if (map[entrance()] == Terrain.ENTRANCE && map[exit()] != Terrain.EXIT
 				&& ch == Dungeon.hero && Dungeon.level.distance(ch.pos, entrance()) >= 2) {
 			seal();
 		}
+
+		super.occupyCell( ch );
 	}
 
 	@Override
@@ -290,7 +303,12 @@ public class HallsBossLevel extends Level {
 		Game.runOnRenderThread(new Callback() {
 			@Override
 			public void call() {
-				Music.INSTANCE.end();
+				Music.INSTANCE.fadeOut(5f, new Callback() {
+					@Override
+					public void call() {
+						Music.INSTANCE.play(Assets.Music.THEME_FINALE, true);
+					}
+				});
 			}
 		});
 	}
@@ -302,6 +320,38 @@ public class HallsBossLevel extends Level {
 			if (m instanceof YogDzewa){
 				((YogDzewa) m).updateVisibility(this);
 			}
+		}
+	}
+
+	@Override
+	public boolean activateTransition(Hero hero, LevelTransition transition) {
+		if (transition.type == LevelTransition.Type.REGULAR_ENTRANCE
+				&& hero.belongings.getItem(Amulet.class) != null
+				&& hero.buff(AscensionChallenge.class) == null) {
+
+			Game.runOnRenderThread(new Callback() {
+				@Override
+				public void call() {
+					GameScene.show( new WndOptions( new ItemSprite(ItemSpriteSheet.AMULET),
+							Messages.get(Amulet.class, "ascent_title"),
+							Messages.get(Amulet.class, "ascent_desc"),
+							Messages.get(Amulet.class, "ascent_yes"),
+							Messages.get(Amulet.class, "ascent_no")){
+						@Override
+						protected void onSelect(int index) {
+							if (index == 0){
+								Buff.affect(hero, AscensionChallenge.class);
+								Statistics.highestAscent = 25;
+								HallsBossLevel.super.activateTransition(hero, transition);
+							}
+						}
+					} );
+				}
+			});
+			return false;
+
+		} else {
+			return super.activateTransition(hero, transition);
 		}
 	}
 

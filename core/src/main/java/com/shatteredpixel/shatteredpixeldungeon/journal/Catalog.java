@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,19 +74,7 @@ public enum Catalog {
 			WEAPONS.seen.put( weapon, false);
 		}
 
-		for (Class armor : Generator.Category.ARM_T1.classes){
-			ARMOR.seen.put( armor, false);
-		}
-		for (Class armor : Generator.Category.ARM_T2.classes){
-			ARMOR.seen.put( armor, false);
-		}
-		for (Class armor : Generator.Category.ARM_T3.classes){
-			ARMOR.seen.put( armor, false);
-		}
-		for (Class armor : Generator.Category.ARM_T4.classes){
-			ARMOR.seen.put( armor, false);
-		}
-		for (Class armor : Generator.Category.ARM_T5.classes){
+		for (Class armor : Generator.Category.ARMOR.classes){
 			ARMOR.seen.put( armor, false);
 		}
 

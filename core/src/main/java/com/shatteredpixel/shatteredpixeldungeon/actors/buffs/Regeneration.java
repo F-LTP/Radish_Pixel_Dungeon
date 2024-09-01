@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.ChaliceOfBlood;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
-import com.watabou.utils.Bundle;
 
 public class Regeneration extends Buff {
 	
@@ -36,36 +35,14 @@ public class Regeneration extends Buff {
 	}
 	
 	private static final float REGENERATION_DELAY = 10;
-	private float p_regen=0f;
-	public float reduce_regen=0;
-	@Override
-	public void storeInBundle(Bundle bundle){
-		super.storeInBundle(bundle);
-		bundle.put("RED_GEN",reduce_regen);
-		bundle.put("P_GEN",p_regen);
-	}
-	@Override
-	public void restoreFromBundle(Bundle bundle){
-		super.restoreFromBundle(bundle);
-		if (bundle.contains("RED_GEN")){
-			reduce_regen=bundle.getFloat("RED_GEN");
-		}
-		if (bundle.contains("P_GEN")){
-			p_regen=bundle.getFloat("P_GEN");
-		}
-	}
+	
 	@Override
 	public boolean act() {
 		if (target.isAlive()) {
 
 			if (target.HP < regencap() && !((Hero)target).isStarving()) {
-				LockedFloor lock = target.buff(LockedFloor.class);
-				if (lock == null || lock.regenOn()) {
-					p_regen+=Math.max(0,1f-reduce_regen);
-					while (p_regen>=1f) {
-						target.HP += 1;
-						p_regen-=1f;
-					}
+				if (regenOn()) {
+					target.HP += 1;
 					if (target.HP == regencap()) {
 						((Hero) target).resting = false;
 					}
@@ -75,17 +52,12 @@ public class Regeneration extends Buff {
 			ChaliceOfBlood.chaliceRegen regenBuff = Dungeon.hero.buff( ChaliceOfBlood.chaliceRegen.class);
 
 			float delay = REGENERATION_DELAY;
-
-			//暂时关闭效果
-//			if (target.buff(MoveCount.class)!=null) {
-//				delay *= target.buff(MoveCount.class).chargeMultiplier(Dungeon.hero);
-//			}
-
 			if (regenBuff != null && target.buff(MagicImmune.class) == null) {
 				if (regenBuff.isCursed()) {
 					delay *= 1.5f;
 				} else {
-					delay -= regenBuff.itemLevel()*0.9f;
+					//15% boost at +0, scaling to a 500% boost at +10
+					delay -= 1.33f + regenBuff.itemLevel()*0.667f;
 					delay /= RingOfEnergy.artifactChargeMultiplier(target);
 				}
 			}
@@ -102,5 +74,13 @@ public class Regeneration extends Buff {
 	
 	public int regencap(){
 		return target.HT;
+	}
+
+	public static boolean regenOn(){
+		LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
+		if (lock != null && !lock.regenOn()){
+			return false;
+		}
+		return true;
 	}
 }

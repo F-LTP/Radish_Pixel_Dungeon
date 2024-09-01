@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,19 +21,18 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
-import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.items.Ankh;
-import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.InterlevelScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
+import com.shatteredpixel.shatteredpixeldungeon.ui.ItemButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
@@ -50,9 +49,9 @@ public class WndResurrect extends Window {
 
 	public static Object instance;
 
-	private WndBlacksmith.ItemButton btnItem1;
-	private WndBlacksmith.ItemButton btnItem2;
-	private WndBlacksmith.ItemButton btnPressed;
+	private ItemButton btnItem1;
+	private ItemButton btnItem2;
+	private ItemButton btnPressed;
 
 	RedButton btnContinue;
 	
@@ -73,7 +72,7 @@ public class WndResurrect extends Window {
 		message.setPos(0, titlebar.bottom() + GAP);
 		add( message );
 
-		btnItem1 = new WndBlacksmith.ItemButton() {
+		btnItem1 = new ItemButton() {
 			@Override
 			protected void onClick() {
 				btnPressed = btnItem1;
@@ -84,7 +83,7 @@ public class WndResurrect extends Window {
 		btnItem1.setRect( (WIDTH - BTN_GAP) / 2 - BTN_SIZE, message.bottom() + BTN_GAP, BTN_SIZE, BTN_SIZE );
 		add( btnItem1 );
 
-		btnItem2 = new WndBlacksmith.ItemButton() {
+		btnItem2 = new ItemButton() {
 			@Override
 			protected void onClick() {
 				btnPressed = btnItem2;
@@ -98,27 +97,46 @@ public class WndResurrect extends Window {
 		btnContinue = new RedButton( Messages.get(this, "confirm") ) {
 			@Override
 			protected void onClick() {
-				hide();
-				
-				Statistics.ankhsUsed++;
-
-				ankh.detach(Dungeon.hero.belongings.backpack);
-
-				if (btnItem1.item != null){
-					btnItem1.item.keptThoughLostInvent = true;
+				if (btnItem1.item() == null || btnItem2.item() == null){
+					GameScene.show(new WndOptions(Icons.WARNING.get(),
+							Messages.get(WndResurrect.class, "warn_title"),
+							Messages.get(WndResurrect.class, "warn_body"),
+							Messages.get(WndResurrect.class, "warn_yes"),
+							Messages.get(WndResurrect.class, "warn_no")){
+						@Override
+						protected void onSelect(int index) {
+							if (index == 0){
+								resurrect(ankh);
+							}
+						}
+					});
+				} else {
+					resurrect( ankh );
 				}
-				if (btnItem2.item != null){
-					btnItem2.item.keptThoughLostInvent = true;
-				}
-				
-				InterlevelScene.mode = InterlevelScene.Mode.RESURRECT;
-				Game.switchScene( InterlevelScene.class );
 			}
 		};
 		btnContinue.setRect( 0, btnItem1.bottom() + BTN_GAP, WIDTH, BTN_HEIGHT );
 		add( btnContinue );
 
 		resize( WIDTH, (int)btnContinue.bottom() );
+	}
+
+	private void resurrect( final Ankh ankh ){
+		hide();
+
+		Statistics.ankhsUsed++;
+
+		ankh.detach(Dungeon.hero.belongings.backpack);
+
+		if (btnItem1.item() != null){
+			btnItem1.item().keptThoughLostInvent = true;
+		}
+		if (btnItem2.item() != null){
+			btnItem2.item().keptThoughLostInvent = true;
+		}
+
+		InterlevelScene.mode = InterlevelScene.Mode.RESURRECT;
+		Game.switchScene( InterlevelScene.class );
 	}
 
 	protected WndBag.ItemSelector itemSelector = new WndBag.ItemSelector() {
@@ -139,7 +157,7 @@ public class WndResurrect extends Window {
 			if (item != null && btnPressed.parent != null) {
 				btnPressed.item( item );
 
-				if (btnItem1.item == btnItem2.item){
+				if (btnItem1.item() == btnItem2.item()){
 					if (btnPressed == btnItem1){
 						btnItem2.clear();
 					} else {

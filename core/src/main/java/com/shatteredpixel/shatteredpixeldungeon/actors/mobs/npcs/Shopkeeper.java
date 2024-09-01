@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,26 +25,36 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BlobImmunity;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ElmoParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ShopkeeperSprite;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTradeItem;
 import com.watabou.noosa.Game;
+import com.watabou.noosa.Image;
+import com.watabou.utils.BArray;
+import com.watabou.utils.Bundlable;
+import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
+import com.watabou.utils.PathFinder;
+
+import java.util.ArrayList;
 
 public class Shopkeeper extends NPC {
 
@@ -53,19 +63,23 @@ public class Shopkeeper extends NPC {
 
 		properties.add(Property.IMMOVABLE);
 	}
+
+	public static int MAX_BUYBACK_HISTORY = 3;
+	public ArrayList<Item> buybackItems = new ArrayList<>();
+
+	private int turnsSinceHarmed = -1;
 	
 	@Override
 	protected boolean act() {
 
-		if (Dungeon.level.heroFOV[pos]){
+		if (Dungeon.level.visited[pos]){
 			Notes.add(Notes.Landmark.SHOP);
 		}
 
-		/*if (Statistics.highestAscent < 20 && Dungeon.hero.buff(AscensionChallenge.class) != null){
-			flee();
-			return true;
-		}*/
-		
+		if (turnsSinceHarmed >= 0){
+			turnsSinceHarmed ++;
+		}
+
 		sprite.turnTo( pos, Dungeon.hero.pos );
 		spend( TICK );
 		return super.act();
@@ -73,12 +87,62 @@ public class Shopkeeper extends NPC {
 	
 	@Override
 	public void damage( int dmg, Object src ) {
-		flee();
+		processHarm();
 	}
 	
 	@Override
-	public void add( Buff buff ) {
-		flee();
+	public boolean add( Buff buff ) {
+		if (buff.type == Buff.buffType.NEGATIVE){
+			processHarm();
+		}
+		return false;
+	}
+
+	public void processHarm(){
+
+		//do nothing if the shopkeeper is out of the hero's FOV
+		if (!Dungeon.level.heroFOV[pos]){
+			return;
+		}
+
+		if (turnsSinceHarmed == -1){
+			turnsSinceHarmed = 0;
+			yell(Messages.get(this, "warn"));
+
+			//cleanses all harmful blobs in the shop
+			ArrayList<Blob> blobs = new ArrayList<>();
+			for (Class c : new BlobImmunity().immunities()){
+				Blob b = Dungeon.level.blobs.get(c);
+				if (b != null && b.volume > 0){
+					blobs.add(b);
+				}
+			}
+
+			PathFinder.buildDistanceMap( pos, BArray.not( Dungeon.level.solid, null ), 4 );
+
+			for (int i=0; i < Dungeon.level.length(); i++) {
+				if (PathFinder.distance[i] < Integer.MAX_VALUE) {
+
+					boolean affected = false;
+					for (Blob blob : blobs) {
+						if (blob.cur[i] > 0) {
+							blob.clear(i);
+							affected = true;
+						}
+					}
+
+					if (affected && Dungeon.level.heroFOV[i]) {
+						CellEmitter.get( i ).burst( Speck.factory( Speck.DISCOVER ), 2 );
+					}
+
+				}
+			}
+
+		//There is a 1 turn buffer before more damage/debuffs make the shopkeeper flee
+		//This is mainly to prevent stacked effects from causing an instant flee
+		} else if (turnsSinceHarmed >= 1) {
+			flee();
+		}
 	}
 	
 	public void flee() {
@@ -117,57 +181,7 @@ public class Shopkeeper extends NPC {
 
 	//shopkeepers are greedy!
 	public static int sellPrice(Item item){
-		int ax= 5 * (Dungeon.depth / 5 + 1);
-		if (item instanceof MeleeWeapon){
-			int price = 20 * ((MeleeWeapon)item).tier;
-			if (((MeleeWeapon)item).hasGoodEnchant()) {
-				price *= 1.2;
-			}
-			if (item.cursedKnown && (item.cursed || ((MeleeWeapon)item).hasCurseEnchant())) {
-				price /= 2;
-			}
-			if (item.levelKnown && item.level() > 0) {
-				price *= (item.level()*0.35f + 1);
-			}
-			if (price < 1) {
-				price = 1;
-			}
-			return price*ax;
-		}else if(item instanceof Armor){
-			int price = 20 * ((Armor)item).tier;
-			if (((Armor)item).hasGoodGlyph()) {
-				price *= 1.2;
-			}
-			if (item.cursedKnown && (item.cursed || ((Armor)item).hasCurseGlyph())) {
-				price /= 2;
-			}
-			if (item.levelKnown && item.level() > 0) {
-				price *= (item.level()*0.35f + 1);
-			}
-			if (price < 1) {
-				price = 1;
-			}
-			return price*ax;
-		}else if (item instanceof MissileWeapon){
-			return (int)(6 * ((MissileWeapon)item).tier * item.quantity() * (item.level()*0.7f + 1)*ax);
-		}else if (item instanceof Wand || item instanceof Ring){
-			int price = 75;
-			if (item.cursed && item.cursedKnown) {
-				price /= 2;
-			}
-			if (item.levelKnown) {
-				if (item.level() > 0) {
-					price *= (item.level()*0.5f + 1);
-				} else if (item.level() < 0) {
-					price /= (1 - item.level()*0.5f);
-				}
-			}
-			if (price < 1) {
-				price = 1;
-			}
-			return price *ax;
-		}
-		return item.value() * ax;
+		return item.value() * 5 * (Dungeon.depth / 5 + 1);
 	}
 	
 	public static WndBag sell() {
@@ -210,9 +224,98 @@ public class Shopkeeper extends NPC {
 		Game.runOnRenderThread(new Callback() {
 			@Override
 			public void call() {
-				sell();
+				String[] options = new String[2+ buybackItems.size()];
+				int maxLen = PixelScene.landscape() ? 30 : 25;
+				int i = 0;
+				options[i++] = Messages.get(Shopkeeper.this, "sell");
+				options[i++] = Messages.get(Shopkeeper.this, "talk");
+				for (Item item : buybackItems){
+					options[i] = Messages.get(Heap.class, "for_sale", item.value(), Messages.titleCase(item.title()));
+					if (options[i].length() > maxLen) options[i] = options[i].substring(0, maxLen-3) + "...";
+					i++;
+				}
+				GameScene.show(new WndOptions(sprite(), Messages.titleCase(name()), description(), options){
+					@Override
+					protected void onSelect(int index) {
+						super.onSelect(index);
+						if (index == 0){
+							sell();
+						} else if (index == 1){
+							GameScene.show(new WndTitledMessage(sprite(), Messages.titleCase(name()), chatText()));
+						} else if (index > 1){
+							GLog.i(Messages.get(Shopkeeper.this, "buyback"));
+							Item returned = buybackItems.remove(index-2);
+							Dungeon.gold -= returned.value();
+							Statistics.goldCollected -= returned.value();
+							if (!returned.doPickUp(Dungeon.hero)){
+								Dungeon.level.drop(returned, Dungeon.hero.pos);
+							}
+						}
+					}
+
+					@Override
+					protected boolean enabled(int index) {
+						if (index > 1){
+							return Dungeon.gold >= buybackItems.get(index-2).value();
+						} else {
+							return super.enabled(index);
+						}
+					}
+
+					@Override
+					protected boolean hasIcon(int index) {
+						return index > 1;
+					}
+
+					@Override
+					protected Image getIcon(int index) {
+						if (index > 1){
+							return new ItemSprite(buybackItems.get(index-2));
+						}
+						return null;
+					}
+				});
 			}
 		});
 		return true;
+	}
+
+	public String chatText(){
+		if (Dungeon.hero.buff(AscensionChallenge.class) != null){
+			return Messages.get(this, "talk_ascent");
+		}
+		switch (Dungeon.depth){
+			case 6: default:
+				return Messages.get(this, "talk_prison_intro") + "\n\n" + Messages.get(this, "talk_prison_" + Dungeon.hero.heroClass.name());
+			case 11:
+				return Messages.get(this, "talk_caves");
+			case 16:
+				return Messages.get(this, "talk_city");
+			case 20:
+				return Messages.get(this, "talk_halls");
+		}
+	}
+
+	public static String BUYBACK_ITEMS = "buyback_items";
+
+	public static String TURNS_SINCE_HARMED = "turns_since_harmed";
+
+	@Override
+	public void storeInBundle(Bundle bundle) {
+		super.storeInBundle(bundle);
+		bundle.put(BUYBACK_ITEMS, buybackItems);
+		bundle.put(TURNS_SINCE_HARMED, turnsSinceHarmed);
+	}
+
+	@Override
+	public void restoreFromBundle(Bundle bundle) {
+		super.restoreFromBundle(bundle);
+		buybackItems.clear();
+		if (bundle.contains(BUYBACK_ITEMS)){
+			for (Bundlable i : bundle.getCollection(BUYBACK_ITEMS)){
+				buybackItems.add((Item) i);
+			}
+		}
+		turnsSinceHarmed = bundle.contains(TURNS_SINCE_HARMED) ? bundle.getInt(TURNS_SINCE_HARMED) : -1;
 	}
 }

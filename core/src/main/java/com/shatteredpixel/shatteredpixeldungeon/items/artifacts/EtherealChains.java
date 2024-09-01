@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,23 +27,24 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MoveCount;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Chains;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
+import com.shatteredpixel.shatteredpixeldungeon.levels.MiningLevel;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
-import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
-import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
+import com.watabou.utils.BArray;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Callback;
@@ -120,7 +121,7 @@ public class EtherealChains extends Artifact {
 
 				//chains cannot be used to go where it is impossible to walk to
 				PathFinder.buildDistanceMap(target, BArray.or(Dungeon.level.passable, Dungeon.level.avoid, null));
-				if (PathFinder.distance[curUser.pos] == Integer.MAX_VALUE){
+				if (!(Dungeon.level instanceof MiningLevel) && PathFinder.distance[curUser.pos] == Integer.MAX_VALUE){
 					GLog.w( Messages.get(EtherealChains.class, "cant_reach") );
 					return;
 				}
@@ -173,10 +174,6 @@ public class EtherealChains extends Artifact {
 		if (chargeUse > charge) {
 			GLog.w( Messages.get(this, "no_charge") );
 			return;
-		} else {
-			charge -= chargeUse;
-			Talent.onArtifactUsed(hero);
-			updateQuickslot();
 		}
 		
 		hero.busy();
@@ -190,6 +187,12 @@ public class EtherealChains extends Artifact {
 				Actor.add(new Pushing(enemy, enemy.pos, pulledPos, new Callback() {
 					public void call() {
 						enemy.pos = pulledPos;
+
+						charge -= chargeUse;
+						Invisibility.dispel(hero);
+						Talent.onArtifactUsed(hero);
+						updateQuickslot();
+
 						Dungeon.level.occupyCell(enemy);
 						Dungeon.observe();
 						GameScene.updateFog();
@@ -206,6 +209,7 @@ public class EtherealChains extends Artifact {
 
 		//don't pull if rooted
 		if (hero.rooted){
+			PixelScene.shake( 1, 1f );
 			GLog.w( Messages.get(EtherealChains.class, "rooted") );
 			return;
 		}
@@ -236,10 +240,6 @@ public class EtherealChains extends Artifact {
 		if (chargeUse > charge){
 			GLog.w( Messages.get(EtherealChains.class, "no_charge") );
 			return;
-		} else {
-			charge -= chargeUse;
-			Talent.onArtifactUsed(hero);
-			updateQuickslot();
 		}
 		
 		hero.busy();
@@ -253,6 +253,12 @@ public class EtherealChains extends Artifact {
 				Actor.add(new Pushing(hero, hero.pos, newHeroPos, new Callback() {
 					public void call() {
 						hero.pos = newHeroPos;
+
+						charge -= chargeUse;
+						Invisibility.dispel(hero);
+						Talent.onArtifactUsed(hero);
+						updateQuickslot();
+
 						Dungeon.level.occupyCell(hero);
 						hero.spendAndNext(1f);
 						Dungeon.observe();
@@ -275,7 +281,7 @@ public class EtherealChains extends Artifact {
 		int chargeTarget = 5+(level()*2);
 		if (charge < chargeTarget*2){
 			partialCharge += 0.5f*amount;
-			if (partialCharge >= 1){
+			while (partialCharge >= 1){
 				partialCharge--;
 				charge++;
 				updateQuickslot();
@@ -302,22 +308,19 @@ public class EtherealChains extends Artifact {
 		@Override
 		public boolean act() {
 			int chargeTarget = 5+(level()*2);
-			LockedFloor lock = target.buff(LockedFloor.class);
 			if (charge < chargeTarget
 					&& !cursed
 					&& target.buff(MagicImmune.class) == null
-					&& (lock == null || lock.regenOn())) {
+					&& Regeneration.regenOn()) {
 				//gains a charge in 40 - 2*missingCharge turns
 				float chargeGain = (1 / (40f - (chargeTarget - charge)*2f));
 				chargeGain *= RingOfEnergy.artifactChargeMultiplier(target);
-				if (target.buff(MoveCount.class)!=null)
-					chargeGain*=target.buff(MoveCount.class).chargeMultiplier(Dungeon.hero);
 				partialCharge += chargeGain;
 			} else if (cursed && Random.Int(100) == 0){
 				Buff.prolong( target, Cripple.class, 10f);
 			}
 
-			if (partialCharge >= 1) {
+			while (partialCharge >= 1) {
 				partialCharge --;
 				charge ++;
 			}
@@ -338,7 +341,7 @@ public class EtherealChains extends Artifact {
 			if (charge > 5+(level()*2)){
 				levelPortion *= (5+((float)level()*2))/charge;
 			}
-			partialCharge += levelPortion*10f;
+			partialCharge += levelPortion*6f;
 
 			if (exp > 100+level()*100 && level() < levelCap){
 				exp -= 100+level()*100;

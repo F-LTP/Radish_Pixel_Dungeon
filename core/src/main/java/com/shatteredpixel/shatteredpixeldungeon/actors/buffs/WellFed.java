@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,10 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
 
@@ -40,22 +41,19 @@ public class WellFed extends Buff {
 	
 	@Override
 	public boolean act() {
-		int interval=18;
-		if (target == Dungeon.hero){
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				interval-=Dungeon.hero.buff(RingOfBenediction.Benediction.class).buffedLvl()/2;
-				interval=Math.max(interval,1);
-			}
-		}
 		left --;
 		if (left < 0){
 			detach();
+			if (target instanceof Hero) {
+				((Hero) target).resting = false;
+			}
 			return true;
-		} else if (left % interval == 0){
-			target.HP = Math.min(target.HT, target.HP + 1);
-			if (target.buff(AfterGlow.Warmth.class)!=null){
-				target.buff(AfterGlow.Warmth.class).getWarmth();
+		} else if (left % 18 == 0 && target.HP < target.HT){
+			target.HP += 1;
+			target.sprite.showStatusWithIcon(CharSprite.POSITIVE, "1", FloatingText.HEALING);
+
+			if (target.HP == target.HT && target instanceof Hero) {
+				((Hero) target).resting = false;
 			}
 		}
 		

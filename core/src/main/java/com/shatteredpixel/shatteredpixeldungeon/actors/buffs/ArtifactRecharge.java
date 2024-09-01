@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,9 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HornOfPlenty;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
@@ -47,20 +45,22 @@ public class ArtifactRecharge extends Buff {
 
 		if (target instanceof Hero) {
 			float chargeAmount = Math.min(1, left);
-			for (Buff b : target.buffs()) {
-				if (b instanceof Artifact.ArtifactBuff) {
-					if (b instanceof HornOfPlenty.hornRecharge && ignoreHornOfPlenty){
-						continue;
-					}
-					if (!((Artifact.ArtifactBuff) b).isCursed()) {
-						((Artifact.ArtifactBuff) b).charge((Hero) target, chargeAmount);
+			if (chargeAmount > 0){
+				for (Buff b : target.buffs()) {
+					if (b instanceof Artifact.ArtifactBuff) {
+						if (b instanceof HornOfPlenty.hornRecharge && ignoreHornOfPlenty){
+							continue;
+						}
+						if (!((Artifact.ArtifactBuff) b).isCursed()) {
+							((Artifact.ArtifactBuff) b).charge((Hero) target, chargeAmount);
+						}
 					}
 				}
 			}
 		}
 
 		left--;
-		if (left <= 0){
+		if (left < 0){ // we expire after 0 to be more consistent with wand recharging visually
 			detach();
 		} else {
 			spend(TICK);
@@ -70,23 +70,11 @@ public class ArtifactRecharge extends Buff {
 	}
 	
 	public ArtifactRecharge set( float amount ){
-		if (target == Dungeon.hero){
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				amount*=RingOfBenediction.periodMultiplier(target);
-			}
-		}
 		if (left < amount) left = amount;
 		return this;
 	}
 	
 	public ArtifactRecharge prolong( float amount ){
-		if (target == Dungeon.hero){
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				amount*=RingOfBenediction.periodMultiplier(target);
-			}
-		}
 		left += amount;
 		return this;
 	}
@@ -112,7 +100,7 @@ public class ArtifactRecharge extends Buff {
 
 	@Override
 	public String iconTextDisplay() {
-		return Integer.toString((int)left);
+		return Integer.toString((int)left+1);
 	}
 	
 	@Override
@@ -135,5 +123,13 @@ public class ArtifactRecharge extends Buff {
 		super.restoreFromBundle(bundle);
 		left = bundle.getFloat(LEFT);
 		ignoreHornOfPlenty = bundle.getBoolean(IGNORE_HORN);
+	}
+
+	public static void chargeArtifacts( Hero hero, float turns ){
+		for (Buff b : hero.buffs()){
+			if (b instanceof Artifact.ArtifactBuff && !((Artifact.ArtifactBuff) b).isCursed()){
+				if (!((Artifact.ArtifactBuff) b).isCursed()) ((Artifact.ArtifactBuff) b).charge(hero, turns);
+			}
+		}
 	}
 }

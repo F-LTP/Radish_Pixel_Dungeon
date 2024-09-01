@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
@@ -35,13 +36,13 @@ public class Repulsion extends Armor.Glyph {
 	@Override
 	public int proc( Armor armor, Char attacker, Char defender, int damage) {
 
-		int level = Math.max( 0, armor.procLvl() );
+		int level = Math.max( 0, armor.buffedLvl() );
 
 		// lvl 0 - 20%
 		// lvl 1 - 33%
 		// lvl 2 - 43%
-		float procChance = (level+1f)/(level+5f) * procChanceMultiplier(defender)*defender.talentProc();
-		if (Random.Float() < procChance){
+		float procChance = (level+1f)/(level+5f) * procChanceMultiplier(defender);
+		if (Dungeon.level.adjacent(attacker.pos, defender.pos) && Random.Float() < procChance){
 
 			float powerMulti = Math.max(1f, procChance);
 
@@ -52,7 +53,7 @@ public class Repulsion extends Armor.Glyph {
 					Math.round(2 * powerMulti),
 					true,
 					true,
-					getClass());
+					this);
 		}
 		
 		return damage;

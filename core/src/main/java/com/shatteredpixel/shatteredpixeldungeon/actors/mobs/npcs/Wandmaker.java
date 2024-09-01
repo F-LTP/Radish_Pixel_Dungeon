@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,11 @@ import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Elemental;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RotHeart;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.CeremonialCandle;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.CorpseDust;
@@ -34,10 +38,12 @@ import com.shatteredpixel.shatteredpixeldungeon.items.quest.Embers;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MassGraveRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.RotGardenRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.RitualSiteRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest.MassGraveRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest.RitualSiteRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest.RotGardenRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Rotberry;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -66,7 +72,7 @@ public class Wandmaker extends NPC {
 			die(null);
 			return true;
 		}
-		if (Dungeon.level.heroFOV[pos] && Quest.wand1 != null){
+		if (Dungeon.level.visited[pos] && Quest.wand1 != null){
 			Notes.add( Notes.Landmark.WANDMAKER );
 		}
 		return super.act();
@@ -76,13 +82,15 @@ public class Wandmaker extends NPC {
 	public int defenseSkill( Char enemy ) {
 		return INFINITE_EVASION;
 	}
-	
+
 	@Override
 	public void damage( int dmg, Object src ) {
+		//do nothing
 	}
-	
+
 	@Override
-	public void add( Buff buff ) {
+	public boolean add( Buff buff ) {
+		return false;
 	}
 	
 	@Override
@@ -125,13 +133,13 @@ public class Wandmaker extends NPC {
 				String msg;
 				switch(Quest.type){
 					case 1: default:
-						msg = Messages.get(this, "reminder_dust", Dungeon.hero.name());
+						msg = Messages.get(this, "reminder_dust", Messages.titleCase(Dungeon.hero.name()));
 						break;
 					case 2:
-						msg = Messages.get(this, "reminder_ember", Dungeon.hero.name());
+						msg = Messages.get(this, "reminder_ember", Messages.titleCase(Dungeon.hero.name()));
 						break;
 					case 3:
-						msg = Messages.get(this, "reminder_berry", Dungeon.hero.name());
+						msg = Messages.get(this, "reminder_berry", Messages.titleCase(Dungeon.hero.name()));
 						break;
 				}
 				Game.runOnRenderThread(new Callback() {
@@ -154,10 +162,13 @@ public class Wandmaker extends NPC {
 					msg1 += Messages.get(this, "intro_rogue");
 					break;
 				case MAGE:
-					msg1 += Messages.get(this, "intro_mage", Dungeon.hero.name());
+					msg1 += Messages.get(this, "intro_mage", Messages.titleCase(Dungeon.hero.name()));
 					break;
 				case HUNTRESS:
 					msg1 += Messages.get(this, "intro_huntress");
+					break;
+				case DUELIST:
+					msg1 += Messages.get(this, "intro_duelist");
 					break;
 			}
 
@@ -201,7 +212,7 @@ public class Wandmaker extends NPC {
 	
 	public static class Quest {
 
-		public static int type;
+		private static int type;
 		// 1 = corpse dust quest
 		// 2 = elemental embers quest
 		// 3 = rotberry quest
@@ -286,10 +297,10 @@ public class Wandmaker extends NPC {
 				
 				Wandmaker npc = new Wandmaker();
 				boolean validPos;
-				//Do not spawn wandmaker on the entrance, a trap, or in front of a door.
+				//Do not spawn wandmaker on the entrance, in front of a door, or on bad terrain.
 				do {
 					validPos = true;
-					npc.pos = level.pointToCell(room.random());
+					npc.pos = level.pointToCell(room.random((room.width() > 6 && room.height() > 6) ? 2 : 1));
 					if (npc.pos == level.entrance()){
 						validPos = false;
 					}
@@ -298,7 +309,9 @@ public class Wandmaker extends NPC {
 							validPos = false;
 						}
 					}
-					if (level.traps.get(npc.pos) != null){
+					if (level.traps.get(npc.pos) != null
+							|| !level.passable[npc.pos]
+							|| level.map[npc.pos] == Terrain.EMPTY_SP){
 						validPos = false;
 					}
 				} while (!validPos);
@@ -311,9 +324,15 @@ public class Wandmaker extends NPC {
 				wand1.cursed = false;
 				wand1.upgrade();
 
-				do {
+				wand2 = (Wand) Generator.random(Generator.Category.WAND);
+				ArrayList<Item> toUndo = new ArrayList<>();
+				while (wand2.getClass() == wand1.getClass()) {
+					toUndo.add(wand2);
 					wand2 = (Wand) Generator.random(Generator.Category.WAND);
-				} while (wand2.getClass().equals(wand1.getClass()));
+				}
+				for (Item i :toUndo){
+					Generator.undoDrop(i);
+				}
 				wand2.cursed = false;
 				wand2.upgrade();
 				
@@ -323,7 +342,7 @@ public class Wandmaker extends NPC {
 		public static ArrayList<Room> spawnRoom( ArrayList<Room> rooms) {
 			questRoomSpawned = false;
 			if (!spawned && (type != 0 || (Dungeon.depth > 6 && Random.Int( 10 - Dungeon.depth ) == 0))) {
-				
+
 				// decide between 1,2, or 3 for quest type.
 				if (type == 0) type = Random.Int(3)+1;
 				
@@ -343,6 +362,79 @@ public class Wandmaker extends NPC {
 				
 			}
 			return rooms;
+		}
+
+		//quest is active if:
+		public static boolean active(){
+			//it is not completed
+			if (wand1 == null || wand2 == null
+					|| !(Dungeon.level instanceof RegularLevel) || Dungeon.hero == null){
+				return false;
+			}
+
+			//and...
+			if (type == 1){
+				//hero is in the mass grave room
+				if (((RegularLevel) Dungeon.level).room(Dungeon.hero.pos) instanceof MassGraveRoom) {
+					return true;
+				}
+
+				//or if they are corpse dust cursed
+				for (Buff b : Dungeon.hero.buffs()) {
+					if (b instanceof CorpseDust.DustGhostSpawner) {
+						return true;
+					}
+				}
+
+				return false;
+			} else if (type == 2){
+				//hero has summoned the newborn elemental
+				for (Mob m : Dungeon.level.mobs) {
+					if (m instanceof Elemental.NewbornFireElemental) {
+						return true;
+					}
+				}
+
+				//or hero is in the ritual room and all 4 candles are with them
+				if (((RegularLevel) Dungeon.level).room(Dungeon.hero.pos) instanceof RitualSiteRoom) {
+					int candles = 0;
+					if (Dungeon.hero.belongings.getItem(CeremonialCandle.class) != null){
+						candles += Dungeon.hero.belongings.getItem(CeremonialCandle.class).quantity();
+					}
+
+					if (candles >= 4){
+						return true;
+					}
+
+					for (Heap h : Dungeon.level.heaps.valueList()){
+						if (((RegularLevel) Dungeon.level).room(h.pos) instanceof RitualSiteRoom){
+							for (Item i : h.items){
+								if (i instanceof CeremonialCandle){
+									candles += i.quantity();
+								}
+							}
+						}
+					}
+
+					if (candles >= 4){
+						return true;
+					}
+
+				}
+
+				return false;
+			} else {
+				//hero is in the rot garden room and the rot heart is alive
+				if (((RegularLevel) Dungeon.level).room(Dungeon.hero.pos) instanceof RotGardenRoom) {
+					for (Mob m : Dungeon.level.mobs) {
+						if (m instanceof RotHeart) {
+							return true;
+						}
+					}
+				}
+
+				return false;
+			}
 		}
 		
 		public static void complete() {

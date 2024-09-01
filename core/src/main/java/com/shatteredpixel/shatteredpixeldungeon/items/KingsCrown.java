@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
@@ -66,16 +65,14 @@ public class KingsCrown extends Item {
 		super.execute( hero, action );
 
 		if (action.equals(AC_WEAR)) {
-			if (!hero.powerOfImp) {
-				curUser = hero;
-				if (hero.belongings.armor() != null) {
-					GameScene.show(new WndChooseAbility(this, hero.belongings.armor(), hero));
-				} else {
-					GLog.w(Messages.get(this, "naked"));
-				}
-			}else {
-				GLog.n(Messages.get(this,"deny"));
+
+			curUser = hero;
+			if (hero.belongings.armor() != null){
+				GameScene.show( new WndChooseAbility(this, hero.belongings.armor(), hero));
+			} else {
+				GLog.w( Messages.get(this, "naked"));
 			}
+			
 		}
 	}
 	
@@ -109,11 +106,6 @@ public class KingsCrown extends Item {
 			if (hero.belongings.armor == armor) {
 
 				hero.belongings.armor = classArmor;
-				for (Buff b :hero.buffs()){
-					if (b instanceof Armor.ArmorBuff){
-						b.detach();
-					}
-				}
 				((HeroSprite) hero.sprite).updateArmor();
 				classArmor.activate(hero);
 

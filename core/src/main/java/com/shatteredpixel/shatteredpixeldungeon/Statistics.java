@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2023 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon;
 
-import com.shatteredpixel.shatteredpixeldungeon.custom.utils.CustomGameSettings;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.SparseArray;
 
@@ -57,21 +56,22 @@ public class Statistics {
 	public static int thrownAttacks;
 
 	public static int spawnersAlive;
-
+	
 	public static float duration;
-
+	
 	public static boolean qualifiedForNoKilling = false;
 	public static boolean completedWithNoKilling = false;
+	public static boolean qualifiedForBossRemainsBadge = false;
 	public static boolean qualifiedForBossChallengeBadge = false;
-
+	
 	public static boolean amuletObtained = false;
 	public static boolean gameWon = false;
 	public static boolean ascended = false;
-
+	
 	public static void reset() {
-
+		
 		goldCollected	= 0;
-		deepestFloor	= -1;
+		deepestFloor	= 0;
 		highestAscent	= 0;
 		enemiesSlain	= 0;
 		foodEaten		= 0;
@@ -91,26 +91,25 @@ public class Statistics {
 		winMultiplier   = 1;
 		chalMultiplier  = 1;
 		totalScore      = 0;
-
+		
 		upgradesUsed    = 0;
 		sneakAttacks    = 0;
 		thrownAttacks   = 0;
 
 		spawnersAlive   = 0;
-
+		
 		duration	    = 0;
-
+		
 		qualifiedForNoKilling = false;
+		qualifiedForBossRemainsBadge = false;
 		qualifiedForBossChallengeBadge = false;
-
+		
 		amuletObtained = false;
 		gameWon = false;
 		ascended = false;
-
-		resetCustom();
-
+		
 	}
-
+	
 	private static final String GOLD		= "score";
 	private static final String DEEPEST		= "maxDepth";
 	private static final String HIGHEST		= "maxAscent";
@@ -132,22 +131,23 @@ public class Statistics {
 	private static final String WIN_MULT		= "win_mult";
 	private static final String CHAL_MULT		= "chal_mult";
 	private static final String TOTAL_SCORE		= "total_score";
-
+	
 	private static final String UPGRADES	= "upgradesUsed";
 	private static final String SNEAKS		= "sneakAttacks";
 	private static final String THROWN		= "thrownAssists";
 
 	private static final String SPAWNERS	= "spawnersAlive";
-
+	
 	private static final String DURATION	= "duration";
 
 	private static final String NO_KILLING_QUALIFIED	= "qualifiedForNoKilling";
+	private static final String BOSS_REMAINS_QUALIFIED	= "qualifiedForBossRemainsBadge";
 	private static final String BOSS_CHALLENGE_QUALIFIED= "qualifiedForBossChallengeBadge";
-
+	
 	private static final String AMULET          = "amuletObtained";
 	private static final String WON		        = "won";
 	private static final String ASCENDED		= "ascended";
-
+	
 	public static void storeInBundle( Bundle bundle ) {
 		bundle.put( GOLD,		goldCollected );
 		bundle.put( DEEPEST,	deepestFloor );
@@ -174,25 +174,24 @@ public class Statistics {
 		bundle.put( WIN_MULT,    winMultiplier );
 		bundle.put( CHAL_MULT,   chalMultiplier );
 		bundle.put( TOTAL_SCORE, totalScore );
-
+		
 		bundle.put( UPGRADES,   upgradesUsed );
 		bundle.put( SNEAKS,		sneakAttacks );
 		bundle.put( THROWN,     thrownAttacks);
 
 		bundle.put( SPAWNERS,	spawnersAlive );
-
+		
 		bundle.put( DURATION,	duration );
 
 		bundle.put(NO_KILLING_QUALIFIED, qualifiedForNoKilling);
+		bundle.put(BOSS_REMAINS_QUALIFIED, qualifiedForBossRemainsBadge);
 		bundle.put(BOSS_CHALLENGE_QUALIFIED, qualifiedForBossChallengeBadge);
-
+		
 		bundle.put( AMULET,		amuletObtained );
 		bundle.put( WON,        gameWon );
 		bundle.put( ASCENDED,   ascended );
-
-		storeCustom(bundle);
 	}
-
+	
 	public static void restoreFromBundle( Bundle bundle ) {
 		goldCollected	= bundle.getInt( GOLD );
 		deepestFloor	= bundle.getInt( DEEPEST );
@@ -222,68 +221,27 @@ public class Statistics {
 		winMultiplier   = bundle.getFloat( WIN_MULT );
 		chalMultiplier  = bundle.getFloat( CHAL_MULT );
 		totalScore      = bundle.getInt( TOTAL_SCORE );
-
+		
 		upgradesUsed    = bundle.getInt( UPGRADES );
 		sneakAttacks    = bundle.getInt( SNEAKS );
 		thrownAttacks   = bundle.getInt( THROWN );
 
 		spawnersAlive   = bundle.getInt( SPAWNERS );
-
+		
 		duration		= bundle.getFloat( DURATION );
 
 		qualifiedForNoKilling = bundle.getBoolean( NO_KILLING_QUALIFIED );
-
+		qualifiedForBossRemainsBadge = bundle.getBoolean( BOSS_REMAINS_QUALIFIED );
 		qualifiedForBossChallengeBadge = bundle.getBoolean( BOSS_CHALLENGE_QUALIFIED );
-
+		
 		amuletObtained	= bundle.getBoolean( AMULET );
 		gameWon         = bundle.getBoolean( WON );
 		ascended        = bundle.getBoolean( ASCENDED );
-
-		restoreCustom(bundle);
 	}
-
+	
 	public static void preview( GamesInProgress.Info info, Bundle bundle ){
 		info.goldCollected  = bundle.getInt( GOLD );
 		info.maxDepth       = bundle.getInt( DEEPEST );
-	}
-
-	public static int boss_enhance = 0;
-	public static int elite_enemies = 0;
-
-	public static boolean isCustomSeed = false;
-	//Directly add float time will cause accuracy lose and stop timing if time is long enough
-	//so use long to record seconds, float to count sub-seconds.
-	public static long real_seconds = 0;
-	public static float second_elapsed = 0;
-	public static float turnsPassed = 0f;
-
-
-	private static void resetCustom(){
-		boss_enhance = 0;
-		elite_enemies = 0;
-		second_elapsed = 0f;
-		real_seconds = 0;
-		//Dungeon has been inited, so write directly.
-		isCustomSeed = !CustomGameSettings.getSeedString().equals("");
-		turnsPassed = 0f;
-	}
-
-	private static void storeCustom(Bundle b){
-		b.put("boss_enhance", boss_enhance);
-		b.put("elite_enemies", elite_enemies);
-		b.put("real_time_passed", second_elapsed);
-		b.put("is_custom_seed", isCustomSeed);
-		b.put("real_seconds_passed", real_seconds);
-		b.put("turns_passed", turnsPassed);
-	}
-
-	private static void restoreCustom(Bundle b){
-		boss_enhance = b.getInt("boss_enhance");
-		elite_enemies = b.getInt("elite_enemies");
-		second_elapsed = b.getFloat("real_time_passed");
-		isCustomSeed = b.getBoolean("is_custom_seed");
-		real_seconds = b.getLong("real_seconds_passed");
-		turnsPassed = b.getFloat("turns_passed");
 	}
 
 }

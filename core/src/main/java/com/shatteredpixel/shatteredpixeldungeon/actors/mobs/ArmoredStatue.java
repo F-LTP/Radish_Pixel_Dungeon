@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.StatueSprite;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.Random;
 
 public class ArmoredStatue extends Statue {
 
@@ -41,18 +40,22 @@ public class ArmoredStatue extends Statue {
 		spriteClass = StatueSprite.class;
 	}
 
-	public Armor armor;
+	protected Armor armor;
 
 	public ArmoredStatue(){
 		super();
 
-		do {
-			armor = Generator.randomArmor();
-		} while (armor.cursed);
-		armor.inscribe(Armor.Glyph.random());
-
 		//double HP
 		HP = HT = 30 + Dungeon.depth * 10;
+	}
+
+	@Override
+	public void createWeapon(boolean useDecks) {
+		super.createWeapon(useDecks);
+
+		armor = Generator.randomArmor();
+		armor.cursed = false;
+		armor.inscribe(Armor.Glyph.random());
 	}
 
 	private static final String ARMOR	= "armor";
@@ -71,7 +74,7 @@ public class ArmoredStatue extends Statue {
 
 	@Override
 	public int drRoll() {
-		return super.drRoll() + Random.NormalIntRange( armor.DRMin(), armor.DRMax());
+		return super.drRoll() + Char.combatRoll( armor.DRMin(), armor.DRMax());
 	}
 
 	//used in some glyph calculations
@@ -100,7 +103,8 @@ public class ArmoredStatue extends Statue {
 		//TODO improve this when I have proper damage source logic
 		if (armor != null && armor.hasGlyph(AntiMagic.class, this)
 				&& AntiMagic.RESISTS.contains(src.getClass())){
-			dmg -= AntiMagic.drRoll(this, armor.procLvl());
+			dmg -= AntiMagic.drRoll(this, armor.buffedLvl());
+			dmg = Math.max(dmg, 0);
 		}
 
 		super.damage( dmg, src );

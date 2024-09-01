@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,11 +43,7 @@ public class IceBlock extends Gizmo {
 	@Override
 	public void update() {
 		super.update();
-		/*if ((phase += Game.elapsed * 2) < 1) {
-			target.tint( 0.5f, 0.5f, 0.5f, phase * 0.6f );
-		} else {
-			target.tint( 0.5f, 0.5f, 0.5f, 0.6f );
-		}*/    //the color is for petrifaction
+
 		if ((phase += Game.elapsed * 2) < 1) {
 			target.tint( 0.83f, 1.17f, 1.33f, phase * 0.6f );
 		} else {

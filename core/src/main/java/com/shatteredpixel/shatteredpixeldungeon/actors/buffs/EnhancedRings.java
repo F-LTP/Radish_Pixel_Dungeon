@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,10 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 
-public class EnhancedRings extends FlavourBuff{
+public class EnhancedRings extends FlavourBuff {
 
 	{
 		type = Buff.buffType.POSITIVE;
@@ -38,10 +37,7 @@ public class EnhancedRings extends FlavourBuff{
 	@Override
 	public boolean attachTo(Char target) {
 		if (super.attachTo(target)){
-			if (target instanceof Hero) {
-				((Hero) target).updateHT(false);
-				((Hero) target).updateCritSkill();
-			}
+			if (target instanceof Hero) ((Hero) target).updateHT(false);
 			return true;
 		}
 		return false;
@@ -50,10 +46,7 @@ public class EnhancedRings extends FlavourBuff{
 	@Override
 	public void detach() {
 		super.detach();
-		if (target instanceof Hero) {
-			((Hero) target).updateHT(false);
-			((Hero) target).updateCritSkill();
-		}
+		if (target instanceof Hero) ((Hero) target).updateHT(false);
 	}
 
 	@Override
@@ -68,12 +61,8 @@ public class EnhancedRings extends FlavourBuff{
 
 	@Override
 	public float iconFadePercent() {
-		float max = 3*Dungeon.hero.pointsInTalent(Talent.DEATHBLOW);
+		float max = 3*Dungeon.hero.pointsInTalent(Talent.ENHANCED_RINGS);
 		return Math.max(0, (max-visualcooldown()) / max);
 	}
 
-	@Override
-	public String desc() {
-		return Messages.get(this, "desc", (int)visualcooldown());
-	}
 }

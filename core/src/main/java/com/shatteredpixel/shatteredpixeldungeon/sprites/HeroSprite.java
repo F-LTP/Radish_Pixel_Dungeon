@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,15 +25,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.EnergyArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.watabou.gltextures.SmartTexture;
 import com.watabou.gltextures.TextureCache;
@@ -72,26 +63,8 @@ public class HeroSprite extends CharSprite {
 	}
 	
 	public void updateArmor() {
-		int t=0;
-		Armor armor =Dungeon.hero.belongings.armor();
-		if (armor instanceof ClassArmor){
-			t= 6;
-		}
-		else if (armor != null){
-			if (armor instanceof PrisonArmor) t=7;
-			else if (armor instanceof CrabArmor) t=8;
-			else if (armor instanceof DarkCoat) t=9;
-			else if (armor instanceof AfterGlow) t=10;
-			else if (armor instanceof CloakofGreyFeather) t=11;
-			else if (armor instanceof RatArmor) t=12;
 
-			else if (armor instanceof EnergyArmor){
-				t= ((EnergyArmor) armor).Energy();
-			}
-
-			else t= armor.tier;
-		}
-		TextureFilm film = new TextureFilm( tiers(), t, FRAME_WIDTH, FRAME_HEIGHT );
+		TextureFilm film = new TextureFilm( tiers(), Dungeon.hero.tier(), FRAME_WIDTH, FRAME_HEIGHT );
 		
 		idle = new Animation( 1, true );
 		idle.frames( film, 0, 0, 0, 1, 0, 0, 1, 1 );
@@ -146,9 +119,10 @@ public class HeroSprite extends CharSprite {
 	}
 
 	@Override
-	public void jump( int from, int to, Callback callback ) {
-		super.jump( from, to, callback );
+	public void jump( int from, int to, float height, float duration,  Callback callback ) {
+		super.jump( from, to, height, duration, callback );
 		play( fly );
+		Camera.main.panFollow(this, 20f);
 	}
 
 	public synchronized void read() {

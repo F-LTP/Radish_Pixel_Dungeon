@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.MetalShard;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
-import com.shatteredpixel.shatteredpixeldungeon.levels.traps.SummoningTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -44,6 +43,8 @@ public class ReclaimTrap extends TargetedSpell {
 	
 	{
 		image = ItemSpriteSheet.RECLAIM_TRAP;
+
+		talentChance = 1/(float)Recipe.OUT_QUANTITY;
 	}
 	
 	private Class<?extends Trap> storedTrap = null;
@@ -116,8 +117,12 @@ public class ReclaimTrap extends TargetedSpell {
 	
 	@Override
 	public int value() {
-		//prices of ingredients, divided by output quantity
-		return Math.round(quantity * ((40 + 50) / 4f));
+		return (int)(60 * (quantity/(float)Recipe.OUT_QUANTITY));
+	}
+
+	@Override
+	public int energyVal() {
+		return (int)(12 * (quantity/(float)Recipe.OUT_QUANTITY));
 	}
 	
 	private static final String STORED_TRAP = "stored_trap";
@@ -135,15 +140,17 @@ public class ReclaimTrap extends TargetedSpell {
 	}
 	
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe.SimpleRecipe {
+
+		private static final int OUT_QUANTITY = 5;
 		
 		{
 			inputs =  new Class[]{ScrollOfMagicMapping.class, MetalShard.class};
 			inQuantity = new int[]{1, 1};
 			
-			cost = 6;
+			cost = 8;
 			
 			output = ReclaimTrap.class;
-			outQuantity = 4;
+			outQuantity = OUT_QUANTITY;
 		}
 		
 	}

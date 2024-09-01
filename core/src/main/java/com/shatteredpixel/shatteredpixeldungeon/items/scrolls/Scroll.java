@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,6 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls;
-
-import static com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll.ScrollToStone.stones;
-import static com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll.exoToReg;
-import static com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll.regToExo;
-import static com.shatteredpixel.shatteredpixeldungeon.items.spells.ArcaneCatalyst.scrollChances;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
@@ -52,8 +47,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFear;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFlock;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfIntuition;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfShock;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
@@ -94,6 +87,11 @@ public abstract class Scroll extends Item {
 	protected static ItemStatusHandler<Scroll> handler;
 	
 	protected String rune;
+
+	//affects how strongly on-scroll talents trigger from this scroll
+	protected float talentFactor = 1;
+	//the chance (0-1) of whether on-scroll talents trigger from this potion
+	protected float talentChance = 1;
 	
 	{
 		stackable = true;
@@ -113,8 +111,8 @@ public abstract class Scroll extends Item {
 		ArrayList<Class<?extends Item>> classes = new ArrayList<>();
 		for (Item i : items){
 			if (i instanceof ExoticScroll){
-				if (!classes.contains(exoToReg.get(i.getClass()))){
-					classes.add(exoToReg.get(i.getClass()));
+				if (!classes.contains(ExoticScroll.exoToReg.get(i.getClass()))){
+					classes.add(ExoticScroll.exoToReg.get(i.getClass()));
 				}
 			} else if (i instanceof Scroll){
 				if (!classes.contains(i.getClass())){
@@ -160,67 +158,14 @@ public abstract class Scroll extends Item {
 		actions.add( AC_READ );
 		return actions;
 	}
-
-	/**
-	 * 重写获得更好的维护<br>
-	 * Author:JDSALing<br>
-	 * 奥术精炼-T4-1实现<br>
-	 * @param log 消息输出
-	 * @param original 原始输出
-	 */
-	public void MagicStone(boolean log,boolean original){
-		if(original) {
-			boolean isNotDouble = !(curItem instanceof ScrollOfRemoveCurse || curItem instanceof ScrollOfUpgrade || curItem instanceof ScrollOfIdentify || curItem instanceof ScrollOfTransmutation);
-			if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 1 && isNotDouble && Random.Int(0,100)>=50) {
-				Item MagicStone = Reflection.newInstance(stones.get(curItem.getClass()));
-				if(log)GLog.p(Messages.get(Scroll.class,"scrollToStone",MagicStone.name()));
-				Dungeon.level.drop(MagicStone, curUser.pos);
-			}
-		}
-	}
-
-	public void ShadowBooks(Hero hero){
-		//确保是装备了 ShadowBooks
-		if(hero.belongings.weapon instanceof ShadowBooks){
-			ShadowBooks sos = (ShadowBooks) hero.belongings.weapon;
-			//获取概率 成功进行
-			// keptThoughLostInvent 检查如果未祝福十字架后是否存在 （即玩家是否保留）
-			if(sos.aloneToChance() && !sos.keptThoughLostInvent){
-				Scroll s = Reflection.newInstance(Random.chances(scrollChances));
-				s.anonymize();
-				sos.AloneChance *= 2;
-				curItem = s;
-				s.doRead();
-			} else {
-				//失败即可恢复为正常概率
-				sos.AloneChance = 1;
-			}
-		}
-	}
-
-	public void ShadowExBooks(Hero hero){
-		//确保是装备了 ShadowBooks
-		if(hero.belongings.weapon instanceof ShadowBooks){
-			ShadowBooks sos = (ShadowBooks) hero.belongings.weapon;
-			//获取概率 成功进行
-			// keptThoughLostInvent 检查如果未祝福十字架后是否存在 （即玩家是否保留）
-			if(sos.aloneToChance() && !sos.keptThoughLostInvent){
-				Scroll s= Reflection.newInstance(regToExo.get(this.getClass()));
-				s.anonymize();
-				curItem = s;
-				sos.AloneChance *= 2;
-				s.doRead();
-			} else {
-				//失败即可恢复为正常概率
-				sos.AloneChance = 1;
-			}
-		}
-	}
-
+	
 	@Override
 	public void execute( Hero hero, String action ) {
+
 		super.execute( hero, action );
+
 		if (action.equals( AC_READ )) {
+			
 			if (hero.buff(MagicImmune.class) != null){
 				GLog.w( Messages.get(this, "no_magic") );
 			} else if (hero.buff( Blindness.class ) != null) {
@@ -230,10 +175,6 @@ public abstract class Scroll extends Item {
 					&& !(this instanceof ScrollOfRemoveCurse || this instanceof ScrollOfAntiMagic)){
 				GLog.n( Messages.get(this, "cursed") );
 			} else {
-				MagicStone(true,true);
-				curUser = hero;
-				ShadowBooks(hero);
-				curItem = detach( hero.belongings.backpack );
 				doRead();
 			}
 			
@@ -242,23 +183,14 @@ public abstract class Scroll extends Item {
 	
 	public abstract void doRead();
 
-	protected void readAnimation(){
-		readAnimation(false);
-	}
-	protected void readAnimation( boolean toDouble) {
+	protected void readAnimation() {
 		Invisibility.dispel();
 		curUser.spend( TIME_TO_READ );
 		curUser.busy();
 		((HeroSprite)curUser.sprite).read();
 
-		/*if (curUser.hasTalent(Talent.SPELL_QUEUE)){
-			Buff.affect(curUser, ScrollEmpower.class).reset();
-			updateQuickslot();
-		}*/
-		if (curUser.hasTalent(Talent.ENERGIZING_UPGRADE)){
-			for (Wand.Charger c : curUser.buffs(Wand.Charger.class)){
-				c.gainCharge((toDouble?2:1)*(0.34f+0.33f*curUser.pointsInTalent(Talent.ENERGIZING_UPGRADE)));
-			}
+		if (!anonymous && Random.Float() < talentChance) {
+			Talent.onScrollUsed(curUser, curUser.pos, talentFactor);
 		}
 
 	}
@@ -342,8 +274,8 @@ public abstract class Scroll extends Item {
 		
 		@Override
 		public boolean isSimilar(Item item) {
-			return regToExo.containsKey(item.getClass())
-					|| regToExo.containsValue(item.getClass());
+			return ExoticScroll.regToExo.containsKey(item.getClass())
+					|| ExoticScroll.regToExo.containsValue(item.getClass());
 		}
 		
 		@Override
@@ -357,7 +289,7 @@ public abstract class Scroll extends Item {
 	
 	public static class ScrollToStone extends Recipe {
 		
-		protected static HashMap<Class<?extends Scroll>, Class<?extends Runestone>> stones = new HashMap<>();
+		private static HashMap<Class<?extends Scroll>, Class<?extends Runestone>> stones = new HashMap<>();
 		static {
 			stones.put(ScrollOfIdentify.class,      StoneOfIntuition.class);
 			stones.put(ScrollOfLullaby.class,       StoneOfDeepSleep.class);

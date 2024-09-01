@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.watabou.input.GameAction;
 
 public class LootIndicator extends Tag {
@@ -36,7 +35,7 @@ public class LootIndicator extends Tag {
 	private int lastQuantity = 0;
 	
 	public LootIndicator() {
-		super( 0x1F75CC );
+		super( 0x185898 );
 		
 		setSize( SIZE, SIZE );
 		
@@ -49,6 +48,7 @@ public class LootIndicator extends Tag {
 
 		slot = new ItemSlot() {
 			protected void onClick() {
+				LootIndicator.this.onClick();
 				if (Dungeon.hero.ready && Dungeon.hero.handle(Dungeon.hero.pos)){
 					Dungeon.hero.next();
 				}

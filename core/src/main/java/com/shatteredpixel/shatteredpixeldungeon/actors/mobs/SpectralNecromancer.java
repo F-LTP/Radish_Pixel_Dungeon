@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurse;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.SpectralNecromancerSprite;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
@@ -41,7 +43,6 @@ public class SpectralNecromancer extends Necromancer {
 
 	{
 		spriteClass = SpectralNecromancerSprite.class;
-		properties.add(Property.ELITES);
 	}
 
 	private ArrayList<Integer> wraithIDs = new ArrayList<>();
@@ -74,7 +75,7 @@ public class SpectralNecromancer extends Necromancer {
 	public void die(Object cause) {
 		for (int ID : wraithIDs){
 			Actor a = Actor.findById(ID);
-			if (a instanceof Wraith){
+			if (a instanceof Wraith && ((Wraith) a).alignment == alignment){
 				((Wraith) a).die(null);
 			}
 		}
@@ -126,7 +127,7 @@ public class SpectralNecromancer extends Necromancer {
 			//push enemy, or wait a turn if there is no valid pushing position
 			if (pushPos != pos) {
 				Char ch = Actor.findChar(summoningPos);
-				Actor.addDelayed( new Pushing( ch, ch.pos, pushPos ), -1 );
+				Actor.add( new Pushing( ch, ch.pos, pushPos ) );
 
 				ch.pos = pushPos;
 				Dungeon.level.occupyCell(ch );
@@ -135,10 +136,11 @@ public class SpectralNecromancer extends Necromancer {
 
 				Char blocker = Actor.findChar(summoningPos);
 				if (blocker.alignment != alignment){
-					blocker.damage( Random.NormalIntRange(2, 10), this );
+					blocker.damage( Char.combatRoll(2, 10), new SummoningBlockDamage() );
 					if (blocker == Dungeon.hero && !blocker.isAlive()){
 						Badges.validateDeathFromEnemyMagic();
-						Dungeon.fail(getClass());
+						Dungeon.fail(this);
+						GLog.n( Messages.capitalize(Messages.get(Char.class, "kill", name())) );
 					}
 				}
 
@@ -149,7 +151,7 @@ public class SpectralNecromancer extends Necromancer {
 
 		summoning = firstSummon = false;
 
-		Wraith wraith = Wraith.spawnAt(summoningPos);
+		Wraith wraith = Wraith.spawnAt(summoningPos, Wraith.class);
 		wraith.adjustStats(0);
 		Dungeon.level.occupyCell( wraith );
 		((SpectralNecromancerSprite)sprite).finishSummoning();

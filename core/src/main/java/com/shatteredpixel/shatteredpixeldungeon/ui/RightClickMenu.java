@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
-import com.shatteredpixel.shatteredpixeldungeon.windows.IconTitle;
 import com.watabou.input.PointerEvent;
 import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.Image;
@@ -52,8 +51,8 @@ public class RightClickMenu extends Component {
 
 	public RightClickMenu(Item item){
 		ArrayList<String> actions = item.actions(Dungeon.hero);
-		if (actions.remove(item.defaultAction)) {
-			actions.add(0, item.defaultAction);
+		if (actions.remove(item.defaultAction())) {
+			actions.add(0, item.defaultAction());
 		}
 		String[] options = actions.toArray(new String[0]);
 		this.item = item;
@@ -105,7 +104,7 @@ public class RightClickMenu extends Component {
 					if (item != null){
 						item.execute(Dungeon.hero, options[finalI]);
 
-						if (options[finalI].equals(item.defaultAction) && item.usesTargeting){
+						if (options[finalI].equals(item.defaultAction()) && item.usesTargeting){
 							InventoryPane.useTargeting();
 						}
 					}
@@ -115,7 +114,7 @@ public class RightClickMenu extends Component {
 				}
 			};
 			if (item != null){
-				if (options[i].equals(item.defaultAction)) {
+				if (options[i].equals(item.defaultAction())) {
 					buttons[i].textColor(Window.TITLE_COLOR);
 				}
 				buttons[i].text(item.actionName(options[i], Dungeon.hero));

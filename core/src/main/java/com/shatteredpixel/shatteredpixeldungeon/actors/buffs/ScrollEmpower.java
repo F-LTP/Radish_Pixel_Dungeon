@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
@@ -38,15 +35,8 @@ public class ScrollEmpower extends Buff {
 
 	private int left;
 
-	public void reset(){
-		int to_left=Dungeon.hero.pointsInTalent(Talent.SPELL_QUEUE);
-		if (target == Dungeon.hero){
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				to_left = (int)(to_left*RingOfBenediction.periodMultiplier(target));
-			}
-		}
-		left = to_left;
+	public void reset(int left){
+		this.left = left;
 		Item.updateQuickslot();
 	}
 
@@ -85,7 +75,7 @@ public class ScrollEmpower extends Buff {
 
 	@Override
 	public String desc() {
-		return Messages.get(this, "desc", Dungeon.hero.pointsInTalent(Talent.SPELL_QUEUE), left);
+		return Messages.get(this, "desc", 2, left);
 	}
 
 	private static final String LEFT = "left";

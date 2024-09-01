@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ public enum Icons {
 	MAGE,
 	ROGUE,
 	HUNTRESS,
+	DUELIST,
 
 	//grey icons, mainly used for buttons, spacing for 16x16
 	EXIT,
@@ -72,12 +73,14 @@ public enum Icons {
 	CHECKED,
 	CLOSE,
 	PLUS,
+	REPEAT,
 	ARROW,
 	INFO,
 	WARNING,
 	BACKPACK_LRG,
 	TALENT,
 	MAGNIFY,
+	SNAKE,
 	BUFFS,
 	ENERGY,
 	COPY,
@@ -166,6 +169,9 @@ public enum Icons {
 			case HUNTRESS:
 				icon.frame( icon.texture.uvRectBySize( 64, 16, 16, 16 ) );
 				break;
+			case DUELIST:
+				icon.frame( icon.texture.uvRectBySize( 80, 16, 13, 14 ) );
+				break;
 
 			case EXIT:
 				icon.frame( icon.texture.uvRectBySize( 0, 32, 15, 11 ) );
@@ -216,10 +222,10 @@ public enum Icons {
 				icon.frame( icon.texture.uvRectBySize( 208, 32, 15, 10 ) );
 				break;
 			case LEFTARROW:
-				icon.frame( icon.texture.uvRectBySize( 224, 32, 14, 8 ) );
+				icon.frame( icon.texture.uvRectBySize( 224, 32, 14, 9 ) );
 				break;
 			case RIGHTARROW:
-				icon.frame( icon.texture.uvRectBySize( 240, 32, 14, 8 ) );
+				icon.frame( icon.texture.uvRectBySize( 240, 32, 14, 9 ) );
 				break;
 			case CALENDAR:
 				icon.frame( icon.texture.uvRectBySize( 240, 16, 15, 12 ) );
@@ -237,35 +243,41 @@ public enum Icons {
 			case PLUS:
 				icon.frame( icon.texture.uvRectBySize( 48, 48, 11, 11 ) );
 				break;
-			case ARROW:
+			case REPEAT:
 				icon.frame( icon.texture.uvRectBySize( 64, 48, 11, 11 ) );
 				break;
-			case INFO:
-				icon.frame( icon.texture.uvRectBySize( 80, 48, 14, 14 ) );
+			case ARROW:
+				icon.frame( icon.texture.uvRectBySize( 80, 48, 11, 11 ) );
 				break;
-			case WARNING:
+			case INFO:
 				icon.frame( icon.texture.uvRectBySize( 96, 48, 14, 14 ) );
 				break;
+			case WARNING:
+				icon.frame( icon.texture.uvRectBySize( 112, 48, 14, 14 ) );
+				break;
 			case BACKPACK_LRG:
-				icon.frame( icon.texture.uvRectBySize( 112, 48, 16, 16 ) );
+				icon.frame( icon.texture.uvRectBySize( 128, 48, 16, 16 ) );
 				break;
 			case TALENT:
-				icon.frame( icon.texture.uvRectBySize( 128, 48, 13, 13 ) );
+				icon.frame( icon.texture.uvRectBySize( 144, 48, 13, 13 ) );
 				break;
 			case MAGNIFY:
-				icon.frame( icon.texture.uvRectBySize( 144, 48, 14, 14 ) );
+				icon.frame( icon.texture.uvRectBySize( 160, 48, 14, 14 ) );
+				break;
+			case SNAKE:
+				icon.frame( icon.texture.uvRectBySize( 176, 48,  9, 13 ) );
 				break;
 			case BUFFS:
-				icon.frame( icon.texture.uvRectBySize( 160, 48, 16, 15 ) );
+				icon.frame( icon.texture.uvRectBySize( 192, 48, 16, 15 ) );
 				break;
 			case ENERGY:
-				icon.frame( icon.texture.uvRectBySize( 176, 48, 16, 16 ) );
+				icon.frame( icon.texture.uvRectBySize( 208, 48, 16, 16 ) );
 				break;
 			case COPY:
-				icon.frame( icon.texture.uvRectBySize( 192, 48, 13, 13 ) );
+				icon.frame( icon.texture.uvRectBySize( 224, 48, 13, 13 ) );
 				break;
 			case PASTE:
-				icon.frame( icon.texture.uvRectBySize( 208, 48, 13, 13 ) );
+				icon.frame( icon.texture.uvRectBySize( 240, 48, 13, 13 ) );
 				break;
 			case COIN_SML:
 				icon.frame( icon.texture.uvRectBySize( 192, 64, 7, 7 ) );
@@ -390,16 +402,18 @@ public enum Icons {
 	
 	public static Image get( HeroClass cl ) {
 		switch (cl) {
-		case WARRIOR:
-			return get( WARRIOR );
-		case MAGE:
-			return get( MAGE );
-		case ROGUE:
-			return get( ROGUE );
-		case HUNTRESS:
-			return get( HUNTRESS );
-		default:
-			return null;
+			case WARRIOR:
+				return get( Icons.WARRIOR );
+			case MAGE:
+				return get( Icons.MAGE );
+			case ROGUE:
+				return get( Icons.ROGUE );
+			case HUNTRESS:
+				return get( Icons.HUNTRESS );
+			case DUELIST:
+				return get( Icons.DUELIST );
+			default:
+				return null;
 		}
 	}
 

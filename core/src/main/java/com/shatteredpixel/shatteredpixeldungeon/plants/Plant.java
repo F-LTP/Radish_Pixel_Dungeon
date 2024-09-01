@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
@@ -59,24 +58,18 @@ public abstract class Plant implements Bundlable {
 	public void trigger(){
 
 		Char ch = Actor.findChar(pos);
-		if (!(this instanceof VineTrap)) {
-			if (ch instanceof Hero) {
-				((Hero) ch).interrupt();
-			}
 
-		/*if (Dungeon.level.heroFOV[pos] && Dungeon.hero.hasTalent(Talent.UNDERESTIMATED)){
-			// 3/5 turns based on talent points spent
-			Buff.affect(Dungeon.hero, Barkskin.class).set(2, 1 + 2*(Dungeon.hero.pointsInTalent(Talent.UNDERESTIMATED)));
-		}*/
-
-			wither();
-			activate(ch);
-		}else {
-			if (ch == null || ch.alignment == Char.Alignment.ENEMY){
-				wither();
-				activate(ch);
-			}
+		if (ch instanceof Hero){
+			((Hero) ch).interrupt();
 		}
+
+		if (Dungeon.level.heroFOV[pos] && Dungeon.hero.hasTalent(Talent.NATURES_AID)){
+			// 3/5 turns based on talent points spent
+			Barkskin.conditionallyAppend(Dungeon.hero, 2, 1 + 2*(Dungeon.hero.pointsInTalent(Talent.NATURES_AID)));
+		}
+
+		wither();
+		activate( ch );
 	}
 	
 	public abstract void activate( Char ch );

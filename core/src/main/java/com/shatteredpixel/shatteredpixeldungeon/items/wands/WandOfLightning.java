@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,11 +35,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocki
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
-import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
+import com.watabou.utils.BArray;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.watabou.noosa.Camera;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Callback;
 import com.watabou.utils.PathFinder;
@@ -69,12 +69,12 @@ public class WandOfLightning extends DamageWand {
 	public void onZap(Ballistica bolt) {
 
 		//lightning deals less damage per-target, the more targets that are hit.
-		float multipler = 0.4f + (0.6f/affected.size());
+		float multiplier = 0.4f + (0.6f/affected.size());
 		//if the main target is in water, all affected take full damage
-		if (Dungeon.level.water[bolt.collisionPos]) multipler = 1f;
+		if (Dungeon.level.water[bolt.collisionPos]) multiplier = 1f;
 
 		for (Char ch : affected){
-			if (ch == Dungeon.hero) Camera.main.shake( 2, 0.3f );
+			if (ch == Dungeon.hero) PixelScene.shake( 2, 0.3f );
 			ch.sprite.centerEmitter().burst( SparkParticle.FACTORY, 3 );
 			ch.sprite.flash();
 
@@ -82,17 +82,16 @@ public class WandOfLightning extends DamageWand {
 				continue;
 			}
 			wandProc(ch, chargesPerCast());
-			if (ch == curUser) {
-				ch.damage(Math.round(damageRoll() * multipler * 0.5f), this);
+			if (ch == curUser && ch.isAlive()) {
+				ch.damage(Math.round(damageRoll() * multiplier * 0.5f), this);
+				if (!curUser.isAlive()) {
+					Badges.validateDeathFromFriendlyMagic();
+					Dungeon.fail( this );
+					GLog.n(Messages.get(this, "ondeath"));
+				}
 			} else {
-				ch.damage(Math.round(damageRoll() * multipler), this);
+				ch.damage(Math.round(damageRoll() * multiplier), this);
 			}
-		}
-
-		if (!curUser.isAlive()) {
-			Badges.validateDeathFromFriendlyMagic();
-			Dungeon.fail( getClass() );
-			GLog.n(Messages.get(this, "ondeath"));
 		}
 	}
 
@@ -102,7 +101,7 @@ public class WandOfLightning extends DamageWand {
 		new LightningOnHit().proc(staff, attacker, defender, damage);
 	}
 
-	private static class LightningOnHit extends Shocking {
+	public static class LightningOnHit extends Shocking {
 		@Override
 		protected float procChanceMultiplier(Char attacker) {
 			return Wand.procChanceMultiplier(attacker);
@@ -111,7 +110,7 @@ public class WandOfLightning extends DamageWand {
 
 	private void arc( Char ch ) {
 
-		int dist = (Dungeon.level.water[ch.pos] && !ch.flying) ? 2 : 1;
+		int dist = Dungeon.level.water[ch.pos] ? 2 : 1;
 
 		ArrayList<Char> hitThisArc = new ArrayList<>();
 		PathFinder.buildDistanceMap( ch.pos, BArray.not( Dungeon.level.solid, null ), dist );

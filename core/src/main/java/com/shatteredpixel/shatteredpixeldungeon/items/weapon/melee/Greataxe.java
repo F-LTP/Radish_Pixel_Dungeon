@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,17 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.AttackIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Callback;
 
 public class Greataxe extends MeleeWeapon {
 
@@ -45,4 +55,68 @@ public class Greataxe extends MeleeWeapon {
 		return STRReq(tier+1, lvl); //20 base strength req, up from 18
 	}
 
+	@Override
+	public String targetingPrompt() {
+		return Messages.get(this, "prompt");
+	}
+
+	@Override
+	protected void duelistAbility(Hero hero, Integer target) {
+		if (hero.HP / (float)hero.HT >= 0.5f){
+			GLog.w(Messages.get(this, "ability_cant_use"));
+			return;
+		}
+
+		if (target == null) {
+			return;
+		}
+
+		Char enemy = Actor.findChar(target);
+		if (enemy == null || enemy == hero || hero.isCharmedBy(enemy) || !Dungeon.level.heroFOV[target]) {
+			GLog.w(Messages.get(this, "ability_no_target"));
+			return;
+		}
+
+		hero.belongings.abilityWeapon = this;
+		if (!hero.canAttack(enemy)){
+			GLog.w(Messages.get(this, "ability_target_range"));
+			hero.belongings.abilityWeapon = null;
+			return;
+		}
+		hero.belongings.abilityWeapon = null;
+
+		hero.sprite.attack(enemy.pos, new Callback() {
+			@Override
+			public void call() {
+				beforeAbilityUsed(hero, enemy);
+				AttackIndicator.target(enemy);
+
+				//+(12+(2*lvl)) damage, roughly +50% base damage, +55% scaling
+				int dmgBoost = augment.damageFactor(12 + 2*buffedLvl());
+
+				if (hero.attack(enemy, 1, dmgBoost, Char.INFINITE_ACCURACY)){
+					Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
+				}
+
+				Invisibility.dispel();
+				if (!enemy.isAlive()){
+					hero.next();
+					onAbilityKill(hero, enemy);
+				} else {
+					hero.spendAndNext(hero.attackDelay());
+				}
+				afterAbilityUsed(hero);
+			}
+		});
+	}
+
+	@Override
+	public String abilityInfo() {
+		int dmgBoost = levelKnown ? 12 + 2*buffedLvl() : 12;
+		if (levelKnown){
+			return Messages.get(this, "ability_desc", augment.damageFactor(min()+dmgBoost), augment.damageFactor(max()+dmgBoost));
+		} else {
+			return Messages.get(this, "typical_ability_desc", min(0)+dmgBoost, max(0)+dmgBoost);
+		}
+	}
 }

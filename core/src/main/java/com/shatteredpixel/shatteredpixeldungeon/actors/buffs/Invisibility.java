@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfConcealment;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -84,8 +83,7 @@ public class Invisibility extends FlavourBuff {
 
 	public static void dispel() {
 		if (Dungeon.hero == null) return;
-		if (Dungeon.hero.buff(ArtifactRecharge.class)!= null && Dungeon.hero.buff(CloakOfConcealment.conceal.class)!=null)
-			Buff.affect(Dungeon.hero, CloakOfConcealment.anti_nru_invisibility.class,1f);
+
 		dispel(Dungeon.hero);
 	}
 
@@ -113,6 +111,11 @@ public class Invisibility extends FlavourBuff {
 		Swiftthistle.TimeBubble bubble =  ch.buff( Swiftthistle.TimeBubble.class );
 		if (bubble != null){
 			bubble.detach();
+		}
+
+		RoundShield.GuardTracker guard = ch.buff(RoundShield.GuardTracker.class);
+		if (guard != null && guard.hasBlocked){
+			guard.detach();
 		}
 	}
 }

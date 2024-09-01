@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.GolemSprite;
-import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
+import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
@@ -53,7 +53,6 @@ public class Golem extends Mob {
 
 		properties.add(Property.INORGANIC);
 		properties.add(Property.LARGE);
-		properties.add(Property.HEADLESS);
 
 		WANDERING = new Wandering();
 		HUNTING = new Hunting();
@@ -61,7 +60,7 @@ public class Golem extends Mob {
 
 	@Override
 	public int damageRoll() {
-		return Random.NormalIntRange( 25, 30 );
+		return Char.combatRoll( 25, 30 );
 	}
 	
 	@Override
@@ -71,7 +70,7 @@ public class Golem extends Mob {
 	
 	@Override
 	public int drRoll() {
-		return Random.NormalIntRange(0, 12);
+		return super.drRoll() + Char.combatRoll(0, 12);
 	}
 
 	@Override
@@ -91,7 +90,7 @@ public class Golem extends Mob {
 		Dungeon.LimitedDrops.GOLEM_EQUIP.count++;
 		//uses probability tables for demon halls
 		if (loot == Generator.Category.WEAPON){
-			return Generator.randomWeapon(5);
+			return Generator.randomWeapon(5, true);
 		} else {
 			return Generator.randomArmor(5);
 		}
@@ -198,7 +197,7 @@ public class Golem extends Mob {
 				teleporting = true;
 				spend( 2*TICK );
 			} else {
-				target = Dungeon.level.randomDestination( Golem.this );
+				target = randomDestination();
 				spend( TICK );
 			}
 

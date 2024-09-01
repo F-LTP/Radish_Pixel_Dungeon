@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,18 +28,15 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
-import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
 
 public class SnipersMark extends FlavourBuff implements ActionIndicator.Action {
 
 	public int object = 0;
-	public int secondObject = 0;
 	public int level = 0;
 
 	private static final String OBJECT    = "object";
@@ -55,12 +52,7 @@ public class SnipersMark extends FlavourBuff implements ActionIndicator.Action {
 		this.object = object;
 		this.level = level;
 	}
-
-	public void setSec(int object, int level){
-		this.secondObject = object;
-		this.level = level;
-	}
-
+	
 	@Override
 	public boolean attachTo(Char target) {
 		ActionIndicator.setAction(this);
@@ -70,8 +62,6 @@ public class SnipersMark extends FlavourBuff implements ActionIndicator.Action {
 	@Override
 	public void detach() {
 		super.detach();
-		object = 0;
-		secondObject = 0;
 		ActionIndicator.clearAction(this);
 	}
 	
@@ -121,10 +111,15 @@ public class SnipersMark extends FlavourBuff implements ActionIndicator.Action {
 	}
 
 	@Override
-	public Image actionIcon() {
-		return new ItemSprite(ItemSpriteSheet.SPIRIT_BOW, null);
+	public int actionIcon() {
+		return HeroIcon.SNIPERS_MARK;
 	}
-	
+
+	@Override
+	public int indicatorColor() {
+		return 0x444444;
+	}
+
 	@Override
 	public void doAction() {
 		
@@ -139,30 +134,14 @@ public class SnipersMark extends FlavourBuff implements ActionIndicator.Action {
 		
 		Char ch = (Char) Actor.findById(object);
 		if (ch == null) return;
-
-		if(secondObject != 0){
-
-			Char chSec = (Char) Actor.findById(secondObject);
-			int cellSec = QuickSlotButton.autoAim(chSec, arrow);
-
-			if(chSec != null && cellSec != -1) {
-				bow.sniperSpecial = true;
-				bow.sniperSpecialBonusDamage = level * Dungeon.hero.pointsInTalent(Talent.SHARED_UPGRADES) / 10f;
-
-				hero.sniperSpecial = true;
-				arrow.cast(hero, cellSec);
-			}
-		}
-
+		
 		int cell = QuickSlotButton.autoAim(ch, arrow);
 		if (cell == -1) return;
 		
 		bow.sniperSpecial = true;
 		bow.sniperSpecialBonusDamage = level*Dungeon.hero.pointsInTalent(Talent.SHARED_UPGRADES)/10f;
-
-		hero.sniperSpecial = true;
+		
 		arrow.cast(hero, cell);
-
 		detach();
 		
 	}

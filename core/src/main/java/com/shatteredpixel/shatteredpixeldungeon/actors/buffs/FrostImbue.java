@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SnowParticle;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 
@@ -39,15 +36,8 @@ public class FrostImbue extends FlavourBuff {
 	public static final float DURATION	= 50f;
 	
 	public void proc(Char enemy){
-		float chill_time=2f;
-		if (target == Dungeon.hero){
-		Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-		if (ben!=null){
-			chill_time*=RingOfBenediction.periodMultiplier(target);
-		}
-	}
-		Buff.affect(enemy, Chill.class, chill_time);
-		enemy.sprite.emitter().burst( SnowParticle.FACTORY, 2 );
+		Buff.affect(enemy, Chill.class, 3f);
+		enemy.sprite.emitter().burst( SnowParticle.FACTORY, 3 );
 	}
 	
 	@Override
@@ -68,5 +58,16 @@ public class FrostImbue extends FlavourBuff {
 	{
 		immunities.add( Frost.class );
 		immunities.add( Chill.class );
+	}
+
+	@Override
+	public boolean attachTo(Char target) {
+		if (super.attachTo(target)){
+			Buff.detach(target, Frost.class);
+			Buff.detach(target, Chill.class);
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

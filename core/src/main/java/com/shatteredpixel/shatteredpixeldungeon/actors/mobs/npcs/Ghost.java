@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,18 +31,17 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.FetidRat;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.GnollTrickster;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.GreatCrab;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
-import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.LeatherArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.MailArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PlateArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ScaleArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ParchmentScrap;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.SewerLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.GhostSprite;
@@ -50,11 +49,11 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndQuest;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndSadGhost;
 import com.watabou.noosa.Game;
+import com.watabou.noosa.audio.Music;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
 import com.watabou.utils.Random;
-import com.watabou.utils.Reflection;
 
 public class Ghost extends NPC {
 
@@ -62,8 +61,24 @@ public class Ghost extends NPC {
 		spriteClass = GhostSprite.class;
 		
 		flying = true;
-		
+
+		WANDERING = new Wandering();
 		state = WANDERING;
+
+		//not actually large of course, but this makes the ghost stick to the exit room
+		properties.add(Property.LARGE);
+	}
+
+	protected class Wandering extends Mob.Wandering{
+		@Override
+		protected int randomDestination() {
+			int pos = super.randomDestination();
+			//cannot wander onto heaps or the level exit
+			if (Dungeon.level.heaps.get(pos) != null || pos == Dungeon.level.exit()){
+				return -1;
+			}
+			return pos;
+		}
 	}
 
 	@Override
@@ -71,9 +86,6 @@ public class Ghost extends NPC {
 		if (Dungeon.hero.buff(AscensionChallenge.class) != null){
 			die(null);
 			return true;
-		}
-		if (Quest.processed()) {
-			target = Dungeon.hero.pos;
 		}
 		if (Dungeon.level.heroFOV[pos] && !Quest.completed()){
 			Notes.add( Notes.Landmark.GHOST );
@@ -88,20 +100,22 @@ public class Ghost extends NPC {
 	
 	@Override
 	public float speed() {
-		return Quest.processed() ? 2f : 0.5f;
+		return 0.5f;
 	}
 	
 	@Override
 	protected Char chooseEnemy() {
 		return null;
 	}
-	
+
 	@Override
 	public void damage( int dmg, Object src ) {
+		//do nothing
 	}
-	
+
 	@Override
-	public void add( Buff buff ) {
+	public boolean add( Buff buff ) {
+		return false;
 	}
 	
 	@Override
@@ -147,20 +161,6 @@ public class Ghost extends NPC {
 						}
 					});
 
-					int newPos = -1;
-					for (int i = 0; i < 10; i++) {
-						newPos = Dungeon.level.randomRespawnCell( this );
-						if (newPos != -1) {
-							break;
-						}
-					}
-					if (newPos != -1) {
-
-						CellEmitter.get(pos).start(Speck.factory(Speck.LIGHT), 0.2f, 3);
-						pos = newPos;
-						sprite.place(pos);
-						sprite.visible = Dungeon.level.heroFOV[pos];
-					}
 				}
 			}
 		} else {
@@ -170,13 +170,13 @@ public class Ghost extends NPC {
 			switch (Quest.type){
 				case 1: default:
 					questBoss = new FetidRat();
-					txt_quest = Messages.get(this, "rat_1", Dungeon.hero.name()); break;
+					txt_quest = Messages.get(this, "rat_1", Messages.titleCase(Dungeon.hero.name())); break;
 				case 2:
 					questBoss = new GnollTrickster();
-					txt_quest = Messages.get(this, "gnoll_1", Dungeon.hero.name()); break;
+					txt_quest = Messages.get(this, "gnoll_1", Messages.titleCase(Dungeon.hero.name())); break;
 				case 3:
 					questBoss = new GreatCrab();
-					txt_quest = Messages.get(this, "crab_1", Dungeon.hero.name()); break;
+					txt_quest = Messages.get(this, "crab_1", Messages.titleCase(Dungeon.hero.name())); break;
 			}
 
 			questBoss.pos = Dungeon.level.randomRespawnCell( this );
@@ -188,7 +188,20 @@ public class Ghost extends NPC {
 				Game.runOnRenderThread(new Callback() {
 					@Override
 					public void call() {
-						GameScene.show( new WndQuest( Ghost.this, txt_quest ) );
+						GameScene.show( new WndQuest( Ghost.this, txt_quest ){
+							@Override
+							public void hide() {
+								super.hide();
+								Music.INSTANCE.fadeOut(1f, new Callback() {
+									@Override
+									public void call() {
+										if (Dungeon.level != null) {
+											Dungeon.level.playLevelMusic();
+										}
+									}
+								});
+							}
+						} );
 					}
 				});
 			}
@@ -285,13 +298,13 @@ public class Ghost extends NPC {
 			}
 		}
 		
-		public static void spawn( SewerLevel level ) {
+		public static void spawn( SewerLevel level, Room room ) {
 			if (!spawned && Dungeon.depth > 1 && Random.Int( 5 - Dungeon.depth ) == 0) {
 				
 				Ghost ghost = new Ghost();
 				do {
-					ghost.pos = level.randomRespawnCell( ghost );
-				} while (ghost.pos == -1);
+					ghost.pos = level.pointToCell(room.random());
+				} while (ghost.pos == -1 || ghost.pos == level.exit());
 				level.mobs.add( ghost );
 				
 				spawned = true;
@@ -313,8 +326,12 @@ public class Ghost extends NPC {
 				}
 				//50%:tier2, 30%:tier3, 15%:tier4, 5%:tier5
 				int wepTier = Random.chances(new float[]{0, 0, 10, 6, 3, 1});
-				Generator.Category c = Generator.wepTiers[wepTier - 1];
-				weapon = (MeleeWeapon) Reflection.newInstance(c.classes[Random.chances(c.probs)]);
+				weapon = (Weapon) Generator.random(Generator.wepTiers[wepTier - 1]);
+
+				//clear weapon's starting properties
+				weapon.level(0);
+				weapon.enchant(null);
+				weapon.cursed = false;
 
 				//50%:+0, 30%:+1, 15%:+2, 5%:+3
 				float itemLevelRoll = Random.Float();
@@ -331,8 +348,9 @@ public class Ghost extends NPC {
 				weapon.upgrade(itemLevel);
 				armor.upgrade(itemLevel);
 
-				//10% to be enchanted. We store it separately so enchant status isn't revealed early
-				if (Random.Int(10) == 0){
+				// 20% base chance to be enchanted, stored separately so status isn't revealed early
+				float enchantRoll = Random.Float();
+				if (enchantRoll < 0.2f * ParchmentScrap.enchantChanceMultiplier()){
 					enchant = Weapon.Enchantment.random();
 					glyph = Armor.Glyph.random();
 				}
@@ -346,7 +364,25 @@ public class Ghost extends NPC {
 				Sample.INSTANCE.play( Assets.Sounds.GHOST );
 				processed = true;
 				Statistics.questScores[0] = 1000;
+
+				Game.runOnRenderThread(new Callback() {
+					@Override
+					public void call() {
+						Music.INSTANCE.fadeOut(1f, new Callback() {
+							@Override
+							public void call() {
+								if (Dungeon.level != null) {
+									Dungeon.level.playLevelMusic();
+								}
+							}
+						});
+					}
+				});
 			}
+		}
+
+		public static boolean active(){
+			return spawned && given && !processed && depth == Dungeon.depth;
 		}
 		
 		public static void complete() {

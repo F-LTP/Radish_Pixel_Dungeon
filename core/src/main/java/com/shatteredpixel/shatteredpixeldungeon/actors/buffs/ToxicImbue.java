@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,14 +22,15 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.PathFinder;
 
 public class ToxicImbue extends Buff {
 	
@@ -58,29 +59,27 @@ public class ToxicImbue extends Buff {
 	}
 
 	public void set( float duration ) {
-		if (target == Dungeon.hero){
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				duration*=RingOfBenediction.periodMultiplier(target);
-			}
-		}
 		this.left = duration;
 	}
 
 	@Override
 	public boolean act() {
-		int amount=50;
-		if (target == Dungeon.hero ){
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				amount=Math.round(amount*RingOfBenediction.periodMultiplier(target));
+		if (left > 0) {
+			//spreads 54 units of gas total
+			int centerVolume = 6;
+			for (int i : PathFinder.NEIGHBOURS8) {
+				if (!Dungeon.level.solid[target.pos + i]) {
+					GameScene.add(Blob.seed(target.pos + i, 6, ToxicGas.class));
+				} else {
+					centerVolume += 6;
+				}
 			}
+			GameScene.add(Blob.seed(target.pos, centerVolume, ToxicGas.class));
 		}
-		GameScene.add(Blob.seed(target.pos, amount, ToxicGas.class));
 
 		spend(TICK);
 		left -= TICK;
-		if (left <= 0){
+		if (left <= -5){
 			detach();
 		}
 
@@ -89,7 +88,7 @@ public class ToxicImbue extends Buff {
 
 	@Override
 	public int icon() {
-		return BuffIndicator.IMBUE;
+		return left > 0 ? BuffIndicator.IMBUE : BuffIndicator.NONE;
 	}
 
 	@Override
@@ -115,5 +114,15 @@ public class ToxicImbue extends Buff {
 	{
 		immunities.add( ToxicGas.class );
 		immunities.add( Poison.class );
+	}
+
+	@Override
+	public boolean attachTo(Char target) {
+		if (super.attachTo(target)){
+			Buff.detach(target, Poison.class);
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

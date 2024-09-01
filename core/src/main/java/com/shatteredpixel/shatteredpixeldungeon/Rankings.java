@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.CorpseDust;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
@@ -77,11 +78,7 @@ public enum Rankings {
 	public Record latestDailyReplay = null; //not stored, only meant to be temp
 	public LinkedHashMap<Long, Integer> dailyScoreHistory = new LinkedHashMap<>();
 
-	public void submit( boolean win, Class cause ) {
-
-		if(Dungeon.isChallenged(Challenges.TEST_MODE)){
-			return;
-		}
+	public void submit( boolean win, Object cause ) {
 
 		load();
 		
@@ -99,7 +96,7 @@ public enum Rankings {
 		DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
 		rec.date = format.format(new Date(Game.realTime));
 
-		rec.cause = cause;
+		rec.cause = cause instanceof Class ? (Class)cause : cause.getClass();
 		rec.win		= win;
 		rec.heroClass	= Dungeon.hero.heroClass;
 		rec.armorTier	= Dungeon.hero.tier();
@@ -246,6 +243,11 @@ public enum Rankings {
 	public static final String DAILY_REPLAY	= "daily_replay";
 
 	public void saveGameData(Record rec){
+		if (Dungeon.hero == null){
+			rec.gameData = null;
+			return;
+		}
+
 		rec.gameData = new Bundle();
 
 		Belongings belongings = Dungeon.hero.belongings;
@@ -262,7 +264,7 @@ public enum Rankings {
 					}
 				}
 			}
-			if (!Dungeon.quickslot.contains(item)) {
+			if (!(item instanceof Trinket) && !Dungeon.quickslot.contains(item)) {
 				belongings.backpack.items.remove(item);
 			}
 		}
@@ -319,6 +321,8 @@ public enum Rankings {
 		Dungeon.quickslot.reset();
 		QuickSlotButton.reset();
 		Toolbar.swappedQuickslots = false;
+
+		if (data == null) return;
 
 		Bundle handler = data.getBundle(HANDLERS);
 		Scroll.restore(handler);

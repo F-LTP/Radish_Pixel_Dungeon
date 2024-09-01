@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ package com.shatteredpixel.shatteredpixeldungeon.items.stones;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
-import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfEnchantment;
@@ -49,18 +48,16 @@ public class StoneOfEnchantment extends InventoryStone {
 	
 	@Override
 	protected void onItemSelected(Item item) {
+		curItem.detach( curUser.belongings.backpack );
 		
 		if (item instanceof Weapon) {
 			
 			((Weapon)item).enchant();
 			
-		} else if (item instanceof Armor){
+		} else {
 			
 			((Armor)item).inscribe();
 			
-		}
-		else if (item instanceof BrokenSeal){
-			((BrokenSeal)item).inscribe();
 		}
 		
 		curUser.sprite.emitter().start( Speck.factory( Speck.LIGHT ), 0.1f, 5 );
@@ -68,10 +65,8 @@ public class StoneOfEnchantment extends InventoryStone {
 		
 		if (item instanceof Weapon) {
 			GLog.p(Messages.get(this, "weapon"));
-		} else if (item instanceof Armor){
+		} else {
 			GLog.p(Messages.get(this, "armor"));
-		}else if (item instanceof BrokenSeal){
-			GLog.p(Messages.get(this, "seal"));
 		}
 		
 		useAnimation();
@@ -85,7 +80,7 @@ public class StoneOfEnchantment extends InventoryStone {
 
 	@Override
 	public int energyVal() {
-		return 4 * quantity;
+		return 5 * quantity;
 	}
 
 }

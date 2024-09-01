@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,22 +21,15 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts;
 
-import static com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion.SeedToPotion.types;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
-import com.shatteredpixel.shatteredpixeldungeon.items.bags.PotionBandolier;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.VelvetPouch;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.AlchemicalCatalyst;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.Brew;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -47,10 +40,10 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class Dart extends MissileWeapon {
 
@@ -66,18 +59,11 @@ public class Dart extends MissileWeapon {
 	}
 	
 	protected static final String AC_TIP = "TIP";
-
-	protected static final String AC_POTION = "POTION";
 	
 	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions( hero );
 		actions.add( AC_TIP );
-
-		if (hero.pointsInTalent(Talent.MEDART_SPECIALIST) >= 1 ) {
-			actions.add( AC_POTION );
-		}
-
 		return actions;
 	}
 	
@@ -86,10 +72,6 @@ public class Dart extends MissileWeapon {
 		super.execute(hero, action);
 		if (action.equals(AC_TIP)){
 			GameScene.selectItem(itemSelector);
-		}
-
-		if (action.equals(AC_POTION)){
-			GameScene.selectItem(potionSelector);
 		}
 	}
 	
@@ -115,11 +97,14 @@ public class Dart extends MissileWeapon {
 		}
 	}
 	
-	private static Crossbow bow;
+	protected static Crossbow bow;
 	
 	private void updateCrossbow(){
 		if (Dungeon.hero.belongings.weapon() instanceof Crossbow){
 			bow = (Crossbow) Dungeon.hero.belongings.weapon();
+		} else if (Dungeon.hero.belongings.secondWep() instanceof Crossbow) {
+			//player can instant swap anyway, so this is just QoL
+			bow = (Crossbow) Dungeon.hero.belongings.secondWep();
 		} else {
 			bow = null;
 		}
@@ -137,14 +122,30 @@ public class Dart extends MissileWeapon {
 			return super.hasEnchant(type, owner);
 		}
 	}
-	
+
+	@Override
+	public float accuracyFactor(Char owner, Char target) {
+		//don't update xbow here, as dart is the active weapon atm
+		if (bow != null && owner.buff(Crossbow.ChargedShot.class) != null){
+			return Char.INFINITE_ACCURACY;
+		} else {
+			return super.accuracyFactor(owner, target);
+		}
+	}
+
 	@Override
 	public int proc(Char attacker, Char defender, int damage) {
-		if (bow != null){
+		if (bow != null
+				//only apply enchant effects to enemies when processing charged shot
+				&& (!processingChargedShot || attacker.alignment != defender.alignment)){
 			damage = bow.proc(attacker, defender, damage);
 		}
 
-		return super.proc(attacker, defender, damage);
+		int dmg = super.proc(attacker, defender, damage);
+		if (!processingChargedShot) {
+			processChargedShot(defender, damage);
+		}
+		return dmg;
 	}
 
 	@Override
@@ -156,7 +157,48 @@ public class Dart extends MissileWeapon {
 	@Override
 	protected void onThrow(int cell) {
 		updateCrossbow();
+		//we have to set this here, as on-hit effects can move the target we aim at
+		chargedShotPos = cell;
 		super.onThrow(cell);
+	}
+
+	protected boolean processingChargedShot = false;
+	private int chargedShotPos;
+	protected void processChargedShot( Char target, int dmg ){
+		//don't update xbow here, as dart may be the active weapon atm
+		processingChargedShot = true;
+		if (chargedShotPos != -1 && bow != null && Dungeon.hero.buff(Crossbow.ChargedShot.class) != null) {
+			PathFinder.buildDistanceMap(chargedShotPos, Dungeon.level.passable, 3);
+			//necessary to clone as some on-hit effects use Pathfinder
+			int[] distance = PathFinder.distance.clone();
+			for (Char ch : Actor.chars()){
+				if (ch == target){
+					Actor.add(new Actor() {
+						{ actPriority = VFX_PRIO; }
+						@Override
+						protected boolean act() {
+							if (!ch.isAlive()){
+								bow.onAbilityKill(Dungeon.hero, ch);
+							}
+							Actor.remove(this);
+							return true;
+						}
+					});
+				} else if (distance[ch.pos] != Integer.MAX_VALUE){
+					proc(Dungeon.hero, ch, dmg);
+				}
+			}
+		}
+		chargedShotPos = -1;
+		processingChargedShot = false;
+	}
+
+	@Override
+	protected void decrementDurability() {
+		super.decrementDurability();
+		if (Dungeon.hero.buff(Crossbow.ChargedShot.class) != null) {
+			Dungeon.hero.buff(Crossbow.ChargedShot.class).detach();
+		}
 	}
 
 	@Override
@@ -295,87 +337,4 @@ public class Dart extends MissileWeapon {
 		}
 		
 	};
-
-	private final WndBag.ItemSelector potionSelector = new WndBag.ItemSelector() {
-
-		@Override
-		public String textPrompt() {
-			return Messages.get(Dart.class, "pot_prompt");
-		}
-
-		@Override
-		public Class<?extends Bag> preferredBag(){
-			return PotionBandolier.class;
-		}
-
-		@Override
-		public boolean itemSelectable(Item item) {
-			return item instanceof Potion && !(item instanceof ExoticPotion || item instanceof Brew || item instanceof AlchemicalCatalyst);
-		}
-
-		private Plant.Seed convertToSeed(Potion potion) {
-			for (Map.Entry<Class<? extends Plant.Seed>, Class<? extends Potion>> entry : types.entrySet()) {
-				Class<? extends Potion> potionClass = entry.getValue();
-				if (potionClass.isInstance(potion)) {
-					try {
-						return entry.getKey().getDeclaredConstructor().newInstance();
-					} catch (Exception e) {
-						return null;
-					}
-				}
-			}
-			return null;
-		}
-
-		@Override
-		public void onSelect(final Item item) {
-
-			if (item == null) return;
-
-			Plant.Seed seed = convertToSeed((Potion) item);
-
-			final int singleSeedDarts;
-
-			final String[] options;
-
-			singleSeedDarts = 4;
-			options = new String[]{
-					Messages.get(Dart.class, "tip_potion"),
-					Messages.get(Dart.class, "tip_cancel")};
-
-			TippedDart tipResult = TippedDart.getTipped(seed, 1);
-
-			GameScene.show(new WndOptions(new ItemSprite(seed),
-					Messages.titleCase(seed.name()),
-					Messages.get(Dart.class, "tip_pdesc", tipResult.name()) + "\n\n" + tipResult.desc(),
-					options) {
-
-				@Override
-				protected void onSelect(int index) {
-					super.onSelect(index);
-
-                    if (index == 0) {
-                        seed.detach(curUser.belongings.backpack);
-						item.detach(curUser.belongings.backpack);
-
-                        if (curItem.quantity() <= singleSeedDarts) {
-                            curItem.detachAll(curUser.belongings.backpack);
-                        } else {
-                            curItem.quantity(curItem.quantity() - singleSeedDarts);
-                        }
-
-                        TippedDart newDart = TippedDart.getTipped(seed, singleSeedDarts);
-                        if (!newDart.collect()) Dungeon.level.drop(newDart, curUser.pos).sprite.drop();
-
-                        curUser.spend(1f);
-                        curUser.busy();
-                        curUser.sprite.operate(curUser.pos);
-                    }
-				}
-			});
-
-		}
-
-	};
-
 }

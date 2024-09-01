@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -239,7 +239,7 @@ public abstract class Room extends Rect implements Graph.Node, Bundlable {
 			return false;
 	}
 
-	public boolean canMerge(Level l, Point p, int mergeTerrain){
+	public boolean canMerge(Level l, Room other, Point p, int mergeTerrain){
 		return false;
 	}
 
@@ -263,6 +263,11 @@ public abstract class Room extends Rect implements Graph.Node, Bundlable {
 	}
 	
 	public boolean connect( Room room ) {
+		if (isExit() && room.isEntrance() || isEntrance() && room.isExit()){
+			//entrance and exit rooms cannot directly connect
+			return false;
+		}
+
 		if ((neigbours.contains(room) || addNeigbour(room))
 				&& !connected.containsKey( room ) && canConnect(room)) {
 			connected.put( room, null );
@@ -281,6 +286,14 @@ public abstract class Room extends Rect implements Graph.Node, Bundlable {
 			r.connected.remove(this);
 		}
 		connected.clear();
+	}
+
+	public boolean isEntrance(){
+		return false;
+	}
+
+	public boolean isExit(){
+		return false;
 	}
 	
 	// **** Painter Logic ****
@@ -428,7 +441,7 @@ public abstract class Room extends Rect implements Graph.Node, Bundlable {
 	public static class Door extends Point implements Bundlable {
 		
 		public enum Type {
-			EMPTY, TUNNEL, WATER, REGULAR, UNLOCKED, HIDDEN, BARRICADE, LOCKED, CRYSTAL
+			EMPTY, TUNNEL, WATER, REGULAR, UNLOCKED, HIDDEN, BARRICADE, LOCKED, CRYSTAL, WALL
 		}
 		public Type type = Type.EMPTY;
 		
@@ -442,9 +455,15 @@ public abstract class Room extends Rect implements Graph.Node, Bundlable {
 		public Door( int x, int y ) {
 			super( x, y );
 		}
-		
+
+		private boolean typeLocked = false;
+
+		public void lockTypeChanges( boolean lock ){
+			typeLocked = lock;
+		}
+
 		public void set( Type type ) {
-			if (type.compareTo( this.type ) > 0) {
+			if (!typeLocked && type.compareTo( this.type ) > 0) {
 				this.type = type;
 			}
 		}
@@ -454,6 +473,7 @@ public abstract class Room extends Rect implements Graph.Node, Bundlable {
 			bundle.put("x", x);
 			bundle.put("y", y);
 			bundle.put("type", type);
+			bundle.put("type_locked", typeLocked);
 		}
 		
 		@Override
@@ -461,6 +481,7 @@ public abstract class Room extends Rect implements Graph.Node, Bundlable {
 			x = bundle.getInt("x");
 			y = bundle.getInt("y");
 			type = bundle.getEnum("type", Type.class);
+			typeLocked = bundle.getBoolean("type_locked");
 		}
 	}
 }

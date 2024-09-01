@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ public class Swiftthistle extends Plant {
 
 		@Override
 		public String iconTextDisplay() {
-			return Integer.toString((int)left);
+			return Integer.toString((int)(left + 0.001f));
 		}
 		
 		public void reset(){
@@ -102,7 +102,7 @@ public class Swiftthistle extends Plant {
 		
 		@Override
 		public String desc() {
-			return Messages.get(this, "desc", dispTurns(left));
+			return Messages.get(this, "desc", dispTurns(Math.max(0, left)));
 		}
 		
 		public void processTime(float time){
@@ -121,18 +121,16 @@ public class Swiftthistle extends Plant {
 			}
 		}
 
-		public void triggerPresses() {
-			for (int cell : presses) {
-				Dungeon.level.pressCell(cell);
-			}
-			
-			presses = new ArrayList<>();
-		}
-
-		public void disarmPressedTraps(){
+		public void triggerPresses(){
 			for (int cell : presses){
+				Plant p = Dungeon.level.plants.get(cell);
+				if (p != null){
+					p.trigger();
+				}
 				Trap t = Dungeon.level.traps.get(cell);
-				if (t != null && t.disarmedByActivation) t.disarm();
+				if (t != null){
+					t.trigger();
+				}
 			}
 
 			presses = new ArrayList<>();
@@ -140,16 +138,19 @@ public class Swiftthistle extends Plant {
 
 		public void disarmPresses(){
 			for (int cell : presses){
+				Plant p = Dungeon.level.plants.get(cell);
+				if (p != null && !(p instanceof Rotberry)) {
+					Dungeon.level.uproot(cell);
+				}
 				Trap t = Dungeon.level.traps.get(cell);
 				if (t != null && t.disarmedByActivation) {
 					t.disarm();
 				}
-
-				Dungeon.level.uproot(cell);
 			}
 
 			presses = new ArrayList<>();
 		}
+		
 		@Override
 		public void detach(){
 			super.detach();

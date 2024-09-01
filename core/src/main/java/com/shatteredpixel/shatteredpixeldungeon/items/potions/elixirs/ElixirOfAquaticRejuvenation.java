@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,13 +25,11 @@ import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
+import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.GooBlob;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
@@ -52,13 +50,6 @@ public class ElixirOfAquaticRejuvenation extends Elixir {
 		} else {
 			Buff.affect(hero, AquaHealing.class).set(Math.round(hero.HT * 1.5f));
 		}
-		Talent.onHealingPotionUsed( hero );
-	}
-	
-	@Override
-	public int value() {
-		//prices of ingredients
-		return quantity * (30 + 30);
 	}
 	
 	public static class AquaHealing extends Buff {
@@ -71,12 +62,6 @@ public class ElixirOfAquaticRejuvenation extends Elixir {
 		private int left;
 		
 		public void set( int amount ){
-			if (target == Dungeon.hero ){
-				Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-				if (ben!=null){
-					amount=Math.round(amount*RingOfBenediction.periodMultiplier(target));
-				}
-			}
 			if (amount > left) left = amount;
 		}
 		
@@ -84,30 +69,30 @@ public class ElixirOfAquaticRejuvenation extends Elixir {
 		public boolean act() {
 			
 			if (!target.flying && Dungeon.level.water[target.pos] && target.HP < target.HT){
-				float healAmt = target.HT/50f;
-				if (target == Dungeon.hero ){
-					Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-					if (ben!=null){
-						healAmt*=RingOfBenediction.periodMultiplier(target);
-					}
-				}
-				healAmt = GameMath.gate(1,healAmt,left);
+				float healAmt = GameMath.gate( 1, target.HT/50f, left );
 				healAmt = Math.min(healAmt, target.HT - target.HP);
 				if (Random.Float() < (healAmt % 1)){
 					healAmt = (float)Math.ceil(healAmt);
 				} else {
 					healAmt = (float)Math.floor(healAmt);
 				}
-				target.HP += healAmt;
-				left -= healAmt;
-				if (target.buff(AfterGlow.Warmth.class)!=null){
-					target.buff(AfterGlow.Warmth.class).getWarmth();
+				target.HP += (int)healAmt;
+				left -= (int)healAmt;
+				target.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString((int)healAmt), FloatingText.HEALING );
+
+				if (target.HP >= target.HT) {
+					target.HP = target.HT;
+					if (target instanceof Hero) {
+						((Hero) target).resting = false;
+					}
 				}
-				target.sprite.emitter().burst( Speck.factory( Speck.HEALING ), 1 );
 			}
 			
 			if (left <= 0){
 				detach();
+				if (target instanceof Hero) {
+					((Hero) target).resting = false;
+				}
 			} else {
 				spend(TICK);
 			}

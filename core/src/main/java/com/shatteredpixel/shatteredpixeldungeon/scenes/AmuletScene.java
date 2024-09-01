@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.scenes;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
@@ -32,15 +33,13 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-import com.shatteredpixel.shatteredpixeldungeon.ui.Archs;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
-import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.StyledButton;
 import com.watabou.noosa.Camera;
-import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
+import com.watabou.noosa.audio.Music;
 import com.watabou.noosa.tweeners.Delayer;
 import com.watabou.utils.Random;
 
@@ -70,7 +69,6 @@ public class AmuletScene extends PixelScene {
 		if (!noText) {
 			text = renderTextBlock( Messages.get(this, "text"), 8 );
 			text.maxWidth( PixelScene.landscape() ? 2*WIDTH-4 : WIDTH);
-			add( text );
 		}
 		
 		amulet = new Image( Assets.Sprites.AMULET );
@@ -81,6 +79,7 @@ public class AmuletScene extends PixelScene {
 			protected void onClick() {
 				Dungeon.win( Amulet.class );
 				Dungeon.deleteGame( GamesInProgress.curSlot, true );
+				Badges.saveGlobal();
 				btnExit.enable(false);
 				btnStay.enable(false);
 
@@ -99,6 +98,10 @@ public class AmuletScene extends PixelScene {
 						}
 					}
 				});
+				Music.INSTANCE.playTracks(
+						new String[]{Assets.Music.THEME_2, Assets.Music.THEME_1},
+						new float[]{1, 1},
+						false);
 			}
 		};
 		btnExit.icon(new ItemSprite(ItemSpriteSheet.AMULET));
@@ -137,6 +140,7 @@ public class AmuletScene extends PixelScene {
 
 			text.setPos((Camera.main.width - text.width()) / 2, amulet.y + amulet.height + LARGE_GAP);
 			align(text);
+			add(text);
 			
 			btnExit.setPos( (Camera.main.width - btnExit.width()) / 2, text.top() + text.height() + LARGE_GAP );
 			btnStay.setPos( btnExit.left(), btnExit.bottom() + SMALL_GAP );

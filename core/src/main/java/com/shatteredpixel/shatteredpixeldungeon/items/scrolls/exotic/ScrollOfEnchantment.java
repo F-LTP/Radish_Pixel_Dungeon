@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,16 +22,12 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
-import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.InventoryScroll;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
@@ -46,8 +42,6 @@ import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.watabou.noosa.audio.Sample;
-import com.watabou.utils.Random;
-import com.watabou.utils.Reflection;
 
 public class ScrollOfEnchantment extends ExoticScroll {
 	
@@ -55,27 +49,17 @@ public class ScrollOfEnchantment extends ExoticScroll {
 		icon = ItemSpriteSheet.Icons.SCROLL_ENCHANT;
 
 		unique = true;
+
+		talentFactor = 2f;
 	}
 
 	protected static boolean identifiedByUse = false;
-
-	@Override
-	public void MagicStone(boolean log,boolean original){
-		//注魔秘卷很特殊 需要特判
-	}
-
-	protected void MagicStoneScroll(){
-		Scroll recoveredScroll = (Scroll) Reflection.newInstance(exoToReg.get(this.getClass()));
-		if(Random.Int(4)==0 && Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 2){
-			Dungeon.level.drop(recoveredScroll, curUser.pos);
-			GLog.i(Messages.get(Scroll.class, "exscrollToscroll", recoveredScroll.name()));
-		}
-	}
-
+	
 	@Override
 	public void doRead() {
 		if (!isKnown()) {
 			identify();
+			curItem = detach(curUser.belongings.backpack);
 			identifiedByUse = true;
 		} else {
 			identifiedByUse = false;
@@ -84,7 +68,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 	}
 
 	public static boolean enchantable( Item item ){
-		return (item instanceof MeleeWeapon || item instanceof SpiritBow || item instanceof Armor)||(Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)&&item instanceof BrokenSeal);
+		return (item instanceof MeleeWeapon || item instanceof SpiritBow || item instanceof Armor);
 	}
 
 	private void confirmCancelation() {
@@ -130,6 +114,10 @@ public class ScrollOfEnchantment extends ExoticScroll {
 		public void onSelect(final Item item) {
 			
 			if (item instanceof Weapon){
+				if (!identifiedByUse) {
+					curItem.detach(curUser.belongings.backpack);
+				}
+				identifiedByUse = false;
 				
 				final Weapon.Enchantment enchants[] = new Weapon.Enchantment[3];
 				
@@ -141,6 +129,10 @@ public class ScrollOfEnchantment extends ExoticScroll {
 				GameScene.show(new WndEnchantSelect((Weapon) item, enchants[0], enchants[1], enchants[2]));
 			
 			} else if (item instanceof Armor) {
+				if (!identifiedByUse) {
+					curItem.detach(curUser.belongings.backpack);
+				}
+				identifiedByUse = false;
 				
 				final Armor.Glyph glyphs[] = new Armor.Glyph[3];
 				
@@ -150,22 +142,8 @@ public class ScrollOfEnchantment extends ExoticScroll {
 				glyphs[2] = Armor.Glyph.random( existing, glyphs[0].getClass(), glyphs[1].getClass());
 				
 				GameScene.show(new WndGlyphSelect((Armor) item, glyphs[0], glyphs[1], glyphs[2]));
-			}else if (item instanceof BrokenSeal){
-				final Armor.Glyph glyphs[] = new Armor.Glyph[3];
-
-				Class<? extends Armor.Glyph> existing = ((BrokenSeal) item).getGlyph() != null ? ((BrokenSeal) item).getGlyph().getClass() : null;
-
-				glyphs[0] = Armor.Glyph.randomCommon( existing );
-				glyphs[1] = Armor.Glyph.randomUncommon( existing );
-				glyphs[2] = Armor.Glyph.random( existing, glyphs[0].getClass(), glyphs[1].getClass());
-
-				GameScene.show(new WndSealGlyphSelect((BrokenSeal) item, glyphs[0], glyphs[1], glyphs[2]));
-			}  else {
-				if (!identifiedByUse){
-					curItem.collect();
-				} else {
-					((ScrollOfEnchantment)curItem).confirmCancelation();
-				}
+			} else if (identifiedByUse){
+				((ScrollOfEnchantment)curItem).confirmCancelation();
 			}
 		}
 	};
@@ -203,11 +181,10 @@ public class ScrollOfEnchantment extends ExoticScroll {
 			if (index < 3) {
 				wep.enchant(enchantments[index]);
 				GLog.p(Messages.get(StoneOfEnchantment.class, "weapon"));
-				((ScrollOfEnchantment)curItem).readAnimation(true);
+				((ScrollOfEnchantment)curItem).readAnimation();
+
 				Sample.INSTANCE.play( Assets.Sounds.READ );
 				Enchanting.show(curUser, wep);
-				Talent.onUpgradeScrollUsed( Dungeon.hero );
-				((ScrollOfEnchantment)curItem).MagicStoneScroll();
 			}
 
 			wep = null;
@@ -267,81 +244,16 @@ public class ScrollOfEnchantment extends ExoticScroll {
 			if (index < 3) {
 				arm.inscribe(glyphs[index]);
 				GLog.p(Messages.get(StoneOfEnchantment.class, "armor"));
-				((ScrollOfEnchantment)curItem).readAnimation(true);
+				((ScrollOfEnchantment)curItem).readAnimation();
 
 				Sample.INSTANCE.play( Assets.Sounds.READ );
 				Enchanting.show(curUser, arm);
-				Talent.onUpgradeScrollUsed( Dungeon.hero );
-				((ScrollOfEnchantment)curItem).MagicStoneScroll();
 			}
 
 			arm = null;
 			glyphs = null;
 		}
 
-		@Override
-		protected boolean hasInfo(int index) {
-			return index < 3;
-		}
-
-		@Override
-		protected void onInfo( int index ) {
-			GameScene.show(new WndTitledMessage(
-					Icons.get(Icons.INFO),
-					Messages.titleCase(glyphs[index].name()),
-					glyphs[index].desc()));
-		}
-
-		@Override
-		public void onBackPressed() {
-			//do nothing, reader has to cancel
-		}
-
-	}
-
-	public static class WndSealGlyphSelect extends WndOptions{
-		private static BrokenSeal seal;
-		private static Armor.Glyph[] glyphs;
-
-		//used in PixelScene.restoreWindows
-		public WndSealGlyphSelect(){
-			this(seal, glyphs[0], glyphs[1], glyphs[2]);
-		}
-
-		public WndSealGlyphSelect(BrokenSeal seal, Armor.Glyph glyph1,
-								  Armor.Glyph glyph2, Armor.Glyph glyph3){
-			super(new ItemSprite(new ScrollOfEnchantment()),
-					Messages.titleCase(new ScrollOfEnchantment().name()),
-					Messages.get(ScrollOfEnchantment.class, "armor") +
-							"\n\n" +
-							Messages.get(ScrollOfEnchantment.class, "cancel_warn"),
-					glyph1.name(),
-					glyph2.name(),
-					glyph3.name(),
-					Messages.get(ScrollOfEnchantment.class, "cancel"));
-			this.seal=seal;
-			glyphs = new Armor.Glyph[3];
-			glyphs[0] = glyph1;
-			glyphs[1] = glyph2;
-			glyphs[2] = glyph3;
-		}
-
-		@Override
-		protected void onSelect(int index) {
-			if (index < 3) {
-				seal.setGlyph(glyphs[index]);
-				GLog.p(Messages.get(StoneOfEnchantment.class, "armor"));
-				((ScrollOfEnchantment)curItem).readAnimation();
-
-				Sample.INSTANCE.play( Assets.Sounds.READ );
-				Enchanting.show(curUser, seal);
-				Talent.onUpgradeScrollUsed( Dungeon.hero );
-				((ScrollOfEnchantment)curItem).MagicStoneScroll();
-			}
-
-			seal = null;
-			glyphs = null;
-		}
 		@Override
 		protected boolean hasInfo(int index) {
 			return index < 3;

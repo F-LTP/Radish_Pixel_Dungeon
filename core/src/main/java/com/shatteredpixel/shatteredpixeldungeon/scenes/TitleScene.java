@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,13 +32,15 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Fireball;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.News;
+import com.shatteredpixel.shatteredpixeldungeon.services.updates.AvailableUpdateData;
+import com.shatteredpixel.shatteredpixeldungeon.services.updates.Updates;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Archs;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ExitButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.StyledButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
-import com.shatteredpixel.shatteredpixeldungeon.update.RDChangesButton;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndSettings;
 import com.watabou.glwrap.Blending;
 import com.watabou.noosa.BitmapText;
@@ -155,12 +157,12 @@ public class TitleScene extends PixelScene {
 		btnBadges.icon(Icons.get(Icons.BADGES));
 		add(btnBadges);
 
-		/*StyledButton btnNews = new NewsButton(GREY_TR, Messages.get(this, "news"));
+		StyledButton btnNews = new NewsButton(GREY_TR, Messages.get(this, "news"));
 		btnNews.icon(Icons.get(Icons.NEWS));
-		add(btnNews);*/
+		add(btnNews);
 
-		StyledButton btnChanges = new RDChangesButton(GREY_TR, Messages.get(this, "changes"));
-		btnChanges.icon(new Image(Icons.get(Icons.CHANGES)));
+		StyledButton btnChanges = new ChangesButton(GREY_TR, Messages.get(this, "changes"));
+		btnChanges.icon(Icons.get(Icons.CHANGES));
 		add(btnChanges);
 
 		StyledButton btnSettings = new SettingsButton(GREY_TR, Messages.get(this, "settings"));
@@ -174,67 +176,40 @@ public class TitleScene extends PixelScene {
 		};
 		btnAbout.icon(Icons.get(Icons.SHPX));
 		add(btnAbout);
-
-		StyledButton btnSeedTest = new StyledButton(GREY_TR, Messages.get(this, "seed_find")){
-			@Override
-			protected void onClick() {
-				ShatteredPixelDungeon.switchScene( SeedFindScene.class );
-			}
-		};
-		btnSeedTest.icon(Icons.get(Icons.SEED));
-		add(btnSeedTest);
-
-		StyledButton btnSeedAnalysis = new StyledButton(GREY_TR, Messages.get(this, "seed_analysis")){
-			@Override
-			protected void onClick() {
-				ShatteredPixelDungeon.switchScene( SeedAnalysisScene.class );
-			}
-		};
-		btnSeedAnalysis.icon(Icons.get(Icons.MAGNIFY));
-		add(btnSeedAnalysis);
-
-		StyledButton seed = new JoinButton(landscape() ? Chrome.Type.GREY_BUTTON_TR : Chrome.Type.BLANK, Messages.get(this, "seed"));
-		seed.icon(Icons.get(Icons.ENERGY));
-		add(seed);
-
+		
 		final int BTN_HEIGHT = 20;
-		int GAP = (int)(h - topRegion - (landscape() ? 3 : 6)*BTN_HEIGHT)/3;
+		int GAP = (int)(h - topRegion - (landscape() ? 3 : 4)*BTN_HEIGHT)/3;
 		GAP /= landscape() ? 3 : 5;
 		GAP = Math.max(GAP, 2);
 
-		BitmapText version = new BitmapText( "v" + Game.version, pixelFont);
-		version.measure();
-		version.alpha( 0.4f);
-		version.x = w - version.width() - 4;
-		version.y = h - version.height() - 2;
-
 		if (landscape()) {
-			btnPlay.setRect(title.x-90, topRegion+GAP, ((title.width()+180)/2)-1, BTN_HEIGHT);
+			btnPlay.setRect(title.x-50, topRegion+GAP, ((title.width()+100)/2)-1, BTN_HEIGHT);
 			align(btnPlay);
 			btnSupport.setRect(btnPlay.right()+2, btnPlay.top(), btnPlay.width(), BTN_HEIGHT);
-			btnRankings.setRect(btnPlay.left(), btnPlay.bottom()+ GAP, (btnPlay.width()*.5f)-1, BTN_HEIGHT);
-			btnSeedTest.setRect(btnRankings.right()+2, btnPlay.bottom()+ GAP, (btnPlay.width()*.5f)-1, BTN_HEIGHT);
-			btnSeedAnalysis.setRect(btnSeedTest.right()+2, btnPlay.bottom()+ GAP, (btnPlay.width()*.5f)-1, BTN_HEIGHT);
-			btnBadges.setRect(btnRankings.left(), btnRankings.bottom()+GAP, (btnPlay.width()*.67f)-1, BTN_HEIGHT);
-			//btnNews.setRect(btnRankings.right()+2, btnRankings.top(), btnRankings.width(), BTN_HEIGHT);
-			btnChanges.setRect(btnBadges.right()+2, btnBadges.top(), btnBadges.width(), BTN_HEIGHT);
-			btnSettings.setRect(btnSupport.centerX(), btnSupport.bottom()+ GAP, (btnPlay.width()*.5f)-1, BTN_HEIGHT);
-			btnAbout.setRect(btnChanges.right()+2, btnSettings.bottom() + GAP, btnBadges.width(), BTN_HEIGHT);
-			seed.setRect(10, 0,40,20);
+			btnRankings.setRect(btnPlay.left(), btnPlay.bottom()+ GAP, (btnPlay.width()*.67f)-1, BTN_HEIGHT);
+			btnBadges.setRect(btnRankings.left(), btnRankings.bottom()+GAP, btnRankings.width(), BTN_HEIGHT);
+			btnNews.setRect(btnRankings.right()+2, btnRankings.top(), btnRankings.width(), BTN_HEIGHT);
+			btnChanges.setRect(btnNews.left(), btnNews.bottom() + GAP, btnRankings.width(), BTN_HEIGHT);
+			btnSettings.setRect(btnNews.right()+2, btnNews.top(), btnRankings.width(), BTN_HEIGHT);
+			btnAbout.setRect(btnSettings.left(), btnSettings.bottom() + GAP, btnRankings.width(), BTN_HEIGHT);
 		} else {
-			seed.setRect(10, version.y-10,40,20);
-			btnPlay.setRect(title.x-5, topRegion+GAP, title.width()+10, BTN_HEIGHT);
+			btnPlay.setRect(title.x, topRegion+GAP, title.width(), BTN_HEIGHT);
 			align(btnPlay);
 			btnSupport.setRect(btnPlay.left(), btnPlay.bottom()+ GAP, btnPlay.width(), BTN_HEIGHT);
-			btnRankings.setRect(btnPlay.left(), btnSupport.bottom()+ GAP, btnPlay.width(), BTN_HEIGHT);
-			btnBadges.setRect(btnRankings.left(), btnRankings.bottom()+ GAP, (btnPlay.width()/2)-1, BTN_HEIGHT);
-			//btnNews.setRect(btnRankings.left(), btnRankings.bottom()+ GAP, btnRankings.width(), BTN_HEIGHT);
-			btnChanges.setRect(btnBadges.right()+2, btnBadges.top(), btnBadges.width(), BTN_HEIGHT);
-			btnSettings.setRect(btnBadges.left(), btnBadges.bottom() +GAP, (btnPlay.width()/2)-1, BTN_HEIGHT);
-			btnAbout.setRect(btnSettings.right()+2, btnBadges.bottom() +GAP, (btnPlay.width()/2)-1, BTN_HEIGHT);
-			btnSeedTest.setRect(btnSettings.left(), btnSettings.bottom() +GAP, (btnPlay.width()/2)-1, BTN_HEIGHT);
-			btnSeedAnalysis.setRect(btnSeedTest.right()+2, btnSettings.bottom() +GAP, (btnPlay.width()/2)-1, BTN_HEIGHT);
+			btnRankings.setRect(btnPlay.left(), btnSupport.bottom()+ GAP, (btnPlay.width()/2)-1, BTN_HEIGHT);
+			btnBadges.setRect(btnRankings.right()+2, btnRankings.top(), btnRankings.width(), BTN_HEIGHT);
+			btnNews.setRect(btnRankings.left(), btnRankings.bottom()+ GAP, btnRankings.width(), BTN_HEIGHT);
+			btnChanges.setRect(btnNews.right()+2, btnNews.top(), btnNews.width(), BTN_HEIGHT);
+			btnSettings.setRect(btnNews.left(), btnNews.bottom()+GAP, btnRankings.width(), BTN_HEIGHT);
+			btnAbout.setRect(btnSettings.right()+2, btnSettings.top(), btnSettings.width(), BTN_HEIGHT);
 		}
+
+		BitmapText version = new BitmapText( "v" + Game.version, pixelFont);
+		version.measure();
+		version.hardlight( 0x888888 );
+		version.x = w - version.width() - 4;
+		version.y = h - version.height() - 2;
+		add( version );
 
 		if (DeviceCompat.isDesktop()) {
 			ExitButton btnExit = new ExitButton();
@@ -291,16 +266,56 @@ public class TitleScene extends PixelScene {
 		}
 	}
 
-	//在线更新 2024-8-6
-	public static class ChangesButton extends StyledButton {
+	private static class ChangesButton extends StyledButton {
 
 		public ChangesButton( Chrome.Type type, String label ){
 			super(type, label);
+			if (SPDSettings.updates()) Updates.checkForUpdate();
+		}
+
+		boolean updateShown = false;
+
+		@Override
+		public void update() {
+			super.update();
+
+			if (!updateShown && Updates.updateAvailable()){
+				updateShown = true;
+				text(Messages.get(TitleScene.class, "update"));
+			}
+
+			if (updateShown){
+				textColor(ColorMath.interpolate( 0xFFFFFF, Window.SHPX_COLOR, 0.5f + (float)Math.sin(Game.timeTotal*5)/2f));
+			}
 		}
 
 		@Override
 		protected void onClick() {
-			ShatteredPixelDungeon.switchNoFade( ChangesScene.class );
+			if (Updates.updateAvailable()){
+				AvailableUpdateData update = Updates.updateData();
+
+				ShatteredPixelDungeon.scene().addToFront( new WndOptions(
+						Icons.get(Icons.CHANGES),
+						update.versionName == null ? Messages.get(this,"title") : Messages.get(this,"versioned_title", update.versionName),
+						update.desc == null ? Messages.get(this,"desc") : update.desc,
+						Messages.get(this,"update"),
+						Messages.get(this,"changes")
+				) {
+					@Override
+					protected void onSelect(int index) {
+						if (index == 0) {
+							Updates.launchUpdate(Updates.updateData());
+						} else if (index == 1){
+							ChangesScene.changesSelected = 0;
+							ShatteredPixelDungeon.switchNoFade( ChangesScene.class );
+						}
+					}
+				});
+
+			} else {
+				ChangesScene.changesSelected = 0;
+				ShatteredPixelDungeon.switchNoFade( ChangesScene.class );
+			}
 		}
 
 	}
@@ -309,7 +324,7 @@ public class TitleScene extends PixelScene {
 
 		public SettingsButton( Chrome.Type type, String label ){
 			super(type, label);
-			if (Messages.lang().status() == Languages.Status.INCOMPLETE){
+			if (Messages.lang().status() == Languages.Status.X_UNFINISH){
 				icon(Icons.get(Icons.LANGS));
 				icon.hardlight(1.5f, 0, 0);
 			} else {
@@ -321,21 +336,19 @@ public class TitleScene extends PixelScene {
 		public void update() {
 			super.update();
 
-			if (Messages.lang().status() == Languages.Status.INCOMPLETE){
+			if (Messages.lang().status() == Languages.Status.X_UNFINISH){
 				textColor(ColorMath.interpolate( 0xFFFFFF, CharSprite.NEGATIVE, 0.5f + (float)Math.sin(Game.timeTotal*5)/2f));
 			}
 		}
 
 		@Override
 		protected void onClick() {
-			if (Messages.lang().status() == Languages.Status.INCOMPLETE){
+			if (Messages.lang().status() == Languages.Status.X_UNFINISH){
 				WndSettings.last_index = 4;
 			}
 			ShatteredPixelDungeon.scene().add(new WndSettings());
 		}
 	}
-
-
 
 	private static class SupportButton extends StyledButton{
 
@@ -350,18 +363,4 @@ public class TitleScene extends PixelScene {
 			ShatteredPixelDungeon.switchNoFade(SupporterScene.class);
 		}
 	}
-
-	private static class JoinButton extends StyledButton {
-
-		public JoinButton( Chrome.Type type, String label ){
-			super(type, label);
-		}
-
-		@Override
-		protected void onClick() {
-			ShatteredPixelDungeon.platform.openURI( "https://qm.qq.com/q/Uzy3eiKSC6" );
-		}
-
-	}
-
 }

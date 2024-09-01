@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,10 +58,6 @@ public abstract class Trap implements Bundlable {
 
 	public boolean visible;
 	public boolean active = true;
-
-	//Only Repair 一次性修复陷阱
-	public boolean onlyRepair = true;
-
 	public boolean disarmedByActivation = true;
 	
 	public boolean canBeHidden = true;
@@ -108,6 +104,13 @@ public abstract class Trap implements Bundlable {
 		Dungeon.level.disarmTrap(pos);
 	}
 
+	//returns the depth value the trap should use for determining its power
+	//If the trap is part of the level, it should use the true depth
+	//If it's not part of the level (e.g. effect from reclaim trap), use scaling depth
+	protected int scalingDepth(){
+		return Dungeon.level.traps.get(pos) == this ? Dungeon.depth : Dungeon.scalingDepth();
+	}
+
 	public String name(){
 		return Messages.get(this, "name");
 	}
@@ -120,17 +123,12 @@ public abstract class Trap implements Bundlable {
 	private static final String VISIBLE	= "visible";
 	private static final String ACTIVE = "active";
 
-	private static final String ONLYREPAIR = "onlyRepair";
-
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		pos = bundle.getInt( POS );
 		visible = bundle.getBoolean( VISIBLE );
 		if (bundle.contains(ACTIVE)){
 			active = bundle.getBoolean(ACTIVE);
-		}
-		if(bundle.contains(ONLYREPAIR)){
-			onlyRepair = bundle.getBoolean(ONLYREPAIR);
 		}
 	}
 
@@ -139,6 +137,5 @@ public abstract class Trap implements Bundlable {
 		bundle.put( POS, pos );
 		bundle.put( VISIBLE, visible );
 		bundle.put( ACTIVE, active );
-		bundle.put( ONLYREPAIR,onlyRepair);
 	}
 }

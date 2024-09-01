@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,33 +21,22 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ArtifactRecharge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ElmoParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArcaneResin;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfEnchantment;
-import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorrosion;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorruption;
@@ -59,11 +48,9 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndUseItem;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
@@ -75,11 +62,10 @@ import java.util.ArrayList;
 
 public class MagesStaff extends MeleeWeapon {
 
-	public Wand wand;
+	private Wand wand;
 
 	public static final String AC_IMBUE = "IMBUE";
 	public static final String AC_ZAP	= "ZAP";
-	public static final String AC_UPDATE = "UPDATE";
 
 	private static final float STAFF_SCALE_FACTOR = 0.75f;
 
@@ -123,15 +109,27 @@ public class MagesStaff extends MeleeWeapon {
 		if (wand!= null && wand.curCharges > 0) {
 			actions.add( AC_ZAP );
 		}
-		if (Dungeon.hero.pointsInTalent(Talent.MAGIC_WORKMAN) > 0 ){
-			actions.add( AC_UPDATE );
-		}
 		return actions;
 	}
 
 	@Override
+	public String defaultAction() {
+		return AC_ZAP;
+	}
+
+	@Override
 	public void activate( Char ch ) {
+		super.activate(ch);
 		applyWandChargeBuff(ch);
+	}
+
+	@Override
+	public int targetingPos(Hero user, int dst) {
+		if (wand != null) {
+			return wand.targetingPos(user, dst);
+		} else {
+			return super.targetingPos(user, dst);
+		}
 	}
 
 	@Override
@@ -150,112 +148,43 @@ public class MagesStaff extends MeleeWeapon {
 				GameScene.show(new WndUseItem(null, this));
 				return;
 			}
-			wand.cursed = (cursed || hasCurseEnchant()) && Dungeon.hero.pointsInTalent(Talent.MAGIC_WORKMAN) < 3;
+
+			if (cursed || hasCurseEnchant()) wand.cursed = true;
+			else                             wand.cursed = false;
 			wand.execute(hero, AC_ZAP);
-		} else if (action.equals(AC_UPDATE)) {
-			ArcaneResinUse();
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private void ArcaneResinUse() {
-
-		ArcaneResin arcaneResin = hero.belongings.getItem(ArcaneResin.class);
-
-		int chance = hero.pointsInTalent(Talent.MAGIC_WORKMAN);
-
-		// Need AR must not null
-		if(arcaneResin != null){
-			switch (chance){
-				case 1:
-					Weapon item = this;
-					item.enchant();
-					curUser.sprite.emitter().start(Speck.factory(Speck.LIGHT), 0.1f, 5);
-					Enchanting.show(curUser, this);
-					arcaneResin.detach(curUser.belongings.backpack);
-					GLog.p(Messages.get(MagesStaff.class,"en_ars"));
-				break;
-				case 2: case 3: case 4:
-					Weapon item2 = this;
-					final Weapon.Enchantment[] enchants = new Weapon.Enchantment[3];
-					Class<? extends Weapon.Enchantment> existing = item2.enchantment != null ? item2.enchantment.getClass() : null;
-					enchants[0] = Weapon.Enchantment.randomCommon( existing );
-					enchants[1] = Weapon.Enchantment.randomUncommon( existing );
-					enchants[2] = Weapon.Enchantment.random( existing, enchants[0].getClass(), enchants[1].getClass());
-					GameScene.show(new WndEnchantSelect(item2, enchants[0], enchants[1], enchants[2]));
-					arcaneResin.detach(curUser.belongings.backpack);
-				break;
-			}
+	@Override
+	public int buffedVisiblyUpgraded() {
+		if (wand != null){
+			return Math.max(super.buffedVisiblyUpgraded(), wand.buffedVisiblyUpgraded());
 		} else {
-			GLog.w(Messages.get(MagesStaff.class,"need_ars"));
+			return super.buffedVisiblyUpgraded();
 		}
 	}
-
-	//影响特效
-	//	@Override
-	//	public int buffedLvl() {
-	//		int buffLv;
-	//		if (wand != null){
-	//			buffLv = Math.max(super.buffedLvl(), wand.buffedLvl());
-	//			updateWand(false);
-	//        } else {
-	//			updateWand(false);
-	//			buffLv = super.buffedLvl();
-	//        }
-	//        return buffLv;
-	//    }
 
 	@Override
 	public int proc(Char attacker, Char defender, int damage) {
 		if (attacker instanceof Hero && ((Hero) attacker).hasTalent(Talent.MYSTICAL_CHARGE)){
 			Hero hero = (Hero) attacker;
-			for (Buff b : hero.buffs()){
-				if (b instanceof Artifact.ArtifactBuff && !((Artifact.ArtifactBuff) b).isCursed() ) {
-					((Artifact.ArtifactBuff) b).charge(hero, hero.pointsInTalent(Talent.MYSTICAL_CHARGE)/2f);
-				}
-			}
+			ArtifactRecharge.chargeArtifacts(hero, hero.pointsInTalent(Talent.MYSTICAL_CHARGE)/2f);
 		}
-
-		if (hero.pointsInTalent(Talent.MAGIC_STICK) >= 2){
-			if(Random.Float() <= 0.15f && hero.buff(AfterImage.AnotabsoluteEvasion.class) == null){
-				Buff.affect(hero, AfterImage.AnotabsoluteEvasion.class);
-			}
-		}
-
-		if (hero.pointsInTalent(Talent.MAGIC_STICK) >= 3){
-			if(Random.Float() <= 0.3f){
-				switch (Random.Int(5)){
-					default:
-					case 1:
-						Buff.prolong(defender, Vulnerable.class, 8f);
-						break;
-					case 2:
-						Buff.prolong(defender, Hex.class, 8f);
-						break;
-					case 3:
-						Buff.prolong(defender, Vertigo.class, 8f);
-						break;
-					case 4:
-						Buff.prolong(defender, Weakness.class, 8f);
-						break;
-				}
-			}
-		}
-
 
 		Talent.EmpoweredStrikeTracker empoweredStrike = attacker.buff(Talent.EmpoweredStrikeTracker.class);
 		if (empoweredStrike != null){
-			damage = Math.round( damage * (1f + hero.pointsInTalent(Talent.EMPOWERED_STRIKE)/6f));
+			damage = Math.round( damage * (1f + Dungeon.hero.pointsInTalent(Talent.EMPOWERED_STRIKE)/6f));
 		}
 
-		if (wand != null && attacker instanceof Hero && ((Hero)attacker).subClass == HeroSubClass.BATTLEMAGE || hero.pointsInTalent(Talent.MAGIC_STICK) >= 1) {
+		if (wand != null &&
+				attacker instanceof Hero && ((Hero)attacker).subClass == HeroSubClass.BATTLEMAGE) {
 			if (wand.curCharges < wand.maxCharges) wand.partialCharge += 0.5f;
-			ScrollOfRecharging.charge(attacker);
-			wand.onHit(this, attacker, defender, damage, true);
+			ScrollOfRecharging.charge((Hero)attacker);
+			wand.onHit(this, attacker, defender, damage);
 		}
 
 		if (empoweredStrike != null){
-			empoweredStrike.detach();
+			if (!empoweredStrike.delayedDetach) empoweredStrike.detach();
 			if (!(defender instanceof Mob) || !((Mob) defender).surprisedBy(attacker)){
 				Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG, 0.75f, 1.2f);
 			}
@@ -293,11 +222,11 @@ public class MagesStaff extends MeleeWeapon {
 
 	public Item imbueWand(Wand wand, Char owner){
 
-		int oldStaffcharges = this.wand.curCharges;
+		int oldStaffcharges = this.wand != null ? this.wand.curCharges : 0;
 
-		if (owner == hero && hero.hasTalent(Talent.WAND_PRESERVATION)){
-			Talent.WandPreservationCounter counter = Buff.affect(hero, Talent.WandPreservationCounter.class);
-			if (counter.count() < 5 && Random.Float() < 0.34f + 0.33f* hero.pointsInTalent(Talent.WAND_PRESERVATION)){
+		if (owner == Dungeon.hero && Dungeon.hero.hasTalent(Talent.WAND_PRESERVATION)){
+			Talent.WandPreservationCounter counter = Buff.affect(Dungeon.hero, Talent.WandPreservationCounter.class);
+			if (counter.count() < 5 && Random.Float() < 0.34f + 0.33f*Dungeon.hero.pointsInTalent(Talent.WAND_PRESERVATION)){
 				counter.countUp(1);
 				this.wand.level(0);
 				if (!this.wand.collect()) {
@@ -332,8 +261,8 @@ public class MagesStaff extends MeleeWeapon {
 		wand.curCharges = Math.min(wand.maxCharges, wand.curCharges+oldStaffcharges);
 		if (owner != null){
 			applyWandChargeBuff(owner);
- 		} else if (hero.belongings.contains(this)){
-			applyWandChargeBuff(hero);
+ 		} else if (Dungeon.hero.belongings.contains(this)){
+			applyWandChargeBuff(Dungeon.hero);
 		}
 
 		//This is necessary to reset any particles.
@@ -408,9 +337,7 @@ public class MagesStaff extends MeleeWeapon {
 
 	@Override
 	public String name() {
-		if (!super.customName.equals("")) {
-			return super.name();
-		} else if (wand == null) {
+		if (wand == null) {
 			return super.name();
 		} else {
 			String name = Messages.get(wand, "staff_name");
@@ -427,7 +354,7 @@ public class MagesStaff extends MeleeWeapon {
 			if ((!cursed && !hasCurseEnchant()) || !cursedKnown)    info += " " + wand.statsDesc();
 			else                                                    info += " " + Messages.get(this, "cursed_wand");
 
-			if (hero.subClass == HeroSubClass.BATTLEMAGE){
+			if (Dungeon.hero.subClass == HeroSubClass.BATTLEMAGE){
 				info += "\n\n" + Messages.get(wand, "bmage_desc");
 			}
 		}
@@ -518,12 +445,12 @@ public class MagesStaff extends MeleeWeapon {
 					}
 
 					String bodyText = Messages.get(MagesStaff.class, "imbue_desc", newLevel);
-					int preservesLeft = hero.hasTalent(Talent.WAND_PRESERVATION) ? 5 : 0;
-					if (hero.buff(Talent.WandPreservationCounter.class) != null){
-						preservesLeft -= hero.buff(Talent.WandPreservationCounter.class).count();
+					int preservesLeft = Dungeon.hero.hasTalent(Talent.WAND_PRESERVATION) ? 5 : 0;
+					if (Dungeon.hero.buff(Talent.WandPreservationCounter.class) != null){
+						preservesLeft -= Dungeon.hero.buff(Talent.WandPreservationCounter.class).count();
 					}
-					if (hero.hasTalent(Talent.WAND_PRESERVATION)){
-						int preserveChance = hero.pointsInTalent(Talent.WAND_PRESERVATION) == 1 ? 67 : 100;
+					if (Dungeon.hero.hasTalent(Talent.WAND_PRESERVATION)){
+						int preserveChance = Dungeon.hero.pointsInTalent(Talent.WAND_PRESERVATION) == 1 ? 67 : 100;
 						bodyText += "\n\n" + Messages.get(MagesStaff.class, "imbue_talent", preserveChance, preservesLeft);
 					} else {
 						bodyText += "\n\n" + Messages.get(MagesStaff.class, "imbue_lost");
@@ -636,70 +563,4 @@ public class MagesStaff extends MeleeWeapon {
 			size(minSize + (left / lifespan)*(maxSize-minSize) + Random.Float(sizeJitter));
 		}
 	}
-
-
-	@Override
-	public void getCurse(boolean extraEffect) {
-		super.getCurse(extraEffect);
-		updateWand(true);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static class WndEnchantSelect extends WndOptions {
-
-		private static Weapon wep;
-		private static Weapon.Enchantment[] enchantments;
-
-		public WndEnchantSelect(Weapon wep, Weapon.Enchantment ench1,
-								Weapon.Enchantment ench2, Weapon.Enchantment ench3){
-			super(new ItemSprite(new ScrollOfEnchantment()),
-					Messages.titleCase(new ScrollOfEnchantment().name()),
-					Messages.get(ScrollOfEnchantment.class, "weapon") +
-							"\n\n" +
-							Messages.get(ScrollOfEnchantment.class, "cancel_warn"),
-					ench1.name(),
-					ench2.name(),
-					ench3.name(),
-					Messages.get(ScrollOfEnchantment.class, "cancel"));
-			WndEnchantSelect.wep = wep;
-			enchantments = new Weapon.Enchantment[3];
-			enchantments[0] = ench1;
-			enchantments[1] = ench2;
-			enchantments[2] = ench3;
-		}
-
-		@Override
-		protected void onSelect(int index) {
-			if (index < 3) {
-				wep.enchant(enchantments[index]);
-				GLog.p(Messages.get(StoneOfEnchantment.class, "weapon"));
-				Sample.INSTANCE.play( Assets.Sounds.READ );
-				Enchanting.show(curUser, wep);
-				Talent.onUpgradeScrollUsed( hero );
-			}
-
-			wep = null;
-			enchantments = null;
-		}
-
-		@Override
-		protected boolean hasInfo(int index) {
-			return index < 3;
-		}
-
-		@Override
-		protected void onInfo( int index ) {
-			GameScene.show(new WndTitledMessage(
-					Icons.get(Icons.INFO),
-					Messages.titleCase(enchantments[index].name()),
-					enchantments[index].desc()));
-		}
-
-		@Override
-		public void onBackPressed() {
-			//do nothing, reader has to cancel
-		}
-
-	}
-
 }
