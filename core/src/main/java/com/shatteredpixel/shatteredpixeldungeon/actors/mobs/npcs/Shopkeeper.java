@@ -35,6 +35,10 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ElmoParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -181,7 +185,57 @@ public class Shopkeeper extends NPC {
 
 	//shopkeepers are greedy!
 	public static int sellPrice(Item item){
-		return item.value() * 5 * (Dungeon.depth / 5 + 1);
+		int ax= 5 * (Dungeon.depth / 5 + 1);
+		if (item instanceof MeleeWeapon){
+			int price = 20 * ((MeleeWeapon)item).tier;
+			if (((MeleeWeapon)item).hasGoodEnchant()) {
+				price *= 1.2;
+			}
+			if (item.cursedKnown && (item.cursed || ((MeleeWeapon)item).hasCurseEnchant())) {
+				price /= 2;
+			}
+			if (item.levelKnown && item.level() > 0) {
+				price *= (item.level()*0.35f + 1);
+			}
+			if (price < 1) {
+				price = 1;
+			}
+			return price*ax;
+		}else if(item instanceof Armor){
+			int price = 20 * ((Armor)item).tier;
+			if (((Armor)item).hasGoodGlyph()) {
+				price *= 1.2;
+			}
+			if (item.cursedKnown && (item.cursed || ((Armor)item).hasCurseGlyph())) {
+				price /= 2;
+			}
+			if (item.levelKnown && item.level() > 0) {
+				price *= (int) (item.level()*0.35f + 1);
+			}
+			if (price < 1) {
+				price = 1;
+			}
+			return price*ax;
+		}else if (item instanceof MissileWeapon){
+			return (int)(6 * ((MissileWeapon)item).tier * item.quantity() * (item.level()*0.7f + 1)*ax);
+		}else if (item instanceof Wand || item instanceof Ring){
+			int price = 75;
+			if (item.cursed && item.cursedKnown) {
+				price /= 2;
+			}
+			if (item.levelKnown) {
+				if (item.level() > 0) {
+					price *= (item.level()*0.5f + 1);
+				} else if (item.level() < 0) {
+					price /= (1 - item.level()*0.5f);
+				}
+			}
+			if (price < 1) {
+				price = 1;
+			}
+			return price *ax;
+		}
+		return item.value() * ax;
 	}
 	
 	public static WndBag sell() {

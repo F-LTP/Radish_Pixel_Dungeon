@@ -126,7 +126,7 @@ public class SeedFinder {
 
         for (int i = Random.Int(9999999); i < DungeonSeed.TOTAL_SEEDS && findingStatus == FINDING.CONTINUE ; i++) {
             if (testSeedALL(seedDigits + i, floor)) {
-                result = logSeedItems(seedDigits + i, floor);
+                result = logSeedItems(seedDigits + Integer.toString(i), floor);
                 break;
             }
         }
@@ -178,7 +178,7 @@ public class SeedFinder {
             if(Ghost.Quest.armor != null){
                 for (int j = 0; j < itemList.size(); j++) {
                     if (Ghost.Quest.armor.identify().title().toLowerCase().replaceAll(" ","").contains(itemList.get(j).replaceAll(" ",""))) {
-                        if (!itemsFound[j]) {
+                        if (itemsFound[j] == false) {
                             itemsFound[j] = true;
                             break;
                         }
@@ -188,23 +188,23 @@ public class SeedFinder {
             if(Wandmaker.Quest.wand1 != null){
                 for (int j = 0; j < itemList.size(); j++) {
                     if (Wandmaker.Quest.wand1.identify().title().toLowerCase().replaceAll(" ","").contains(itemList.get(j).replaceAll(" ","")) || Wandmaker.Quest.wand2.identify().title().toLowerCase().replaceAll(" ","").contains(itemList.get(j).replaceAll(" ",""))) {
-                        if (!itemsFound[j]) {
+                        if (itemsFound[j] == false) {
                             itemsFound[j] = true;
                             break;
                         }
                     }
                     if(Wandmaker.Quest.type == 1 && Messages.get(this, "corpsedust").contains(itemList.get(j).replaceAll(" ",""))){
-                        if (!itemsFound[j]) {
+                        if (itemsFound[j] == false) {
                             itemsFound[j] = true;
                             break;
                         }
                     }else if(Wandmaker.Quest.type == 2 && Messages.get(this, "embers").contains(itemList.get(j).replaceAll(" ",""))){
-                        if (!itemsFound[j]) {
+                        if (itemsFound[j] == false) {
                             itemsFound[j] = true;
                             break;
                         }
                     }else if(Wandmaker.Quest.type == 3 && Messages.get(this, "rotberry").contains(itemList.get(j).replaceAll(" ",""))){
-                        if (!itemsFound[j]) {
+                        if (itemsFound[j] == false) {
                             itemsFound[j] = true;
                             break;
                         }
@@ -214,7 +214,7 @@ public class SeedFinder {
             if(Imp.Quest.reward != null){
                 for (int j = 0; j < itemList.size(); j++) {
                     if (Imp.Quest.reward.identify().title().toLowerCase().replaceAll(" ","").contains(itemList.get(j).replaceAll(" ",""))) {
-                        if (!itemsFound[j]) {
+                        if (itemsFound[j] == false) {
                             itemsFound[j] = true;
                             break;
                         }
@@ -228,7 +228,7 @@ public class SeedFinder {
 
                     for (int j = 0; j < itemList.size(); j++) {
                         if (item.title().toLowerCase().replaceAll(" ","").contains(itemList.get(j).replaceAll(" ",""))) {
-                            if (!itemsFound[j]) {
+                            if (itemsFound[j] == false) {
                                 itemsFound[j] = true;
                                 break;
                             }
@@ -242,7 +242,7 @@ public class SeedFinder {
 
         if (Options.condition == Condition.ANY) {
             for (int i = 0; i < itemList.size(); i++) {
-                if (itemsFound[i])
+                if (itemsFound[i] == true)
                     return true;
             }
 
@@ -251,7 +251,7 @@ public class SeedFinder {
 
         else {
             for (int i = 0; i < itemList.size(); i++) {
-                if (!itemsFound[i])
+                if (itemsFound[i] == false)
                     return false;
             }
 
@@ -283,7 +283,7 @@ public class SeedFinder {
                         wantingItem = wantingItem.replaceAll("\"","");
                     }
                     if (!precise&&Ghost.Quest.armor.identify().title().toLowerCase().replaceAll(" ","").contains(wantingItem) || precise&& Ghost.Quest.armor.identify().title().toLowerCase().equals(wantingItem)) {
-                        if (!itemsFound[j]) {
+                        if (itemsFound[j] == false) {
                             itemsFound[j] = true;
                             break;
                         }
@@ -299,7 +299,7 @@ public class SeedFinder {
                     if(precise){
                         wantingItem = wantingItem.replaceAll("\"","");
                         if (wand1.equals(wantingItem) || wand2.equals(wantingItem)) {
-                            if (!itemsFound[j]) {
+                            if (itemsFound[j] == false) {
                                 itemsFound[j] = true;
                                 break;
                             }
@@ -309,24 +309,24 @@ public class SeedFinder {
                         wand1 = wand1.replaceAll(" ","");
                         wand2 = wand2.replaceAll(" ","");
                         if (wand1.contains(wantingItem) || wand2.contains(wantingItem)) {
-                            if (!itemsFound[j]) {
+                            if (itemsFound[j] == false) {
                                 itemsFound[j] = true;
                                 break;
                             }
                         }
                     }
                     if(Wandmaker.Quest.type == 1 && Messages.get(this, "corpsedust").contains(wantingItem.replaceAll(" ",""))){
-                        if (!itemsFound[j]) {
+                        if (itemsFound[j] == false) {
                             itemsFound[j] = true;
                             break;
                         }
                     }else if(Wandmaker.Quest.type == 2 && Messages.get(this, "embers").contains(wantingItem.replaceAll(" ",""))){
-                        if (!itemsFound[j]) {
+                        if (itemsFound[j] == false) {
                             itemsFound[j] = true;
                             break;
                         }
                     }else if(Wandmaker.Quest.type == 3 && Messages.get(this, "rotberry").contains(wantingItem.replaceAll(" ",""))){
-                        if (!itemsFound[j]) {
+                        if (itemsFound[j] == false) {
                             itemsFound[j] = true;
                             break;
                         }
@@ -341,7 +341,7 @@ public class SeedFinder {
                     if (!precise&&ring.replaceAll(" ","").contains(wantingItem.replaceAll(" ",""))
                             ||
                             precise&& ring.equals(wantingItem)) {
-                        if (!itemsFound[j]) {
+                        if (itemsFound[j] == false) {
                             itemsFound[j] = true;
                             break;
                         }
@@ -359,7 +359,7 @@ public class SeedFinder {
                         boolean precise = wantingItem.startsWith("\"")&&wantingItem.endsWith("\"");
                         if (!precise&&itemName.replaceAll(" ","").contains(wantingItem.replaceAll(" ",""))
                                 || precise&& itemName.equals(wantingItem.replaceAll("\"", ""))) {
-                            if (!itemsFound[j]) {
+                            if (itemsFound[j] == false) {
                                 itemsFound[j] = true;
                                 break;
                             }

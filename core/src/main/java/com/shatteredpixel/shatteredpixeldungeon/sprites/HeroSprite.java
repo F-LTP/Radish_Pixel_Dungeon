@@ -25,6 +25,15 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.EnergyArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.watabou.gltextures.SmartTexture;
 import com.watabou.gltextures.TextureCache;
@@ -61,34 +70,52 @@ public class HeroSprite extends CharSprite {
 		else
 			die();
 	}
-	
-	public void updateArmor() {
 
-		TextureFilm film = new TextureFilm( tiers(), Dungeon.hero.tier(), FRAME_WIDTH, FRAME_HEIGHT );
-		
+	public void updateArmor() {
+		int t=0;
+		Armor armor =Dungeon.hero.belongings.armor();
+		if (armor instanceof ClassArmor){
+			t= 6;
+		}
+		else if (armor != null){
+			if (armor instanceof PrisonArmor) t=7;
+			else if (armor instanceof CrabArmor) t=8;
+			else if (armor instanceof DarkCoat) t=9;
+			else if (armor instanceof AfterGlow) t=10;
+			else if (armor instanceof CloakofGreyFeather) t=11;
+			else if (armor instanceof RatArmor) t=12;
+
+			else if (armor instanceof EnergyArmor){
+				t= ((EnergyArmor) armor).Energy();
+			}
+
+			else t= armor.tier;
+		}
+		TextureFilm film = new TextureFilm( tiers(), t, FRAME_WIDTH, FRAME_HEIGHT );
+
 		idle = new Animation( 1, true );
 		idle.frames( film, 0, 0, 0, 1, 0, 0, 1, 1 );
-		
+
 		run = new Animation( RUN_FRAMERATE, true );
 		run.frames( film, 2, 3, 4, 5, 6, 7 );
-		
+
 		die = new Animation( 20, false );
 		die.frames( film, 8, 9, 10, 11, 12, 11 );
-		
+
 		attack = new Animation( 15, false );
 		attack.frames( film, 13, 14, 15, 0 );
-		
+
 		zap = attack.clone();
-		
+
 		operate = new Animation( 8, false );
 		operate.frames( film, 16, 17, 16, 17 );
-		
+
 		fly = new Animation( 1, true );
 		fly.frames( film, 18 );
 
 		read = new Animation( 20, false );
 		read.frames( film, 19, 20, 20, 20, 20, 20, 20, 20, 20, 19 );
-		
+
 		if (Dungeon.hero.isAlive())
 			idle();
 		else
