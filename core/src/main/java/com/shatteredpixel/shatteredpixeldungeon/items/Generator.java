@@ -729,6 +729,13 @@ public class Generator {
 			}
 		}
 	}
+	public static final Category[] armTiers = new Category[]{
+			Category.ARM_T1,
+			Category.ARM_T2,
+			Category.ARM_T3,
+			Category.ARM_T4,
+			Category.ARM_T5
+	};
 
 	private static final float[][] floorSetTierProbs = new float[][] {
 			{0, 75, 20,  4,  1},
@@ -888,7 +895,8 @@ public class Generator {
 
 		floorSet = (int)GameMath.gate(0, floorSet, floorSetTierProbs.length-1);
 
-		Armor a = (Armor)Reflection.newInstance(Category.ARMOR.classes[Random.chances(floorSetTierProbs[floorSet])]);
+		Category c = armTiers[Random.chances(floorSetTierProbs[floorSet])];
+		Armor a = (Armor) Reflection.newInstance(c.classes[Random.chances(c.probs)]);
 		a.random();
 		return a;
 	}
