@@ -867,6 +867,47 @@ public class Generator {
 		}
 	}
 
+	public static Item random( Category cat, boolean requireNewWeapon ) {
+		switch (cat) {
+			case ARMOR:
+				return randomArmor();
+			case WEAPON:
+				if (!requireNewWeapon)
+					return randomWeapon();
+				else
+					return randomWeapon(true);
+			case MISSILE:
+				return randomMissile();
+			case ARTIFACT:
+				Item item = randomArtifact();
+				//if we're out of artifacts, return a ring instead.
+				return item != null ? item : random(Category.RING);
+			default:
+				if (cat.defaultProbs != null && cat.seed != null){
+					Random.pushGenerator(cat.seed);
+					for (int i = 0; i < cat.dropped; i++) Random.Long();
+				}
+
+				int i = Random.chances(cat.probs);
+				if (i == -1) {
+					reset(cat);
+					i = Random.chances(cat.probs);
+				}
+				if (cat.defaultProbs != null) cat.probs[i]--;
+
+				if (cat.defaultProbs != null && cat.seed != null){
+					Random.popGenerator();
+					cat.dropped++;
+				}
+				//try {
+				return ((Item) Reflection.newInstance(cat.classes[i])).random();
+				/*}catch (Exception e){
+					Game.reportException(e);
+					return null;
+				}*/
+		}
+	}
+
 	//overrides any deck systems and always uses default probs
 	// except for artifacts, which must always use a deck
 	public static Item randomUsingDefaults( Category cat ){

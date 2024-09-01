@@ -114,13 +114,13 @@ public class DistortionTrap extends Trap{
 					mob = Reflection.newInstance(Bestiary.getMobRotation(floor).get(0));
 					break;
 				case 2:
-					switch (2){
+					switch (Random.Int(4)){
 						case 0: default:
 							Wraith.spawnAt(point);
 							continue; //wraiths spawn themselves, no need to do more
 						case 1:
 							//yes it's intended that these are likely to die right away
-							mob = Piranha.random();
+							mob = new Piranha();
 							break;
 						case 2:
 							mob = Mimic.spawnAt(point, false);
@@ -128,7 +128,7 @@ public class DistortionTrap extends Trap{
 							mob.alignment = Char.Alignment.ENEMY;
 							break;
 						case 3:
-							mob = Statue.random(false);
+							mob = Statue.random();
 							break;
 					}
 					break;
