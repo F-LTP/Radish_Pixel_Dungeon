@@ -36,10 +36,11 @@ public class ItemSpriteSheet {
 		return x + WIDTH*y;
 	}
 
+	//TODO 全部改成16
 	private static void assignItemRect( int item, int width, int height ){
 		int x = (item % WIDTH) * SIZE;
 		int y = (item / WIDTH) * SIZE;
-		film.add( item, x, y, x+width, y+height);
+		film.add( item, x, y, x+16, y+16);
 	}
 
 	private static final int PLACEHOLDERS   =                               xy(1, 1);   //16 slots
