@@ -35,9 +35,13 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.DM175_Sprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 public class DM175 extends Mob {
+
+    private boolean onlyShield;
+
     {
         spriteClass = DM175_Sprite.class;
 
@@ -250,10 +254,30 @@ public class DM175 extends Mob {
 
         }
     }
+
+    private static final String STRING = "first";
+
+    @Override
+    public void storeInBundle(Bundle bundle) {
+        super.storeInBundle(bundle);
+        bundle.put(STRING, onlyShield);
+    }
+
+    @Override
+    public void restoreFromBundle(Bundle bundle) {
+        super.restoreFromBundle(bundle);
+        onlyShield = bundle.getBoolean(STRING);
+    }
+
+
     @Override
     protected boolean act() {
         if (state == SLEEPING || state == WANDERING){
-            Buff.affect(this,Barrier.class).setShield(60);
+            if(!onlyShield){
+                Buff.affect(this,Barrier.class).setShield(60);
+                onlyShield = true;
+            }
+
         }
         return super.act();
     }

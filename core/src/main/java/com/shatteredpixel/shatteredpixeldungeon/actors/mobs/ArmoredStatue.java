@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.StatueSprite;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.Random;
 
 public class ArmoredStatue extends Statue {
 
@@ -45,17 +46,13 @@ public class ArmoredStatue extends Statue {
 	public ArmoredStatue(){
 		super();
 
+		do {
+			armor = Generator.randomArmor();
+		} while (armor.cursed);
+		armor.inscribe(Armor.Glyph.random());
+
 		//double HP
 		HP = HT = 30 + Dungeon.depth * 10;
-	}
-
-	@Override
-	public void createWeapon(boolean useDecks) {
-		super.createWeapon(useDecks);
-
-		armor = Generator.randomArmor();
-		armor.cursed = false;
-		armor.inscribe(Armor.Glyph.random());
 	}
 
 	private static final String ARMOR	= "armor";
@@ -103,8 +100,7 @@ public class ArmoredStatue extends Statue {
 		//TODO improve this when I have proper damage source logic
 		if (armor != null && armor.hasGlyph(AntiMagic.class, this)
 				&& AntiMagic.RESISTS.contains(src.getClass())){
-			dmg -= AntiMagic.drRoll(this, armor.buffedLvl());
-			dmg = Math.max(dmg, 0);
+			dmg -= AntiMagic.drRoll(this, armor.procLvl());
 		}
 
 		super.damage( dmg, src );

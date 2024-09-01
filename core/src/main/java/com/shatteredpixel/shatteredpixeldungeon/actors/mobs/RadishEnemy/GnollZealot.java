@@ -17,6 +17,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Fury;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Healing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
@@ -68,11 +69,16 @@ public class GnollZealot extends Mob {
                 isFirstSeen = true;
                 GLog.n('\n'+ Messages.get(GnollZealot.class, "rage",GnollZealot.this.name()));
             }
-            if((!Dungeon.hero.buffs(Healing.class).isEmpty() || !Dungeon.hero.buffs(Sungrass.Health.class).isEmpty()) && fieldOfView[Dungeon.hero.pos]){
-                Set<Mob> mobs = Collections.synchronizedSet(Dungeon.level.mobs);
-                for(Mob mob:mobs){
-                    Buff.affect(mob,Healing.class).setHeal(8,1f,0);
-                }
+
+            Healing healing = Dungeon.hero.buff(Healing.class);
+            Sungrass.Health sunHealing = Dungeon.hero.buff(Sungrass.Health.class);
+
+            if((healing != null || sunHealing != null && fieldOfView[Dungeon.hero.pos])){
+                //TODO 有问题 暂时让效果失效
+//                Set<Mob> mobs = Collections.synchronizedSet(Dungeon.level.mobs);
+//                for(Mob mob:mobs){
+//                    Buff.affect(mob,Healing.class).setHeal(8,1f,0);
+//                }
             }
         }
         return super.act();
