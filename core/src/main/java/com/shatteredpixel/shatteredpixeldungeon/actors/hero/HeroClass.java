@@ -43,11 +43,35 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.Smok
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.HeroicLeap;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Shockwave;
+import com.shatteredpixel.shatteredpixeldungeon.custom.ch.ChallengeBag;
+import com.shatteredpixel.shatteredpixeldungeon.custom.dict.DictBook;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.BackpackCleaner;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.CustomWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.EnemyAttributeModifier;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.ImmortalShieldAffecter;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.LevelTeleporter;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.MobAttributeViewer;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.MobPlacer;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TerrainPlacer;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TestBag;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TimeReverser;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TrapPlacer;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.LazyTest;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestArmor;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestArtifact;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestMelee;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestMissile;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestPotion;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestRing;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestTalentOFTerminalBook;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.PotionBandolier;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.ScrollHolder;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.VelvetPouch;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
@@ -63,10 +87,17 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRage;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfMagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CelestialSphere;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dagger;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EchoplexHammer;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EndGuard;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EnemyFlag;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gloves;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rapier;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingKnife;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingSpike;
@@ -88,7 +119,93 @@ public enum HeroClass {
 		this.subClasses = subClasses;
 	}
 
+
+	private static void doChallengeSpawn(Hero hero) {
+		new ChallengeBag().collect();
+
+		new DictBook().collect();
+		//new NewDictBook().collect();
+			/*
+			Mana mana = new Mana();
+			mana.maxMana = 200;
+			mana.curMana = 0;
+			mana.manaRegen = 0.514f;
+			mana.attachTo(hero);
+			 */
+		//new WandOfScanningBeam().identify().collect();
+
+		//Dev Tst
+//			new Spanner().collect();
+//			new RingOfKing().collect();
+//			new GiantKiller().collect();
+//			new FogSword().collect();
+		new EchoplexHammer().collect();
+		new EnemyFlag().collect();
+		new ShadowBooks().collect();
+		new CelestialSphere().collect();
+		new Rlyeh().collect();
+		new EndGuard().collect();
+		new KillBoatSword().collect();
+
+		new MobPlacer().collect();
+
+
+		CustomWeapon customWeapon = new CustomWeapon();
+		customWeapon.adjustStatus();
+		customWeapon.identify().collect();
+
+		new TestBag().collect();
+
+		new TrapPlacer().collect();
+
+		new TimeReverser().collect();
+
+		new ImmortalShieldAffecter().collect();
+
+		new BackpackCleaner().collect();
+
+		new LevelTeleporter().collect();
+
+		new LazyTest().collect();
+
+		new TestArmor().collect();
+		new TestArtifact().collect();
+		new TestMelee().collect();
+		new TestMissile().collect();
+		new TestRing().collect();
+		new TestPotion().collect();
+
+		new TestTalentOFTerminalBook().collect();
+
+		new ScrollHolder().collect();
+		Dungeon.LimitedDrops.SCROLL_HOLDER.drop();
+
+		new PotionBandolier().collect();
+		Dungeon.LimitedDrops.POTION_BANDOLIER.drop();
+
+		if (!Dungeon.LimitedDrops.VELVET_POUCH.dropped()) {
+			new VelvetPouch().collect();
+			Dungeon.LimitedDrops.VELVET_POUCH.drop();
+		}
+
+		new MagicalHolster().collect();
+		Dungeon.LimitedDrops.MAGICAL_HOLSTER.drop();
+
+		//	new WandOfReflectDisintegration().identify().collect();
+
+		new EnemyAttributeModifier().collect();
+
+		new MobAttributeViewer().collect();
+
+		new TerrainPlacer().collect();
+
+	}
+
 	public void initHero( Hero hero ) {
+
+		//[TEST MODE]
+		if (Dungeon.isChallenged(Challenges.TEST_MODE))
+			doChallengeSpawn(hero);
 
 		hero.heroClass = this;
 		Talent.initClassTalents(hero);
