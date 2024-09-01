@@ -138,6 +138,10 @@ public abstract class Mob extends Char {
 	private static final String MAX_LVL	= "max_lvl";
 
 	private static final String ENEMY_ID	= "enemy_id";
+	private static final String ONLY_ACTDOWN = "only_actdown";
+
+	public boolean onlyActDown = true;
+
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -162,6 +166,9 @@ public abstract class Mob extends Char {
 		if (enemy != null) {
 			bundle.put(ENEMY_ID, enemy.id() );
 		}
+
+		bundle.put(ONLY_ACTDOWN,onlyActDown);
+
 	}
 	
 	@Override
@@ -190,6 +197,10 @@ public abstract class Mob extends Char {
 
 		if (bundle.contains(ENEMY_ID)) {
 			enemyID = bundle.getInt(ENEMY_ID);
+		}
+
+		if(bundle.contains(ONLY_ACTDOWN)){
+			onlyActDown = bundle.getBoolean(ONLY_ACTDOWN);
 		}
 
 		//no need to actually save this, must be false

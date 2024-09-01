@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal.WarriorShield;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -166,7 +167,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 
 	public float enchantFactor(float chance){
-		return chance + ((Math.min(1f, power) * 0.15f) * ((Hero) target).pointsInTalent(Talent.ENRAGED_CATALYST));
+		return chance;
 	}
 
 	public float damageFactor(float dmg){
@@ -178,7 +179,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				&& state == State.NORMAL
 				&& power >= 1f
 				&& target.buff(WarriorShield.class) != null
-				&& ((Hero)target).hasTalent(Talent.DEATHLESS_FURY)){
+				&& (target).buff(HeadCleaver.headCleaverTracker.class)==null){
 			startBerserking();
 			ActionIndicator.clearAction(this);
 		}
@@ -196,7 +197,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 			turnRecovery = TURN_RECOVERY_START;
 			levelRecovery = 0;
 		} else {
-			levelRecovery = LEVEL_RECOVER_START - ((Hero)target).pointsInTalent(Talent.DEATHLESS_FURY);
+			levelRecovery = LEVEL_RECOVER_START;
 			turnRecovery = 0;
 		}
 
@@ -307,7 +308,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				return 0f;
 			case RECOVERING:
 				if (levelRecovery > 0) {
-					return 1f - levelRecovery/(LEVEL_RECOVER_START-Dungeon.hero.pointsInTalent(Talent.DEATHLESS_FURY));
+					return 1f - levelRecovery/(LEVEL_RECOVER_START);
 				} else {
 					return 1f - turnRecovery/(float)TURN_RECOVERY_START;
 				}

@@ -123,7 +123,7 @@ public enum DictionaryJournal {
         MOBS.d.put("mob_slime",             DictSpriteSheet.SLIME);
         MOBS.d.put("mob_caustic_slime",     DictSpriteSheet.CAUSTIC_SLIME);
         MOBS.d.put("mob_great_crab",        DictSpriteSheet.GREAT_CRAB);
-        MOBS.d.put("ch1_div",               ItemSpriteSheet.SKULL);
+        MOBS.d.put("ch1_div",               ItemSpriteSheet.RAT_SKULL);
         MOBS.d.put("mob_goo",               DictSpriteSheet.BOSS_CHAPTER1);
 
         //ch2
@@ -138,7 +138,7 @@ public enum DictionaryJournal {
         MOBS.d.put("mob_rot_heart",         DictSpriteSheet.ROT_HEART);
         MOBS.d.put("mob_rot_lash",          DictSpriteSheet.ROT_LASHER);
         MOBS.d.put("mob_new_ele_fire",      DictSpriteSheet.NEW_FIRE_ELE);
-        MOBS.d.put("ch2_div",               ItemSpriteSheet.SKULL);
+        MOBS.d.put("ch2_div",               ItemSpriteSheet.RAT_SKULL);
         MOBS.d.put("mob_tengu",             DictSpriteSheet.BOSS_CHAPTER2);
 
         //ch3
@@ -150,7 +150,7 @@ public enum DictionaryJournal {
         MOBS.d.put("mob_spinner",           DictSpriteSheet.SPINNER);
         MOBS.d.put("mob_dm200",             DictSpriteSheet.DM200);
         MOBS.d.put("mob_dm201",             DictSpriteSheet.DM201);
-        MOBS.d.put("ch3_div",               ItemSpriteSheet.SKULL);
+        MOBS.d.put("ch3_div",               ItemSpriteSheet.RAT_SKULL);
         MOBS.d.put("mob_pylon",             DictSpriteSheet.PYLON);
         MOBS.d.put("mob_dm300",             DictSpriteSheet.BOSS_CHAPTER3);
 
@@ -165,7 +165,7 @@ public enum DictionaryJournal {
         MOBS.d.put("mob_monk",              DictSpriteSheet.MONK);
         MOBS.d.put("mob_senior",            DictSpriteSheet.SENIOR);
         MOBS.d.put("mob_golem",             DictSpriteSheet.GOLEM);
-        MOBS.d.put("ch4_div",               ItemSpriteSheet.SKULL);
+        MOBS.d.put("ch4_div",               ItemSpriteSheet.RAT_SKULL);
         MOBS.d.put("mob_king",              DictSpriteSheet.BOSS_CHAPTER4);
 
         //ch5
@@ -176,7 +176,7 @@ public enum DictionaryJournal {
         MOBS.d.put("mob_eye",               DictSpriteSheet.EYE);
         MOBS.d.put("mob_scorpio",           DictSpriteSheet.SCORPIO);
         MOBS.d.put("mob_acidic",            DictSpriteSheet.AICDIC);
-        MOBS.d.put("ch5_div",               ItemSpriteSheet.SKULL);
+        MOBS.d.put("ch5_div",               ItemSpriteSheet.RAT_SKULL);
         MOBS.d.put("mob_fist1",             DictSpriteSheet.FIST_1);
         MOBS.d.put("mob_fist2",             DictSpriteSheet.FIST_2);
         MOBS.d.put("mob_fist3",             DictSpriteSheet.FIST_3);
@@ -248,7 +248,7 @@ public enum DictionaryJournal {
         WEAPONS.d.put("melee_scimitar",     ItemSpriteSheet.SCIMITAR);
         WEAPONS.d.put("melee_roundshield",  ItemSpriteSheet.ROUND_SHIELD);
         WEAPONS.d.put("melee_sai",          ItemSpriteSheet.SAI);
-        WEAPONS.d.put("melee_whip",         ItemSpriteSheet.SNAKE_SPEAR);
+        WEAPONS.d.put("melee_whip",         ItemSpriteSheet.WHIP);
         WEAPONS.d.put("melee_longsword",    ItemSpriteSheet.LONGSWORD);
         WEAPONS.d.put("melee_battleaxe",    ItemSpriteSheet.BATTLE_AXE);
         WEAPONS.d.put("melee_flail",        ItemSpriteSheet.FLAIL);

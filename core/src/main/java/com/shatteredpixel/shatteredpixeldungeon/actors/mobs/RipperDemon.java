@@ -180,7 +180,7 @@ public class RipperDemon extends Mob {
 					public void call() {
 
 						if (leapVictim != null && alignment != leapVictim.alignment){
-							if (hit(RipperDemon.this, leapVictim, Char.INFINITE_ACCURACY, false)) {
+							if (hit(RipperDemon.this, leapVictim, Char.INFINITE_ACCURACY)) {
 								Buff.affect(leapVictim, Bleeding.class).set(0.75f * damageRoll());
 								leapVictim.sprite.flash();
 								Sample.INSTANCE.play(Assets.Sounds.HIT);

@@ -12,7 +12,7 @@ import com.watabou.utils.Random;
 
 public class SnakeSpear extends MeleeWeapon{
     {
-        image = ItemSpriteSheet.SNAKE_SPEAR;
+        image = ItemSpriteSheet.WHIP;
         hitSound = Assets.Sounds.HIT;
         hitSoundPitch = 1.1f;
 

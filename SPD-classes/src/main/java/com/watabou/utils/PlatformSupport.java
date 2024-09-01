@@ -32,6 +32,8 @@ import java.io.File;
 import java.util.HashMap;
 
 public abstract class PlatformSupport {
+
+	public abstract boolean supportsVibration();
 	
 	public abstract void updateDisplaySize();
 	

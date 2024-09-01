@@ -121,6 +121,11 @@ public class BuffIndicator extends Component {
 	public static final int DUEL_COMBO  = 69;
 	public static final int DAZE        = 70;
 
+	public static final int HOLD_BREATH = 71;
+	public static final int A_EVA	    = 72;
+//	public static final int DUEL_DANCE  = 73;
+	public static final int SCYTHE_S    = 78;
+
 	public static final int SIZE_SMALL  = 7;
 	public static final int SIZE_LARGE  = 16;
 	

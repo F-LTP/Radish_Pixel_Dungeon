@@ -44,7 +44,6 @@ public class Bloodblade extends MeleeWeapon{
         return actions;
     }
     private void updateImage(){
-        int oldimage=image;
         if (sac>=30){
             image =ItemSpriteSheet.BLOODBLADE3;
         }

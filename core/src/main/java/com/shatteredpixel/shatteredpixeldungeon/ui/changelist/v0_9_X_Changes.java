@@ -367,7 +367,7 @@ public class v0_9_X_Changes {
 				"_- the Chalice of Blood_ now grants more HP per turn with artifact charging based on its level, instead of based on dungeon depth.\n" +
 				"_-_ This scaling occurs in the same way as how the chalice scales up health regen. The max heal per turn is unchanged at 5."));
 
-		changes.addButton(new ChangeButton(new TalentIcon(Talent.NATURES_AID), "Nature's Aid",
+		changes.addButton(new ChangeButton(new TalentIcon(Talent.LAND_HEART), "Nature's Aid",
 				"I'm nudging nature's down slightly as it is currently the strongest T1 talent by a fair margin:\n\n" +
 				"_- Nature's Aid_ turns of barkskin reduced to 3/5 at +1/+2, from 4/6 at +1/+2."));
 

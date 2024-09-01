@@ -149,6 +149,6 @@ public class TerrainPlacer extends TestItem {
             DungeonTileSheet.FLAT_WALL,DungeonTileSheet.FLAT_DOOR,DungeonTileSheet.FLAT_DOOR_OPEN,DungeonTileSheet.ENTRANCE,DungeonTileSheet.EXIT,
             DungeonTileSheet.EMBERS,DungeonTileSheet.FLAT_DOOR_LOCKED,DungeonTileSheet.PEDESTAL,DungeonTileSheet.FLAT_WALL_DECO,DungeonTileSheet.FLAT_BARRICADE,
             DungeonTileSheet.FLOOR_SP,DungeonTileSheet.FLAT_HIGH_GRASS,DungeonTileSheet.FLAT_DOOR,-1,-1,-1,DungeonTileSheet.FLOOR_DECO,DungeonTileSheet.LOCKED_EXIT,
-            DungeonTileSheet.UNLOCKED_EXIT,DungeonTileSheet.FLAT_SIGN,DungeonTileSheet.WELL,DungeonTileSheet.FLAT_STATUE,DungeonTileSheet.FLAT_STATUE_SP,
+            DungeonTileSheet.UNLOCKED_EXIT,DungeonTileSheet.WELL,DungeonTileSheet.FLAT_STATUE,DungeonTileSheet.FLAT_STATUE_SP,
             DungeonTileSheet.FLAT_BOOKSHELF,DungeonTileSheet.FLAT_ALCHEMY_POT,DungeonTileSheet.WATER,DungeonTileSheet.FLAT_FURROWED_GRASS,DungeonTileSheet.FLAT_DOOR_CRYSTAL));
 }

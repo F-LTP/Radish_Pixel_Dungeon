@@ -63,6 +63,9 @@ public abstract class Trap implements Bundlable {
 	public boolean canBeHidden = true;
 	public boolean canBeSearched = true;
 
+	//Only Repair 一次性修复陷阱
+	public boolean onlyRepair = true;
+
 	public boolean avoidsHallways = false; //whether this trap should avoid being placed in hallways
 
 	public Trap set(int pos){
@@ -123,12 +126,17 @@ public abstract class Trap implements Bundlable {
 	private static final String VISIBLE	= "visible";
 	private static final String ACTIVE = "active";
 
+	private static final String ONLYREPAIR = "onlyRepair";
+
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		pos = bundle.getInt( POS );
 		visible = bundle.getBoolean( VISIBLE );
 		if (bundle.contains(ACTIVE)){
 			active = bundle.getBoolean(ACTIVE);
+		}
+		if(bundle.contains(ONLYREPAIR)){
+			onlyRepair = bundle.getBoolean(ONLYREPAIR);
 		}
 	}
 
@@ -137,5 +145,6 @@ public abstract class Trap implements Bundlable {
 		bundle.put( POS, pos );
 		bundle.put( VISIBLE, visible );
 		bundle.put( ACTIVE, active );
+		bundle.put( ONLYREPAIR,onlyRepair);
 	}
 }

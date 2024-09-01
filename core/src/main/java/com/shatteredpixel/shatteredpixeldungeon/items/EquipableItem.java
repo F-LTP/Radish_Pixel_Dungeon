@@ -158,4 +158,9 @@ public abstract class EquipableItem extends Item {
 	}
 
 	public void activate( Char ch ){}
+
+	protected float time2equip( Hero hero ) {
+		return 1;
+	}
+
 }

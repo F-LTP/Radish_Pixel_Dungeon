@@ -240,7 +240,7 @@ public class EliteBadge extends Artifact{
         ChampionHero.getElite(hero,randthree[i],10f+level()*2f, this);
         Sample.INSTANCE.play( Assets.Sounds.BURNING );
         Talent.onArtifactUsed( hero );
-        ActionIndicator.updateIcon();
+        //ActionIndicator.updateIcon();
     }
     public void record_growing(float m){
         growing_mul=m;

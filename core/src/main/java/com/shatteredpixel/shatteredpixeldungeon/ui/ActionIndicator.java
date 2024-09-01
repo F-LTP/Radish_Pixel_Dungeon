@@ -27,10 +27,14 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.watabou.input.GameAction;
 import com.watabou.noosa.BitmapText;
+import com.watabou.noosa.Image;
 import com.watabou.noosa.Visual;
 
 public class ActionIndicator extends Tag {
 
+	private boolean needsLayout = false;
+
+	Image icon;
 	Visual primaryVis;
 	Visual secondVis;
 
@@ -131,6 +135,11 @@ public class ActionIndicator extends Tag {
 			}
 		}
 
+		if (needsLayout){
+			layout();
+			needsLayout = false;
+		}
+
 	}
 
 	@Override
@@ -161,6 +170,21 @@ public class ActionIndicator extends Tag {
 	public static void clearAction(){
 		clearAction(null);
 	}
+
+//	public static void updateIcon(){
+//		if (instance != null){
+//			synchronized (instance) {
+//				if (instance.icon != null) {
+//					instance.icon.killAndErase();
+//					instance.icon = null;
+//				}
+//				if (action != null) {
+//					instance.icon = action.actionIcon();
+//					instance.needsLayout = true;
+//				}
+//			}
+//		}
+//	}
 
 	public static void clearAction(Action action){
 		synchronized (ActionIndicator.class) {
@@ -201,5 +225,8 @@ public class ActionIndicator extends Tag {
 		void doAction();
 
 	}
+
+
+
 
 }

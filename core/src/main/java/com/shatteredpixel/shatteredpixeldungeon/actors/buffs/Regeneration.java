@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.ChaliceOfBlood;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
+import com.watabou.utils.Bundle;
 
 public class Regeneration extends Buff {
 	
@@ -35,6 +36,25 @@ public class Regeneration extends Buff {
 	}
 	
 	private static final float REGENERATION_DELAY = 10;
+	private float p_regen=0f;
+	public float reduce_regen=0;
+
+	@Override
+	public void storeInBundle(Bundle bundle){
+		super.storeInBundle(bundle);
+		bundle.put("RED_GEN",reduce_regen);
+		bundle.put("P_GEN",p_regen);
+	}
+	@Override
+	public void restoreFromBundle(Bundle bundle){
+		super.restoreFromBundle(bundle);
+		if (bundle.contains("RED_GEN")){
+			reduce_regen=bundle.getFloat("RED_GEN");
+		}
+		if (bundle.contains("P_GEN")){
+			p_regen=bundle.getFloat("P_GEN");
+		}
+	}
 	
 	@Override
 	public boolean act() {

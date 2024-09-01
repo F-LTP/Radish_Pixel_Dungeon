@@ -90,17 +90,17 @@ public class InputHandler extends InputAdapter {
 		PointF hoverPos = PointerEvent.currentHoverPos();
 		multiplexer.touchDragged((int)hoverPos.x, (int)hoverPos.y, id);
 	}
-	
+
 	public void processAllEvents(){
 		PointerEvent.processPointerEvents();
 		KeyEvent.processKeyEvents();
 		ScrollEvent.processScrollEvents();
 	}
-	
+
 	// *********************
 	// *** Pointer Input ***
 	// *********************
-	
+
 	@Override
 	public synchronized boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		if (screenX < 0 || screenX > Game.width || screenY < 0 || screenY > Game.height){
@@ -119,7 +119,7 @@ public class InputHandler extends InputAdapter {
 		}
 		return true;
 	}
-	
+
 	@Override
 	public synchronized boolean touchUp(int screenX, int screenY, int pointer, int button) {
 
@@ -131,21 +131,22 @@ public class InputHandler extends InputAdapter {
 		return true;
 	}
 
-	@Override
-	public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-		//currently emulating functionality from libGDX 1.11.0, do we keep this?
-		//in particular this is probably a more graceful way to handle things like system swipes on iOS
-		//whereas previously they generated garbage inputs sometimes
-		//which were then fixed in v2.2.2
-		return touchUp(screenX, screenY, pointer, button);
-	}
+	//TODO 暂时屏蔽
+//	@Override
+//	public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+//		//currently emulating functionality from libGDX 1.11.0, do we keep this?
+//		//in particular this is probably a more graceful way to handle things like system swipes on iOS
+//		//whereas previously they generated garbage inputs sometimes
+//		//which were then fixed in v2.2.2
+//		return touchUp(screenX, screenY, pointer, button);
+//	}
 
 	@Override
 	public synchronized boolean touchDragged(int screenX, int screenY, int pointer) {
 		PointerEvent.addIfExisting(new PointerEvent(screenX, screenY, pointer, PointerEvent.Type.DOWN));
 		return true;
 	}
-	
+
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
 		if (ControllerHandler.controllerPointerActive()) {
@@ -157,11 +158,11 @@ public class InputHandler extends InputAdapter {
 		PointerEvent.addPointerEvent(new PointerEvent(screenX, screenY, -1, PointerEvent.Type.HOVER));
 		return true;
 	}
-	
+
 	// *****************
 	// *** Key Input ***
 	// *****************
-	
+
 	@Override
 	public synchronized boolean keyDown( int keyCode ) {
 		if (KeyBindings.isKeyBound( keyCode )) {
@@ -171,7 +172,7 @@ public class InputHandler extends InputAdapter {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public synchronized boolean keyUp( int keyCode ) {
 		if (KeyBindings.isKeyBound( keyCode )) {
@@ -181,11 +182,11 @@ public class InputHandler extends InputAdapter {
 			return false;
 		}
 	}
-	
+
 	// ********************
 	// *** Scroll Input ***
 	// ********************
-	
+
 	@Override
 	public boolean scrolled(float amountX, float amountY) {
 		ScrollEvent.addScrollEvent( new ScrollEvent(PointerEvent.currentHoverPos(), amountY));

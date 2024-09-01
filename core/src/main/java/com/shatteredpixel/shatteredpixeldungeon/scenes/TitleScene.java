@@ -266,56 +266,16 @@ public class TitleScene extends PixelScene {
 		}
 	}
 
-	private static class ChangesButton extends StyledButton {
+	//在线更新 2024-8-6
+	public static class ChangesButton extends StyledButton {
 
 		public ChangesButton( Chrome.Type type, String label ){
 			super(type, label);
-			if (SPDSettings.updates()) Updates.checkForUpdate();
-		}
-
-		boolean updateShown = false;
-
-		@Override
-		public void update() {
-			super.update();
-
-			if (!updateShown && Updates.updateAvailable()){
-				updateShown = true;
-				text(Messages.get(TitleScene.class, "update"));
-			}
-
-			if (updateShown){
-				textColor(ColorMath.interpolate( 0xFFFFFF, Window.SHPX_COLOR, 0.5f + (float)Math.sin(Game.timeTotal*5)/2f));
-			}
 		}
 
 		@Override
 		protected void onClick() {
-			if (Updates.updateAvailable()){
-				AvailableUpdateData update = Updates.updateData();
-
-				ShatteredPixelDungeon.scene().addToFront( new WndOptions(
-						Icons.get(Icons.CHANGES),
-						update.versionName == null ? Messages.get(this,"title") : Messages.get(this,"versioned_title", update.versionName),
-						update.desc == null ? Messages.get(this,"desc") : update.desc,
-						Messages.get(this,"update"),
-						Messages.get(this,"changes")
-				) {
-					@Override
-					protected void onSelect(int index) {
-						if (index == 0) {
-							Updates.launchUpdate(Updates.updateData());
-						} else if (index == 1){
-							ChangesScene.changesSelected = 0;
-							ShatteredPixelDungeon.switchNoFade( ChangesScene.class );
-						}
-					}
-				});
-
-			} else {
-				ChangesScene.changesSelected = 0;
-				ShatteredPixelDungeon.switchNoFade( ChangesScene.class );
-			}
+			ShatteredPixelDungeon.switchNoFade( ChangesScene.class );
 		}
 
 	}

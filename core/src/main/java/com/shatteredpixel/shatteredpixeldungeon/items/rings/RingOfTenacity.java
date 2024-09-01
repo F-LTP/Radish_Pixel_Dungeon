@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,11 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.rings;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+
+import java.text.DecimalFormat;
 
 public class RingOfTenacity extends Ring {
 
@@ -34,15 +35,12 @@ public class RingOfTenacity extends Ring {
 
 	public String statsInfo() {
 		if (isIdentified()){
-			String info = Messages.get(this, "stats",
-					Messages.decimalFormat("#.##", 100f * (1f - Math.pow(0.85f, soloBuffedBonus()))));
-			if (isEquipped(Dungeon.hero) && soloBuffedBonus() != combinedBuffedBonus(Dungeon.hero)){
-				info += "\n\n" + Messages.get(this, "combined_stats",
-						Messages.decimalFormat("#.##", 100f * (1f - Math.pow(0.85f, combinedBuffedBonus(Dungeon.hero)))));
-			}
-			return info;
+			if (!cursed)
+				return Messages.get(this, "stats", new DecimalFormat("#.##").format(100f * (Math.pow(1.05f, soloBuffedBonus()) - 1f)),new DecimalFormat("#.##").format(100f*(1.1f-Math.max(0.11f,Math.pow(0.944, soloBuffedBonus()-1f)))));
+			else
+				return Messages.get(this, "stats", new DecimalFormat("#.##").format(100f * (Math.pow(1.05f, soloBuffedBonus()) - 1f)),new DecimalFormat("#.##").format(100f*(1f-Math.pow(0.944, soloBuffedBonus()))));
 		} else {
-			return Messages.get(this, "typical_stats", Messages.decimalFormat("#.##", 15f));
+			return Messages.get(this, "typical_stats", new DecimalFormat("#.##").format(5f),new DecimalFormat("#.##").format(10f));
 		}
 	}
 
@@ -50,10 +48,17 @@ public class RingOfTenacity extends Ring {
 	protected RingBuff buff( ) {
 		return new Tenacity();
 	}
-	
+
 	public static float damageMultiplier( Char t ){
-		//(HT - HP)/HT = heroes current % missing health.
-		return (float)Math.pow(0.85, getBuffedBonus( t, Tenacity.class)*((float)(t.HT - t.HP)/t.HT));
+		int gbb=getBuffedBonus( t, Tenacity.class);
+		if (gbb>0)
+			return Math.max(0.01f,(float)Math.pow(0.944,gbb-1)-0.1f);
+		else
+			return (float)(Math.pow(0.944,gbb));
+	}
+	public static float attackMultiplier( Char t ){
+		int gbb=getBuffedBonus( t, Tenacity.class);
+		return (float)Math.pow(1.05,gbb);
 	}
 
 	public class Tenacity extends RingBuff {

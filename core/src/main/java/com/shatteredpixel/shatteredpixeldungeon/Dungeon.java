@@ -72,6 +72,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.plants.VineTrap;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Toolbar;
@@ -124,6 +125,21 @@ public class Dungeon {
 		SLIME_WEP,
 		SKELE_WEP,
 		THEIF_MISC,
+
+		// Date : 2024/07/17
+		// DoggingDog
+		// for Grudge in RadishNewEnemy
+		GRUDGE_WEP,
+
+		CLUSTERED_SKELETON_WEP,
+
+
+		// Date : 2024/07/26
+		// DoggingDog
+		// for RoyalGuard in RadishNewEnemy
+		ROYALGUARD_WEP,
+
+
 		GUARD_ARM,
 		SHAMAN_WAND,
 		DM200_EQUIP,
@@ -208,6 +224,8 @@ public class Dungeon {
 	public static HashSet<Integer> chapters;
 
 	public static SparseArray<ArrayList<Item>> droppedItems;
+	public static SparseArray<ArrayList<Item>> portedItems;
+
 
 	//first variable is only assigned when game is started, second is updated every time game is saved
 	public static int initialVersion;
@@ -270,6 +288,7 @@ public class Dungeon {
 		energy = 0;
 
 		droppedItems = new SparseArray<>();
+		portedItems = new SparseArray<>();
 
 		LimitedDrops.reset();
 		
@@ -645,6 +664,11 @@ public class Dungeon {
 				bundle.put(Messages.format(DROPPED, d), droppedItems.get(d));
 			}
 
+			for (int p : portedItems.keyArray()){
+				bundle.put(Messages.format(PORTED, p), portedItems.get(p));
+			}
+
+
 			quickslot.storePlaceholders( bundle );
 
 			Bundle limDrops = new Bundle();
@@ -820,8 +844,9 @@ public class Dungeon {
 		}
 
 		droppedItems = new SparseArray<>();
+		portedItems = new SparseArray<>();
 		for (int i=1; i <= 26; i++) {
-			
+
 			//dropped items
 			ArrayList<Item> items = new ArrayList<>();
 			if (bundle.contains(Messages.format( DROPPED, i )))
@@ -832,7 +857,17 @@ public class Dungeon {
 				droppedItems.put( i, items );
 			}
 
+			//ported items
+			items = new ArrayList<>();
+			if (bundle.contains(Messages.format( PORTED, i )))
+				for (Bundlable b : bundle.getCollection( Messages.format( PORTED, i ) ) ) {
+					items.add( (Item)b );
+				}
+			if (!items.isEmpty()) {
+				portedItems.put( i, items );
+			}
 		}
+
 	}
 	
 	public static Level loadLevel( int save ) throws IOException {
@@ -1101,6 +1136,17 @@ public class Dungeon {
 		boolean canApproachFromPos = ch.buff(Terror.class) == null && ch.buff(Dread.class) == null;
 		return PathFinder.getStepBack( ch.pos, from, canApproachFromPos ? 8 : 4, passable, canApproachFromPos );
 		
+	}
+
+	/**
+	 * [Plant TRAP]
+	 * @param pos
+	 */
+	public static void plantVineTrap(int pos){
+		VineTrap v=new VineTrap();
+		v.pos=pos;
+		level.plants.put(pos,v);
+		GameScene.plantSeed( pos );
 	}
 
 }

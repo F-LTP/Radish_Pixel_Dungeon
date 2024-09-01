@@ -146,6 +146,8 @@ public class SPDSettings extends GameSettings {
 	public static final String KEY_SYSTEMFONT	= "system_font";
 	public static final String KEY_VIBRATION    = "vibration";
 
+	public static final String KEY_SEEDDEPTH	= "seeddepth";
+
 	//0 = mobile, 1 = mixed (large without inventory in main UI), 2 = large
 	public static void interfaceSize( int value ){
 		put( KEY_UI_SIZE, value );
@@ -171,6 +173,16 @@ public class SPDSettings extends GameSettings {
 	public static int scale() {
 		return getInt( KEY_SCALE, 0 );
 	}
+
+
+	public static void setKeySeeddepth( int value ) {
+		put( KEY_SEEDDEPTH, value );
+	}
+
+	public static int getKeySeedDepth() {
+		return getInt( KEY_SEEDDEPTH, 1 );
+	}
+
 	
 	public static void quickSwapper(boolean value ){ put( KEY_QUICK_SWAP, value ); }
 	
@@ -278,6 +290,12 @@ public class SPDSettings extends GameSettings {
 	public static boolean supportNagged() {
 		return getBoolean(KEY_SUPPORT_NAGGED, false);
 	}
+
+	public static void boatMeeted(boolean meet){put("boat_meeted",meet);}
+	public static boolean boatMeeted(){
+		return getBoolean("boat_meeted",false);
+	}
+
 
 	//Input
 

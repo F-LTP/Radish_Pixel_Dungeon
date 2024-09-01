@@ -191,4 +191,15 @@ public class Image extends Visual {
 		if (buffer != null)
 			buffer.delete();
 	}
+
+	public Image setPos(float x, float y ) {
+		this.x = x;
+		this.y = y;
+		layout();
+
+		return this;
+	}
+
+	protected void layout() {
+	}
 }

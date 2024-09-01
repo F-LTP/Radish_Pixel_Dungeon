@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -39,11 +41,13 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionHero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corrosion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CriticalAttack;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Daze;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Doom;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
@@ -83,13 +87,17 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CrystalSpire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DwarfKing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Elemental;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.GnollGeomancer;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Necromancer;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Grudge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Potential;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
@@ -97,7 +105,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.Pickaxe;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfElements;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRetribution;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
@@ -113,9 +123,16 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazin
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Axe_D;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bloodblade;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GiantKiller;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sickle;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.ShockingDart;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
@@ -148,6 +165,11 @@ public abstract class Char extends Actor {
 	
 	public int HT;
 	public int HP;
+
+	// CRIT DAMAGE
+	protected float critSkill=0;
+	protected float critDamage = 1.5f;
+	protected float critDamageCap = 3f;
 	
 	protected float baseSpeed	= 1;
 	protected PathFinder.Path path;
@@ -310,6 +332,9 @@ public abstract class Char extends Actor {
 	protected static final String TAG_HT    = "HT";
 	protected static final String TAG_SHLD  = "SHLD";
 	protected static final String BUFFS	    = "buffs";
+
+	protected static final String CRIT		= "crit";
+	protected static final String CRIT_D		= "crit_d";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -320,6 +345,9 @@ public abstract class Char extends Actor {
 		bundle.put( TAG_HP, HP );
 		bundle.put( TAG_HT, HT );
 		bundle.put( BUFFS, buffs );
+
+		bundle.put( CRIT, critSkill);
+		bundle.put( CRIT_D, critDamage);
 	}
 	
 	@Override
@@ -336,6 +364,14 @@ public abstract class Char extends Actor {
 				((Buff)b).attachTo( this );
 			}
 		}
+
+		if (bundle.contains(CRIT)){
+			critSkill= bundle.getFloat(CRIT);
+		}
+		if (bundle.contains(CRIT_D)){
+			critDamage= bundle.getFloat(CRIT_D);
+		}
+
 	}
 
 	final public boolean attack( Char enemy ){
@@ -358,7 +394,7 @@ public abstract class Char extends Actor {
 
 			return false;
 
-		} else if (hit( this, enemy, accMulti, false )) {
+		} else if (hit( this, enemy, accMulti )) {
 			
 			int dr = Math.round(enemy.drRoll() * AscensionChallenge.statModifier(enemy));
 			
@@ -391,7 +427,61 @@ public abstract class Char extends Actor {
 				dmg = damageRoll();
 			}
 
-			dmg = dmg*dmgMulti;
+			//TODO 暴击后续需要优化
+			boolean crit=false;
+			boolean surprise =enemy instanceof Mob && ((Mob) enemy).surprisedBy(this);
+			float current_crit=critSkill(),current_critdamage=critDamage();
+			if (this == hero){
+				if (hero.belongings.weapon() instanceof Bloodblade) {
+					Bloodblade bb = (Bloodblade) hero.belongings.weapon;
+					current_crit += bb.sac;
+				}
+
+				else if(hero.belongings.weapon() instanceof GiantKiller){
+					GiantKiller ks =(GiantKiller) hero.belongings.weapon;
+					crit = ks.isMustCrit;
+				}
+
+				else if (hero.belongings.weapon() instanceof Seekingspear){
+					Seekingspear ss=(Seekingspear) hero.belongings.weapon;
+					current_critdamage+=0.3f+0.05f*ss.buffedLvl();
+					if (surprise){
+						current_crit+=25f;
+					}
+				}else if (hero.belongings.weapon() instanceof MissileWeapon){
+					Talent.HoldBreathTracker hb=buff(Talent.HoldBreathTracker.class);
+					if (hb!=null){
+						current_crit+=hb.crit_b;
+						current_critdamage+=hb.cd_b;
+					}
+				}
+				if (hero.hasTalent(Talent.DEATHBLOW)){
+					current_crit+=15f;
+				}
+			}
+			current_critdamage=Math.min(current_critdamage,critDamageCap);
+			if (this.buff(Scythe.scytheSac.class)!=null){
+				current_crit+=10f;
+				current_critdamage+=0.1f;
+			}
+			if (this instanceof Hero) {
+				if (hero.hasTalent(Talent.DEATHBLOW) && surprise){
+					if (hero.pointsInTalent(Talent.DEATHBLOW) >= 2) {
+						current_critdamage += 0.25f;
+						if (hero.pointsInTalent(Talent.DEATHBLOW) == 3)
+							dmg *= 1.15f;
+					}
+				}
+			}
+
+			if (this.buff(RingOfTenacity.Tenacity.class)!=null) {current_crit=0;}
+			if (Random.Float()*100<current_crit || crit || (critDamage >= 3 && ( this instanceof Hero && hero.buff(CriticalAttack.class) != null))) {
+				dmg*=current_critdamage;
+				crit = true;
+			}
+
+
+			dmg = Math.round(dmg*dmgMulti);
 
 			//flat damage bonus is affected by multipliers
 			dmg += dmgBonus;
@@ -458,6 +548,11 @@ public abstract class Char extends Actor {
 			// This matters as defence procs can sometimes inflict self-damage, such as armor glyphs.
 			if (!enemy.isAlive()){
 				return true;
+			}
+
+
+			if(crit){
+				enemy.sprite.showStatus(CharSprite.NEGATIVE,Messages.get(this,"crit"));
 			}
 
 			enemy.damage( effectiveDamage, this );
@@ -542,26 +637,25 @@ public abstract class Char extends Actor {
 	public static int INFINITE_EVASION = 1_000_000;
 
 	final public static boolean hit( Char attacker, Char defender, boolean magic ) {
-		return hit(attacker, defender, magic ? 2f : 1f, magic);
+		return hit(attacker, defender, magic ? 2f : 1f);
 	}
 
-	public static boolean hit( Char attacker, Char defender, float accMulti, boolean magic ) {
+	public static boolean hit( Char attacker, Char defender, float accMulti ) {
 		float acuStat = attacker.attackSkill( defender );
 		float defStat = defender.defenseSkill( attacker );
-
-		if (defender instanceof Hero && ((Hero) defender).damageInterrupt){
-			((Hero) defender).interrupt();
-		}
 
 		//invisible chars always hit (for the hero this is surprise attacking)
 		if (attacker.invisible > 0 && attacker.canSurpriseAttack()){
 			acuStat = INFINITE_ACCURACY;
 		}
+		if (defender.buff(AfterImage.absoluteEvasion.class)!=null){
+			Buff.detach(defender, AfterImage.absoluteEvasion.class);
+			return false;
+		}
 
-		if (defender.buff(MonkEnergy.MonkAbility.Focus.FocusBuff.class) != null && !magic){
-			defStat = INFINITE_EVASION;
-			defender.buff(MonkEnergy.MonkAbility.Focus.FocusBuff.class).detach();
-			Buff.affect(defender, MonkEnergy.MonkAbility.Focus.FocusActivation.class, 0);
+		if (defender.buff(AfterImage.AnotabsoluteEvasion.class)!=null){
+			Buff.detach(defender, AfterImage.AnotabsoluteEvasion.class);
+			return false;
 		}
 
 		//if accuracy or evasion are large enough, treat them as infinite.
@@ -572,24 +666,69 @@ public abstract class Char extends Actor {
 			return true;
 		}
 
+		if (defender.HP<defender.HT){
+			if (attacker instanceof Hero){
+				if (((Hero) attacker).belongings.weapon() instanceof Axe_D){
+					return true;
+				}
+			}else if (attacker instanceof Statue){
+				if (((Statue) attacker).weapon instanceof Axe_D){
+					return true;
+				}
+			}
+		}
+
+
+		if (hero.pointsInTalent(Talent.MEDART_SPECIALIST) >= 2 ) {
+			if(hero.belongings.thrownWeapon instanceof TippedDart){
+				return true;
+			}
+		}
+
 		float acuRoll = Random.Float( acuStat );
-		if (attacker.buff(Bless.class) != null) acuRoll *= 1.25f;
-		if (attacker.buff(  Hex.class) != null) acuRoll *= 0.8f;
-		if (attacker.buff( Daze.class) != null) acuRoll *= 0.5f;
+		float bless_adj_a=1.25f,bless_adj_d=1.25f;
+		if (hero.buff(RingOfBenediction.Benediction.class) != null) {
+			if (attacker == hero)
+				bless_adj_a *= RingOfBenediction.periodMultiplier(attacker);
+			else if (defender == hero)
+				bless_adj_d *= RingOfBenediction.periodMultiplier(attacker);
+		}
+		if (attacker.buff(Bless.class) != null) acuRoll *= bless_adj_a;
+
+		if (attacker.buff(Hex.class) != null) acuRoll *= 0.8f;
 		for (ChampionEnemy buff : attacker.buffs(ChampionEnemy.class)){
 			acuRoll *= buff.evasionAndAccuracyFactor();
 		}
+
+		for (ChampionHero buff : attacker.buffs(ChampionHero.class)){
+			acuRoll *= buff.evasionAndAccuracyFactor();
+		}
 		acuRoll *= AscensionChallenge.statModifier(attacker);
-		
+
 		float defRoll = Random.Float( defStat );
-		if (defender.buff(Bless.class) != null) defRoll *= 1.25f;
-		if (defender.buff(  Hex.class) != null) defRoll *= 0.8f;
-		if (defender.buff( Daze.class) != null) defRoll *= 0.5f;
+		if (defender.buff(Bless.class) != null) defRoll *= bless_adj_d;
+		if (defender.buff( Hex.class) != null) defRoll *= 0.8f;
+
+		// create by DoggingDog on 2024-07-17
+		// Haunted buff from Grudge if it die
+		if(attacker.buff(Grudge.Haunted.class) != null) acuRoll -= 5;
+		if(defender.buff(Grudge.Haunted.class) != null) defRoll -= 5;
+
+		//雾剑祝福效果
+		// Change by DoggingDog on 2024-07-01
+		if (attacker.buff(FogSword.ActBless.class) != null && hero.belongings.weapon() instanceof FogSword) {
+			FogSword ks =(FogSword) hero.belongings.weapon;
+			defRoll *= 1 + (20 + (float) (ks.level() * 4) / 100);
+		}
+
 		for (ChampionEnemy buff : defender.buffs(ChampionEnemy.class)){
 			defRoll *= buff.evasionAndAccuracyFactor();
 		}
+		for (ChampionHero buff : defender.buffs(ChampionHero.class)){
+			defRoll *= buff.evasionAndAccuracyFactor();
+		}
 		defRoll *= AscensionChallenge.statModifier(defender);
-		
+
 		return (acuRoll * accMulti) >= defRoll;
 	}
 
@@ -783,11 +922,11 @@ public abstract class Char extends Actor {
 		shielded -= dmg;
 		HP -= dmg;
 
-		if (HP > 0 && shielded > 0 && shielding() == 0){
-			if (this instanceof Hero && ((Hero) this).hasTalent(Talent.PROVOKED_ANGER)){
-				Buff.affect(this, Talent.ProvokedAngerTracker.class, 5f);
-			}
-		}
+//		if (HP > 0 && shielded > 0 && shielding() == 0){
+//			if (this instanceof Hero && ((Hero) this).hasTalent(Talent.PROVOKED_ANGER)){
+//				Buff.affect(this, Talent.ProvokedAngerTracker.class, 5f);
+//			}
+//		}
 
 		if (HP > 0 && buff(Grim.GrimTracker.class) != null){
 
@@ -1200,7 +1339,10 @@ public abstract class Char extends Actor {
 		//A character that acts in an unchanging manner. immune to AI state debuffs or stuns/slows
 		STATIC( new HashSet<Class>(),
 				new HashSet<Class>( Arrays.asList(AllyBuff.class, Dread.class, Terror.class, Amok.class, Charm.class, Sleep.class,
-									Paralysis.class, Frost.class, Chill.class, Slow.class, Speed.class) ));
+									Paralysis.class, Frost.class, Chill.class, Slow.class, Speed.class) )),
+		ELITES,
+
+		HEADLESS;
 
 		private HashSet<Class> resistances;
 		private HashSet<Class> immunities;
@@ -1227,4 +1369,19 @@ public abstract class Char extends Actor {
 	public static boolean hasProp( Char ch, Property p){
 		return (ch != null && ch.properties().contains(p));
 	}
+
+
+	public float talentProc(){//for RUNIC_TRANSFERENCE
+		return 1f;
+	}
+
+
+	//CRIT METHOD
+	protected float critSkill() {
+		return critSkill;
+	}
+	protected float critDamage() {
+		return Math.min(critDamage,critDamageCap);
+	}
+
 }

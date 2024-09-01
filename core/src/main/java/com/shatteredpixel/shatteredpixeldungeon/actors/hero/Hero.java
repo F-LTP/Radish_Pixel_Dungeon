@@ -43,6 +43,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Calm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Drowsy;
@@ -112,6 +113,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfDiv
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.DarkGold;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.Pickaxe;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfConcentration;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEvasion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
@@ -214,6 +216,17 @@ public class Hero extends Char {
 	public int exp = 0;
 	
 	public int HTBoost = 0;
+
+	/**
+	 * [CRIT BR POWER]
+	 */
+	public float csBoost=0;
+	public boolean sniperSpecial = false;
+
+	/**
+	 * [IMP POWER]
+	 */
+	public boolean powerOfImp = false;
 	
 	private ArrayList<Mob> visibleEnemies;
 
@@ -266,9 +279,39 @@ public class Hero extends Char {
 		return STR + strBonus;
 	}
 
+	@Override
+	public float critSkill(){
+		if (buff(RingOfTenacity.Tenacity.class)!=null) {return 0;}
+		float critbonus=0;
+
+		return critSkill+critbonus;
+	}
+	public void updateCritSkill(){
+		critSkill = 5 + 0.5f*(lvl-1) + csBoost;
+		float bonus= RingOfConcentration.critBonus(this);
+		critSkill+=bonus;
+	}
+	@Override
+	public float critDamage(){
+		float cdbouns=0;
+		cdbouns += RingOfConcentration.critDamgeBonus(this);
+
+		float calm_bouns = 0;
+		if(buff(Calm.class)!=null){
+			calm_bouns = 0.02f;
+		}
+
+		return Math.min(critDamage+cdbouns,critDamageCap) * ( 1 + calm_bouns * 100 * ((float) (HT-HP) /HT)) ;
+	}
+	public int critDamage_shown(){
+		return (int)(100*critDamage());
+	}
+
 	private static final String CLASS       = "class";
 	private static final String SUBCLASS    = "subClass";
 	private static final String ABILITY     = "armorAbility";
+
+	private static final String IMP_POWER     = "imp_power";
 
 	private static final String ATTACK		= "attackSkill";
 	private static final String DEFENSE		= "defenseSkill";
@@ -297,6 +340,8 @@ public class Hero extends Char {
 		
 		bundle.put( HTBOOST, HTBoost );
 
+		bundle.put( IMP_POWER, powerOfImp);
+
 		belongings.storeInBundle( bundle );
 	}
 	
@@ -317,7 +362,9 @@ public class Hero extends Char {
 		
 		attackSkill = bundle.getInt( ATTACK );
 		defenseSkill = bundle.getInt( DEFENSE );
-		
+
+		powerOfImp = bundle.getBoolean(IMP_POWER);
+
 		STR = bundle.getInt( STRENGTH );
 
 		belongings.restoreFromBundle( bundle );
@@ -470,13 +517,13 @@ public class Hero extends Char {
 		float accuracy = 1;
 		accuracy *= RingOfAccuracy.accuracyMultiplier( this );
 		
-		if (wep instanceof MissileWeapon){
-			if (Dungeon.level.adjacent( pos, target.pos )) {
-				accuracy *= (0.5f + 0.2f*pointsInTalent(Talent.POINT_BLANK));
-			} else {
-				accuracy *= 1.5f;
-			}
-		}
+//		if (wep instanceof MissileWeapon){
+//			if (Dungeon.level.adjacent( pos, target.pos )) {
+//				accuracy *= (0.5f + 0.2f*pointsInTalent(Talent.POINT_BLANK));
+//			} else {
+//				accuracy *= 1.5f;
+//			}
+//		}
 
 		if (buff(Scimitar.SwordDance.class) != null){
 			accuracy *= 1.50f;

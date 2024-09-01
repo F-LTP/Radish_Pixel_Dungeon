@@ -31,6 +31,7 @@ import com.watabou.noosa.Game;
 import com.watabou.utils.PlatformSupport;
 import com.watabou.utils.Point;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -149,5 +150,15 @@ public class DesktopPlatformSupport extends PlatformSupport {
 		} else {
 			return regularsplitter.split(text);
 		}
+	}
+
+	@Override
+	public void updateGame(String url, UpdateCallback listener) {
+
+	}
+
+	@Override
+	public void install(File file) {
+
 	}
 }
