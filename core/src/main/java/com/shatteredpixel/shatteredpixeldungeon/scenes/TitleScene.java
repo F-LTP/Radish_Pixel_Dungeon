@@ -208,6 +208,8 @@ public class TitleScene extends PixelScene {
 		version.x = w - version.width() - 4;
 		version.y = h - version.height() - 2;
 
+		add( version );
+
 		if (landscape()) {
 			btnPlay.setRect(title.x-90, topRegion+GAP, ((title.width()+180)/2)-1, BTN_HEIGHT);
 			align(btnPlay);
@@ -341,7 +343,7 @@ public class TitleScene extends PixelScene {
 
 		public SupportButton( Chrome.Type type, String label ){
 			super(type, label);
-			icon(Icons.get(Icons.GOLD));
+			icon(Icons.get(Icons.TALENT));
 			textColor(Window.TITLE_COLOR);
 		}
 
