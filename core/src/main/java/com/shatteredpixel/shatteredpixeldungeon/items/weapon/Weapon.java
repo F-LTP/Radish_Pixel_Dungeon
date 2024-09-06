@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -34,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfKing;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ParchmentScrap;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Annoying;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Dazzling;
@@ -96,6 +99,8 @@ abstract public class Weapon extends KindOfWeapon {
 			return dly * delayFactor;
 		}
 	}
+
+
 	
 	public Augment augment = Augment.NONE;
 	
@@ -246,7 +251,21 @@ abstract public class Weapon extends KindOfWeapon {
 	}
 
 	public int STRReq(){
+		int req2 = STRReq(buffedLvl());
 		int req = STRReq(level());
+		if(req2 != 0 ){
+			req = req2;
+		}
+		int multi = RingOfKing.updateMultiplier(hero);
+		if( RingOfKing.curItem != null && RingOfKing.curItem.cursed )
+			multi = 1;
+		// 暂时这样吧，先把问题修了
+		if(hero != null){
+			RingOfKing ringOfKing = hero.belongings.getItem(RingOfKing.class);
+			if(ringOfKing != null){
+				if(hero.belongings.weapon == this && (hero.belongings.misc instanceof RingOfKing || hero.belongings.ring instanceof RingOfKing)) req = req + multi;
+			}
+		}
 		if (masteryPotionBonus){
 			req -= 2;
 		}
@@ -267,6 +286,20 @@ abstract public class Weapon extends KindOfWeapon {
 		int level = super.level();
 		if (curseInfusionBonus) level += 1 + level/6;
 		return level;
+	}
+
+	//overrides as other things can equip these
+	@Override
+	public int buffedLvl() {
+		if(hero.belongings.weapon == this ) {
+			return hero.belongings.weapon.level() + RingOfKing.updateMultiplier(Dungeon.hero);
+		}
+
+		if (isEquipped( hero ) || hero.belongings.contains( this )){
+			return super.buffedLvl();
+		} else {
+			return level();
+		}
 	}
 	
 	@Override

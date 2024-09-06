@@ -181,7 +181,7 @@ public class Goblin extends Mob {
 
             return false;
 
-        } else if (hit( this, enemy, accMulti )) {
+        } else if (hit( this, enemy, accMulti, false )) {
             if (enemy.buff(AfterImage.Blur.class)!=null){
                 enemy.buff(AfterImage.Blur.class).gainDodge();
             }

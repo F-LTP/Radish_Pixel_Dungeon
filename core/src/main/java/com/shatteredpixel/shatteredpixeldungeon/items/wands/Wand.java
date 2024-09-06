@@ -533,7 +533,7 @@ public abstract class Wand extends Item {
 				timeToZap = -hero.cooldown();
 		}
 
-		GLog.n(""+isMagesStaff);
+		//GLog.n(""+isMagesStaff);
 		if( !(hero.buff(MagicStick.class)!=null && isMagesStaff)) {
 			curUser.spendAndNext(timeToZap);
 		}else{
