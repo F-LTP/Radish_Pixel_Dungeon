@@ -77,12 +77,15 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotio
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfConcentration;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfElements;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEvasion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfHaste;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfKing;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfMight;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
@@ -668,22 +671,24 @@ public class Generator {
 					MysteryMeat.class };
 			FOOD.defaultProbs = new float[]{ 4, 1, 0 };
 			FOOD.probs = FOOD.defaultProbs.clone();
-			
+
 			RING.classes = new Class<?>[]{
-					RingOfAccuracy.class,
+					RingOfConcentration.class,
 					RingOfArcana.class,
-					RingOfElements.class,
-					RingOfEnergy.class,
+					RingOfBenediction.class,
 					RingOfEvasion.class,
+					RingOfElements.class,
 					RingOfForce.class,
 					RingOfFuror.class,
 					RingOfHaste.class,
+					RingOfEnergy.class,
 					RingOfMight.class,
 					RingOfSharpshooting.class,
 					RingOfTenacity.class,
-					RingOfWealth.class};
-			RING.defaultProbs = new float[]{ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 };
-			RING.probs = RING.defaultProbs.clone();
+					RingOfWealth.class,
+					RingOfKing.class};
+			RING.probs = new float[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+			//RING.probs = RING.defaultProbs.clone();
 			
 			ARTIFACT.classes = new Class<?>[]{
 					AlchemistsToolkit.class,

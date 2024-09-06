@@ -65,7 +65,7 @@ public enum DictionaryJournal {
 
         //cats
         ALCHEMY.d.put("catalyst_potion",    ItemSpriteSheet.POTION_CATALYST);
-        ALCHEMY.d.put("catalyst_scroll",    ItemSpriteSheet.SCROLL_CATALYST);
+        //ALCHEMY.d.put("catalyst_scroll",    ItemSpriteSheet.SCROLL_CATALYST);
         //food
         ALCHEMY.d.put("food_ration",        ItemSpriteSheet.RATION);
         ALCHEMY.d.put("food_frozen",        ItemSpriteSheet.CARPACCIO);

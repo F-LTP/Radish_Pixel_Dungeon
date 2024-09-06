@@ -57,11 +57,11 @@ import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TestBag;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TimeReverser;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TrapPlacer;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.LazyTest;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.SpawnMisc;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestArmor;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestArtifact;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestMelee;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestMissile;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestPotion;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestRing;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestTalentOFTerminalBook;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
@@ -147,7 +147,7 @@ public enum HeroClass {
 		new Rlyeh().collect();
 		new EndGuard().collect();
 		new KillBoatSword().collect();
-
+		new SpawnMisc().collect();
 		new MobPlacer().collect();
 
 
@@ -174,7 +174,7 @@ public enum HeroClass {
 		new TestMelee().collect();
 		new TestMissile().collect();
 		new TestRing().collect();
-		new TestPotion().collect();
+		//new TestPotion().collect();
 
 		new TestTalentOFTerminalBook().collect();
 

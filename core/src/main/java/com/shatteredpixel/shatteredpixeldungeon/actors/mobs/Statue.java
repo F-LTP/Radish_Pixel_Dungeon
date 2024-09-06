@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RatSkull;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon.Enchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
@@ -54,14 +55,19 @@ public class Statue extends Mob {
 	public Statue() {
 		super();
 
-		do {
-			weapon = (MeleeWeapon) Generator.random(Generator.Category.WEAPON,true);
-		} while (weapon.cursed);
-
-		weapon.enchant( Enchantment.random() );
-
 		HP = HT = 15 + Dungeon.depth * 5;
 		defenseSkill = 4 + Dungeon.depth;
+	}
+
+	public void createWeapon( boolean useDecks ){
+		if (useDecks) {
+			weapon = (MeleeWeapon) Generator.random(Generator.Category.WEAPON);
+		} else {
+			weapon = (MeleeWeapon) Generator.randomUsingDefaults(Generator.Category.WEAPON);
+		}
+		levelGenStatue = useDecks;
+		weapon.cursed = false;
+		weapon.enchant( Enchantment.random() );
 	}
 
 	private static final String WEAPON	= "weapon";
@@ -80,7 +86,7 @@ public class Statue extends Mob {
 
 	@Override
 	protected boolean act() {
-		if (levelGenStatue && Dungeon.level.heroFOV[pos]) {
+		if (levelGenStatue && Dungeon.level.visited[pos]) {
 			Notes.add( Notes.Landmark.STATUE );
 		}
 		return super.act();
@@ -108,14 +114,16 @@ public class Statue extends Mob {
 
 	@Override
 	public int drRoll() {
-		return Random.NormalIntRange(0, Dungeon.depth + weapon.defenseFactor(this));
+		return super.drRoll() + Char.combatRoll(0, Dungeon.depth + weapon.defenseFactor(this));
 	}
 
 	@Override
 	public boolean add(Buff buff) {
-		super.add(buff);
-		if (state == PASSIVE && buff.type == Buff.buffType.NEGATIVE){
-			state = HUNTING;
+		if (super.add(buff)) {
+			if (state == PASSIVE && buff.type == Buff.buffType.NEGATIVE) {
+				state = HUNTING;
+			}
+			return true;
 		}
 		return false;
 	}
@@ -135,7 +143,7 @@ public class Statue extends Mob {
 		damage = super.attackProc( enemy, damage );
 		damage = weapon.proc( this, enemy, damage );
 		if (!enemy.isAlive() && enemy == Dungeon.hero){
-			Dungeon.fail(getClass());
+			Dungeon.fail(this);
 			GLog.n( Messages.capitalize(Messages.get(Char.class, "kill", name())) );
 		}
 		return damage;
@@ -182,11 +190,20 @@ public class Statue extends Mob {
 	}
 
 	public static Statue random(){
-		if (Random.Int(10) == 0){
-			return new ArmoredStatue();
+		return random( true );
+	}
+
+	public static Statue random( boolean useDecks ){
+		Statue statue;
+		float altChance = 1/10f * RatSkull.exoticChanceMultiplier();
+		if (altChance > 0.1f) altChance = (altChance+0.1f)/2f; //rat skull is 1/2 as effective here
+		if (Random.Float() < altChance){
+			statue = new ArmoredStatue();
 		} else {
-			return new Statue();
+			statue = new Statue();
 		}
+		statue.createWeapon(useDecks);
+		return statue;
 	}
 
 }
