@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
@@ -36,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.DrakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -262,6 +264,25 @@ public class Drake extends Mob {
 
             return false;
 
+        }
+    }
+
+
+    @Override
+    public boolean interact(Char c) {
+        if (alignment != Alignment.NEUTRAL || c != Dungeon.hero) {
+            return super.interact(c);
+        }
+        stopHiding();
+        if (Dungeon.hero.invisible <= 0
+                && Dungeon.hero.buff(Swiftthistle.TimeBubble.class) == null
+                && Dungeon.hero.buff(TimekeepersHourglass.timeFreeze.class) == null){
+            return doAttack(Dungeon.hero);
+        } else {
+            sprite.idle();
+            alignment = Alignment.ENEMY;
+            Dungeon.hero.spendAndNext(1f);
+            return true;
         }
     }
 
