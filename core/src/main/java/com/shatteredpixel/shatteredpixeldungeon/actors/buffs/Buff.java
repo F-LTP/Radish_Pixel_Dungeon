@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Drake;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
@@ -72,6 +73,11 @@ public class Buff extends Actor {
 			if (target.sprite != null) fx( true );
 			return true;
 		} else {
+			// bug fix 4 Drake
+			// Date 2024-09-14 by DoggingDog
+			if(target instanceof Drake){
+				return false;
+			}
 			this.target = null;
 			return false;
 		}
