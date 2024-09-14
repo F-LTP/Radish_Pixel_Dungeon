@@ -362,13 +362,13 @@ public class Drake extends Mob {
 
     @Override
     public boolean add(Buff buff) {
-        super.add(buff);
+        boolean buffAdd = super.add(buff);
         if (buff.type == Buff.buffType.NEGATIVE && alignment == Alignment.NEUTRAL){
             alignment = Alignment.ENEMY;
             stopHiding();
             if (sprite != null) sprite.idle();
         }
-        return false;
+        return buffAdd;
     }
     public void stopHiding(){
         state = HUNTING;
