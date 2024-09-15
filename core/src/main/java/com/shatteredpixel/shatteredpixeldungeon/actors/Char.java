@@ -914,8 +914,8 @@ public abstract class Char extends Actor {
 
 		int shielded = dmg;
 
-		if (this.buff(ImmortalShieldAffecter.ImmortalShield.class)==null) {
-			HP -= dmg;
+		if (this.buff(ImmortalShieldAffecter.ImmortalShield.class)!=null) {
+			dmg = 0;
 		}
 
 		if (!(src instanceof Hunger)){
