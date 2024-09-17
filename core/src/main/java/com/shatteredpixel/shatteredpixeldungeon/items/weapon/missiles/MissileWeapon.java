@@ -31,14 +31,17 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.TacticalThrowTalen4Battlemage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -176,6 +179,16 @@ abstract public class MissileWeapon extends Weapon {
 			}
 		}
 
+		// Change: 4 battle mage talent: War throw (if magestaff inj Disint)
+		// date  : 2024-06-28
+		// by    : DoggingDog
+		if(user.hasTalent(Talent.WAR_THROW)){
+			MagesStaff magesStaff = Dungeon.hero.belongings.getItem(MagesStaff.class);
+			if(magesStaff != null && magesStaff.wand instanceof WandOfDisintegration){
+				projecting = true;
+			}
+		}
+
 		if (projecting
 				&& (Dungeon.level.passable[dst] || Dungeon.level.avoid[dst] || Actor.findChar(dst) != null)
 				&& Dungeon.level.distance(user.pos, dst) <= Math.round(4 * Enchantment.genericProcChanceMultiplier(user))){
@@ -251,6 +264,16 @@ abstract public class MissileWeapon extends Weapon {
 				if (bow != null && bow.enchantment != null && Dungeon.hero.buff(MagicImmune.class) == null) {
 					damage = bow.enchantment.proc(this, attacker, defender, damage);
 				}
+			}
+		}
+
+		// Change: TALENT OF BATTLEMAGE:WAR_THROW(exc Distin)
+		// Data  : 2024-06-28
+		// by	 : DoggingDog
+		if(attacker == Dungeon.hero && Dungeon.hero.hasTalent(Talent.WAR_THROW)){
+			MagesStaff magesStaff = Dungeon.hero.belongings.getItem(MagesStaff.class);
+			if(magesStaff != null){
+				TacticalThrowTalen4Battlemage.onThrow(magesStaff,attacker,defender,damage);
 			}
 		}
 

@@ -47,6 +47,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HornOfPlenty;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
+import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.SpellQueue;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
@@ -439,11 +440,23 @@ public enum Talent {
 
 	public static void onTalentUpgraded( Hero hero, Talent talent ){
 
+		if (talent == SPELL_QUEUE){
+			if (hero.belongings.getItem(SpellQueue.class)==null && hero.buff(SpellQueue.imageListner.class)==null){
+				Dungeon.level.drop(new SpellQueue(),Dungeon.hero.pos);
+				Buff.affect(hero, SpellQueue.imageListner.class);
+			}
+			SpellQueue mySq= hero.belongings.getItem(SpellQueue.class);
+			if (mySq!=null){
+				mySq.updateImage();
+			}
+		}
 
 		if (talent == ARMSMASTERS_INTUITION && hero.pointsInTalent(ARMSMASTERS_INTUITION) == 2){
 			if (hero.belongings.weapon() != null) hero.belongings.weapon().identify();
 			if (hero.belongings.armor() != null)  hero.belongings.armor.identify();
 		}
+
+
 
 		if (talent == THIEFS_INTUITION && hero.pointsInTalent(THIEFS_INTUITION) == 2){
 			if (hero.belongings.ring instanceof Ring) hero.belongings.ring.identify();

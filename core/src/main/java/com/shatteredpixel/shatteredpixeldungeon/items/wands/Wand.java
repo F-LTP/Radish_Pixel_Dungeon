@@ -408,6 +408,19 @@ public abstract class Wand extends Item {
 		particle.radiateXY(0.5f);
 	}
 
+	public void spellUsed(){
+		curCharges -= 2;
+		if (hero.hasTalent(Talent.SPELL_QUEUE)){
+			SpellQueue mySq= hero.belongings.getItem(SpellQueue.class);
+			if (mySq!=null) mySq.updateImage();
+			if (hero.pointsInTalent(Talent.SPELL_QUEUE)>2){
+				partialCharge+=0.33f;
+			}
+		}
+		Invisibility.dispel();
+		updateQuickslot();
+	}
+
 	protected void wandUsed() {
 
 		if(hero.hasTalent(Talent.MAGIC_STICK) && hero.pointsInTalent(Talent.MAGIC_STICK) >=4 && ! isMagesStaff){
