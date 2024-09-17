@@ -487,6 +487,7 @@ public class Hero extends Char {
 		for (Buff b : buffs()){
 			if (!b.revivePersists) b.detach();
 		}
+		if (hasTalent(Talent.HOLD_BREATH)) Buff.affect(this, Talent.HoldBreathTracker.class);
 		if (hasTalent(Talent.SPELL_QUEUE)) Buff.affect(this, SpellQueue.imageListner.class);
 		Buff.affect( this, Regeneration.class );
 		Buff.affect( this, Hunger.class );

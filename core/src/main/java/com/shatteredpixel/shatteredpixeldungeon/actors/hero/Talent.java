@@ -47,6 +47,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HornOfPlenty;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
+import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.HerbMaker;
 import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.SpellQueue;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
@@ -193,6 +194,8 @@ public enum Talent {
 	ELEMENTAL_REACH(148, 4), STRIKING_FORCE(149, 4), DIRECTED_POWER(150, 4),
 	//Duelist A3 T4
 	FEIGNED_RETREAT(151, 4), EXPOSE_WEAKNESS(152, 4), COUNTER_ABILITY(153, 4);
+
+	public static class MagicRootDropped extends CounterBuff{{revivePersists = true;}};
 
 	public static class ImprovisedProjectileCooldown extends FlavourBuff{
 		public int icon() { return BuffIndicator.TIME; }
@@ -439,7 +442,12 @@ public enum Talent {
 	}
 
 	public static void onTalentUpgraded( Hero hero, Talent talent ){
-
+		if (talent == HERB_MIXTURE  &&hero.belongings.getItem(HerbMaker.class)==null){
+			Dungeon.level.drop(new HerbMaker(),Dungeon.hero.pos);
+		}
+		if (talent == HOLD_BREATH){
+			Buff.affect(hero, HoldBreathTracker.class);
+		}
 		if (talent == SPELL_QUEUE){
 			if (hero.belongings.getItem(SpellQueue.class)==null && hero.buff(SpellQueue.imageListner.class)==null){
 				Dungeon.level.drop(new SpellQueue(),Dungeon.hero.pos);
