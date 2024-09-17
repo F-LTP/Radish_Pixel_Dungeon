@@ -29,7 +29,7 @@ allprojects {
         appAndroidTargetSDK = 33
 
         gdxVersion = '1.11.0'
-        gdxControllersVersion = '2.2.3-SNAPSHOT'
+        gdxControllersVersion = '2.2.4-SNAPSHOT'
         //robovmVersion = '2.3.16'
     }
     version = appVersionName
