@@ -933,10 +933,6 @@ public abstract class Char extends Actor {
 			}
 		}
 
-		if (this.buff(ImmortalShieldAffecter.ImmortalShield.class)==null) {
-			HP -= dmg;
-		}
-
 		if (!(src instanceof Hunger)){
 			for (ShieldBuff s : buffs(ShieldBuff.class)){
 				dmg = s.absorbDamage(dmg);
@@ -944,7 +940,11 @@ public abstract class Char extends Actor {
 			}
 		}
 		shielded -= dmg;
-		HP -= dmg;
+
+		if (this.buff(ImmortalShieldAffecter.ImmortalShield.class)==null) {
+			HP -= dmg;
+		}
+
 		if (HP > 0 && buff(Grim.GrimTracker.class) != null){
 
 			float finalChance = buff(Grim.GrimTracker.class).maxChance;
