@@ -324,7 +324,7 @@ public class InterlevelScene extends PixelScene {
 				btnContinue.setPos((Camera.main.width - btnContinue.width())/2f, storyMessage.bottom()+10);
 				add(btnContinue);
 
-				btnHideStory = new IconButton(Icons.STATS.get()){
+				btnHideStory = new IconButton(Icons.CHEVRON.get()){
 					@Override
 					protected void onClick() {
 						if (btnContinue.alpha() != 0 && btnContinue.alpha() != 1){
