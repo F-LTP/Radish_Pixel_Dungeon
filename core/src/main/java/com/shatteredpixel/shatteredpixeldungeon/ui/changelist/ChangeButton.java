@@ -27,7 +27,9 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.ChangesScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.NewChangesScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
+import com.watabou.noosa.Scene;
 import com.watabou.noosa.ui.Component;
 
 //not actually a button, but functions as one.
@@ -54,8 +56,17 @@ public class ChangeButton extends Component {
 	}
 	
 	protected void onClick() {
-		ChangesScene.showChangeInfo(new Image(icon), title, messages);
-		NewChangesScene.showChangeInfo(new Image(icon), title, messages);
+		
+		Scene moreAltScenes = Game.scene();
+
+		if(moreAltScenes instanceof ChangesScene){
+			ChangesScene.showChangeInfo(new Image(icon), title, messages);
+		}
+
+		if(moreAltScenes instanceof NewChangesScene){
+			NewChangesScene.showChangeInfo(new Image(icon), title, messages);
+		}
+
 	}
 	
 	@Override
