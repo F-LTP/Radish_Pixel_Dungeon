@@ -836,6 +836,9 @@ public abstract class Char extends Actor {
 			return;
 		}
 
+
+
+
 		if(isInvulnerable(src.getClass())){
 			sprite.showStatus(CharSprite.POSITIVE, Messages.get(this, "invulnerable"));
 			return;
@@ -925,6 +928,13 @@ public abstract class Char extends Actor {
 
 		int shielded = dmg;
 		//FIXME: when I add proper damage properties, should add an IGNORES_SHIELDS property to use here.
+
+		//受衅怒火 2024-9-17
+		if (HP > 0 && shielded > 0 && shielding() == 0){
+			if (this instanceof Hero && ((Hero) this).hasTalent(Talent.PROVOKED_ANGER)){
+				Buff.affect(this, Talent.ProvokedAngerTracker.class, 5f);
+			}
+		}
 
 		if (this.buff(ImmortalShieldAffecter.ImmortalShield.class)==null) {
 			HP -= dmg;

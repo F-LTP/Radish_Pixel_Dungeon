@@ -89,7 +89,7 @@ public enum Talent {
 	 * [WARRIOR TALENT]
  	 */
 	//Warrior T1
-	HEARTY_MEAL(0), ARMSMASTERS_INTUITION(1), TEST_SUBJECT(2), IRON_WILL(3),
+	HEARTY_MEAL(0), ARMSMASTERS_INTUITION(1), PROVOKED_ANGER(2), IRON_WILL(3),
 	//Warrior T2
 	IRON_STOMACH(4), EMERGENCY_PROTECTION(5), RUNIC_TRANSFERENCE(6), LETHAL_MOMENTUM(7), IMPROVISED_PROJECTILES(8),
 	//Warrior T3
@@ -453,9 +453,11 @@ public enum Talent {
 	}
 
 	public static void onTalentUpgraded( Hero hero, Talent talent ){
-		//for metamorphosis
-		if (talent == IRON_WILL && hero.heroClass != HeroClass.WARRIOR){
-			Buff.affect(hero, BrokenSeal.WarriorShield.class);
+
+
+		if (talent == ARMSMASTERS_INTUITION && hero.pointsInTalent(ARMSMASTERS_INTUITION) == 2){
+			if (hero.belongings.weapon() != null) hero.belongings.weapon().identify();
+			if (hero.belongings.armor() != null)  hero.belongings.armor.identify();
 		}
 
 		if (talent == THIEFS_INTUITION && hero.pointsInTalent(THIEFS_INTUITION) == 2){
@@ -574,7 +576,10 @@ public enum Talent {
 	public static float itemIDSpeedFactor( Hero hero, Item item ){
 		// 1.75x/2.5x speed with Huntress talent
 		float factor = 1f + 0.75f*hero.pointsInTalent(SURVIVALISTS_INTUITION);
-
+		// 2x/instant for Warrior (see onItemEquipped)
+		if (item instanceof MeleeWeapon || item instanceof Armor){
+			factor *= 1f + hero.pointsInTalent(ARMSMASTERS_INTUITION);
+		}
 		// 3x/instant for Mage (see Wand.wandUsed())
 		if (item instanceof Wand){
 			factor *= 1f + 2.0f*hero.pointsInTalent(SCHOLARS_INTUITION);
@@ -666,7 +671,9 @@ public enum Talent {
 	}
 
 	public static void onItemEquipped( Hero hero, Item item ){
-
+		if (hero.pointsInTalent(ARMSMASTERS_INTUITION) == 2 && (item instanceof Weapon || item instanceof Armor)){
+			item.identify();
+		}
 		if (hero.hasTalent(THIEFS_INTUITION) && item instanceof Ring){
 			if (hero.pointsInTalent(THIEFS_INTUITION) == 2){
 				item.identify();
@@ -696,6 +703,14 @@ public enum Talent {
 				&& enemy.buff(SuckerPunchTracker.class) == null){
 			dmg += Random.IntRange(hero.pointsInTalent(Talent.SUCKER_PUNCH) , 2);
 			Buff.affect(enemy, SuckerPunchTracker.class);
+		}
+
+
+		//受衅怒火 2024-9-17
+		if (hero.hasTalent(Talent.PROVOKED_ANGER)
+				&& hero.buff(ProvokedAngerTracker.class) != null){
+			dmg += 1 + hero.pointsInTalent(Talent.PROVOKED_ANGER);
+			hero.buff(ProvokedAngerTracker.class).detach();
 		}
 
 		if (hero.hasTalent(Talent.FOLLOWUP_STRIKE) && enemy.isAlive() && enemy.alignment == Char.Alignment.ENEMY) {
@@ -803,7 +818,7 @@ public enum Talent {
 		//tier 1
 		switch (cls){
 			case WARRIOR: default:
-				Collections.addAll(tierTalents, HEARTY_MEAL, ARMSMASTERS_INTUITION, TEST_SUBJECT, IRON_WILL);
+				Collections.addAll(tierTalents, HEARTY_MEAL, ARMSMASTERS_INTUITION, PROVOKED_ANGER, IRON_WILL);
 				break;
 			case MAGE:
 				Collections.addAll(tierTalents, EMPOWERING_MEAL, SCHOLARS_INTUITION, TESTED_HYPOTHESIS, BACKUP_BARRIER);
