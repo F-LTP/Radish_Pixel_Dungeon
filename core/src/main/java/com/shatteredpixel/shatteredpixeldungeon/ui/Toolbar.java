@@ -256,7 +256,7 @@ public class Toolbar extends Component {
 						&& Dungeon.hero.handle(Dungeon.hero.pos)){
 						//trigger hold fast and patient strike here, even if the hero didn't specifically wait
 						if (Dungeon.hero.hasTalent(Talent.HOLD_FAST)){
-							Buff.affect(Dungeon.hero, HoldFast.class).pos = Dungeon.hero.pos;
+							Buff.affect(Dungeon.hero, HoldFast.class);
 						}
 						if (Dungeon.hero.hasTalent(Talent.PATIENT_STRIKE)){
 							Buff.affect(Dungeon.hero, Talent.PatientStrikeTracker.class).pos = Dungeon.hero.pos;
