@@ -301,9 +301,17 @@ abstract public class MissileWeapon extends Weapon {
 		//show quantity even when it is 1
 		return Integer.toString( quantity );
 	}
-	
+
 	@Override
 	public float castDelay(Char user, int dst) {
+		if (user instanceof Hero) {
+			if (Dungeon.hero.hasTalent(Talent.DUEL_DANCE)) {
+				if (Dungeon.hero.buff(Talent.DuelDanceMissileTracker.class) != null) {
+					Buff.detach(Dungeon.hero, Talent.DuelDanceMissileTracker.class);
+					return (0.84f - 0.17f * Dungeon.hero.pointsInTalent(Talent.DUEL_DANCE)) * delayFactor(user);
+				}
+			}
+		}
 		return delayFactor( user );
 	}
 	
