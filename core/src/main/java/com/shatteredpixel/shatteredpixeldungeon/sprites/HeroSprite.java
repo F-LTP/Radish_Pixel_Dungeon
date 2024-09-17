@@ -80,9 +80,7 @@ public class HeroSprite extends CharSprite {
 			t= 6;
 		}
 
-		if (hero.heroClass != HeroClass.DUELIST) {
-			t = armor.tier;
-		} else if (armor != null) {
+		if (armor != null && hero.heroClass != HeroClass.DUELIST) {
 				if (armor instanceof PrisonArmor) t=7;
 				else if (armor instanceof CrabArmor) t=8;
 				else if (armor instanceof DarkCoat) t=9;
