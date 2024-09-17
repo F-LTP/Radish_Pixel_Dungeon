@@ -836,9 +836,6 @@ public abstract class Char extends Actor {
 			return;
 		}
 
-
-
-
 		if(isInvulnerable(src.getClass())){
 			sprite.showStatus(CharSprite.POSITIVE, Messages.get(this, "invulnerable"));
 			return;

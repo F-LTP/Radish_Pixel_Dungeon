@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
@@ -41,9 +42,9 @@ import com.watabou.noosa.audio.Sample;
 import java.util.ArrayList;
 
 public class KingsCrown extends Item {
-	
+
 	private static final String AC_WEAR = "WEAR";
-	
+
 	{
 		image = ItemSpriteSheet.CROWN;
 
@@ -51,41 +52,43 @@ public class KingsCrown extends Item {
 
 		unique = true;
 	}
-	
+
 	@Override
 	public ArrayList<String> actions( Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
 		actions.add( AC_WEAR );
 		return actions;
 	}
-	
+
 	@Override
 	public void execute( Hero hero, String action ) {
 
 		super.execute( hero, action );
 
 		if (action.equals(AC_WEAR)) {
-
-			curUser = hero;
-			if (hero.belongings.armor() != null){
-				GameScene.show( new WndChooseAbility(this, hero.belongings.armor(), hero));
-			} else {
-				GLog.w( Messages.get(this, "naked"));
+			if (!hero.powerOfImp) {
+				curUser = hero;
+				if (hero.belongings.armor() != null) {
+					GameScene.show(new WndChooseAbility(this, hero.belongings.armor(), hero));
+				} else {
+					GLog.w(Messages.get(this, "naked"));
+				}
+			}else {
+				GLog.n(Messages.get(this,"deny"));
 			}
-			
 		}
 	}
-	
+
 	@Override
 	public boolean isUpgradable() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean isIdentified() {
 		return true;
 	}
-	
+
 	public void upgradeArmor(Hero hero, Armor armor, ArmorAbility ability) {
 
 		detach(hero.belongings.backpack);
@@ -106,6 +109,11 @@ public class KingsCrown extends Item {
 			if (hero.belongings.armor == armor) {
 
 				hero.belongings.armor = classArmor;
+				for (Buff b :hero.buffs()){
+					if (b instanceof Armor.ArmorBuff){
+						b.detach();
+					}
+				}
 				((HeroSprite) hero.sprite).updateArmor();
 				classArmor.activate(hero);
 
