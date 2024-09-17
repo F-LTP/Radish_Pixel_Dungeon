@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
+import static com.shatteredpixel.shatteredpixeldungeon.items.Item.updateQuickslot;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
@@ -71,6 +73,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ExoticCrystals;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
@@ -839,6 +843,14 @@ public abstract class Mob extends Char {
 
 				if (Dungeon.hero.hasTalent(Talent.IRON_WILL)){
 					Buff.affect(Dungeon.hero, Barrier.class).setShield (1+Dungeon.hero.pointsInTalent(Talent.IRON_WILL));
+				}
+
+				if (Dungeon.hero.belongings.weapon() instanceof Beecomb) {
+					Beecomb bc = (Beecomb) Dungeon.hero.belongings.weapon;
+					bc.getCharge();
+					updateQuickslot();
+				} else if (Dungeon.hero.belongings.weapon instanceof Scythe){
+					Buff.affect(Dungeon.hero, Scythe.scytheSac.class,5f);
 				}
 
 				if (Dungeon.hero.heroClass != HeroClass.DUELIST
