@@ -117,10 +117,11 @@ public class DemonLord extends Mob {
 
                 Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1f, Random.Float(0.96f, 1.05f));
             }
+            // CRIT DAMAGE
 
             return false;
 
-        } else if (hit( this, enemy, accMulti )) {
+        } else if (hit( this, enemy, accMulti, false )) {
             if (enemy.buff(AfterImage.Blur.class)!=null){
                 enemy.buff(AfterImage.Blur.class).gainDodge();
             }
@@ -284,4 +285,15 @@ public class DemonLord extends Mob {
     protected boolean act() {
         return super.act();
     }
+
+
+
+    //CRIT METHOD
+    protected float critSkill() {
+        return critSkill;
+    }
+    protected float critDamage() {
+        return Math.min(critDamage,critDamageCap);
+    }
+
 }

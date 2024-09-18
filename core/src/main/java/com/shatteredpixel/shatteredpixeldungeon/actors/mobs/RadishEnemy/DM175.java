@@ -48,6 +48,7 @@ public class DM175 extends Mob {
         HP = HT = 20;
         defenseSkill = 14;
 
+        Buff.affect(this,Barrier.class).setShield(60);
 
         EXP = 7;
         maxLvl = 17;
@@ -94,7 +95,7 @@ public class DM175 extends Mob {
 
             return false;
 
-        } else if (hit( this, enemy, accMulti )) {
+        } else if (hit( this, enemy, accMulti, false )) {
             if (enemy.buff(AfterImage.Blur.class)!=null){
                 enemy.buff(AfterImage.Blur.class).gainDodge();
             }

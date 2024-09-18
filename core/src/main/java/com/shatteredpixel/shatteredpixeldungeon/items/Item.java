@@ -642,8 +642,13 @@ public class Item implements Bundlable {
 								}
 							}
 							if (user.buff(Talent.LethalMomentumTracker.class) != null){
+								float dec_dly;
 								user.buff(Talent.LethalMomentumTracker.class).detach();
-								user.next();
+								switch (user.pointsInTalent(Talent.LETHAL_MOMENTUM)){
+									case 1: default: dec_dly=1f;break;
+									case 2:dec_dly=1.5f;
+								}
+								user.spendAndNext(Math.max(0f,delay-dec_dly));
 							} else {
 								user.spendAndNext(delay);
 							}

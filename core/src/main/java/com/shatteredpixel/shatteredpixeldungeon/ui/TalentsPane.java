@@ -61,7 +61,7 @@ public class TalentsPane extends ScrollPane {
 				tiersAvailable = 1;
 			} else if (!Badges.isUnlocked(Badges.Badge.LEVEL_REACHED_2) || !Badges.isUnlocked(Badges.Badge.BOSS_SLAIN_2)){
 				tiersAvailable = 2;
-			} else if (!Badges.isUnlocked(Badges.Badge.BOSS_SLAIN_4)){
+			} else if (!Badges.isUnlocked(Badges.Badge.BOSS_SLAIN_4) ){
 				tiersAvailable = 3;
 			} else {
 				tiersAvailable = Talent.MAX_TALENT_TIERS;
@@ -73,11 +73,10 @@ public class TalentsPane extends ScrollPane {
 			}
 			if (tiersAvailable > 2 && Dungeon.hero.subClass == HeroSubClass.NONE){
 				tiersAvailable = 2;
-			} else if (tiersAvailable > 3 && Dungeon.hero.armorAbility == null){
+			} else if (tiersAvailable > 3 && (Dungeon.hero.armorAbility == null && !Dungeon.hero.powerOfImp)){
 				tiersAvailable = 3;
 			}
 		}
-
 		tiersAvailable = Math.min(tiersAvailable, talents.size());
 
 		for (int i = 0; i < Math.min(tiersAvailable, talents.size()); i++){

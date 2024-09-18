@@ -22,13 +22,10 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
-import com.watabou.utils.Bundle;
 
 public class HoldFast extends Buff {
 
@@ -40,21 +37,13 @@ public class HoldFast extends Buff {
 
 	@Override
 	public boolean act() {
+		if (pos == -1) pos = target.pos;
 		if (pos != target.pos) {
 			detach();
 		} else {
 			spend(TICK);
 		}
 		return true;
-	}
-
-	public int armorBonus(){
-		if (pos == target.pos && target instanceof Hero){
-			return Char.combatRoll(0, 2* ((Hero) target).pointsInTalent(Talent.HOLD_FAST));
-		} else {
-			detach();
-			return 0;
-		}
 	}
 
 	@Override
@@ -69,20 +58,8 @@ public class HoldFast extends Buff {
 
 	@Override
 	public String desc() {
-		return Messages.get(this, "desc", 2*Dungeon.hero.pointsInTalent(Talent.HOLD_FAST));
+		return Messages.get(this, "desc",Dungeon.hero.pointsInTalent(Talent.HOLD_FAST), 3*Dungeon.hero.pointsInTalent(Talent.HOLD_FAST));
 	}
 
-	private static final String POS = "pos";
 
-	@Override
-	public void storeInBundle(Bundle bundle) {
-		super.storeInBundle(bundle);
-		bundle.put(POS, pos);
-	}
-
-	@Override
-	public void restoreFromBundle(Bundle bundle) {
-		super.restoreFromBundle(bundle);
-		pos = bundle.getInt(POS);
-	}
 }

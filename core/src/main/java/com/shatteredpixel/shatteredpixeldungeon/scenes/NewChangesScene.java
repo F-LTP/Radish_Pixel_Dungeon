@@ -35,23 +35,11 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.ExitButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollPane;
-import com.shatteredpixel.shatteredpixeldungeon.ui.StyledButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.ChangeInfo;
 import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.WndChanges;
 import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.WndChangesTabbed;
 import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.rapd.RA_v0_13_X_Changes;
-import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.v0_1_X_Changes;
-import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.v0_2_X_Changes;
-import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.v0_3_X_Changes;
-import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.v0_4_X_Changes;
-import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.v0_5_X_Changes;
-import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.v0_6_X_Changes;
-import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.v0_7_X_Changes;
-import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.v0_8_X_Changes;
-import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.v0_9_X_Changes;
-import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.v1_X_Changes;
-import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.v2_X_Changes;
 import com.shatteredpixel.shatteredpixeldungeon.windows.IconTitle;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Image;
@@ -249,11 +237,11 @@ public class NewChangesScene extends PixelScene {
             rightScroll.scrollTo(0, 0);
 
         } else {
-//            if (messages.length == 1) {
-//                addToFront(new WndChanges(icon, title, messages[0]));
-//            } else {
-//                addToFront(new WndChangesTabbed(icon, title, messages));
-//            }
+            if (messages.length == 1) {
+                addToFront(new WndChanges(icon, title, messages[0]));
+            } else {
+                addToFront(new WndChangesTabbed(icon, title, messages));
+            }
         }
     }
 
@@ -263,11 +251,11 @@ public class NewChangesScene extends PixelScene {
             ((NewChangesScene) s).updateChangesText(icon, title, messages);
             return;
         }
-//        if (messages.length == 1) {
-//            s.addToFront(new WndChanges(icon, title, messages[0]));
-//        } else {
-//            s.addToFront(new WndChangesTabbed(icon, title, messages));
-//        }
+        if (messages.length == 1) {
+            s.addToFront(new WndChanges(icon, title, messages[0]));
+        } else {
+            s.addToFront(new WndChangesTabbed(icon, title, messages));
+        }
     }
 
     @Override

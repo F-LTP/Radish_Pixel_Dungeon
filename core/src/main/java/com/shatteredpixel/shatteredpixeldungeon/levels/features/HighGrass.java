@@ -39,6 +39,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Camouflage;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.SandalsOfNature;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Berry;
+import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.MagicRoot;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.PetrifiedSeed;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.MiningLevel;
@@ -57,7 +58,20 @@ public class HighGrass {
 		if (freezeTrample) return;
 		
 		Char ch = Actor.findChar(pos);
-		
+
+		if (ch instanceof Hero && ((Hero) ch).hasTalent(Talent.UNDERESTIMATED)){
+			int berriesAvailable = 2 + 4*((Hero) ch).pointsInTalent(Talent.UNDERESTIMATED);
+
+			Talent.MagicRootDropped dropped = Buff.affect(ch, Talent.MagicRootDropped.class);
+			berriesAvailable -= dropped.count();
+			if (berriesAvailable > 0) {
+				if (Random.Float()*100<15f) {
+					dropped.countUp(1);
+					level.drop(new MagicRoot(), pos).sprite.drop();
+				}
+			}
+		}
+
 		if (level.map[pos] == Terrain.FURROWED_GRASS){
 			if (ch instanceof Hero && ((Hero) ch).heroClass == HeroClass.HUNTRESS){
 				//Do nothing

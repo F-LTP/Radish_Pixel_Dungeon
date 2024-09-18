@@ -19,8 +19,8 @@ allprojects {
         appName = 'Radish Pixel Dungeon'
         appPackageName = 'com.shatteredpixel.radishpixeldungeon'
 
-        appVersionCode = 240905
-        appVersionName = '0.3.6-base2.4.2'
+        appVersionCode = 240918
+        appVersionName = '0.3.8-base2.4.2'
 
         appJavaCompatibility = JavaVersion.VERSION_1_8
 
@@ -29,7 +29,7 @@ allprojects {
         appAndroidTargetSDK = 33
 
         gdxVersion = '1.11.0'
-        gdxControllersVersion = '2.2.3-SNAPSHOT'
+        gdxControllersVersion = '2.2.4-SNAPSHOT'
         //robovmVersion = '2.3.16'
     }
     version = appVersionName

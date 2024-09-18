@@ -441,11 +441,7 @@ public class DwarfKing extends Mob {
 
 	@Override
 	public boolean isInvulnerable(Class effect) {
-		if (effect == KingDamager.class){
-			return false;
-		} else {
-			return phase == 2 || super.isInvulnerable(effect);
-		}
+		return phase == 2 && effect != KingDamager.class;
 	}
 
 	@Override
@@ -517,6 +513,9 @@ public class DwarfKing extends Mob {
 			sprite.centerEmitter().start( Speck.factory( Speck.SCREAM ), 0.4f, 2 );
 			Sample.INSTANCE.play( Assets.Sounds.CHALLENGE );
 			yell(  Messages.get(this, "enraged", Dungeon.hero.name()) );
+			//TODO 迁移后出现一些问题，在战斗过程中会扣完国王血
+			// 尚未找到问题来源 在三阶段后立刻设置国王以获得解决 暴力Boss100血 常规50血
+			HP = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 100 : 50;
 			BossHealthBar.bleed(true);
 			Game.runOnRenderThread(new Callback() {
 				@Override

@@ -40,6 +40,7 @@ public class WndInfoSubclass extends WndTitledMessage {
 		ArrayList<LinkedHashMap<Talent, Integer>> talentList = new ArrayList<>();
 		Talent.initClassTalents(cls, talentList);
 		Talent.initSubclassTalents(subCls, talentList);
+		Talent.initT4Talents(cls,subCls,talentList);
 
 		TalentsPane.TalentTierPane talentPane = new TalentsPane.TalentTierPane(talentList.get(2), 3, TalentButton.Mode.INFO);
 		talentPane.title.text( Messages.titleCase(Messages.get(WndHeroInfo.class, "talents")));

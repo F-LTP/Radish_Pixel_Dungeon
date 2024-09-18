@@ -17,8 +17,47 @@ import java.util.ArrayList;
 public class RA_v0_13_X_Changes {
 
     public static void addAllChanges( ArrayList<ChangeInfo> changeInfos ){
+        add_v03_3_Changes(changeInfos);
         add_v03_2_Changes(changeInfos);
         add_v03_1_Changes(changeInfos);
+    }
+
+    public static void add_v03_3_Changes( ArrayList<ChangeInfo> changeInfos ) {
+        ChangeInfo changes = new ChangeInfo("v0.3.8", true, "");
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(Icons.get(Icons.DISPLAY_LAND), ("界面更新"),
+                ("过渡界面已迁移到2.5.0风格")));
+
+        changes.addButton( new ChangeButton(Icons.get(Icons.PREFS), "测试时间加强",
+                "_-_ 追加属性生成器，更方便您的调试"));
+
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
+        changes.hardlight(CharSprite.WARNING);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16), Messages.get(ChangesScene.class, "bugfixes"),
+                "修复了以下Bug:\n\n" +
+                        "_来自于 v0.3.8:_\n\n" +
+                        "[修复者：JDSALing]：\n"+
+                        "_-_ 0.优化萝卜更新记录的界面的显示问题\n" +
+                        "_-_ 1.修复各种文本丢失的异常\n" +
+                        "_-_ 2.修复 自然之覆 的功能异常\n" +
+                        "_-_ 3.战术，法师，盗贼，女猎的T1-T3天赋迁移完成\n" +
+                        "_-_ 4.修复 守卫者陷阱 崩溃异常\n" +
+                        "_-_ 5.修复穿戴护甲必定崩溃游戏的异常\n" +
+                        "_-_ 6.修复全局伤害翻倍异常\n" +
+                        "_-_ 7.修复 蜂巢 武器的功能缺失异常\n\n" +
+                        "[修复者：Doge]：\n" +
+                        "_-_ 8.修复 护盾 伤害失效异常\n" +
+                        "_-_ 9.修复 地底亚龙 的各种异常\n" +
+                        "_-_ 10.修复 效果基类 的一些异常"));
     }
 
     public static void add_v03_2_Changes( ArrayList<ChangeInfo> changeInfos ) {

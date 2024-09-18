@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.sprites;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
@@ -60,10 +62,10 @@ public class HeroSprite extends CharSprite {
 	public HeroSprite() {
 		super();
 		
-		texture( Dungeon.hero.heroClass.spritesheet() );
+		texture( hero.heroClass.spritesheet() );
 		updateArmor();
 		
-		link( Dungeon.hero );
+		link( hero );
 
 		if (ch.isAlive())
 			idle();
@@ -73,23 +75,23 @@ public class HeroSprite extends CharSprite {
 
 	public void updateArmor() {
 		int t=0;
-		Armor armor =Dungeon.hero.belongings.armor();
+		Armor armor = hero.belongings.armor();
 		if (armor instanceof ClassArmor){
 			t= 6;
 		}
-		else if (armor != null){
-			if (armor instanceof PrisonArmor) t=7;
-			else if (armor instanceof CrabArmor) t=8;
-			else if (armor instanceof DarkCoat) t=9;
-			else if (armor instanceof AfterGlow) t=10;
-			else if (armor instanceof CloakofGreyFeather) t=11;
-			else if (armor instanceof RatArmor) t=12;
 
-			else if (armor instanceof EnergyArmor){
-				t= ((EnergyArmor) armor).Energy();
-			}
+		if (armor != null && hero.heroClass != HeroClass.DUELIST) {
+				if (armor instanceof PrisonArmor) t=7;
+				else if (armor instanceof CrabArmor) t=8;
+				else if (armor instanceof DarkCoat) t=9;
+				else if (armor instanceof AfterGlow) t=10;
+				else if (armor instanceof CloakofGreyFeather) t=11;
+				else if (armor instanceof RatArmor) t=12;
 
-			else t= armor.tier;
+				else if (armor instanceof EnergyArmor){
+					t= ((EnergyArmor) armor).Energy();
+				}
+			else t = armor.tier;
 		}
 		TextureFilm film = new TextureFilm( tiers(), t, FRAME_WIDTH, FRAME_HEIGHT );
 
@@ -116,7 +118,7 @@ public class HeroSprite extends CharSprite {
 		read = new Animation( 20, false );
 		read.frames( film, 19, 20, 20, 20, 20, 20, 20, 20, 20, 19 );
 
-		if (Dungeon.hero.isAlive())
+		if (hero.isAlive())
 			idle();
 		else
 			die();
