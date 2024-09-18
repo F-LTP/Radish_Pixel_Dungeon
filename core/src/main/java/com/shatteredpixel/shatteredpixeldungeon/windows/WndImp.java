@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ import com.watabou.noosa.particles.Emitter;
 import java.util.Collections;
 
 public class WndImp extends Window{
-	
+
 	private static final int WIDTH      = 120;
 	private static final int BUTTON_HEIGHT = 20;
 	private static final int MARGIN        = 2;
@@ -63,10 +63,10 @@ public class WndImp extends Window{
 		int width = WIDTH;
 
 		float pos = 0;
-			IconTitle tfTitle = new IconTitle(new ItemSprite( tokens.image(), null ), tokens.name());
-			tfTitle.setRect(0, pos, width, 0);
-			add(tfTitle);
-			pos = tfTitle.bottom() + 2*MARGIN;
+		IconTitle tfTitle = new IconTitle(new ItemSprite( tokens.image(), null ), tokens.name());
+		tfTitle.setRect(0, pos, width, 0);
+		add(tfTitle);
+		pos = tfTitle.bottom() + 2*MARGIN;
 
 
 		layoutBody(pos, Messages.get(WndImp.class, "message"), Messages.get(WndImp.class, "reward"),Messages.get(WndImp.class, "power"));
@@ -74,20 +74,20 @@ public class WndImp extends Window{
 
 	}
 	/*public WndImp( final Imp imp, final DwarfToken tokens ) {
-		
+
 		super();
-		
+
 		IconTitle titlebar = new IconTitle();
 		titlebar.icon( new ItemSprite( tokens.image(), null ) );
 		titlebar.label( Messages.titleCase( tokens.name() ) );
 		titlebar.setRect( 0, 0, WIDTH, 0 );
 		add( titlebar );
-		
+
 		RenderedTextBlock message = PixelScene.renderTextBlock( Messages.get(this, "message"), 6 );
 		message.maxWidth(WIDTH);
 		message.setPos(0, titlebar.bottom() + GAP);
 		add( message );
-		
+
 		RedButton btnReward = new RedButton( Messages.get(this, "reward") ) {
 			@Override
 			protected void onClick() {
@@ -96,7 +96,7 @@ public class WndImp extends Window{
 		};
 		btnReward.setRect( 0, message.top() + message.height() + GAP, WIDTH, BTN_HEIGHT );
 		add( btnReward );
-		
+
 		resize( WIDTH, (int)btnReward.bottom() );
 	}*/
 	private void layoutBody(float pos, String message, String... options){
@@ -185,9 +185,9 @@ public class WndImp extends Window{
 		return null;
 	}
 	private void takeReward( Imp imp, DwarfToken tokens, Item reward ) {
-		
+
 		hide();
-		
+
 		tokens.detachAll( Dungeon.hero.belongings.backpack );
 		if (reward == null) return;
 
@@ -197,9 +197,9 @@ public class WndImp extends Window{
 		} else {
 			Dungeon.level.drop( reward, imp.pos ).sprite.drop();
 		}
-		
+
 		imp.flee();
-		
+
 		Imp.Quest.complete();
 	}
 

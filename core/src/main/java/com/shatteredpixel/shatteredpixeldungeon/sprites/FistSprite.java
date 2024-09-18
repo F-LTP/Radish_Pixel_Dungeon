@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlameParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SparkParticle;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
-import com.watabou.noosa.Camera;
 import com.watabou.noosa.TextureFilm;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
@@ -115,7 +115,7 @@ public abstract class FistSprite extends MobSprite {
 	public void attack( int cell ) {
 		super.attack( cell );
 
-		jump(ch.pos, ch.pos, null, 9, SLAM_TIME );
+		jump(ch.pos, ch.pos, 9, SLAM_TIME, null );
 	}
 
 	//different bolt, so overrides zap
@@ -140,7 +140,7 @@ public abstract class FistSprite extends MobSprite {
 	public void onComplete( Animation anim ) {
 		super.onComplete( anim );
 		if (anim == attack) {
-			Camera.main.shake( 4, 0.2f );
+			PixelScene.shake( 4, 0.2f );
 		} else if (anim == zap) {
 			idle();
 		}

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AndroidPlatformSupport extends PlatformSupport {
-	
+
+	@Override
+	public boolean supportsVibration() {
+		return true;
+	}
+
 	public void updateDisplaySize(){
 		if (SPDSettings.landscape() != null) {
 			AndroidLauncher.instance.setRequestedOrientation( SPDSettings.landscape() ?

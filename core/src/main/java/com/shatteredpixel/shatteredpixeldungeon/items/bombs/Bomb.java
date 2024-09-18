@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurse;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -108,10 +107,14 @@ public class Bomb extends Item {
 		super.execute(hero, action);
 	}
 
+	protected Fuse createFuse(){
+		return new Fuse();
+	}
+
 	@Override
 	protected void onThrow( int cell ) {
 		if (!Dungeon.level.pit[ cell ] && lightingFuse) {
-			Actor.addDelayed(fuse = new Fuse().ignite(this), 2);
+			Actor.addDelayed(fuse = createFuse().ignite(this), 2);
 		}
 		if (Actor.findChar( cell ) != null && !(Actor.findChar( cell ) instanceof Hero) ){
 			ArrayList<Integer> candidates = new ArrayList<>();
@@ -165,11 +168,7 @@ public class Bomb extends Item {
 					Heap heap = Dungeon.level.heaps.get(c);
 					if (heap != null)
 						heap.explode();
-
-					Plant plant = Dungeon.level.plants.get( c );
-					if (plant != null){
-						plant.wither();
-					}
+					
 					Char ch = Actor.findChar(c);
 					if (ch != null) {
 						affected.add(ch);
@@ -184,7 +183,7 @@ public class Bomb extends Item {
 					continue;
 				}
 
-				int dmg = Random.NormalIntRange(5 + Dungeon.scalingDepth(), 10 + Dungeon.scalingDepth()*2);
+				int dmg = Char.combatRoll(5 + Dungeon.scalingDepth(), 10 + Dungeon.scalingDepth()*2);
 
 				//those not at the center of the blast take less damage
 				if (ch.pos != cell){
@@ -198,11 +197,11 @@ public class Bomb extends Item {
 				}
 				
 				if (ch == Dungeon.hero && !ch.isAlive()) {
-					if (this instanceof MagicalBomb){
+					if (this instanceof ConjuredBomb){
 						Badges.validateDeathFromFriendlyMagic();
 					}
 					GLog.n(Messages.get(this, "ondeath"));
-					Dungeon.fail(Bomb.class);
+					Dungeon.fail(this);
 				}
 			}
 			
@@ -265,8 +264,8 @@ public class Bomb extends Item {
 			Actor.add( fuse = ((Fuse)bundle.get(FUSE)).ignite(this) );
 	}
 
-	//used to track the death from friendly magic badge
-	public static class MagicalBomb extends Bomb{};
+	//used to track the death from friendly magic badge, if an explosion was conjured by magic
+	public static class ConjuredBomb extends Bomb{};
 
 	public static class Fuse extends Actor{
 
@@ -274,7 +273,7 @@ public class Bomb extends Item {
 			actPriority = BLOB_PRIO+1; //after hero, before other actors
 		}
 
-		private Bomb bomb;
+		protected Bomb bomb;
 
 		public Fuse ignite(Bomb bomb){
 			this.bomb = bomb;
@@ -294,21 +293,7 @@ public class Bomb extends Item {
 			for (Heap heap : Dungeon.level.heaps.valueList()) {
 				if (heap.items.contains(bomb)) {
 
-					//FIXME this is a bit hacky, might want to generalize the functionality
-					//of bombs that don't explode instantly when their fuse ends
-					if (bomb instanceof Noisemaker){
-
-						((Noisemaker) bomb).setTrigger(heap.pos);
-
-					} else {
-
-						heap.remove(bomb);
-
-						bomb.explode(heap.pos);
-					}
-
-					diactivate();
-					Actor.remove(this);
+					trigger(heap);
 					return true;
 				}
 			}
@@ -316,6 +301,18 @@ public class Bomb extends Item {
 			//can't find our bomb, something must have removed it, do nothing.
 			bomb.fuse = null;
 			Actor.remove( this );
+			return true;
+		}
+
+		protected void trigger(Heap heap){
+			heap.remove(bomb);
+			bomb.explode(heap.pos);
+			Actor.remove(this);
+		}
+
+		public boolean freeze(){
+			bomb.fuse = null;
+			Actor.remove(this);
 			return true;
 		}
 	}

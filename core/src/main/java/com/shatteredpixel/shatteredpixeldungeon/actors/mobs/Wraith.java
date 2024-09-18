@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,19 +24,22 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ChallengeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RatSkull;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.WraithSprite;
 import com.watabou.noosa.tweeners.AlphaTweener;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
+import com.watabou.utils.Reflection;
 
 public class Wraith extends Mob {
 
 	private static final float SPAWN_DELAY	= 2f;
 	
-	private int level;
+	protected int level;
 	
 	{
 		spriteClass = WraithSprite.class;
@@ -49,6 +52,7 @@ public class Wraith extends Mob {
 		flying = true;
 
 		properties.add(Property.UNDEAD);
+		properties.add(Property.INORGANIC);
 	}
 	
 	private static final String LEVEL = "level";
@@ -68,7 +72,7 @@ public class Wraith extends Mob {
 	
 	@Override
 	public int damageRoll() {
-		return Random.NormalIntRange( 1 + level/2, 2 + level );
+		return Char.combatRoll( 1 + level/2, 2 + level );
 	}
 	
 	@Override
@@ -92,17 +96,36 @@ public class Wraith extends Mob {
 		state = WANDERING;
 		return true;
 	}
-	
+
 	public static void spawnAround( int pos ) {
-		for (int n : PathFinder.NEIGHBOURS4) {
-			spawnAt( pos + n );
-		}
+		spawnAround( pos, null );
 	}
 	
+	public static void spawnAround( int pos, Class<? extends Wraith> wraithClass ) {
+		for (int n : PathFinder.NEIGHBOURS4) {
+			spawnAt( pos + n, wraithClass );
+		}
+	}
+
 	public static Wraith spawnAt( int pos ) {
+		return spawnAt( pos, null );
+	}
+
+	public static Wraith spawnAt( int pos, Class<? extends Wraith> wraithClass ) {
 		if ((!Dungeon.level.solid[pos] || Dungeon.level.passable[pos]) && Actor.findChar( pos ) == null) {
-			
-			Wraith w = new Wraith();
+
+			Wraith w;
+			//if no wraith type is specified, 1/100 chance for exotic, otherwise normal
+			if (wraithClass == null){
+				float altChance = 1/100f * RatSkull.exoticChanceMultiplier();
+				if (Random.Float() < altChance){
+					w = new TormentedSpirit();
+				} else {
+					w = new Wraith();
+				}
+			} else {
+				w = Reflection.newInstance(wraithClass);
+			}
 			w.adjustStats( Dungeon.scalingDepth() );
 			w.pos = pos;
 			w.state = w.HUNTING;
@@ -111,9 +134,13 @@ public class Wraith extends Mob {
 
 			w.sprite.alpha( 0 );
 			w.sprite.parent.add( new AlphaTweener( w.sprite, 1, 0.5f ) );
-			
-			w.sprite.emitter().burst( ShadowParticle.CURSE, 5 );
-			
+
+			if (w instanceof TormentedSpirit){
+				w.sprite.emitter().burst(ChallengeParticle.FACTORY, 10);
+			} else {
+				w.sprite.emitter().burst(ShadowParticle.CURSE, 5);
+			}
+
 			return w;
 		} else {
 			return null;

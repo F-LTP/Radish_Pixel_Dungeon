@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,14 +58,13 @@ public abstract class Trap implements Bundlable {
 
 	public boolean visible;
 	public boolean active = true;
-
-	//Only Repair 一次性修复陷阱
-	public boolean onlyRepair = true;
-
 	public boolean disarmedByActivation = true;
 	
 	public boolean canBeHidden = true;
 	public boolean canBeSearched = true;
+
+	//Only Repair 一次性修复陷阱
+	public boolean onlyRepair = true;
 
 	public boolean avoidsHallways = false; //whether this trap should avoid being placed in hallways
 
@@ -106,6 +105,13 @@ public abstract class Trap implements Bundlable {
 	public void disarm(){
 		active = false;
 		Dungeon.level.disarmTrap(pos);
+	}
+
+	//returns the depth value the trap should use for determining its power
+	//If the trap is part of the level, it should use the true depth
+	//If it's not part of the level (e.g. effect from reclaim trap), use scaling depth
+	protected int scalingDepth(){
+		return Dungeon.level.traps.get(pos) == this ? Dungeon.depth : Dungeon.scalingDepth();
 	}
 
 	public String name(){

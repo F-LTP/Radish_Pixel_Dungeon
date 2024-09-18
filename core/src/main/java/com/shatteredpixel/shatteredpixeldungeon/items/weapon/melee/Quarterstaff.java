@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,12 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 
 public class Quarterstaff extends MeleeWeapon {
 
@@ -45,4 +50,42 @@ public class Quarterstaff extends MeleeWeapon {
 	public int defenseFactor( Char owner ) {
 		return 2;	//2 extra defence
 	}
+
+	@Override
+	protected void duelistAbility(Hero hero, Integer target) {
+		beforeAbilityUsed(hero, null);
+		//1 turn less as using the ability is instant
+		Buff.prolong(hero, DefensiveStance.class, 3 + buffedLvl());
+		hero.sprite.operate(hero.pos);
+		hero.next();
+		afterAbilityUsed(hero);
+	}
+
+	@Override
+	public String abilityInfo() {
+		if (levelKnown){
+			return Messages.get(this, "ability_desc", 4+buffedLvl());
+		} else {
+			return Messages.get(this, "typical_ability_desc", 4);
+		}
+	}
+
+	public static class DefensiveStance extends FlavourBuff {
+
+		{
+			announced = true;
+			type = buffType.POSITIVE;
+		}
+
+		@Override
+		public int icon() {
+			return BuffIndicator.DUEL_EVASIVE;
+		}
+
+		@Override
+		public float iconFadePercent() {
+			return Math.max(0, (4 - visualcooldown()) / 4);
+		}
+	}
+
 }

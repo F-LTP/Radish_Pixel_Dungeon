@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,55 +23,26 @@ package com.shatteredpixel.shatteredpixeldungeon.items.rings;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-
-import java.text.DecimalFormat;
 
 public class RingOfAccuracy extends Ring {
 
 	{
 		icon = ItemSpriteSheet.Icons.RING_ACCURACY;
 	}
-	@Override
-	public boolean doEquip(Hero hero) {
-		if (super.doEquip(hero)){
-			hero.updateCritSkill(  );
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	@Override
-	public boolean doUnequip(Hero hero, boolean collect, boolean single) {
-		if (super.doUnequip(hero, collect, single)){
-			hero.updateCritSkill(  );
-			return true;
-		} else {
-			return false;
-		}
-	}
-	@Override
-	public Item upgrade() {
-		super.upgrade();
-		if (buff != null && buff.target instanceof Hero){
-			((Hero) buff.target).updateCritSkill();
-		}
-		return this;
-	}
-	@Override
-	public void level(int value) {
-		super.level(value);
-		Dungeon.hero.updateCritSkill();
-	}
+	
 	public String statsInfo() {
 		if (isIdentified()){
-			return Messages.get(this, "stats", new DecimalFormat("#.##").format(100f * (Math.pow(1.2f, soloBuffedBonus()) - 1f)),new DecimalFormat("#.##").format(5f*soloBuffedBonus()),new DecimalFormat("#.##").format(0.1f*soloBuffedBonus()));
+			String info = Messages.get(this, "stats",
+					Messages.decimalFormat("#.##", 100f * (Math.pow(1.3f, soloBuffedBonus()) - 1f)));
+			if (isEquipped(Dungeon.hero) && soloBuffedBonus() != combinedBuffedBonus(Dungeon.hero)){
+				info += "\n\n" + Messages.get(this, "combined_stats",
+						Messages.decimalFormat("#.##", 100f * (Math.pow(1.3f, combinedBuffedBonus(Dungeon.hero)) - 1f)));
+			}
+			return info;
 		} else {
-			return Messages.get(this, "typical_stats", new DecimalFormat("#.##").format(20f),new DecimalFormat("#.##").format(5f),new DecimalFormat("#.##").format(0.1f));
+			return Messages.get(this, "typical_stats", Messages.decimalFormat("#.##", 30f));
 		}
 	}
 	
@@ -81,14 +52,9 @@ public class RingOfAccuracy extends Ring {
 	}
 	
 	public static float accuracyMultiplier( Char target ){
-		return (float)Math.pow(1.2f, getBuffedBonus(target, Accuracy.class));
+		return (float)Math.pow(1.3f, getBuffedBonus(target, Accuracy.class));
 	}
-	public static float critBonus( Char target ){
-		return 5f*getBuffedBonus(target, Accuracy.class);
-	}
-	public static float critDamgeBonus( Char target ){
-		return 0.1f*getBuffedBonus(target, Accuracy.class);
-	}
+	
 	public class Accuracy extends RingBuff {
 	}
 }

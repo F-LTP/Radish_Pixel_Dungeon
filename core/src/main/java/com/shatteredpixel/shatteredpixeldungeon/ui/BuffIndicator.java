@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,20 +25,18 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoBuff;
-import com.watabou.gltextures.SmartTexture;
 import com.watabou.gltextures.TextureCache;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Image;
-import com.watabou.noosa.TextureFilm;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.tweeners.AlphaTweener;
 import com.watabou.noosa.ui.Component;
+import com.watabou.utils.GameMath;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,7 +45,7 @@ import java.util.LinkedHashMap;
 public class BuffIndicator extends Component {
 	
 	//transparent icon
-	public static final int NONE    = 63;
+	public static final int NONE    = 127;
 
 	//FIXME this is becoming a mess, should do a big cleaning pass on all of these
 	//and think about tinting options
@@ -111,9 +109,21 @@ public class BuffIndicator extends Component {
 	public static final int INVERT_MARK = 57;
 	public static final int NATURE_POWER= 58;
 	public static final int AMULET      = 59;
+	public static final int DUEL_CLEAVE = 60;
+	public static final int DUEL_GUARD  = 61;
+	public static final int DUEL_SPIN   = 62;
+	public static final int DUEL_EVASIVE= 63;
+	public static final int DUEL_DANCE  = 64;
+	public static final int DUEL_BRAWL  = 65;
+	public static final int DUEL_XBOW   = 66;
+	public static final int CHALLENGE   = 67;
+	public static final int MONK_ENERGY = 68;
+	public static final int DUEL_COMBO  = 69;
+	public static final int DAZE        = 70;
+
 	public static final int HOLD_BREATH = 71;
 	public static final int A_EVA	    = 72;
-	public static final int DUEL_DANCE  = 73;
+//	public static final int DUEL_DANCE  = 73;
 	public static final int SCYTHE_S    = 78;
 
 	public static final int SIZE_SMALL  = 7;
@@ -280,7 +290,8 @@ public class BuffIndicator extends Component {
 			//round up to the nearest pixel if <50% faded, otherwise round down
 			if (!large || buff.iconTextDisplay().isEmpty()) {
 				text.visible = false;
-				float fadeHeight = buff.iconFadePercent() * icon.height();
+				grey.visible = true;
+				float fadeHeight = GameMath.gate(0, buff.iconFadePercent(), 1) * icon.height();
 				float zoom = (camera() != null) ? camera().zoom : 1;
 				if (fadeHeight < icon.height() / 2f) {
 					grey.scale.set(icon.width(), (float) Math.ceil(zoom * fadeHeight) / zoom);
@@ -288,6 +299,7 @@ public class BuffIndicator extends Component {
 					grey.scale.set(icon.width(), (float) Math.floor(zoom * fadeHeight) / zoom);
 				}
 			} else if (!buff.iconTextDisplay().isEmpty()) {
+				text.visible = true;
 				grey.visible = false;
 				if (buff.type == Buff.buffType.POSITIVE)        text.hardlight(CharSprite.POSITIVE);
 				else if (buff.type == Buff.buffType.NEGATIVE)   text.hardlight(CharSprite.NEGATIVE);

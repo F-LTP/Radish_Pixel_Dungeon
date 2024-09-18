@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,15 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.ui.changelist;
 
-import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.ChangesScene;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.NewChangesScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
+import com.watabou.noosa.Scene;
 import com.watabou.noosa.ui.Component;
 
 //not actually a button, but functions as one.
@@ -35,16 +37,16 @@ public class ChangeButton extends Component {
 	
 	protected Image icon;
 	protected String title;
-	protected String message;
+	protected String[] messages;
 	
-	public ChangeButton( Image icon, String title, String message){
+	public ChangeButton( Image icon, String title, String... messages){
 		super();
 		
 		this.icon = icon;
 		add(this.icon);
 		
 		this.title = Messages.titleCase(title);
-		this.message = message;
+		this.messages = messages;
 		
 		layout();
 	}
@@ -54,7 +56,17 @@ public class ChangeButton extends Component {
 	}
 	
 	protected void onClick() {
-		ChangesScene.showChangeInfo(new Image(icon), title, message);
+		
+		Scene moreAltScenes = Game.scene();
+
+		if(moreAltScenes instanceof ChangesScene){
+			ChangesScene.showChangeInfo(new Image(icon), title, messages);
+		}
+
+		if(moreAltScenes instanceof NewChangesScene){
+			NewChangesScene.showChangeInfo(new Image(icon), title, messages);
+		}
+
 	}
 	
 	@Override

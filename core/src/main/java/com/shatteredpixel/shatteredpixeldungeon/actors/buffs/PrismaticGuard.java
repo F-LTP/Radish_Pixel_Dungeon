@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -52,7 +51,8 @@ public class PrismaticGuard extends Buff {
 		int v = hero.visibleEnemies();
 		for (int i=0; i < v; i++) {
 			Mob mob = hero.visibleEnemy( i );
-			if ( mob.isAlive() && mob.state != mob.PASSIVE && mob.state != mob.WANDERING && mob.state != mob.SLEEPING && !hero.mindVisionEnemies.contains(mob)
+			if ( mob.isAlive() && !mob.isInvulnerable(PrismaticImage.class)
+					&& mob.state != mob.PASSIVE && mob.state != mob.WANDERING && mob.state != mob.SLEEPING && !hero.mindVisionEnemies.contains(mob)
 					&& (closest == null || Dungeon.level.distance(hero.pos, mob.pos) < Dungeon.level.distance(hero.pos, closest.pos))) {
 				closest = mob;
 			}
@@ -87,15 +87,8 @@ public class PrismaticGuard extends Buff {
 		}
 		
 		LockedFloor lock = target.buff(LockedFloor.class);
-		if (HP < maxHP() && (lock == null || lock.regenOn())){
-			float to_heal=0.1f;
-			if (target == Dungeon.hero){
-				Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-				if (ben!=null){
-					to_heal*=RingOfBenediction.periodMultiplier(target);
-				}
-			}
-			HP +=to_heal;
+		if (HP < maxHP() && Regeneration.regenOn()){
+			HP += 0.1f;
 		}
 		
 		return true;

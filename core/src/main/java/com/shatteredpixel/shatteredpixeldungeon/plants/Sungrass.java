@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,11 +28,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Healing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
@@ -91,25 +90,22 @@ public class Sungrass extends Plant {
 			
 			//for the hero, full heal takes ~50/93/111/120 turns at levels 1/10/20/30
 			partialHeal += (40 + target.HT)/150f;
-			if (target.buff(AfterGlow.Warmth.class)!=null){
-				target.buff(AfterGlow.Warmth.class).getWarmth();
-			}
-			if (target == Dungeon.hero ){
-				Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-				if (ben!=null){
-					partialHeal*=RingOfBenediction.periodMultiplier(target);
-				}
-			}
+			
 			if (partialHeal > 1){
-				target.HP += (int)partialHeal;
-				level -= (int)partialHeal;
-				partialHeal -= (int)partialHeal;
-				target.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
-				
-				if (target.HP >= target.HT) {
-					target.HP = target.HT;
-					if (target instanceof Hero){
-						((Hero)target).resting = false;
+				int healThisTurn = (int)partialHeal;
+				partialHeal -= healThisTurn;
+				level -= healThisTurn;
+
+				if (target.HP < target.HT) {
+
+					target.HP += healThisTurn;
+					target.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(healThisTurn), FloatingText.HEALING);
+
+					if (target.HP >= target.HT) {
+						target.HP = target.HT;
+						if (target instanceof Hero) {
+							((Hero) target).resting = false;
+						}
 					}
 				}
 			}
@@ -126,12 +122,6 @@ public class Sungrass extends Plant {
 
 		public void boost( int amount ){
 			if (target != null) {
-				if (target == Dungeon.hero ){
-					Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-					if (ben!=null){
-						amount=Math.round(amount*RingOfBenediction.periodMultiplier(target));
-					}
-				}
 				level += amount;
 				pos = target.pos;
 			}

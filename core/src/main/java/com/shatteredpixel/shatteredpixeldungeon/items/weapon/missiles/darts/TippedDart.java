@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,14 +29,16 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfRegrowth;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Blindweed;
-import com.shatteredpixel.shatteredpixeldungeon.plants.Mageroyal;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Earthroot;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Fadeleaf;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Firebloom;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Icecap;
+import com.shatteredpixel.shatteredpixeldungeon.plants.Mageroyal;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Rotberry;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Sorrowmoss;
@@ -46,7 +48,6 @@ import com.shatteredpixel.shatteredpixeldungeon.plants.Sungrass;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.utils.Reflection;
 
@@ -130,11 +131,27 @@ public abstract class TippedDart extends Dart {
 		}
 	}
 
+	//the number of regular darts lost due to merge being called
+	public static int lostDarts = 0;
+
+	@Override
+	public Item merge(Item other) {
+		int total = quantity() + other.quantity();
+		super.merge(other);
+		int extra = total - quantity();
+
+		//need to spawn waste tipped darts as regular darts
+		if (extra > 0){
+			lostDarts += extra;
+		}
+		return this;
+	}
+
 	private static int targetPos = -1;
 
 	@Override
 	public float durabilityPerUse() {
-		float use = super.durabilityPerUse();
+		float use = super.durabilityPerUse(false);
 		
 		use /= (1 + Dungeon.hero.pointsInTalent(Talent.DURABLE_TIPS));
 
@@ -161,8 +178,19 @@ public abstract class TippedDart extends Dart {
 			}
 		}
 		use *= (1f - lotusPreserve);
-		
-		return use;
+
+		float usages = Math.round(MAX_DURABILITY/use);
+
+		//grants 3+lvl extra uses with charged shot
+		if (bow != null && Dungeon.hero.buff(Crossbow.ChargedShot.class) != null){
+			usages += 3 + bow.buffedLvl();
+		}
+
+		//at 100 uses, items just last forever.
+		if (usages >= 100f) return 0;
+
+		//add a tiny amount to account for rounding error for calculations like 1/3
+		return (MAX_DURABILITY/usages) + 0.001f;
 	}
 	
 	@Override
@@ -171,7 +199,7 @@ public abstract class TippedDart extends Dart {
 		return 8 * quantity;
 	}
 	
-	private static HashMap<Class<?extends Plant.Seed>, Class<?extends TippedDart>> types = new HashMap<>();
+	public static HashMap<Class<?extends Plant.Seed>, Class<?extends TippedDart>> types = new HashMap<>();
 	static {
 		types.put(Blindweed.Seed.class,     BlindingDart.class);
 		types.put(Mageroyal.Seed.class,     CleansingDart.class);
@@ -199,14 +227,6 @@ public abstract class TippedDart extends Dart {
 		
 		return getTipped(s, quantity );
 		
-	}
-
-	@Override
-	protected void decrementDurability(){
-		if( Dungeon.hero.pointsInTalent(Talent.MEDART_SPECIALIST) >= 3 && Math.random() <= 0.33d){
-			return;
-		}
-		super.decrementDurability();
 	}
 	
 }

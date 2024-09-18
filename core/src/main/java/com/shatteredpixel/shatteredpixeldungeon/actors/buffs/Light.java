@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 
@@ -44,14 +42,6 @@ public class Light extends FlavourBuff {
 				target.viewDistance = Math.max( Dungeon.level.viewDistance, DISTANCE );
 				Dungeon.observe();
 			}
-			if (target == Dungeon.hero){
-				if (target.buff(RingOfBenediction.Benediction.class)!=null)
-				if (Dungeon.hero.buff(RingOfBenediction.Benediction.class).buffedLvl()>=11){
-					immunities.add(Blindness.class);
-					Buff tb=target.buff(Blindness.class);
-					if (tb!=null) tb.detach();
-				}
-			}
 			return true;
 		} else {
 			return false;
@@ -62,7 +52,6 @@ public class Light extends FlavourBuff {
 	public void detach() {
 		target.viewDistance = Dungeon.level.viewDistance;
 		Dungeon.observe();
-		if (immunities.contains(Blindness.class)) immunities.remove(Blindness.class);
 		super.detach();
 	}
 

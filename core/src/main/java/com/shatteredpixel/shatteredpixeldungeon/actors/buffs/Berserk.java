@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -233,7 +233,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 		BuffIndicator.refreshHero();
 	}
-	
+
 	public void damage(int damage){
 		if (state != State.NORMAL) return;
 		float maxPower = Dungeon.hero.hasTalent(Talent.ENDLESS_RAGE) ?  1.25f + 0.25f*((Hero)target).pointsInTalent(Talent.ENDLESS_RAGE) : 1f ;
@@ -282,9 +282,13 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 
 	@Override
-	public Image actionIcon() {
-		//TODO, should look into these in general honestly
-		return new BuffIcon(BuffIndicator.FURY, true);
+	public int actionIcon() {
+		return BuffIndicator.FURY;
+	}
+
+	@Override
+	public int indicatorColor() {
+		return 0;
 	}
 
 	@Override
@@ -303,7 +307,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	public int icon() {
 		return BuffIndicator.BERSERK;
 	}
-	
+
 	@Override
 	public void tintIcon(Image icon) {
 		switch (state){
@@ -319,7 +323,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				break;
 		}
 	}
-	
+
 	@Override
 	public float iconFadePercent() {
 		switch (state){
@@ -377,7 +381,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 					return Messages.get(this, "recovering_desc") + "\n\n" + Messages.get(this, "recovering_desc_turns", turnRecovery);
 				}
 		}
-		
+
 	}
 	public boolean canRoar(){
 		if (state==State.BERSERK) return false;

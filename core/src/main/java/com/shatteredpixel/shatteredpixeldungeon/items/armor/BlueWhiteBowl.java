@@ -15,7 +15,7 @@ import com.watabou.utils.Bundle;
 public class BlueWhiteBowl extends Armor{
     int cd =0;
     {
-        image = ItemSpriteSheet.ARMOR_BOWL;
+        //image = ItemSpriteSheet.ARMOR_BOWL;
 
         bones = false;
     }

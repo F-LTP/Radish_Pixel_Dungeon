@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,14 +25,15 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Sacrificial;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sickle;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PointF;
-
-import static com.watabou.utils.Random.NormalFloat;
+import com.watabou.utils.Random;
 
 public class Bleeding extends Buff {
 
@@ -92,7 +93,7 @@ public class Bleeding extends Buff {
 	public boolean act() {
 		if (target.isAlive()) {
 			
-			level = NormalFloat(level / 2f, level);
+			level = Random.NormalFloat(level / 2f, level);
 			int dmg = Math.round(level);
 			
 			if (dmg > 0) {
@@ -109,8 +110,12 @@ public class Bleeding extends Buff {
 					} else if (source == Sacrificial.class){
 						Badges.validateDeathFromFriendlyMagic();
 					}
-					Dungeon.fail( getClass() );
+					Dungeon.fail( this );
 					GLog.n( Messages.get(this, "ondeath") );
+				}
+
+				if (source == Sickle.HarvestBleedTracker.class && !target.isAlive()){
+					MeleeWeapon.onAbilityKill(Dungeon.hero, target);
 				}
 				
 				spend( TICK );

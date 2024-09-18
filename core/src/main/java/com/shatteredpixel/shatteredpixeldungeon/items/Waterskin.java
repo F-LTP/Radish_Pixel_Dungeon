@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ public class Waterskin extends Item {
 		if (action.equals( AC_DRINK )) {
 
 			if (volume > 0) {
-				
+
 				float missingHealthPercent = 1f - (hero.HP / (float)hero.HT);
 
 				int curShield = 0;
@@ -98,7 +98,7 @@ public class Waterskin extends Item {
 						missingHealthPercent += missingShieldPercent;
 					}
 				}*/
-				
+
 				//trimming off 0.01 drops helps with floating point errors
 				int dropsNeeded = (int)Math.ceil((missingHealthPercent / 0.05f) - 0.01f);
 				dropsNeeded = (int)GameMath.gate(1, dropsNeeded, volume);

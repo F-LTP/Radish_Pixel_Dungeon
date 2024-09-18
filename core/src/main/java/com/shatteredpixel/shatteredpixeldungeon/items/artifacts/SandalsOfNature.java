@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,16 +24,18 @@ package com.shatteredpixel.shatteredpixeldungeon.items.artifacts;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.VelvetPouch;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Blindweed;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Earthroot;
@@ -52,12 +54,12 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
+import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.PathFinder;
+import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
@@ -159,10 +161,22 @@ public class SandalsOfNature extends Artifact {
 	protected ArtifactBuff passiveBuff() {
 		return new Naturalism();
 	}
-	
+
 	@Override
 	public void charge(Hero target, float amount) {
-		target.buff(Naturalism.class).charge(amount);
+		if (cursed || target.buff(MagicImmune.class) != null) return;
+		if (charge < chargeCap) {
+			partialCharge += 2*amount;
+			while (partialCharge >= 1f){
+				charge++;
+				partialCharge--;
+			}
+			if (charge >= chargeCap) {
+				charge = chargeCap;
+				partialCharge = 0;
+			}
+			updateQuickslot();
+		}
 	}
 
 	@Override
@@ -195,14 +209,9 @@ public class SandalsOfNature extends Artifact {
 		}
 
 		if (curSeedEffect != null){
-			//TODO fix in v2.0.0 when this line is translated
-			if (Messages.lang() == Languages.ENGLISH){
-				desc += "\n\n" + Messages.get(this, "desc_ability",
-						Messages.titleCase(Messages.get(curSeedEffect, "name")),
-						seedChargeReqs.get(curSeedEffect));
-			} else {
-				desc += "\n\n" + Messages.get(this, "desc_ability", seedChargeReqs.get(curSeedEffect));
-			}
+			desc += "\n\n" + Messages.get(this, "desc_ability",
+					Messages.titleCase(Messages.get(curSeedEffect, "name")),
+					seedChargeReqs.get(curSeedEffect));
 		}
 
 		if (!seeds.isEmpty()){
@@ -233,14 +242,14 @@ public class SandalsOfNature extends Artifact {
 	@Override
 	public void storeInBundle( Bundle bundle ) {
 		super.storeInBundle(bundle);
-		bundle.put(SEEDS, seeds.toArray(new Class[seeds.size()]));
+		bundle.put(SEEDS, seeds.toArray(new Class[0]));
 		bundle.put(CUR_SEED_EFFECT, curSeedEffect);
 	}
 
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		super.restoreFromBundle(bundle);
-		if (bundle.contains(SEEDS)) {
+		if (bundle.contains(SEEDS) && bundle.getClassArray(SEEDS) != null) {
 			Collections.addAll(seeds, bundle.getClassArray(SEEDS));
 		}
 		curSeedEffect = bundle.getClass(CUR_SEED_EFFECT);
@@ -251,12 +260,11 @@ public class SandalsOfNature extends Artifact {
 	}
 
 	public class Naturalism extends ArtifactBuff{
-		public void charge(float amount) {
+		public void charge() {
 			if (cursed || target.buff(MagicImmune.class) != null) return;
 			if (charge < chargeCap){
 				//0.5 charge per grass at +0, up to 1 at +10
 				float chargeGain = (3f + level())/6f;
-				chargeGain *= amount;
 				chargeGain *= RingOfEnergy.artifactChargeMultiplier(target);
 				partialCharge += Math.max(0, chargeGain);
 				while (partialCharge >= 1){
@@ -318,16 +326,23 @@ public class SandalsOfNature extends Artifact {
 		@Override
 		public void onSelect(Integer cell) {
 			if (cell != null){
-				PathFinder.buildDistanceMap(curUser.pos, BArray.not(Dungeon.level.solid,null), 3);
 
-				if (PathFinder.distance[cell] == Integer.MAX_VALUE){
+				if (!Dungeon.level.heroFOV[cell] || Dungeon.level.distance(curUser.pos, cell) > 3){
 					GLog.w(Messages.get(SandalsOfNature.class, "out_of_range"));
 				} else {
-					CellEmitter.get( cell ).burst( LeafParticle.GENERAL, 6 );
+
+					Ballistica aim = new Ballistica(curUser.pos, cell, Ballistica.STOP_TARGET);
+					for (int c : aim.subPath(0, aim.dist)){
+						CellEmitter.get( c ).burst( LeafParticle.GENERAL, 6 );
+					}
+
+					Splash.at(DungeonTilemap.tileCenterToWorld( cell ), -PointF.PI/2, PointF.PI/2, seedColors.get(curSeedEffect), 6);
+					Invisibility.dispel(curUser);
 
 					Plant plant = ((Plant.Seed) Reflection.newInstance(curSeedEffect)).couch(cell, null);
 					plant.activate(Actor.findChar(cell));
-					Sample.INSTANCE.play(Assets.Sounds.TRAMPLE, 1, Random.Float( 0.96f, 1.05f ) );
+					Sample.INSTANCE.play(Assets.Sounds.PLANT);
+					Sample.INSTANCE.playDelayed(Assets.Sounds.TRAMPLE, 0.25f, 1, Random.Float( 0.96f, 1.05f ) );
 
 					charge -= seedChargeReqs.get(curSeedEffect);
 					Talent.onArtifactUsed(Dungeon.hero);

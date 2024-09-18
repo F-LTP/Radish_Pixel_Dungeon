@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EndGuard;
 import com.watabou.utils.Bundle;
 
 public abstract class ShieldBuff extends Buff {
@@ -52,18 +49,6 @@ public abstract class ShieldBuff extends Buff {
 	}
 	
 	public void setShield( int shield ) {
-		if (target == Dungeon.hero){
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				shield *= RingOfBenediction.periodMultiplier(target);
-			}
-			if (Dungeon.hero.belongings.weapon() instanceof EndGuard) {
-				EndGuard w2 = (EndGuard) Dungeon.hero.belongings.weapon;
-				if (w2 != null) {
-					shield = (int) ( shield * ( 0.2f * ( w2.level() +1 ) ) );
-				}
-			}
-		}
 		if (this.shielding <= shield) this.shielding = shield;
 		if (target != null) target.needsShieldUpdate = true;
 	}
@@ -73,12 +58,6 @@ public abstract class ShieldBuff extends Buff {
 	}
 
 	public void incShield( int amt ){
-		if (target == Dungeon.hero){
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				amt=Math.round(amt*RingOfBenediction.periodMultiplier(target));
-			}
-		}
 		shielding += amt;
 		if (target != null) target.needsShieldUpdate = true;
 	}

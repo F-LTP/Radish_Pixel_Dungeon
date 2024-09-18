@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ public class SacrificialFire extends Blob {
 							}
 						}
 
-						if (off[cell] > 0 && Dungeon.level.heroFOV[cell]) {
+						if (off[cell] > 0 && Dungeon.level.visited[cell]) {
 
 							Notes.add( Notes.Landmark.SACRIFICIAL_FIRE);
 
@@ -166,8 +166,8 @@ public class SacrificialFire extends Blob {
 				} else if (ch instanceof Swarm && ((Swarm) ch).EXP == 0){
 					//give 1 exp for child swarms, instead of 0
 					exp = 1;
-				} else {
-					exp = ((Mob)ch).EXP;
+				} else if (((Mob) ch).EXP > 0) {
+					exp = 1 + ((Mob)ch).EXP;
 				}
 				exp *= Random.IntRange( 2, 3 );
 			} else if (ch instanceof Hero) {

@@ -306,7 +306,7 @@ public class Deviloon extends Mob {
 
             return false;
 
-        } else if (hit( this, enemy, accMulti )) {
+        } else if (hit( this, enemy, accMulti, false )) {
             if (enemy.buff(AfterImage.Blur.class)!=null){
                 enemy.buff(AfterImage.Blur.class).gainDodge();
             }
@@ -527,7 +527,7 @@ public class Deviloon extends Mob {
             dropsDownHeap = true;
             unique = true;
             fuse = new Fuse();
-            image = ItemSpriteSheet.TIPPED_DARTS+16;
+            image = ItemSpriteSheet.DARTS+16;
         }
 
         public BlastRune set_pos(int pos){

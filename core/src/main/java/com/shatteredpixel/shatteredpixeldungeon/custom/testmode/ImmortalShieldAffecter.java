@@ -43,6 +43,7 @@ public class ImmortalShieldAffecter extends TestItem {
             type = buffType.NEUTRAL;
             announced = false;
             revivePersists = true;
+            immunities.addAll(com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic.RESISTS);
         }
 
         @Override

@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.AlchemicalCatalyst;
+import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -42,6 +41,8 @@ public class ElixirOfMight extends Elixir {
 		image = ItemSpriteSheet.ELIXIR_MIGHT;
 
 		unique = true;
+
+		talentFactor = 2f;
 	}
 	
 	@Override
@@ -49,35 +50,30 @@ public class ElixirOfMight extends Elixir {
 		identify();
 		
 		hero.STR++;
+		hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, "1", FloatingText.STRENGTH);
 		
 		Buff.affect(hero, HTBoost.class).reset();
 		HTBoost boost = Buff.affect(hero, HTBoost.class);
 		boost.reset();
 		
 		hero.updateHT( true );
-		hero.sprite.showStatus( CharSprite.POSITIVE, Messages.get(this, "msg_1", boost.boost() ));
-		GLog.p( Messages.get(this, "msg_2") );
+		GLog.p( Messages.get(this, "msg", hero.STR()) );
 
 		Badges.validateStrengthAttained();
+		Badges.validateDuelistUnlock();
 	}
 	
 	public String desc() {
 		return Messages.get(this, "desc", HTBoost.boost(Dungeon.hero.HT));
 	}
 	
-	@Override
-	public int value() {
-		//prices of ingredients
-		return quantity * (50 + 40);
-	}
-	
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe.SimpleRecipe {
 		
 		{
-			inputs =  new Class[]{PotionOfStrength.class, AlchemicalCatalyst.class};
-			inQuantity = new int[]{1, 1};
+			inputs =  new Class[]{PotionOfStrength.class};
+			inQuantity = new int[]{1};
 			
-			cost = 6;
+			cost = 16;
 			
 			output = ElixirOfMight.class;
 			outQuantity = 1;
@@ -98,14 +94,7 @@ public class ElixirOfMight extends Elixir {
 		}
 		
 		public int boost(){
-			int might_boost=Math.round(left*boost(15 + 5*((Hero)target).lvl)/5f);
-			if (target==Dungeon.hero) {
-				Buff ben = target.buff(RingOfBenediction.Benediction.class);
-				if (ben != null) {
-					might_boost = Math.round(might_boost * RingOfBenediction.periodMultiplier(target));
-				}
-			}
-			return might_boost;
+			return Math.round(left*boost(15 + 5*((Hero)target).lvl)/5f);
 		}
 		
 		public static int boost(int HT){

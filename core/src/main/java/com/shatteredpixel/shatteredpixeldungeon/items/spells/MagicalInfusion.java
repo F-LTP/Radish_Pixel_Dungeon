@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,13 +22,10 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
@@ -42,6 +39,8 @@ public class MagicalInfusion extends InventorySpell {
 		image = ItemSpriteSheet.MAGIC_INFUSE;
 
 		unique = true;
+
+		talentFactor = 2;
 	}
 
 	@Override
@@ -69,7 +68,6 @@ public class MagicalInfusion extends InventorySpell {
 		}
 		
 		GLog.p( Messages.get(this, "infuse") );
-		Talent.onUpgradeScrollUsed( Dungeon.hero );
 		Badges.validateItemLevelAquired(item);
 
 		Statistics.upgradesUsed++;
@@ -77,17 +75,21 @@ public class MagicalInfusion extends InventorySpell {
 	
 	@Override
 	public int value() {
-		//prices of ingredients, divided by output quantity
-		return Math.round(quantity * ((50 + 40) / 1f));
+		return 60 * quantity;
+	}
+
+	@Override
+	public int energyVal() {
+		return 12 * quantity;
 	}
 	
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe.SimpleRecipe {
 		
 		{
-			inputs =  new Class[]{ScrollOfUpgrade.class, ArcaneCatalyst.class};
-			inQuantity = new int[]{1, 1};
+			inputs =  new Class[]{ScrollOfUpgrade.class};
+			inQuantity = new int[]{1};
 			
-			cost = 4;
+			cost = 12;
 			
 			output = MagicalInfusion.class;
 			outQuantity = 1;

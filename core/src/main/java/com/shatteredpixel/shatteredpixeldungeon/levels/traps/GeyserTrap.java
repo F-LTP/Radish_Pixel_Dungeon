@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,13 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
-import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.BArray;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
@@ -46,7 +47,7 @@ public class GeyserTrap extends Trap {
 	}
 
 	public int centerKnockBackDirection = -1;
-	public Class source = getClass();
+	public Object source = this;
 
 	@Override
 	public void activate() {
@@ -72,12 +73,28 @@ public class GeyserTrap extends Trap {
 		for (int i : PathFinder.NEIGHBOURS8){
 			Char ch = Actor.findChar(pos + i);
 			if (ch != null){
-				//trace a ballistica to our target (which will also extend past them)
-				Ballistica trajectory = new Ballistica(pos, ch.pos, Ballistica.STOP_TARGET);
-				//trim it to just be the part that goes past them
-				trajectory = new Ballistica(trajectory.collisionPos, trajectory.path.get(trajectory.path.size()-1), Ballistica.PROJECTILE);
-				//knock them back along that ballistica
-				WandOfBlastWave.throwChar(ch, trajectory, 2, true, true, source);
+
+				//does the equivalent of a bomb's damage against fiery enemies.
+				if (Char.hasProp(ch, Char.Property.FIERY)){
+					int dmg = Char.combatRoll(5 + scalingDepth(), 10 + scalingDepth()*2);
+					dmg *= 0.67f;
+					if (!ch.isImmune(GeyserTrap.class)){
+						ch.damage(dmg, this);
+					}
+				}
+
+				if (ch.isAlive()) {
+					if (ch.buff(Burning.class) != null){
+						ch.buff(Burning.class).detach();
+					}
+
+					//trace a ballistica to our target (which will also extend past them)
+					Ballistica trajectory = new Ballistica(pos, ch.pos, Ballistica.STOP_TARGET);
+					//trim it to just be the part that goes past them
+					trajectory = new Ballistica(trajectory.collisionPos, trajectory.path.get(trajectory.path.size() - 1), Ballistica.PROJECTILE);
+					//knock them back along that ballistica
+					WandOfBlastWave.throwChar(ch, trajectory, 2, true, true, source);
+				}
 			}
 		}
 
@@ -102,7 +119,19 @@ public class GeyserTrap extends Trap {
 				//random direction if it isn't the hero
 				targetpos = pos + PathFinder.NEIGHBOURS8[Random.Int(8)];
 			}
-			if (targetpos != -1){
+
+			//does the equivalent of a bomb's damage against fiery enemies.
+			if (Char.hasProp(ch, Char.Property.FIERY)){
+				int dmg = Char.combatRoll(5 + scalingDepth(), 10 + scalingDepth()*2);
+				if (!ch.isImmune(GeyserTrap.class)){
+					ch.damage(dmg, this);
+				}
+			}
+
+			if (ch.isAlive() && targetpos != -1){
+				if (ch.buff(Burning.class) != null){
+					ch.buff(Burning.class).detach();
+				}
 				//trace a ballistica in the direction of our target
 				Ballistica trajectory = new Ballistica(pos, targetpos, Ballistica.MAGIC_BOLT);
 				//knock them back along that ballistica

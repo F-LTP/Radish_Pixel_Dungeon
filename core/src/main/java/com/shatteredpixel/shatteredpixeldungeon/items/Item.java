@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfKing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -66,7 +67,7 @@ public class Item implements Bundlable {
 	public static final String AC_DROP		= "DROP";
 	public static final String AC_THROW		= "THROW";
 	
-	public String defaultAction;
+	protected String defaultAction;
 	public boolean usesTargeting;
 	public boolean curseInfusionBonus = false;
 
@@ -89,6 +90,7 @@ public class Item implements Bundlable {
 	public boolean unique = false;
 
 	// These items are preserved even if the hero's inventory is lost via unblessed ankh
+	// this is largely set by the resurrection window, items can override this to always be kept
 	public boolean keptThoughLostInvent = false;
 
 	// whether an item can be included in heroes remains
@@ -100,29 +102,7 @@ public class Item implements Bundlable {
 			return Generator.Category.order( lhs ) - Generator.Category.order( rhs );
 		}
 	};
-
-	/**
-	 * 2024-3-20<br>
-	 * Author:JDSALing & Evan<br>
-	 * 快捷行动方法化<br>
-	 * 使用方法:重写<br>
-	 * */
-	public String defaultAction(){
-		return defaultAction;
-	}
-
-	//TODO 原始方法弃用
-	//	public void execute( Hero hero ) {
-	//		execute( hero, defaultAction );
-	//	}
-
-	public void execute( Hero hero ) {
-		String action = defaultAction();
-		if (action != null) {
-			execute(hero, defaultAction());
-		}
-	}
-
+	
 	public ArrayList<String> actions( Hero hero ) {
 		ArrayList<String> actions = new ArrayList<>();
 		actions.add( AC_DROP );
@@ -150,18 +130,7 @@ public class Item implements Bundlable {
 			return false;
 		}
 	}
-	public final boolean doPickUpInstantly(Hero hero){return doPickUpInstantly(hero,hero.pos);}
-	public boolean doPickUpInstantly (Hero hero,int pos){
-		if (collect( hero.belongings.backpack )) {
-
-			GameScene.pickUp( this, pos );
-			Sample.INSTANCE.play( Assets.Sounds.ITEM );
-			return true;
-
-		} else {
-			return false;
-		}
-	}
+	
 	public void doDrop( Hero hero ) {
 		hero.spendAndNext(TIME_TO_DROP);
 		int pos = hero.pos;
@@ -171,6 +140,10 @@ public class Item implements Bundlable {
 	//resets an item's properties, to ensure consistency between runs
 	public void reset(){
 		keptThoughLostInvent = false;
+	}
+
+	public boolean keptThroughLostInventory(){
+		return keptThoughLostInvent;
 	}
 
 	public void doThrow( Hero hero ) {
@@ -197,8 +170,18 @@ public class Item implements Bundlable {
 			
 		}
 	}
-	
 
+	//can be overridden if default action is variable
+	public String defaultAction(){
+		return defaultAction;
+	}
+	
+	public void execute( Hero hero ) {
+		String action = defaultAction();
+		if (action != null) {
+			execute(hero, defaultAction());
+		}
+	}
 	
 	protected void onThrow( int cell ) {
 		Heap heap = Dungeon.level.drop( this, cell );
@@ -249,6 +232,23 @@ public class Item implements Bundlable {
 						Badges.validateItemLevelAquired( this );
 						Talent.onItemCollected(Dungeon.hero, item);
 						if (isIdentified()) Catalog.setSeen(getClass());
+					}
+					if (TippedDart.lostDarts > 0){
+						Dart d = new Dart();
+						d.quantity(TippedDart.lostDarts);
+						TippedDart.lostDarts = 0;
+						if (!d.collect()){
+							//have to handle this in an actor as we can't manipulate the heap during pickup
+							Actor.add(new Actor() {
+								{ actPriority = VFX_PRIO; }
+								@Override
+								protected boolean act() {
+									Dungeon.level.drop(d, Dungeon.hero.pos).sprite.drop();
+									Actor.remove(this);
+									return true;
+								}
+							});
+						}
 					}
 					return true;
 				}
@@ -355,7 +355,7 @@ public class Item implements Bundlable {
 	}
 	
 	public boolean isSimilar( Item item ) {
-		return level == item.level && getClass() == item.getClass();
+		return getClass() == item.getClass();
 	}
 
 	protected void onDetach(){}
@@ -373,9 +373,11 @@ public class Item implements Bundlable {
 	//returns the level of the item, after it may have been modified by temporary boosts/reductions
 	//note that not all item properties should care about buffs/debuffs! (e.g. str requirement)
 	public int buffedLvl(){
-		if (Dungeon.hero.buff( Degrade.class ) != null) {
+		//only the hero can be affected by Degradation
+		if (Dungeon.hero.buff( Degrade.class ) != null
+			&& (isEquipped( Dungeon.hero ) || Dungeon.hero.belongings.contains( this ))) {
 			return Degrade.reduceLevel(level());
-		}else {
+		} else {
 			return level();
 		}
 	}
@@ -543,12 +545,7 @@ public class Item implements Bundlable {
 	public String status() {
 		return quantity != 1 ? Integer.toString( quantity ) : null;
 	}
-	public String special(){
-		return null;
-	}
-	public boolean specialColorChange(){
-		return false;
-	}
+
 	public static void updateQuickslot() {
 		GameScene.updateItemDisplays = true;
 	}
@@ -645,7 +642,7 @@ public class Item implements Bundlable {
 								}
 							}
 							if (user.buff(Talent.LethalMomentumTracker.class) != null){
-								float dec_dly=0f;
+								float dec_dly;
 								user.buff(Talent.LethalMomentumTracker.class).detach();
 								switch (user.pointsInTalent(Talent.LETHAL_MOMENTUM)){
 									case 1: default: dec_dly=1f;break;
@@ -654,10 +651,6 @@ public class Item implements Bundlable {
 								user.spendAndNext(Math.max(0f,delay-dec_dly));
 							} else {
 								user.spendAndNext(delay);
-							}
-							if (user.hasTalent(Talent.DUEL_DANCE)
-							&& Item.this instanceof MissileWeapon){
-								Buff.affect(user, Talent.DuelDanceWandTracker.class,user.cooldown());
 							}
 						}
 					});
@@ -671,8 +664,9 @@ public class Item implements Bundlable {
 						public void call() {
 							curUser = user;
 							Item i = Item.this.detach(user.belongings.backpack);
+							user.spend(delay);
 							if (i != null) i.onThrow(cell);
-							user.spendAndNext(delay);
+							user.next();
 						}
 					});
 		}
@@ -697,7 +691,17 @@ public class Item implements Bundlable {
 		}
 	};
 
+
 	public void getCurse(boolean extraEffect){
 		cursed=cursedKnown=true;
 	}
+
+	public String special(){
+		return null;
+	}
+
+	public boolean specialColorChange(){
+		return false;
+	}
+
 }

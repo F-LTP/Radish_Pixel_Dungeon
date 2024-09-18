@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,22 +21,15 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls;
 
-import static com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll.ScrollToStone.stones;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.audio.Sample;
-import com.watabou.utils.Random;
-import com.watabou.utils.Reflection;
 
 public abstract class InventoryScroll extends Scroll {
 
@@ -44,9 +37,10 @@ public abstract class InventoryScroll extends Scroll {
 
 	@Override
 	public void doRead() {
-
+		
 		if (!isKnown()) {
 			identify();
+			curItem = detach( curUser.belongings.backpack );
 			identifiedByUse = true;
 		} else {
 			identifiedByUse = false;
@@ -88,7 +82,7 @@ public abstract class InventoryScroll extends Scroll {
 	}
 	
 	protected abstract void onItemSelected( Item item );
-
+	
 	protected WndBag.ItemSelector itemSelector = new WndBag.ItemSelector() {
 
 		@Override
@@ -117,24 +111,19 @@ public abstract class InventoryScroll extends Scroll {
 			
 			if (item != null) {
 
+				if (!identifiedByUse) {
+					curItem = detach(curUser.belongings.backpack);
+				}
 				((InventoryScroll)curItem).onItemSelected( item );
 				((InventoryScroll)curItem).readAnimation();
-
+				
 				Sample.INSTANCE.play( Assets.Sounds.READ );
-				if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 1 && Random.Int(0,100)>=50 ){
-					Item MagicStone = Reflection.newInstance(stones.get(curItem.getClass()));
-					GLog.p(Messages.get(Scroll.class,"scrollToStone",MagicStone.name()));
-					Dungeon.level.drop( MagicStone, curUser.pos );
-				}
+				
 			} else if (identifiedByUse && !((Scroll)curItem).anonymous) {
 				
 				((InventoryScroll)curItem).confirmCancelation();
 				
-			} else if (!((Scroll)curItem).anonymous) {
-				
-				curItem.collect( curUser.belongings.backpack );
-				
-			} else {
+			} else if (((Scroll)curItem).anonymous) {
 
 				curUser.spendAndNext( TIME_TO_READ );
 

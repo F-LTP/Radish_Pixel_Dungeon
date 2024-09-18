@@ -34,7 +34,7 @@ public class CompositeCrossbow extends MeleeWeapon{
     public static final String AC_SHOOT		= "SHOOT";
     private int curAmmo = 75;
     {
-        image = ItemSpriteSheet.CROSSBOW_C;
+        image = ItemSpriteSheet.CRBSC;
 
         defaultAction = AC_SHOOT;
         tier = 4;

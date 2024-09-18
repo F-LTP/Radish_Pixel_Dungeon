@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,8 +38,11 @@ public class GitHubUpdates extends UpdateService {
 	private static Pattern descPattern = Pattern.compile("(.*?)(\r\n|\n|\r)(\r\n|\n|\r)---", Pattern.DOTALL + Pattern.MULTILINE);
 	private static Pattern versionCodePattern = Pattern.compile("internal version number: ([0-9]*)", Pattern.CASE_INSENSITIVE);
 
+	private static Pattern minAndroidPattern = Pattern.compile("Android .*\\(API ([0-9]*)\\)\\+ Devices", Pattern.CASE_INSENSITIVE);
+	private static Pattern minIOSPattern = Pattern.compile("iOS ([0-9]*)\\+ Devices", Pattern.CASE_INSENSITIVE);
+
 	@Override
-	public boolean isUpdateable() {
+	public boolean supportsUpdatePrompts() {
 		return true;
 	}
 
@@ -72,11 +75,31 @@ public class GitHubUpdates extends UpdateService {
 
 						if (m.find()){
 							int releaseVersion = Integer.parseInt(m.group(1));
-							if (releaseVersion > latestVersionCode
-									&& (includeBetas || !b.getBoolean("prerelease"))){
-								latestRelease = b;
-								latestVersionCode = releaseVersion;
+
+
+							//skip release that aren't the latest update (or an update at all)
+							if (releaseVersion <= latestVersionCode) {
+								continue;
+
+							// or that are betas when we haven't opted in
+							} else if (!includeBetas && !b.getBoolean("prerelease")){
+								continue;
+
+							// or that aren't compatible
+							} else if (DeviceCompat.isDesktop()){
+								Matcher minAndroid = minAndroidPattern.matcher(b.getString("body"));
+								if (minAndroid.find() && DeviceCompat.getPlatformVersion() < Integer.parseInt(minAndroid.group(1))){
+									continue;
+								}
+							} else if (DeviceCompat.isiOS()){
+								Matcher minIOS = minIOSPattern.matcher(b.getString("body"));
+								if (minIOS.find() && DeviceCompat.getPlatformVersion() < Integer.parseInt(minIOS.group(1))){
+									continue;
+								}
 							}
+
+							latestRelease = b;
+							latestVersionCode = releaseVersion;
 						}
 
 					}
@@ -126,16 +149,6 @@ public class GitHubUpdates extends UpdateService {
 	@Override
 	public void initializeUpdate(AvailableUpdateData update) {
 		Game.platform.openURI( update.URL );
-	}
-
-	@Override
-	public boolean isInstallable() {
-		return false;
-	}
-
-	@Override
-	public void initializeInstall() {
-		//does nothing, always installed
 	}
 
 	@Override

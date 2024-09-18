@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlameParticle;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -60,12 +59,6 @@ public class FireImbue extends Buff {
 	}
 
 	public void set( float duration ) {
-		if (target == Dungeon.hero){
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				duration*=RingOfBenediction.periodMultiplier(target);
-			}
-		}
 		this.left = duration;
 	}
 
@@ -119,5 +112,15 @@ public class FireImbue extends Buff {
 
 	{
 		immunities.add( Burning.class );
+	}
+
+	@Override
+	public boolean attachTo(Char target) {
+		if (super.attachTo(target)){
+			Buff.detach(target, Burning.class);
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

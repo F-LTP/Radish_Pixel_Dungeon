@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 
@@ -54,7 +53,6 @@ public class MagicImmune extends FlavourBuff {
 			}
 			if (target instanceof Hero){
 				((Hero) target).updateHT(false);
-				((Hero) target).updateCritSkill();
 			}
 			return true;
 		} else {
@@ -67,7 +65,6 @@ public class MagicImmune extends FlavourBuff {
 		super.detach();
 		if (target instanceof Hero){
 			((Hero) target).updateHT(false);
-			((Hero) target).updateCritSkill();
 		}
 	}
 

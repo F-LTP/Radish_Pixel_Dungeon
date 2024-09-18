@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -160,9 +160,6 @@ public class Ring extends KindofMisc {
 	
 	@Override
 	public String name() {
-		if (!super.customName.equals("")) {
-			return super.name();
-		}
 		return isKnown() ? super.name() : Messages.get(Ring.class, gem);
 	}
 	
@@ -294,7 +291,7 @@ public class Ring extends KindofMisc {
 		levelsToID -= levelPercent;
 		if (levelsToID <= 0){
 			identify();
-			GLog.p( Messages.get(Ring.class, "identify", title()) );
+			GLog.p( Messages.get(Ring.class, "identify") );
 			Badges.validateItemLevelAquired( this );
 		}
 	}
@@ -325,7 +322,8 @@ public class Ring extends KindofMisc {
 		}
 		return bonus;
 	}
-	
+
+	//just used for ring descriptions
 	public int soloBonus(){
 		if (cursed){
 			return Math.min( 0, Ring.this.level()-2 );
@@ -334,6 +332,7 @@ public class Ring extends KindofMisc {
 		}
 	}
 
+	//just used for ring descriptions
 	public int soloBuffedBonus(){
 		if (cursed){
 			return Math.min( 0, Ring.this.buffedLvl()-2 );
@@ -342,13 +341,39 @@ public class Ring extends KindofMisc {
 		}
 	}
 
+	//just used for ring descriptions
+	public int combinedBonus(Hero hero){
+		int bonus = 0;
+		if (hero.belongings.ring() != null && hero.belongings.ring().getClass() == getClass()){
+			bonus += hero.belongings.ring().soloBonus();
+		}
+		if (hero.belongings.misc() != null && hero.belongings.misc().getClass() == getClass()){
+			bonus += ((Ring)hero.belongings.misc()).soloBonus();
+		}
+		return bonus;
+	}
+
+	//just used for ring descriptions
+	public int combinedBuffedBonus(Hero hero){
+		int bonus = 0;
+		if (hero.belongings.ring() != null && hero.belongings.ring().getClass() == getClass()){
+			bonus += hero.belongings.ring().soloBuffedBonus();
+		}
+		if (hero.belongings.misc() != null && hero.belongings.misc().getClass() == getClass()){
+			bonus += ((Ring)hero.belongings.misc()).soloBuffedBonus();
+		}
+		return bonus;
+	}
+
 	public class RingBuff extends Buff {
 
 		@Override
 		public boolean attachTo( Char target ) {
 			if (super.attachTo( target )) {
 				//if we're loading in and the hero has partially spent a turn, delay for 1 turn
-				if (now() == 0 && cooldown() == 0 && target.cooldown() > 0) spend(TICK);
+				if (target instanceof Hero && Dungeon.hero == null && cooldown() == 0 && target.cooldown() > 0) {
+					spend(TICK);
+				}
 				return true;
 			}
 			return false;

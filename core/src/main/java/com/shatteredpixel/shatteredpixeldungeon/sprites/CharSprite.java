@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.DarkBlock;
 import com.shatteredpixel.shatteredpixeldungeon.effects.EmoIcon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
+import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.IceBlock;
-import com.shatteredpixel.shatteredpixeldungeon.effects.IconFloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.ShieldHalo;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
@@ -188,7 +188,11 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		point( worldToCamera( cell ) );
 	}
 	
-	/*public void showStatus( int color, String text, Object... args ) {
+	public void showStatus( int color, String text, Object... args ) {
+		showStatusWithIcon(color, text, FloatingText.NO_ICON, args);
+	}
+
+	public void showStatusWithIcon( int color, String text, int icon, Object... args ) {
 		if (visible) {
 			if (args.length > 0) {
 				text = Messages.format( text, args );
@@ -196,31 +200,13 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 			float x = destinationCenter().x;
 			float y = destinationCenter().y - height()/2f;
 			if (ch != null) {
-				FloatingText.show( x, y, ch.pos, text, color );
+				FloatingText.show( x, y, ch.pos, text, color, icon, true );
 			} else {
-				FloatingText.show( x, y, text, color );
-			}
-		}
-	}*/
-	public void showStatus(int color, String text, Object... args) {
-		//TODO 实验性功能 ICONTYPE
-		showStatusWithIcon(color, text, IconFloatingText.NO_ICON, args);
-	}
-
-	public void showStatusWithIcon(int color, String text, int icon, Object... args) {
-		if (this.visible) {
-			if (args.length > 0) {
-				text = Messages.format(text, args);
-			}
-			float x = destinationCenter().x;
-			float y = destinationCenter().y - (height() / 2.0f);
-			if (ch != null) {
-				IconFloatingText.show(x, y, ch.pos, text, color, icon, true);
-			} else {
-				IconFloatingText.show(x, y, -1, text, color, icon, true);
+				FloatingText.show( x, y, -1, text, color, icon, true );
 			}
 		}
 	}
+	
 	public void idle() {
 		play(idle);
 	}
@@ -304,10 +290,10 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 
 	public void jump( int from, int to, Callback callback ) {
 		float distance = Math.max( 1f, Dungeon.level.trueDistance( from, to ));
-		jump( from, to, callback, distance * 2, distance * 0.1f );
+		jump( from, to, distance * 2, distance * 0.1f, callback );
 	}
 
-	public void jump( int from, int to, Callback callback, float height, float duration ) {
+	public void jump( int from, int to, float height, float duration,  Callback callback ) {
 		jumpCallback = callback;
 
 		jumpTweener = new JumpTweener( this, worldToCamera( to ), height, duration );
@@ -319,6 +305,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 
 	public void die() {
 		sleeping = false;
+		remove( State.PARALYSED );
 		play( die );
 
 		hideEmo();
@@ -511,6 +498,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		aura = new Flare(5, size);
 		aura.angularSpeed = 90;
 		aura.color(color, true);
+		aura.visible = visible;
 
 		if (parent != null) {
 			aura.show(this, 0);
@@ -731,6 +719,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 			if (jumpCallback != null) {
 				jumpCallback.call();
 			}
+			GameScene.sortMobSprites();
 
 		} else if (tweener == motion) {
 
@@ -741,6 +730,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 				motion = null;
 				ch.onMotionComplete();
 
+				GameScene.sortMobSprites();
 				notifyAll();
 			}
 

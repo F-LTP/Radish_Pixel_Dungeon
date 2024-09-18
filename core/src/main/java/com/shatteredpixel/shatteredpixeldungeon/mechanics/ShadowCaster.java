@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.mechanics;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
-import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
+import com.watabou.utils.BArray;
 
 //based on: http://www.roguebasin.com/index.php?title=FOV_using_recursive_shadowcasting
 public final class ShadowCaster {
@@ -41,12 +40,12 @@ public final class ShadowCaster {
 				//testing the middle of a cell, so we use i + 0.5
 				rounding[i][j] = (int)Math.min(
 						j,
-						Math.round( (i + 0.5) * Math.cos( Math.asin( j / (i + 0.5) ))));
+						Math.round( i * Math.cos( Math.asin( j / (i + 0.5) ))));
 			}
 		}
 	}
 	
-	public static void castShadow( int x, int y, boolean[] fieldOfView, boolean[] blocking, int distance ) {
+	public static void castShadow( int x, int y, int w, boolean[] fieldOfView, boolean[] blocking, int distance ) {
 		
 		if (distance >= MAX_DISTANCE){
 			distance = MAX_DISTANCE;
@@ -55,18 +54,18 @@ public final class ShadowCaster {
 		BArray.setFalse(fieldOfView);
 
 		//set source cell to true
-		fieldOfView[y * Dungeon.level.width() + x] = true;
+		fieldOfView[y * w + x] = true;
 		
 		//scans octants, clockwise
 		try {
-			scanOctant(distance, fieldOfView, blocking, 1, x, y, 0.0, 1.0, +1, -1, false);
-			scanOctant(distance, fieldOfView, blocking, 1, x, y, 0.0, 1.0, -1, +1, true);
-			scanOctant(distance, fieldOfView, blocking, 1, x, y, 0.0, 1.0, +1, +1, true);
-			scanOctant(distance, fieldOfView, blocking, 1, x, y, 0.0, 1.0, +1, +1, false);
-			scanOctant(distance, fieldOfView, blocking, 1, x, y, 0.0, 1.0, -1, +1, false);
-			scanOctant(distance, fieldOfView, blocking, 1, x, y, 0.0, 1.0, +1, -1, true);
-			scanOctant(distance, fieldOfView, blocking, 1, x, y, 0.0, 1.0, -1, -1, true);
-			scanOctant(distance, fieldOfView, blocking, 1, x, y, 0.0, 1.0, -1, -1, false);
+			scanOctant(distance, fieldOfView, blocking, 1, x, y, w, 0.0, 1.0, +1, -1, false);
+			scanOctant(distance, fieldOfView, blocking, 1, x, y, w, 0.0, 1.0, -1, +1, true);
+			scanOctant(distance, fieldOfView, blocking, 1, x, y, w, 0.0, 1.0, +1, +1, true);
+			scanOctant(distance, fieldOfView, blocking, 1, x, y, w, 0.0, 1.0, +1, +1, false);
+			scanOctant(distance, fieldOfView, blocking, 1, x, y, w, 0.0, 1.0, -1, +1, false);
+			scanOctant(distance, fieldOfView, blocking, 1, x, y, w, 0.0, 1.0, +1, -1, true);
+			scanOctant(distance, fieldOfView, blocking, 1, x, y, w, 0.0, 1.0, -1, -1, true);
+			scanOctant(distance, fieldOfView, blocking, 1, x, y, w, 0.0, 1.0, -1, -1, false);
 		} catch (Exception e){
 			ShatteredPixelDungeon.reportException(e);
 			BArray.setFalse(fieldOfView);
@@ -77,12 +76,23 @@ public final class ShadowCaster {
 	//scans a single 45 degree octant of the FOV.
 	//This can add up to a whole FOV by mirroring in X(mX), Y(mY), and X=Y(mXY)
 	private static void scanOctant(int distance, boolean[] fov, boolean[] blocking, int row,
-	                               int x, int y, double lSlope, double rSlope,
+	                               int x, int y, int w, double lSlope, double rSlope,
 	                               int mX, int mY, boolean mXY){
 		
 		boolean inBlocking = false;
 		int start, end;
 		int col;
+
+		int[] roundingAtDist;
+		if (distance == 2){
+			//at a visibility distance of 2 we fill in the corners of vision
+			// as otherwise this vision range disproportionately punishes diagonal movement,
+			// even though removing corners is technically correct
+			roundingAtDist = rounding[distance].clone();
+			roundingAtDist[2] = 2;
+		} else {
+			roundingAtDist = rounding[distance];
+		}
 		
 		//calculations are offset by 0.5 because FOV is coming from the center of the source cell
 		
@@ -96,16 +106,16 @@ public final class ShadowCaster {
 			if (lSlope == 0)    start = 0;
 			else                start = (int)Math.floor((row - 0.5) * lSlope + 0.499);
 			
-			if (rSlope == 1)    end = rounding[distance][row];
-			else                end = Math.min( rounding[distance][row],
+			if (rSlope == 1)    end = roundingAtDist[row];
+			else                end = Math.min( roundingAtDist[row],
 			                                    (int)Math.ceil((row + 0.5) * rSlope - 0.499));
 			
 			//coordinates of source
-			int cell = x + y*Dungeon.level.width();
+			int cell = x + y*w;
 			
 			//plus coordinates of current cell (including mirroring in x, y, and x=y)
-			if (mXY)    cell += mX*start*Dungeon.level.width() + mY*row;
-			else        cell += mX*start + mY*row*Dungeon.level.width();
+			if (mXY)    cell += mX*start*w + mY*row;
+			else        cell += mX*start + mY*row*w;
 			
 			//for each column in this row, which
 			for (col = start; col <= end; col++){
@@ -125,7 +135,7 @@ public final class ShadowCaster {
 						
 						//start a new scan, 1 row deeper, ending at the left side of current cell
 						if (col != start){
-							scanOctant(distance, fov, blocking, row+1, x, y, lSlope,
+							scanOctant(distance, fov, blocking, row+1, x, y, w, lSlope,
 									//change in x over change in y
 									(col - 0.5) / (row + 0.5),
 									mX, mY, mXY);
@@ -144,7 +154,7 @@ public final class ShadowCaster {
 				}
 				
 				if (!mXY)   cell += mX;
-				else        cell += mX*Dungeon.level.width();
+				else        cell += mX*w;
 				
 			}
 			

@@ -145,15 +145,6 @@ public class SeedFinder {
                 heaps.add(h);
             }
 
-            else if (m instanceof ArmoredStatue) {
-                Heap h = new Heap();
-                h.items = new LinkedList<>();
-                h.items.add(((ArmoredStatue) m).armor.identify());
-                h.items.add(((ArmoredStatue) m).weapon.identify());
-                h.type = Type.STATUE;
-                heaps.add(h);
-            }
-
             else if (m instanceof Mimic) {
                 Heap h = new Heap();
                 h.items = new LinkedList<>();

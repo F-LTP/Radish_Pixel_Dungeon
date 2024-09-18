@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
+import com.shatteredpixel.shatteredpixeldungeon.Rankings;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
@@ -37,13 +38,13 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.StyledButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndTextInput;
 import com.shatteredpixel.shatteredpixeldungeon.utils.DungeonSeed;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndChallenges;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndHeroInfo;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndKeyBindings;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndTextInput;
 import com.watabou.gltextures.TextureCache;
 import com.watabou.input.PointerEvent;
 import com.watabou.noosa.Camera;
@@ -90,7 +91,7 @@ public class HeroSelectScene extends PixelScene {
 		Badges.loadGlobal();
 		Journal.loadGlobal();
 
-		background = new Image(HeroClass.WARRIOR.splashArt()){
+		background = new Image(TextureCache.createSolid(0xFF2d2f31), 0, 0, 800, 450){
 			@Override
 			public void update() {
 				if (GamesInProgress.selectedClass != null) {
@@ -104,7 +105,6 @@ public class HeroSelectScene extends PixelScene {
 			}
 		};
 		background.scale.set(Camera.main.height/background.height);
-		background.tint(0x2d2f31, 1f);
 
 		background.x = (Camera.main.width - background.width())/2f;
 		background.y = (Camera.main.height - background.height())/2f;
@@ -136,7 +136,7 @@ public class HeroSelectScene extends PixelScene {
 
 				Dungeon.hero = null;
 				Dungeon.daily = Dungeon.dailyReplay = false;
-				ActionIndicator.action = null;
+				ActionIndicator.clearAction();
 				InterlevelScene.mode = InterlevelScene.Mode.DESCEND;
 
 				Game.switchScene( InterlevelScene.class );
@@ -152,11 +152,14 @@ public class HeroSelectScene extends PixelScene {
 			@Override
 			protected void onClick() {
 				super.onClick();
-				Window w = new WndHeroInfo(GamesInProgress.selectedClass);
-				if (landscape()){
-					w.offset(Camera.main.width/6, 0);
+				HeroClass cls = GamesInProgress.selectedClass;
+				if (cls != null) {
+					Window w = new WndHeroInfo(GamesInProgress.selectedClass);
+					if (landscape()) {
+						w.offset(Camera.main.width / 6, 0);
+					}
+					ShatteredPixelDungeon.scene().addToFront(w);
 				}
-				ShatteredPixelDungeon.scene().addToFront(w);
 			}
 
 			@Override
@@ -204,7 +207,8 @@ public class HeroSelectScene extends PixelScene {
 		};
 		updateOptionsColor();
 		btnOptions.visible = false;
-		if (true || Badges.isUnlocked(Badges.Badge.VICTORY)){
+
+		if (DeviceCompat.isDebug() || Badges.isUnlocked(Badges.Badge.VICTORY)){
 			add(btnOptions);
 		} else {
 			Dungeon.challenges = 0;
@@ -234,7 +238,7 @@ public class HeroSelectScene extends PixelScene {
 				btnHeight += 6;
 			}
 
-			int cols = 2;
+			int cols = (int)Math.ceil(heroBtns.size()/2f);
 			float curX = (leftArea - btnWidth * cols + (cols-1))/2f;
 			float curY = title.bottom() + uiSpacing;
 
@@ -371,7 +375,14 @@ public class HeroSelectScene extends PixelScene {
 	private void setSelectedHero(HeroClass cl){
 		GamesInProgress.selectedClass = cl;
 
-		background.texture( cl.splashArt() );
+		try {
+			//loading these big jpgs fails sometimes, so we have a catch for it
+			background.texture(cl.splashArt());
+		} catch (Exception e){
+			Game.reportException(e);
+			background.texture(TextureCache.createSolid(0xFF2d2f31));
+			background.frame(0, 0, 800, 450);
+		}
 		background.visible = true;
 		background.hardlight(1.5f,1.5f,1.5f);
 
@@ -427,6 +438,9 @@ public class HeroSelectScene extends PixelScene {
 	@Override
 	public void update() {
 		super.update();
+		if (SPDSettings.intro() && Rankings.INSTANCE.totalNumber > 0){
+			SPDSettings.intro(false);
+		}
 		btnExit.visible = btnExit.active = !SPDSettings.intro();
 		//do not fade when a window is open
 		for (Object v : members){
@@ -455,7 +469,7 @@ public class HeroSelectScene extends PixelScene {
 		}
 		startBtn.enable(alpha != 0);
 		startBtn.alpha(alpha);
-		btnExit.enable(alpha != 0);
+		btnExit.enable(btnExit.visible && alpha != 0);
 		btnExit.icon().alpha(alpha);
 		optionsPane.active = optionsPane.visible && alpha != 0;
 		optionsPane.alpha(alpha);
@@ -563,7 +577,7 @@ public class HeroSelectScene extends PixelScene {
 
 			buttons = new ArrayList<>();
 			spacers = new ArrayList<>();
-			if (true || Badges.isUnlocked(Badges.Badge.VICTORY)){
+			if (DeviceCompat.isDebug() || Badges.isUnlocked(Badges.Badge.VICTORY)){
 				StyledButton seedButton = new StyledButton(Chrome.Type.BLANK, Messages.get(HeroSelectScene.class, "custom_seed"), 6){
 					@Override
 					protected void onClick() {
@@ -649,9 +663,9 @@ public class HeroSelectScene extends PixelScene {
 									if (diff <= 0) {
 										long time = Game.realTime - (Game.realTime % DAY);
 
-										//earliest possible daily for v1.4.0 is Sept 10 2022
-										//which is 19,245 days after Jan 1 1970
-										time = Math.max(time, 19_245 * DAY);
+										//earliest possible daily for v2.3.2 is Jan 30 2024
+										//which is 19,752 days after Jan 1 1970
+										time = Math.max(time, 19_752 * DAY);
 
 										SPDSettings.lastDaily(time);
 										Dungeon.dailyReplay = false;
@@ -661,7 +675,7 @@ public class HeroSelectScene extends PixelScene {
 
 									Dungeon.hero = null;
 									Dungeon.daily = true;
-									ActionIndicator.action = null;
+									ActionIndicator.clearAction();
 									InterlevelScene.mode = InterlevelScene.Mode.DESCEND;
 
 									Game.switchScene( InterlevelScene.class );

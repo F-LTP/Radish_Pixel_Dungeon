@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,29 +26,21 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awareness;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicalSight;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpiritHawk;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Acidic;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Elemental;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Artillerist;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GnollZealot;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Goblin;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Mayfly;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Scorpio;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Shaman;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Warlock;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Blacksmith;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Imp;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Wandmaker;
-import com.shatteredpixel.shatteredpixeldungeon.custom.messages.M;
 import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
@@ -57,24 +49,25 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesi
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.MimicTooth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfRegrowth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
+import com.shatteredpixel.shatteredpixeldungeon.levels.CavesBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.CavesLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.CityBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.CityLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.DeadEndLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.HallsBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.HallsLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.LastLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
-import com.shatteredpixel.shatteredpixeldungeon.levels.CavesBossLevel;
-import com.shatteredpixel.shatteredpixeldungeon.levels.CityBossLevel;
-import com.shatteredpixel.shatteredpixeldungeon.levels.HallsBossLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.MiningLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.PrisonBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.PrisonLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.SewerBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.SewerLevel;
-import com.shatteredpixel.shatteredpixeldungeon.levels.ZeroLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
@@ -83,10 +76,10 @@ import com.shatteredpixel.shatteredpixeldungeon.plants.VineTrap;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Toolbar;
-import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
 import com.shatteredpixel.shatteredpixeldungeon.utils.DungeonSeed;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndResurrect;
 import com.watabou.noosa.Game;
+import com.watabou.utils.BArray;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.FileUtils;
@@ -112,6 +105,10 @@ public class Dungeon {
 		STRENGTH_POTIONS,
 		UPGRADE_SCROLLS,
 		ARCANE_STYLI,
+		ENCH_STONE,
+		INT_STONE,
+		TRINKET_CATA,
+		LAB_ROOM, //actually a room, but logic is the same
 
 		//Health potion sources
 		//enemies
@@ -141,6 +138,7 @@ public class Dungeon {
 		// DoggingDog
 		// for RoyalGuard in RadishNewEnemy
 		ROYALGUARD_WEP,
+
 
 		GUARD_ARM,
 		SHAMAN_WAND,
@@ -191,6 +189,14 @@ public class Dungeon {
 				}
 				
 			}
+
+			//pre-v2.2.0 saves
+			if (Dungeon.version < 750
+					&& Dungeon.isChallenged(Challenges.NO_SCROLLS)
+					&& UPGRADE_SCROLLS.count > 0){
+				//we now count SOU fully, and just don't drop every 2nd one
+				UPGRADE_SCROLLS.count += UPGRADE_SCROLLS.count-1;
+			}
 		}
 
 	}
@@ -206,8 +212,11 @@ public class Dungeon {
 	public static int depth;
 	//determines path the hero is on. Current uses:
 	// 0 is the default path
-	// Other numbers are currently unused
+	// 1 is for quest sub-floors
 	public static int branch;
+
+	//keeps track of what levels the game should try to load instead of creating fresh
+	public static ArrayList<Integer> generatedLevels = new ArrayList<>();
 
 	public static int gold;
 	public static int energy;
@@ -216,6 +225,7 @@ public class Dungeon {
 
 	public static SparseArray<ArrayList<Item>> droppedItems;
 	public static SparseArray<ArrayList<Item>> portedItems;
+
 
 	//first variable is only assigned when game is started, second is updated every time game is saved
 	public static int initialVersion;
@@ -270,8 +280,9 @@ public class Dungeon {
 		QuickSlotButton.reset();
 		Toolbar.swappedQuickslots = false;
 		
-		depth = 0;
+		depth = 1;
 		branch = 0;
+		generatedLevels.clear();
 
 		gold = 0;
 		energy = 0;
@@ -299,28 +310,19 @@ public class Dungeon {
 	public static boolean isChallenged( int mask ) {
 		return (challenges & mask) != 0;
 	}
+
+	public static boolean levelHasBeenGenerated(int depth, int branch){
+		return generatedLevels.contains(depth + 1000*branch);
+	}
 	
 	public static Level newLevel() {
 		
 		Dungeon.level = null;
 		Actor.clear();
-
-		if (depth > Statistics.deepestFloor) {
-			Statistics.deepestFloor = depth;
-			
-			if (Statistics.qualifiedForNoKilling) {
-				Statistics.completedWithNoKilling = true;
-			} else {
-				Statistics.completedWithNoKilling = false;
-			}
-		}
 		
 		Level level;
 		if (branch == 0) {
 			switch (depth) {
-				case 0:
-					level = new ZeroLevel();
-					break;
 				case 1:
 				case 2:
 				case 3:
@@ -371,16 +373,46 @@ public class Dungeon {
 					break;
 				default:
 					level = new DeadEndLevel();
-					Statistics.deepestFloor--;
+			}
+		} else if (branch == 1) {
+			switch (depth) {
+				case 11:
+				case 12:
+				case 13:
+				case 14:
+					level = new MiningLevel();
+					break;
+				default:
+					level = new DeadEndLevel();
 			}
 		} else {
 			level = new DeadEndLevel();
-			Statistics.deepestFloor--;
 		}
+
+		//dead end levels get cleared, don't count as generated
+		if (!(level instanceof DeadEndLevel)){
+			//this assumes that we will never have a depth value outside the range 0 to 999
+			// or -500 to 499, etc.
+			if (!generatedLevels.contains(depth + 1000*branch)) {
+				generatedLevels.add(depth + 1000 * branch);
+			}
+
+			if (depth > Statistics.deepestFloor && branch == 0) {
+				Statistics.deepestFloor = depth;
+
+				if (Statistics.qualifiedForNoKilling) {
+					Statistics.completedWithNoKilling = true;
+				} else {
+					Statistics.completedWithNoKilling = false;
+				}
+			}
+		}
+
+		Statistics.qualifiedForBossRemainsBadge = false;
 		
 		level.create();
 		
-		Statistics.qualifiedForNoKilling = !bossLevel() && depth>0;
+		if (branch == 0) Statistics.qualifiedForNoKilling = !bossLevel();
 		Statistics.qualifiedForBossChallengeBadge = false;
 		
 		return level;
@@ -436,21 +468,26 @@ public class Dungeon {
 	}
 
 	public static boolean interfloorTeleportAllowed(){
-		if (depth==0) return false;
-		if (Dungeon.level.locked || (Dungeon.hero != null && Dungeon.hero.belongings.getItem(Amulet.class) != null)){
+		if (Dungeon.level.locked
+				|| Dungeon.level instanceof MiningLevel
+				|| (Dungeon.hero != null && Dungeon.hero.belongings.getItem(Amulet.class) != null)){
 			return false;
 		}
 		return true;
 	}
 	
 	public static void switchLevel( final Level level, int pos ) {
-		
+
+		//Position of -2 specifically means trying to place the hero the exit
 		if (pos == -2){
 			LevelTransition t = level.getTransition(LevelTransition.Type.REGULAR_EXIT);
 			if (t != null) pos = t.cell();
 		}
 
-		if (pos < 0 || pos >= level.length() || (!level.passable[pos] && !level.avoid[pos])){
+		//Place hero at the entrance if they are out of the map (often used for pox = -1)
+		// or if they are in solid terrain (except in the mining level, where that happens normally)
+		if (pos < 0 || pos >= level.length()
+				|| (!(level instanceof MiningLevel) && !level.passable[pos] && !level.avoid[pos])){
 			pos = level.getTransition(null).cell();
 		}
 		
@@ -506,7 +543,6 @@ public class Dungeon {
 	}
 
 	public static boolean posNeeded() {
-		if (depth==0) return false;
 		//2 POS each floor set
 		int posLeftThisSet = 2 - (LimitedDrops.STRENGTH_POTIONS.count - (depth / 5) * 2);
 		if (posLeftThisSet <= 0) return false;
@@ -523,14 +559,9 @@ public class Dungeon {
 	}
 	
 	public static boolean souNeeded() {
-		if (depth==0) return false;
 		int souLeftThisSet;
-		//3 SOU each floor set, 1.5 (rounded) on forbidden runes challenge
-		if (isChallenged(Challenges.NO_SCROLLS)){
-			souLeftThisSet = Math.round(1.5f - (LimitedDrops.UPGRADE_SCROLLS.count - (depth / 5) * 1.5f));
-		} else {
-			souLeftThisSet = 3 - (LimitedDrops.UPGRADE_SCROLLS.count - (depth / 5) * 3);
-		}
+		//3 SOU each floor set
+		souLeftThisSet = 3 - (LimitedDrops.UPGRADE_SCROLLS.count - (depth / 5) * 3);
 		if (souLeftThisSet <= 0) return false;
 
 		int floorThisSet = (depth % 5);
@@ -539,7 +570,6 @@ public class Dungeon {
 	}
 	
 	public static boolean asNeeded() {
-		if (depth==0) return false;
 		//1 AS each floor set
 		int asLeftThisSet = 1 - (LimitedDrops.ARCANE_STYLI.count - (depth / 5));
 		if (asLeftThisSet <= 0) return false;
@@ -548,6 +578,46 @@ public class Dungeon {
 		//chance is floors left / scrolls left
 		return Random.Int(5 - floorThisSet) < asLeftThisSet;
 	}
+
+	public static boolean enchStoneNeeded(){
+		//1 enchantment stone, spawns on chapter 2 or 3
+		if (!LimitedDrops.ENCH_STONE.dropped()){
+			int region = 1+depth/5;
+			if (region > 1){
+				int floorsVisited = depth - 5;
+				if (floorsVisited > 4) floorsVisited--; //skip floor 10
+				return Random.Int(9-floorsVisited) == 0; //1/8 chance each floor
+			}
+		}
+		return false;
+	}
+
+	public static boolean intStoneNeeded(){
+		//one stone on floors 1-3
+		return depth < 5 && !LimitedDrops.INT_STONE.dropped() && Random.Int(4-depth) == 0;
+	}
+
+	public static boolean trinketCataNeeded(){
+		//one trinket catalyst on floors 1-3
+		return depth < 5 && !LimitedDrops.TRINKET_CATA.dropped() && Random.Int(4-depth) == 0;
+	}
+
+	public static boolean labRoomNeeded(){
+		//one laboratory each floor set, in floor 3 or 4, 1/2 chance each floor
+		int region = 1+depth/5;
+		if (region > LimitedDrops.LAB_ROOM.count){
+			int floorThisRegion = depth%5;
+			if (floorThisRegion >= 4 || (floorThisRegion == 3 && Random.Int(2) == 0)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// 1/4
+	// 3/4 * 1/3 = 3/12 = 1/4
+	// 3/4 * 2/3 * 1/2 = 6/24 = 1/4
+	// 1/4
 
 	private static final String INIT_VER	= "init_ver";
 	private static final String VERSION		= "version";
@@ -560,6 +630,7 @@ public class Dungeon {
 	private static final String HERO		= "hero";
 	private static final String DEPTH		= "depth";
 	private static final String BRANCH		= "branch";
+	private static final String GENERATED_LEVELS    = "generated_levels";
 	private static final String GOLD		= "gold";
 	private static final String ENERGY		= "energy";
 	private static final String DROPPED     = "dropped%d";
@@ -592,10 +663,11 @@ public class Dungeon {
 			for (int d : droppedItems.keyArray()) {
 				bundle.put(Messages.format(DROPPED, d), droppedItems.get(d));
 			}
-			
+
 			for (int p : portedItems.keyArray()){
 				bundle.put(Messages.format(PORTED, p), portedItems.get(p));
 			}
+
 
 			quickslot.storePlaceholders( bundle );
 
@@ -623,6 +695,12 @@ public class Dungeon {
 			Statistics.storeInBundle( bundle );
 			Notes.storeInBundle( bundle );
 			Generator.storeInBundle( bundle );
+
+			int[] bundleArr = new int[generatedLevels.size()];
+			for (int i = 0; i < generatedLevels.size(); i++){
+				bundleArr[i] = generatedLevels.get(i);
+			}
+			bundle.put( GENERATED_LEVELS, bundleArr);
 			
 			Scroll.save( bundle );
 			Potion.save( bundle );
@@ -753,10 +831,22 @@ public class Dungeon {
 		Statistics.restoreFromBundle( bundle );
 		Generator.restoreFromBundle( bundle );
 
+		generatedLevels.clear();
+		if (bundle.contains(GENERATED_LEVELS)){
+			for (int i : bundle.getIntArray(GENERATED_LEVELS)){
+				generatedLevels.add(i);
+			}
+		//pre-v2.1.1 saves
+		} else  {
+			for (int i = 1; i <= Statistics.deepestFloor; i++){
+				generatedLevels.add(i);
+			}
+		}
+
 		droppedItems = new SparseArray<>();
 		portedItems = new SparseArray<>();
 		for (int i=1; i <= 26; i++) {
-			
+
 			//dropped items
 			ArrayList<Item> items = new ArrayList<>();
 			if (bundle.contains(Messages.format( DROPPED, i )))
@@ -766,7 +856,7 @@ public class Dungeon {
 			if (!items.isEmpty()) {
 				droppedItems.put( i, items );
 			}
-			
+
 			//ported items
 			items = new ArrayList<>();
 			if (bundle.contains(Messages.format( PORTED, i )))
@@ -777,6 +867,7 @@ public class Dungeon {
 				portedItems.put( i, items );
 			}
 		}
+
 	}
 	
 	public static Level loadLevel( int save ) throws IOException {
@@ -824,7 +915,7 @@ public class Dungeon {
 		Statistics.preview( info, bundle );
 	}
 	
-	public static void fail( Class cause ) {
+	public static void fail( Object cause ) {
 		if (WndResurrect.instance == null) {
 			updateLevelExplored();
 			Statistics.gameWon = false;
@@ -832,7 +923,7 @@ public class Dungeon {
 		}
 	}
 	
-	public static void win( Class cause ) {
+	public static void win( Object cause ) {
 
 		updateLevelExplored();
 		Statistics.gameWon = true;
@@ -847,12 +938,7 @@ public class Dungeon {
 			Statistics.floorsExplored.put( depth, level.isLevelExplored(depth));
 		}
 	}
-	public static void plantVineTrap(int pos){
-		VineTrap v=new VineTrap();
-		v.pos=pos;
-		level.plants.put(pos,v);
-		GameScene.plantSeed( pos );
-	}
+
 	//default to recomputing based on max hero vision, in case vision just shrank/grew
 	public static void observe(){
 		int dist = Math.max(Dungeon.hero.viewDistance, 8);
@@ -891,11 +977,21 @@ public class Dungeon {
 			BArray.or( level.visited, level.heroFOV, pos, width, level.visited );
 			pos+=level.width();
 		}
+
+		//always visit adjacent tiles, even if they aren't seen
+		for (int i : PathFinder.NEIGHBOURS9){
+			level.visited[hero.pos+i] = true;
+		}
 	
 		GameScene.updateFog(l, t, width, height);
 
+		boolean stealthyMimics = MimicTooth.stealthyMimics();
 		if (hero.buff(MindVision.class) != null){
 			for (Mob m : level.mobs.toArray(new Mob[0])){
+				if (stealthyMimics && m instanceof Mimic && m.alignment == Char.Alignment.NEUTRAL){
+					continue;
+				}
+
 				BArray.or( level.visited, level.heroFOV, m.pos - 1 - level.width(), 3, level.visited );
 				BArray.or( level.visited, level.heroFOV, m.pos - 1, 3, level.visited );
 				BArray.or( level.visited, level.heroFOV, m.pos - 1 + level.width(), 3, level.visited );
@@ -923,7 +1019,7 @@ public class Dungeon {
 		}
 
 		for (TalismanOfForesight.HeapAwareness h : hero.buffs(TalismanOfForesight.HeapAwareness.class)){
-			if (Dungeon.depth != h.depth) continue;
+			if (Dungeon.depth != h.depth || Dungeon.branch != h.branch) continue;
 			BArray.or( level.visited, level.heroFOV, h.pos - 1 - level.width(), 3, level.visited );
 			BArray.or( level.visited, level.heroFOV, h.pos - 1, 3, level.visited );
 			BArray.or( level.visited, level.heroFOV, h.pos - 1 + level.width(), 3, level.visited );
@@ -931,7 +1027,7 @@ public class Dungeon {
 		}
 
 		for (RevealedArea a : hero.buffs(RevealedArea.class)){
-			if (Dungeon.depth != a.depth) continue;
+			if (Dungeon.depth != a.depth || Dungeon.branch != a.branch) continue;
 			BArray.or( level.visited, level.heroFOV, a.pos - 1 - level.width(), 3, level.visited );
 			BArray.or( level.visited, level.heroFOV, a.pos - 1, 3, level.visited );
 			BArray.or( level.visited, level.heroFOV, a.pos - 1 + level.width(), 3, level.visited );
@@ -978,8 +1074,11 @@ public class Dungeon {
 			BArray.setFalse(passable);
 	}
 
-	public static PathFinder.Path findPath(Char ch, int to, boolean[] pass, boolean[] vis, boolean chars) {
+	public static boolean[] findPassable(Char ch, boolean[] pass, boolean[] vis, boolean chars){
+		return findPassable(ch, pass, vis, chars, chars);
+	}
 
+	public static boolean[] findPassable(Char ch, boolean[] pass, boolean[] vis, boolean chars, boolean considerLarge){
 		setupPassable();
 		if (ch.flying || ch.buff( Amok.class ) != null) {
 			BArray.or( pass, Dungeon.level.avoid, passable );
@@ -987,9 +1086,11 @@ public class Dungeon {
 			System.arraycopy( pass, 0, passable, 0, Dungeon.level.length() );
 		}
 
-		if (chars && Char.hasProp(ch, Char.Property.LARGE)){
+		if (considerLarge && Char.hasProp(ch, Char.Property.LARGE)){
 			BArray.and( passable, Dungeon.level.openSpace, passable );
 		}
+
+		ch.modifyPassable(passable);
 
 		if (chars) {
 			for (Char c : Actor.chars()) {
@@ -999,62 +1100,53 @@ public class Dungeon {
 			}
 		}
 
-		return PathFinder.find( ch.pos, to, passable );
+		return passable;
+	}
+
+	public static PathFinder.Path findPath(Char ch, int to, boolean[] pass, boolean[] vis, boolean chars) {
+
+		return PathFinder.find( ch.pos, to, findPassable(ch, pass, vis, chars) );
 
 	}
 	
 	public static int findStep(Char ch, int to, boolean[] pass, boolean[] visible, boolean chars ) {
 
 		if (Dungeon.level.adjacent( ch.pos, to )) {
-			return Actor.findChar( to ) == null && (pass[to] || Dungeon.level.avoid[to]) ? to : -1;
+			return Actor.findChar( to ) == null && pass[to] ? to : -1;
 		}
 
-		setupPassable();
-		if (ch.flying || ch.buff( Amok.class ) != null) {
-			BArray.or( pass, Dungeon.level.avoid, passable );
-		} else {
-			System.arraycopy( pass, 0, passable, 0, Dungeon.level.length() );
-		}
-
-		if (Char.hasProp(ch, Char.Property.LARGE)){
-			BArray.and( passable, Dungeon.level.openSpace, passable );
-		}
-
-		if (chars){
-			for (Char c : Actor.chars()) {
-				if (visible[c.pos]) {
-					passable[c.pos] = false;
-				}
-			}
-		}
-		
-		return PathFinder.getStep( ch.pos, to, passable );
+		return PathFinder.getStep( ch.pos, to, findPassable(ch, pass, visible, chars) );
 
 	}
 	
 	public static int flee( Char ch, int from, boolean[] pass, boolean[] visible, boolean chars ) {
-
-		setupPassable();
-		if (ch.flying) {
-			BArray.or( pass, Dungeon.level.avoid, passable );
-		} else {
-			System.arraycopy( pass, 0, passable, 0, Dungeon.level.length() );
-		}
-
-		if (Char.hasProp(ch, Char.Property.LARGE)){
-			BArray.and( passable, Dungeon.level.openSpace, passable );
-		}
-
+		boolean[] passable = findPassable(ch, pass, visible, false, true);
 		passable[ch.pos] = true;
 
-		//only consider chars impassable if our retreat path runs into them
-		int step = PathFinder.getStepBack( ch.pos, from, passable );
-		while (step != -1 && Actor.findChar(step) != null){
-			passable[step] = false;
-			step = PathFinder.getStepBack( ch.pos, from, passable );
+		//only consider other chars impassable if our retreat step may collide with them
+		if (chars) {
+			for (Char c : Actor.chars()) {
+				if (c.pos == from || Dungeon.level.adjacent(c.pos, ch.pos)) {
+					passable[c.pos] = false;
+				}
+			}
 		}
-		return step;
+
+		//chars affected by terror have a shorter lookahead and can't approach the fear source
+		boolean canApproachFromPos = ch.buff(Terror.class) == null && ch.buff(Dread.class) == null;
+		return PathFinder.getStepBack( ch.pos, from, canApproachFromPos ? 8 : 4, passable, canApproachFromPos );
 		
+	}
+
+	/**
+	 * [Plant TRAP]
+	 * @param pos
+	 */
+	public static void plantVineTrap(int pos){
+		VineTrap v=new VineTrap();
+		v.pos=pos;
+		level.plants.put(pos,v);
+		GameScene.plantSeed( pos );
 	}
 
 }

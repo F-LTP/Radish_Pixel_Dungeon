@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,6 @@ public class ItemSlot extends Button {
 	protected BitmapText extra;
 	protected Image      itemIcon;
 	protected BitmapText level;
-	protected BitmapText special;
 	
 	private static final String TXT_STRENGTH	= ":%d";
 	private static final String TXT_TYPICAL_STR	= "%d?";
@@ -119,9 +118,6 @@ public class ItemSlot extends Button {
 		
 		level = new BitmapText( PixelScene.pixelFont);
 		add(level);
-
-		special = new BitmapText( PixelScene.pixelFont);
-		add(special);
 	}
 	
 	@Override
@@ -167,17 +163,7 @@ public class ItemSlot extends Button {
 			level.y = y + (height - level.baseLine() - 1) - margin.bottom;
 			PixelScene.align(level);
 		}
-		if (special!=null){
-			special.measure();
-			if (special.width > width - (margin.left + margin.right)){
-				special.scale.set(PixelScene.align(0.8f));
-			} else {
-				special.scale.set(1f);
-			}
-			special.x = x + margin.left;
-			special.y = y + (height - level.baseLine() - 1) - margin.bottom;
-			PixelScene.align(special);
-		}
+
 	}
 
 	public void alpha( float value ){
@@ -233,10 +219,10 @@ public class ItemSlot extends Button {
 		}
 
 		if (item == null){
-			status.visible = extra.visible = level.visible = special.visible = false;
+			status.visible = extra.visible = level.visible = false;
 			return;
 		} else {
-			status.visible = extra.visible = level.visible = special.visible = true;
+			status.visible = extra.visible = level.visible = true;
 		}
 
 		status.text( item.status() );
@@ -309,12 +295,6 @@ public class ItemSlot extends Button {
 			level.text( null );
 		}
 
-		special.text( item.special() );
-		if (item.specialColorChange()){
-			special.hardlight(WARNING);
-		}else {
-			special.resetColor();
-		}
 		layout();
 	}
 	

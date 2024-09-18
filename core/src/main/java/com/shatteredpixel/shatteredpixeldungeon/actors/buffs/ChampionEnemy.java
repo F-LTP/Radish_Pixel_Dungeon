@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,14 +27,11 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EliteBadge;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
-import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.utils.BArray;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
@@ -89,12 +86,8 @@ public abstract class ChampionEnemy extends Buff {
 	}
 
 	public static void rollForChampion(Mob m){
-		boolean cursed_badge=(Dungeon.hero.buff(EliteBadge.badgeRecharge.class)!=null && Dungeon.hero.buff(EliteBadge.badgeRecharge.class).isCursed());
-		if (Dungeon.mobsToChampion <= 0) {
-			Dungeon.mobsToChampion = 8;
-			if (Dungeon.isChallenged(Challenges.CHAMPION_ENEMIES) && cursed_badge)
-				Dungeon.mobsToChampion=5;
-		}
+		if (Dungeon.mobsToChampion <= 0) Dungeon.mobsToChampion = 8;
+
 		Dungeon.mobsToChampion--;
 
 		//we roll for a champion enemy even if we aren't spawning one to ensure that
@@ -109,7 +102,7 @@ public abstract class ChampionEnemy extends Buff {
 			case 5:             buffCls = Growing.class;      break;
 		}
 
-		if (Dungeon.mobsToChampion <= 0 && (Dungeon.isChallenged(Challenges.CHAMPION_ENEMIES)||cursed_badge)) {
+		if (Dungeon.mobsToChampion <= 0 && Dungeon.isChallenged(Challenges.CHAMPION_ENEMIES)) {
 			Buff.affect(m, buffCls);
 			m.state = m.WANDERING;
 		}
@@ -188,7 +181,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public float damageTakenFactor() {
-			return 0.75f;
+			return 0.5f;
 		}
 
 		{
@@ -206,7 +199,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public float damageTakenFactor() {
-			return 0.25f;
+			return 0.2f;
 		}
 
 		@Override
@@ -235,7 +228,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public float evasionAndAccuracyFactor() {
-			return 3f;
+			return 4f;
 		}
 	}
 
@@ -250,7 +243,7 @@ public abstract class ChampionEnemy extends Buff {
 		@Override
 		public boolean act() {
 			multiplier += 0.01f;
-			spend(3*TICK);
+			spend(4*TICK);
 			return true;
 		}
 

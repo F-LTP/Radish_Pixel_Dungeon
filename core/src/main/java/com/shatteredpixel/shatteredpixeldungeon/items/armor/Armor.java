@@ -1,24 +1,3 @@
-/*
- * Pixel Dungeon
- * Copyright (C) 2012-2015 Oleg Dolya
- *
- * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
- */
-
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
@@ -82,47 +61,52 @@ public class Armor extends EquipableItem {
 	protected static final String AC_DETACH       = "DETACH";
 
 
-	
+
 	public enum Augment {
 		EVASION (2f , -1f),
 		DEFENSE (-2f, 1f),
 		NONE	(0f   ,  0f);
-		
+
 		private float evasionFactor;
 		private float defenceFactor;
-		
+
 		Augment(float eva, float df){
 			evasionFactor = eva;
 			defenceFactor = df;
 		}
-		
+
 		public int evasionFactor(int level){
 			return Math.round((2 + level) * evasionFactor);
 		}
-		
+
 		public int defenseFactor(int level){
 			return Math.round((2 + level) * defenceFactor);
 		}
 	}
-	
+
 	public Augment augment = Augment.NONE;
-	
+
 	public Glyph glyph;
 	//public boolean curseInfusionBonus = false;
+
+	public boolean glyphHardened = false;
+
 	public boolean masteryPotionBonus = false;
-	
+
+
+
 	protected BrokenSeal seal;
-	
+
 	public int tier;
-	
+
 	private static final int USES_TO_ID = 10;
 	private float usesLeftToID = USES_TO_ID;
 	private float availableUsesToID = USES_TO_ID/2f;
-	
+
 	public Armor( int tier ) {
 		this.tier = tier;
 	}
-	
+
 	private static final String USES_LEFT_TO_ID = "uses_left_to_id";
 	private static final String AVAILABLE_USES  = "available_uses";
 	private static final String GLYPH			= "glyph";
@@ -152,7 +136,7 @@ public class Armor extends EquipableItem {
 		curseInfusionBonus = bundle.getBoolean( CURSE_INFUSION_BONUS );
 		masteryPotionBonus = bundle.getBoolean( MASTERY_POTION_BONUS );
 		seal = (BrokenSeal)bundle.get(SEAL);
-		
+
 		augment = bundle.getEnum(AUGMENT, Augment.class);
 	}
 
@@ -201,30 +185,30 @@ public class Armor extends EquipableItem {
 
 	@Override
 	public boolean doEquip( Hero hero ) {
-		
+
 		detach(hero.belongings.backpack);
 
 		if (hero.belongings.armor == null || hero.belongings.armor.doUnequip( hero, true, false )) {
-			
+
 			hero.belongings.armor = this;
-			
+
 			cursedKnown = true;
 			if (cursed) {
 				equipCursed( hero );
 				GLog.n( Messages.get(Armor.class, "equip_cursed") );
 			}
-			
+
 			((HeroSprite)hero.sprite).updateArmor();
 			activate(hero);
 			Talent.onItemEquipped(hero, this);
 			hero.spendAndNext( time2equip( hero ) );
 			return true;
-			
+
 		} else {
-			
+
 			collect( hero.belongings.backpack );
 			return false;
-			
+
 		}
 	}
 
@@ -287,7 +271,7 @@ public class Armor extends EquipableItem {
 
 		}
 	}
-	
+
 	@Override
 	public boolean isEquipped( Hero hero ) {
 		return hero.belongings.armor() == this;
@@ -326,7 +310,7 @@ public class Armor extends EquipableItem {
 			return lvl;
 		}
 	}
-	
+
 	public float evasionFactor( Char owner, float evasion ){
 
 		if (hasGlyph(Stone.class, owner) ){
@@ -334,27 +318,27 @@ public class Armor extends EquipableItem {
 					|| (seal != null&&seal.getGlyph()!=null && seal.getGlyph() instanceof Stone))
 				return 0;
 		}
-		
+
 		if (owner instanceof Hero){
 			int aEnc = STRReq() - ((Hero) owner).STR();
 			if (aEnc > 0) evasion /= Math.pow(1.5, aEnc);
-			
+
 			Momentum momentum = owner.buff(Momentum.class);
 			if (momentum != null){
 				evasion += momentum.evasionBonus(((Hero) owner).lvl, Math.max(0, -aEnc));
 			}
 		}
-		
+
 		return evasion + augment.evasionFactor(buffedLvl());
 	}
-	
+
 	public float speedFactor( Char owner, float speed ){
-		
+
 		if (owner instanceof Hero) {
 			int aEnc = STRReq() - ((Hero) owner).STR();
 			if (aEnc > 0) speed /= Math.pow(1.2, aEnc);
 		}
-		
+
 		if (hasGlyph(Swiftness.class, owner)) {
 			boolean enemyNear = false;
 			PathFinder.buildDistanceMap(owner.pos, Dungeon.level.passable, 2);
@@ -369,33 +353,33 @@ public class Armor extends EquipableItem {
 		if (hasGlyph(Flow.class, owner) && Dungeon.level.water[owner.pos]){
 			speed *= (2f + 0.25f*procLvl()) * RingOfArcana.enchantPowerMultiplier(owner)*owner.talentProc();
 		}
-		
+
 		if (hasGlyph(Bulk.class, owner) &&
 				(Dungeon.level.map[owner.pos] == Terrain.DOOR
 						|| Dungeon.level.map[owner.pos] == Terrain.OPEN_DOOR )) {
 			speed /= 3f * RingOfArcana.enchantPowerMultiplier(owner);
 		}
-		
+
 		return speed;
-		
+
 	}
-	
+
 	public float stealthFactor( Char owner, float stealth ){
-		
+
 		if (hasGlyph(Obfuscation.class, owner)){
 			stealth += (1 + procLvl()/3f) * RingOfArcana.enchantPowerMultiplier(owner)*owner.talentProc();
 		}
-		
+
 		return stealth;
 	}
-	
+
 	@Override
 	public int level() {
 		int level = super.level();
 		if (curseInfusionBonus) level += 1 + level/6;
 		return level;
 	}
-	
+
 	//other things can equip these, for now we assume only the hero can be affected by levelling debuffs
 	@Override
 	public int buffedLvl() {
@@ -410,12 +394,12 @@ public class Armor extends EquipableItem {
 			return level();
 		}
 	}
-	
+
 	@Override
 	public Item upgrade() {
 		return upgrade( false );
 	}
-	
+
 	public Item upgrade( boolean inscribe ) {
 
 		if (inscribe){
@@ -429,7 +413,7 @@ public class Armor extends EquipableItem {
 				inscribe(null);
 			}
 		}
-		
+
 		cursed = false;
 
 		if (seal != null && seal.level() == 0)
@@ -437,16 +421,16 @@ public class Armor extends EquipableItem {
 
 		return super.upgrade();
 	}
-	
+
 	public int proc( Char attacker, Char defender, int damage ) {
-		
+
 		if (glyph != null && defender.buff(MagicImmune.class) == null) {
 			damage = glyph.proc( this, attacker, defender, damage );
 		}
 		if (seal!=null&&seal.getGlyph()!=null && seal.getGlyph()!=glyph&& defender.buff(MagicImmune.class) == null){
 			damage = seal.getGlyph().proc( this, attacker, defender, damage);
 		}
-		
+
 		if (!levelKnown && defender == Dungeon.hero) {
 			float uses = Math.min( availableUsesToID, Talent.itemIDSpeedFactor(Dungeon.hero, this) );
 			availableUsesToID -= uses;
@@ -457,10 +441,10 @@ public class Armor extends EquipableItem {
 				Badges.validateItemLevelAquired( this );
 			}
 		}
-		
+
 		return damage;
 	}
-	
+
 	@Override
 	public void onHeroGainExp(float levelPercent, Hero hero) {
 		levelPercent *= Talent.itemIDSpeedFactor(hero, this);
@@ -469,19 +453,19 @@ public class Armor extends EquipableItem {
 			availableUsesToID = Math.min(USES_TO_ID/2f, availableUsesToID + levelPercent * USES_TO_ID);
 		}
 	}
-	
+
 	@Override
 	public String name() {
 		return glyph != null && (cursedKnown || !glyph.curse()) ? glyph.name( super.name() ) : super.name();
 	}
-	
+
 	@Override
 	public String info() {
 		String info = desc();
-		
+
 		if (levelKnown) {
 			info += "\n\n" + Messages.get(Armor.class, "curr_absorb", DRMin(), DRMax(), STRReq());
-			
+
 			if (STRReq() > Dungeon.hero.STR()) {
 				info += " " + Messages.get(Armor.class, "too_heavy");
 			}
@@ -505,12 +489,12 @@ public class Armor extends EquipableItem {
 				break;
 			case NONE:
 		}
-		
+
 		if (glyph != null  && (cursedKnown || !glyph.curse())) {
 			info += "\n\n" +  Messages.capitalize(Messages.get(Armor.class, "inscribed", glyph.name()));
 			info += " " + glyph.desc();
 		}
-		
+
 		if (cursed && isEquipped( Dungeon.hero )) {
 			info += "\n\n" + Messages.get(Armor.class, "cursed_worn");
 		} else if (cursedKnown && cursed) {
@@ -529,7 +513,7 @@ public class Armor extends EquipableItem {
 				info += "\n\n" + Messages.get(Armor.class, "not_cursed");
 			}
 		}
-		
+
 		return info;
 	}
 
@@ -559,7 +543,7 @@ public class Armor extends EquipableItem {
 			}
 		}
 		level(n);
-		
+
 		//30% chance to be cursed
 		//15% chance to be inscribed
 		float effectRoll = Random.Float();
@@ -606,7 +590,7 @@ public class Armor extends EquipableItem {
 		//strength req decreases at +1,+3,+6,+10,etc.
 		return (8 + Math.round(tier * 2)) - (int)(Math.sqrt(8 * lvl + 1) - 1)/2;
 	}
-	
+
 	@Override
 	public int value() {
 		if (seal != null) return 0;
@@ -665,24 +649,30 @@ public class Armor extends EquipableItem {
 	public boolean hasCurseGlyph(){
 		return glyph != null && glyph.curse();
 	}
-	
+
 	@Override
 	public ItemSprite.Glowing glowing() {
 		return glyph != null && (cursedKnown || !glyph.curse()) ? glyph.glowing() : null;
 	}
-	
+
 	public static abstract class Glyph implements Bundlable {
-		
-		private static final Class<?>[] common = new Class<?>[]{
+
+		public static float genericProcChanceMultiplier( Char defender ){
+			return RingOfArcana.enchantPowerMultiplier(defender);
+		}
+
+
+
+		public static final Class<?>[] common = new Class<?>[]{
 				Obfuscation.class, Swiftness.class, Viscosity.class, Potential.class };
-		
-		private static final Class<?>[] uncommon = new Class<?>[]{
+
+		public static final Class<?>[] uncommon = new Class<?>[]{
 				Brimstone.class, Stone.class, Entanglement.class,
 				Repulsion.class, Camouflage.class, Flow.class };
-		
+
 		private static final Class<?>[] rare = new Class<?>[]{
 				Affection.class, AntiMagic.class, Thorns.class };
-		
+
 		private static final float[] typeChances = new float[]{
 				50, //12.5% each
 				40, //6.67% each
@@ -700,14 +690,14 @@ public class Armor extends EquipableItem {
 		protected float procChanceMultiplier( Char defender ){
 			return RingOfArcana.enchantPowerMultiplier(defender);
 		}
-		
+
 		public String name() {
 			if (!curse())
 				return name( Messages.get(this, "glyph") );
 			else
 				return name( Messages.get(Item.class, "curse"));
 		}
-		
+
 		public String name( String armorName ) {
 			return Messages.get(this, "name", armorName);
 		}
@@ -719,7 +709,7 @@ public class Armor extends EquipableItem {
 		public boolean curse() {
 			return false;
 		}
-		
+
 		@Override
 		public void restoreFromBundle( Bundle bundle ) {
 			if (bundle.contains("onseal")){
@@ -731,7 +721,7 @@ public class Armor extends EquipableItem {
 		public void storeInBundle( Bundle bundle ) {
 			bundle.put("onseal",onSeal);
 		}
-		
+
 		public abstract ItemSprite.Glowing glowing();
 
 		@SuppressWarnings("unchecked")
@@ -745,7 +735,7 @@ public class Armor extends EquipableItem {
 					return randomRare( toIgnore );
 			}
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		public static Glyph randomCommon( Class<? extends Glyph> ... toIgnore ){
 			ArrayList<Class<?>> glyphs = new ArrayList<>(Arrays.asList(common));
@@ -756,7 +746,7 @@ public class Armor extends EquipableItem {
 				return (Glyph) Reflection.newInstance(Random.element(glyphs));
 			}
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		public static Glyph randomUncommon( Class<? extends Glyph> ... toIgnore ){
 			ArrayList<Class<?>> glyphs = new ArrayList<>(Arrays.asList(uncommon));
@@ -767,7 +757,7 @@ public class Armor extends EquipableItem {
 				return (Glyph) Reflection.newInstance(Random.element(glyphs));
 			}
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		public static Glyph randomRare( Class<? extends Glyph> ... toIgnore ){
 			ArrayList<Class<?>> glyphs = new ArrayList<>(Arrays.asList(rare));
@@ -778,7 +768,7 @@ public class Armor extends EquipableItem {
 				return (Glyph) Reflection.newInstance(Random.element(glyphs));
 			}
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		public static Glyph randomCurse( Class<? extends Glyph> ... toIgnore ){
 			ArrayList<Class<?>> glyphs = new ArrayList<>(Arrays.asList(curses));
@@ -789,7 +779,7 @@ public class Armor extends EquipableItem {
 				return (Glyph) Reflection.newInstance(Random.element(glyphs));
 			}
 		}
-		
+
 	}
 	public class ArmorBuff extends Buff {
 

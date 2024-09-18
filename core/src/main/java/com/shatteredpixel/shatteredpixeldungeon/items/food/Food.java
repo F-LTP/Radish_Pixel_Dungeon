@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ public class Food extends Item {
 			hero.sprite.operate( hero.pos );
 			hero.busy();
 			SpellSprite.show( hero, SpellSprite.FOOD );
-			Sample.INSTANCE.play( Assets.Sounds.EAT );
+			eatSFX();
 			
 			hero.spend( eatingTime() );
 
@@ -92,11 +92,16 @@ public class Food extends Item {
 		}
 	}
 
+	protected void eatSFX(){
+		Sample.INSTANCE.play( Assets.Sounds.EAT );
+	}
+
 	protected float eatingTime(){
 		if (Dungeon.hero.hasTalent(Talent.IRON_STOMACH)
 			|| Dungeon.hero.hasTalent(Talent.ENERGIZING_MEAL)
 			|| Dungeon.hero.hasTalent(Talent.MYSTICAL_MEAL)
-			|| Dungeon.hero.hasTalent(Talent.INVIGORATING_MEAL)){
+			|| Dungeon.hero.hasTalent(Talent.INVIGORATING_MEAL)
+			|| Dungeon.hero.hasTalent(Talent.FOCUSED_MEAL)){
 			return TIME_TO_EAT - 2;
 		} else {
 			return TIME_TO_EAT;

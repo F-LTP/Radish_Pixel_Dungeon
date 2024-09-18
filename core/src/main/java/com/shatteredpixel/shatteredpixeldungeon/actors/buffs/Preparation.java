@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,16 +29,20 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroAction;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
-import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
+import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
+import com.watabou.utils.BArray;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Image;
+import com.watabou.noosa.Visual;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
@@ -78,18 +82,11 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 				{.20f, .27f, .33f, .40f},
 				{.50f, .67f, .83f, 1.0f}
 		};
-		private static final float[][] braceYourselfExtraDmgs=new float[][]{
-				{0,.15f,.20f,.25f,.30f},
-				{0,.30f,.40f,.50f,.60f},
-				{0,.45f,.60f,.75f,.90f},
-				{0,.60f,.80f,1.0f,1.2f}
-		};
+
 		public float KOThreshold(){
 			return KOThresholds[ordinal()][Dungeon.hero.pointsInTalent(Talent.ENHANCED_LETHALITY)];
 		}
-		public float  braceYourselfExtraDmg(){
-			return braceYourselfExtraDmgs[ordinal()][Dungeon.hero.pointsInTalent(Talent.BRACE_YOURSELF)];
-		}
+
 		//1st index is prep level, 2nd is talent level
 		private static final int[][] blinkRanges = new int[][]{
 				{1, 1, 2, 2},
@@ -117,11 +114,7 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 				int newDmg = attacker.damageRoll();
 				if (newDmg > dmg) dmg = newDmg;
 			}
-			// Talent : brace_yourself
-			if(Dungeon.hero.buff(BraceYourself.class) != null)
-				return Math.round(dmg * (1f + baseDmgBonus+braceYourselfExtraDmg()));
-			else
-				return Math.round(dmg * (1f + baseDmgBonus));
+			return Math.round(dmg * (1f + baseDmgBonus));
 		}
 		
 		public static AttackLevel getLvl(int turnsInvis){
@@ -137,8 +130,6 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	}
 	
 	private int turnsInvis = 0;
-
-	public boolean stay = true;
 	
 	@Override
 	public boolean act() {
@@ -196,36 +187,13 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	}
 
 	@Override
-	public float iconFadePercent() {
-		AttackLevel level = AttackLevel.getLvl(turnsInvis);
-		if (level == AttackLevel.LVL_4){
-			return 0;
-		} else {
-			float turnsForCur = level.turnsReq;
-			float turnsForNext = AttackLevel.values()[level.ordinal()+1].turnsReq;
-			turnsForNext -= turnsForCur;
-			float turnsToNext = turnsInvis - turnsForCur;
-			return Math.min(1, (turnsForNext - turnsToNext)/(turnsForNext));
-		}
-	}
-
-	@Override
-	public String iconTextDisplay() {
-		return Integer.toString(turnsInvis);
-	}
-
-	@Override
 	public String desc() {
 		String desc = Messages.get(this, "desc");
 		
 		AttackLevel lvl = AttackLevel.getLvl(turnsInvis);
-		//Talent : brace_yourself
-		float bdb=lvl.baseDmgBonus;
-		if(Dungeon.hero.buff(BraceYourself.class)!=null)
-			bdb=lvl.baseDmgBonus+ lvl.braceYourselfExtraDmg();
 
 		desc += "\n\n" + Messages.get(this, "desc_dmg",
-				(int)(bdb*100),
+				(int)(lvl.baseDmgBonus*100),
 				(int)(lvl.KOThreshold()*100),
 				(int)(lvl.KOThreshold()*20));
 		
@@ -253,7 +221,6 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		turnsInvis = bundle.getInt(TURNS);
-		stay=bundle.getBoolean("do_you_stay");
 		ActionIndicator.setAction(this);
 	}
 	
@@ -261,7 +228,6 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(TURNS, turnsInvis);
-		bundle.put("do_you_stay",stay);
 	}
 
 	@Override
@@ -270,10 +236,29 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	}
 	
 	@Override
-	public Image actionIcon() {
-		Image actionIco = Effects.get(Effects.Type.WOUND);
+	public int actionIcon() {
+		return HeroIcon.PREPARATION;
+	}
+
+	@Override
+	public Visual primaryVisual() {
+		Image actionIco = new HeroIcon(this);
 		tintIcon(actionIco);
 		return actionIco;
+	}
+
+	@Override
+	public Visual secondaryVisual() {
+		BitmapText txt = new BitmapText(PixelScene.pixelFont);
+		txt.text(Integer.toString(Math.min(9, turnsInvis)));
+		txt.hardlight(CharSprite.POSITIVE);
+		txt.measure();
+		return txt;
+	}
+
+	@Override
+	public int indicatorColor() {
+		return 0x444444;
 	}
 	
 	@Override
@@ -300,12 +285,14 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 				
 				AttackLevel lvl = AttackLevel.getLvl(turnsInvis);
 
-				PathFinder.buildDistanceMap(Dungeon.hero.pos, BArray.not(Dungeon.level.solid, null), lvl.blinkDistance());
+				PathFinder.buildDistanceMap(Dungeon.hero.pos,BArray.or(Dungeon.level.passable, Dungeon.level.avoid, null), lvl.blinkDistance());
 				int dest = -1;
 				for (int i : PathFinder.NEIGHBOURS8){
 					//cannot blink into a cell that's occupied or impassable, only over them
 					if (Actor.findChar(cell+i) != null)     continue;
-					if (!Dungeon.level.passable[cell+i])    continue;
+					if (!Dungeon.level.passable[cell+i] && !(target.flying && Dungeon.level.avoid[cell+i])) {
+						continue;
+					}
 
 					if (dest == -1 || PathFinder.distance[dest] > PathFinder.distance[cell+i]){
 						dest = cell+i;
@@ -320,6 +307,7 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 
 				if (dest == -1 || PathFinder.distance[dest] == Integer.MAX_VALUE || Dungeon.hero.rooted){
 					GLog.w(Messages.get(Preparation.class, "out_of_reach"));
+					if (Dungeon.hero.rooted) PixelScene.shake( 1, 1f );
 					return;
 				}
 				

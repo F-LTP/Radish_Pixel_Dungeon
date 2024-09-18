@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,16 +21,14 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Drake;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Reflection;
 
-import java.text.DecimalFormat;
 import java.util.HashSet;
 
 public class Buff extends Actor {
@@ -70,9 +68,8 @@ public class Buff extends Actor {
 		}
 		
 		this.target = target;
-		target.add( this );
 
-		if (target.buffs().contains(this)){
+		if (target.add( this )){
 			if (target.sprite != null) fx( true );
 			return true;
 		} else {
@@ -82,8 +79,7 @@ public class Buff extends Actor {
 	}
 	
 	public void detach() {
-		if (target.sprite != null) fx( false );
-		target.remove( this );
+		if (target.remove( this ) && target.sprite != null) fx( false );
 	}
 	
 	@Override
@@ -135,7 +131,7 @@ public class Buff extends Actor {
 
 	//to handle the common case of showing how many turns are remaining in a buff description.
 	protected String dispTurns(float input){
-		return new DecimalFormat("#.##").format(input);
+		return Messages.decimalFormat("#.##", input);
 	}
 
 	//buffs act after the hero, so it is often useful to use cooldown+1 when display buff time remaining
@@ -152,14 +148,7 @@ public class Buff extends Actor {
 
 	public static<T extends FlavourBuff> T append( Char target, Class<T> buffClass, float duration ) {
 		T buff = append( target, buffClass );
-		float time_to_spend=duration * target.resist(buffClass);
-		if (target == Dungeon.hero && buff.type==buffType.POSITIVE){
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				time_to_spend*=RingOfBenediction.periodMultiplier(target);
-			}
-		}
-		buff.spend( time_to_spend );
+		buff.spend( duration * target.resist(buffClass) );
 		return buff;
 	}
 
@@ -175,28 +164,14 @@ public class Buff extends Actor {
 	
 	public static<T extends FlavourBuff> T affect( Char target, Class<T> buffClass, float duration ) {
 		T buff = affect( target, buffClass );
-		float time_to_spend=duration * target.resist(buffClass);
-		if (target == Dungeon.hero && buff.type==buffType.POSITIVE){
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				time_to_spend*=RingOfBenediction.periodMultiplier(target);
-			}
-		}
-		buff.spend( time_to_spend );
+		buff.spend( duration * target.resist(buffClass) );
 		return buff;
 	}
 
 	//postpones an already active buff, or creates & attaches a new buff and delays that.
 	public static<T extends FlavourBuff> T prolong( Char target, Class<T> buffClass, float duration ) {
 		T buff = affect( target, buffClass );
-		float time_to_postpone=duration * target.resist(buffClass);
-		if (target == Dungeon.hero && buff.type==buffType.POSITIVE){
-			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-			if (ben!=null){
-				time_to_postpone*=RingOfBenediction.periodMultiplier(target);
-			}
-		}
-		buff.postpone( time_to_postpone );
+		buff.postpone( duration * target.resist(buffClass) );
 		return buff;
 	}
 

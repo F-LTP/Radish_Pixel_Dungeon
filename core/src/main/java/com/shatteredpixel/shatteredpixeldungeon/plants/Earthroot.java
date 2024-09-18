@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,11 +29,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.EarthParticle;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
-import com.watabou.noosa.Camera;
 import com.watabou.utils.Bundle;
 
 public class Earthroot extends Plant {
@@ -48,7 +47,7 @@ public class Earthroot extends Plant {
 
 		if (ch != null){
 			if (ch instanceof Hero && ((Hero) ch).subClass == HeroSubClass.WARDEN) {
-				Buff.affect(ch, Barkskin.class).set(Dungeon.hero.lvl + 5, 5);
+				Barkskin.conditionallyAppend(Dungeon.hero, Dungeon.hero.lvl + 5, 5);
 			} else {
 				Buff.affect(ch, Armor.class).level(ch.HT);
 			}
@@ -56,7 +55,7 @@ public class Earthroot extends Plant {
 		
 		if (Dungeon.level.heroFOV[pos]) {
 			CellEmitter.bottom( pos ).start( EarthParticle.FACTORY, 0.05f, 8 );
-			Camera.main.shake( 1, 0.4f );
+			PixelScene.shake( 1, 0.4f );
 		}
 	}
 	
@@ -83,12 +82,6 @@ public class Earthroot extends Plant {
 		}
 		
 		@Override
-		public boolean attachTo( Char target ) {
-			pos = target.pos;
-			return super.attachTo( target );
-		}
-		
-		@Override
 		public boolean act() {
 			if (target.pos != pos) {
 				detach();
@@ -102,6 +95,10 @@ public class Earthroot extends Plant {
 		}
 		
 		public int absorb( int damage ) {
+			if (pos != target.pos){
+				detach();
+				return damage;
+			}
 			int block = Math.min( damage, blocking());
 			if (level <= block) {
 				detach();
@@ -114,12 +111,6 @@ public class Earthroot extends Plant {
 		
 		public void level( int value ) {
 			if (target != null) {
-				if (target == Dungeon.hero){
-					Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
-					if (ben!=null){
-						value=Math.round(value*RingOfBenediction.periodMultiplier(target));
-					}
-				}
 				if (level < value) {
 					level = value;
 				}

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class RottenLance extends MeleeWeapon{// idea is from relic pd
     private static final String AC_WEAPONSKILL="WS";
     {
-        image = ItemSpriteSheet.SPEAR;
+        image = ItemSpriteSheet.ROTTEN_LANCE;
         hitSound = Assets.Sounds.HIT_STAB;
         hitSoundPitch=1f;
 

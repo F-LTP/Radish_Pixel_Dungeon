@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels;
 
 import com.shatteredpixel.shatteredpixeldungeon.Bones;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -30,27 +31,32 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.EbonyMimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.GoldenMimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
-import com.shatteredpixel.shatteredpixeldungeon.items.food.SmallRation;
+import com.shatteredpixel.shatteredpixeldungeon.items.food.SupplyRation;
 import com.shatteredpixel.shatteredpixeldungeon.items.journal.DocumentPage;
 import com.shatteredpixel.shatteredpixeldungeon.items.journal.GuidePage;
 import com.shatteredpixel.shatteredpixeldungeon.items.journal.RegionLorePage;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.GoldenKey;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.Key;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.MimicTooth;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
-import com.shatteredpixel.shatteredpixeldungeon.journal.Journal;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.levels.builders.Builder;
 import com.shatteredpixel.shatteredpixeldungeon.levels.builders.FigureEightBuilder;
 import com.shatteredpixel.shatteredpixeldungeon.levels.builders.LoopBuilder;
+import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretRoom;
@@ -58,18 +64,24 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MagicalFire
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.PitRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.ShopRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.EntranceRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.ExitRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.StandardRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.CavesFissureEntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.EntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.exit.CavesFissureExitRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.exit.ExitRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.BlazingTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.BurningTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.ChillingTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.DisintegrationTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.ExplosiveTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.FrostTrap;
+import com.shatteredpixel.shatteredpixeldungeon.levels.traps.PitfallTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.WornDartTrap;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
+import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 
@@ -109,8 +121,8 @@ public abstract class RegularLevel extends Level {
 	
 	protected ArrayList<Room> initRooms() {
 		ArrayList<Room> initRooms = new ArrayList<>();
-		initRooms.add ( roomEntrance = new EntranceRoom());
-		initRooms.add( roomExit = new ExitRoom());
+		initRooms.add ( roomEntrance = EntranceRoom.createEntrance());
+		initRooms.add( roomExit = ExitRoom.createExit());
 
 		//force max standard rooms and multiple by 1.5x for large levels
 		int standards = standardRooms(feeling == Feeling.LARGE);
@@ -122,7 +134,7 @@ public abstract class RegularLevel extends Level {
 			do {
 				s = StandardRoom.createRoom();
 			} while (!s.setSizeCat( standards-i ));
-			i += s.sizeCat.roomValue-1;
+			i += s.sizeFactor()-1;
 			initRooms.add(s);
 		}
 		
@@ -209,8 +221,8 @@ public abstract class RegularLevel extends Level {
 
 		ArrayList<Room> stdRooms = new ArrayList<>();
 		for (Room room : rooms) {
-			if (room instanceof StandardRoom && room != roomEntrance) {
-				for (int i = 0; i < ((StandardRoom) room).sizeCat.roomValue; i++) {
+			if (room instanceof StandardRoom) {
+				for (int i = 0; i < ((StandardRoom) room).mobSpawnWeight(); i++) {
 					stdRooms.add(room);
 				}
 			}
@@ -218,8 +230,16 @@ public abstract class RegularLevel extends Level {
 		Random.shuffle(stdRooms);
 		Iterator<Room> stdRoomIter = stdRooms.iterator();
 
+		//enemies cannot be within an 8-tile FOV of the entrance
+		// or a 6-tile open space distance from the entrance
+		boolean[] entranceFOV = new boolean[length()];
+		Point c = cellToPoint(entrance());
+		ShadowCaster.castShadow(c.x, c.y, width(), entranceFOV, losBlocking, 6);
+		PathFinder.buildDistanceMap(entrance(), BArray.not(solid, null), 8);
+
+		Mob mob = null;
 		while (mobsToSpawn > 0) {
-			Mob mob = createMob();
+			if (mob == null) mob = createMob();
 			Room roomToSpawn;
 			
 			if (!stdRoomIter.hasNext()) {
@@ -232,15 +252,18 @@ public abstract class RegularLevel extends Level {
 				mob.pos = pointToCell(roomToSpawn.random());
 				tries--;
 			} while (tries >= 0 && (findMob(mob.pos) != null
+					|| entranceFOV[mob.pos] || PathFinder.distance[mob.pos] != Integer.MAX_VALUE
 					|| !passable[mob.pos]
 					|| solid[mob.pos]
 					|| !roomToSpawn.canPlaceCharacter(cellToPoint(mob.pos), this)
 					|| mob.pos == exit()
+					|| traps.get(mob.pos) != null || plants.get(mob.pos) != null
 					|| (!openSpace[mob.pos] && mob.properties().contains(Char.Property.LARGE))));
 
 			if (tries >= 0) {
 				mobsToSpawn--;
 				mobs.add(mob);
+				mob = null;
 
 				//chance to add a second mob to this room, except on floor 1
 				if (Dungeon.depth > 1 && mobsToSpawn > 0 && Random.Int(4) == 0){
@@ -250,12 +273,19 @@ public abstract class RegularLevel extends Level {
 					do {
 						mob.pos = pointToCell(roomToSpawn.random());
 						tries--;
-					} while (tries >= 0 && (findMob(mob.pos) != null || !passable[mob.pos] || solid[mob.pos] || mob.pos == exit()
+					} while (tries >= 0 && (findMob(mob.pos) != null
+							|| entranceFOV[mob.pos] || PathFinder.distance[mob.pos] != Integer.MAX_VALUE
+							|| !passable[mob.pos]
+							|| solid[mob.pos]
+							|| !roomToSpawn.canPlaceCharacter(cellToPoint(mob.pos), this)
+							|| mob.pos == exit()
+							|| traps.get(mob.pos) != null || plants.get(mob.pos) != null
 							|| (!openSpace[mob.pos] && mob.properties().contains(Char.Property.LARGE))));
 
 					if (tries >= 0) {
 						mobsToSpawn--;
 						mobs.add(mob);
+						mob = null;
 					}
 				}
 			}
@@ -359,6 +389,13 @@ public abstract class RegularLevel extends Level {
 			case 2:
 			case 3:
 			case 4:
+				//base mimic chance is 1/20, regular chest is 4/20
+				// so each +1x mimic spawn rate converts to a 25% chance here
+				if (Random.Float() < (MimicTooth.mimicChanceMultiplier() - 1f)/4f  && findMob(cell) == null){
+					mobs.add(Mimic.spawnAt(cell, toDrop));
+					continue;
+				}
+
 				type = Heap.Type.CHEST;
 				break;
 			case 5:
@@ -376,8 +413,9 @@ public abstract class RegularLevel extends Level {
 			if ((toDrop instanceof Artifact && Random.Int(2) == 0) ||
 					(toDrop.isUpgradable() && Random.Int(4 - toDrop.level()) == 0)){
 
-				if (Dungeon.depth > 1 && Random.Int(10) == 0 && findMob(cell) == null){
-					mobs.add(Mimic.spawnAt(cell, toDrop, GoldenMimic.class));
+				float mimicChance = 1/10f * MimicTooth.mimicChanceMultiplier();
+				if (Dungeon.depth > 1 && Random.Float() < mimicChance && findMob(cell) == null){
+					mobs.add(Mimic.spawnAt(cell, GoldenMimic.class, toDrop));
 				} else {
 					Heap dropped = drop(toDrop, cell);
 					if (heaps.get(cell) == dropped) {
@@ -397,158 +435,229 @@ public abstract class RegularLevel extends Level {
 
 		for (Item item : itemsToSpawn) {
 			int cell = randomDropCell();
-			drop( item, cell ).type = Heap.Type.HEAP;
+			if (item instanceof TrinketCatalyst){
+				drop( item, cell ).type = Heap.Type.LOCKED_CHEST;
+				int keyCell = randomDropCell();
+				drop( new GoldenKey(Dungeon.depth), keyCell ).type = Heap.Type.HEAP;
+				if (map[keyCell] == Terrain.HIGH_GRASS || map[keyCell] == Terrain.FURROWED_GRASS) {
+					map[keyCell] = Terrain.GRASS;
+					losBlocking[keyCell] = false;
+				}
+			} else {
+				drop( item, cell ).type = Heap.Type.HEAP;
+			}
 			if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
 				map[cell] = Terrain.GRASS;
 				losBlocking[cell] = false;
 			}
 		}
 
-		//use a separate generator for this to prevent held items, meta progress, and talents from affecting levelgen
-		//we can use a random long for the seed as it will be the same long every time
+		//use separate generator(s) for this to prevent held items, meta progress, and talents from affecting levelgen
+		//we can use a random long for these as they will be the same longs every time
+
 		Random.pushGenerator( Random.Long() );
-
-		Item item = Bones.get();
-		if (item != null) {
-			int cell = randomDropCell();
-			if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
-				map[cell] = Terrain.GRASS;
-				losBlocking[cell] = false;
-			}
-			drop( item, cell ).setHauntedIfCursed().type = Heap.Type.REMAINS;
-		}
-
-		DriedRose rose = Dungeon.hero.belongings.getItem( DriedRose.class );
-		if (rose != null && rose.isIdentified() && !rose.cursed){
-			//aim to drop 1 petal every 2 floors
-			int petalsNeeded = (int) Math.ceil((float)((Dungeon.depth / 2) - rose.droppedPetals) / 3);
-
-			for (int i=1; i <= petalsNeeded; i++) {
-				//the player may miss a single petal and still max their rose.
-				if (rose.droppedPetals < 11) {
-					item = new DriedRose.Petal();
-					int cell = randomDropCell();
-					drop( item, cell ).type = Heap.Type.HEAP;
+			if (Dungeon.isChallenged(Challenges.DARKNESS)){
+				int cell = randomDropCell();
+				if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
+					map[cell] = Terrain.GRASS;
+					losBlocking[cell] = false;
+				}
+				drop( new Torch(), cell );
+				//add a second torch to help with the larger floor
+				if (feeling == Feeling.LARGE){
+					cell = randomDropCell();
 					if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
 						map[cell] = Terrain.GRASS;
 						losBlocking[cell] = false;
 					}
-					rose.droppedPetals++;
+					drop( new Torch(), cell );
 				}
 			}
-		}
+		Random.popGenerator();
 
-		//cached rations try to drop in a special room on floors 2/3/4/6/7/8, to a max of 4/6
-		if (Dungeon.hero.hasTalent(Talent.CACHED_RATIONS)){
-			Talent.CachedRationsDropped dropped = Buff.affect(Dungeon.hero, Talent.CachedRationsDropped.class);
-			if (dropped.count() < 2 + 2*Dungeon.hero.pointsInTalent(Talent.CACHED_RATIONS)){
-				int cell;
-				int tries = 100;
-				boolean valid;
-				do {
-					cell = randomDropCell(SpecialRoom.class);
-					valid = cell != -1 && !(room(cell) instanceof SecretRoom)
-							&& !(room(cell) instanceof ShopRoom)
-							&& map[cell] != Terrain.EMPTY_SP
-							&& map[cell] != Terrain.WATER
-							&& map[cell] != Terrain.PEDESTAL;
- 				} while (tries-- > 0 && !valid);
-				if (valid) {
-					if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
-						map[cell] = Terrain.GRASS;
-						losBlocking[cell] = false;
-					}
-					drop(new SmallRation(), cell).type = Heap.Type.CHEST;
-					dropped.countUp(1);
+		Random.pushGenerator( Random.Long() );
+			ArrayList<Item> bonesItems = Bones.get();
+			if (bonesItems != null) {
+				int cell = randomDropCell();
+				if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
+					map[cell] = Terrain.GRASS;
+					losBlocking[cell] = false;
+				}
+				for (Item i : bonesItems) {
+					drop(i, cell).setHauntedIfCursed().type = Heap.Type.REMAINS;
 				}
 			}
-		}
+		Random.popGenerator();
 
-		//guide pages
-		Collection<String> allPages = Document.ADVENTURERS_GUIDE.pageNames();
-		ArrayList<String> missingPages = new ArrayList<>();
-		for ( String page : allPages){
-			if (!Document.ADVENTURERS_GUIDE.isPageFound(page)){
-				missingPages.add(page);
-			}
-		}
+		Random.pushGenerator( Random.Long() );
+			DriedRose rose = Dungeon.hero.belongings.getItem( DriedRose.class );
+			if (rose != null && rose.isIdentified() && !rose.cursed && Ghost.Quest.completed()){
+				//aim to drop 1 petal every 2 floors
+				int petalsNeeded = (int) Math.ceil((float)((Dungeon.depth / 2) - rose.droppedPetals) / 3);
 
-		//a total of 6 pages drop randomly, the rest are specially dropped or are given at the start
-		missingPages.remove(Document.GUIDE_SEARCHING);
-
-		//chance to find a page is 0/25/50/75/100% for floors 1/2/3/4/5+
-		float dropChance = 0.25f*(Dungeon.depth-1);
-		if (!missingPages.isEmpty() && Random.Float() < dropChance){
-			GuidePage p = new GuidePage();
-			p.page(missingPages.get(0));
-			int cell = randomDropCell();
-			if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
-				map[cell] = Terrain.GRASS;
-				losBlocking[cell] = false;
-			}
-			drop( p, cell );
-		}
-
-		//lore pages
-		//TODO a fair bit going on here, I might want to refactor/externalize this in the future
-		if (Document.ADVENTURERS_GUIDE.allPagesFound()){
-
-			int region = 1+(Dungeon.depth-1)/5;
-
-			Document regionDoc;
-			switch( region ){
-				default: regionDoc = null; break;
-				case 1: regionDoc = Document.SEWERS_GUARD; break;
-				case 2: regionDoc = Document.PRISON_WARDEN; break;
-				case 3: regionDoc = Document.CAVES_EXPLORER; break;
-				case 4: regionDoc = Document.CITY_WARLOCK; break;
-				case 5: regionDoc = Document.HALLS_KING; break;
-			}
-
-			if (regionDoc != null && !regionDoc.allPagesFound()) {
-
-				Dungeon.LimitedDrops limit = limitedDocs.get(regionDoc);
-
-				if (limit == null || !limit.dropped()) {
-
-					float totalPages = 0;
-					float pagesFound = 0;
-					String pageToDrop = null;
-					for (String page : regionDoc.pageNames()) {
-						totalPages++;
-						if (!regionDoc.isPageFound(page)) {
-							if (pageToDrop == null) {
-								pageToDrop = page;
-							}
-						} else {
-							pagesFound++;
-						}
-					}
-					float percentComplete = pagesFound / totalPages;
-
-					// initial value is the first floor in a region
-					int targetFloor = 5*(region-1) + 1;
-					targetFloor += Math.round(3*percentComplete);
-
-					//TODO maybe drop last page in boss floor with custom logic?
-					if (Dungeon.depth >= targetFloor){
-						DocumentPage page = RegionLorePage.pageForDoc(regionDoc);
-						page.page(pageToDrop);
+				for (int i=1; i <= petalsNeeded; i++) {
+					//the player may miss a single petal and still max their rose.
+					if (rose.droppedPetals < 11) {
+						Item item = new DriedRose.Petal();
 						int cell = randomDropCell();
+						drop( item, cell ).type = Heap.Type.HEAP;
 						if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
 							map[cell] = Terrain.GRASS;
 							losBlocking[cell] = false;
 						}
-						drop(page, cell);
-						if (limit != null) limit.drop();
+						rose.droppedPetals++;
+					}
+				}
+			}
+		Random.popGenerator();
+
+		//cached rations try to drop in a special room on floors 2/4/7, to a max of 2/3
+		//we incremented dropped by 2 for compatibility with pre-v2.4 saves (when the talent dropped 4/6 items)
+		Random.pushGenerator( Random.Long() );
+			if (Dungeon.hero.hasTalent(Talent.CACHED_RATIONS)){
+				Talent.CachedRationsDropped dropped = Buff.affect(Dungeon.hero, Talent.CachedRationsDropped.class);
+				int targetFloor = (int)(2 + dropped.count());
+				if (dropped.count() > 4) targetFloor++;
+				if (Dungeon.depth >= targetFloor && dropped.count() < 2 + 2*Dungeon.hero.pointsInTalent(Talent.CACHED_RATIONS)){
+					int cell;
+					int tries = 100;
+					boolean valid;
+					do {
+						cell = randomDropCell(SpecialRoom.class);
+						valid = cell != -1 && !(room(cell) instanceof SecretRoom)
+								&& !(room(cell) instanceof ShopRoom)
+								&& map[cell] != Terrain.EMPTY_SP
+								&& map[cell] != Terrain.WATER
+								&& map[cell] != Terrain.PEDESTAL;
+					} while (tries-- > 0 && !valid);
+					if (valid) {
+						if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
+							map[cell] = Terrain.GRASS;
+							losBlocking[cell] = false;
+						}
+						drop(new SupplyRation(), cell).type = Heap.Type.CHEST;
+						dropped.countUp(2);
+					}
+				}
+			}
+		Random.popGenerator();
+
+		//guide pages
+		Random.pushGenerator( Random.Long() );
+			Collection<String> allPages = Document.ADVENTURERS_GUIDE.pageNames();
+			ArrayList<String> missingPages = new ArrayList<>();
+			for ( String page : allPages){
+				if (!Document.ADVENTURERS_GUIDE.isPageFound(page)){
+					missingPages.add(page);
+				}
+			}
+
+			//a total of 6 pages drop randomly, the rest are specially dropped or are given at the start
+			missingPages.remove(Document.GUIDE_SEARCHING);
+
+			//chance to find a page is 0/25/50/75/100% for floors 1/2/3/4/5+
+			float dropChance = 0.25f*(Dungeon.depth-1);
+			if (!missingPages.isEmpty() && Random.Float() < dropChance){
+				GuidePage p = new GuidePage();
+				p.page(missingPages.get(0));
+				int cell = randomDropCell();
+				if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
+					map[cell] = Terrain.GRASS;
+					losBlocking[cell] = false;
+				}
+				drop( p, cell );
+			}
+		Random.popGenerator();
+
+		//lore pages
+		//TODO a fair bit going on here, I might want to refactor/externalize this in the future
+		Random.pushGenerator( Random.Long() );
+			if (Document.ADVENTURERS_GUIDE.allPagesFound()){
+
+				int region = 1+(Dungeon.depth-1)/5;
+
+				Document regionDoc;
+				switch( region ){
+					default: regionDoc = null; break;
+					case 1: regionDoc = Document.SEWERS_GUARD; break;
+					case 2: regionDoc = Document.PRISON_WARDEN; break;
+					case 3: regionDoc = Document.CAVES_EXPLORER; break;
+					case 4: regionDoc = Document.CITY_WARLOCK; break;
+					case 5: regionDoc = Document.HALLS_KING; break;
+				}
+
+				if (regionDoc != null && !regionDoc.allPagesFound()) {
+
+					Dungeon.LimitedDrops limit = limitedDocs.get(regionDoc);
+
+					if (limit == null || !limit.dropped()) {
+
+						float totalPages = 0;
+						float pagesFound = 0;
+						String pageToDrop = null;
+						for (String page : regionDoc.pageNames()) {
+							totalPages++;
+							if (!regionDoc.isPageFound(page)) {
+								if (pageToDrop == null) {
+									pageToDrop = page;
+								}
+							} else {
+								pagesFound++;
+							}
+						}
+						float percentComplete = pagesFound / totalPages;
+
+						// initial value is the first floor in a region
+						int targetFloor = 5*(region-1) + 1;
+						targetFloor += Math.round(3*percentComplete);
+
+						//TODO maybe drop last page in boss floor with custom logic?
+						if (Dungeon.depth >= targetFloor){
+							DocumentPage page = RegionLorePage.pageForDoc(regionDoc);
+							page.page(pageToDrop);
+							int cell = randomDropCell();
+							if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
+								map[cell] = Terrain.GRASS;
+								losBlocking[cell] = false;
+							}
+							drop(page, cell);
+							if (limit != null) limit.drop();
+						}
+
 					}
 
 				}
 
 			}
+		Random.popGenerator();
 
-		}
+		//ebony mimics >:)
+		Random.pushGenerator(Random.Long());
+			if (Random.Float() < MimicTooth.ebonyMimicChance()){
+				ArrayList<Integer> candidateCells = new ArrayList<>();
+				if (Random.Int(2) == 0){
+					for (Heap h : heaps.valueList()){
+						if (h.type == Heap.Type.HEAP
+								&& !(room(h.pos) instanceof SpecialRoom)
+								&& findMob(h.pos) == null){
+							candidateCells.add(h.pos);
+						}
+					}
+				} else {
+					if (Random.Int(5) == 0 && findMob(exit()) == null){
+						candidateCells.add(exit());
+					} else {
+						for (int i = 0; i < length(); i++) {
+							if (map[i] == Terrain.DOOR && findMob(i) == null) {
+								candidateCells.add(i);
+							}
+						}
+					}
+				}
 
+				int pos = Random.element(candidateCells);
+				mobs.add(Mimic.spawnAt(pos, EbonyMimic.class, false));
+			}
 		Random.popGenerator();
 
 	}
@@ -611,7 +720,8 @@ public abstract class RegularLevel extends Level {
 					if (t == null ||
 							! (t instanceof BurningTrap || t instanceof BlazingTrap
 							|| t instanceof ChillingTrap || t instanceof FrostTrap
-							|| t instanceof ExplosiveTrap || t instanceof DisintegrationTrap)) {
+							|| t instanceof ExplosiveTrap || t instanceof DisintegrationTrap
+							|| t instanceof PitfallTrap)) {
 						
 						return pos;
 					}
@@ -713,10 +823,33 @@ public abstract class RegularLevel extends Level {
 		rooms = new ArrayList<>( (Collection<Room>) ((Collection<?>) bundle.getCollection( "rooms" )) );
 		for (Room r : rooms) {
 			r.onLevelLoad( this );
-			if (r instanceof EntranceRoom ){
+			if (r.isEntrance()){
 				roomEntrance = r;
-			} else if (r instanceof ExitRoom ){
+			} else if (r.isExit()){
 				roomExit = r;
+			}
+		}
+
+		//This exists to fix an alpha bug =S, remove for release
+		if (roomEntrance instanceof CavesFissureEntranceRoom){
+			for (LevelTransition t : transitions){
+				if (t.type == LevelTransition.Type.REGULAR_EXIT && roomEntrance.inside(t.center())){
+					set(t.centerCell, Terrain.ENTRANCE, this);
+					t.type = LevelTransition.Type.REGULAR_ENTRANCE;
+					t.destDepth = Dungeon.depth-1;
+					t.destType =  LevelTransition.Type.REGULAR_EXIT;
+				}
+			}
+		}
+
+		if (roomExit instanceof CavesFissureExitRoom){
+			for (LevelTransition t : transitions){
+				if (t.type == LevelTransition.Type.REGULAR_ENTRANCE && roomExit.inside(t.center())){
+					set(t.centerCell, Terrain.EXIT, this);
+					t.type = LevelTransition.Type.REGULAR_EXIT;
+					t.destDepth = Dungeon.depth+1;
+					t.destType =  LevelTransition.Type.REGULAR_ENTRANCE;
+				}
 			}
 		}
 	}

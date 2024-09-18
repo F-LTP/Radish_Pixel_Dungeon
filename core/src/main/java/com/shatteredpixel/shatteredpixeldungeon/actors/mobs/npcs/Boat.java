@@ -20,7 +20,7 @@ import com.shatteredpixel.shatteredpixeldungeon.windows.WndWandmaker;
 import com.watabou.noosa.Game;
 import com.watabou.utils.Callback;
 
-public class Boat extends NPC{
+public class Boat extends NPC {
 
     {
         spriteClass = BoatSprite.class;
@@ -38,7 +38,8 @@ public class Boat extends NPC{
     }
 
     @Override
-    public void add( Buff buff ) {
+    public boolean add( Buff buff ) {
+        return false;
     }
 
     @Override

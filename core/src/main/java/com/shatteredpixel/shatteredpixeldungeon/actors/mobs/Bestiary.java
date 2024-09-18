@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.RoyalGua
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.ShieldMage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.StoneSpirit;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RatSkull;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class Bestiary {
 	//returns a rotation of standard mobs, unshuffled.
 	private static ArrayList<Class<? extends Mob>> standardMobRotation( int depth ){
 		switch(depth){
-			
+
 			// Sewers
 			case 1: default:
 				//3x rat, 1x snake
@@ -84,7 +85,7 @@ public class Bestiary {
 						Swarm.class,
 						Crab.class, Crab.class,
 						Slime.class, Slime.class, Mayfly.class, Dog.class, Dog.class, Goblin.class, Goblin.class));
-				
+
 			// Prison
 			case 6:
 				//3x skeleton, 1x thief, 1x swarm
@@ -111,7 +112,7 @@ public class Bestiary {
 						DM100.class, DM100.class,
 						Guard.class, Guard.class,
 						Necromancer.class, Necromancer.class, Torturer.class, Grudge.class));
-				
+
 			// Caves
 			case 11:
 				//3x bat, 1x brute, 1x shaman
@@ -142,7 +143,7 @@ public class Bestiary {
 						Shaman.random(), Shaman.random(),
 						Spinner.class, Spinner.class,
 						DM200.class, DM200.class, GnollZealot.class, Drake.class, StoneSpirit.class));
-				
+
 			// City
 			case 16:
 				//3x ghoul, 1x elemental, 1x warlock
@@ -172,7 +173,7 @@ public class Bestiary {
 						Warlock.class, Warlock.class,
 						Monk.class, Monk.class,
 						Golem.class, Golem.class, Golem.class, ClusteredSkeleton.class, RoyalGuard.class, ShieldMage.class));
-				
+
 			// Halls
 			case 21:
 				//2x succubus, 1x evil eye
@@ -231,8 +232,9 @@ public class Bestiary {
 	
 	//switches out regular mobs for their alt versions when appropriate
 	private static void swapMobAlts(ArrayList<Class<?extends Mob>> rotation){
+		float altChance = 1/50f * RatSkull.exoticChanceMultiplier();
 		for (int i = 0; i < rotation.size(); i++){
-			if (Random.Int( 50 ) == 0) {
+			if (Random.Float() < altChance) {
 				Class<? extends Mob> cl = rotation.get(i);
 				if (cl == Rat.class) {
 					cl = Albino.class;

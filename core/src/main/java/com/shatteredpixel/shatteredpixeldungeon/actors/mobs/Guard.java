@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Prisoner;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Chains;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
@@ -39,7 +38,6 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.GuardSprite;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
-import com.watabou.utils.Random;
 
 public class Guard extends Mob {
 
@@ -65,7 +63,7 @@ public class Guard extends Mob {
 
 	@Override
 	public int damageRoll() {
-		return Random.NormalIntRange(4, 12);
+		return Char.combatRoll(4, 12);
 	}
 
 	private boolean chain(int target){
@@ -102,11 +100,11 @@ public class Guard extends Mob {
 							Effects.Type.CHAIN,
 							new Callback() {
 						public void call() {
-							Actor.addDelayed(new Pushing(enemy, enemy.pos, newPosFinal, new Callback() {
+							Actor.add(new Pushing(enemy, enemy.pos, newPosFinal, new Callback() {
 								public void call() {
 									pullEnemy(enemy, newPosFinal);
 								}
-							}), -1);
+							}));
 							next();
 						}
 					}));
@@ -138,7 +136,7 @@ public class Guard extends Mob {
 
 	@Override
 	public int drRoll() {
-		return Random.NormalIntRange(0, 7);
+		return super.drRoll() + Char.combatRoll(0, 7);
 	}
 
 	@Override
@@ -187,22 +185,5 @@ public class Guard extends Mob {
 			}
 			
 		}
-	}
-
-
-	// add if it really hate prisoner
-	@Override
-	protected Char chooseEnemy() {
-		for (Mob mob : Dungeon.level.mobs) {
-			if (!(mob == this)
-					&& mob.alignment != Alignment.NEUTRAL
-					&& !mob.isInvulnerable(getClass())
-					&& !(alignment == Alignment.ALLY && mob.alignment == Alignment.ALLY)
-					&& mob instanceof Prisoner
-					&& fieldOfView[mob.pos]) {
-				return mob;
-			}
-		}
-		return super.chooseEnemy();
 	}
 }

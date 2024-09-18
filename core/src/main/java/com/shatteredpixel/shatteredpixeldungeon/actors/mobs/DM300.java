@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Frost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
@@ -44,37 +43,37 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Sleep;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Slow;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo;
-import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
-import com.shatteredpixel.shatteredpixeldungeon.effects.particles.EarthParticle;
+import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
+import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SparkParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.LloydsBeacon;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.MetalShard;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
-import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.CavesBossLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.ConeAOE;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.DM300Sprite;
-import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.watabou.noosa.Camera;
+import com.watabou.noosa.Game;
+import com.watabou.noosa.audio.Music;
 import com.watabou.noosa.audio.Sample;
-import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.Callback;
+import com.watabou.utils.GameMath;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 import com.watabou.utils.Rect;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class DM300 extends Mob {
 
@@ -88,12 +87,11 @@ public class DM300 extends Mob {
 		properties.add(Property.BOSS);
 		properties.add(Property.INORGANIC);
 		properties.add(Property.LARGE);
-		properties.add(Property.HEADLESS);
 	}
 
 	@Override
 	public int damageRoll() {
-		return Random.NormalIntRange( 15, 25 );
+		return Char.combatRoll( 15, 25 );
 	}
 
 	@Override
@@ -103,7 +101,7 @@ public class DM300 extends Mob {
 
 	@Override
 	public int drRoll() {
-		return Random.NormalIntRange(0, 10);
+		return super.drRoll() + Char.combatRoll(0, 10);
 	}
 
 	public int pylonsActivated = 0;
@@ -176,7 +174,7 @@ public class DM300 extends Mob {
 
 			//determine if DM can reach its enemy
 			boolean canReach;
-			if (enemy == null){
+			if (enemy == null || !enemy.isAlive()){
 				if (Dungeon.level.adjacent(pos, Dungeon.hero.pos)){
 					canReach = true;
 				} else {
@@ -196,10 +194,12 @@ public class DM300 extends Mob {
 				}
 			} else {
 
-				if (enemy == null && Dungeon.hero.invisible <= 0) enemy = Dungeon.hero;
+				if ((enemy == null || !enemy.isAlive()) && Dungeon.hero.invisible <= 0) {
+					enemy = Dungeon.hero;
+				}
 
 				//more aggressive ability usage when DM can't reach its target
-				if (enemy != null && !canReach){
+				if (enemy != null && enemy.isAlive() && !canReach){
 
 					//try to fire gas at an enemy we can't reach
 					if (turnsSinceLastAbility >= MIN_COOLDOWN){
@@ -209,7 +209,6 @@ public class DM300 extends Mob {
 							lastAbility = GAS;
 							turnsSinceLastAbility = 0;
 
-							GLog.w(Messages.get(this, "vent"));
 							if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
 								sprite.zap(enemy.pos);
 								return false;
@@ -223,7 +222,6 @@ public class DM300 extends Mob {
 						} else if (enemy.paralysed <= 0) {
 							lastAbility = ROCKS;
 							turnsSinceLastAbility = 0;
-							GLog.w(Messages.get(this, "rocks"));
 							if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
 								((DM300Sprite)sprite).slam(enemy.pos);
 								return false;
@@ -236,7 +234,7 @@ public class DM300 extends Mob {
 
 					}
 
-				} else if (enemy != null && fieldOfView[enemy.pos]) {
+				} else if (enemy != null && enemy.isAlive() && fieldOfView[enemy.pos]) {
 					if (turnsSinceLastAbility > abilityCooldown) {
 
 						if (lastAbility == NONE) {
@@ -259,7 +257,6 @@ public class DM300 extends Mob {
 						abilityCooldown = Random.NormalIntRange(MIN_COOLDOWN, MAX_COOLDOWN);
 
 						if (lastAbility == GAS) {
-							GLog.w(Messages.get(this, "vent"));
 							if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
 								sprite.zap(enemy.pos);
 								return false;
@@ -269,7 +266,6 @@ public class DM300 extends Mob {
 								return true;
 							}
 						} else {
-							GLog.w(Messages.get(this, "rocks"));
 							if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
 								((DM300Sprite)sprite).slam(enemy.pos);
 								return false;
@@ -321,7 +317,7 @@ public class DM300 extends Mob {
 	public void move(int step, boolean travelling) {
 		super.move(step, travelling);
 
-		if (travelling) Camera.main.shake( supercharged ? 3 : 1, 0.25f );
+		if (travelling) PixelScene.shake( supercharged ? 3 : 1, 0.25f );
 
 		if (Dungeon.level.map[step] == Terrain.INACTIVE_TRAP && state == HUNTING) {
 
@@ -336,6 +332,7 @@ public class DM300 extends Mob {
 				}
 				Sample.INSTANCE.play(Assets.Sounds.LIGHTNING);
 				sprite.emitter().start(SparkParticle.STATIC, 0.05f, 20);
+				sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(30 + (HT - HP)/10), FloatingText.SHIELDING);
 			}
 
 			Buff.affect(this, Barrier.class).setShield( 30 + (HT - HP)/10);
@@ -408,7 +405,7 @@ public class DM300 extends Mob {
 		if (Dungeon.level.adjacent(pos, target.pos)){
 			int oppositeAdjacent = target.pos + (target.pos - pos);
 			Ballistica trajectory = new Ballistica(target.pos, oppositeAdjacent, Ballistica.MAGIC_BOLT);
-			WandOfBlastWave.throwChar(target, trajectory, 2, false, false, getClass());
+			WandOfBlastWave.throwChar(target, trajectory, 2, false, false, this);
 			if (target == Dungeon.hero){
 				Dungeon.hero.interrupt();
 			}
@@ -418,7 +415,7 @@ public class DM300 extends Mob {
 		} else if (fieldOfView[target.pos] && Dungeon.level.distance(pos, target.pos) == 2) {
 			int oppositeAdjacent = target.pos + (target.pos - pos);
 			Ballistica trajectory = new Ballistica(target.pos, oppositeAdjacent, Ballistica.MAGIC_BOLT);
-			WandOfBlastWave.throwChar(target, trajectory, 1, false, false, getClass());
+			WandOfBlastWave.throwChar(target, trajectory, 1, false, false, this);
 			if (target == Dungeon.hero){
 				Dungeon.hero.interrupt();
 			}
@@ -449,13 +446,16 @@ public class DM300 extends Mob {
 				}
 				//add rock cell to pos, if it is not solid, and isn't the safecell
 				if (!Dungeon.level.solid[pos] && pos != safeCell && Random.Int(Dungeon.level.distance(rockCenter, pos)) == 0) {
-					//don't want to overly punish players with slow move or attack speed
 					rockCells.add(pos);
 				}
 				pos++;
 			}
 		}
-		Buff.append(this, FallingRockBuff.class, Math.min(target.cooldown(), 3*TICK)).setRockPositions(rockCells);
+		for (int i : rockCells){
+			sprite.parent.add(new TargetedCell(i, 0xFF0000));
+		}
+		//don't want to overly punish players with slow move or attack speed
+		Buff.append(this, FallingRockBuff.class, GameMath.gate(TICK, (int)Math.ceil(target.cooldown()), 3*TICK)).setRockPositions(rockCells);
 
 	}
 
@@ -463,6 +463,10 @@ public class DM300 extends Mob {
 
 	@Override
 	public void damage(int dmg, Object src) {
+		if (!BossHealthBar.isAssigned()){
+			notice();
+		}
+
 		int preHP = HP;
 		super.damage(dmg, src);
 		if (isInvulnerable(src.getClass())){
@@ -472,7 +476,10 @@ public class DM300 extends Mob {
 		int dmgTaken = preHP - HP;
 		if (dmgTaken > 0) {
 			LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
-			if (lock != null && !isImmune(src.getClass())) lock.addTime(dmgTaken*1.5f);
+			if (lock != null && !isImmune(src.getClass()) && !isInvulnerable(src.getClass())){
+				if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES))   lock.addTime(dmgTaken/2f);
+				else                                                    lock.addTime(dmgTaken);
+			}
 		}
 
 		int threshold;
@@ -482,7 +489,7 @@ public class DM300 extends Mob {
 			threshold = HT / 3 * (2 - pylonsActivated);
 		}
 
-		if (HP < threshold){
+		if (HP <= threshold && threshold > 0){
 			HP = threshold;
 			supercharge();
 		}
@@ -499,7 +506,7 @@ public class DM300 extends Mob {
 			invulnWarned = true;
 			GLog.w(Messages.get(this, "charging_hint"));
 		}
-		return supercharged;
+		return supercharged || super.isInvulnerable(effect);
 	}
 
 	public void supercharge(){
@@ -529,6 +536,17 @@ public class DM300 extends Mob {
 		} else {
 			yell(Messages.get(this, "pylons_destroyed"));
 			BossHealthBar.bleed(true);
+			Game.runOnRenderThread(new Callback() {
+				@Override
+				public void call() {
+					Music.INSTANCE.fadeOut(0.5f, new Callback() {
+						@Override
+						public void call() {
+							Music.INSTANCE.play(Assets.Music.CAVES_BOSS_FINALE, true);
+						}
+					});
+				}
+			});
 		}
 	}
 
@@ -618,7 +636,7 @@ public class DM300 extends Mob {
 				if (bestpos != pos) {
 					move(bestpos);
 				}
-				Camera.main.shake( 5, 1f );
+				PixelScene.shake( 5, 1f );
 
 				return true;
 			}
@@ -649,70 +667,17 @@ public class DM300 extends Mob {
 		resistances.add(Slow.class);
 	}
 
-	public static class FallingRockBuff extends FlavourBuff {
-
-		private int[] rockPositions;
-		private ArrayList<Emitter> rockEmitters = new ArrayList<>();
-
-		public void setRockPositions( List<Integer> rockPositions ) {
-			this.rockPositions = new int[rockPositions.size()];
-			for (int i = 0; i < rockPositions.size(); i++){
-				this.rockPositions[i] = rockPositions.get(i);
-			}
-
-			fx(true);
-		}
+	public static class FallingRockBuff extends DelayedRockFall {
 
 		@Override
-		public boolean act() {
-			for (int i : rockPositions){
-				CellEmitter.get( i ).start( Speck.factory( Speck.ROCK ), 0.07f, 10 );
-
-				Char ch = Actor.findChar(i);
-				if (ch != null && !(ch instanceof DM300)){
-					Buff.prolong( ch, Paralysis.class, Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 5 : 3 );
-					if (ch == Dungeon.hero){
-						Statistics.bossScores[2] -= 100;
-					}
-				}
-			}
-
-			Camera.main.shake( 3, 0.7f );
-			Sample.INSTANCE.play(Assets.Sounds.ROCKS);
-
-			detach();
-			return super.act();
-		}
-
-		@Override
-		public void fx(boolean on) {
-			if (on && rockPositions != null){
-				for (int i : this.rockPositions){
-					Emitter e = CellEmitter.get(i);
-					e.y -= DungeonTilemap.SIZE*0.2f;
-					e.height *= 0.4f;
-					e.pour(EarthParticle.FALLING, 0.1f);
-					rockEmitters.add(e);
-				}
-			} else {
-				for (Emitter e : rockEmitters){
-					e.on = false;
+		public void affectChar(Char ch) {
+			if (!(ch instanceof DM300)){
+				Buff.prolong(ch, Paralysis.class, Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 5 : 3);
+				if (ch == Dungeon.hero) {
+					Statistics.bossScores[2] -= 100;
 				}
 			}
 		}
 
-		private static final String POSITIONS = "positions";
-
-		@Override
-		public void storeInBundle(Bundle bundle) {
-			super.storeInBundle(bundle);
-			bundle.put(POSITIONS, rockPositions);
-		}
-
-		@Override
-		public void restoreFromBundle(Bundle bundle) {
-			super.restoreFromBundle(bundle);
-			rockPositions = bundle.getIntArray(POSITIONS);
-		}
 	}
 }

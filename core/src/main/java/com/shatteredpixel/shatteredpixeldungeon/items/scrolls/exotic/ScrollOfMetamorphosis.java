@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2022 Evan Debenham
+ * Copyright (C) 2014-2024 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Transmuting;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.InventoryScroll;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -38,15 +37,12 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentsPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.IconTitle;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
-import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
@@ -54,28 +50,17 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 	
 	{
 		icon = ItemSpriteSheet.Icons.SCROLL_METAMORPH;
+
+		talentFactor = 2f;
 	}
 
 	protected static boolean identifiedByUse = false;
-
-
-	@Override
-	public void MagicStone(boolean log,boolean original){
-		//蜕变秘卷很特殊 需要特判
-	}
-
-	public void MagicStoneScroll(){
-		Scroll recoveredScroll = (Scroll) Reflection.newInstance(exoToReg.get(this.getClass()));
-		if(Random.Int(4)==0 && Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 2){
-			Dungeon.level.drop(recoveredScroll, curUser.pos);
-			GLog.i(Messages.get(Scroll.class, "exscrollToscroll", recoveredScroll.name()));
-		}
-	}
-
+	
 	@Override
 	public void doRead() {
 		if (!isKnown()) {
 			identify();
+			curItem = detach(curUser.belongings.backpack);
 			identifiedByUse = true;
 		} else {
 			identifiedByUse = false;
@@ -84,12 +69,12 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 	}
 
 	public static void onMetamorph( Talent oldTalent, Talent newTalent ){
-		((ScrollOfMetamorphosis) curItem).readAnimation(true);
-		Sample.INSTANCE.play( Assets.Sounds.READ );
+		if (curItem instanceof ScrollOfMetamorphosis) {
+			((ScrollOfMetamorphosis) curItem).readAnimation();
+			Sample.INSTANCE.play(Assets.Sounds.READ);
+		}
 		curUser.sprite.emitter().start(Speck.factory(Speck.CHANGE), 0.2f, 10);
 		Transmuting.show(curUser, oldTalent, newTalent);
-
-		((ScrollOfMetamorphosis)curItem).MagicStoneScroll();
 
 		if (Dungeon.hero.hasTalent(newTalent)) {
 			Talent.onTalentUpgraded(Dungeon.hero, newTalent);
@@ -176,7 +161,6 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 				((ScrollOfMetamorphosis)curItem).confirmCancelation(this);
 			} else {
 				super.onBackPressed();
-				curItem.collect();
 			}
 		}
 
@@ -188,13 +172,6 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 	}
 
 	public static class WndMetamorphReplace extends Window {
-
-		//talents that can only be used by one hero class
-		private static HashMap<Talent, HeroClass> restrictedTalents = new HashMap<>();
-		static {
-			restrictedTalents.put(Talent.RUNIC_TRANSFERENCE, HeroClass.WARRIOR);
-			restrictedTalents.put(Talent.WAND_PRESERVATION, HeroClass.MAGE);
-		}
 
 		public static WndMetamorphReplace INSTANCE;
 
@@ -220,6 +197,11 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 		public WndMetamorphReplace(Talent replacing, int tier){
 			super();
 
+			if (!identifiedByUse && curItem instanceof ScrollOfMetamorphosis) {
+				curItem.detach(curUser.belongings.backpack);
+			}
+			identifiedByUse = false;
+
 			INSTANCE = this;
 
 			this.replacing = replacing;
@@ -240,10 +222,6 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 						break;
 					} else {
 						if (curTalentsAtTier.contains(talent)){
-							clsTalentsAtTier.remove(talent);
-						}
-						if (restrictedTalents.containsKey(talent)
-								&& restrictedTalents.get(talent) != curUser.heroClass){
 							clsTalentsAtTier.remove(talent);
 						}
 					}
@@ -294,7 +272,11 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 
 		@Override
 		public void onBackPressed() {
-			((ScrollOfMetamorphosis)curItem).confirmCancelation(this);
+			if (curItem instanceof ScrollOfMetamorphosis) {
+				((ScrollOfMetamorphosis) curItem).confirmCancelation(this);
+			} else {
+				super.onBackPressed();
+			}
 		}
 	}
 }

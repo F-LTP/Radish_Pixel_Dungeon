@@ -3,7 +3,11 @@ package com.shatteredpixel.shatteredpixeldungeon.custom.testmode;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.custom.messages.M;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TestItem;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TrapPlacer;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
+import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -13,7 +17,14 @@ import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoCell;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
+import com.sun.org.apache.bcel.internal.generic.I2F;
 import com.watabou.noosa.Image;
+import com.watabou.utils.Bundle;
+import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -109,6 +120,7 @@ public class TerrainPlacer extends TestItem {
                 case 17:
                 case 18:
                 case 19:
+                case 23:
                     break;
                 case 29:
                     icon(new Image(Dungeon.level.waterTex(),0, 0, DungeonTilemap.SIZE, DungeonTilemap.SIZE));
@@ -137,6 +149,9 @@ public class TerrainPlacer extends TestItem {
                 case 19:
                     name.text("已触发陷阱");
                     break;
+                case 23:
+                    name.text("被移除的告示牌");
+                    break;
                 default:
                     name.text(Dungeon.level.tileName(terrain));
                     break;
@@ -149,6 +164,6 @@ public class TerrainPlacer extends TestItem {
             DungeonTileSheet.FLAT_WALL,DungeonTileSheet.FLAT_DOOR,DungeonTileSheet.FLAT_DOOR_OPEN,DungeonTileSheet.ENTRANCE,DungeonTileSheet.EXIT,
             DungeonTileSheet.EMBERS,DungeonTileSheet.FLAT_DOOR_LOCKED,DungeonTileSheet.PEDESTAL,DungeonTileSheet.FLAT_WALL_DECO,DungeonTileSheet.FLAT_BARRICADE,
             DungeonTileSheet.FLOOR_SP,DungeonTileSheet.FLAT_HIGH_GRASS,DungeonTileSheet.FLAT_DOOR,-1,-1,-1,DungeonTileSheet.FLOOR_DECO,DungeonTileSheet.LOCKED_EXIT,
-            DungeonTileSheet.UNLOCKED_EXIT,DungeonTileSheet.FLAT_SIGN,DungeonTileSheet.WELL,DungeonTileSheet.FLAT_STATUE,DungeonTileSheet.FLAT_STATUE_SP,
+            DungeonTileSheet.UNLOCKED_EXIT,-1,DungeonTileSheet.WELL,DungeonTileSheet.FLAT_STATUE,DungeonTileSheet.FLAT_STATUE_SP,
             DungeonTileSheet.FLAT_BOOKSHELF,DungeonTileSheet.FLAT_ALCHEMY_POT,DungeonTileSheet.WATER,DungeonTileSheet.FLAT_FURROWED_GRASS,DungeonTileSheet.FLAT_DOOR_CRYSTAL));
 }
