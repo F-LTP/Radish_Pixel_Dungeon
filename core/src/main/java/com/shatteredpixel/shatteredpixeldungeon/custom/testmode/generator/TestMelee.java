@@ -20,8 +20,10 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Bloomi
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Chilling;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Corrupting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Elastic;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Euphoria;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lamprey;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
@@ -128,6 +130,8 @@ public class TestMelee extends TestGenerator {
                 return Chilling.class;
             case 3:
                 return Kinetic.class;
+            case 4:
+                return Lamprey.class;
             default:
                 return null;
         }
@@ -156,6 +160,8 @@ public class TestMelee extends TestGenerator {
                 return Vampiric.class;
             case 3:
                 return Striking.class;
+            case 4:
+                return Euphoria.class;
             default:
                 return null;
         }

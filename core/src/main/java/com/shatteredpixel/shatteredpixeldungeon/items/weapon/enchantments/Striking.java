@@ -18,7 +18,7 @@ import com.watabou.utils.Random;
 */
 public class Striking extends Weapon.Enchantment {
 
-    private static ItemSprite.Glowing YELLOW = new ItemSprite.Glowing( 0xFFFF00 );
+    private static ItemSprite.Glowing STRINGKING = new ItemSprite.Glowing( 0xB8860B );
 
     @Override
     public int proc(Weapon weapon, Char attacker, Char defender, int damage ) {
@@ -37,7 +37,7 @@ public class Striking extends Weapon.Enchantment {
     }
     @Override
     public ItemSprite.Glowing glowing() {
-        return YELLOW;
+        return STRINGKING;
     }
 
 }
