@@ -21,15 +21,19 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.custom.messages.M;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
+import com.shatteredpixel.shatteredpixeldungeon.text.HeroStat;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
@@ -50,10 +54,10 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public class WndHero extends WndTabbed {
-	
+
 	private static final int WIDTH		= 120;
-	private static final int HEIGHT		= 120;
-	
+	private static final int HEIGHT		= 160;
+
 	private StatsTab stats;
 	private TalentsTab talents;
 	private BuffsTab buffs;
@@ -61,11 +65,11 @@ public class WndHero extends WndTabbed {
 	public static int lastIdx = 0;
 
 	public WndHero() {
-		
+
 		super();
-		
+
 		resize( WIDTH, HEIGHT );
-		
+
 		stats = new StatsTab();
 		add( stats );
 
@@ -77,7 +81,7 @@ public class WndHero extends WndTabbed {
 		add( buffs );
 		buffs.setRect(0, 0, WIDTH, HEIGHT);
 		buffs.setupList();
-		
+
 		add( new IconTab( Icons.get(Icons.RANKINGS) ) {
 			protected void select( boolean value ) {
 				super.select( value );
@@ -123,11 +127,11 @@ public class WndHero extends WndTabbed {
 	}
 
 	private class StatsTab extends Group {
-		
+
 		private static final int GAP = 6;
-		
+
 		private float pos;
-		
+
 		public StatsTab() {
 			initialize();
 		}
@@ -138,7 +142,7 @@ public class WndHero extends WndTabbed {
 				if (g != null) g.destroy();
 			}
 			clear();
-			
+
 			Hero hero = Dungeon.hero;
 
 			IconTitle title = new IconTitle();
@@ -180,8 +184,11 @@ public class WndHero extends WndTabbed {
 			if (hero.shielding() > 0)   statSlot( Messages.get(this, "health"), hero.HP + "+" + hero.shielding() + "/" + hero.HT );
 			else                        statSlot( Messages.get(this, "health"), (hero.HP) + "/" + hero.HT );
 			statSlot( Messages.get(this, "exp"), hero.exp + "/" + hero.maxExp() );
-
-			pos += GAP;
+			float c=hero.critSkill();
+			int cd=hero.critDamage_shown();
+			statSlot(Messages.get(this,"crit"),c+"%");
+			statSlot(Messages.get(this,"critdamage"),cd+"%");
+			//pos += GAP;
 
 			statSlot( Messages.get(this, "gold"), Statistics.goldCollected );
 			statSlot( Messages.get(this, "depth"), Statistics.deepestFloor );
@@ -198,26 +205,42 @@ public class WndHero extends WndTabbed {
 			}
 
 			pos += GAP;
+			Hunger hunger = Dungeon.hero.buff(Hunger.class);
+			String hunger_str = "null";
+			if(hunger != null){
+				hunger_str = hunger.hunger() + "/" + Hunger.STARVING;
+			}
+			statSlot( M.L(HeroStat.class, "hunger"), hunger_str);
+			if (Dungeon.isChallenged(Challenges.TEST_MODE)) {
+				statSlot(M.L(HeroStat.class, "turns"), String.format(Locale.ENGLISH, "%.2f", Statistics.turnsPassed));
+				int t_all_sec = Math.round(Statistics.real_seconds);
+				int t_hour = t_all_sec / 3600;
+				int t_minute = (t_all_sec - t_hour * 3600) / 60;
+				int t_second = t_all_sec - t_hour * 3600 - t_minute * 60;
+				statSlot(M.L(HeroStat.class, "playtime"), String.format(Locale.ENGLISH, "%dd %dm %ds", t_hour, t_minute, t_second));
+			}
+			pos += GAP;
+
 		}
 
 		private void statSlot( String label, String value ) {
-			
+
 			RenderedTextBlock txt = PixelScene.renderTextBlock( label, 8 );
 			txt.setPos(0, pos);
 			add( txt );
-			
+
 			txt = PixelScene.renderTextBlock( value, 8 );
 			txt.setPos(WIDTH * 0.55f, pos);
 			PixelScene.align(txt);
 			add( txt );
-			
+
 			pos += GAP + txt.height();
 		}
-		
+
 		private void statSlot( String label, int value ) {
 			statSlot( label, Integer.toString( value ) );
 		}
-		
+
 		public float height() {
 			return pos;
 		}
@@ -241,11 +264,11 @@ public class WndHero extends WndTabbed {
 		}
 
 	}
-	
+
 	private class BuffsTab extends Component {
-		
+
 		private static final int GAP = 2;
-		
+
 		private float pos;
 		private ScrollPane buffList;
 		private ArrayList<BuffSlot> slots = new ArrayList<>();
@@ -268,13 +291,13 @@ public class WndHero extends WndTabbed {
 			};
 			add(buffList);
 		}
-		
+
 		@Override
 		protected void layout() {
 			super.layout();
 			buffList.setRect(0, 0, width, height);
 		}
-		
+
 		private void setupList() {
 			Component content = buffList.content();
 			for (Buff buff : Dungeon.hero.buffs()) {
@@ -326,7 +349,7 @@ public class WndHero extends WndTabbed {
 				);
 				PixelScene.align(txt);
 			}
-			
+
 			protected boolean onClick ( float x, float y ) {
 				if (inside( x, y )) {
 					GameScene.show(new WndInfoBuff(buff));

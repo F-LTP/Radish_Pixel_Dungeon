@@ -1,9 +1,11 @@
 package com.shatteredpixel.shatteredpixeldungeon.ui.changelist.rapd;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.ChangesScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
@@ -17,9 +19,43 @@ import java.util.ArrayList;
 public class RA_v0_13_X_Changes {
 
     public static void addAllChanges( ArrayList<ChangeInfo> changeInfos ){
+        add_v03_4_Changes(changeInfos);
         add_v03_3_Changes(changeInfos);
         add_v03_2_Changes(changeInfos);
         add_v03_1_Changes(changeInfos);
+    }
+
+    public static void add_v03_4_Changes( ArrayList<ChangeInfo> changeInfos ) {
+        ChangeInfo changes = new ChangeInfo("v0.3.9-RC", true, "");
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(HeroSprite.avatar(HeroClass.WARRIOR, 8), ("战士改动：角斗士更新"),
+                ("角斗士连携技大改")));
+
+        changes.addButton(new ChangeButton(Icons.get(Icons.DEPTH), ("0层回归"),
+                ("萝卜地牢0层回归！")));
+
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
+        changes.hardlight(CharSprite.WARNING);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16), Messages.get(ChangesScene.class, "bugfixes"),
+                "修复了以下Bug:\n\n" +
+                        "_来自于 v0.3.9:_\n\n" +
+                        "[修复者：JDSALing]：\n"+
+                        "_-_ 0.修复 恶魔天赋 重进失效的问题\n" +
+                        "_-_ 1.修复角斗士连击技能面板全英文；你现在已有X块暗金矿英文；被魅惑后攻击怪物提示英文的文本丢失\n" +
+                        "_-_ 2.修复 火印恶魔火印不可见但仍能触发 的异常\n" +
+                        "_-_ 3.二次修复 蜂巢 武器的功能缺失异常\n" +
+                        "_-_ 4.修复 恶魔领主 伤害异常问题\n" +
+                        "_-_ 5.修复 刻印者 与 火印恶魔的素材异常问题\n" +
+                        "_-_ 6.修复部分情况下，每次退回主菜单，鉴定天赋会退回升级" ));
     }
 
     public static void add_v03_3_Changes( ArrayList<ChangeInfo> changeInfos ) {
@@ -53,11 +89,13 @@ public class RA_v0_13_X_Changes {
                         "_-_ 4.修复 守卫者陷阱 崩溃异常\n" +
                         "_-_ 5.修复穿戴护甲必定崩溃游戏的异常\n" +
                         "_-_ 6.修复全局伤害翻倍异常\n" +
-                        "_-_ 7.修复 蜂巢 武器的功能缺失异常\n\n" +
+                        "_-_ 7.修复 蜂巢 武器的功能缺失异常\n" +
+                        "_-_ 8.修复 战士 部分护甲状态下素材显示错误\n" +
+                        "_-_ 9.修复 石像 给予Buff闪退的严重异常\n\n" +
                         "[修复者：Doge]：\n" +
-                        "_-_ 8.修复 护盾 伤害失效异常\n" +
-                        "_-_ 9.修复 地底亚龙 的各种异常\n" +
-                        "_-_ 10.修复 效果基类 的一些异常"));
+                        "_-_ 10.修复 护盾 伤害失效异常\n" +
+                        "_-_ 11.修复 地底亚龙 的各种异常\n" +
+                        "_-_ 12.修复 Buff基类 的一些迁移迭代异常"));
     }
 
     public static void add_v03_2_Changes( ArrayList<ChangeInfo> changeInfos ) {

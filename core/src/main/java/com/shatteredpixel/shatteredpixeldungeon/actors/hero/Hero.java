@@ -342,6 +342,7 @@ public class Hero extends Char {
 		bundle.put( CLASS, heroClass );
 		bundle.put( SUBCLASS, subClass );
 		bundle.put( ABILITY, armorAbility );
+		bundle.put( IMP_POWER, powerOfImp);
 		Talent.storeTalentsInBundle( bundle, this );
 		
 		bundle.put( ATTACK, attackSkill );
@@ -353,8 +354,6 @@ public class Hero extends Char {
 		bundle.put( EXPERIENCE, exp );
 		
 		bundle.put( HTBOOST, HTBoost );
-
-		bundle.put( IMP_POWER, powerOfImp);
 
 		belongings.storeInBundle( bundle );
 	}
@@ -372,12 +371,11 @@ public class Hero extends Char {
 		heroClass = bundle.getEnum( CLASS, HeroClass.class );
 		subClass = bundle.getEnum( SUBCLASS, HeroSubClass.class );
 		armorAbility = (ArmorAbility)bundle.get( ABILITY );
+		powerOfImp = bundle.getBoolean(IMP_POWER);
 		Talent.restoreTalentsFromBundle( bundle, this );
 		
 		attackSkill = bundle.getInt( ATTACK );
 		defenseSkill = bundle.getInt( DEFENSE );
-
-		powerOfImp = bundle.getBoolean(IMP_POWER);
 
 		STR = bundle.getInt( STRENGTH );
 
@@ -518,7 +516,7 @@ public class Hero extends Char {
 		belongings.thrownWeapon = null;
 
 		if (hit && subClass == HeroSubClass.GLADIATOR && wasEnemy){
-			Buff.affect( this, Combo.class ).hit( enemy );
+			Buff.affect( this, Combo.class ).hit(  );
 		}
 
 		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
@@ -604,10 +602,7 @@ public class Hero extends Char {
 	public String defenseVerb() {
 		Combo.ParryTracker parry = buff(Combo.ParryTracker.class);
 		if (parry != null){
-			parry.parried = true;
-			if (buff(Combo.class).getComboCount() < 9 || pointsInTalent(Talent.ENHANCED_COMBO) < 2){
-				parry.detach();
-			}
+			parry.parry();
 			return Messages.get(Monk.class, "parried");
 		}
 
@@ -2316,7 +2311,7 @@ public class Hero extends Char {
 		spend( attackDelay() );
 
 		if (hit && subClass == HeroSubClass.GLADIATOR && wasEnemy){
-			Buff.affect( this, Combo.class ).hit( enemy );
+			Buff.affect( this, Combo.class ).hit( );
 		}
 
 		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){

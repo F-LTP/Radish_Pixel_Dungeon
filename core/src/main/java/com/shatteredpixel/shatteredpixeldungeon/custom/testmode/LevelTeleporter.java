@@ -6,6 +6,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awareness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
@@ -108,6 +109,7 @@ public class LevelTeleporter extends TestItem {
             InterlevelScene.returnBranch = Dungeon.branch;
             Game.switchScene( InterlevelScene.class );
         } else if(action.equals(AC_VIEW)){
+            Buff.affect( hero, Awareness.class, Awareness.DURATION );
             Buff.affect( hero, MindVision.class, MindVision.DURATION );
             Dungeon.observe();
             ScrollOfMagicMapping som = new ScrollOfMagicMapping();
