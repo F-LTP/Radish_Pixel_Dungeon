@@ -141,27 +141,9 @@ public class RingOfForce extends Ring {
 	@Override
 	public void activate(Char ch) {
 		super.activate(ch);
-		if (ch instanceof Hero && ((Hero) ch).heroClass == HeroClass.DUELIST){
+		if (ch instanceof Hero){
 			Buff.affect(ch, MeleeWeapon.Charger.class);
 		}
-	}
-
-	@Override
-	public String defaultAction() {
-		if (Dungeon.hero != null && Dungeon.hero.heroClass == HeroClass.DUELIST){
-			return AC_ABILITY;
-		} else {
-			return super.defaultAction();
-		}
-	}
-
-	@Override
-	public ArrayList<String> actions(Hero hero) {
-		ArrayList<String> actions = super.actions(hero);
-		if (isEquipped(hero) && hero.heroClass == HeroClass.DUELIST){
-			actions.add(AC_ABILITY);
-		}
-		return actions;
 	}
 
 	@Override
@@ -194,26 +176,6 @@ public class RingOfForce extends Ring {
 		} else {
 			super.execute(hero, action);
 		}
-	}
-
-	@Override
-	public String info() {
-		String info = super.info();
-
-		if (Dungeon.hero.heroClass == HeroClass.DUELIST
-			&& (anonymous || isIdentified() || isEquipped(Dungeon.hero))){
-			//0 if unidentified, solo level if unequipped, combined level if equipped
-			int level = isIdentified() ? (isEquipped(Dungeon.hero) ? getBuffedBonus(Dungeon.hero, Force.class) : soloBuffedBonus()) : 0;
-			float tier = tier(Dungeon.hero.STR());
-			int dmgBoost = Math.round(1+tier+(level*((3+tier)/8f)));
-			if (isIdentified()) {
-				info += "\n\n" + Messages.get(this, "ability_desc", min(level, tier)+dmgBoost, max(level, tier)+dmgBoost);
-			} else {
-				info += "\n\n" + Messages.get(this, "typical_ability_desc",  min(level, tier)+dmgBoost, max(level, tier)+dmgBoost);
-			}
-		}
-
-		return info;
 	}
 
 	public static boolean fightingUnarmed( Hero hero ){

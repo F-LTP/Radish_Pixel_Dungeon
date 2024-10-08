@@ -519,10 +519,6 @@ public class Hero extends Char {
 			Buff.affect( this, Combo.class ).hit(  );
 		}
 
-		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
-			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
-		}
-
 		return hit;
 	}
 	
@@ -684,12 +680,6 @@ public class Hero extends Char {
 				emp.detach();
 			}
 			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG, 0.75f, 1.2f);
-		}
-
-		if (heroClass != HeroClass.DUELIST
-				&& hasTalent(Talent.WEAPON_RECHARGING)
-				&& (buff(Recharging.class) != null || buff(ArtifactRecharge.class) != null)){
-			dmg = Math.round(dmg * 1.025f + (.025f*pointsInTalent(Talent.WEAPON_RECHARGING)));
 		}
 
 		if (dmg < 0) dmg = 0;
@@ -1399,15 +1389,7 @@ public class Hero extends Char {
 
 		if (enemy.isAlive() && canAttack( enemy ) && enemy.invisible == 0) {
 
-			if (heroClass != HeroClass.DUELIST
-					&& hasTalent(Talent.AGGRESSIVE_BARRIER)
-					&& buff(Talent.AggressiveBarrierCooldown.class) == null
-					&& (HP / (float)HT) < 0.20f*(1+pointsInTalent(Talent.AGGRESSIVE_BARRIER))){
-				Buff.affect(this, Barrier.class).setShield(3);
-				sprite.showStatusWithIcon(CharSprite.POSITIVE, "3", FloatingText.SHIELDING);
-				Buff.affect(this, Talent.AggressiveBarrierCooldown.class, 50f);
 
-			}
 			sprite.attack( enemy.pos );
 
 			return false;
@@ -2312,10 +2294,6 @@ public class Hero extends Char {
 
 		if (hit && subClass == HeroSubClass.GLADIATOR && wasEnemy){
 			Buff.affect( this, Combo.class ).hit( );
-		}
-
-		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
-			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
 		}
 
 		curAction = null;

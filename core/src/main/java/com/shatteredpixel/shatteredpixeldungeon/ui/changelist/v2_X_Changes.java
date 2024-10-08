@@ -68,7 +68,7 @@ public class v2_X_Changes {
 				"Please keep in mind that while I always try to keep to the ETAs I provide, they are just estimates. If you don't hear from me by the ETA, it means I'm still busy with the update!"));
 
 		changes.addButton( new ChangeButton(Icons.get(Icons.BUFFS), "Balance Tweaks",
-				"v2.4.0 ended up being a pretty massive update balance-wise, with a new item category and sweeping changes to both the Duelist and alchemy. More fine-tuned adjustment will definitely be needed once the dust settles a bit, and so I expect that will be an important aspect of both v2.5.0 and v2.4.0's patches. Ideally most of the followup changes will be buffs, but we'll have to see how everything shapes up."));
+				"v2.4.0 ended up being a pretty massive update balance-wise, with a new item category and sweeping changes to both the WARRIOR and alchemy. More fine-tuned adjustment will definitely be needed once the dust settles a bit, and so I expect that will be an important aspect of both v2.5.0 and v2.4.0's patches. Ideally most of the followup changes will be buffs, but we'll have to see how everything shapes up."));
 
 		changes.addButton( new ChangeButton(Icons.get(Icons.PREFS), "Interface and QoL Changes",
 				"Given that v2.5.0 won't have a new content focus, I'd also like to take the chance to make some smaller interface-driven changes that players have been asking me for. I can't guarantee what will be in v2.5.0 specifically yet, but frequent requests include better journal functionality (landmarks, catalogs, notes, etc.), a bestiary, and better support for controller users and keyboard users."));
@@ -90,13 +90,13 @@ public class v2_X_Changes {
 		changeInfos.add(changes);
 
 		changes.addButton( new ChangeButton(new ItemSprite(ItemSpriteSheet.SICKLE), "Weapon Ability Buffs",
-				"Overall success rates are up across the board for the Duelist and weapon abilities, but I've giving out some buffs to a few abilities that didn't benefit as strongly from v.2.4.0:\n" +
+				"Overall success rates are up across the board for the WARRIOR and weapon abilities, but I've giving out some buffs to a few abilities that didn't benefit as strongly from v.2.4.0:\n" +
 				"_- Harvest_ bleeding increased by ~30%\n" +
 				"_- Harvest_ now deals regular damage to bleed-immune foes\n" +
 				"_- Spin_ damage boost up to 8+lvl from 6+lvl\n" +
 				"_- Runic Slash_ base enchant boost up to 300% from 200%\n\n" +
-				"I'm also making a general change to the Duelist's weapon ability charge cap to improve her scaling a tiny bit, especially at level 4:\n" +
-				"_-_ Duelist now gains another weapon charge every 3 levels, down from 4\n" +
+				"I'm also making a general change to the WARRIOR's weapon ability charge cap to improve her scaling a tiny bit, especially at level 4:\n" +
+				"_-_ WARRIOR now gains another weapon charge every 3 levels, down from 4\n" +
 				"_-_ Max possible charges unchanged, but they are now reached at level 19, down from 25\n\n" +
 				"I had mentioned in v2.4.1 that I was planning to make more changes to trinkets, but I've decided to hold off on that for now."));
 
@@ -123,7 +123,7 @@ public class v2_X_Changes {
 		changeInfos.add(changes);
 
 		changes.addButton( new ChangeButton(new ItemSprite(ItemSpriteSheet.MOSSY_CLUMP), "Trinket Balance Changes",
-				"I'm making some balance tweaks to trinkets based on early gameplay data. I expect I'll be making more tweaks here later on, both to trinkets and the new Duelist abilities, once a little more time has passed.\n" +
+				"I'm making some balance tweaks to trinkets based on early gameplay data. I expect I'll be making more tweaks here later on, both to trinkets and the new WARRIOR abilities, once a little more time has passed.\n" +
 				"\n" +
 				"_- Mossy Clump_ upgrade cost increased\n" +
 				"\n" +
@@ -145,7 +145,7 @@ public class v2_X_Changes {
 				"_Caused by v2.4.0:_\n" +
 				"_-_ Saves from before v2.4 sometimes generating trinkets in the dungeon\n" +
 				"_-_ Errors when DM-300 took massive amounts of damage\n" +
-				"_-_ Duelist harvest ability being reduced by damage reduction effects twice\n" +
+				"_-_ WARRIOR harvest ability being reduced by damage reduction effects twice\n" +
 				"\n" +
 				"_Existed Prior to v2.4.0:_\n" +
 				"_-_ Various minor visual bugs and typos\n" +
@@ -194,8 +194,8 @@ public class v2_X_Changes {
 		changes.hardlight(CharSprite.WARNING);
 		changeInfos.add(changes);
 
-		changes.addButton( new ChangeButton(HeroSprite.avatar(HeroClass.DUELIST, 6), "Duelist Weapon Abilities",
-				"I'm making some overarching changes to the Duelist's weapon abilities, to make them stronger and feel more impactful:\n" +
+		changes.addButton( new ChangeButton(HeroSprite.avatar(HeroClass.WARRIOR, 6), "WARRIOR Weapon Abilities",
+				"I'm making some overarching changes to the WARRIOR's weapon abilities, to make them stronger and feel more impactful:\n" +
 				"_-_ Weapon ability charge speed down by 33%\n" +
 				"_-_ Weapon ability charge cap reduced to 2-8, from 3-10\n" +
 				"_-_ Weapon abilities buffed across the board\n" +
@@ -220,7 +220,7 @@ public class v2_X_Changes {
 				"Various specific alchemy items have also received changes to their energy cost, output quantity, or mechanics. Check the buffs and nerfs section for more details on those."));
 
 		changes.addButton( new ChangeButton(Icons.get(Icons.TALENT), "Talent Changes",
-				"Duelist talents have been changed to account for adjustments to weapon charge mechanics:\n" +
+				"WARRIOR talents have been changed to account for adjustments to weapon charge mechanics:\n" +
 				"_- Aggressive Barrier_ shielding increased to 3/5 from 3, threshold changed to 50% from 40%/60%.\n" +
 				"_- Focused Meal_ charge boost reduced to 0.67/1 from 1/1.5.\n" +
 				"_- Weapon Recharging_ boost reduced to every 15/10 turns from every 10/6 turns.\n" +
@@ -296,7 +296,7 @@ public class v2_X_Changes {
 				"_-_ Geyser traps and aqua brew not extinguishing flames",
 
 				"_Heroes:_\n" +
-				"_-_ Duelist's swift equip not working during time freeze\n" +
+				"_-_ WARRIOR's swift equip not working during time freeze\n" +
 				"_-_ Monk's flurry of blows not using projecting enchantment when empowered\n" +
 				"_-_ Various battlemage on-hit effects not showing as magical damage\n" +
 				"_-_ Empowered strike talent not working with blastwave\n" +
@@ -511,7 +511,7 @@ public class v2_X_Changes {
 
 				"_Hero & Allies:_\n" +
 				"_-_ Thrown potions not triggering Liquid Agility talent\n" +
-				"_-_ Sneak ability working while Duelist is rooted\n" +
+				"_-_ Sneak ability working while WARRIOR is rooted\n" +
 				"_-_ Damage from Body Slam talent ignoring armor\n" +
 				"_-_ Lunge ability incorrectly interacting with movespeed in some cases\n" +
 				"_-_ Cases where prismatic images could keep appearing and then disappearing\n" +
@@ -519,7 +519,7 @@ public class v2_X_Changes {
 				"_-_ Berserker being able to rage without his seal equipped in some cases\n" +
 				"_-_ Allies rarely spawning on hazards after ankh revive\n" +
 				"_-_ Ally warp working on corrupted DM-201s\n" +
-				"_-_ Duelist's lunge ability not correctly applying range boosts in rare cases\n" +
+				"_-_ WARRIOR's lunge ability not correctly applying range boosts in rare cases\n" +
 				"\n" +
 				"_Misc.:_\n" +
 				"_-_ Various rare crash and freeze bugs\n" +
@@ -621,14 +621,14 @@ public class v2_X_Changes {
 		changes.addButton( new ChangeButton(Icons.TALENT.get(), "T2 Potion and Scroll Talents",
 				"The T2 potion and scroll talents have been reworked to trigger on a more broad range of items, and have had their names and effects changed as a result:\n" +
 				"\n" +
-				"_-_ Warrior, Huntress, and Duelist talents now trigger on any potion, not just potions of healing. Their effects are doubled when using potions of strength or experience.\n" +
+				"_-_ Warrior, Huntress, and WARRIOR talents now trigger on any potion, not just potions of healing. Their effects are doubled when using potions of strength or experience.\n" +
 				"_-_ Mage and Rogue talents now trigger on any scroll, not just scrolls of upgrade. Their effects are doubled when using scrolls of upgrade or transmutation.\n" +
 				"\n" +
 				"_-_ Warrior effect reduced to 50/75% shield, from 67/100%\n" +
 				"_-_ Mage effect changed to +2 levels on the next 2/3 wand zaps\n" +
 				"_-_ Rogue effect changed to 3/5 turns of invisibility\n" +
 				"_-_ Huntress effect reduced to 1/2 turns of rooting and 4/6 grass, from 2/3 root and 5/8 grass\n" +
-				"_-_ Duelist effect unchanged\n" +
+				"_-_ WARRIOR effect unchanged\n" +
 				"\n" +
 				"_-_ The Mage now also has a new T3 talent: 'desperate power', as the above change effectively moves the Empowering Scrolls talent to T2."));
 
@@ -646,7 +646,7 @@ public class v2_X_Changes {
 				"_-_ There is now a Google Play achievements button in the badges screen, if Google Play Games is enabled\n" +
 				"_-_ Indicators now lower into empty space below them after the hero takes an action, not whenever new indicators appear\n" +
 				"_-_ The game's tutorial is now skipped if there is existing gameplay data (e.g. via Google Play Games sync)\n" +
-				"_-_ Heroes other than the duelist can now quickslot weapons if they get the swift equip talent.",
+				"_-_ Heroes other than the WARRIOR can now quickslot weapons if they get the swift equip talent.",
 
 				"_Misc.:_\n" +
 				"_-_ Overhauled retreating enemy AI. Retreating enemies should get stuck far less often, and terrified enemies are unable to approach the hero.\n" +
@@ -718,7 +718,7 @@ public class v2_X_Changes {
 		changes.addButton( new ChangeButton(new ItemSprite(ItemSpriteSheet.DIRK), "Weapon Ability Buffs",
 				"Weapon abilities are overall in a much better place now, but there are still a couple that need a boost:\n" +
 				"\n" +
-				"_- Sneak_ ability (Dagger, Dirk, and Assassin's blade) reworked. Now lets the Duelist instantly blink for 6/5/4 tiles of distance and grants 1 turn of invisibility, instead of granting 10/8/6 turns of invisibility.\n" +
+				"_- Sneak_ ability (Dagger, Dirk, and Assassin's blade) reworked. Now lets the WARRIOR instantly blink for 6/5/4 tiles of distance and grants 1 turn of invisibility, instead of granting 10/8/6 turns of invisibility.\n" +
 				"\n" +
 				"_- Harvest_ ability (Sickle and War Scythe) bleeding amount increased to 110%/90% of damage, from 100%/80% of damage.\n" +
 				"\n" +
@@ -763,9 +763,9 @@ public class v2_X_Changes {
 		changes.addButton( new ChangeButton(new ItemSprite(ItemSpriteSheet.WAR_SCYTHE), "New Weapons!",
 				"Three new weapons have been added to the game!\n" +
 				"\n" +
-				"_The Katana_ is a tier-4 defensive weapon that was designed to respond to the common feedback point of players wanting a higher tier weapon with the rapier's ability. Just like with her rapier, the Duelist can _lunge_ at enemies with a katana, dealing bonus damage.\n" +
+				"_The Katana_ is a tier-4 defensive weapon that was designed to respond to the common feedback point of players wanting a higher tier weapon with the rapier's ability. Just like with her rapier, the WARRIOR can _lunge_ at enemies with a katana, dealing bonus damage.\n" +
 				"\n" +
-				"_The Sickle_ and _War Scythe_ are T2 and T5 weapons that trade in some accuracy for increased base damage. The Duelist can use the _harvest_ ability with these weapons, which deals a large amount of bleeding instead of direct damage, but costs 2 charges."));
+				"_The Sickle_ and _War Scythe_ are T2 and T5 weapons that trade in some accuracy for increased base damage. The WARRIOR can use the _harvest_ ability with these weapons, which deals a large amount of bleeding instead of direct damage, but costs 2 charges."));
 
 		changes.addButton( new ChangeButton(new Image(new TormentedSpiritSprite()), "New Exotic Enemies",
 				"An exotic variant has been added for wraiths and piranhas!\n" +
@@ -792,7 +792,7 @@ public class v2_X_Changes {
 
 		changes.addButton( new ChangeButton(new TalentIcon(Talent.PRECISE_ASSAULT), "Precise Assault",
 				"The _Lightweight Charge_ talent has been completely replaced with a new talent: _Precise Assault_. This new talent grants a big accuracy boost for 1 attack after using a weapon ability, encouraging interweaving special and regular attacks.\n\n" +
-				"Lightweight Charge is removed as it was originally designed much earlier in the Duelist's development process. This was before mechanics like Swift Equip, the Champion's Dual wielding, or Unencumbered Spirit existed. Those mechanics do a much better job of encouraging using abilities on lower tier weapons."));
+				"Lightweight Charge is removed as it was originally designed much earlier in the WARRIOR's development process. This was before mechanics like Swift Equip, the Champion's Dual wielding, or Unencumbered Spirit existed. Those mechanics do a much better job of encouraging using abilities on lower tier weapons."));
 
 		changes.addButton(new ChangeButton(Icons.get(Icons.PREFS), Messages.get(ChangesScene.class, "misc"),
 				"_Highlights:_\n" +
@@ -802,7 +802,7 @@ public class v2_X_Changes {
 				"_-_ Players are now less likely to find multiple of the same weapon/wand/ring\n" +
 				"_-_ Slightly improved the final loot from crystal path rooms\n" +
 				"_-_ The toolbar's dimming behaviour is now less visually disruptive\n" +
-				"_-_ Added visual buffs for some Duelist and Huntress talents\n" +
+				"_-_ Added visual buffs for some WARRIOR and Huntress talents\n" +
 				"_-_ Shattered Supporters on Google Play now have access to 10 HoH pages, up from 4",
 
 				"_Other:_\n" +
@@ -848,13 +848,13 @@ public class v2_X_Changes {
 				"_-_ Empty item spots on the floor 20 shop",
 
 				"_Effects:_\n" +
-				"_-_ Some Duelist abilities not clearing invisibility\n" +
+				"_-_ Some WARRIOR abilities not clearing invisibility\n" +
 				"_-_ Cases where the player could input actions during the Sniper's flurry ability\n" +
 				"_-_ Speedy Stealth talent requiring existing momentum to work\n" +
 				"_-_ Rare errors caused by triggering many pitfall traps at once\n" +
 				"_-_ Projectile traps firing at incorrect targets in very specific cases\n" +
 				"_-_ Lethal Haste talent triggering on ally kills\n" +
-				"_-_ Very rare cases where the Duelist could be debuffed by attacking her own afterimage\n" +
+				"_-_ Very rare cases where the WARRIOR could be debuffed by attacking her own afterimage\n" +
 				"_-_ Monk's focus ability rarely triggering on magical attacks\n" +
 				"_-_ Chill and ring of elements interacting incorrectly in some cases\n" +
 				"_-_ Protective Shadows talent not triggering if unlocked while invisible\n" +
@@ -914,7 +914,7 @@ public class v2_X_Changes {
 				"_- Whip_ base damage increased to 3-15 from 3-12"));
 
 		changes.addButton( new ChangeButton(new ItemSprite(ItemSpriteSheet.WAR_HAMMER), "Weapon Abilities",
-				"Several of the Duelist's weapon abilities have not been performing as well as I'd hoped, even after the buffs in v2.0.1. It seems that I've overestimated how much the drawbacks I added have held back many of these abilities. My hope with these changes is to better balance other abilities versus the simple-yet-effective Cleave.\n" +
+				"Several of the WARRIOR's weapon abilities have not been performing as well as I'd hoped, even after the buffs in v2.0.1. It seems that I've overestimated how much the drawbacks I added have held back many of these abilities. My hope with these changes is to better balance other abilities versus the simple-yet-effective Cleave.\n" +
 				"\n" +
 				"Firstly, some abilities need relatively little help:\n" +
 				"_- Sneak_ invis duration up to 10/8/6 from 8/6/4\n" +
@@ -940,8 +940,8 @@ public class v2_X_Changes {
 				"_-_ Now triggers on-hit effects in a 5x5 AOE\n" +
 				"_-_ Harmful on-hit effects now only apply to enemies in the AOE, and positive effects only apply to allies."));
 
-		changes.addButton( new ChangeButton(HeroSprite.avatar(HeroClass.DUELIST, 2), "Duelist Subclasses",
-				"The Duelist's subclasses have not had as many problems as her weapon abilities, so the changes here are more incremental. I've been more generous with the Monk, in anticipation that the weapon ability changes will be more beneficial to the Champion:\n\n" +
+		changes.addButton( new ChangeButton(HeroSprite.avatar(HeroClass.WARRIOR, 2), "WARRIOR Subclasses",
+				"The WARRIOR's subclasses have not had as many problems as her weapon abilities, so the changes here are more incremental. I've been more generous with the Monk, in anticipation that the weapon ability changes will be more beneficial to the Champion:\n\n" +
 				"_Champion:_\n" +
 				"_- Combined Lethality_ HP threshold up to 13/27/40 from 10/20/30\n\n" +
 				"_Monk:_\n" +
@@ -952,7 +952,7 @@ public class v2_X_Changes {
 				"_-_ Dash range boost up to +3 from +2\n" +
 				"_-_ Dragon Kick damage boost up to +50% from +33%"));
 
-		changes.addButton( new ChangeButton(HeroSprite.avatar(HeroClass.DUELIST, 6), "Duelist Armor Abilities",
+		changes.addButton( new ChangeButton(HeroSprite.avatar(HeroClass.WARRIOR, 6), "WARRIOR Armor Abilities",
 				"Armor abilities are also getting more minor changes, targeted at specific talents and the elemental strike ability:\n\n" +
 				"_- Elemental Strike_ AOE effect base power increased by 20-33%, varying by enchantment\n\n" +
 				"_- Expose Weakness_ turns of vulnerable increased to 2/4/6/8 from 1/2/3/4\n\n" +
@@ -962,8 +962,8 @@ public class v2_X_Changes {
 		changes.hardlight(CharSprite.NEGATIVE);
 		changeInfos.add(changes);
 
-		changes.addButton( new ChangeButton(HeroSprite.avatar(HeroClass.DUELIST, 4), "Duelist Nerfs",
-				"The Duelist is also receiving a few very specific nerfs in v2.1.0:\n\n" +
+		changes.addButton( new ChangeButton(HeroSprite.avatar(HeroClass.WARRIOR, 4), "WARRIOR Nerfs",
+				"The WARRIOR is also receiving a few very specific nerfs in v2.1.0:\n\n" +
 				"_- Meditate_ now grants the monk 8 turns of recharging, down from 10.\n" +
 				"_- Meditate_ recharging now begins after meditation ends, instead of when it starts.\n\n" +
 				"_- Elimination Match_ charge cost reduction down to 16/30/40/50% from 20/36/50/60%"));
@@ -987,28 +987,28 @@ public class v2_X_Changes {
 				"\n" +
 				"Dev commentary will be added here in the future."));
 
-		changes.addButton(new ChangeButton(HeroSprite.avatar(HeroClass.DUELIST, 1), HeroClass.DUELIST.title(),
+		changes.addButton(new ChangeButton(HeroSprite.avatar(HeroClass.WARRIOR, 1), HeroClass.WARRIOR.title(),
 				"_Shattered Pixel Dungeon has a new playable character!!_\n" +
 				"\n" +
-				"The Duelist is an entire new hero class, _with a unique ability for every weapon in the game!_ She can be unlocked by earning a simple badge for equipping a T2 or higher weapon without a strength penalty. However, for existing players who already have a win she is unlocked by default!\n" +
+				"The WARRIOR is an entire new hero class, _with a unique ability for every weapon in the game!_ She can be unlocked by earning a simple badge for equipping a T2 or higher weapon without a strength penalty. However, for existing players who already have a win she is unlocked by default!\n" +
 				"\n" +
-				"I want the Duelist to provide more interesting gameplay options for melee weapon focused builds, that have previously been fairly plain and simple compared to builds using other items."));
+				"I want the WARRIOR to provide more interesting gameplay options for melee weapon focused builds, that have previously been fairly plain and simple compared to builds using other items."));
 
-		changes.addButton(new ChangeButton(HeroSprite.avatar(HeroClass.DUELIST, 4), "Duelist Subclasses",
-				"_The Duelist has two subclasses, with 3 more talents each!_\n" +
+		changes.addButton(new ChangeButton(HeroSprite.avatar(HeroClass.WARRIOR, 4), "WARRIOR Subclasses",
+				"_The WARRIOR has two subclasses, with 3 more talents each!_\n" +
 				"\n" +
 				"_The Champion_ is a master of melee weapons who can equip a secondary weapon in addition to her primary one!\n" +
 				"\n" +
 				"_The Monk_ is a master of physical technique. As she defeats enemies, she gains energy which can be used on a variety of defensive and utlity-focused abilities."));
 
-		changes.addButton(new ChangeButton(HeroSprite.avatar(HeroClass.DUELIST, 6), "Duelist Armor Abilities",
-				"_The Duelist has three lategame armor abilities, with 3 more talents each!_\n" +
+		changes.addButton(new ChangeButton(HeroSprite.avatar(HeroClass.WARRIOR, 6), "WARRIOR Armor Abilities",
+				"_The WARRIOR has three lategame armor abilities, with 3 more talents each!_\n" +
 				"\n" +
-				"_Challenge_ compels an enemy to fight the Duelist while all other enemies are temporarily frozen in time.\n" +
+				"_Challenge_ compels an enemy to fight the WARRIOR while all other enemies are temporarily frozen in time.\n" +
 				"\n" +
-				"_Elemental Strike_ produces a special effect that is based on the Duelist's weapon enchantment.\n" +
+				"_Elemental Strike_ produces a special effect that is based on the WARRIOR's weapon enchantment.\n" +
 				"\n" +
-				"_Feint_ allows the Duelist to sidestep an enemy's attack while they are focused on her afterimage."));
+				"_Feint_ allows the WARRIOR to sidestep an enemy's attack while they are focused on her afterimage."));
 
 		changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
 		changes.hardlight(CharSprite.WARNING);
@@ -1037,7 +1037,7 @@ public class v2_X_Changes {
 				"_-_ Added metamorphosis effects to the two remaining talents that previously couldn't be gained by metamorphosis\n" +
 				"_-_ Desktop users can now toggle fullscreen with right-alt + enter\n" +
 				"_-_ Added a setting to enable/disable playing music in background on desktop\n" +
-				"_-_ Added a 5th games in progress slot for the Duelist",
+				"_-_ Added a 5th games in progress slot for the WARRIOR",
 
 				"_Translations:_\n" +
 				"_-_ Added a new Language: _Vietnamese!_\n" +
@@ -1200,7 +1200,7 @@ public class v2_X_Changes {
 				"\n" +
 				"_- Wild Magic_ now spends 0.5 wand charges at base. Conserved magic can reduce this to 0.1\n" +
 				"\n" +
-				"I expect the next update will include more hero balance changes, after the dust settles from the Duelist."));
+				"I expect the next update will include more hero balance changes, after the dust settles from the WARRIOR."));
 
 		changes = new ChangeInfo(Messages.get(ChangesScene.class, "nerfs"), false, null);
 		changes.hardlight(CharSprite.NEGATIVE);
@@ -1242,7 +1242,7 @@ public class v2_X_Changes {
 
 		changes.addButton( new ChangeButton(HeroSprite.avatar(HeroClass.ROGUE, 6), "Hero Nerfs",
 				"T1 Talents:\n" +
-				"_-_ Warrior's T1 ID talent renamed from _Armsmaster's Intuition_ to _Veteran's Intuition_. The talent now focuses more on armor, to contrast with the Duelist.\n" +
+				"_-_ Warrior's T1 ID talent renamed from _Armsmaster's Intuition_ to _Veteran's Intuition_. The talent now focuses more on armor, to contrast with the WARRIOR.\n" +
 				"\n" +
 				"Armor Abilities:\n" +
 				"_- Heroic Energy_ lightly nerfed to 12/23/32/40% charge speed boost, from 13/24/34/43%\n" +

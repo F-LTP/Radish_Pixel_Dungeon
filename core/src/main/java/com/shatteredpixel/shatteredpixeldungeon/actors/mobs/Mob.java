@@ -852,13 +852,6 @@ public abstract class Mob extends Char {
 				} else if (Dungeon.hero.belongings.weapon instanceof Scythe){
 					Buff.affect(Dungeon.hero, Scythe.scytheSac.class,5f);
 				}
-
-				if (Dungeon.hero.heroClass != HeroClass.DUELIST
-						&& Dungeon.hero.hasTalent(Talent.LETHAL_HASTE)
-						&& Dungeon.hero.buff(Talent.LethalHasteCooldown.class) == null){
-					Buff.affect(Dungeon.hero, Talent.LethalHasteCooldown.class, 100f);
-					Buff.affect(Dungeon.hero, Haste.class, 1.67f + Dungeon.hero.pointsInTalent(Talent.LETHAL_HASTE));
-				}
 			}
 
 		}

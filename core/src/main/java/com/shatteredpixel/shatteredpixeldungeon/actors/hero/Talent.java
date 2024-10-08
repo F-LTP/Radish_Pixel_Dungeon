@@ -408,8 +408,6 @@ public enum Talent {
 					return 90;
 				case HUNTRESS:
 					return 122;
-				case DUELIST:
-					return 154;
 			}
 		} else {
 			return icon;
@@ -434,7 +432,7 @@ public enum Talent {
 	public String desc(boolean metamorphed){
 		if (metamorphed){
 			String metaDesc = Messages.get(this, name() + ".meta_desc");
-			if (!metaDesc.equals(Messages.NO_TEXT_FOUND)){
+			if (!metaDesc.contains("Ms:")) {
 				return Messages.get(this, name() + ".desc") + "\n\n" + metaDesc;
 			}
 		}
@@ -560,14 +558,8 @@ public enum Talent {
 			Buff.affect( hero, PhysicalEmpower.class).set(3, 1 + hero.pointsInTalent(STRENGTHENING_MEAL));
 		}
 		if (hero.hasTalent(FOCUSED_MEAL)){
-			if (hero.heroClass == HeroClass.DUELIST){
-				//0.67/1 charge for the duelist
-				Buff.affect( hero, MeleeWeapon.Charger.class ).gainCharge((hero.pointsInTalent(FOCUSED_MEAL)+1)/3f);
-				ScrollOfRecharging.charge( hero );
-			} else {
 				// lvl/3 / lvl/2 bonus dmg on next hit for other classes
 				Buff.affect( hero, PhysicalEmpower.class).set(Math.round(hero.lvl / (4f - hero.pointsInTalent(FOCUSED_MEAL))), 1);
-			}
 		}
 	}
 

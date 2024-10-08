@@ -709,7 +709,6 @@ public class Badges {
 		firstBossClassBadges.put(HeroClass.MAGE, Badge.BOSS_SLAIN_1_MAGE);
 		firstBossClassBadges.put(HeroClass.ROGUE, Badge.BOSS_SLAIN_1_ROGUE);
 		firstBossClassBadges.put(HeroClass.HUNTRESS, Badge.BOSS_SLAIN_1_HUNTRESS);
-		firstBossClassBadges.put(HeroClass.DUELIST, Badge.BOSS_SLAIN_1_DUELIST);
 	}
 
 	private static LinkedHashMap<HeroClass, Badge> victoryClassBadges = new LinkedHashMap<>();
@@ -718,7 +717,6 @@ public class Badges {
 		victoryClassBadges.put(HeroClass.MAGE, Badge.VICTORY_MAGE);
 		victoryClassBadges.put(HeroClass.ROGUE, Badge.VICTORY_ROGUE);
 		victoryClassBadges.put(HeroClass.HUNTRESS, Badge.VICTORY_HUNTRESS);
-		victoryClassBadges.put(HeroClass.DUELIST, Badge.VICTORY_DUELIST);
 	}
 
 	private static LinkedHashMap<HeroSubClass, Badge> thirdBossSubclassBadges = new LinkedHashMap<>();
@@ -848,9 +846,6 @@ public class Badges {
 				break;
 			case HUNTRESS:
 				badge = Badge.MASTERY_HUNTRESS;
-				break;
-			case DUELIST:
-				badge = Badge.MASTERY_DUELIST;
 				break;
 		}
 		
