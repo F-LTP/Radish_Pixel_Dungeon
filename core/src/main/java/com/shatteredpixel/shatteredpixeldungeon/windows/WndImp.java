@@ -206,8 +206,7 @@ public class WndImp extends Window{
 	private void gainTalent(Imp imp, DwarfToken tokens, Hero hero) {
 		if (hero.subClass== HeroSubClass.NONE){
 			GLog.n( Messages.get(this, "deny"));
-		}
-		else {
+		} else {
 			hero.powerOfImp=true;
 			Buff.affect(hero, powerGainTracker.class);
 			hero.spend(Actor.TICK);

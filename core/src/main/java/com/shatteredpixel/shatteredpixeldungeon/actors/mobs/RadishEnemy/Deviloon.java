@@ -527,7 +527,7 @@ public class Deviloon extends Mob {
             dropsDownHeap = true;
             unique = true;
             fuse = new Fuse();
-            image = ItemSpriteSheet.DARTS+16;
+            image = ItemSpriteSheet.DARTS+13;
         }
 
         public BlastRune set_pos(int pos){

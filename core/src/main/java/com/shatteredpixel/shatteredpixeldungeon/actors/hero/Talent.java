@@ -88,7 +88,7 @@ public enum Talent {
 	//Berserker T4
 	REVENGE_ROAR(130,4),THIRSTY_BLADE(131,4),
 	//Gladiator T3
-	CLEAVE(14, 3), LETHAL_DEFENSE(15, 3), ENHANCED_COMBO(16, 3),
+	KEEP_VIGILANCE(14, 3), LETHAL_DEFENSE(15, 3), VENT_NOPLACE(16, 3),
 	//Gladiator T4
 	DEFENSIVE_STRIKE(132,4),DEVASTATE(133,4),
 	//Heroic Leap T4
@@ -408,8 +408,6 @@ public enum Talent {
 					return 90;
 				case HUNTRESS:
 					return 122;
-				case DUELIST:
-					return 154;
 			}
 		} else {
 			return icon;
@@ -434,7 +432,7 @@ public enum Talent {
 	public String desc(boolean metamorphed){
 		if (metamorphed){
 			String metaDesc = Messages.get(this, name() + ".meta_desc");
-			if (!metaDesc.equals(Messages.NO_TEXT_FOUND)){
+			if (!metaDesc.contains("Ms:")) {
 				return Messages.get(this, name() + ".desc") + "\n\n" + metaDesc;
 			}
 		}
@@ -560,14 +558,8 @@ public enum Talent {
 			Buff.affect( hero, PhysicalEmpower.class).set(3, 1 + hero.pointsInTalent(STRENGTHENING_MEAL));
 		}
 		if (hero.hasTalent(FOCUSED_MEAL)){
-			if (hero.heroClass == HeroClass.DUELIST){
-				//0.67/1 charge for the duelist
-				Buff.affect( hero, MeleeWeapon.Charger.class ).gainCharge((hero.pointsInTalent(FOCUSED_MEAL)+1)/3f);
-				ScrollOfRecharging.charge( hero );
-			} else {
 				// lvl/3 / lvl/2 bonus dmg on next hit for other classes
 				Buff.affect( hero, PhysicalEmpower.class).set(Math.round(hero.lvl / (4f - hero.pointsInTalent(FOCUSED_MEAL))), 1);
-			}
 		}
 	}
 
@@ -909,7 +901,7 @@ public enum Talent {
 				Collections.addAll(tierTalents, ENDLESS_RAGE, PAIN_SCAR, FANATICISM_MAGIC);
 				break;
 			case GLADIATOR:
-				Collections.addAll(tierTalents, CLEAVE, LETHAL_DEFENSE, ENHANCED_COMBO);
+				Collections.addAll(tierTalents, KEEP_VIGILANCE, LETHAL_DEFENSE, VENT_NOPLACE);
 				break;
 			case BATTLEMAGE:
 				Collections.addAll(tierTalents, EMPOWERED_STRIKE, MYSTICAL_CHARGE, WAR_THROW);
@@ -1054,6 +1046,32 @@ public enum Talent {
 		bundle.put("replacements", replacementsBundle);
 	}
 
+	public static void restoreTalentsFromBundle( Bundle bundle, Hero hero ){
+		if (bundle.contains("replacements")){
+			Bundle replacements = bundle.getBundle("replacements");
+			for (String key : replacements.getKeys()){
+				hero.metamorphedTalents.put(Talent.valueOf(key), replacements.getEnum(key, Talent.class));
+			}
+		}
+
+		if (hero.heroClass != null)     initClassTalents(hero);
+		if (hero.subClass != null)      initSubclassTalents(hero);
+		if (hero.armorAbility != null)  initArmorTalents(hero);
+		if (hero.powerOfImp) initT4Talents(hero);
+
+		for (int i = 0; i < MAX_TALENT_TIERS; i++){
+			LinkedHashMap<Talent, Integer> tier = hero.talents.get(i);
+			Bundle tierBundle = bundle.contains(TALENT_TIER+(i+1)) ? bundle.getBundle(TALENT_TIER+(i+1)) : null;
+
+			if (tierBundle != null){
+				for (Talent talent : tier.keySet()){
+					if (tierBundle.contains(talent.name())){
+						tier.put(talent, Math.min(tierBundle.getInt(talent.name()), talent.maxPoints()));
+					}
+				}
+			}
+		}
+	}
 	private static final HashSet<String> removedTalents = new HashSet<>();
 	static{
 		//v2.4.0
@@ -1081,49 +1099,4 @@ public enum Talent {
 		//v2.0.0
 		renamedTalents.put("ARMSMASTERS_INTUITION",     "VETERANS_INTUITION");
 	}
-
-	public static void restoreTalentsFromBundle( Bundle bundle, Hero hero ){
-		if (bundle.contains("replacements")){
-			Bundle replacements = bundle.getBundle("replacements");
-			for (String key : replacements.getKeys()){
-				String value = replacements.getString(key);
-				if (renamedTalents.containsKey(key)) key = renamedTalents.get(key);
-				if (renamedTalents.containsKey(value)) value = renamedTalents.get(value);
-				if (!removedTalents.contains(key) && !removedTalents.contains(value)){
-					try {
-						hero.metamorphedTalents.put(Talent.valueOf(key), Talent.valueOf(value));
-					} catch (Exception e) {
-						ShatteredPixelDungeon.reportException(e);
-					}
-				}
-			}
-		}
-		if (hero.powerOfImp) initT4Talents(hero);
-		if (hero.heroClass != null)     initClassTalents(hero);
-		if (hero.subClass != null)      initSubclassTalents(hero);
-		if (hero.armorAbility != null)  initArmorTalents(hero);
-
-		for (int i = 0; i < MAX_TALENT_TIERS; i++){
-			LinkedHashMap<Talent, Integer> tier = hero.talents.get(i);
-			Bundle tierBundle = bundle.contains(TALENT_TIER+(i+1)) ? bundle.getBundle(TALENT_TIER+(i+1)) : null;
-
-			if (tierBundle != null){
-				for (String tName : tierBundle.getKeys()){
-					int points = tierBundle.getInt(tName);
-					if (renamedTalents.containsKey(tName)) tName = renamedTalents.get(tName);
-					if (!removedTalents.contains(tName)) {
-						try {
-							Talent talent = Talent.valueOf(tName);
-							if (tier.containsKey(talent)) {
-								tier.put(talent, Math.min(points, talent.maxPoints()));
-							}
-						} catch (Exception e) {
-							ShatteredPixelDungeon.reportException(e);
-						}
-					}
-				}
-			}
-		}
-	}
-
 }

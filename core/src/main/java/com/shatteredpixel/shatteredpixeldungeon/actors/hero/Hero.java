@@ -36,11 +36,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AdrenalineSurge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AnkhInvulnerability;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ArtifactRecharge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awareness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BraceYourself;
@@ -76,13 +74,14 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbili
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.ElementalStrike;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.NaturesPower;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Monk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CheckedCell;
-import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
@@ -138,11 +137,14 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CelestialSphere;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.PneumFistGloves;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Quarterstaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sai;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scimitar;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
@@ -344,6 +346,7 @@ public class Hero extends Char {
 		bundle.put( CLASS, heroClass );
 		bundle.put( SUBCLASS, subClass );
 		bundle.put( ABILITY, armorAbility );
+		bundle.put( IMP_POWER, powerOfImp);
 		Talent.storeTalentsInBundle( bundle, this );
 		
 		bundle.put( ATTACK, attackSkill );
@@ -355,8 +358,6 @@ public class Hero extends Char {
 		bundle.put( EXPERIENCE, exp );
 		
 		bundle.put( HTBOOST, HTBoost );
-
-		bundle.put( IMP_POWER, powerOfImp);
 
 		belongings.storeInBundle( bundle );
 	}
@@ -374,12 +375,11 @@ public class Hero extends Char {
 		heroClass = bundle.getEnum( CLASS, HeroClass.class );
 		subClass = bundle.getEnum( SUBCLASS, HeroSubClass.class );
 		armorAbility = (ArmorAbility)bundle.get( ABILITY );
+		powerOfImp = bundle.getBoolean(IMP_POWER);
 		Talent.restoreTalentsFromBundle( bundle, this );
 		
 		attackSkill = bundle.getInt( ATTACK );
 		defenseSkill = bundle.getInt( DEFENSE );
-
-		powerOfImp = bundle.getBoolean(IMP_POWER);
 
 		STR = bundle.getInt( STRENGTH );
 
@@ -520,11 +520,7 @@ public class Hero extends Char {
 		belongings.thrownWeapon = null;
 
 		if (hit && subClass == HeroSubClass.GLADIATOR && wasEnemy){
-			Buff.affect( this, Combo.class ).hit( enemy );
-		}
-
-		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
-			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
+			Buff.affect( this, Combo.class ).hit(  );
 		}
 
 		return hit;
@@ -606,10 +602,7 @@ public class Hero extends Char {
 	public String defenseVerb() {
 		Combo.ParryTracker parry = buff(Combo.ParryTracker.class);
 		if (parry != null){
-			parry.parried = true;
-			if (buff(Combo.class).getComboCount() < 9 || pointsInTalent(Talent.ENHANCED_COMBO) < 2){
-				parry.detach();
-			}
+			parry.parry();
 			return Messages.get(Monk.class, "parried");
 		}
 
@@ -691,12 +684,6 @@ public class Hero extends Char {
 				emp.detach();
 			}
 			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG, 0.75f, 1.2f);
-		}
-
-		if (heroClass != HeroClass.DUELIST
-				&& hasTalent(Talent.WEAPON_RECHARGING)
-				&& (buff(Recharging.class) != null || buff(ArtifactRecharge.class) != null)){
-			dmg = Math.round(dmg * 1.025f + (.025f*pointsInTalent(Talent.WEAPON_RECHARGING)));
 		}
 
 		if (dmg < 0) dmg = 0;
@@ -1398,7 +1385,34 @@ public class Hero extends Char {
 
 		enemy = action.target;
 
-		if (isCharmedBy( enemy )){
+		if(belongings.weapon instanceof PneumFistGloves){
+			PneumFistGloves pneumFistGloves = (PneumFistGloves) hero.belongings.weapon;
+			if(hero.belongings.weapon != null){
+				if(pneumFistGloves.)
+			} else {
+
+			}
+			return false;
+		} else if(belongings.weapon instanceof KillBoatSword){
+			KillBoatSword w2 = (KillBoatSword) hero.belongings.weapon;
+			if(hero.belongings.weapon != null){
+				if (!w2.delayAttack && Dungeon.level.adjacent(enemy.pos,pos)) {
+					sprite.attack(enemy.pos);
+					w2.delayAttack = true;
+				} else if(Dungeon.level.distance( enemy.pos, pos ) > w2.RCH) {
+					spend(1f);
+					hero.sprite.showStatus(CharSprite.WARNING, Messages.get(w2, "no_rch"));
+					sprite.operate(pos);
+				} else {
+					spend(1f);
+					sprite.operate(pos);
+					/** 斩舰刀实现 */
+					MoveBoatSword();
+					hero.sprite.showStatus(CharSprite.WARNING, Messages.get(w2, "ready"));
+				}
+			}
+			return false;
+		} else if (isCharmedBy( enemy )){
 			GLog.w( Messages.get(Charm.class, "cant_attack"));
 			ready();
 			return false;
@@ -1406,15 +1420,7 @@ public class Hero extends Char {
 
 		if (enemy.isAlive() && canAttack( enemy ) && enemy.invisible == 0) {
 
-			if (heroClass != HeroClass.DUELIST
-					&& hasTalent(Talent.AGGRESSIVE_BARRIER)
-					&& buff(Talent.AggressiveBarrierCooldown.class) == null
-					&& (HP / (float)HT) < 0.20f*(1+pointsInTalent(Talent.AGGRESSIVE_BARRIER))){
-				Buff.affect(this, Barrier.class).setShield(3);
-				sprite.showStatusWithIcon(CharSprite.POSITIVE, "3", FloatingText.SHIELDING);
-				Buff.affect(this, Talent.AggressiveBarrierCooldown.class, 50f);
 
-			}
 			sprite.attack( enemy.pos );
 
 			return false;
@@ -1464,6 +1470,18 @@ public class Hero extends Char {
 	@Override
 	public int attackProc( final Char enemy, int damage ) {
 		damage = super.attackProc( enemy, damage );
+
+		if(Dungeon.level.distance(enemy.pos,pos)<=1) {
+			RlyehHeroDamage(enemy, damage);
+		}
+
+		KindOfWeapon wept = belongings.weapon();
+		if (wept instanceof CelestialSphere) {
+			int magicDamage;
+			magicDamage = Random.NormalIntRange(wept.min(wept.level()),wept.max(wept.level()));
+			enemy.damage(magicDamage, new DM100.LightningBolt());
+			damage = wept.proc( this, enemy,0 );
+		}
 
 		KindOfWeapon wep;
 		if (RingOfForce.fightingUnarmed(this) && !RingOfForce.unarmedGetsWeaponEnchantment(this)){
@@ -2326,11 +2344,7 @@ public class Hero extends Char {
 		spend( attackDelay() );
 
 		if (hit && subClass == HeroSubClass.GLADIATOR && wasEnemy){
-			Buff.affect( this, Combo.class ).hit( enemy );
-		}
-
-		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
-			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
+			Buff.affect( this, Combo.class ).hit( );
 		}
 
 		curAction = null;
@@ -2577,6 +2591,15 @@ public class Hero extends Char {
 		MagicalHolster holster = belongings.getItem(MagicalHolster.class);
 
 		Buff.affect(this, LostInventory.class);
+
+		//重生后验证 拉莱耶 合理性
+		Weapon w2 = (Weapon) hero.belongings.weapon;
+		if(w2 instanceof Rlyeh){
+			if(w2.keptThoughLostInvent && hero.buff(LostInventory.class) != null){
+				Buff.affect(this, Rlyeh.StateProject.class);
+			}
+		}
+
 		Buff.affect(this, Invisibility.class, 3f);
 		//lost inventory is dropped in interlevelscene
 
@@ -2611,4 +2634,51 @@ public class Hero extends Char {
 	public static interface Doom {
 		public void onDeath();
 	}
+
+	public void MoveBoatSword(){
+		KillBoatSword w2 = (KillBoatSword) hero.belongings.weapon;
+		if(w2 !=null) w2.delayAttack = false;
+	}
+
+	/**
+	 * 拉莱耶文本 自相残杀伤害 英雄<br>
+	 * @param enemy 敌人<br>
+	 * @param damage 伤害
+	 */
+	public void RlyehHeroDamage (Char enemy,int damage){
+		if(hero.belongings.weapon() instanceof Rlyeh){
+			Rlyeh w2 = (Rlyeh) hero.belongings.weapon;
+			if(w2.HeroChance()){
+				damage(hero.belongings.weapon.damageRoll(hero),new Rlyeh());
+				//因为再处理无伤害会更麻烦，所以这里改成打多少回多少
+				enemy.HP += Math.min(enemy.HT, damage);
+				//一个神奇的特性会导致满血额外+1点血量，所以-1
+				if(enemy.HP == enemy.HT){
+					enemy.damage(1,new Rlyeh());
+				}
+				if(!isAlive()){
+					Badges.validateDeathFromFriendlyMagic();
+				}
+			}
+		} else {
+			for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])){
+				if (mob instanceof Statue) {
+					if(((Statue) mob).weapon instanceof Rlyeh){
+						Rlyeh w2 =(Rlyeh) ((Statue) mob).weapon;
+						if(w2.HeroChance()){
+							damage(damage, new Rlyeh());
+							enemy.HP += Math.min(enemy.HT, damage);
+							if(!enemy.isAlive() && enemy == hero){
+								Badges.validateDeathFromEnemyMagic();
+							}
+							if(enemy.HP == enemy.HT){
+								enemy.damage(1,new Rlyeh());
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 }
