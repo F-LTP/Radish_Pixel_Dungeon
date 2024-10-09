@@ -97,6 +97,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EnemyFlag;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gloves;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.PneumFistGloves;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rapier;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks;
@@ -151,6 +152,7 @@ public enum HeroClass {
 		new SpawnMisc().collect();
 		new MobPlacer().collect();
 
+		new PneumFistGloves().collect();
 
 		CustomWeapon customWeapon = new CustomWeapon();
 		customWeapon.adjustStatus();

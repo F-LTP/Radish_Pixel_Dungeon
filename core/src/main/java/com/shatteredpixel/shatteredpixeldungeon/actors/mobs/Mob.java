@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 import static com.shatteredpixel.shatteredpixeldungeon.items.Item.updateQuickslot;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
@@ -40,7 +41,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
@@ -50,7 +50,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Sleep;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SoulMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Feint;
@@ -74,6 +73,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
@@ -1341,6 +1341,52 @@ public abstract class Mob extends Char {
 			}
 		}
 		heldAllies.clear();
+	}
+
+	/**
+	 * 拉莱耶文本 自相残杀伤害 生物<br>
+	 * @param enemy 敌人<br>
+	 * @param damage 伤害
+	 */
+	public void RlyehMobDamage (Char enemy,int damage){
+		if (hero.belongings.weapon() instanceof Rlyeh) {
+			Rlyeh w2 = (Rlyeh) hero.belongings.weapon;
+			if (w2.chance()) {
+				damage(damage, new Rlyeh());
+				//因为再处理无伤害会更麻烦，所以这里改成打多少回多少
+				enemy.HP += Math.min(enemy.HT, damage);
+				//一个神奇的特性会导致满血额外+1点血量，所以-1
+				if(enemy.HP == enemy.HT){
+					enemy.damage(1,new Rlyeh());
+				}
+			}
+		} else {
+			for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
+				if (mob instanceof Statue) {
+					if (((Statue) mob).weapon instanceof Rlyeh) {
+						Rlyeh w2 =(Rlyeh) ((Statue) mob).weapon;
+						if (w2.chance()) {
+							damage(((Statue) mob).weapon.damageRoll(mob), new Rlyeh());
+							enemy.HP += Math.min(enemy.HT, damage);
+							if(enemy.HP == enemy.HT){
+								damage(1,new Rlyeh());
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public int attackProc( final Char enemy, int damage ) {
+		damage = super.attackProc(enemy,damage);
+
+		if(Dungeon.level.distance(enemy.pos,pos)<=1){
+			RlyehMobDamage(enemy,damage);
+		}
+
+		return damage;
 	}
 	
 	public static void clearHeldAllies(){
