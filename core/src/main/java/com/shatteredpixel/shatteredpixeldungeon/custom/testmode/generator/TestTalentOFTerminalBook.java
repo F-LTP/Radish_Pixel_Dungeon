@@ -38,7 +38,7 @@ public class TestTalentOFTerminalBook extends TestItem {
     public void execute(final Hero hero, String action) {
         super.execute(hero, action);
         if (action.equals( AC_READ )) {
-            if ( !hero.powerOfImp & hero.subClass != NONE ) {
+            if (!hero.powerOfImp & hero.subClass != NONE ) {
                 hero.powerOfImp = true;
                 Buff.affect(hero, WndImp.powerGainTracker.class);
                 hero.spend(Actor.TICK);

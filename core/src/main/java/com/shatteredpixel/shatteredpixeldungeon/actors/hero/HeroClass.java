@@ -97,6 +97,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EnemyFlag;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gloves;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.PneumFistGloves;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rapier;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks;
@@ -112,8 +113,8 @@ public enum HeroClass {
 	WARRIOR( HeroSubClass.BERSERKER, HeroSubClass.GLADIATOR ),
 	MAGE( HeroSubClass.BATTLEMAGE, HeroSubClass.WARLOCK ),
 	ROGUE( HeroSubClass.ASSASSIN, HeroSubClass.FREERUNNER ),
-	HUNTRESS( HeroSubClass.SNIPER, HeroSubClass.WARDEN ),
-	DUELIST( HeroSubClass.CHAMPION, HeroSubClass.MONK );
+	HUNTRESS( HeroSubClass.SNIPER, HeroSubClass.WARDEN );
+//	DUELIST( HeroSubClass.CHAMPION, HeroSubClass.MONK );
 
 	private HeroSubClass[] subClasses;
 
@@ -151,6 +152,7 @@ public enum HeroClass {
 		new SpawnMisc().collect();
 		new MobPlacer().collect();
 
+		new PneumFistGloves().collect();
 
 		CustomWeapon customWeapon = new CustomWeapon();
 		customWeapon.adjustStatus();
@@ -244,10 +246,6 @@ public enum HeroClass {
 			case HUNTRESS:
 				initHuntress( hero );
 				break;
-
-			case DUELIST:
-				initDuelist( hero );
-				break;
 		}
 
 		if (SPDSettings.quickslotWaterskin()) {
@@ -271,8 +269,6 @@ public enum HeroClass {
 				return Badges.Badge.MASTERY_ROGUE;
 			case HUNTRESS:
 				return Badges.Badge.MASTERY_HUNTRESS;
-			case DUELIST:
-				return Badges.Badge.MASTERY_DUELIST;
 		}
 		return null;
 	}
@@ -375,8 +371,6 @@ public enum HeroClass {
 				return new ArmorAbility[]{new SmokeBomb(), new DeathMark(), new ShadowClone()};
 			case HUNTRESS:
 				return new ArmorAbility[]{new SpectralBlades(), new NaturesPower(), new SpiritHawk()};
-			case DUELIST:
-				return new ArmorAbility[]{new Challenge(), new ElementalStrike(), new Feint()};
 		}
 	}
 
@@ -390,8 +384,6 @@ public enum HeroClass {
 				return Assets.Sprites.ROGUE;
 			case HUNTRESS:
 				return Assets.Sprites.HUNTRESS;
-			case DUELIST:
-				return Assets.Sprites.DUELIST;
 		}
 	}
 
@@ -405,8 +397,6 @@ public enum HeroClass {
 				return Assets.Splashes.ROGUE;
 			case HUNTRESS:
 				return Assets.Splashes.HUNTRESS;
-			case DUELIST:
-				return Assets.Splashes.DUELIST;
 		}
 	}
 	
@@ -423,8 +413,6 @@ public enum HeroClass {
 				return Badges.isUnlocked(Badges.Badge.UNLOCK_ROGUE);
 			case HUNTRESS:
 				return Badges.isUnlocked(Badges.Badge.UNLOCK_HUNTRESS);
-			case DUELIST:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_DUELIST);
 		}
 	}
 	

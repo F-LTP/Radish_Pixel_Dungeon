@@ -36,7 +36,7 @@ import com.watabou.noosa.Image;
 public class WndCombo extends Window {
 
 	private static final int WIDTH_P = 120;
-	private static final int WIDTH_L = 180;
+	private static final int WIDTH_L = 160;
 
 	private static final int MARGIN  = 2;
 
@@ -46,7 +46,8 @@ public class WndCombo extends Window {
 		int width = PixelScene.landscape() ? WIDTH_L : WIDTH_P;
 
 		float pos = MARGIN;
-		RenderedTextBlock title = PixelScene.renderTextBlock(Messages.titleCase(Messages.get(this, "title")), 9);
+		String titleKey=combo.isFinish?"finish_title":"title";
+		RenderedTextBlock title = PixelScene.renderTextBlock(Messages.titleCase(Messages.get(this, titleKey)), 9);
 		title.hardlight(TITLE_COLOR);
 		title.setPos((width-title.width())/2, pos);
 		title.maxWidth(width - MARGIN * 2);
@@ -62,8 +63,13 @@ public class WndCombo extends Window {
 		}
 
 		for (Combo.ComboMove move : Combo.ComboMove.values()) {
-
-			String text = "_" + Messages.titleCase(move.title()) + " " + Messages.get(this, "combo_req", move.comboReq) + ":_ " + move.desc(combo.getComboCount());
+			if(move== Combo.ComboMove.FINISH &&combo.isFinish){
+				continue;
+			}
+			if (move== Combo.ComboMove.CALM&&!combo.isFinish){
+				continue;
+			}
+			String text = "_" + Messages.titleCase(move.title()) + " " +":_  " + move.desc(combo.getComboCount(),combo.isFinish);
 			RedButton moveBtn = new RedButton(text, 6){
 				@Override
 				protected void onClick() {

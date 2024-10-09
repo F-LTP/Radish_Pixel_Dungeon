@@ -414,8 +414,6 @@ public enum Icons {
 				return get( Icons.ROGUE );
 			case HUNTRESS:
 				return get( Icons.HUNTRESS );
-			case DUELIST:
-				return get( Icons.DUELIST );
 			default:
 				return null;
 		}
