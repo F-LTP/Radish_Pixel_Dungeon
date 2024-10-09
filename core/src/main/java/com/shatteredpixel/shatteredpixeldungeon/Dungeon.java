@@ -472,6 +472,7 @@ public class Dungeon {
 	}
 
 	public static boolean interfloorTeleportAllowed(){
+		if (depth==0) return false;
 		if (Dungeon.level.locked
 				|| Dungeon.level instanceof MiningLevel
 				|| (Dungeon.hero != null && Dungeon.hero.belongings.getItem(Amulet.class) != null)){
@@ -547,6 +548,9 @@ public class Dungeon {
 	}
 
 	public static boolean posNeeded() {
+
+		if (depth==0) return false;
+
 		//2 POS each floor set
 		int posLeftThisSet = 2 - (LimitedDrops.STRENGTH_POTIONS.count - (depth / 5) * 2);
 		if (posLeftThisSet <= 0) return false;
@@ -563,6 +567,9 @@ public class Dungeon {
 	}
 	
 	public static boolean souNeeded() {
+
+		if (depth==0) return false;
+
 		int souLeftThisSet;
 		//3 SOU each floor set
 		souLeftThisSet = 3 - (LimitedDrops.UPGRADE_SCROLLS.count - (depth / 5) * 3);
@@ -574,6 +581,9 @@ public class Dungeon {
 	}
 	
 	public static boolean asNeeded() {
+
+		if (depth==0) return false;
+
 		//1 AS each floor set
 		int asLeftThisSet = 1 - (LimitedDrops.ARCANE_STYLI.count - (depth / 5));
 		if (asLeftThisSet <= 0) return false;
@@ -602,6 +612,7 @@ public class Dungeon {
 	}
 
 	public static boolean trinketCataNeeded(){
+		if(depth == 0)return false;
 		//one trinket catalyst on floors 1-3
 		return depth < 5 && !LimitedDrops.TRINKET_CATA.dropped() && Random.Int(4-depth) == 0;
 	}
