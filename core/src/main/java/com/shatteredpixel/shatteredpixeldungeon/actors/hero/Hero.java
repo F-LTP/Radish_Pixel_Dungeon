@@ -1388,7 +1388,7 @@ public class Hero extends Char {
 		if(belongings.weapon instanceof PneumFistGloves){
 			PneumFistGloves pneumFistGloves = (PneumFistGloves) hero.belongings.weapon;
 			if(hero.belongings.weapon != null){
-				if(pneumFistGloves.)
+				//
 			} else {
 
 			}

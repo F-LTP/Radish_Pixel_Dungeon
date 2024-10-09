@@ -104,12 +104,12 @@ public class CityBossLevel extends Level {
 
 	@Override
 	public String tilesTex() {
-		return Assets.Environment.TILES_CITY;
+		return Assets.Environment.TILES_WAR_CITY;
 	}
 
 	@Override
 	public String waterTex() {
-		return Assets.Environment.WATER_CITY;
+		return Assets.Environment.WATER_D;
 	}
 
 	private static final String IMP_SHOP = "imp_shop";

@@ -24,7 +24,6 @@ package com.shatteredpixel.shatteredpixeldungeon.levels;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Ripple;
@@ -47,7 +46,6 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.SurfaceScene;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Group;
@@ -107,12 +105,12 @@ public class SewerLevel extends RegularLevel {
 	
 	@Override
 	public String tilesTex() {
-		return Assets.Environment.TILES_SEWERS;
+		return RandomMap ? Assets.Environment.TILES_OLD_SEWERS : Assets.Environment.TILES_SEWERS;
 	}
 	
 	@Override
 	public String waterTex() {
-		return Assets.Environment.WATER_SEWERS;
+		return RandomMap ? Assets.Environment.WATER_A : Assets.Environment.WATER_SEWERS;
 	}
 	
 	@Override

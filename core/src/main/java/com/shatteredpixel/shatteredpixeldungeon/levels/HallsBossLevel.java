@@ -94,12 +94,12 @@ public class HallsBossLevel extends Level {
 
 	@Override
 	public String tilesTex() {
-		return Assets.Environment.TILES_HALLS;
+		return Assets.Environment.TILES_FIRE_HALLS;
 	}
 
 	@Override
 	public String waterTex() {
-		return Assets.Environment.WATER_HALLS;
+		return Assets.Environment.WATER_E;
 	}
 
 	@Override

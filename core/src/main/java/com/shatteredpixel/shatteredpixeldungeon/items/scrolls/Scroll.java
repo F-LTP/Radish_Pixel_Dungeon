@@ -69,7 +69,10 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 public abstract class Scroll extends Item {
-
+	//affects how strongly on-scroll talents trigger from this scroll
+	protected float talentFactor = 1;
+	//the chance (0-1) of whether on-scroll talents trigger from this potion
+	protected float talentChance = 1;
 	public static final String AC_READ	= "READ";
 
 	protected static final float TIME_TO_READ	= 1f;

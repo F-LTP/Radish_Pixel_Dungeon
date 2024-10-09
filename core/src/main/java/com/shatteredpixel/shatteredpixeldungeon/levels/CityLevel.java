@@ -90,12 +90,12 @@ public class CityLevel extends RegularLevel {
 	
 	@Override
 	public String tilesTex() {
-		return Assets.Environment.TILES_CITY;
+		return RandomMap ? Assets.Environment.TILES_WAR_CITY : Assets.Environment.TILES_CITY;
 	}
 	
 	@Override
 	public String waterTex() {
-		return Assets.Environment.WATER_CITY;
+		return RandomMap ? Assets.Environment.WATER_D : Assets.Environment.WATER_CITY;
 	}
 	
 	@Override

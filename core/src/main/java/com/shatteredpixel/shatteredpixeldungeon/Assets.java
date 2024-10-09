@@ -43,6 +43,19 @@ public class Assets {
 		public static final String TILES_CITY   = "environment/tiles_city.png";
 		public static final String TILES_HALLS  = "environment/tiles_halls.png";
 
+		public static final String TILES_OLD_SEWERS =   "environment/alter/tiles_old_sewers.png";
+		public static final String TILES_BLOOD_PRISON = "environment/alter/tiles_blood_prison.png";
+		public static final String TILES_WORK_CAVES  =  "environment/alter/tiles_work_caves.png";
+		public static final String TILES_WAR_CITY   =   "environment/alter/tiles_war_city.png";
+		public static final String TILES_FIRE_HALLS  =  "environment/alter/tiles_fire_halls.png";
+
+		public static final String WATER_A = "environment/alter/water_a.png";
+		public static final String WATER_B = "environment/alter/water_b.png";
+		public static final String WATER_C = "environment/alter/water_c.png";
+		public static final String WATER_D = "environment/alter/water_d.png";
+		public static final String WATER_E = "environment/alter/water_e.png";
+
+
 		public static final String TILES_CAVES_CRYSTAL  = "environment/tiles_caves_crystal.png";
 		public static final String TILES_CAVES_GNOLL    = "environment/tiles_caves_gnoll.png";
 

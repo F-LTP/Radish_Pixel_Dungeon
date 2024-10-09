@@ -93,12 +93,12 @@ public class CavesBossLevel extends Level {
 
 	@Override
 	public String tilesTex() {
-		return Assets.Environment.TILES_CAVES;
+		return Assets.Environment.TILES_WORK_CAVES;
 	}
 
 	@Override
 	public String waterTex() {
-		return Assets.Environment.WATER_CAVES;
+		return Assets.Environment.WATER_C;
 	}
 
 	private static int WIDTH = 33;
