@@ -98,10 +98,12 @@ public abstract class RegularLevel extends Level {
 	
 	protected Room roomEntrance;
 	protected Room roomExit;
+
+	protected boolean RandomMap = Random.Float() >= 0.5f;
 	
 	@Override
 	protected boolean build() {
-		
+
 		builder = builder();
 		
 		ArrayList<Room> initRooms = initRooms();
@@ -126,6 +128,9 @@ public abstract class RegularLevel extends Level {
 
 		//force max standard rooms and multiple by 1.5x for large levels
 		int standards = standardRooms(feeling == Feeling.LARGE);
+
+		standards = (int) (standards * 1.15f);
+
 		if (feeling == Feeling.LARGE){
 			standards = (int)Math.ceil(standards * 1.5f);
 		}
@@ -143,6 +148,9 @@ public abstract class RegularLevel extends Level {
 
 		//force max special rooms and add one more for large levels
 		int specials = specialRooms(feeling == Feeling.LARGE);
+
+		specials = (int) (specials * 1.15f);
+
 		if (feeling == Feeling.LARGE){
 			specials++;
 		}
@@ -211,6 +219,10 @@ public abstract class RegularLevel extends Level {
 		if (feeling == Feeling.LARGE){
 			mobs = (int)Math.ceil(mobs * 1.33f);
 		}
+
+		//TODO 2024-1-9 Mobs L2
+		mobs += 2;
+
 		return mobs;
 	}
 	
@@ -365,6 +377,8 @@ public abstract class RegularLevel extends Level {
 		// drops 3/4/5 items 60%/30%/10% of the time
 		int nItems = 3 + Random.chances(new float[]{6, 3, 1});
 
+		nItems *= 1.1f;
+		
 		if (feeling == Feeling.LARGE){
 			nItems += 2;
 		}
