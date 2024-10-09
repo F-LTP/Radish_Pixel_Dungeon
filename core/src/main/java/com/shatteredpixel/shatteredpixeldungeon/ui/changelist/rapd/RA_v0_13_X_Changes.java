@@ -19,10 +19,46 @@ import java.util.ArrayList;
 public class RA_v0_13_X_Changes {
 
     public static void addAllChanges( ArrayList<ChangeInfo> changeInfos ){
+        add_v03_5_Changes(changeInfos);
         add_v03_4_Changes(changeInfos);
         add_v03_3_Changes(changeInfos);
         add_v03_2_Changes(changeInfos);
         add_v03_1_Changes(changeInfos);
+    }
+
+    public static void add_v03_5_Changes( ArrayList<ChangeInfo> changeInfos ) {
+        ChangeInfo changes = new ChangeInfo("v0.4.0", true, "");
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(Icons.get(Icons.STATS), ("全局优化"),
+                ("每层的初始出怪数量增加2，物品刷新率增加个10%，楼层大小增加15%。")));
+
+        changes.addButton(new ChangeButton(Icons.get(Icons.DISPLAY_LAND), ("随机图层"),
+                ("每层可以出现隐藏图块，但怪物不变。你也许能在新图块环境中有更好的作战积极性！")));
+
+        changes.addButton(new ChangeButton(Icons.get(Icons.PREFS), ("全新3大附魔登场"),
+                ("汲能，狂热，重击 附魔登场")));
+
+        changes.addButton(new ChangeButton(Icons.get(Icons.WARNING), ("0层相关问题修复"),
+                ("吞力量，升级，魔能触媒问题修正")));
+
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
+        changes.hardlight(CharSprite.WARNING);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16), Messages.get(ChangesScene.class, "bugfixes"),
+                "修复了以下Bug:\n\n" +
+                        "_来自于 v0.4.0:_\n\n" +
+                        "[修复者：JDSALing]：\n"+
+                        "_-_ 0.修复 斩舰刃 和 两书的问题\n" +
+                        "_-_ 1.移除决斗家\n" +
+                        "_-_ 2.修复 上个版本的一些崩溃问题" ));
     }
 
     public static void add_v03_4_Changes( ArrayList<ChangeInfo> changeInfos ) {
