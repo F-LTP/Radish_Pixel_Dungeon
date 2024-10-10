@@ -64,7 +64,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MonkEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PhysicalEmpower;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Recharging;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Roots;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Slow;
@@ -141,7 +140,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CelestialSphe
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.PneumFistGloves;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Quarterstaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
@@ -1385,15 +1383,7 @@ public class Hero extends Char {
 
 		enemy = action.target;
 
-		if(belongings.weapon instanceof PneumFistGloves){
-			PneumFistGloves pneumFistGloves = (PneumFistGloves) hero.belongings.weapon;
-			if(hero.belongings.weapon != null){
-				//
-			} else {
-
-			}
-			return false;
-		} else if(belongings.weapon instanceof KillBoatSword){
+		if(belongings.weapon instanceof KillBoatSword){
 			KillBoatSword w2 = (KillBoatSword) hero.belongings.weapon;
 			if(hero.belongings.weapon != null){
 				if (!w2.delayAttack && Dungeon.level.adjacent(enemy.pos,pos)) {

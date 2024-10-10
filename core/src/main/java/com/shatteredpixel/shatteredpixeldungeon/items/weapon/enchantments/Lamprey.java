@@ -18,8 +18,10 @@ public class Lamprey extends Weapon.Enchantment {
         if(damage > defender.HP && defender.isAlive()){
             if(Dungeon.hero != null){
                 Wand wand = Dungeon.hero.belongings.getItem(Wand.class);
-                wand.partialCharge += Math.floor(procChanceMultiplier(attacker));
-                wand.partialCharge = Math.min(wand.maxCharges,wand.partialCharge);
+                if(wand != null){
+                    wand.partialCharge += Math.floor(procChanceMultiplier(attacker));
+                    wand.partialCharge = Math.min(wand.maxCharges,wand.partialCharge);
+                }
             }
         }
         return damage;

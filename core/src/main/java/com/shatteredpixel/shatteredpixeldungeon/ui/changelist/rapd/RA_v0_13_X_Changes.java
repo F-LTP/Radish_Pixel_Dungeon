@@ -27,13 +27,19 @@ public class RA_v0_13_X_Changes {
     }
 
     public static void add_v03_5_Changes( ArrayList<ChangeInfo> changeInfos ) {
-        ChangeInfo changes = new ChangeInfo("v0.4.0", true, "");
+        ChangeInfo changes = new ChangeInfo("v0.4.0-1", true, "");
         changes.hardlight(Window.TITLE_COLOR);
         changeInfos.add(changes);
 
         changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
         changes.hardlight(Window.TITLE_COLOR);
         changeInfos.add(changes);
+
+        changes.addButton( new ChangeButton(new ItemSprite(ItemSpriteSheet.PNEGLOVE_FIVE), "新武器：气动拳套",
+                "在启动状态下的每次攻击需要消耗1炼金能量，此武器的伤害上升150%+10%*武器等级，" +
+                        "\n\n" +
+                        "攻击必定命中并会将敌人击退2+0.5*武器等级\n\n"+
+                        "在启动状态下点击周围3*3范围内的非空地格时将会消耗1能量释放冲击波，（无伤害）击退范围内除自己外的单位2+0.5*武器等级"));
 
         changes.addButton(new ChangeButton(Icons.get(Icons.STATS), ("全局优化"),
                 ("每层的初始出怪数量增加2，物品刷新率增加个10%，楼层大小增加15%。")));

@@ -236,7 +236,7 @@ public abstract class Scroll extends Item {
 				MagicStone(true,true);
 				curUser = hero;
 				ShadowBooks(hero);
-				curItem = detach( hero.belongings.backpack );
+				//curItem = detach( hero.belongings.backpack );
 				doRead();
 			}
 
