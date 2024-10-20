@@ -4,7 +4,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
-public class DarkCoat extends Armor{
+public class DarkCoat extends Armor {
 
     {
         image = ItemSpriteSheet.ARMOR_BLACKCOAT;

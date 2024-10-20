@@ -522,7 +522,7 @@ public class ItemSpriteSheet {
 		assignItemRect(ARMOR_HUNTRESS,  13, 15);
 		assignItemRect(ARMOR_DUELIST,   12, 13);
 		assignItemRect(ARMOR_CRAB,   16, 12);
-		assignItemRect(ARMOR_AFTERGLOW,   15, 14);
+		assignItemRect(ARMOR_AFTERGLOW,   16, 16);
 		assignItemRect(ARMOR_RAT,   12, 14);
 		assignItemRect(ARMOR_GREYFEATHER,   14, 13);
 		assignItemRect(ARMOR_AFTERIMAGE,   16, 15);

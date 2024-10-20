@@ -136,7 +136,7 @@ public class GamesInProgress {
 		info.customSeed = Dungeon.customSeedText;
 		info.daily = Dungeon.daily;
 		info.dailyReplay = Dungeon.dailyReplay;
-		
+
 		info.level = Dungeon.hero.lvl;
 		info.str = Dungeon.hero.STR;
 		info.strBonus = Dungeon.hero.STR() - Dungeon.hero.STR;
@@ -146,7 +146,7 @@ public class GamesInProgress {
 		info.shld = Dungeon.hero.shielding();
 		info.heroClass = Dungeon.hero.heroClass;
 		info.subClass = Dungeon.hero.subClass;
-		info.armorTier = Dungeon.hero.tier();
+		info.armorTier = Dungeon.hero.tier_for_image();
 		
 		info.goldCollected = Statistics.goldCollected;
 		info.maxDepth = Statistics.deepestFloor;
