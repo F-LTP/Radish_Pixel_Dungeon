@@ -234,6 +234,7 @@ public abstract class Scroll extends Item {
 				GLog.n( Messages.get(this, "cursed") );
 			} else {
 				MagicStone(true,true);
+				ExoticScrollToScroll(true,true);
 				curUser = hero;
 				ShadowBooks(hero);
 				//curItem = detach( hero.belongings.backpack );
@@ -330,6 +331,11 @@ public abstract class Scroll extends Item {
 	public static boolean allKnown() {
 		return handler.known().size() == Generator.Category.SCROLL.classes.length;
 	}
+
+	//实现法师恶魔天赋4-1 2级效果
+	public void ExoticScrollToScroll(boolean log, boolean original) {
+	}
+
 
 	@Override
 	public int value() {

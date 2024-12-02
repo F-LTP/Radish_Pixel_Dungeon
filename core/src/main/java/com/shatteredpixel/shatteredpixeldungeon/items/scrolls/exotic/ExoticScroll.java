@@ -21,7 +21,9 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Recipe;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
@@ -38,6 +40,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTerror;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTransmutation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
@@ -142,6 +146,21 @@ public abstract class ExoticScroll extends Scroll {
 		if (handler != null && handler.contains(exoToReg.get(this.getClass()))) {
 			image = handler.image(exoToReg.get(this.getClass())) + 16;
 			rune = handler.label(exoToReg.get(this.getClass()));
+		}
+	}
+	@Override
+	public void MagicStone(boolean log,boolean original){
+	}
+
+	//实现法师恶魔天赋4-1 2级效果
+	@Override
+	public void ExoticScrollToScroll(boolean log,boolean original){
+		if(original) {
+			if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 2 && Random.Int(0,100)>=75) {
+				Item scroll = Reflection.newInstance(exoToReg.get(curItem.getClass()));
+				if(log) GLog.p(Messages.get(Scroll.class,"exscrolltoscroll",scroll.name()));
+				Dungeon.level.drop(scroll, curUser.pos);
+			}
 		}
 	}
 
