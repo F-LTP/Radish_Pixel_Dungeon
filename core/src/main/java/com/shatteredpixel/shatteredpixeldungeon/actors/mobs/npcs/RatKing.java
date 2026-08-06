@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.Ratmogrify;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
 import com.shatteredpixel.shatteredpixeldungeon.custom.messages.M;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.KingsCrown;
@@ -35,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RatKingSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.utils.Holiday;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoArmorAbility;
@@ -154,12 +156,21 @@ public class RatKing extends NPC {
 									if (index == 0){
 										if (!Dungeon.hero.powerOfImp) {
 											crown.upgradeArmor(Dungeon.hero, Dungeon.hero.belongings.armor(), new Ratmogrify());
-											((RatKingSprite) sprite).resetAnims();
+											if (sprite instanceof RatKingSprite){
+												((RatKingSprite) sprite).resetAnims();
+											} else if (sprite instanceof SnakeSprite){
+												((SnakeSprite) sprite).resetAnims();
+											}
+
 											yell(Messages.get(RatKing.class, "crown_thankyou"));
 										}else {
 											crown.detach(Dungeon.hero.belongings.backpack);
 											yell(Messages.get(RatKing.class,"crown_gold"));
-											((RatKingSprite) sprite).resetAnims();
+											if (sprite instanceof RatKingSprite){
+												((RatKingSprite) sprite).resetAnims();
+											} else if (sprite instanceof SnakeSprite){
+												((SnakeSprite) sprite).resetAnims();
+											}
 											Dungeon.level.drop(new Gold(10000),Dungeon.hero.pos);
 										}
 									} else if (index == 1) {

@@ -10,7 +10,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 // DoggingDog on 20250415
 public class Chibayari extends LegacyItemWeapon {
     {
-        image = ItemSpriteSheet.DARTS+15;
+        image = ItemSpriteSheet.CHIBAYARI;
         hitSound = Assets.Sounds.HIT_STAB;
         hitSoundPitch = 1.1f;
         RCH = 100000;    //lots of extra reach

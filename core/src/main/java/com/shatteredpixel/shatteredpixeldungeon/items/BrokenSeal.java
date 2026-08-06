@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
@@ -42,7 +43,7 @@ import com.watabou.utils.Bundle;
 
 import java.util.ArrayList;
 
-public class BrokenSeal extends Item {
+public class BrokenSeal extends ItemArmorAttachable {
 
 	public static final String AC_AFFIX = "AFFIX";
 	public boolean hasCurseGlyph(){
@@ -172,6 +173,20 @@ public class BrokenSeal extends Item {
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		glyph = (Armor.Glyph)bundle.get(GLYPH);
+	}
+
+	// ItemArmorAttachable 抽象方法实现
+	@Override
+	public void applyEffect(Hero hero) {
+		Buff.affect(hero, WarriorShield.class).setArmor(attachedTo);
+	}
+
+	@Override
+	public void removeEffect(Hero hero) {
+		WarriorShield shield = hero.buff(WarriorShield.class);
+		if (shield != null) {
+			shield.detach();
+		}
 	}
 
 	public static class WarriorShield extends ShieldBuff {

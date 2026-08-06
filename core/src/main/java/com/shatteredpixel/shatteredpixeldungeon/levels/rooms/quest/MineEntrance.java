@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Blacksmith;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretRoom;
@@ -90,12 +91,11 @@ public class MineEntrance extends CaveRoom {
 		vis.pos(e.x - 1, e.y - 1);
 		level.customTiles.add(vis);
 
-		level.transitions.add(new LevelTransition(level,
-				entrance,
-				LevelTransition.Type.BRANCH_ENTRANCE,
-				Dungeon.depth,
-				0,
-				LevelTransition.Type.BRANCH_EXIT));
+		// 创建返回主线的楼梯（BRANCH_ENTRANCE）
+		LevelTransition t = LevelTransition.branchUp(level, entrance,
+				"mining:main-" + Blacksmith.Quest.entranceDepth(),
+				Branches.MAIN, Blacksmith.Quest.entranceDepth());
+		level.transitions.add(t);
 
 		if (Blacksmith.Quest.Type() == Blacksmith.Quest.CRYSTAL){
 			for (int i = 0; i < width()*height()/2; i ++){

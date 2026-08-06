@@ -39,8 +39,8 @@ public class ShadowBooks extends MeleeWeapon {
         public boolean act() {
             ShadowBooks w2 = (ShadowBooks) hero.belongings.weapon;
             if (w2 != null) {
-                w2.chance = (int) (1 + 0.2*w2.level());
-            }
+            			w2.chance = (int) (1 + 0.2*w2.buffedLvl());
+            		}
             spend(TICK);
             return true;
         }

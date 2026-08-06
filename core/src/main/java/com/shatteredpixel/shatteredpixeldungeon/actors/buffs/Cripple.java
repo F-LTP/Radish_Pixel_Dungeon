@@ -11,7 +11,7 @@
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY, without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
@@ -21,7 +21,14 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Wheelchair;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 
 public class Cripple extends FlavourBuff {
 
@@ -31,9 +38,28 @@ public class Cripple extends FlavourBuff {
 		type = buffType.NEGATIVE;
 		announced = true;
 	}
-	
+
 	@Override
-	public int icon() {
+	public boolean attachTo(Char target) {
+		if (super.attachTo(target)) {
+			// 弹射起步天赋触发：受到残废时获得免费轮椅使用机会
+			if (target instanceof Hero) {
+				Hero hero = (Hero) target;
+				if (hero.heroClass == HeroClass.MOONLIGHT
+						&& hero.pointsInTalent(Talent.CATAPULT_START) >= 1
+						&& hero.buff(CatapultStartCooldown.class) == null) {
+					Buff.affect(hero, CatapultStartBuff.class, 1f);
+					Buff.affect(hero, CatapultStartCooldown.class, CatapultStartCooldown.DURATION);
+					GLog.p(Messages.get(Wheelchair.class, "catapult_triggered"));
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public String icon() {
 		return BuffIndicator.CRIPPLE;
 	}
 

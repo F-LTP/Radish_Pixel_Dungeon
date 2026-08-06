@@ -149,7 +149,7 @@ public class HolyLand extends Item {
 
     public static class DemonSlowSpeed extends FlavourBuff {
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.TIME;
         }
         public void detach() {
@@ -171,7 +171,7 @@ public class HolyLand extends Item {
     };
     public static class MobSlowSpeed extends FlavourBuff {
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.TIME;
         }
 

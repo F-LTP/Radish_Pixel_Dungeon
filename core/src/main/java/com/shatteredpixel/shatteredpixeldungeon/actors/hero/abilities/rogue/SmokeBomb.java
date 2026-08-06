@@ -152,7 +152,7 @@ public class SmokeBomb extends ArmorAbility {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return HeroIcon.SMOKE_BOMB;
 	}
 

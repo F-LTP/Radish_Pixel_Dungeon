@@ -75,7 +75,7 @@ public abstract class DamageWand extends Wand{
 
 		LightKing lightKing = hero.belongings.getItem(LightKing.class);
 		if (lightKing != null) {
-			int lkLvl = lightKing.level();
+			int lkLvl = lightKing.buffedLvl();
 			float[] thresholds = {0.9f, 0.85f, 0.8f, 0.75f};
 			float[] damageModifiers = {1.25f, 1.33f, 1.41f, 1.50f};
 

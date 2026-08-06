@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SnDBGM;
 import com.shatteredpixel.shatteredpixeldungeon.Bones;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -77,6 +78,7 @@ public class CavesBossLevel extends Level {
 
 	@Override
 	public void playLevelMusic() {
+        if (SnDBGM.playLevelMusic()) return;
 		if (locked){
 			if (BossHealthBar.isBleeding()){
 				Music.INSTANCE.play(Assets.Music.CAVES_BOSS_FINALE, true);
@@ -317,7 +319,9 @@ public class CavesBossLevel extends Level {
 		Game.runOnRenderThread(new Callback() {
 			@Override
 			public void call() {
-				Music.INSTANCE.play(Assets.Music.CAVES_BOSS, true);
+				if (!SnDBGM.playLevelMusic()) {
+					Music.INSTANCE.play(Assets.Music.CAVES_BOSS, true);
+				}
 			}
 		});
 

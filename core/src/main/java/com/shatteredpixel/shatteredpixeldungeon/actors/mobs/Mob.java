@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.challenge.SnakeBiteChallengeManager;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -51,6 +52,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MonkEnergy;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicPoint;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Recharging;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Sleep;
@@ -61,10 +63,18 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.Belief;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.dicemage.DiceMageSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Feint;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.FatedDraw;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Drake;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishBoss.GnollShamanKing;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishBoss.GnollKing;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SentryRoom;
 import com.shatteredpixel.shatteredpixeldungeon.effects.*;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -91,7 +101,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CelestialSphere;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
@@ -105,6 +114,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
@@ -157,7 +167,15 @@ public abstract class Mob extends Char {
 		if (firstAdded) {
 			//modify health for ascension challenge if applicable, only on first add
 			float percent = HP / (float) HT;
-			HT = Math.round(HT * AscensionChallenge.statModifier(this));
+			
+			// Apply Ascension Challenge modifier
+			float ascensionMod = AscensionChallenge.statModifier(this);
+			
+			// Apply Cross Level Challenge modifier (next region: -30%, prev region: +30%)
+			float crossLevelMod = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CrossLevelChallenge.statModifier(this);
+			
+			// Apply both modifiers
+			HT = Math.round(HT * ascensionMod * crossLevelMod);
 			HP = Math.round(HT * percent);
 			firstAdded = false;
 		}
@@ -257,6 +275,10 @@ public abstract class Mob extends Char {
 	}
 
 	public CharSprite sprite() {
+		// Snake Bite challenge: all mobs use snake sprite (except those with special sprites)
+		if (SnakeBiteChallengeManager.shouldReplaceMobSprite(this)){
+			return new SnakeSprite();
+		}
 		return Reflection.newInstance(spriteClass);
 	}
 
@@ -951,6 +973,53 @@ public abstract class Mob extends Char {
 	@Override
 	public void die( Object cause ) {
 
+		// DiceMage 死亡着色器效果：根据伤害类型应用 shader
+		if (alignment == Alignment.ENEMY
+				&& Dungeon.hero != null
+				&& Dungeon.hero.subClass == HeroSubClass.DICE_MAGE
+				&& sprite != null
+				&& sprite.parent != null) {
+			com.shatteredpixel.shatteredpixeldungeon.damage.DamageType dmgType = 
+				com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.fromSource(cause);
+			
+			// 根据伤害类型选择 shader
+			com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType shaderType = null;
+			if (dmgType.isElemental()) {
+				switch (dmgType) {
+					case FIRE:
+						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.BURN;
+						break;
+					case FROST:
+						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.ALPHA;
+						break;
+					case LIGHTNING:
+						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.NOISE;
+						break;
+					case TOXIC:
+					case CORROSIVE:
+						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.ACID;
+						break;
+					default:
+						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.ALPHA;
+				}
+			} else if (dmgType == com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.MAGICAL) {
+				shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.SINGULARITY;
+			} else if (dmgType.isPhysical() || dmgType == com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.PHYSICAL_NO_ARMOR) {
+				shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.CUT;
+			}
+			
+			// 应用 shader 效果
+			if (shaderType != null) {
+				com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.apply(this, shaderType, 0.5f);
+			}
+		}
+
+		if (alignment == Alignment.ENEMY
+				&& hero.subClass == HeroSubClass.DICE_MAGE
+				&& (cause == hero || cause instanceof Weapon || cause instanceof Wand || cause instanceof DiceMageSpell)){
+			Buff.affect(hero, MagicPoint.class).recordKill(getClass());
+		}
+
 		if(hero.subClass == HeroSubClass.SNIPER){
 			next();
 		}
@@ -1152,6 +1221,16 @@ public abstract class Mob extends Char {
 		if (buff(SoulMark.class) != null &&
 				Random.Int(10) < Dungeon.hero.pointsInTalent(Talent.SOUL_EATER)){
 			Talent.onFoodEaten(Dungeon.hero, 0, null);
+		}
+
+		//搜刮地皮天赋：注定一抽消耗次数产生掉落
+		FatedDraw.FatedDrawTracker fatedTracker = Dungeon.hero.buff(FatedDraw.FatedDrawTracker.class);
+		if (fatedTracker != null && Dungeon.hero.hasTalent(Talent.LOOT_GROUND)) {
+			Item lootItem = fatedTracker.tryGenLootGroundDrop(Dungeon.hero);
+			if (lootItem != null) {
+				Dungeon.level.drop(lootItem, pos).sprite.drop();
+				RingOfWealth.showFlareForBonusDrop(sprite);
+			}
 		}
 
 	}

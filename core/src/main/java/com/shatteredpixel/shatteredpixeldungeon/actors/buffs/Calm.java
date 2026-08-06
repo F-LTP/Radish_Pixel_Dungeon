@@ -10,7 +10,7 @@ public class Calm extends Buff{
     }
 
     @Override
-    public int icon() {
+    public String icon() {
         return BuffIndicator.TAI_COLD;
     }
 

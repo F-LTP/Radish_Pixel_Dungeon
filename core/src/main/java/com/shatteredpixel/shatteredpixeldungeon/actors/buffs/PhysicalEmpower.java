@@ -35,7 +35,7 @@ public class PhysicalEmpower extends Buff {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.UPGRADE;
 	}
 

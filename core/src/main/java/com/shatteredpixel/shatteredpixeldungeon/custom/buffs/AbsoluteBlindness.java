@@ -64,7 +64,7 @@ public class AbsoluteBlindness extends Buff {
         super.detach();
     }
     @Override
-    public int icon(){
+    public String icon() {
         return BuffIndicator.BLINDNESS;
     }
     @Override

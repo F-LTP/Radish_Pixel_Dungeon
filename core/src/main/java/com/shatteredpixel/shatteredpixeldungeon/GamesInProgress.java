@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.FileUtils;
@@ -46,29 +47,33 @@ public class GamesInProgress {
 	private static final String GAME_FOLDER = "game%d";
 	private static final String GAME_FILE	= "game.dat";
 	private static final String DEPTH_FILE	= "depth%d.dat";
-	private static final String DEPTH_BRANCH_FILE	= "depth%d-branch%d.dat";
+	private static final String DEPTH_BRANCH_ID_FILE = "depth%d-branch_%s.dat";
+
+	/**
+	 * 获取存档文件路径（使用 String branchId）
+	 */
+	public static String depthFile( int slot, int depth, String branchId ) {
+		if (branchId == null || branchId.equals(Branches.MAIN)) {
+			return gameFolder(slot) + "/" + Messages.format(DEPTH_FILE, depth);
+		} else {
+			return gameFolder(slot) + "/" + Messages.format(DEPTH_BRANCH_ID_FILE, depth, branchId);
+		}
+	}
 	
+
 	public static boolean gameExists( int slot ){
 		return FileUtils.dirExists(gameFolder(slot))
 				&& FileUtils.fileLength(gameFile(slot)) > 1;
 	}
-	
+
 	public static String gameFolder( int slot ){
 		return Messages.format(GAME_FOLDER, slot);
 	}
-	
+
 	public static String gameFile( int slot ){
 		return gameFolder(slot) + "/" + GAME_FILE;
 	}
-	
-	public static String depthFile( int slot, int depth, int branch ) {
-		if (branch == 0) {
-			return gameFolder(slot) + "/" + Messages.format(DEPTH_FILE, depth);
-		} else {
-			return gameFolder(slot) + "/" + Messages.format(DEPTH_BRANCH_FILE, depth, branch);
-		}
-	}
-	
+
 	public static int firstEmpty(){
 		for (int i = 1; i <= MAX_SLOTS; i++){
 			if (check(i) == null) return i;

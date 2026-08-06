@@ -52,15 +52,14 @@ public class Healing extends Buff {
 	@Override
 	public boolean act(){
 
-		if (target.HP < target.HT) {
-			target.HP = Math.min(target.HT, target.HP + healingThisTick());
-
-			if (target.HP == target.HT && target instanceof Hero) {
-				((Hero) target).resting = false;
-			}
-
-			target.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(healingThisTick()), FloatingText.HEALING);
+		if (target instanceof Hero) {
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToyEffects.heal((Hero) target, healingThisTick());
+			if (target.HP == target.HT) ((Hero) target).resting = false;
+		} else if (target.HP < target.HT) {
+				target.HP = Math.min(target.HT, target.HP + healingThisTick());
 		}
+		if (target.HP < target.HT || target instanceof Hero) target.sprite.showStatusWithIcon(
+				CharSprite.POSITIVE, Integer.toString(healingThisTick()), FloatingText.HEALING);
 
 		healingLeft -= healingThisTick();
 		
@@ -128,7 +127,7 @@ public class Healing extends Buff {
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.HEALING;
 	}
 
@@ -150,7 +149,7 @@ public class Healing extends Buff {
 		}
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.HERB_HEALING;
 		}
 	}

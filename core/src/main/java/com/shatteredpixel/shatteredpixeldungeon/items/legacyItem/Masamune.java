@@ -71,7 +71,7 @@ public class Masamune extends MeleeWeapon {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.BLESS;
         }
 

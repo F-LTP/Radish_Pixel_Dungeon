@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.remains.RemainsItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.FileUtils;
 import com.watabou.utils.Random;
@@ -43,12 +44,12 @@ public class Bones {
 	private static final String BONES_FILE	= "bones.dat";
 	
 	private static final String LEVEL	= "level";
-	private static final String BRANCH	= "branch";
+	private static final String BRANCH_ID	= "branch_id";
 	private static final String ITEM	= "item";
 	private static final String HERO_CLASS	= "hero_class";
 
 	private static int depth = -1;
-	private static int branch = -1;
+	private static String branchId = null;
 
 	private static Item item;
 	private static HeroClass heroClass;
@@ -59,11 +60,12 @@ public class Bones {
 		// but are capped at 5 floors above the lowest depth reached (even when ascending)
 		depth = Math.max(Dungeon.depth, Statistics.deepestFloor-5);
 
-		branch = Dungeon.branch;
+		branchId = Dungeon.branchId;
 
 		//daily runs do not interact with remains
 		if (Dungeon.daily) {
-			depth = branch = -1;
+			depth = -1;
+			branchId = null;
 			return;
 		}
 
@@ -72,7 +74,7 @@ public class Bones {
 
 		Bundle bundle = new Bundle();
 		bundle.put( LEVEL, depth );
-		bundle.put( BRANCH, branch );
+		bundle.put( BRANCH_ID, branchId );
 		bundle.put( ITEM, item );
 		bundle.put( HERO_CLASS, heroClass );
 
@@ -163,7 +165,9 @@ public class Bones {
 				Bundle bundle = FileUtils.bundleFromFile(BONES_FILE);
 
 				depth = bundle.getInt( LEVEL );
-				branch = bundle.getInt( BRANCH );
+				
+					branchId = bundle.getString(BRANCH_ID);
+				
 				if (depth > 0) {
 					if (bundle.contains(ITEM)) {
 						item = (Item) bundle.get(ITEM);
@@ -258,11 +262,11 @@ public class Bones {
 	}
 
 	private static boolean lootAtCurLevel(){
-		if (branch == Dungeon.branch) {
-			if (branch == 0) {
+		if (branchId != null && branchId.equals(Dungeon.branchId)) {
+			if (branchId.equals(Branches.MAIN)) {
 				//always match depth exactly for main path
 				return depth == Dungeon.depth;
-			} else if (branch == 1) {
+			} else {
 				//just match the region for quest sub-floors
 				return depth/5 == Dungeon.depth/5;
 			}

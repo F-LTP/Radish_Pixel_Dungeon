@@ -27,16 +27,19 @@ import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.QuickSlot;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
+import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.Belief;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.Ratmogrify;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.NaturesPower;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpectralBlades;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpiritHawk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.ElementalBlast;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.WarpBeacon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.WildMagic;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.AshKing;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.FatedDraw;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.ToyBackpack;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rector.GodsPossesion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rector.LastPrayer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rector.ShadowHymn;
@@ -56,6 +59,9 @@ import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.ImmortalShieldAf
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.LevelTeleporter;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.MobAttributeViewer;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.MobPlacer;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.SnakeBiteToggle;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.SnDItemBox;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TalentSetter;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TerrainPlacer;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TestBag;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TimeReverser;
@@ -76,6 +82,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.alive.StoneOfCard;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.MagneticCrown;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Wheelchair;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.PotionBandolier;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.ScrollHolder;
@@ -91,12 +98,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Starlight;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Sunless;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Turtleir;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Wastelandew;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfInvisibility;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLiquidFlame;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfMindVision;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.SmallWoodenCross;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfIdentify;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfLullaby;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
@@ -117,8 +121,16 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingKnife;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingStone;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndKeyBindings;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
+import com.watabou.noosa.Image;
 import com.watabou.utils.DeviceCompat;
+import com.watabou.utils.Random;
+import com.watabou.utils.Reflection;
+
+import java.util.HashSet;
 
 public enum HeroClass {
 
@@ -128,7 +140,8 @@ public enum HeroClass {
 	HUNTRESS( HeroSubClass.SNIPER, HeroSubClass.WARDEN ),
 
 	//New Hero-Radish Pixel Dungeon
-	RECTOR( HeroSubClass.BATTLEPREIST, HeroSubClass.REDCARDINAL, HeroSubClass.DEAD_KNIGHT);
+	RECTOR( HeroSubClass.BATTLEPREIST, HeroSubClass.REDCARDINAL, HeroSubClass.DEAD_KNIGHT),
+	MOONLIGHT( HeroSubClass.LITTLE_KNIGHT, HeroSubClass.DICE_MAGE, HeroSubClass.JUTTE_CHAMPION);
 
 //	DUELIST( HeroSubClass.CHAMPION, HeroSubClass.MONK );
 
@@ -173,6 +186,10 @@ public enum HeroClass {
 		customWeapon.identify().collect();
 
 		new CustomPlayer().collect();
+		
+		new SnakeBiteToggle().collect();
+
+		new TalentSetter().collect();
 
 		new TestBag().collect();
 
@@ -193,6 +210,7 @@ public enum HeroClass {
 		new SpawnWeapon().collect();
 		new TestMissile().collect();
 		new TestRing().collect();
+		new SnDItemBox().collect();
 		//new TestPotion().collect();
 
 		new TestTalentOFTerminalBook().collect();
@@ -235,14 +253,23 @@ public enum HeroClass {
 		hero.heroClass = this;
 		Talent.initClassTalents(hero);
 
+		// Snake Bite challenge: start with 11 strength
+		if (Dungeon.isChallenged(Challenges.SNAKE_BITE)) {
+			hero.STR = Hero.STARTING_STR + 1;
+		}
+
 		Item i = new ClothArmor().identify();
 		if (!Challenges.isItemBlocked(i)) hero.belongings.armor = (ClothArmor)i;
 
 		i = new Food();
 		if (!Challenges.isItemBlocked(i)) i.collect();
 
-		new VelvetPouch().collect();
-		Dungeon.LimitedDrops.VELVET_POUCH.drop();
+		// 牧师不初始携带绒布包，商人会售卖
+		// TODO 这里应该重构成每个职业在init里面添加对应的背包
+		if (this != RECTOR && this != MOONLIGHT) {
+			new VelvetPouch().collect();
+			Dungeon.LimitedDrops.VELVET_POUCH.drop();
+		}
 
 		Waterskin waterskin = new Waterskin();
 		waterskin.collect();
@@ -268,6 +295,10 @@ public enum HeroClass {
 
 			case RECTOR:
 				initRector( hero );
+				break;
+
+			case MOONLIGHT:
+				initMoonlight( hero );
 				break;
 		}
 
@@ -353,6 +384,49 @@ public enum HeroClass {
 		new ScrollOfRemoveCurse().identify();
 	}
 
+	private static void initMoonlight( Hero hero ) {
+		Wheelchair wheelchair = new Wheelchair();
+		(hero.belongings.artifact = wheelchair).identify();
+		hero.belongings.artifact.activate( hero );
+		// 初始武器：所有角色的初始武器
+		(hero.belongings.weapon = new WornShortsword()).identify();
+		new Dagger().identify().collect();
+		new Gloves().identify().collect();
+		new MagicalHolster().collect();
+		new MagesStaff().identify().collect();
+		Dart knives = new Dart();
+		knives.quantity(3).collect();
+
+		Dungeon.quickslot.setSlot(0, wheelchair);
+		Dungeon.quickslot.setSlot(1, knives);
+		// 初始物品：力量药剂、升级卷轴、鉴定卷轴已鉴定
+		// 以及四种随机卷轴与药水
+		new PotionOfStrength().identify();
+		new ScrollOfUpgrade().identify();
+		new ScrollOfIdentify().identify();
+
+		int scrollCount = Random.Int(5); // 0-4
+		int potionCount = 4 - scrollCount;
+
+		HashSet<Class<? extends Scroll>> unknownScrolls = Scroll.getUnknown();
+		for (int i = 0; i < scrollCount && !unknownScrolls.isEmpty(); i++) {
+			Class<? extends Scroll> scrollClass = Random.element(unknownScrolls);
+			Reflection.newInstance(scrollClass).identify();
+			unknownScrolls.remove(scrollClass);
+		}
+
+		HashSet<Class<? extends Potion>> unknownPotions = Potion.getUnknown();
+		for (int i = 0; i < potionCount && !unknownPotions.isEmpty(); i++) {
+			Class<? extends Potion> potionClass = Random.element(unknownPotions);
+			Reflection.newInstance(potionClass).identify();
+			unknownPotions.remove(potionClass);
+		}
+
+		// 月华生命值调整：-2 最大生命值，-1 成长
+		hero.HT = hero.HT - 2;
+		hero.HP = hero.HT;
+	}
+
 	public String title() {
 		return Messages.get(HeroClass.class, name());
 	}
@@ -381,6 +455,8 @@ public enum HeroClass {
 				return new ArmorAbility[]{new SpectralBlades(), new NaturesPower(), new SpiritHawk()};
 			case RECTOR:
 				return new ArmorAbility[]{new LastPrayer(),new ShadowHymn(),new GodsPossesion()};
+			case MOONLIGHT:
+				return new ArmorAbility[]{new FatedDraw(), new ToyBackpack(), new AshKing()};
 		}
 	}
 
@@ -396,6 +472,8 @@ public enum HeroClass {
 				return Assets.Sprites.HUNTRESS;
 			case RECTOR:
 				return Assets.Sprites.RECTOR;
+			case MOONLIGHT:
+				return Assets.Sprites.MOONLIGHT;
 		}
 	}
 
@@ -411,6 +489,8 @@ public enum HeroClass {
 				return Assets.Splashes.HUNTRESS;
 			case RECTOR:
 				return Assets.Splashes.RECTOR;
+			case MOONLIGHT:
+				return Assets.Splashes.MOONLIGHT;
 		}
 	}
 	
@@ -427,6 +507,8 @@ public enum HeroClass {
 				return Badges.isUnlocked(Badges.Badge.UNLOCK_HUNTRESS);
 			case RECTOR:
 				return true;
+			case MOONLIGHT:
+				return true; // TODO: 添加解锁条件
 			case WARRIOR: default:
 				return true;
 		}
@@ -434,6 +516,85 @@ public enum HeroClass {
 	
 	public String unlockMsg() {
 		return shortDesc() + "\n\n" + Messages.get(HeroClass.class, name()+"_unlock");
+	}
+
+	public String GetSkinAssest(){
+		switch (this) {
+			case WARRIOR: default:
+				return Assets.Sprites.AVATARS_WARRIOR;
+			case MAGE:
+				return Assets.Sprites.AVATARS_MAGE;
+			case ROGUE:
+				return Assets.Sprites.AVATARS_ROGUE;
+			case HUNTRESS:
+				return Assets.Sprites.AVATARS_HUNTRESS;
+			case RECTOR:
+				return Assets.Sprites.AVATARS_RECTOR;
+			case MOONLIGHT:
+				return Assets.Sprites.AVATARS_MOONLIGHT;
+		}
+	}
+
+	private static boolean onlyMode = false;
+
+
+
+	/**
+	 *
+	 * @param skinIndex 注意皮肤iNDEX与PNG索引有关
+	 */
+	public void SetSkin(int skinIndex){
+		boolean isSkinUnlock = false;
+		Image img = new Image(this.GetSkinAssest());
+		int skinCount = img.texture.width/64;
+
+		if(skinIndex==0){
+			isSkinUnlock = true;
+		}else {
+			while ( skinIndex < skinCount ) {
+				switch (this) {
+					case WARRIOR:
+					default:
+						isSkinUnlock = SPDSettings.isItemUnlock("avatars_warrior_" + skinIndex);
+						break;
+					case MAGE:
+						isSkinUnlock = SPDSettings.isItemUnlock("avatars_mage_" + skinIndex);
+						break;
+					case ROGUE:
+						isSkinUnlock = SPDSettings.isItemUnlock("avatars_rogue_" + skinIndex);
+						break;
+					case HUNTRESS:
+						isSkinUnlock = SPDSettings.isItemUnlock("avatars_huntress_" + skinIndex);
+						break;
+					case RECTOR:
+						isSkinUnlock = SPDSettings.isItemUnlock("avatars_rector_" + skinIndex);
+						break;
+					case MOONLIGHT:
+						isSkinUnlock = SPDSettings.isItemUnlock("avatars_moonlight_" + skinIndex);
+						break;
+				}
+				if(!isSkinUnlock){
+					skinIndex++;
+				}else {
+					break;
+				}
+			}
+		}
+
+		if(!isSkinUnlock){
+			skinIndex=0;
+			if(!onlyMode){
+				ShatteredPixelDungeon.scene().addToFront(new WndMessage(Messages.get(WndKeyBindings.class,"switch_skin")));
+				onlyMode = true;
+			}
+		}
+
+
+		SPDSettings.setHeroSkin(this.ordinal(),skinIndex);
+	}
+
+	public int GetSkin(){
+		return SPDSettings.getHeroSkin(this.ordinal());
 	}
 
 }

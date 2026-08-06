@@ -34,6 +34,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.ArmoredStatue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Blacksmith;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
+import com.shatteredpixel.shatteredpixeldungeon.events.HeroTrampleGrassEvent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Dewdrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -62,6 +64,11 @@ public class HighGrass {
 		if (freezeTrample) return;
 		
 		Char ch = Actor.findChar(pos);
+
+		// 发布踩踏高草事件（仅对英雄）
+		if (ch instanceof Hero) {
+			EventManager.emit(new HeroTrampleGrassEvent((Hero) ch, level, pos));
+		}
 
 		if (ch instanceof Hero && ((Hero) ch).hasTalent(Talent.UNDERESTIMATED)){
 			int berriesAvailable = 2 + 4*((Hero) ch).pointsInTalent(Talent.UNDERESTIMATED);

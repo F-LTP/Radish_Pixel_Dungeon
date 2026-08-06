@@ -124,7 +124,7 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		if (momentumStacks > 0 || freerunCooldown > 0)  return BuffIndicator.MOMENTUM;
 		else                                            return BuffIndicator.NONE;
 	}
@@ -212,7 +212,7 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 	}
 
 	@Override
-	public int actionIcon() {
+	public String actionIcon() {
 		return HeroIcon.MOMENTUM;
 	}
 

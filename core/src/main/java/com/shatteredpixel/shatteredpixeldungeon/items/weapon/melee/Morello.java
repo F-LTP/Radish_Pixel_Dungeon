@@ -49,9 +49,9 @@ public class Morello extends MeleeWeapon {
 
        public void updateMaxCharge(Hero hero){
            if(hero.belongings.weapon instanceof Morello){
-               KindOfWeapon morello = hero.belongings.weapon;
-               this.buffCharge = 2 + (int)Math.ceil(morello.level() * 0.5f);
-           }
+           			KindOfWeapon morello = hero.belongings.weapon;
+           			this.buffCharge = 2 + (int)Math.ceil(morello.buffedLvl() * 0.5f);
+           		}
        }
 
         @Override
@@ -65,7 +65,7 @@ public class Morello extends MeleeWeapon {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.UPGRADE;
         }
 

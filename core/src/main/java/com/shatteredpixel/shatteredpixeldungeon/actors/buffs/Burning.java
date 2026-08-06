@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Thief;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ElmoParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -94,13 +95,15 @@ public class Burning extends Buff implements Hero.Doom {
 			int damage = Char.combatRoll( 1, 3 + Dungeon.scalingDepth()/4 );
 			Buff.detach( target, Chill.class);
 
+			DamageInfo dmgInfo = DamageInfo.burningStatus(damage, this);
+
 			if (target instanceof Hero
 					&& target.buff(TimekeepersHourglass.timeStasis.class) == null
 					&& target.buff(TimeStasis.class) == null) {
 
 				Hero hero = (Hero)target;
 
-				hero.damage( damage, this );
+				hero.damage( dmgInfo );
 				burnIncrement++;
 
 				//at 4+ turns, there is a (turns-3)/3 chance an item burns
@@ -131,7 +134,7 @@ public class Burning extends Buff implements Hero.Doom {
 				}
 
 			} else {
-				target.damage( damage, this );
+				target.damage( dmgInfo );
 			}
 
 			if (target instanceof Thief && ((Thief) target).item != null) {
@@ -197,7 +200,7 @@ public class Burning extends Buff implements Hero.Doom {
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.FIRE;
 	}
 

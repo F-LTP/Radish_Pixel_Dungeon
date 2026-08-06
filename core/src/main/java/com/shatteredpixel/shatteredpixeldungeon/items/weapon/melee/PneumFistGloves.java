@@ -38,7 +38,7 @@ public class PneumFistGloves extends MeleeWeapon {
         return actions;
     }
 
-    public int image() {
+    public String image() {
         if (active){
             super.image = ItemSpriteSheet.PNEGLOVE_ACTIVE;
         } else {
@@ -113,5 +113,4 @@ public class PneumFistGloves extends MeleeWeapon {
         bundle.put("active_boolean", active);
     }
 }
-
 

@@ -23,7 +23,7 @@ public class FaithObstruction extends FlavourBuff {
     }
 
     @Override
-    public int icon() {
+    public String icon() {
         return BuffIndicator.BELIEF_DNOT;
     }
 

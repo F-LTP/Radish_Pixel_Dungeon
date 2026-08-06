@@ -297,7 +297,7 @@ public class Gorgon extends Mob {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.TERROR;
         }
 

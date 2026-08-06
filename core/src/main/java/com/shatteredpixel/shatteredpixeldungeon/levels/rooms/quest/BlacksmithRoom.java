@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.StandardRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.BurningTrap;
@@ -89,12 +90,10 @@ public class BlacksmithRoom extends StandardRoom {
 		vis.pos(entrancePos, level);
 		level.customTiles.add(vis);
 
-		level.transitions.add(new LevelTransition(level,
-				entrancePos,
-				LevelTransition.Type.BRANCH_EXIT,
-				Dungeon.depth,
-				Dungeon.branch + 1,
-				LevelTransition.Type.BRANCH_ENTRANCE));
+		// 创建通往 mining 分支的楼梯（BRANCH_ENTRANCE）
+		LevelTransition t = LevelTransition.branchDown(level, entrancePos,
+				"mining:main-" + Dungeon.depth, Branches.MINING, 1);
+		level.transitions.add(t);
 		Painter.set(level, entrancePos, Terrain.EXIT);
 
 		for(Point p : getPoints()) {

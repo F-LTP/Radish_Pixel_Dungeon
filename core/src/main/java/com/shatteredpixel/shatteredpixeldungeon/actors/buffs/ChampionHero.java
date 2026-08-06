@@ -75,7 +75,7 @@ public abstract class ChampionHero extends Buff {
 
 
     @Override
-    public int icon() {
+    public String icon() {
         return BuffIndicator.CORRUPT;
     }
 
@@ -184,7 +184,7 @@ public abstract class ChampionHero extends Buff {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.AMULET;
         }
 

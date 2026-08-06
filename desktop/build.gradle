@@ -12,6 +12,7 @@ application {
     mainClass = appMainClass
 }
 processResources {
+    dependsOn rootProject.tasks.named('generateRuntimeAtlasManifests')
     from new File(project(':core').projectDir, "/src/main/assets")
     from new File(project(':desktop').projectDir,"/src/main/assets")
 }
@@ -124,6 +125,9 @@ runtime {
 
 dependencies {
     implementation project(':core')
+    // 事件系统 APT 依赖（桌面端需要注解处理器）
+    annotationProcessor project(':event-processor')
+    annotationProcessor 'com.google.auto.service:auto-service:1.1.1'
 
     implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"

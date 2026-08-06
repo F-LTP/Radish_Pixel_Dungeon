@@ -122,7 +122,7 @@ public class SpiritHawk extends ArmorAbility {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return HeroIcon.SPIRIT_HAWK;
 	}
 

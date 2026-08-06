@@ -40,6 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.Brew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -215,16 +216,59 @@ public class Dart extends MissileWeapon {
 	@Override
 	public String info() {
 		updateCrossbow();
-		if (bow != null && !bow.isIdentified()){
-			int level = bow.level();
-			//temporarily sets the level of the bow to 0 for IDing purposes
-			bow.level(0);
-			String info = super.info();
-			bow.level(level);
-			return info;
-		} else {
-			return super.info();
+		String info = desc();
+		
+		int min = Math.round(augment.damageFactor(min()));
+		int max = Math.round(augment.damageFactor(max()));
+		
+		info += "\n\n" + Messages.get( MissileWeapon.class, "stats",
+				tier,
+				min,
+				max,
+				STRReq());
+		
+		if (Dungeon.hero != null) {
+			if (STRReq() > Dungeon.hero.STR()) {
+				info += " " + Messages.get(Weapon.class, "too_heavy");
+			} else if (Dungeon.hero.STR() > STRReq()) {
+				info += " " + Messages.get(Weapon.class, "excess_str", Dungeon.hero.STR() - STRReq());
+			}
 		}
+		
+		// 显示弩加成提示
+		if (bow != null) {
+			int bowMin = min();
+			int bowMax = max();
+			info += "\n\n" + Messages.get(this, "crossbow_bonus", bow.name(), bowMin, bowMax);
+		}
+
+		if (enchantment != null && (cursedKnown || !enchantment.curse())){
+			info += "\n\n" + Messages.get(Weapon.class, "enchanted", enchantment.name());
+			info += " " + Messages.get(enchantment, "desc");
+		}
+
+		if (cursed && isEquipped( Dungeon.hero )) {
+			info += "\n\n" + Messages.get(Weapon.class, "cursed_worn");
+		} else if (cursedKnown && cursed) {
+			info += "\n\n" + Messages.get(Weapon.class, "cursed");
+		} else if (!isIdentified() && cursedKnown){
+			info += "\n\n" + Messages.get(Weapon.class, "not_cursed");
+		}
+
+		info += "\n\n" + Messages.get(MissileWeapon.class, "distance");
+		
+		info += "\n\n" + Messages.get(this, "durability");
+		
+		if (durabilityPerUse() > 0){
+			info += " " + Messages.get(this, "uses_left",
+					(int)Math.ceil(durability/durabilityPerUse()),
+					(int)Math.ceil(MAX_DURABILITY/durabilityPerUse()));
+		} else {
+			info += " " + Messages.get(this, "unlimited_uses");
+		}
+		
+		
+		return info;
 	}
 
 	@Override
@@ -381,7 +425,14 @@ public class Dart extends MissileWeapon {
 
 			final String[] options;
 
-			singleSeedDarts = 4;
+			// 守望4-3 药水涂飞镖数量加成
+			int baseDarts = 4;
+			if (Dungeon.hero != null && Dungeon.hero.hasTalent(Talent.MORE_DARTS)) {
+				int points = Dungeon.hero.pointsInTalent(Talent.MORE_DARTS);
+				// +1: 4枚, +2: 6枚
+				baseDarts = (points >= 2) ? 6 : 4;
+			}
+			singleSeedDarts = baseDarts;
 			options = new String[]{
 					Messages.get(Dart.class, "tip_potion"),
 					Messages.get(Dart.class, "tip_cancel")};

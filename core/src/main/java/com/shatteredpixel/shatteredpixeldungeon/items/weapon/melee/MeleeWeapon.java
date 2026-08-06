@@ -235,19 +235,20 @@ public class MeleeWeapon extends Weapon {
 	@Override
 	public int buffedLvl() {
 
-		if(hero.belongings.weapon == this ) {
+		if (hero != null && hero.belongings.weapon == this) {
 			GoldRadish goldRadish = hero.belongings.getItem(GoldRadish.class);
 			if(goldRadish != null){
 				return goldRadish.fixedLevel(goldRadish.buffedLvl());
 			}
 
 			RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
+			// 塑形玻璃的虚拟等级需要与国王之戒的虚拟等级叠加
 			if(riverGlass != null && hero.buff(BlessAWP.WeaponGetReady.class)!=null && hero.belongings.weapon() == this) {
-				return super.buffedLvl() + 1 + riverGlass.level() + 1;
+				return super.buffedLvl() + 1 + riverGlass.level() + 1 + RingOfKing.updateMultiplier(Dungeon.hero);
 			} else if(hero.buff(BlessAWP.WeaponGetReady.class)!=null && hero.belongings.weapon() == this){
-				return super.buffedLvl()+1;
+				return super.buffedLvl() + 1 + RingOfKing.updateMultiplier(Dungeon.hero);
 			} else if(riverGlass != null){
-				return super.buffedLvl() + riverGlass.level() + 1;
+				return super.buffedLvl() + riverGlass.level() + 1 + RingOfKing.updateMultiplier(Dungeon.hero);
 			}
 
 			if (hero.pointsInTalent(Talent.GIFT) > 0) {
@@ -270,15 +271,14 @@ public class MeleeWeapon extends Weapon {
 			}
 
 			if(Dungeon.hero.buff( Degrade.class ) != null){
-				return super.buffedLvl();
-			} else {
-				return hero.belongings.weapon.level() + RingOfKing.updateMultiplier(Dungeon.hero);
-			}
+						return super.buffedLvl();
+					} else {
+						return hero.belongings.weapon.level() + RingOfKing.updateMultiplier(Dungeon.hero);
+					}
 		}
 
 
-
-		if (isEquipped( hero ) || hero.belongings.contains( this )){
+		if (hero != null && (isEquipped(hero) || hero.belongings.contains(this))){
 			return super.buffedLvl();
 		} else {
 			return level();
@@ -515,7 +515,7 @@ public class MeleeWeapon extends Weapon {
 		}
 
 		@Override
-		public int actionIcon() {
+		public String actionIcon() {
 			return HeroIcon.WEAPON_SWAP;
 		}
 

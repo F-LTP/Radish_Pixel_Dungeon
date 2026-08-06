@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurse;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.SpectralNecromancerSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
@@ -53,6 +54,8 @@ public class SpectralNecromancer extends Necromancer {
 			summoning = false;
 			if (sprite instanceof SpectralNecromancerSprite) {
 				((SpectralNecromancerSprite) sprite).cancelSummoning();
+			} else if (sprite instanceof SnakeSprite) {
+				((SnakeSprite) sprite).cancelSummoning();
 			}
 		}
 		return super.act();
@@ -109,7 +112,11 @@ public class SpectralNecromancer extends Necromancer {
 			//cancel if character cannot be moved
 			if (Char.hasProp(Actor.findChar(summoningPos), Property.IMMOVABLE)){
 				summoning = false;
-				((SpectralNecromancerSprite)sprite).finishSummoning();
+				if (sprite instanceof SpectralNecromancerSprite) {
+					((SpectralNecromancerSprite)sprite).finishSummoning();
+				} else if (sprite instanceof SnakeSprite) {
+					((SnakeSprite)sprite).finishSummoning();
+				}
 				spend(TICK);
 				return;
 			}
@@ -154,7 +161,11 @@ public class SpectralNecromancer extends Necromancer {
 		Wraith wraith = Wraith.spawnAt(summoningPos, Wraith.class);
 		wraith.adjustStats(0);
 		Dungeon.level.occupyCell( wraith );
-		((SpectralNecromancerSprite)sprite).finishSummoning();
+		if (sprite instanceof SpectralNecromancerSprite) {
+			((SpectralNecromancerSprite)sprite).finishSummoning();
+		} else if (sprite instanceof SnakeSprite) {
+			((SnakeSprite)sprite).finishSummoning();
+		}
 
 		for (Buff b : buffs(AllyBuff.class)){
 			Buff.affect( wraith, b.getClass());

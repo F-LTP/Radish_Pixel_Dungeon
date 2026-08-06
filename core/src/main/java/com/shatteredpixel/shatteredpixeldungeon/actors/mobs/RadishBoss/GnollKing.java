@@ -158,7 +158,7 @@ public class GnollKing extends Mob {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.MIND_VISION;
         }
 

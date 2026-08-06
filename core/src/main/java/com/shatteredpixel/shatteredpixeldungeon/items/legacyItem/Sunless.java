@@ -17,7 +17,7 @@ import com.watabou.utils.Bundle;
 // 薄暮
 public class Sunless extends LegacyItemArmor {
     {
-        image = ItemSpriteSheet.STONE_SHOCK+6;
+        image = ItemSpriteSheet.SUNLESS;
     }
 
     public Sunless() {
@@ -51,7 +51,7 @@ public class Sunless extends LegacyItemArmor {
         private boolean inGas = false;
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.BLESS;
         }
 

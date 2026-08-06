@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MoveCount;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
@@ -356,7 +357,7 @@ public class TalismanOfForesight extends Artifact {
 		}
 
 		@Override
-		public int icon() {
+		public String icon() {
 			if (warn)
 				return BuffIndicator.FORESIGHT;
 			else
@@ -395,11 +396,11 @@ public class TalismanOfForesight extends Artifact {
 
 		public int pos;
 		public int depth = Dungeon.depth;
-		public int branch = Dungeon.branch;
+		public String branchId = Dungeon.branchId;
 
 		private static final String POS = "pos";
 		private static final String DEPTH = "depth";
-		private static final String BRANCH = "branch";
+		private static final String BRANCH_ID = "branch_id";
 
 		@Override
 		public void detach() {
@@ -413,7 +414,7 @@ public class TalismanOfForesight extends Artifact {
 			super.restoreFromBundle(bundle);
 			pos = bundle.getInt(POS);
 			depth = bundle.getInt(DEPTH);
-			branch = bundle.getInt(BRANCH);
+			branchId = bundle.getString(BRANCH_ID);
 		}
 
 		@Override
@@ -421,7 +422,7 @@ public class TalismanOfForesight extends Artifact {
 			super.storeInBundle(bundle);
 			bundle.put(POS, pos);
 			bundle.put(DEPTH, depth);
-			bundle.put(BRANCH, branch);
+			bundle.put(BRANCH_ID, branchId);
 		}
 	}
 

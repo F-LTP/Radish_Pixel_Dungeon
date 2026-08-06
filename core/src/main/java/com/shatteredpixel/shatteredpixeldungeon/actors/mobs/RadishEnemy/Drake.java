@@ -3,6 +3,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 import static com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave.throwChar;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -41,12 +42,10 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.DrakeSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
-import com.watabou.utils.Bundle;
-import com.watabou.utils.Callback;
-import com.watabou.utils.PathFinder;
-import com.watabou.utils.Random;
+import com.watabou.utils.*;
 
 public class Drake extends Mob {
     {
@@ -323,9 +322,14 @@ public class Drake extends Mob {
     }
     @Override
     public CharSprite sprite() {
-        DrakeSprite sprite = (DrakeSprite) super.sprite();
-        if (alignment == Alignment.NEUTRAL) sprite.hideDrake();
-        return sprite;
+        if (alignment == Alignment.NEUTRAL && !isStopHiding) {
+            DrakeSprite sprite = (DrakeSprite) Reflection.newInstance(DrakeSprite.class);
+            sprite.hideDrake();
+            return sprite;
+        }
+        return Dungeon.isChallenged(Challenges.SNAKE_BITE)
+                ? new SnakeSprite()
+                : Reflection.newInstance(DrakeSprite.class);
     }
     @Override
     public void onAttackComplete() {

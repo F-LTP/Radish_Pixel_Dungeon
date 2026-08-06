@@ -78,7 +78,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotio
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfCompression;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfConcentration;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfDestruction;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfElements;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEvasion;
@@ -355,7 +357,7 @@ public class Generator {
 			if (catResult != -1) return catResult*100 + subResult;
 
 			//items without a category-defined order are sorted based on the spritesheet
-			return Short.MAX_VALUE+item.image();
+			return Short.MAX_VALUE + (item.image().hashCode() & 0x7FFF);
 		}
 
 		static {
@@ -671,7 +673,9 @@ public class Generator {
 			FOOD.probs = FOOD.defaultProbs.clone();
 
 			RING.classes = new Class<?>[]{
+					RingOfCompression.class,
 					RingOfConcentration.class,
+					RingOfDestruction.class,
 					RingOfArcana.class,
 					RingOfBenediction.class,
 					RingOfEvasion.class,
@@ -685,7 +689,7 @@ public class Generator {
 					RingOfTenacity.class,
 					RingOfWealth.class,
 					RingOfKing.class};
-			RING.probs = new float[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+			RING.probs = new float[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 			//RING.probs = RING.defaultProbs.clone();
 			
 			ARTIFACT.classes = new Class<?>[]{

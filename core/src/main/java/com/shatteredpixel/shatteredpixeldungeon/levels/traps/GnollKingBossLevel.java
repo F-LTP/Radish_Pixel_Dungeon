@@ -3,6 +3,7 @@ package com.shatteredpixel.shatteredpixeldungeon.levels.traps;
 import static com.shatteredpixel.shatteredpixeldungeon.levels.Terrain.WALL;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SnDBGM;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -34,9 +35,15 @@ public class GnollKingBossLevel extends Level {
 
     private static final int WIDTH = 19;
     private static final int HEIGHT = 19;
+    private static final int GATE_POS = 180;
+    private static final int EXIT_POS = 28;
+    private static final int GNOLL_KING_POS = 236;
+    private static final int RETURN_ENTRANCE_POS = 237;
+    private static final int SHAMAN_KING_POS = 238;
 
     @Override
     public void playLevelMusic() {
+        if (SnDBGM.playLevelMusic()) return;
         if (locked){
             if (BossHealthBar.isBleeding()){
                 Music.INSTANCE.play(Assets.Music.CAVES_BOSS_FINALE, true);
@@ -52,16 +59,28 @@ public class GnollKingBossLevel extends Level {
     @Override
     public void occupyCell( Char ch ) {
         super.occupyCell(ch);
-        int gatePos = 180;
-        if (Dungeon.level.distance(ch.pos, gatePos) >= 3 && map[gatePos] == Terrain.ENTRANCE){
+        if (ch == Dungeon.hero && !locked
+                && distance(ch.pos, GATE_POS) >= 3
+                && map[GATE_POS] == Terrain.ENTRANCE) {
             seal();
         }
     }
 
     @Override
     public void seal() {
+        if (locked) return;
+
+        LevelTransition exitTransition = getTransitionByDirection(LevelTransition.Direction.DOWN);
+        if (exitTransition == null) {
+            exitTransition = new LevelTransition(this, EXIT_POS, LevelTransition.Type.REGULAR_EXIT);
+            transitions.add(exitTransition);
+        }
+
         super.seal();
-        int exit = exit();
+        int exit = exitTransition.cell();
+        if (exit < 0 || exit >= length()) {
+            exit = EXIT_POS;
+        }
         set( exit, Terrain.EMPTY );
         GameScene.updateMap( exit );
         Dungeon.observe();
@@ -71,29 +90,31 @@ public class GnollKingBossLevel extends Level {
         Sample.INSTANCE.play( Assets.Sounds.ROCKS );
 
         GnollKing gk = new GnollKing();
-        gk.pos = 236;
+        gk.pos = GNOLL_KING_POS;
         BossHealthBar.assignBoss(gk);
         gk.state = gk.WANDERING;
         GameScene.add(gk);
 
-        CellEmitter.get( 236 ).start( Speck.factory( Speck.BUBBLE ), 0.07f, 10 );
+        CellEmitter.get( GNOLL_KING_POS ).start( Speck.factory( Speck.BUBBLE ), 0.07f, 10 );
         PixelScene.shake( 3, 0.7f );
         Sample.INSTANCE.play( Assets.Sounds.TELEPORT );
 
         GnollShamanKing gsk = new GnollShamanKing();
-        gsk.pos = 238;
+        gsk.pos = SHAMAN_KING_POS;
         BossHealthBar.assignBoss(gsk);
         gsk.state = gsk.WANDERING;
         GameScene.add(gsk);
 
-        CellEmitter.get( 238 ).start( Speck.factory( Speck.BUBBLE ), 0.07f, 10 );
+        CellEmitter.get( SHAMAN_KING_POS ).start( Speck.factory( Speck.BUBBLE ), 0.07f, 10 );
         PixelScene.shake( 3, 0.7f );
         Sample.INSTANCE.play( Assets.Sounds.TELEPORT );
 
         Game.runOnRenderThread(new Callback() {
             @Override
             public void call() {
-                Music.INSTANCE.play(Assets.Music.CAVES_BOSS, true);
+                if (!SnDBGM.playLevelMusic()) {
+                    Music.INSTANCE.play(Assets.Music.CAVES_BOSS, true);
+                }
             }
         });
     }
@@ -103,12 +124,15 @@ public class GnollKingBossLevel extends Level {
         super.unseal();
         transitions.clear();
 
-        int exitpos = 28;
-        LevelTransition exit = new LevelTransition(this, exitpos, LevelTransition.Type.REGULAR_EXIT);
+        LevelTransition exit = new LevelTransition(this, EXIT_POS, LevelTransition.Type.REGULAR_EXIT);
         transitions.add(exit);
-        map[exitpos] = Terrain.LOCKED_EXIT;
+        set(EXIT_POS, Terrain.EXIT);
+        GameScene.updateMap(EXIT_POS);
 
-        int entrance = 237;
+        set(GATE_POS, Terrain.EMPTY);
+        GameScene.updateMap(GATE_POS);
+
+        int entrance = RETURN_ENTRANCE_POS;
         LevelTransition enter = new LevelTransition(this, entrance, LevelTransition.Type.REGULAR_ENTRANCE);
         transitions.add(enter);
 
@@ -150,13 +174,12 @@ public class GnollKingBossLevel extends Level {
         setSize(WIDTH, HEIGHT);
         map = code_map.clone();
 
-        int entrance = 180;
-        int exit = 28;
-
-        LevelTransition ecne = new LevelTransition(this, entrance, LevelTransition.Type.REGULAR_ENTRANCE);
+        LevelTransition ecne = new LevelTransition(this, GATE_POS, LevelTransition.Type.REGULAR_ENTRANCE);
         transitions.add(ecne);
 
-        map[exit] = Terrain.LOCKED_EXIT;
+        LevelTransition exit = new LevelTransition(this, EXIT_POS, LevelTransition.Type.REGULAR_EXIT);
+        transitions.add(exit);
+        map[EXIT_POS] = Terrain.LOCKED_EXIT;
 
         return true;
     }
@@ -183,4 +206,3 @@ public class GnollKingBossLevel extends Level {
     }
 
 }
-

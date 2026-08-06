@@ -24,27 +24,27 @@ public class CelestialSphere extends MeleeWeapon {
     }
 
     @Override
-    public int min(int lvl) {
-        int wandTotalLevel = 0;
-        if(Dungeon.hero != null) {
-            ArrayList<Wand> wands = hero.belongings.getAllItems(Wand.class);
-            for (Wand w : wands.toArray(new Wand[0])) {
-                wandTotalLevel += w.level();
-            }
-        }
+    	public int min(int lvl) {
+    		int wandTotalLevel = 0;
+    		if(Dungeon.hero != null) {
+    			ArrayList<Wand> wands = hero.belongings.getAllItems(Wand.class);
+    			for (Wand w : wands.toArray(new Wand[0])) {
+    				wandTotalLevel += w.buffedLvl();
+    			}
+    		}
 
-        return 3 + lvl + wandTotalLevel;
-    }
+    		return 3 + lvl + wandTotalLevel;
+    	}
     @Override
-    public int max(int lvl) {
-        int wandTotalLevel = 0;
-        if(Dungeon.hero != null) {
-            ArrayList<Wand> wands = hero.belongings.getAllItems(Wand.class);
-            for (Wand w : wands.toArray(new Wand[0])) {
-                wandTotalLevel += w.level();
-            }
-        }
+    	public int max(int lvl) {
+    		int wandTotalLevel = 0;
+    		if(Dungeon.hero != null) {
+    			ArrayList<Wand> wands = hero.belongings.getAllItems(Wand.class);
+    			for (Wand w : wands.toArray(new Wand[0])) {
+    				wandTotalLevel += w.buffedLvl();
+    			}
+    		}
 
-        return 12 + lvl * 3 + wandTotalLevel * 2;
-    }
+    		return 12 + lvl * 3 + wandTotalLevel * 2;
+    	}
 }

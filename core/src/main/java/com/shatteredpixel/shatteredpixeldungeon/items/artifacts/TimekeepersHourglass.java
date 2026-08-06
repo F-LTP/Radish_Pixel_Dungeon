@@ -420,7 +420,7 @@ public class TimekeepersHourglass extends Artifact {
 		}
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.TIME;
 		}
 

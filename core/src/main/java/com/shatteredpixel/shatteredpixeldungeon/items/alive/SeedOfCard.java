@@ -1,5 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.alive;
 
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
@@ -158,8 +160,7 @@ public class SeedOfCard extends TestItem {
                         super.onClick();
                     }
                 };
-                Image im = new Image(Assets.Sprites.ITEMS);
-                im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(seedList.get(i))).image));
+                Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(seedList.get(i))).image);
                 im.scale.set(1.0f);
                 btn.icon(im);
 

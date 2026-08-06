@@ -32,11 +32,18 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bleeding;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.AshKing;
+import com.shatteredpixel.shatteredpixeldungeon.challenge.SnakeBiteChallengeManager;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Muramasa;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
@@ -47,6 +54,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -79,8 +87,9 @@ public class Item implements Bundlable {
 	public boolean curseInfusionBonus = false;
 
 	//TODO should these be private and accessed through methods?
-	public int image = 0;
-	public int icon = -1; //used as an identifier for items with randomized images
+	public String image = ItemSpriteSheet.SOMETHING;
+	public String icon;
+	public String sndImageName = null; // SND atlas 中的物品名称，如果设置则使用 SND 贴图
 	
 	public boolean stackable = false;
 	protected int quantity = 1;
@@ -200,6 +209,17 @@ public class Item implements Bundlable {
 		}
 		//
 
+		// 薪王化身触发检测
+		AshKing.IncarnationReady incarnationReady = hero.buff(AshKing.IncarnationReady.class);
+		if (incarnationReady != null && !action.equals(AC_DROP) && !action.equals(AC_THROW)) {
+			String itemType = null;
+			if (this instanceof Artifact) itemType = "Artifact";
+			else if (this instanceof Wand) itemType = "Wand";
+			else if (this instanceof MissileWeapon) itemType = "MissileWeapon";
+			if (itemType != null && incarnationReady.tryIncarnate(hero, itemType)) {
+				// 成功触发化身，继续执行物品使用
+			}
+		}
 
 		GameScene.cancel();
 		curUser = hero;
@@ -556,12 +576,26 @@ public class Item implements Bundlable {
 		return Messages.get(this, "name");
 	}
 	
-	public int image() {
+	public String image() {
+		if (SnakeBiteChallengeManager.shouldReplaceItemSprite(this)) {
+			return com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet.SNAKE_BITE;
+		}
 		return image;
 	}
-	
+
 	public ItemSprite.Glowing glowing() {
 		return null;
+	}
+
+	// Snake Bite challenge: hide item type icon (right top corner)
+	// Skip if hero is dead (for rankings/death screen)
+	// Test mode items should always show their original icons
+	public String icon() {
+		if (SnakeBiteChallengeManager.shouldReplaceItemSprite(this)
+				&& !(this instanceof com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TestItem)) {
+			return null;
+		}
+		return icon;
 	}
 
 	public Emitter emitter() { return null; }
@@ -696,6 +730,8 @@ public class Item implements Bundlable {
 
 		Char enemy = Actor.findChar( cell );
 		QuickSlotButton.target(enemy);
+		final MissileWeapon.SplitShot splitShot = this instanceof MissileWeapon
+				? ((MissileWeapon) this).launchSplitProjectiles(user, cell) : null;
 		
 		final float delay = castDelay(user, dst);
 
@@ -709,7 +745,9 @@ public class Item implements Bundlable {
 						public void call() {
 							curUser = user;
 							Item i = Item.this.detach(user.belongings.backpack);
+							if (i instanceof MissileWeapon) ((MissileWeapon) i).bindSplitShot(splitShot);
 							if (i != null) i.onThrow(cell);
+							if (i instanceof MissileWeapon) ((MissileWeapon) i).finishPendingSplitShot();
 							if (curUser.hasTalent(Talent.IMPROVISED_PROJECTILES)
 									&& !(Item.this instanceof MissileWeapon)
 									&& curUser.buff(Talent.ImprovisedProjectileCooldown.class) == null){
@@ -717,6 +755,21 @@ public class Item implements Bundlable {
 									Sample.INSTANCE.play(Assets.Sounds.HIT);
 									Buff.affect(enemy, Blindness.class, 1f + curUser.pointsInTalent(Talent.IMPROVISED_PROJECTILES));
 									Buff.affect(curUser, Talent.ImprovisedProjectileCooldown.class, 50f);
+								}
+							}
+							// 左弓连射天赋：投掷武器不消耗回合（如果目标有足够中矢层数）
+							if (user.heroClass == HeroClass.MOONLIGHT
+									&& user.subClass == HeroSubClass.LITTLE_KNIGHT
+									&& user.hasTalent(Talent.LEFT_BOW_RAPID)
+									&& enemy != null
+									&& Item.this instanceof MissileWeapon) {
+								PinCushion pc = enemy.buff(PinCushion.class);
+								if (pc != null) {
+									int requiredStacks = 4 - user.pointsInTalent(Talent.LEFT_BOW_RAPID);
+									if (pc.getStuckItems().size() >= requiredStacks) {
+										user.next();
+										return;
+									}
 								}
 							}
 							if (user.buff(Talent.LethalMomentumTracker.class) != null){
@@ -742,8 +795,10 @@ public class Item implements Bundlable {
 						public void call() {
 							curUser = user;
 							Item i = Item.this.detach(user.belongings.backpack);
+							if (i instanceof MissileWeapon) ((MissileWeapon) i).bindSplitShot(splitShot);
 							user.spend(delay);
 							if (i != null) i.onThrow(cell);
+							if (i instanceof MissileWeapon) ((MissileWeapon) i).finishPendingSplitShot();
 							user.next();
 						}
 					});

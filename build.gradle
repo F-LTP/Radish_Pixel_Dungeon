@@ -22,10 +22,10 @@ allprojects {
 
     ext {
         appName = 'Radish Pixel Dungeon'
-        appPackageName = 'com.shatteredpixel.radishpixeldungeon'
+        appPackageName = 'com.thecatist.radishpixeldungeon'
 
-        appVersionCode = 2603260
-        appVersionName = '0.7.1-base2.4.2'
+        appVersionCode = 2608060
+        appVersionName = '0.8.0-test'
 
         appJavaCompatibility = JavaVersion.VERSION_1_8
 
@@ -48,3 +48,5 @@ allprojects {
     }
 
 }
+
+apply from: 'gradle/runtime-atlas.gradle'

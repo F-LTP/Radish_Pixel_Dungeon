@@ -31,6 +31,8 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PitfallParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branch;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -39,6 +41,7 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class PitfallTrap extends Trap {
 
@@ -50,14 +53,14 @@ public class PitfallTrap extends Trap {
 	@Override
 	public void activate() {
 
-		if( Dungeon.bossLevel() || Dungeon.depth > 25 || Dungeon.branch != 0){
+		if( Dungeon.bossLevel() || Dungeon.depth > 25 || !Objects.equals(Dungeon.branchId, Branches.MAIN)){
 			GLog.w(Messages.get(this, "no_pit"));
 			return;
 		}
 
 		DelayedPit p = Buff.append(Dungeon.hero, DelayedPit.class, 1);
 		p.depth = Dungeon.depth;
-		p.branch = Dungeon.branch;
+		p.branch = Dungeon.branchId;
 
 		ArrayList<Integer> positions = new ArrayList<>();
 		for (int i : PathFinder.NEIGHBOURS9){
@@ -84,7 +87,7 @@ public class PitfallTrap extends Trap {
 
 		public int[] positions = new int[0];
 		public int depth;
-		public int branch;
+		public String branch;
 
 		public boolean ignoreAllies = false;
 
@@ -92,7 +95,7 @@ public class PitfallTrap extends Trap {
 		public boolean act() {
 
 			boolean herofell = false;
-			if (depth == Dungeon.depth && branch == Dungeon.branch && positions != null) {
+			if (depth == Dungeon.depth && Objects.equals(branch, Dungeon.branchId) && positions != null) {
 				for (int cell : positions) {
 
 					if (!Dungeon.level.insideMap(cell)
@@ -166,7 +169,7 @@ public class PitfallTrap extends Trap {
 			super.restoreFromBundle(bundle);
 			positions = bundle.getIntArray(POSITIONS);
 			depth = bundle.getInt(DEPTH);
-			branch = bundle.getInt(BRANCH);
+			branch = bundle.getString(BRANCH);
 			ignoreAllies = bundle.getBoolean(IGNORE_ALLIES);
 		}
 

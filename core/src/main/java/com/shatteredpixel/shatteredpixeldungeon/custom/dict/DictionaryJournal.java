@@ -17,11 +17,11 @@ public enum DictionaryJournal {
     DOCUMENTS,
     UNCLASSIFIED;
 
-    private LinkedHashMap<String, Integer> d = new LinkedHashMap<>();
+    private LinkedHashMap<String, Object> d = new LinkedHashMap<>();
 
     public Collection<String> keyList(){return d.keySet();}
 
-    public Collection<Integer> imageList() {return d.values();}
+    public Collection<Object> imageList() {return d.values();}
 
     static {
         //armors

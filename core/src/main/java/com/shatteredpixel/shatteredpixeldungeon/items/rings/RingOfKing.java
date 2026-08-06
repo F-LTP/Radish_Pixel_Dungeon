@@ -38,7 +38,7 @@ public class RingOfKing extends Ring {
     }
 
     public static int updateMultiplier( Char target ){
-        return getBonus( target, KingUpdate.class );
+        return getBuffedBonus( target, KingUpdate.class );
     }
 
     public class KingUpdate extends RingBuff {

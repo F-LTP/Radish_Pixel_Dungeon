@@ -61,7 +61,7 @@ public class AfterImage extends Armor{
     public static class absoluteEvasion extends Buff{
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.A_EVA;
         }
     }
@@ -69,7 +69,7 @@ public class AfterImage extends Armor{
     public static class AnotabsoluteEvasion extends absoluteEvasion {
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.A_EVA;
         }
 

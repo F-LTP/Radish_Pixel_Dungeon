@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs;
@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor.Glyph;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
@@ -39,9 +41,9 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
 
 public class Viscosity extends Glyph {
-	
+
 	private static ItemSprite.Glowing PURPLE = new ItemSprite.Glowing( 0x8844CC );
-	
+
 	@Override
 	public int proc( Armor armor, Char attacker, Char defender, int damage ) {
 
@@ -49,7 +51,7 @@ public class Viscosity extends Glyph {
 		Buff.affect(defender, ViscosityTracker.class).level = armor.buffedLvl();
 
 		return damage;
-		
+
 	}
 
 	@Override
@@ -100,30 +102,30 @@ public class Viscosity extends Glyph {
 			return true;
 		}
 	};
-	
+
 	public static class DeferedDamage extends Buff {
-		
+
 		{
 			type = buffType.NEGATIVE;
 		}
-		
+
 		protected int damage = 0;
-		
+
 		private static final String DAMAGE	= "damage";
-		
+
 		@Override
 		public void storeInBundle( Bundle bundle ) {
 			super.storeInBundle( bundle );
 			bundle.put( DAMAGE, damage );
-			
+
 		}
-		
+
 		@Override
 		public void restoreFromBundle( Bundle bundle ) {
 			super.restoreFromBundle( bundle );
 			damage = bundle.getInt( DAMAGE );
 		}
-		
+
 		@Override
 		public boolean attachTo( Char target ) {
 			if (super.attachTo( target )) {
@@ -133,13 +135,13 @@ public class Viscosity extends Glyph {
 				return false;
 			}
 		}
-		
+
 		public void prolong( int damage ) {
 			this.damage += damage;
 		}
-		
+
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.DEFERRED;
 		}
 
@@ -147,13 +149,13 @@ public class Viscosity extends Glyph {
 		public String iconTextDisplay() {
 			return Integer.toString(damage);
 		}
-		
+
 		@Override
 		public boolean act() {
 			if (target.isAlive()) {
 
 				int damageThisTick = Math.max(1, (int)(damage*0.1f));
-				target.damage( damageThisTick, this );
+				target.damage(new DamageInfo(damageThisTick, DamageType.DEFERRED, null, null, this));
 				if (target == Dungeon.hero && !target.isAlive()) {
 
 					Badges.validateDeathFromFriendlyMagic();
@@ -167,13 +169,13 @@ public class Viscosity extends Glyph {
 				if (damage <= 0) {
 					detach();
 				}
-				
+
 			} else {
-				
+
 				detach();
-				
+
 			}
-			
+
 			return true;
 		}
 

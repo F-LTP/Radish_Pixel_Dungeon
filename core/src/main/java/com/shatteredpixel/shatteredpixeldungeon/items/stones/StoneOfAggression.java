@@ -74,7 +74,7 @@ public class StoneOfAggression extends Runestone {
 		}
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.TARGETED;
 		}
 

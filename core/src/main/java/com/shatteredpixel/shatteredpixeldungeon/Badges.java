@@ -66,6 +66,7 @@ public class Badges {
 		MASTERY_ROGUE,
 		MASTERY_HUNTRESS,
 		MASTERY_RECTOR,
+		MASTERY_MOONLIGHT,
 		FOUND_RATMOGRIFY,
 
 		//bronze
@@ -920,6 +921,9 @@ public class Badges {
 				break;
 			case RECTOR:
 				badge = Badge.MASTERY_RECTOR;
+				break;
+			case MOONLIGHT:
+				badge = Badge.MASTERY_MOONLIGHT;
 				break;
 		}
 

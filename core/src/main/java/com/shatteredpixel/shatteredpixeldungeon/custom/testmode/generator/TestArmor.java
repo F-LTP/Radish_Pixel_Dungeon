@@ -1,5 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator;
 
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -263,8 +265,7 @@ public class TestArmor extends TestGenerator {
                         super.onClick();
                     }
                 };
-                Image im = new Image(Assets.Sprites.ITEMS);
-                im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(all[i])).image));
+                Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(all[i])).image);
                 im.scale.set(1f);
                 btn.icon(im);
                 left = (WIDTH - BTN_SIZE * ((i/r_limit+1<t_row)?r_limit:length-(t_row-1)*r_limit) )/2f;

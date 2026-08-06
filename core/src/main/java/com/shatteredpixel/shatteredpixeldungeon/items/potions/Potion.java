@@ -31,6 +31,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Ooze;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.events.DrinkPotionEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
+import com.shatteredpixel.shatteredpixeldungeon.events.ThrowPotionEvent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -87,7 +90,7 @@ public class Potion extends Item {
 
 	private static final float TIME_TO_DRINK = 1f;
 
-	private static final LinkedHashMap<String, Integer> colors = new LinkedHashMap<String, Integer>() {
+	private static final LinkedHashMap<String, String> colors = new LinkedHashMap<String, String>() {
 		{
 			put("crimson",ItemSpriteSheet.POTION_CRIMSON);
 			put("amber",ItemSpriteSheet.POTION_AMBER);
@@ -300,6 +303,12 @@ public class Potion extends Item {
 		hero.spend( TIME_TO_DRINK );
 		hero.busy();
 		apply( hero );
+		if (com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToyEffects.has(
+				com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToy.BlessedWater.class)) {
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToyEffects.heal(hero, 10);
+		}
+
+		emitDrinkEvent(hero);
 
 		Sample.INSTANCE.play( Assets.Sounds.DRINK );
 
@@ -335,6 +344,14 @@ public class Potion extends Item {
 			}
 
 		}
+
+		if (curUser instanceof Hero) {
+			EventManager.emit(new ThrowPotionEvent((Hero) curUser, this, cell));
+		}
+	}
+
+	protected void emitDrinkEvent(Hero hero) {
+		EventManager.emit(new DrinkPotionEvent(hero, this));
 	}
 
 	public void apply( Hero hero ) {

@@ -35,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.ui.Component;
@@ -191,6 +192,10 @@ public class TalentsPane extends ScrollPane {
 							//光辉灌注天赋
 							if(talent == Talent.LIGHT_STEP){
 								Dungeon.level.drop(new PotionOfExperience(),Dungeon.hero.pos);
+							}
+							// TheCatist 2026/7/30 月华剑盾骑士更新自身贴图代码
+							if (talent == Talent.SWORD_SHIELD_KNIGHT) {
+								((HeroSprite) Dungeon.hero.sprite).updateArmor();
 							}
 						}
 					}

@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.StatueSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
@@ -112,7 +113,11 @@ public class ArmoredStatue extends Statue {
 	@Override
 	public CharSprite sprite() {
 		CharSprite sprite = super.sprite();
-		((StatueSprite)sprite).setArmor(armor.tier);
+		if (sprite instanceof StatueSprite) {
+			((StatueSprite)sprite).setArmor(armor.tier);
+		} else if (sprite instanceof SnakeSprite) {
+			((SnakeSprite)sprite).setArmor(armor.tier);
+		}
 		return sprite;
 	}
 

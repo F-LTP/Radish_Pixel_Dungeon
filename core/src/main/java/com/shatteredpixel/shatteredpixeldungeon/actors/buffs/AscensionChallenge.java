@@ -370,7 +370,7 @@ public class AscensionChallenge extends Buff {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.AMULET;
 	}
 

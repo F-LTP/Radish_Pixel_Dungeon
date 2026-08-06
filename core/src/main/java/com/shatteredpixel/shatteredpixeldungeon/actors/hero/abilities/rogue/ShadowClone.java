@@ -125,7 +125,7 @@ public class ShadowClone extends ArmorAbility {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return HeroIcon.SHADOW_CLONE;
 	}
 

@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.scenes;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
@@ -36,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.LostBackpack;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
@@ -55,6 +57,7 @@ import com.watabou.noosa.tweeners.Tweener;
 import com.watabou.utils.BArray;
 import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.GameMath;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 import com.watabou.utils.Signal;
 
@@ -80,7 +83,7 @@ public class InterlevelScene extends PixelScene {
 
 	public static LevelTransition curTransition = null;
 	public static int returnDepth;
-	public static int returnBranch;
+	public static String returnBranchId;
 	public static int returnPos;
 
 	public static boolean fallIntoPit;
@@ -610,38 +613,43 @@ public class InterlevelScene extends PixelScene {
 			// which ensures levelgen consistency with a regular game that was played to that depth.
 			if (DeviceCompat.isDebug()){
 				int trueDepth = Dungeon.depth;
-				int trueBranch = Dungeon.branch;
-				for (int i = 1; i < trueDepth + (trueBranch == 0 ? 0 : 1); i++){
-					if (!Dungeon.levelHasBeenGenerated(i, 0)){
+				String trueBranchId = Dungeon.branchId;
+				boolean isMainBranch = trueBranchId != null && trueBranchId.equals(Branches.MAIN);
+				for (int i = 1; i < trueDepth + (isMainBranch ? 0 : 1); i++){
+					if (!Dungeon.levelHasBeenGenerated(i, Branches.MAIN)){
 						Dungeon.depth = i;
-						Dungeon.branch = 0;
+						Dungeon.branchId = Branches.MAIN;
 						Dungeon.level = Dungeon.newLevel();
 						Dungeon.saveLevel(GamesInProgress.curSlot);
 					}
 				}
 				Dungeon.depth = trueDepth;
-				Dungeon.branch = trueBranch;
+				Dungeon.branchId = trueBranchId;
 			}
 
 			Level level = Dungeon.newLevel();
 			Dungeon.switchLevel( level, -1 );
 		} else {
 			Mob.holdAllies( Dungeon.level );
+			
+			// Snake Bite challenge: teleport all monsters to exit before descending
+			if (Dungeon.isChallenged(Challenges.SNAKE_BITE)) {
+				int exitPos = Dungeon.level.exit();
+				for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
+					if (mob.alignment != Mob.Alignment.ALLY && mob.pos != exitPos) {
+						// Find a random passable cell near the exit
+						int newPos = findNearbyPassable(exitPos, mob);
+						if (newPos != -1) {
+							mob.pos = newPos;
+							mob.state = mob.HUNTING;
+						}
+					}
+				}
+			}
+			
 			Dungeon.saveAll();
 
-			Level level;
-			Dungeon.depth = curTransition.destDepth;
-			Dungeon.branch = curTransition.destBranch;
-
-			if (Dungeon.levelHasBeenGenerated(Dungeon.depth, Dungeon.branch)) {
-				level = Dungeon.loadLevel( GamesInProgress.curSlot );
-			} else {
-				level = Dungeon.newLevel();
-			}
-
-			LevelTransition destTransition = level.getTransition(curTransition.destType);
-			curTransition = null;
-			Dungeon.switchLevel( level, destTransition.cell() );
+			travel();
 		}
 
 	}
@@ -656,7 +664,7 @@ public class InterlevelScene extends PixelScene {
 
 		Level level;
 		Dungeon.depth++;
-		if (Dungeon.levelHasBeenGenerated(Dungeon.depth, Dungeon.branch)) {
+		if (Dungeon.levelHasBeenGenerated(Dungeon.depth, Dungeon.branchId)) {
 			level = Dungeon.loadLevel( GamesInProgress.curSlot );
 		} else {
 			level = Dungeon.newLevel();
@@ -667,36 +675,37 @@ public class InterlevelScene extends PixelScene {
 	private void ascend() throws IOException {
 		Mob.holdAllies( Dungeon.level );
 		Dungeon.saveAll();
+		travel();
+	}
 
-		Level level;
-		Dungeon.depth = curTransition.destDepth;
-		Dungeon.branch = curTransition.destBranch;
+	private void travel() throws IOException {
+		LevelTransition source = curTransition;
+		if (source == null) throw new IllegalStateException("Missing source transition");
 
-		if (Dungeon.levelHasBeenGenerated(Dungeon.depth, Dungeon.branch)) {
-			level = Dungeon.loadLevel( GamesInProgress.curSlot );
-		} else {
-			level = Dungeon.newLevel();
+		String sourceBranch = Dungeon.branchId;
+		int sourceDepth = Dungeon.depth;
+		Level level = Dungeon.loadOrCreateLevel(GamesInProgress.curSlot, source.destBranch, source.destDepth);
+		LevelTransition arrival = level.requireTransition(source.linkId);
+
+		if (!sourceBranch.equals(arrival.destBranch) || sourceDepth != arrival.destDepth) {
+			throw new IllegalStateException("Transition " + source.linkId + " does not point back to "
+					+ sourceBranch + ":" + sourceDepth);
+		}
+		if (arrival.direction != source.direction.opposite()) {
+			throw new IllegalStateException("Transition " + source.linkId + " has invalid directions");
 		}
 
-		LevelTransition destTransition = level.getTransition(curTransition.destType);
-		curTransition = null;
-		Dungeon.switchLevel( level, destTransition.cell() );
+		Dungeon.switchLevel(level, arrival.cell());
 	}
 
 	private void returnTo() throws IOException {
 		Mob.holdAllies( Dungeon.level );
 		Dungeon.saveAll();
 
-		Level level;
-		Dungeon.depth = returnDepth;
-		Dungeon.branch = returnBranch;
-		if (Dungeon.levelHasBeenGenerated(Dungeon.depth, Dungeon.branch)) {
-			level = Dungeon.loadLevel( GamesInProgress.curSlot );
-		} else {
-			level = Dungeon.newLevel();
-		}
-
-		Dungeon.switchLevel( level, returnPos );
+		Level level = Dungeon.loadOrCreateLevel(GamesInProgress.curSlot, returnBranchId, returnDepth);
+		int destination = returnPos;
+		if (destination == -1) destination = level.entrance();
+		Dungeon.switchLevel(level, destination);
 	}
 
 	private void restore() throws IOException {
@@ -725,6 +734,7 @@ public class InterlevelScene extends PixelScene {
 
 			Dungeon.hero.resurrect();
 			level = Dungeon.newLevel();
+			Dungeon.levelJustGenerated = false;
 			Dungeon.hero.pos = level.randomRespawnCell(Dungeon.hero);
 			if (Dungeon.hero.pos == -1) Dungeon.hero.pos = level.entrance();
 
@@ -771,11 +781,47 @@ public class InterlevelScene extends PixelScene {
 		SpecialRoom.resetPitRoom(Dungeon.depth+1);
 
 		Level level = Dungeon.newLevel();
+		Dungeon.levelJustGenerated = false;
 		Dungeon.switchLevel( level, level.entrance() );
 	}
 
 	@Override
 	protected void onBackPressed() {
 		//Do nothing
+	}
+
+	// Snake Bite challenge: find a passable cell near a position for a mob
+	private int findNearbyPassable(int centerPos, Mob mob) {
+		ArrayList<Integer> candidates = new ArrayList<>();
+		int[] neighbours = PathFinder.NEIGHBOURS8;
+		
+		for (int n : neighbours) {
+			int cell = centerPos + n;
+			if (Dungeon.level.passable[cell] && Actor.findChar(cell) == null) {
+				if (Dungeon.level.openSpace[cell]) {
+					candidates.add(cell);
+				}
+			}
+		}
+		
+		if (candidates.isEmpty()) {
+			// Try neighbours of neighbours
+			for (int n : neighbours) {
+				for (int n2 : neighbours) {
+					int cell = centerPos + n + n2;
+					if (Dungeon.level.passable[cell] && Actor.findChar(cell) == null) {
+						if (Dungeon.level.openSpace[cell]) {
+							candidates.add(cell);
+						}
+					}
+				}
+			}
+		}
+		
+		if (candidates.isEmpty()) {
+			return -1;
+		}
+		
+		return Random.element(candidates);
 	}
 }

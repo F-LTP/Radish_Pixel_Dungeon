@@ -13,7 +13,7 @@ public class ReplacePoint extends MeleeWeapon {
 
     {
         tier = 4;
-        image = ItemSpriteSheet.DARTS+21;
+        image = ItemSpriteSheet.REPLACE_POINT;
         DLY = 0.4f;
     }
 
@@ -85,7 +85,7 @@ public class ReplacePoint extends MeleeWeapon {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.CHALLENGE;
         }
 

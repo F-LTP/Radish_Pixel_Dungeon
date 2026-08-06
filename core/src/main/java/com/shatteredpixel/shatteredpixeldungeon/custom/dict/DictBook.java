@@ -95,7 +95,17 @@ public class DictBook extends ChallengeItem {
         private static final int UNCLASSIFIED_IDX = 7;
         private static final int DOCUMENTS_IDX = 8;
 
-        private static final int spriteIndexes[] = {2, 1, 4, 5, 6, 13, 0, 0, 0};
+        private static final String[] spriteNames = {
+                ItemSpriteSheet.ARMOR_HOLDER,
+                ItemSpriteSheet.WEAPON_HOLDER,
+                ItemSpriteSheet.WAND_HOLDER,
+                ItemSpriteSheet.RING_HOLDER,
+                ItemSpriteSheet.ARTIFACT_HOLDER,
+                ItemSpriteSheet.STONE_HOLDER,
+                ItemSpriteSheet.SOMETHING,
+                ItemSpriteSheet.SOMETHING,
+                ItemSpriteSheet.SOMETHING
+        };
 
         private ScrollPane list;
 
@@ -113,7 +123,7 @@ public class DictBook extends ChallengeItem {
                         updateList();
                     }
                 };
-                itemButtons[i].icon(new ItemSprite(ItemSpriteSheet.SOMETHING + spriteIndexes[i], null));
+                itemButtons[i].icon(new ItemSprite(spriteNames[i], null));
                 add(itemButtons[i]);
             }
 
@@ -165,7 +175,7 @@ public class DictBook extends ChallengeItem {
             list.scrollTo(0, 0);
 
             ArrayList<String> keys;
-            ArrayList<Integer> imageSheets;
+            ArrayList<Object> imageSheets;
             if (currentItemIdx == ARMORS_IDX) {
                 keys = new ArrayList<>(DictionaryJournal.ARMORS.keyList());
                 imageSheets = new ArrayList<>(DictionaryJournal.ARMORS.imageList());
@@ -216,7 +226,7 @@ public class DictBook extends ChallengeItem {
 
             private String k;
 
-            public DictButton(String key, int imageSheet) {
+            public DictButton(String key, Object imageSheet) {
                 super(DictSpriteSheet.createImage(imageSheet), M.TL(Dict.class, key ));
                 this.k = key;
             }

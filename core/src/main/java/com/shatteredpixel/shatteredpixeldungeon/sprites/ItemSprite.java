@@ -28,12 +28,14 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.food.HalfFood;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
-import com.watabou.gltextures.SmartTexture;
-import com.watabou.gltextures.TextureCache;
+import com.watabou.gltextures.AtlasFrame;
+import com.watabou.gltextures.RuntimeAtlas;
+import com.watabou.gltextures.RuntimeAtlasRegistry;
 import com.watabou.glwrap.Matrix;
 import com.watabou.glwrap.Vertexbuffer;
 import com.watabou.noosa.Camera;
@@ -50,11 +52,12 @@ import java.nio.Buffer;
 
 public class ItemSprite extends MovieClip {
 
-	public static final int SIZE	= 16;
+	private static final int MIN_VISIBLE_ALPHA = 16;
 
 	private static final float DROP_INTERVAL = 0.4f;
 
 	public Heap heap;
+	private static final RuntimeAtlas ATLAS = RuntimeAtlasRegistry.get( ItemSpriteSheet.ATLAS );
 
 	private Glowing glowing;
 	//FIXME: a lot of this emitter functionality isn't very well implemented.
@@ -80,22 +83,21 @@ public class ItemSprite extends MovieClip {
 	}
 
 	public ItemSprite( Heap heap ){
-		super(Assets.Sprites.ITEMS);
+		this();
 		view( heap );
 	}
 
 	public ItemSprite( Item item ) {
-		super(Assets.Sprites.ITEMS);
+		this();
 		view( item );
 	}
 
-	public ItemSprite( int image ){
+	public ItemSprite( String image ){
 		this( image, null );
 	}
 
-	public ItemSprite( int image, Glowing glowing ) {
-		super( Assets.Sprites.ITEMS );
-
+	public ItemSprite( String image, Glowing glowing ) {
+		super();
 		view(image, glowing);
 	}
 
@@ -199,7 +201,32 @@ public class ItemSprite extends MovieClip {
 	}
 
 	public ItemSprite view( Item item ){
+		if (item.sndImageName != null) {
+			com.watabou.gltextures.SmartTexture tex = com.shatteredpixel.shatteredpixeldungeon.ui.SNDItems.texture();
+			com.watabou.utils.RectF sndFrame = com.shatteredpixel.shatteredpixeldungeon.ui.SNDItems.frame(item.sndImageName);
+			if (tex != null && sndFrame != null) {
+				if (this.emitter != null) this.emitter.killAndErase();
+				emitter = null;
+				this.texture = tex;
+				frame(sndFrame);
+				glow(item.glowing());
+				com.watabou.noosa.particles.Emitter emitter = item.emitter();
+				if (emitter != null && parent != null) {
+					emitter.pos(this);
+					parent.add(emitter);
+					this.emitter = emitter;
+				}
+				return this;
+			}
+		}
 		view(item.image(), item.glowing());
+		if (item instanceof HalfFood) {
+			AtlasFrame atlasFrame = ATLAS.trimmedFrame(item.image(), MIN_VISIBLE_ALPHA);
+			float middle = (atlasFrame.uv.top + atlasFrame.uv.bottom) / 2f;
+			texture = atlasFrame.texture;
+			frame(new com.watabou.utils.RectF(
+					atlasFrame.uv.left, middle, atlasFrame.uv.right, atlasFrame.uv.bottom));
+		}
 		Emitter emitter = item.emitter();
 		if (emitter != null && parent != null) {
 			emitter.pos( this );
@@ -211,7 +238,7 @@ public class ItemSprite extends MovieClip {
 
 	public ItemSprite view( Heap heap ){
 		if (heap.size() <= 0 || heap.items == null){
-			return view( 0, null );
+			return view( ItemSpriteSheet.SOMETHING, null );
 		}
 
 		switch (heap.type) {
@@ -230,11 +257,11 @@ public class ItemSprite extends MovieClip {
 			case REMAINS:
 				return view( ItemSpriteSheet.REMAINS, null );
 			default:
-				return view( 0, null );
+				return view( ItemSpriteSheet.SOMETHING, null );
 		}
 	}
 
-	public ItemSprite view( int image, Glowing glowing ) {
+	public ItemSprite view( String image, Glowing glowing ) {
 		if (this.emitter != null) this.emitter.killAndErase();
 		emitter = null;
 		frame( image );
@@ -242,10 +269,12 @@ public class ItemSprite extends MovieClip {
 		return this;
 	}
 
-	public void frame( int image ){
-		frame( ItemSpriteSheet.film.get( image ));
+	public void frame( String image ){
+		AtlasFrame atlasFrame = ATLAS.trimmedFrame( image, MIN_VISIBLE_ALPHA );
+		texture = atlasFrame.texture;
+		frame( atlasFrame.uv );
 
-		float height = ItemSpriteSheet.film.height( image );
+		float height = atlasFrame.height;
 		//adds extra raise to very short items, so they are visible
 		if (height < 8f){
 			perspectiveRaise =  (5 + 8 - height) / 16f;
@@ -380,12 +409,12 @@ public class ItemSprite extends MovieClip {
 		}
 	}
 
-	public static int pick( int index, int x, int y ) {
-		SmartTexture tx = TextureCache.get( Assets.Sprites.ITEMS );
-		int rows = tx.width / SIZE;
-		int row = index / rows;
-		int col = index % rows;
-		return tx.getPixel( col * SIZE + x, row * SIZE + y );
+	public static int pick( String name, int x, int y ) {
+		return ATLAS.pixel( name, x, y );
+	}
+
+	public static AtlasFrame atlasFrame( String name ) {
+		return ATLAS.trimmedFrame( name, MIN_VISIBLE_ALPHA );
 	}
 
 	public static class Glowing {

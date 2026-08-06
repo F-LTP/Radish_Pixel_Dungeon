@@ -16,7 +16,7 @@ import com.watabou.utils.Random;
 // Doggingdog on 20250517
 public class Wastelandew extends LegacyItemArmor {
     {
-        image = ItemSpriteSheet.STONE_SHOCK+8;
+        image = ItemSpriteSheet.WASTELANDEW;
     }
     public Wastelandew() {
         super(1);

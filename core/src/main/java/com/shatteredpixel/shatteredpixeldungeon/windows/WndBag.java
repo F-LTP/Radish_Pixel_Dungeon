@@ -36,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.DiceMageUI;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.InventorySlot;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
@@ -222,8 +223,9 @@ public class WndBag extends WndTabbed {
 
 		String title = selector != null ? selector.textPrompt() : null;
 		RenderedTextBlock txtTitle = PixelScene.renderTextBlock(
-				title != null ? Messages.titleCase(title) : Messages.titleCase( bag.name() ), 8 );
-		txtTitle.hardlight( TITLE_COLOR );
+				DiceMageUI.active() ? "[DICE BAG] " + (title != null ? Messages.titleCase(title) : Messages.titleCase( bag.name() ))
+						: title != null ? Messages.titleCase(title) : Messages.titleCase( bag.name() ), 8 );
+		txtTitle.hardlight( DiceMageUI.active() ? DiceMageUI.GOLD : TITLE_COLOR );
 		txtTitle.maxWidth( (int)titleWidth - 2 );
 		txtTitle.setPos(
 				1,
@@ -437,6 +439,12 @@ public class WndBag extends WndTabbed {
 					return SPDAction.BAG_4;
 				case 5:
 					return SPDAction.BAG_5;
+				case 6:
+					return SPDAction.BAG_6;
+				case 7:
+					return SPDAction.BAG_7;
+				case 8:
+					return SPDAction.BAG_8;
 			}
 		}
 
@@ -448,7 +456,7 @@ public class WndBag extends WndTabbed {
 	
 	public static class Placeholder extends Item {
 
-		public Placeholder(int image ) {
+		public Placeholder(String image ) {
 			this.image = image;
 		}
 

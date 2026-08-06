@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.blobs;
@@ -26,6 +26,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SparkParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
@@ -38,31 +40,31 @@ import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
 public class Electricity extends Blob {
-	
+
 	{
 		//acts after mobs, to give them a chance to resist paralysis
 		actPriority = MOB_PRIO - 1;
 	}
-	
+
 	private boolean[] water;
-	
+
 	@Override
 	protected void evolve() {
-		
+
 		water = Dungeon.level.water;
 		int cell;
-		
+
 		//spread first..
 		for (int i = area.left-1; i <= area.right; i++) {
 			for (int j = area.top-1; j <= area.bottom; j++) {
 				cell = i + j*Dungeon.level.width();
-				
+
 				if (cur[cell] > 0) {
 					spreadFromCell(cell, cur[cell]);
 				}
 			}
 		}
-		
+
 		//..then decrement/shock
 		for (int i = area.left-1; i <= area.right; i++) {
 			for (int j = area.top-1; j <= area.bottom; j++) {
@@ -74,14 +76,15 @@ public class Electricity extends Blob {
 							Buff.prolong( ch, Paralysis.class, cur[cell]);
 						}
 						if (cur[cell] % 2 == 1) {
-							ch.damage(Math.round(Random.Float(2 + Dungeon.scalingDepth() / 5f)), this);
+							int damage = Math.round(Random.Float(2 + Dungeon.scalingDepth() / 5f));
+							ch.damage(new DamageInfo(damage, DamageType.LIGHTNING, null, null, this));
 							if (!ch.isAlive() && ch == Dungeon.hero){
 								Dungeon.fail( this );
 								GLog.n( Messages.get(this, "ondeath") );
 							}
 						}
 					}
-					
+
 					Heap h = Dungeon.level.heaps.get( cell );
 					if (h != null){
 						Item toShock = h.peek();
@@ -91,7 +94,7 @@ public class Electricity extends Blob {
 							((MagesStaff) toShock).gainCharge(0.333f);
 						}
 					}
-					
+
 					off[cell] = cur[cell] - 1;
 					volume += off[cell];
 				} else {
@@ -99,31 +102,31 @@ public class Electricity extends Blob {
 				}
 			}
 		}
-		
+
 	}
-	
+
 	private void spreadFromCell( int cell, int power ){
 		if (cur[cell] == 0) {
 			area.union(cell % Dungeon.level.width(), cell / Dungeon.level.width());
 		}
 		cur[cell] = Math.max(cur[cell], power);
-		
+
 		for (int c : PathFinder.NEIGHBOURS4){
 			if (water[cell + c] && cur[cell + c] < power){
 				spreadFromCell(cell + c, power);
 			}
 		}
 	}
-	
+
 	@Override
 	public void use( BlobEmitter emitter ) {
 		super.use( emitter );
 		emitter.start( SparkParticle.FACTORY, 0.05f, 0 );
 	}
-	
+
 	@Override
 	public String tileDesc() {
 		return Messages.get(this, "desc");
 	}
-	
+
 }

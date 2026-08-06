@@ -33,7 +33,15 @@ public class DrakeSprite extends MobSprite {
     }
     public void hideDrake(){
         play(hiding);
-        hideSleep();
+    }
+
+    @Override
+    public void update() {
+        // 当处于 hiding 动画时，强制显示睡眠状态（潜入地下动画）
+        if (curAnim == hiding) {
+            sleeping = true;
+        }
+        super.update();
     }
 
     @Override
@@ -42,5 +50,13 @@ public class DrakeSprite extends MobSprite {
             return;
         }
         super.showSleep();
+    }
+
+    @Override
+    public void hideSleep() {
+        if (curAnim == hiding){
+            return;
+        }
+        super.hideSleep();
     }
 }

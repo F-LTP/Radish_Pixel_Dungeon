@@ -40,13 +40,11 @@ android {
         }
         release {
 
-            //These lines enable R8, which is a code shrinker/optimizer/obfuscator.
-            //This makes release APKs smaller and more efficient, but also makes debugging trickier
-            //as the information produced in stack traces must be de-obfuscated.
-            //See here: https://developer.android.com/studio/build/shrink-code#decode-stack-trace
-            shrinkResources true
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            //Disabled R8/minify to prevent removal of reflection-loaded classes (e.g. EventSubscriberIndex)
+            shrinkResources false
+            minifyEnabled false
+            //启用MultiDex解决64k方法限制
+            multiDexEnabled true
             firebaseCrashlytics {mappingFileUploadEnabled false}
             dependencies {
                 releaseImplementation project(':services:updates:githubUpdates')
@@ -64,8 +62,14 @@ android {
 
 configurations { natives }
 
+preBuild.dependsOn rootProject.tasks.named('generateRuntimeAtlasManifests')
+
 dependencies {
     implementation project(':core')
+
+    // 事件系统模块引入（订阅者在 core 模块，annotationProcessor 已在 core 模块配置）
+    implementation project(':event-annotations')
+
     implementation 'cat.ereza:customactivityoncrash:2.3.0'
 
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"

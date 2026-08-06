@@ -87,9 +87,7 @@ public class WndHero extends WndTabbed {
 				super.select( value );
 				if (selected) {
 					lastIdx = 0;
-					if (!stats.visible) {
-						stats.initialize();
-					}
+					stats.initialize(); // 每次打开都刷新数据
 				}
 				stats.visible = stats.active = selected;
 			}
@@ -301,7 +299,7 @@ public class WndHero extends WndTabbed {
 		private void setupList() {
 			Component content = buffList.content();
 			for (Buff buff : Dungeon.hero.buffs()) {
-				if (buff.icon() != BuffIndicator.NONE) {
+				if (!BuffIndicator.NONE.equals(buff.icon())) {
 					BuffSlot slot = new BuffSlot(buff);
 					slot.setRect(0, pos, WIDTH, slot.icon.height());
 					content.add(slot);

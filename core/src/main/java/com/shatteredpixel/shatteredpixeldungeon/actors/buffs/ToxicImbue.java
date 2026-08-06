@@ -88,7 +88,7 @@ public class ToxicImbue extends Buff {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.IMBUE;
 	}
 

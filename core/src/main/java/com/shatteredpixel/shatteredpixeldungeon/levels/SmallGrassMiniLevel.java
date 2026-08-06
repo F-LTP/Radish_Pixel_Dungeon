@@ -1,19 +1,20 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.depth;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
-import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
-import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.InterlevelScene;
-import com.watabou.noosa.Game;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MossEntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MossExitRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.EntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.ExitRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.StandardRoom;
 import com.watabou.noosa.audio.Music;
 import com.watabou.utils.Random;
 
-public class SmallGrassMiniLevel extends SewerLevel{
+import java.util.ArrayList;
+
+public class SmallGrassMiniLevel extends SewerLevel {
 
     @Override
     public void playLevelMusic(){
@@ -41,69 +42,38 @@ public class SmallGrassMiniLevel extends SewerLevel{
     }
 
     @Override
-    public boolean activateTransition(Hero hero, LevelTransition transition) {
-        if (Dungeon.branch != 0) {
-            if (transition.type == LevelTransition.Type.REGULAR_EXIT) {
-                if(Dungeon.branch == 2){
-                    TimekeepersHourglass.timeFreeze timeFreeze = Dungeon.hero.buff(TimekeepersHourglass.timeFreeze.class);
-                    if (timeFreeze != null) timeFreeze.disarmPresses();
-                    Swiftthistle.TimeBubble timeBubble = Dungeon.hero.buff(Swiftthistle.TimeBubble.class);
-                    if (timeBubble != null) timeBubble.disarmPresses();
-                    InterlevelScene.mode = InterlevelScene.Mode.DESCEND;
-                    InterlevelScene.curTransition = new LevelTransition();
-                    InterlevelScene.curTransition.destDepth = depth;
-                    InterlevelScene.curTransition.destType = LevelTransition.Type.BRANCH_EXIT;
-                    InterlevelScene.curTransition.destBranch = 0;
-                    InterlevelScene.curTransition.type = LevelTransition.Type.BRANCH_EXIT;
-                    InterlevelScene.curTransition.centerCell = -1;
-                    Game.switchScene(InterlevelScene.class);
-                } else {
-                    TimekeepersHourglass.timeFreeze timeFreeze = Dungeon.hero.buff(TimekeepersHourglass.timeFreeze.class);
-                    if (timeFreeze != null) timeFreeze.disarmPresses();
-                    Swiftthistle.TimeBubble timeBubble = Dungeon.hero.buff(Swiftthistle.TimeBubble.class);
-                    if (timeBubble != null) timeBubble.disarmPresses();
-                    InterlevelScene.mode = InterlevelScene.Mode.DESCEND;
-                    InterlevelScene.curTransition = new LevelTransition();
-                    InterlevelScene.curTransition.destDepth = depth;
-                    InterlevelScene.curTransition.destType = LevelTransition.Type.BRANCH_EXIT;
-                    InterlevelScene.curTransition.destBranch = Dungeon.branch+1;
-                    InterlevelScene.curTransition.type = LevelTransition.Type.BRANCH_EXIT;
-                    InterlevelScene.curTransition.centerCell = -1;
-                    Game.switchScene(InterlevelScene.class);
-                }
-                return false;
-            } else if(transition.type == LevelTransition.Type.REGULAR_ENTRANCE && Dungeon.branch > 1) {
-                TimekeepersHourglass.timeFreeze timeFreeze = Dungeon.hero.buff(TimekeepersHourglass.timeFreeze.class);
-                if (timeFreeze != null) timeFreeze.disarmPresses();
-                Swiftthistle.TimeBubble timeBubble = Dungeon.hero.buff(Swiftthistle.TimeBubble.class);
-                if (timeBubble != null) timeBubble.disarmPresses();
-                InterlevelScene.mode = InterlevelScene.Mode.ASCEND;
-                InterlevelScene.curTransition = new LevelTransition();
-                InterlevelScene.curTransition.destDepth = depth;
-                InterlevelScene.curTransition.destType = LevelTransition.Type.BRANCH_EXIT;
-                InterlevelScene.curTransition.destBranch = Dungeon.branch+1;
-                InterlevelScene.curTransition.type = LevelTransition.Type.BRANCH_EXIT;
-                InterlevelScene.curTransition.centerCell = -1;
-                Game.switchScene(InterlevelScene.class);
-                return false;
-            } else {
-                TimekeepersHourglass.timeFreeze timeFreeze = Dungeon.hero.buff(TimekeepersHourglass.timeFreeze.class);
-                if (timeFreeze != null) timeFreeze.disarmPresses();
-                Swiftthistle.TimeBubble timeBubble = Dungeon.hero.buff(Swiftthistle.TimeBubble.class);
-                if (timeBubble != null) timeBubble.disarmPresses();
-                InterlevelScene.mode = InterlevelScene.Mode.ASCEND;
-                InterlevelScene.curTransition = new LevelTransition();
-                InterlevelScene.curTransition.destDepth = depth;
-                InterlevelScene.curTransition.destType = LevelTransition.Type.BRANCH_EXIT;
-                InterlevelScene.curTransition.destBranch = 0;
-                InterlevelScene.curTransition.type = LevelTransition.Type.BRANCH_EXIT;
-                InterlevelScene.curTransition.centerCell = -1;
-                Game.switchScene(InterlevelScene.class);
-                return false;
-            }
-        } else {
-            return super.activateTransition(hero,transition);
-        }
-    }
+    protected ArrayList<Room> initRooms() {
+        ArrayList<Room> initRooms = new ArrayList<>();
 
+        // 苔藓分支第1层使用 MossEntranceRoom（从主线进入）
+        // 第2层使用普通入口房间（从第1层进入）
+        if (Dungeon.depth == 1) {
+            initRooms.add(roomEntrance = new MossEntranceRoom());
+        } else {
+            initRooms.add(roomEntrance = EntranceRoom.createEntrance());
+        }
+
+        // 苔藓分支第2层使用 MossExitRoom（返回主线）
+        if (Dungeon.depth == 2) {
+            initRooms.add(roomExit = new MossExitRoom());
+        } else {
+            // 第1层正常生成出口
+            initRooms.add(roomExit = ExitRoom.createExit());
+        }
+
+        // 标准房间
+        int standards = standardRooms(false);
+        for (int i = 0; i < standards; i++) {
+            initRooms.add(StandardRoom.createRoom());
+        }
+
+        // 特殊房间
+        int specials = specialRooms(false);
+        SpecialRoom.initForFloor();
+        for (int i = 0; i < specials; i++) {
+            initRooms.add(SpecialRoom.createRoom());
+        }
+
+        return initRooms;
+    }
 }

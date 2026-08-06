@@ -26,16 +26,109 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.DiceMageUI;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HealthBar;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
+import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.noosa.ui.Component;
 
-public class WndInfoMob extends WndTitledMessage {
+public class WndInfoMob extends Window {
+
+	private static final int WIDTH_MIN    = 120;
+	private static final int WIDTH_MAX    = 220;
+	private static final int GAP	= 2;
+	private static final int DICE_WIDTH_P = 150;
+	private static final int DICE_WIDTH_L = 170;
+	private static final int DICE_PAD = 3;
+	private static final int DICE_PORTRAIT = 38;
 	
 	public WndInfoMob( Mob mob ) {
+		if (DiceMageUI.active()) {
+			layoutDiceMob(mob);
+		} else {
+			layoutDefault(mob);
+		}
+	}
 
-		super( new MobTitle( mob ), mob.info() );
-		
+	private void layoutDefault(Mob mob) {
+		int width = WIDTH_MIN;
+		Component titlebar = new MobTitle(mob);
+		titlebar.setRect( 0, 0, width, 0 );
+		add(titlebar);
+
+		RenderedTextBlock text = PixelScene.renderTextBlock( 6 );
+		text.text( mob.info(), width );
+		text.setPos( titlebar.left(), titlebar.bottom() + 2*GAP );
+		add( text );
+
+		while (PixelScene.landscape()
+				&& text.bottom() > (PixelScene.MIN_HEIGHT_L - 10)
+				&& width < WIDTH_MAX){
+			width += 20;
+			titlebar.setRect(0, 0, width, 0);
+			text.setPos( titlebar.left(), titlebar.bottom() + 2*GAP );
+			text.maxWidth(width);
+		}
+
+		bringToFront(titlebar);
+		resize( width, (int)text.bottom() + 2 );
+	}
+
+	private void layoutDiceMob(Mob mob) {
+		int width = PixelScene.landscape() ? DICE_WIDTH_L : DICE_WIDTH_P;
+		chrome.hardlight(DiceMageUI.DARK);
+
+		int lineColor = mob.properties().contains(com.shatteredpixel.shatteredpixeldungeon.actors.Char.Property.BOSS)
+				? DiceMageUI.RED : DiceMageUI.PURPLE;
+		DiceMageUI.Frame portraitFrame = new DiceMageUI.Frame(DiceMageUI.BLACK, lineColor);
+		portraitFrame.setRect(0, 0, DICE_PORTRAIT, DICE_PORTRAIT);
+		add(portraitFrame);
+
+		CharSprite image = mob.sprite();
+		image.x = (DICE_PORTRAIT - image.width()) / 2f;
+		image.y = (DICE_PORTRAIT - image.height()) / 2f;
+		PixelScene.align(image);
+		add(image);
+
+		DiceMageUI.Frame titleFrame = new DiceMageUI.Frame(DiceMageUI.PANEL_ALT, lineColor);
+		titleFrame.setRect(DICE_PORTRAIT + DICE_PAD, 0, width - DICE_PORTRAIT - DICE_PAD, DICE_PORTRAIT);
+		add(titleFrame);
+
+		RenderedTextBlock name = PixelScene.renderTextBlock("[MONSTER] " + Messages.titleCase(mob.name()), 8);
+		name.hardlight(DiceMageUI.GOLD);
+		name.maxWidth(width - DICE_PORTRAIT - DICE_PAD * 3);
+		name.setPos(DICE_PORTRAIT + DICE_PAD * 2, DICE_PAD);
+		add(name);
+
+		DiceMageUI.HealthPips health = new DiceMageUI.HealthPips();
+		int healthPips = DiceMageUI.pipCount(mob.HT);
+		health.setRect(name.left(), name.bottom() + 1,
+				DiceMageUI.pipWidth(healthPips), DiceMageUI.pipHeight(healthPips));
+		health.level(mob);
+		add(health);
+
+		BuffIndicator buffs = new BuffIndicator(mob, false);
+		buffs.setSize(width - DICE_PORTRAIT - DICE_PAD * 3, 8);
+		buffs.setPos(name.left(), health.bottom() + 1);
+		add(buffs);
+
+		RenderedTextBlock info = PixelScene.renderTextBlock(mob.info(), 6);
+		info.hardlight(DiceMageUI.CREAM);
+		info.maxWidth(width - DICE_PAD * 4);
+		info.setPos(DICE_PAD * 2, DICE_PORTRAIT + DICE_PAD * 4 + 8);
+
+		RenderedTextBlock section = PixelScene.renderTextBlock("[INFO]", 8);
+		section.hardlight(DiceMageUI.GOLD);
+		section.setPos(DICE_PAD * 2, DICE_PORTRAIT + DICE_PAD * 2);
+		add(section);
+
+		DiceMageUI.Frame body = new DiceMageUI.Frame(DiceMageUI.PANEL, lineColor);
+		body.setRect(0, DICE_PORTRAIT + DICE_PAD, width, info.height() + DICE_PAD * 6 + 8);
+		add(body);
+		bringToFront(section);
+		add(info);
+
+		resize(width, (int)(body.bottom() + DICE_PAD));
 	}
 	
 	private static class MobTitle extends Component {

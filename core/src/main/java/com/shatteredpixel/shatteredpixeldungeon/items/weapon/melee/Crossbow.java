@@ -93,7 +93,7 @@ public class Crossbow extends MeleeWeapon {
 		}
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.DUEL_XBOW;
 		}
 

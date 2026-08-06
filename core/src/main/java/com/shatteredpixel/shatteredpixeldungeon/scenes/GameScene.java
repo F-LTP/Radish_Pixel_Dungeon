@@ -40,12 +40,17 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BlessAWP;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.ToyBackpack;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DemonSpawner;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Ghoul;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.WhitePlasticChair;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BannerSprites;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branch;
+import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.EmoIcon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
@@ -495,9 +500,31 @@ public class GameScene extends PixelScene {
 		Camera.main.panTo(hero.center(), 2.5f);
 
 		if (InterlevelScene.mode != InterlevelScene.Mode.NONE) {
-			if (Dungeon.depth == Statistics.deepestFloor
-					&& (InterlevelScene.mode == InterlevelScene.Mode.DESCEND || InterlevelScene.mode == InterlevelScene.Mode.FALL)) {
-				GLog.h(Messages.get(this, "descend"), Dungeon.depth);
+			LevelTransition travelTransition = InterlevelScene.curTransition;
+			String destinationBranch = travelTransition == null
+					? Dungeon.branchId : travelTransition.destBranch;
+			int destinationDepth = travelTransition == null
+					? Dungeon.depth : travelTransition.destDepth;
+			InterlevelScene.curTransition = null;
+
+			boolean isNewFloor = false;
+			if (destinationBranch.equals(Branches.MAIN)) {
+				isNewFloor = destinationDepth == Statistics.deepestFloor;
+			} else if (destinationBranch.equals(Branches.MOSS)) {
+				isNewFloor = destinationDepth == Statistics.deepestMossFloor;
+			}
+
+			if (isNewFloor
+					&& (InterlevelScene.mode == InterlevelScene.Mode.DESCEND
+					|| InterlevelScene.mode == InterlevelScene.Mode.FALL)) {
+
+				Branch branch = Branches.get(destinationBranch);
+				if (branch != null && !destinationBranch.equals(Branches.MAIN)) {
+					String branchName = branch.getLocalizedName();
+					GLog.h(Messages.get(this, "descend_branch"), branchName, destinationDepth);
+				} else {
+					GLog.h(Messages.get(this, "descend"), destinationDepth);
+				}
 				Sample.INSTANCE.play(Assets.Sounds.DESCEND);
 				
 				for (Char ch : Actor.chars()){
@@ -528,7 +555,13 @@ public class GameScene extends PixelScene {
 			} else if (InterlevelScene.mode == InterlevelScene.Mode.RESURRECT) {
 				GLog.h(Messages.get(this, "resurrect"), Dungeon.depth);
 			} else {
-				GLog.h(Messages.get(this, "return"), Dungeon.depth);
+				Branch branch = Branches.get(destinationBranch);
+				if (branch != null && !destinationBranch.equals(Branches.MAIN)) {
+					GLog.h(Messages.get(this, "return_branch"),
+							branch.getLocalizedName(), destinationDepth);
+				} else {
+					GLog.h(Messages.get(this, "return"), destinationDepth);
+				}
 			}
 
 //			if (Dungeon.hero.hasTalent(Talent.ROGUES_FORESIGHT)
@@ -613,6 +646,8 @@ public class GameScene extends PixelScene {
 
 			
 		}
+
+		ToyBackpack.checkForNewFloorChallenge();
 
 		//Tutorial
 		if (SPDSettings.intro()){
@@ -1451,7 +1486,7 @@ public class GameScene extends PixelScene {
 			
 			Sample.INSTANCE.play( Assets.Sounds.BOSS );
 
-			if(Dungeon.branch == 0 && Dungeon.bossLevel()) {
+			if(Dungeon.branchId.equals(Branches.MAIN) && Dungeon.bossLevel()) {
 				Buff.detach(Dungeon.hero, BlessAWP.ArmorGetReady.class);
 				Buff.detach(Dungeon.hero, BlessAWP.WeaponGetReady.class);
 			}
@@ -1680,7 +1715,9 @@ public class GameScene extends PixelScene {
 			} else if (objects.get(0) instanceof Hero) {
 				textLines.add(0, Messages.get(GameScene.class, "go_here"));
 			} else if (objects.get(0) instanceof Mob) {
-				if (((Mob) objects.get(0)).alignment != Char.Alignment.ENEMY) {
+				if (objects.get(0) instanceof WhitePlasticChair) {
+					textLines.add(0, Messages.get(WhitePlasticChair.class, "kick"));
+				} else if (((Mob) objects.get(0)).alignment != Char.Alignment.ENEMY) {
 					textLines.add(0, Messages.get(GameScene.class, "interact"));
 				} else {
 					textLines.add(0, Messages.get(GameScene.class, "attack"));
@@ -1720,7 +1757,11 @@ public class GameScene extends PixelScene {
 				@Override
 				public void onSelect(int index) {
 					if (index == 0){
-						handleCell(cell);
+						if (objects.size() == 1 && objects.get(0) instanceof WhitePlasticChair) {
+							((WhitePlasticChair) objects.get(0)).kick(Dungeon.hero);
+						} else {
+							handleCell(cell);
+						}
 					} else {
 						if (objects.size() == 0){
 							GameScene.show(new WndInfoCell(cell));

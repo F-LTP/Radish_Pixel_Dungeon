@@ -58,7 +58,6 @@ public class Glasssword extends MeleeWeapon{
         return d;
     }
     private void updateImage(){
-        int oldimage=image;
         if (ruin>=ruinCap){
             image =ItemSpriteSheet.GLASSSWORD3;
         }

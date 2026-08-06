@@ -60,6 +60,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.DM300Sprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Game;
@@ -223,7 +224,11 @@ public class DM300 extends Mob {
 							lastAbility = ROCKS;
 							turnsSinceLastAbility = 0;
 							if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
-								((DM300Sprite)sprite).slam(enemy.pos);
+								if (sprite instanceof DM300Sprite) {
+									((DM300Sprite)sprite).slam(enemy.pos);
+								} else if (sprite instanceof SnakeSprite) {
+									((SnakeSprite)sprite).slam(enemy.pos);
+								}
 								return false;
 							} else {
 								dropRocks(enemy);
@@ -267,7 +272,11 @@ public class DM300 extends Mob {
 							}
 						} else {
 							if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
-								((DM300Sprite)sprite).slam(enemy.pos);
+								if (sprite instanceof DM300Sprite) {
+									((DM300Sprite)sprite).slam(enemy.pos);
+								} else if (sprite instanceof SnakeSprite) {
+									((SnakeSprite)sprite).slam(enemy.pos);
+								}
 								return false;
 							} else {
 								dropRocks(enemy);
@@ -517,8 +526,13 @@ public class DM300 extends Mob {
 		spend(Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 2f : 3f);
 		yell(Messages.get(this, "charging"));
 		sprite.showStatus(CharSprite.POSITIVE, Messages.get(this, "invulnerable"));
-		((DM300Sprite)sprite).updateChargeState(true);
-		((DM300Sprite)sprite).charge();
+		if (sprite instanceof DM300Sprite) {
+			((DM300Sprite)sprite).updateChargeState(true);
+			((DM300Sprite)sprite).charge();
+		} else if (sprite instanceof SnakeSprite) {
+			((SnakeSprite)sprite).updateChargeState(true);
+			((SnakeSprite)sprite).charge();
+		}
 		chargeAnnounced = false;
 
 	}
@@ -529,7 +543,11 @@ public class DM300 extends Mob {
 
 	public void loseSupercharge(){
 		supercharged = false;
-		((DM300Sprite)sprite).updateChargeState(false);
+		if (sprite instanceof DM300Sprite) {
+			((DM300Sprite)sprite).updateChargeState(false);
+		} else if (sprite instanceof SnakeSprite) {
+			((SnakeSprite)sprite).updateChargeState(false);
+		}
 
 		if (pylonsActivated < totalPylonsToActivate()){
 			yell(Messages.get(this, "charge_lost"));

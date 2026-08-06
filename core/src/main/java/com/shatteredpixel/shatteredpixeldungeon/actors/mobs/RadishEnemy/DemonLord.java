@@ -4,6 +4,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
@@ -64,7 +65,25 @@ public class DemonLord extends Mob {
 
     @Override
     protected boolean canAttack( Char enemy ) {
-        return Dungeon.level.distance(pos,enemy.pos)<=2;
+        // 相邻位置可以直接攻击
+        if (Dungeon.level.adjacent(pos, enemy.pos)) {
+            return true;
+        }
+
+        // ChampionEnemy 的 extra reach 可能提供更远的攻击距离
+        for (ChampionEnemy buff : buffs(ChampionEnemy.class)) {
+            if (buff.canAttackWithExtraReach(enemy)) {
+                return true;
+            }
+        }
+
+        // 基础攻击距离 2 格，需要检查弹道联通
+        if (Dungeon.level.distance(pos, enemy.pos) <= 2) {
+            Ballistica shot = new Ballistica(pos, enemy.pos, Ballistica.STOP_TARGET);
+            return shot.collisionPos == enemy.pos;
+        }
+
+        return false;
     }
 
     private double damageBoost(int lv){
@@ -83,7 +102,7 @@ public class DemonLord extends Mob {
         buffCnt = 0;
         // accumulate without buff with no icon
         for(Object i:enemy.buffs(Buff.class).toArray()){
-            if(((Buff) i).icon()!= BuffIndicator.NONE) buffCnt+=1;
+            if(!BuffIndicator.NONE.equals(((Buff) i).icon())) buffCnt+=1;
         }
         if(enemy.buff(Light.class)!=null) buffCnt-=1;
         buffCnt = Math.max(buffCnt, 0);

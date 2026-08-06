@@ -41,6 +41,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.GooSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
@@ -124,7 +125,11 @@ public class Goo extends Mob {
 			}
 			if (HP*2 > HT) {
 				BossHealthBar.bleed(false);
-				((GooSprite)sprite).spray(false);
+				if (sprite instanceof GooSprite) {
+					((GooSprite)sprite).spray(false);
+				} else if (sprite instanceof SnakeSprite) {
+					((SnakeSprite)sprite).spray(false);
+				}
 				HP = Math.min(HP, HT);
 			}
 		} else {
@@ -171,7 +176,11 @@ public class Goo extends Mob {
 		super.updateSpriteState();
 
 		if (pumpedUp > 0){
-			((GooSprite)sprite).pumpUp( pumpedUp );
+			if (sprite instanceof GooSprite) {
+				((GooSprite)sprite).pumpUp( pumpedUp );
+			} else if (sprite instanceof SnakeSprite) {
+				((SnakeSprite)sprite).pumpUp( pumpedUp );
+			}
 		}
 	}
 
@@ -179,7 +188,11 @@ public class Goo extends Mob {
 	protected boolean doAttack( Char enemy ) {
 		if (pumpedUp == 1) {
 			pumpedUp++;
-			((GooSprite)sprite).pumpUp( pumpedUp );
+			if (sprite instanceof GooSprite) {
+				((GooSprite)sprite).pumpUp( pumpedUp );
+			} else if (sprite instanceof SnakeSprite) {
+				((SnakeSprite)sprite).pumpUp( pumpedUp );
+			}
 
 			spend( attackDelay() );
 
@@ -190,13 +203,21 @@ public class Goo extends Mob {
 
 			if (visible) {
 				if (pumpedUp >= 2) {
-					((GooSprite) sprite).pumpAttack();
+					if (sprite instanceof GooSprite) {
+						((GooSprite) sprite).pumpAttack();
+					} else if (sprite instanceof SnakeSprite) {
+						((SnakeSprite) sprite).pumpAttack();
+					}
 				} else {
 					sprite.attack(enemy.pos);
 				}
 			} else {
 				if (pumpedUp >= 2){
-					((GooSprite)sprite).triggerEmitters();
+					if (sprite instanceof GooSprite) {
+						((GooSprite)sprite).triggerEmitters();
+					} else if (sprite instanceof SnakeSprite) {
+						((SnakeSprite)sprite).triggerEmitters();
+					}
 				}
 				attack( enemy );
 				Invisibility.dispel(this);
@@ -216,7 +237,11 @@ public class Goo extends Mob {
 				spend( attackDelay() );
 			}
 
-			((GooSprite)sprite).pumpUp( pumpedUp );
+			if (sprite instanceof GooSprite) {
+				((GooSprite)sprite).pumpUp( pumpedUp );
+			} else if (sprite instanceof SnakeSprite) {
+				((SnakeSprite)sprite).pumpUp( pumpedUp );
+			}
 
 			if (Dungeon.level.heroFOV[pos]) {
 				sprite.showStatus( CharSprite.WARNING, Messages.get(this, "!!!") );
@@ -269,7 +294,11 @@ public class Goo extends Mob {
 		if ((HP*2 <= HT) && !bleeding){
 			BossHealthBar.bleed(true);
 			sprite.showStatus(CharSprite.WARNING, Messages.get(this, "enraged"));
-			((GooSprite)sprite).spray(true);
+			if (sprite instanceof GooSprite) {
+				((GooSprite)sprite).spray(true);
+			} else if (sprite instanceof SnakeSprite) {
+				((SnakeSprite)sprite).spray(true);
+			}
 			yell(Messages.get(this, "gluuurp"));
 		}
 		LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);

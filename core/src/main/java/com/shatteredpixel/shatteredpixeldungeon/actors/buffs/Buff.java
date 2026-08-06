@@ -100,7 +100,7 @@ public class Buff extends Actor {
 		return true;
 	}
 	
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.NONE;
 	}
 
@@ -161,6 +161,9 @@ public class Buff extends Actor {
 	public static<T extends FlavourBuff> T append( Char target, Class<T> buffClass, float duration ) {
 		T buff = append( target, buffClass );
 		float time_to_spend=duration * target.resist(buffClass);
+		if (target == Dungeon.hero && buff.type == buffType.NEGATIVE) {
+			time_to_spend = TinctureBuff.modifyDebuffDuration(time_to_spend);
+		}
 		if (target == Dungeon.hero && buff.type==buffType.POSITIVE){
 			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
 			if (ben!=null){
@@ -184,6 +187,9 @@ public class Buff extends Actor {
 	public static<T extends FlavourBuff> T affect( Char target, Class<T> buffClass, float duration ) {
 		T buff = affect( target, buffClass );
 		float time_to_spend=duration * target.resist(buffClass);
+		if (target == Dungeon.hero && buff.type == buffType.NEGATIVE) {
+			time_to_spend = TinctureBuff.modifyDebuffDuration(time_to_spend);
+		}
 		if (target == Dungeon.hero && buff.type==buffType.POSITIVE){
 			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
 			if (ben!=null){
@@ -198,6 +204,9 @@ public class Buff extends Actor {
 	public static<T extends FlavourBuff> T prolong( Char target, Class<T> buffClass, float duration ) {
 		T buff = affect( target, buffClass );
 		float time_to_postpone=duration * target.resist(buffClass);
+		if (target == Dungeon.hero && buff.type == buffType.NEGATIVE) {
+			time_to_postpone = TinctureBuff.modifyDebuffDuration(time_to_postpone);
+		}
 		if (target == Dungeon.hero && buff.type==buffType.POSITIVE){
 			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
 			if (ben!=null){

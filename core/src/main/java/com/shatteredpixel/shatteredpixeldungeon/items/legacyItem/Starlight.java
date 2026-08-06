@@ -9,7 +9,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 public class Starlight extends LegacyItemArmor {
 
     {
-        image = ItemSpriteSheet.STONE_SHOCK+7;
+        image = ItemSpriteSheet.STARLIGHT;
     }
 
     public Starlight() {
@@ -47,7 +47,7 @@ public class Starlight extends LegacyItemArmor {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.BLESS;
         }
 

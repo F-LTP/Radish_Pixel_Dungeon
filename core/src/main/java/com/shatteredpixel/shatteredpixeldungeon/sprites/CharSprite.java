@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.EmoIcon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.IceBlock;
+import com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect;
 import com.shatteredpixel.shatteredpixeldungeon.effects.ShieldHalo;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
@@ -43,6 +44,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CharHealthIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.glwrap.Matrix;
 import com.watabou.glwrap.Vertexbuffer;
 import com.watabou.noosa.Camera;
@@ -117,6 +119,39 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	protected ShieldHalo shield;
 	protected AlphaTweener invisible;
 	protected Flare aura;
+	protected ShaderEffect shaderEffect;
+	protected boolean pendingDeathAfterShader = false;
+
+	public void setShaderEffect(ShaderEffect effect) {
+		if (shaderEffect == effect) return;
+		ShaderEffect previous = shaderEffect;
+		shaderEffect = effect;
+		if (previous != null) {
+			previous.killAndErase();
+		}
+	}
+
+	public ShaderEffect getShaderEffect() {
+		return shaderEffect;
+	}
+
+	public boolean isPendingDeathAfterShader() {
+		return pendingDeathAfterShader;
+	}
+
+	public void clearPendingDeath() {
+		pendingDeathAfterShader = false;
+	}
+
+	public void dieAfterShader() {
+		sleeping = false;
+		remove(State.PARALYSED);
+		hideEmo();
+		if (health != null) {
+			health.killAndErase();
+		}
+		pendingDeathAfterShader = true;
+	}
 
 	
 	protected EmoIcon emo;
@@ -318,6 +353,16 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 
 		hideEmo();
 		
+		if (health != null){
+			health.killAndErase();
+		}
+	}
+
+	public void skipDieAnimation() {
+		sleeping = false;
+		remove( State.PARALYSED );
+		hideEmo();
+
 		if (health != null){
 			health.killAndErase();
 		}
@@ -734,11 +779,27 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 					0, 0, 0, aa * .6f);
 
 			script.drawQuad(buffer);
-		}
+					}
 
-		super.draw();
+					// 如果有着色器效果，使用着色器渲染
+					if (shaderEffect != null && !shaderEffect.isFinished()) {
+//						GLog.w("CharSprite.draw: 检测到着色器效果");
+						if (dirty) {
+							((Buffer)verticesBuffer).position(0);
+							verticesBuffer.put(vertices);
+							if (buffer == null)
+								buffer = new Vertexbuffer(verticesBuffer);
+							else
+								buffer.updateVertices(verticesBuffer);
+							dirty = false;
+						}
+						updateMatrix();
+						shaderEffect.drawWithShader(texture, frame(), width, height, matrix, verticesBuffer, buffer);
+					} else {
+						super.draw();
+					}
 
-	}
+				}
 
 	@Override
 	public void onComplete( Tweener tweener ) {

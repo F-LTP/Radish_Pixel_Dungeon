@@ -35,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBerserk;
 import com.watabou.noosa.Image;
@@ -281,8 +282,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 
 	@Override
-	public int actionIcon() {
-		return BuffIndicator.FURY;
+	public String actionIcon() {
+		return HeroIcon.ENDURE;
 	}
 
 	@Override
@@ -301,7 +302,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.BERSERK;
 	}
 

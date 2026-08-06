@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.ui;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.NinePatch;
 import com.watabou.noosa.audio.Sample;
@@ -37,6 +38,12 @@ public class StyledButton extends Button {
 	public boolean leftJustify = false;
 
 	public boolean multiline;
+	
+	// dice-mode 1px border overlay
+	private ColorBlock diceTop;
+	private ColorBlock diceBottom;
+	private ColorBlock diceLeft;
+	private ColorBlock diceRight;
 	
 	public StyledButton(Chrome.Type type, String label ) {
 		this(type, label, 9);
@@ -54,6 +61,31 @@ public class StyledButton extends Button {
 	}
 	
 	@Override
+	protected void createChildren() {
+		super.createChildren();
+
+		diceTop = new ColorBlock(1, 1, 0xFFFFFFFF);
+		diceTop.hardlight(DiceMageUI.GREY_LINE);
+		diceTop.visible = false;
+		add(diceTop);
+
+		diceBottom = new ColorBlock(1, 1, 0xFFFFFFFF);
+		diceBottom.hardlight(DiceMageUI.GREY_LINE);
+		diceBottom.visible = false;
+		add(diceBottom);
+
+		diceLeft = new ColorBlock(1, 1, 0xFFFFFFFF);
+		diceLeft.hardlight(DiceMageUI.GREY_LINE);
+		diceLeft.visible = false;
+		add(diceLeft);
+
+		diceRight = new ColorBlock(1, 1, 0xFFFFFFFF);
+		diceRight.hardlight(DiceMageUI.GREY_LINE);
+		diceRight.visible = false;
+		add(diceRight);
+	}
+	
+	@Override
 	protected void layout() {
 		
 		super.layout();
@@ -61,6 +93,31 @@ public class StyledButton extends Button {
 		bg.x = x;
 		bg.y = y;
 		bg.size( width, height );
+
+		boolean dice = DiceMageUI.active();
+		diceTop.visible = dice;
+		diceBottom.visible = dice;
+		diceLeft.visible = dice;
+		diceRight.visible = dice;
+
+		if (dice) {
+			bg.hardlight(DiceMageUI.BLACK);
+			diceTop.x = x;
+			diceTop.y = y;
+			diceTop.size(width, 1);
+
+			diceBottom.x = x;
+			diceBottom.y = y + height - 1;
+			diceBottom.size(width, 1);
+
+			diceLeft.x = x;
+			diceLeft.y = y;
+			diceLeft.size(1, height);
+
+			diceRight.x = x + width - 1;
+			diceRight.y = y;
+			diceRight.size(1, height);
+		}
 		
 		float componentWidth = 0;
 		
@@ -103,11 +160,29 @@ public class StyledButton extends Button {
 	protected void onPointerDown() {
 		bg.brightness( 1.2f );
 		Sample.INSTANCE.play( Assets.Sounds.CLICK );
+
+		if (diceTop.visible) {
+			diceTop.hardlight(DiceMageUI.GOLD);
+			diceBottom.hardlight(DiceMageUI.GOLD);
+			diceLeft.hardlight(DiceMageUI.GOLD);
+			diceRight.hardlight(DiceMageUI.GOLD);
+		}
 	}
 	
 	@Override
 	protected void onPointerUp() {
-		bg.resetColor();
+		if (DiceMageUI.active()) {
+			bg.hardlight(DiceMageUI.BLACK);
+		} else {
+			bg.resetColor();
+		}
+
+		if (diceTop.visible) {
+			diceTop.hardlight(DiceMageUI.GREY_LINE);
+			diceBottom.hardlight(DiceMageUI.GREY_LINE);
+			diceLeft.hardlight(DiceMageUI.GREY_LINE);
+			diceRight.hardlight(DiceMageUI.GREY_LINE);
+		}
 	}
 	
 	public void enable( boolean value ) {

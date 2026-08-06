@@ -21,94 +21,97 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.ui;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
+import com.watabou.gltextures.AtlasFrame;
+import com.watabou.gltextures.AtlasSource;
+import com.watabou.gltextures.RuntimeAtlas;
+import com.watabou.gltextures.RuntimeAtlasRegistry;
 import com.watabou.noosa.Image;
-import com.watabou.noosa.TextureFilm;
 
-//icons for hero subclasses and abilities atm, maybe add classes?
+// 把字符串写在文件里面纯粹是想要用IDE的引用计数功能，不过鉴于大部分的常量都只用了一次，其实不用也许是个好选择……
 public class HeroIcon extends Image {
 
-	private static TextureFilm film;
-	private static final int SIZE = 16;
+	public static final AtlasSource ATLAS_SOURCE = new AtlasSource("interfaces/hero_icons", "none");
+	private static final RuntimeAtlas ATLAS = RuntimeAtlasRegistry.get(ATLAS_SOURCE);
+
 
 	//transparent icon
-	public static final int NONE    = 63;
+	public static final String NONE = "none";
 
 	//subclasses
-	public static final int BERSERKER   = 0;
-	public static final int GLADIATOR   = 1;
-	public static final int BATTLEMAGE  = 2;
-	public static final int WARLOCK     = 3;
-	public static final int ASSASSIN    = 4;
-	public static final int FREERUNNER  = 5;
-	public static final int SNIPER      = 6;
-	public static final int WARDEN      = 7;
-	public static final int CHAMPION    = 8;
-	public static final int MONK        = 9;
+	public static final String BERSERKER = "berserker";
+	public static final String GLADIATOR = "gladiator";
+	public static final String BATTLEMAGE = "battlemage";
+	public static final String WARLOCK = "warlock";
+	public static final String ASSASSIN = "assassin";
+	public static final String FREERUNNER = "freerunner";
+	public static final String SNIPER = "sniper";
+	public static final String WARDEN = "warden";
+	public static final String CHAMPION = "champion";
+	public static final String MONK = "monk";
+	public static final String BATTLE_PRIEST = "battle_priest";
+	public static final String RED_CARDINAL = "red_cardinal";
+	public static final String DEAD_KNIGHT = "dead_knight";
 
 	//abilities
-	public static final int HEROIC_LEAP     = 16;
-	public static final int SHOCKWAVE       = 17;
-	public static final int ENDURE          = 18;
-	public static final int ELEMENTAL_BLAST = 19;
-	public static final int WILD_MAGIC      = 20;
-	public static final int WARP_BEACON     = 21;
-	public static final int SMOKE_BOMB      = 22;
-	public static final int DEATH_MARK      = 23;
-	public static final int SHADOW_CLONE    = 24;
-	public static final int SPECTRAL_BLADES = 25;
-	public static final int NATURES_POWER   = 26;
-	public static final int SPIRIT_HAWK     = 27;
-	public static final int CHALLENGE       = 28;
-	public static final int ELEMENTAL_STRIKE= 29;
-	public static final int FEINT           = 30;
-	public static final int RATMOGRIFY      = 31;
+	public static final String ASH_KING = "ash_king";
+	public static final String END_BLESS = "end_bless";
+	public static final String SHADOW = "shadow";
+	public static final String POSSESSION = "possession";
+	public static final String HEROIC_LEAP = "heroic_leap";
+	public static final String SHOCKWAVE = "shockwave";
+	public static final String ENDURE = "endure";
+	public static final String ELEMENTAL_BLAST = "elemental_blast";
+	public static final String WILD_MAGIC = "wild_magic";
+	public static final String WARP_BEACON = "warp_beacon";
+	public static final String SMOKE_BOMB = "smoke_bomb";
+	public static final String DEATH_MARK = "death_mark";
+	public static final String SHADOW_CLONE = "shadow_clone";
+	public static final String SPECTRAL_BLADES = "spectral_blades";
+	public static final String NATURES_POWER = "natures_power";
+	public static final String SPIRIT_HAWK = "spirit_hawk";
+	public static final String CHALLENGE = "challenge";
+	public static final String ELEMENTAL_STRIKE = "elemental_strike";
+	public static final String FEINT = "feint";
+	public static final String RATMOGRIFY = "ratmogrify";
 
 	//action indicator visuals
-	public static final int BERSERK         = 32;
-	public static final int COMBO           = 33;
-	public static final int PREPARATION     = 34;
-	public static final int MOMENTUM        = 35;
-	public static final int SNIPERS_MARK    = 36;
-	public static final int WEAPON_SWAP     = 37;
-	public static final int MONK_ABILITIES  = 38;
+	public static final String BERSERK = "berserk";
+	public static final String COMBO = "combo";
+	public static final String PREPARATION = "preparation";
+	public static final String MOMENTUM = "momentum";
+	public static final String SNIPERS_MARK = "snipers_mark";
+	public static final String WEAPON_SWAP = "weapon_swap";
+	public static final String MONK_ABILITIES = "monk_abilities";
+	public static final String BLESS = "bless";
 
-	public static final int BLESS          = 39;
+	//Moonlight SubClasses
+	public static final String LITTLE_KNIGHT = "little_knight";
+	public static final String DICE_MAGE = "dice_mage";
+	public static final String JUTTE_CHAMPION = "jutte_champion";
 
-	public static final int PATLE   	  = 10;
-	public static final int REDLORD       = 11;
-
-	public static final int DEADKNIGHT = 12;
-
-	public static final int END_BLESS = 13;
-
-	public static final int SHADOW = 14;
-	public static final int POSSESSION = 15;
+	//Moonlight ArmorAbility
+	public static final String TOY_BACKPACK = "toy_backpack";
+	public static final String FATED_DRAW = "fated_draw";
 
 	public HeroIcon(HeroSubClass subCls){
-		super( Assets.Interfaces.HERO_ICONS );
-		if (film == null){
-			film = new TextureFilm(texture, SIZE, SIZE);
-		}
-		frame(film.get(subCls.icon()));
+		this(subCls.icon());
 	}
 
 	public HeroIcon(ArmorAbility abil){
-		super( Assets.Interfaces.HERO_ICONS );
-		if (film == null){
-			film = new TextureFilm(texture, SIZE, SIZE);
-		}
-		frame(film.get(abil.icon()));
+		this(abil.icon());
 	}
 
 	public HeroIcon(ActionIndicator.Action action){
-		super( Assets.Interfaces.HERO_ICONS );
-		if (film == null){
-			film = new TextureFilm(texture, SIZE, SIZE);
-		}
-		frame(film.get(action.actionIcon()));
+		this(action.actionIcon());
+	}
+
+	public HeroIcon(String icon) {
+		super();
+		AtlasFrame atlasFrame = ATLAS.frame(icon);
+		texture = atlasFrame.texture;
+		frame(atlasFrame.uv);
 	}
 
 }

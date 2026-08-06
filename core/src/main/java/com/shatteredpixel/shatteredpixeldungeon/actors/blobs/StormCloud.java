@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.blobs;
@@ -24,16 +24,18 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.blobs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 
 public class StormCloud extends Blob {
-	
+
 	@Override
 	protected void evolve() {
 		super.evolve();
-		
+
 		int cell;
 
 		Fire fire = (Fire) Dungeon.level.blobs.get(Fire.class);
@@ -51,22 +53,23 @@ public class StormCloud extends Blob {
 					if (ch != null
 							&& !ch.isImmune(getClass())
 							&& Char.hasProp(ch, Char.Property.FIERY)){
-						ch.damage(1 + Dungeon.scalingDepth()/5, this);
+						int damage = 1 + Dungeon.scalingDepth()/5;
+						ch.damage(new DamageInfo(damage, DamageType.WATER, null, null, this));
 					}
 				}
 			}
 		}
 	}
-	
+
 	@Override
 	public void use( BlobEmitter emitter ) {
 		super.use( emitter );
 		emitter.pour( Speck.factory( Speck.STORM ), 0.4f );
 	}
-	
+
 	@Override
 	public String tileDesc() {
 		return Messages.get(this, "desc");
 	}
-	
+
 }

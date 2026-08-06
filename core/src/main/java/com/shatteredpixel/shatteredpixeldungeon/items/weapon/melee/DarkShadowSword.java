@@ -10,7 +10,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 public class DarkShadowSword extends MeleeWeapon {
 
     {
-        image = ItemSpriteSheet.DARTS+18;
+        image = ItemSpriteSheet.DARK_SHADOW_SWORD;
         tier = 2;
         ACC = 1.2f;
     }

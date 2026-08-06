@@ -25,7 +25,9 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ScorpionCrossbow;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
@@ -91,15 +93,58 @@ public class ThrowingSpear extends MissileWeapon {
 	@Override
 	public String info() {
 		updateCrossbow();
-		if (bow != null && !bow.isIdentified()){
-			int level = bow.level();
-			//temporarily sets the level of the bow to 0 for IDing purposes
-			bow.level(0);
-			String info = super.info();
-			bow.level(level);
-			return info;
-		} else {
-			return super.info();
+		String info = desc();
+		
+		int min = Math.round(augment.damageFactor(min()));
+		int max = Math.round(augment.damageFactor(max()));
+		
+		info += "\n\n" + Messages.get( MissileWeapon.class, "stats",
+				tier,
+				min,
+				max,
+				STRReq());
+		
+		if (Dungeon.hero != null) {
+			if (STRReq() > Dungeon.hero.STR()) {
+				info += " " + Messages.get(Weapon.class, "too_heavy");
+			} else if (Dungeon.hero.STR() > STRReq()) {
+				info += " " + Messages.get(Weapon.class, "excess_str", Dungeon.hero.STR() - STRReq());
+			}
 		}
+		
+		// 显示蝎子弩加成提示
+		if (bow != null) {
+			int bowMin = min();
+			int bowMax = max();
+			info += "\n\n" + Messages.get(this, "crossbow_bonus", bow.name(), bowMin, bowMax);
+		}
+
+		if (enchantment != null && (cursedKnown || !enchantment.curse())){
+			info += "\n\n" + Messages.get(Weapon.class, "enchanted", enchantment.name());
+			info += " " + Messages.get(enchantment, "desc");
+		}
+
+		if (cursed && isEquipped( Dungeon.hero )) {
+			info += "\n\n" + Messages.get(Weapon.class, "cursed_worn");
+		} else if (cursedKnown && cursed) {
+			info += "\n\n" + Messages.get(Weapon.class, "cursed");
+		} else if (!isIdentified() && cursedKnown){
+			info += "\n\n" + Messages.get(Weapon.class, "not_cursed");
+		}
+
+		info += "\n\n" + Messages.get(MissileWeapon.class, "distance");
+		
+		info += "\n\n" + Messages.get(this, "durability");
+		
+		if (durabilityPerUse() > 0){
+			info += " " + Messages.get(this, "uses_left",
+					(int)Math.ceil(durability/durabilityPerUse()),
+					(int)Math.ceil(MAX_DURABILITY/durabilityPerUse()));
+		} else {
+			info += " " + Messages.get(this, "unlimited_uses");
+		}
+		
+		
+		return info;
 	}
 }

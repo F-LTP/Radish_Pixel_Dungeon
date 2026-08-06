@@ -59,7 +59,7 @@ public class Challenge extends ArmorAbility {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return HeroIcon.CHALLENGE;
 	}
 
@@ -207,7 +207,7 @@ public class Challenge extends ArmorAbility {
 		private int takenDmg = 0;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.CHALLENGE;
 		}
 

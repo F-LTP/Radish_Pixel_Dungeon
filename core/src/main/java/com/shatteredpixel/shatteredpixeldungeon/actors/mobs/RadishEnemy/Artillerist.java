@@ -38,6 +38,7 @@ import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.ArtilleristSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.PathFinder;
@@ -318,7 +319,11 @@ public class Artillerist extends Mob {
                 sprite.parent.add(new TargetedCell(enemy.pos + c, 0xFF0000));
             }
             cellToFire = enemy.pos;
-            ((ArtilleristSprite)sprite).targeting(cellToFire);
+            if (sprite instanceof ArtilleristSprite) {
+                ((ArtilleristSprite)sprite).targeting(cellToFire);
+            } else if (sprite instanceof SnakeSprite) {
+                ((SnakeSprite)sprite).targeting(cellToFire);
+            }
             spend( attackDelay());
             return true;
         }

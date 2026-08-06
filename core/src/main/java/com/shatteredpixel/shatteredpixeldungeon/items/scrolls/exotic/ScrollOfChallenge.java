@@ -80,7 +80,7 @@ public class ScrollOfChallenge extends ExoticScroll {
 		}
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.ARMOR;
 		}
 

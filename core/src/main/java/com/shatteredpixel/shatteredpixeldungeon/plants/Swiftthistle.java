@@ -77,7 +77,7 @@ public class Swiftthistle extends Plant {
 		ArrayList<Integer> presses = new ArrayList<>();
 		
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.TIME;
 		}
 

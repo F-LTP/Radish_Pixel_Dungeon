@@ -9,15 +9,20 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BlessAWP;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChallengeToyEffects;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Momentum;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.talents.moonlight.SharpeningEdgeTalent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.ToyBackpack;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.ItemArmorAttachable;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.AntiEntropy;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Bulk;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Corrosion;
@@ -44,17 +49,24 @@ import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Muramasa;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfKing;
+import com.shatteredpixel.shatteredpixeldungeon.items.toys.ClumsyShoes;
+import com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToy;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.GoldRadish;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ParchmentScrap;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RiverCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CircleSword;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
@@ -67,10 +79,38 @@ import java.util.Arrays;
 
 public class Armor extends EquipableItem {
 
+	public static final String AC_SHARPENING_EDGE = "SHARPENING_EDGE";
+	public static final String AC_ATTACH = "ATTACH";
+	public static final String AC_TOY = "TOY";
 	protected Buff buff;
 	protected static final String AC_DETACH       = "DETACH";
 
+	// 玩具背包相关字段
+	public int toyCharge = 0; // 玩具背包充能
+	protected ArrayList<ItemArmorAttachable> attachedToys = new ArrayList<>();
 
+	private static final Class<? extends ItemArmorAttachable>[][] TOY_CLASSES_BY_TIER = new Class[][]{
+		{
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.Scar.class,
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.IronHeart.class,
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.Arrow.class,
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.BarkskinToy.class,
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.Cloak.class,
+			ClumsyShoes.class,
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.Poem.class,
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.Mercury.class,
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.Tincture.class,
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.Polearm.class,
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.Whetstone.class,
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.MagicWand.class,
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.ShieldToy.class,
+		},
+		{TieredToy.Buckler.class, TieredToy.TwinDaggers.class, TieredToy.BlessedWater.class, TieredToy.Spinach.class, TieredToy.Terrarium.class},
+		{TieredToy.Harpoon.class, TieredToy.EnchantedShield.class, TieredToy.IronPendant.class, TieredToy.Shortsword.class, TieredToy.BloodChalice.class},
+		{TieredToy.CrackedPlate.class, TieredToy.LifeBolt.class, TieredToy.SplittingArrows.class, TieredToy.HissingRing.class, TieredToy.Antivenom.class},
+		{TieredToy.Ambrosia.class, TieredToy.Nunchaku.class, TieredToy.Sponge.class, TieredToy.MiniCrossbow.class, TieredToy.Doomblade.class, TieredToy.BagOfHolding.class},
+		{TieredToy.BlindingBolt.class, TieredToy.Hourglass.class, TieredToy.GhostShield.class, TieredToy.ToothNecklace.class, TieredToy.Determination.class}
+	};
 
 	public enum Augment {
 		EVASION (2f , -1f),
@@ -103,10 +143,6 @@ public class Armor extends EquipableItem {
 
 	public boolean masteryPotionBonus = false;
 
-
-
-	protected BrokenSeal seal;
-
 	public int tier;
 
 	private static final int USES_TO_ID = 10;
@@ -122,8 +158,9 @@ public class Armor extends EquipableItem {
 	private static final String GLYPH			= "glyph";
 	private static final String CURSE_INFUSION_BONUS = "curse_infusion_bonus";
 	private static final String MASTERY_POTION_BONUS = "mastery_potion_bonus";
-	private static final String SEAL            = "seal";
 	private static final String AUGMENT			= "augment";
+	private static final String TOY_CHARGE      = "toy_charge";
+	private static final String ATTACHED_TOYS   = "attached_toys";
 
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -133,8 +170,14 @@ public class Armor extends EquipableItem {
 		bundle.put( GLYPH, glyph );
 		bundle.put( CURSE_INFUSION_BONUS, curseInfusionBonus );
 		bundle.put( MASTERY_POTION_BONUS, masteryPotionBonus );
-		bundle.put( SEAL, seal);
 		bundle.put( AUGMENT, augment);
+		bundle.put( TOY_CHARGE, toyCharge);
+		Bundle toyBundle = new Bundle();
+		for (int i = 0; i < attachedToys.size(); i++) {
+			toyBundle.put("toy_" + i, attachedToys.get(i));
+		}
+		toyBundle.put("toy_count", attachedToys.size());
+		bundle.put(ATTACHED_TOYS, toyBundle);
 	}
 
 	@Override
@@ -145,9 +188,27 @@ public class Armor extends EquipableItem {
 		inscribe((Glyph) bundle.get(GLYPH));
 		curseInfusionBonus = bundle.getBoolean( CURSE_INFUSION_BONUS );
 		masteryPotionBonus = bundle.getBoolean( MASTERY_POTION_BONUS );
-		seal = (BrokenSeal)bundle.get(SEAL);
 
 		augment = bundle.getEnum(AUGMENT, Augment.class);
+
+		// 恢复玩具背包数据
+		if (bundle.contains(TOY_CHARGE)) {
+			toyCharge = bundle.getInt(TOY_CHARGE);
+		}
+		attachedToys = new ArrayList<>();
+		if (bundle.contains(ATTACHED_TOYS)) {
+			Bundle toyBundle = bundle.getBundle(ATTACHED_TOYS);
+			if (toyBundle.contains("toy_count")) {
+				int count = toyBundle.getInt("toy_count");
+				for (int i = 0; i < count; i++) {
+					ItemArmorAttachable toy = (ItemArmorAttachable) toyBundle.get("toy_" + i);
+					if (toy != null) {
+						attachedToys.add(toy);
+						toy.attachToArmor(this);
+					}
+				}
+			}
+		}
 	}
 
 	@Override
@@ -155,8 +216,9 @@ public class Armor extends EquipableItem {
 		super.reset();
 		usesLeftToID = USES_TO_ID;
 		availableUsesToID = USES_TO_ID/2f;
-		//armor can be kept in bones between runs, the seal cannot.
-		seal = null;
+		// armor can be kept in bones between runs, attachments cannot.
+		toyCharge = 0;
+		attachedToys.clear();
 	}
 
 	public boolean readyToIdentify(){
@@ -166,8 +228,38 @@ public class Armor extends EquipableItem {
 	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions(hero);
-		if (seal != null) actions.add(AC_DETACH);
+
+		// 有附着物时显示卸下选项
+		boolean hasAttachments = !attachedToys.isEmpty();
+		if (hasAttachments) {
+			actions.add(AC_DETACH);
+		}
+
+		// 砥砺锋芒天赋：只有月华英雄且有天赋时显示
+		if (SharpeningEdgeTalent.canUse(hero, this)) {
+			actions.add(AC_SHARPENING_EDGE);
+		}
+
+		// 玩具背包护甲技能：只有选择了玩具背包护甲技能时显示
+		if (hero.armorAbility instanceof ToyBackpack) {
+			actions.add(AC_TOY); // 查看玩具背包
+			if (this instanceof ClassArmor
+					&& ((ClassArmor)this).charge >= hero.armorAbility.chargeUse(hero)) {
+				actions.add(AC_ATTACH); // 生成新玩具
+			}
+		}
 		return actions;
+	}
+
+	@Override
+	public String actionName(String action, Hero hero) {
+		if (action.equals(AC_SHARPENING_EDGE)) {
+			return Messages.get(Armor.class, "ac_" + action);
+		}
+		if (action.equals(AC_TOY) || action.equals(AC_ATTACH)) {
+			return Messages.get(Armor.class, "ac_" + action);
+		}
+		return super.actionName(action, hero);
 	}
 
 	@Override
@@ -175,25 +267,23 @@ public class Armor extends EquipableItem {
 
 		super.execute(hero, action);
 
-		if (action.equals(AC_DETACH) && seal != null){
-			BrokenSeal.WarriorShield sealBuff = hero.buff(BrokenSeal.WarriorShield.class);
-			if (sealBuff != null) sealBuff.setArmor(null);
+		if (action.equals(AC_SHARPENING_EDGE)) {
+			SharpeningEdgeTalent.showTargetSelectionWindow(hero, this);
 
-			BrokenSeal detaching = seal;
-			seal = null;
+		} else if (action.equals(AC_DETACH)) {
+			// 打开窗口选择要卸下的物品
+			GameScene.show(new WndDetachItems(hero, this));
 
-			if (detaching.level() > 0){
-				degrade();
+		} else if (action.equals(AC_ATTACH)) {
+			if (this instanceof ClassArmor
+					&& hero.armorAbility instanceof ToyBackpack
+					&& ((ClassArmor)this).charge >= hero.armorAbility.chargeUse(hero)) {
+				((ToyBackpack) hero.armorAbility).requestGeneration((ClassArmor) this, hero);
 			}
-			/*if (detaching.getGlyph() != null){
-				detaching.setGlyph(null);
-			}*/
-			GLog.i( Messages.get(Armor.class, "detach_seal") );
-			hero.sprite.operate(hero.pos);
-			if (!detaching.collect()){
-				Dungeon.level.drop(detaching, hero.pos);
-			}
-			updateQuickslot();
+
+		} else if (action.equals(AC_TOY)) {
+			// 查看玩具背包信息
+			GameScene.show(new WndToyBackpackInfo(this));
 		}
 	}
 
@@ -237,7 +327,7 @@ public class Armor extends EquipableItem {
 
 	@Override
 	public void activate(Char ch) {
-		if (seal != null) Buff.affect(ch, BrokenSeal.WarriorShield.class).setArmor(this);
+		// BrokenSeal 的 WarriorShield 通过 applyEffect() 自动应用
 		if (buff != null){
 			buff.detach();
 			buff = null;
@@ -245,26 +335,346 @@ public class Armor extends EquipableItem {
 		buff = buff();
 		if (buff!=null)
 			buff.attachTo( ch );
+		if (ch instanceof Hero) {
+			for (ItemArmorAttachable toy : attachedToys) {
+				toy.applyEffect((Hero)ch);
+			}
+		}
 	}
 
 	public void affixSeal(BrokenSeal seal){
-		this.seal = seal;
+		// 升级传递逻辑：纹章等级传递给护甲，但卸下时会返还
 		if (seal.level() > 0){
 			//doesn't trigger upgrading logic such as affecting curses/glyphs
 			int newLevel = trueLevel()+1;
 			level(newLevel);
 			Badges.validateItemLevelAquired(this);
 		}
-		/*if (seal.getGlyph() != null){
-			inscribe(seal.getGlyph());
-		}*/
-		if (isEquipped(Dungeon.hero)){
-			Buff.affect(Dungeon.hero, BrokenSeal.WarriorShield.class).setArmor(this);
-		}
+		attachToy(seal);
 	}
 
 	public BrokenSeal checkSeal(){
-		return seal;
+		return getToy(BrokenSeal.class);
+	}
+
+	// ========== 玩具背包方法 ==========
+
+	/**
+	 * 生成随机玩具
+	 */
+	public ItemArmorAttachable generateRandomToy() {
+		int talent = Dungeon.hero == null ? 0 : Dungeon.hero.pointsInTalent(Talent.BETTER_ITEM);
+		return generateRandomToy( Random.IntRange(1 + talent, 2 + talent) );
+	}
+
+	public ItemArmorAttachable generateRandomToy( int tier ) {
+		try {
+			if (tier < 1 || tier > TOY_CLASSES_BY_TIER.length) return null;
+			Class<? extends ItemArmorAttachable> cls = Random.oneOf(TOY_CLASSES_BY_TIER[tier - 1]);
+			ItemArmorAttachable toy = cls.getDeclaredConstructor().newInstance();
+			if (toy != null) {
+				toy.identify();
+			}
+			return toy;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public static int toyTierCount() {
+		return TOY_CLASSES_BY_TIER.length;
+	}
+
+	public static Class<? extends ItemArmorAttachable>[] toyClassesForTier(int tier) {
+		if (tier < 1 || tier > TOY_CLASSES_BY_TIER.length) {
+			throw new IllegalArgumentException("Invalid toy tier: " + tier);
+		}
+		return TOY_CLASSES_BY_TIER[tier - 1].clone();
+	}
+
+	/**
+	 * 将玩具附着到护甲上
+	 */
+	public void attachToy(ItemArmorAttachable toy) {
+		attachedToys.add(toy);
+		toy.attachToArmor(this);
+		if (Dungeon.hero != null && isEquipped(Dungeon.hero)) {
+			toy.applyEffect(Dungeon.hero);
+		}
+	}
+
+	public int toyCapacity() {
+		int base = Dungeon.hero != null && Dungeon.hero.armorAbility instanceof ToyBackpack
+				? ToyBackpack.attachedToyCapacity(Dungeon.hero) : 2;
+		boolean temporaryBag = Dungeon.hero != null && isEquipped(Dungeon.hero)
+				&& ChallengeToyEffects.hasEffect(Dungeon.hero, TieredToy.BagOfHolding.class);
+		return hasToy(TieredToy.BagOfHolding.class) || temporaryBag ? base + 2 : base;
+	}
+
+	public static class ToyRef {
+		public final ItemArmorAttachable toy;
+		private final Armor armor;
+		private ToyRef(ItemArmorAttachable toy, Armor armor) { this.toy = toy; this.armor = armor; }
+		public void destroy(Hero hero) {
+			if (armor != null) {
+				int index = armor.attachedToys.indexOf(toy);
+				if (index >= 0) armor.detachToy(index);
+				armor.dropExcessToys(hero);
+			} else {
+				toy.detachAll(hero.belongings.backpack);
+			}
+		}
+	}
+
+	public static ArrayList<ToyRef> ownedToys(Hero hero) {
+		ArrayList<ToyRef> result = new ArrayList<>();
+		collectToyRefs(hero.belongings.backpack, result);
+		if (hero.belongings.armor != null) addArmorToyRefs(hero.belongings.armor, result);
+		return result;
+	}
+
+	private static void collectToyRefs(Bag bag, ArrayList<ToyRef> result) {
+		for (Item item : bag.items) {
+			if (item instanceof ItemArmorAttachable) result.add(new ToyRef((ItemArmorAttachable) item, null));
+			if (item instanceof Armor) addArmorToyRefs((Armor) item, result);
+			if (item instanceof Bag) collectToyRefs((Bag) item, result);
+		}
+	}
+
+	private static void addArmorToyRefs(Armor armor, ArrayList<ToyRef> result) {
+		for (ItemArmorAttachable toy : armor.attachedToys) {
+			boolean present = false;
+			for (ToyRef ref : result) if (ref.toy == toy) { present = true; break; }
+			if (!present) result.add(new ToyRef(toy, armor));
+		}
+	}
+
+	public void requestAttachToy(Hero hero, ItemArmorAttachable toy) {
+		if (attachedToys.size() < toyCapacity()) {
+			completeToyAttachment(hero, toy);
+		} else {
+			GameScene.show(new WndReplaceToy(hero, this, toy));
+		}
+	}
+
+	private void completeToyAttachment(Hero hero, ItemArmorAttachable toy) {
+		attachToy(toy);
+		toy.detach(hero.belongings.backpack);
+		GLog.p(Messages.get(ItemArmorAttachable.class, "attached", toy.name(), name()));
+	}
+
+	private void returnToy(Hero hero, ItemArmorAttachable toy) {
+		if (!toy.collect(hero.belongings.backpack)) {
+			if (toy instanceof BrokenSeal) Dungeon.level.drop(toy, hero.pos).sprite.drop();
+			else toy.vanishOnGround(false, hero.pos);
+		}
+	}
+
+	private void replaceToy(Hero hero, int index, ItemArmorAttachable replacement) {
+		ItemArmorAttachable removed = attachedToys.get(index);
+		detachToy(index);
+		returnToy(hero, removed);
+		completeToyAttachment(hero, replacement);
+		dropExcessToys(hero);
+	}
+
+	private void dropExcessToys(Hero hero) {
+		while (attachedToys.size() > toyCapacity()) {
+			int overflowIndex = toyCapacity();
+			ItemArmorAttachable removed = attachedToys.get(overflowIndex);
+			detachToy(overflowIndex);
+			if (removed instanceof BrokenSeal) Dungeon.level.drop(removed, hero.pos).sprite.drop();
+			else removed.vanishOnGround(true, hero.pos);
+		}
+	}
+
+	public void dropExcessToysAfterCapacityChange(Hero hero) {
+		if (hero != null) dropExcessToys(hero);
+	}
+
+	/**
+	 * 从护甲卸下玩具
+	 */
+	public void detachToy(int index) {
+		if (index >= 0 && index < attachedToys.size()) {
+			ItemArmorAttachable toy = attachedToys.remove(index);
+			if (Dungeon.hero != null && isEquipped(Dungeon.hero)) {
+				ChallengeToyEffects.removePermanentEffect(Dungeon.hero, toy);
+			}
+			toy.attachedTo = null;
+		}
+	}
+
+	/**
+	 * 卸下破损纹章（向后兼容，现在统一通过 detachToy 处理）
+	 * 卸下时：护甲等级-1返还给纹章，如果有符文传递天赋则携带护甲附魔/诅咒
+	 */
+	public void detachSeal(Hero hero) {
+		BrokenSeal seal = getToy(BrokenSeal.class);
+		if (seal == null) return;
+
+		// 如果纹章有等级，返还给护甲-1
+		if (seal.level() > 0) {
+			int newLevel = Math.max(0, trueLevel() - 1);
+			level(newLevel);
+		}
+
+		// 如果有符文传递天赋，携带护甲附魔/诅咒
+		if (hero != null && hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
+			if (glyph != null) {
+				seal.inscribe(glyph);
+			}
+		}
+
+		int idx = attachedToys.indexOf(seal);
+		detachToy(idx);
+	}
+
+	/**
+	 * 获取指定类型的已附着玩具
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends ItemArmorAttachable> T getToy(Class<T> toyClass) {
+		for (ItemArmorAttachable toy : attachedToys) {
+			if (toy.getClass() == toyClass) {
+				return (T) toy;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 获取所有附着玩具
+	 */
+	public ArrayList<ItemArmorAttachable> getToys() {
+		return new ArrayList<>(attachedToys);
+	}
+
+	/**
+	 * 检查是否附着了指定类型的玩具
+	 */
+	public boolean hasToy(Class<? extends ItemArmorAttachable> toyClass) {
+		return getToy(toyClass) != null;
+	}
+
+	/**
+	 * 附着玩具数量
+	 */
+	public int toyCount() {
+		return attachedToys.size();
+	}
+
+	// ========== 窗口类 ==========
+
+	public class WndReplaceToy extends WndOptions {
+		private final Hero hero;
+		private final Armor armor;
+		private final ItemArmorAttachable replacement;
+
+		public WndReplaceToy(Hero hero, Armor armor, ItemArmorAttachable replacement) {
+			super(Messages.get(Armor.class, "replace_toy_title"),
+					Messages.get(Armor.class, "replace_toy_message", replacement.name()),
+					armor.attachedToys.stream().map(ItemArmorAttachable::name).toArray(String[]::new));
+			this.hero = hero;
+			this.armor = armor;
+			this.replacement = replacement;
+		}
+
+		@Override protected void onSelect(int index) {
+			if (index >= 0 && index < armor.attachedToys.size()) armor.replaceToy(hero, index, replacement);
+		}
+	}
+
+	/**
+	 * 卸下附着物品窗口
+	 */
+	public class WndDetachItems extends WndOptions {
+
+		private Hero hero;
+		private Armor armor;
+
+		public WndDetachItems(Hero hero, Armor armor) {
+			super(
+				Messages.get(Armor.class, "detach_title"),
+				Messages.get(Armor.class, "detach_message"),
+				armor.attachedToys.stream().map(ItemArmorAttachable::name).toArray(String[]::new)
+			);
+			this.hero = hero;
+			this.armor = armor;
+		}
+
+		@Override
+		protected void onSelect(int index) {
+			if (index < 0 || index >= armor.attachedToys.size()) return;
+			ItemArmorAttachable item = armor.attachedToys.get(index);
+
+			// 破损纹章有特殊卸下逻辑
+			if (item instanceof BrokenSeal) {
+				armor.detachSeal(hero);
+			} else {
+				armor.detachToy(index);
+			}
+			armor.dropExcessToys(hero);
+
+			GLog.i(Messages.get(Armor.class, "detached_toy", item.name()));
+			hero.sprite.operate(hero.pos);
+			if (!item.collect()) {
+				if (item instanceof BrokenSeal) Dungeon.level.drop(item, hero.pos).sprite.drop();
+				else item.vanishOnGround(false, hero.pos);
+			}
+		}
+	}
+
+	/**
+	 * 玩具背包信息窗口
+	 */
+	public class WndToyBackpackInfo extends WndTitledMessage {
+
+		public WndToyBackpackInfo(Armor armor) {
+			super(
+				new ItemSprite(armor.image(), null),
+				Messages.get(Armor.class, "toy_backpack_title"),
+				buildToyBackpackMessage(armor)
+			);
+		}
+	}
+
+	// 静态辅助方法：构建玩具背包信息文本
+	private static String buildToyBackpackMessage(Armor armor) {
+		StringBuilder sb = new StringBuilder();
+		int currentCharge = armor instanceof ClassArmor ? (int)Math.floor(((ClassArmor)armor).charge) : armor.toyCharge;
+		float chargeCost = Dungeon.hero != null && Dungeon.hero.armorAbility instanceof ToyBackpack
+				? Dungeon.hero.armorAbility.chargeUse(Dungeon.hero)
+				: ToyBackpack.BASE_CHARGE_COST;
+		int ownedToyCount = Dungeon.hero == null ? armor.toyCount() : Armor.ownedToys(Dungeon.hero).size();
+		int totalToyCapacity = Dungeon.hero != null && Dungeon.hero.armorAbility instanceof ToyBackpack
+				? ToyBackpack.totalToyCapacity(Dungeon.hero) : armor.toyCapacity();
+		sb.append(Messages.get(Armor.class, "toy_backpack_charge", currentCharge, (int)Math.ceil(chargeCost)));
+		sb.append("\n").append(Messages.get(Armor.class, "toy_backpack_slots", armor.toyCount(), armor.toyCapacity()));
+		sb.append("\n").append(Messages.get(Armor.class, "toy_backpack_total",
+				ownedToyCount, totalToyCapacity));
+		sb.append("\n\n");
+		if (armor.attachedToys.isEmpty()) {
+			sb.append(Messages.get(Armor.class, "toy_backpack_empty"));
+		} else {
+			sb.append(Messages.get(Armor.class, "toy_backpack_attached"));
+			for (ItemArmorAttachable toy : armor.attachedToys) {
+				sb.append("\n\n• ").append(toy.name()).append("\n  ").append(toy.desc());
+			}
+		}
+		ChallengeToyEffects challengeEffects = Dungeon.hero == null
+				? null : Dungeon.hero.buff(ChallengeToyEffects.class);
+		if (challengeEffects != null && !challengeEffects.effects().isEmpty()) {
+			sb.append("\n\n").append(Messages.get(Armor.class, "toy_backpack_challenge_effects"));
+			ArrayList<ItemArmorAttachable> effects = challengeEffects.effects();
+			for (int i = 0; i < effects.size(); i++) {
+				ItemArmorAttachable toy = effects.get(i);
+				sb.append("\n\n").append(Messages.get(Armor.class, "toy_backpack_challenge_effect",
+						toy.name(), challengeEffects.remainingTurns(i)));
+				sb.append("\n  ").append(toy.desc());
+			}
+		}
+		return sb.toString();
 	}
 
 	@Override
@@ -295,12 +705,15 @@ public class Armor extends EquipableItem {
 	@Override
 	public boolean doUnequip( Hero hero, boolean collect, boolean single ) {
 		if (super.doUnequip( hero, collect, single )) {
+			hero.belongings.armor = null;
+			for (ItemArmorAttachable toy : attachedToys) {
+				ChallengeToyEffects.removePermanentEffect(hero, toy);
+			}
 
 			if (buff != null) {
 				buff.detach();
 				buff = null;
 			}
-			hero.belongings.armor = null;
 			((HeroSprite)hero.sprite).updateArmor();
 
 			BrokenSeal.WarriorShield sealBuff = hero.buff(BrokenSeal.WarriorShield.class);
@@ -339,18 +752,36 @@ public class Armor extends EquipableItem {
 
 	public int DRMin(int lvl){
 		int max = DRMax(lvl);
+		int min;
 		if (lvl >= max){
-			return (lvl - max);
+			min = (lvl - max);
 		} else {
-			return lvl;
+			min = lvl;
 		}
+
+		// 剑盾骑士天赋：月华护甲最小值至少为武器伤害最小值的倍数
+		if (Dungeon.hero != null && Dungeon.hero.heroClass == HeroClass.MOONLIGHT) {
+			int points = Dungeon.hero.pointsInTalent(Talent.SWORD_SHIELD_KNIGHT);
+			if (points > 0 && Dungeon.hero.belongings.weapon instanceof MeleeWeapon) {
+				// 获取武器伤害最小值
+				int weaponMinDamage = Dungeon.hero.belongings.weapon.min();
+				// 计算加成：+1=100%, +2=125%, +3=150%
+				float multiplier = 1.0f + (points - 1) * 0.25f;
+				int talentMin = Math.round(weaponMinDamage * multiplier);
+				// 不能超过护甲最大值
+				min = Math.min(Math.max(min, talentMin), max);
+			}
+		}
+
+		return min;
 	}
 
 	public float evasionFactor( Char owner, float evasion ){
 
 		if (hasGlyph(Stone.class, owner) ){
+			BrokenSeal s = checkSeal();
 			if((glyph instanceof Stone && !((Stone)glyph).testingEvasion())
-					|| (seal != null&&seal.getGlyph()!=null && seal.getGlyph() instanceof Stone))
+					|| (s != null && s.getGlyph() != null && s.getGlyph() instanceof Stone))
 				return 0;
 		}
 
@@ -418,22 +849,21 @@ public class Armor extends EquipableItem {
 	//other things can equip these, for now we assume only the hero can be affected by levelling debuffs
 	@Override
 	public int buffedLvl() {
-		if(hero != null && Dungeon.hero.belongings.armor == this ) {
+		if (hero != null && hero.belongings.armor == this) {
 			GoldRadish goldRadish = hero.belongings.getItem(GoldRadish.class);
 			if(goldRadish != null){
 				return goldRadish.fixedLevel(goldRadish.buffedLvl());
 			}
 
 			RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
+			// 塑形玻璃的虚拟等级需要与国王之戒的虚拟等级叠加
 			if(hero.buff(BlessAWP.ArmorGetReady.class)!=null && hero.belongings.armor() == this && riverGlass != null){
-				return super.buffedLvl()+1 + riverGlass.level() + 1;
+				return super.buffedLvl()+1 + riverGlass.level() + 1 + RingOfKing.updateMultiplier(Dungeon.hero);
 			} else if(hero.buff(BlessAWP.ArmorGetReady.class)!=null && hero.belongings.armor() == this) {
-				return super.buffedLvl()+1;
+				return super.buffedLvl()+1 + RingOfKing.updateMultiplier(Dungeon.hero);
 			} else if(riverGlass != null){
-				return super.buffedLvl() + riverGlass.level() + 1;
+				return super.buffedLvl() + riverGlass.level() + 1 + RingOfKing.updateMultiplier(Dungeon.hero);
 			}
-
-
 
 
 			if (hero.pointsInTalent(Talent.GIFT) > 0) {
@@ -457,13 +887,13 @@ public class Armor extends EquipableItem {
 
 
 			if(Dungeon.hero.buff( Degrade.class ) != null){
-				return super.buffedLvl();
-			} else {
-				return hero.belongings.armor.level() + RingOfKing.updateMultiplier(Dungeon.hero);
-			}
+						return super.buffedLvl();
+					} else {
+						return hero.belongings.armor.level() + RingOfKing.updateMultiplier(Dungeon.hero);
+					}
 		}
 
-		if (hero != null && isEquipped( Dungeon.hero ) || Dungeon.hero.belongings.contains( this )){
+		if (hero != null && (isEquipped(hero) || hero.belongings.contains(this))){
 			return super.buffedLvl();
 		} else {
 			return level();
@@ -491,8 +921,9 @@ public class Armor extends EquipableItem {
 
 		cursed = false;
 
-		if (seal != null && seal.level() == 0)
-			seal.upgrade();
+		BrokenSeal s = checkSeal();
+		if (s != null && s.level() == 0)
+			s.upgrade();
 
 		return super.upgrade();
 	}
@@ -582,14 +1013,19 @@ public class Armor extends EquipableItem {
 			info += "\n\n" + Messages.get(Armor.class, "cursed_worn");
 		} else if (cursedKnown && cursed) {
 			info += "\n\n" + Messages.get(Armor.class, "cursed");
-		} else if (seal != null) {
-			info += "\n\n" + Messages.get(Armor.class, "seal_attached", seal.maxShield(tier, level()));
-			Glyph g=seal.getGlyph();
-			if (g!=null){
-				info+="\n\n" +  Messages.capitalize(Messages.get(Armor.class, "inscribed", g.name()));
-				info += " " + g.desc();
+		} else {
+			BrokenSeal s = checkSeal();
+			if (s != null) {
+				info += "\n\n" + Messages.get(Armor.class, "seal_attached", s.maxShield(tier, level()));
+				Glyph g = s.getGlyph();
+				if (g != null) {
+					info += "\n\n" + Messages.capitalize(Messages.get(Armor.class, "inscribed", g.name()));
+					info += " " + g.desc();
+				}
 			}
-		} else if (!isIdentified() && cursedKnown){
+		}
+
+		if (!isIdentified() && cursedKnown) {
 			if (glyph != null && glyph.curse()) {
 				info += "\n\n" + Messages.get(Armor.class, "weak_cursed");
 			} else {
@@ -605,9 +1041,10 @@ public class Armor extends EquipableItem {
 	}
 	@Override
 	public Emitter emitter() {
-		if (seal == null) return super.emitter();
+		BrokenSeal s = checkSeal();
+		if (s == null) return super.emitter();
 		Emitter emitter = new Emitter();
-		emitter.pos(ItemSpriteSheet.film.width(image)/2f + 2f, ItemSpriteSheet.film.height(image)/3f);
+		emitter.pos(ItemSprite.atlasFrame(image).width/2f + 2f, ItemSprite.atlasFrame(image).height/3f);
 		emitter.fillTarget = false;
 		emitter.pour(Speck.factory( Speck.RED_LIGHT ), 0.6f);
 		return emitter;
@@ -630,10 +1067,10 @@ public class Armor extends EquipableItem {
 		//30% chance to be cursed
 		//15% chance to be inscribed
 		float effectRoll = Random.Float();
-		if (effectRoll < 0.3f) {
+		if (effectRoll < 0.3f * ParchmentScrap.curseChanceMultiplier()) {
 			inscribe(Glyph.randomCurse());
 			cursed = true;
-		} else if (effectRoll >= 0.85f){
+		} else if (effectRoll >= 1f - (0.15f * ParchmentScrap.enchantChanceMultiplier())){
 			inscribe();
 		}
 
@@ -676,7 +1113,7 @@ public class Armor extends EquipableItem {
 
 	@Override
 	public int value() {
-		if (seal != null) return 0;
+		if (checkSeal() != null) return 0;
 
 		int price = 20 * tier;
 		if (hasGoodGlyph()) {
@@ -704,8 +1141,9 @@ public class Armor extends EquipableItem {
 		updateQuickslot();
 		//the hero needs runic transference to actually transfer, but we still attach the glyph here
 		// in case they take that talent in the future
-		if (seal != null){
-			seal.setGlyph(glyph);
+		BrokenSeal s = checkSeal();
+		if (s != null){
+			s.setGlyph(glyph);
 		}
 		if (glyph != null && isIdentified() && Dungeon.hero != null
 				&& Dungeon.hero.isAlive() && Dungeon.hero.belongings.contains(this)){
@@ -724,7 +1162,8 @@ public class Armor extends EquipableItem {
 
 	public boolean hasGlyph(Class<?extends Glyph> type, Char owner) {
 		boolean armorHasGlyph=glyph != null && glyph.getClass() == type && owner.buff(MagicImmune.class) == null;
-		boolean sealHasGlyph=seal != null&&seal.getGlyph()!=null && seal.getGlyph().getClass() == type && owner.buff(MagicImmune.class) == null;
+		BrokenSeal s = checkSeal();
+		boolean sealHasGlyph = s != null && s.getGlyph() != null && s.getGlyph().getClass() == type && owner.buff(MagicImmune.class) == null;
 		return armorHasGlyph||sealHasGlyph;
 	}
 
@@ -907,8 +1346,9 @@ public class Armor extends EquipableItem {
 		super.getCurse(extraEffect);
 	}
 	public int procLvl(){
-		if (glyph!=null && seal!=null && seal.getGlyph()!=null && seal.getGlyph()==glyph){
-			return buffedLvl()+1;
+		BrokenSeal s = checkSeal();
+		if (glyph != null && s != null && s.getGlyph() != null && s.getGlyph() == glyph) {
+			return buffedLvl() + 1;
 		}
 		return buffedLvl();
 	}

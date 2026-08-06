@@ -100,6 +100,8 @@ public class Regeneration extends Buff {
 				}
 			}
 			delay /= SaltCube.healthRegenMultiplier();
+			// 战士4-2 高端饮食：高饱食度时回血间隔缩短
+			delay /= Hunger.getHighDietRegenMultiplier((Hero)target);
 			spend( delay );
 
 		} else {

@@ -476,8 +476,10 @@ public enum Icons {
 				return new ItemSprite(ItemSpriteSheet.SPIRIT_BOW);
 			case RECTOR:
 				return new ItemSprite(ItemSpriteSheet.HOLYANKH);
+			case MOONLIGHT:
+				return new ItemSprite(ItemSpriteSheet.HOLYANKH); // TODO: 添加MOONLIGHT专属图标
 			default:
-				return null;
+				return new ItemSprite(ItemSpriteSheet.SEAL); // 默认返回战士图标避免崩溃
 		}
 	}
 

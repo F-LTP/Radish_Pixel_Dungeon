@@ -144,7 +144,7 @@ public class Sungrass extends Plant {
 		}
 		
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.HERB_HEALING;
 		}
 

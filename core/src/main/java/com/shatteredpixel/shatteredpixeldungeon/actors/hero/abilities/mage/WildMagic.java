@@ -253,7 +253,7 @@ public class WildMagic extends ArmorAbility {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return HeroIcon.WILD_MAGIC;
 	}
 

@@ -54,7 +54,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorrosion;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorruption;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfNewStar;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfRegrowth;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -187,11 +186,7 @@ public class MagesStaff extends MeleeWeapon {
 				return;
 			}
 			wand.cursed = (cursed || hasCurseEnchant()) && Dungeon.hero.pointsInTalent(Talent.MAGIC_WORKMAN) < 3;
-			if(wand instanceof WandOfNewStar){
-				wand.execute(hero, WandOfNewStar.AC_ALIAS_ZAP);
-			} else {
-				wand.execute(hero, AC_ZAP);
-			}
+			wand.execute(hero, AC_ZAP);
 		} else if (action.equals(AC_UPDATE)) {
 			ArcaneResinUse();
 		}
@@ -343,6 +338,19 @@ public class MagesStaff extends MeleeWeapon {
 						break;
 				}
 			}
+		}
+
+		// 战法4-3 老魔杖闪避：近战攻击后概率获得闪避机动，物理伤害加成
+		if (hero.hasTalent(Talent.WAND_DODGE) && wand != null) {
+			int points = hero.pointsInTalent(Talent.WAND_DODGE);
+			// 闪避概率：+2:15%, +3:20%, +4:25%
+			int dodgeChance = 10 + points * 5;
+			if (Random.Int(100) < dodgeChance && hero.buff(AfterImage.AnotabsoluteEvasion.class) == null) {
+				Buff.affect(hero, AfterImage.AnotabsoluteEvasion.class);
+			}
+			// 物理伤害加成：+2:4, +3:6, +4:8
+			int bonusDamage = points * 2;
+			damage += bonusDamage;
 		}
 
 		Talent.EmpoweredStrikeTracker empoweredStrike = attacker.buff(Talent.EmpoweredStrikeTracker.class);

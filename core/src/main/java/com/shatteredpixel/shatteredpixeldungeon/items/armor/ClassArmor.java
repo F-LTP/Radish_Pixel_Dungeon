@@ -117,6 +117,9 @@ abstract public class ClassArmor extends Armor {
 			case RECTOR:
 				classArmor = new DuelistArmor();
 				break;
+			case MOONLIGHT:
+				classArmor = new MoonlightArmor();
+				break;
 		}
 
 		classArmor.level(armor.trueLevel());
@@ -191,6 +194,9 @@ abstract public class ClassArmor extends Armor {
 				GLog.w( Messages.get(this, "low_charge") );
 			} else  {
 				usesTargeting = hero.armorAbility.useTargeting();
+				if (!(hero.armorAbility instanceof com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.ToyBackpack)) {
+					com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToyEffects.onAbilityUsed(hero);
+				}
 				hero.armorAbility.use(this, hero);
 			}
 
@@ -231,7 +237,8 @@ abstract public class ClassArmor extends Armor {
 								cursed = armor.cursed;
 								curseInfusionBonus = armor.curseInfusionBonus;
 								masteryPotionBonus = armor.masteryPotionBonus;
-								if (armor.checkSeal() != null) seal = armor.checkSeal();
+								BrokenSeal seal = armor.checkSeal();
+								if (seal != null) affixSeal(seal);
 
 								identify();
 

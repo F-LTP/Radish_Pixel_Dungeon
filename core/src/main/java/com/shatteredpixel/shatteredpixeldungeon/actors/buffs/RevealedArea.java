@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -35,7 +36,8 @@ public class RevealedArea extends FlavourBuff{
 		type = Buff.buffType.POSITIVE;
 	}
 
-	public int pos, depth, branch;
+	public int pos, depth;
+	public String branchId = Dungeon.branchId;
 
 	@Override
 	public void detach() {
@@ -44,7 +46,7 @@ public class RevealedArea extends FlavourBuff{
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.MIND_VISION;
 	}
 
@@ -64,7 +66,7 @@ public class RevealedArea extends FlavourBuff{
 		return Messages.get(this, "desc", (int)visualcooldown());
 	}
 
-	private static final String BRANCH = "branch";
+	private static final String BRANCH_ID = "branch_id";
 	private static final String DEPTH = "depth";
 	private static final String POS = "pos";
 
@@ -72,7 +74,7 @@ public class RevealedArea extends FlavourBuff{
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(DEPTH, depth);
-		bundle.put(BRANCH, branch);
+		bundle.put(BRANCH_ID, branchId);
 		bundle.put(POS, pos);
 	}
 
@@ -80,7 +82,7 @@ public class RevealedArea extends FlavourBuff{
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		depth = bundle.getInt(DEPTH);
-		branch = bundle.getInt(BRANCH);
 		pos = bundle.getInt(POS);
+		branchId = bundle.getString(BRANCH_ID);
 	}
 }

@@ -43,6 +43,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.ShieldMa
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.StoneSpirit;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RatSkull;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
@@ -60,6 +61,44 @@ public class Bestiary {
 	
 	//returns a rotation of standard mobs, unshuffled.
 	private static ArrayList<Class<? extends Mob>> standardMobRotation( int depth ){
+		
+		// ====== 支线怪物表 ======
+		if (Dungeon.branchId.equals(Branches.MOSS)) {
+			return getMossMobs(depth);
+		}
+		
+		if (Dungeon.branchId.equals(Branches.MINING)) {
+			return getMiningMobs(depth);
+		}
+		
+		// ====== 主线怪物表 ======
+		return getMainMobs(depth);
+	}
+	
+	// ====== 苔藓分支怪物表 ======
+	private static ArrayList<Class<? extends Mob>> getMossMobs(int depth) {
+		switch (depth) {
+			case 1:
+			default:
+				return new ArrayList<>(Arrays.asList(
+						Frog.class, Frog.class, Frog.class,
+						Goblin.class, Goblin.class, Goblin.class));
+			case 2:
+				return new ArrayList<>(Arrays.asList(
+						Frog.class, Frog.class,
+						Goblin.class, Goblin.class, Goblin.class, Goblin.class));
+		}
+	}
+	
+	// ====== 采矿分支怪物表 ======
+	private static ArrayList<Class<? extends Mob>> getMiningMobs(int depth) {
+		// 采矿分支只有1层
+		return new ArrayList<>(Arrays.asList(
+				Frog.class, Frog.class, Frog.class));
+	}
+	
+	// ====== 主线怪物表 ======
+	private static ArrayList<Class<? extends Mob>> getMainMobs(int depth) {
 		switch(depth){
 
 			// Sewers
@@ -69,28 +108,23 @@ public class Bestiary {
 						Rat.class, Rat.class, Rat.class,
 						Snake.class, GiantWorm.class, GiantWorm.class));
 			case 2:
-				if(Dungeon.branch == 2){
-					return new ArrayList<>(Arrays.asList(
-							Frog.class, Frog.class, Frog.class,
-							Goblin.class,Goblin.class,Goblin.class));
-				} else if(Dungeon.branch == 1){
-					return new ArrayList<>(Arrays.asList(Frog.class, Frog.class, Frog.class));
-				} else {
-					//2x rat, 1x snake, 2x gnoll
-					return new ArrayList<>(Arrays.asList(Rat.class, Rat.class,
-							Snake.class,
-							Gnoll.class, Gnoll.class, GiantWorm.class, Mayfly.class));
-				}
+				//2x rat, 1x snake, 2x gnoll
+				return new ArrayList<>(Arrays.asList(
+						Rat.class, Rat.class,
+						Snake.class,
+						Gnoll.class, Gnoll.class, GiantWorm.class, Mayfly.class));
 			case 3:
 				//1x rat, 1x snake, 3x gnoll, 1x swarm, 1x crab
-				return new ArrayList<>(Arrays.asList(Rat.class,
+				return new ArrayList<>(Arrays.asList(
+						Rat.class,
 						Snake.class,
 						Gnoll.class, Gnoll.class, Gnoll.class,
 						Swarm.class,
 						Crab.class, Mayfly.class, Dog.class, Goblin.class));
 			case 4: case 5:
 				//1x gnoll, 1x swarm, 2x crab, 2x slime
-				return new ArrayList<>(Arrays.asList(Gnoll.class,
+				return new ArrayList<>(Arrays.asList(
+						Gnoll.class,
 						Swarm.class,
 						Crab.class, Crab.class,
 						Slime.class, Slime.class, Mayfly.class, Dog.class, Dog.class, Goblin.class, Goblin.class));
@@ -98,25 +132,29 @@ public class Bestiary {
 			// Prison
 			case 6:
 				//3x skeleton, 1x thief, 1x swarm
-				return new ArrayList<>(Arrays.asList(Skeleton.class, Skeleton.class, Skeleton.class,
+				return new ArrayList<>(Arrays.asList(
+						Skeleton.class, Skeleton.class, Skeleton.class,
 						Thief.class,
 						Swarm.class, Jailer.class));
 			case 7:
 				//3x skeleton, 1x thief, 1x DM-100, 1x guard
-				return new ArrayList<>(Arrays.asList(Skeleton.class, Skeleton.class, Skeleton.class,
+				return new ArrayList<>(Arrays.asList(
+						Skeleton.class, Skeleton.class, Skeleton.class,
 						Thief.class,
 						DM100.class,
 						Guard.class, Jailer.class, Prisoner.class));
 			case 8:
 				//2x skeleton, 1x thief, 2x DM-100, 2x guard, 1x necromancer
-				return new ArrayList<>(Arrays.asList(Skeleton.class, Skeleton.class,
+				return new ArrayList<>(Arrays.asList(
+						Skeleton.class, Skeleton.class,
 						Thief.class,
 						DM100.class, DM100.class,
 						Guard.class, Guard.class,
-						Necromancer.class,Prisoner.class, Jailer.class, Torturer.class, Grudge.class));
+						Necromancer.class, Prisoner.class, Jailer.class, Torturer.class, Grudge.class));
 			case 9: case 10:
 				//1x skeleton, 1x thief, 2x DM-100, 2x guard, 2x necromancer
-				return new ArrayList<>(Arrays.asList(Skeleton.class,
+				return new ArrayList<>(Arrays.asList(
+						Skeleton.class,
 						Thief.class,
 						DM100.class, DM100.class,
 						Guard.class, Guard.class,
@@ -188,7 +226,7 @@ public class Bestiary {
 				//2x succubus, 1x evil eye
 				return new ArrayList<>(Arrays.asList(
 						Succubus.class, Succubus.class,
-						Eye.class, Deminion.class,Deminion.class, Gorgon.class, Deviloon.class));
+						Eye.class, Deminion.class, Deminion.class, Gorgon.class, Deviloon.class));
 			case 22:
 				//1x succubus, 1x evil eye
 				return new ArrayList<>(Arrays.asList(
@@ -213,6 +251,11 @@ public class Bestiary {
 	//has a chance to add a rarely spawned mobs to the rotation
 	public static void addRareMobs( int depth, ArrayList<Class<?extends Mob>> rotation ){
 		
+		// 支线不生成稀有怪物
+		if (!Dungeon.branchId.equals(Branches.MAIN)) {
+			return;
+		}
+		
 		switch (depth){
 			
 			// Sewers
@@ -221,17 +264,17 @@ public class Bestiary {
 			case 4:
 				if (Random.Float() < 0.025f) rotation.add(Thief.class);
 				return;
-				
+			
 			// Prison
 			case 9:
 				if (Random.Float() < 0.025f) rotation.add(Bat.class);
 				return;
-				
+			
 			// Caves
 			case 14:
 				if (Random.Float() < 0.025f) rotation.add(Ghoul.class);
 				return;
-				
+			
 			// City
 			case 19:
 				if (Random.Float() < 0.025f) rotation.add(Succubus.class);

@@ -28,8 +28,9 @@ import com.watabou.utils.SparseArray;
 public class Statistics {
 
 	public static int goldCollected;
-	public static int deepestFloor;
-	public static int highestAscent;
+		public static int deepestFloor;
+		public static int deepestMossFloor;  // 苔藓分支探索过的最高层
+		public static int highestAscent;
 	public static int enemiesSlain;
 	public static int foodEaten;
 	public static int itemsCrafted;
@@ -88,8 +89,9 @@ public class Statistics {
 		RectorGetHP = false;
 		
 		goldCollected	= 0;
-		deepestFloor	= 0;
-		highestAscent	= 0;
+				deepestFloor	= 0;
+				deepestMossFloor = 0;
+				highestAscent	= 0;
 		enemiesSlain	= 0;
 		foodEaten		= 0;
 		itemsCrafted    = 0;
@@ -128,8 +130,9 @@ public class Statistics {
 	}
 	
 	private static final String GOLD		= "score";
-	private static final String DEEPEST		= "maxDepth";
-	private static final String HIGHEST		= "maxAscent";
+		private static final String DEEPEST		= "maxDepth";
+		private static final String DEEPEST_MOSS	= "maxDepthMoss";
+		private static final String HIGHEST		= "maxAscent";
 	private static final String SLAIN		= "enemiesSlain";
 	private static final String FOOD		= "foodEaten";
 	private static final String ALCHEMY		= "potionsCooked";
@@ -173,9 +176,10 @@ public class Statistics {
 	private static final String GETRECTOR_HP		        = "getrector_hp";
 	
 	public static void storeInBundle( Bundle bundle ) {
-		bundle.put( GOLD,		goldCollected );
-		bundle.put( DEEPEST,	deepestFloor );
-		bundle.put( HIGHEST,	highestAscent );
+		bundle.put( GOLD,	goldCollected );
+			bundle.put( DEEPEST,	deepestFloor );
+			bundle.put( DEEPEST_MOSS, deepestMossFloor );
+			bundle.put( HIGHEST,	highestAscent );
 		bundle.put( SLAIN,		enemiesSlain );
 		bundle.put( FOOD,		foodEaten );
 		bundle.put( ALCHEMY,    itemsCrafted );
@@ -228,8 +232,9 @@ public class Statistics {
 	
 	public static void restoreFromBundle( Bundle bundle ) {
 		goldCollected	= bundle.getInt( GOLD );
-		deepestFloor	= bundle.getInt( DEEPEST );
-		highestAscent   = bundle.getInt( HIGHEST );
+			deepestFloor	= bundle.getInt( DEEPEST );
+			deepestMossFloor = bundle.getInt( DEEPEST_MOSS );
+			highestAscent   = bundle.getInt( HIGHEST );
 		enemiesSlain	= bundle.getInt( SLAIN );
 		foodEaten		= bundle.getInt( FOOD );
 		itemsCrafted    = bundle.getInt( ALCHEMY );

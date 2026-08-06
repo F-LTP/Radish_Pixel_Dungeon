@@ -83,6 +83,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfSir
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.WondrousResin;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.BurningTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.ChillingTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.CursingTrap;
@@ -115,6 +116,7 @@ import com.watabou.utils.Random;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 //helper class to contain all the cursed wand zapping logic, so the main wand class doesn't get huge.
 public class CursedWand {
@@ -765,7 +767,7 @@ public class CursedWand {
 				Level.beforeTransition();
 				InterlevelScene.mode = InterlevelScene.Mode.RETURN;
 				InterlevelScene.returnDepth = depth;
-				InterlevelScene.returnBranch = 0;
+				InterlevelScene.returnBranchId = Branches.MAIN;
 				InterlevelScene.returnPos = -1;
 				Game.switchScene(InterlevelScene.class);
 
@@ -1223,11 +1225,8 @@ public class CursedWand {
 		@Override
 		public boolean valid(Item origin, Char user, Ballistica bolt, boolean positiveOnly) {
 			//can't happen on floors where chasms aren't allowed
-			if( Dungeon.bossLevel() || Dungeon.depth > 25 || Dungeon.branch != 0){
-				return false;
-			}
-			return true;
-		}
+            return !Dungeon.bossLevel() && Dungeon.depth <= 25 && Objects.equals(Dungeon.branchId, "main");
+        }
 
 		@Override
 		public void FX(Item origin, Char user, Ballistica bolt, Callback callback) {
@@ -1250,7 +1249,7 @@ public class CursedWand {
 			}
 			PitfallTrap.DelayedPit p = Buff.append(Dungeon.hero, PitfallTrap.DelayedPit.class, 1);
 			p.depth = Dungeon.depth;
-			p.branch = Dungeon.branch;
+			p.branch = Dungeon.branchId;
 			p.setPositions(positions);
 
 			//effect does not harm hero/allies if positive only

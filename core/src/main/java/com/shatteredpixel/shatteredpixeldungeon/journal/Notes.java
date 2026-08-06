@@ -21,7 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.journal;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Foliage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
@@ -436,9 +435,8 @@ public class Notes {
 					return text;
 				case ITEM:
 					Item item = (Item) Reflection.newInstance(itemClass);
-					if (item.isIdentified() && item.icon != -1) {
-						Image secondIcon = new Image(Assets.Sprites.ITEM_ICONS);
-						secondIcon.frame(ItemSpriteSheet.Icons.film.get(item.icon));
+					if (item.isIdentified() && item.icon != null) {
+						Image secondIcon = ItemSpriteSheet.Icons.image(item.icon);
 						return secondIcon;
 					}
 					return null;

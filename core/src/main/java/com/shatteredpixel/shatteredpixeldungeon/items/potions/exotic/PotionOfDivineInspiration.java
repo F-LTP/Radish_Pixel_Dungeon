@@ -108,6 +108,7 @@ public class PotionOfDivineInspiration extends ExoticPotion {
 						curItem.detach(curUser.belongings.backpack);
 					}
 					identifiedByUse = false;
+					emitDrinkEvent(curUser);
 
 					curUser.busy();
 					curUser.sprite.operate(curUser.pos);

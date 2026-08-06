@@ -556,17 +556,9 @@ public class DwarfKing extends Mob {
 		}
 
 		if (Dungeon.level.solid[pos]){
-			if(Dungeon.hero.heroClass == HeroClass.RECTOR){
-				Dungeon.level.drop(new TestTalentOFTerminalBook(), pos + Dungeon.level.width()).sprite.drop(pos);
-			} else {
-				Dungeon.level.drop(new KingsCrown(), pos + Dungeon.level.width()).sprite.drop(pos);
-			}
+			Dungeon.level.drop(new KingsCrown(), pos + Dungeon.level.width()).sprite.drop(pos);
 		} else {
-			if(Dungeon.hero.heroClass == HeroClass.RECTOR){
-				Dungeon.level.drop(new TestTalentOFTerminalBook(), pos).sprite.drop();
-			} else {
-				Dungeon.level.drop(new KingsCrown(), pos).sprite.drop();
-			}
+			Dungeon.level.drop(new KingsCrown(), pos).sprite.drop();
 		}
 
 		Badges.validateBossSlain();
@@ -796,7 +788,7 @@ public class DwarfKing extends Mob {
 		}
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.NONE;
 		}
 	}

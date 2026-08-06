@@ -125,7 +125,7 @@ public class CapeOfThorns extends Artifact {
 		}
 
 		@Override
-		public int icon() {
+		public String icon() {
 			if (cooldown == 0)
 				return BuffIndicator.NONE;
 			else

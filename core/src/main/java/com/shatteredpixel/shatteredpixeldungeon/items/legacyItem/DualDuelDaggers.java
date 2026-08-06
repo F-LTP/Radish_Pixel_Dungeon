@@ -13,7 +13,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 // 决斗对剑
 public class DualDuelDaggers extends LegacyItemWeapon {
     {
-        image = ItemSpriteSheet.DARTS+16;
+        image = ItemSpriteSheet.DUAL_DUEL_DAGGERS;
         hitSound = Assets.Sounds.HIT;
         hitSoundPitch = 1.1f;
         DLY = 0.8f;

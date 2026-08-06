@@ -19,7 +19,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
@@ -29,6 +29,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Thief;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ElmoParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -84,11 +86,13 @@ public class HalomethaneBurning extends Buff implements Hero.Doom {
 
             Buff.detach( target, Chill.class);
 
+            DamageInfo dmgInfo = new DamageInfo(damage, DamageType.BURNING_STATUS, null, null, this);
+
             if (target instanceof Hero) {
 
                 Hero hero = (Hero)target;
 
-                hero.damage( damage, this );
+                hero.damage( dmgInfo );
                 burnIncrement++;
 
                 //at 4+ turns, there is a (turns-3)/3 chance an item burns
@@ -116,7 +120,7 @@ public class HalomethaneBurning extends Buff implements Hero.Doom {
                     }
                 }
             } else {
-                target.damage( damage, this );
+                target.damage( dmgInfo );
             }
 
             if (target instanceof Thief && ((Thief) target).item != null) {
@@ -157,7 +161,7 @@ public class HalomethaneBurning extends Buff implements Hero.Doom {
     }
 
     @Override
-    public int icon() {
+    public String icon() {
         return BuffIndicator.SACRIFICE;
     }
 

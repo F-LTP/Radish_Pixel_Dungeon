@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.scenes;
 
+import com.badlogic.gdx.Gdx;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.SeedFinder;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
@@ -36,7 +37,6 @@ import com.watabou.noosa.Camera;
 import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.Group;
 import com.watabou.noosa.ui.Component;
-import com.watabou.utils.Bundle;
 
 import java.util.Arrays;
 
@@ -97,7 +97,8 @@ public class SeedFindScene extends PixelScene {
                     Component content = list.content();
                     content.clear();
 
-                    CreditsBlock txt = new CreditsBlock(true, Window.TITLE_COLOR, new SeedFinder().findSeed(itemList, floor+1));
+                    // 先显示搜索中提示
+                    CreditsBlock txt = new CreditsBlock(true, Window.TITLE_COLOR, Messages.get(SeedFinder.class, "searching"));
                     txt.setRect((Camera.main.width - colWidth)/2f, 12, colWidth, 0);
                     content.add(txt);
 
@@ -105,6 +106,30 @@ public class SeedFindScene extends PixelScene {
 
                     list.setRect( 0, 0, w, h );
                     list.scrollTo(0, 0);
+
+                    // 异步搜索
+                    final SeedFinder finder = new SeedFinder();
+                    final ScrollPane finalList = list;
+                    final Component finalContent = content;
+                    final float finalColWidth = colWidth;
+                    final float finalFullWidth = fullWidth;
+                    
+                    finder.findSeedAsync(itemList, floor+1, result -> {
+                        // 回到主线程更新UI
+                        Gdx.app.postRunnable(() -> {
+                            Component c = finalList.content();
+                            c.clear();
+
+                            CreditsBlock resultTxt = new CreditsBlock(true, Window.TITLE_COLOR, result);
+                            resultTxt.setRect((Camera.main.width - finalColWidth)/2f, 12, finalColWidth, 0);
+                            c.add(resultTxt);
+
+                            c.setSize(finalFullWidth, resultTxt.bottom()+10);
+
+                            finalList.setRect( 0, 0, w, h );
+                            finalList.scrollTo(0, 0);
+                        });
+                    });
 
                 } else {
                     SPDSettings.customSeed("");

@@ -228,6 +228,11 @@ public enum Rankings {
 
 		Statistics.totalScore *= Statistics.winMultiplier * Statistics.chalMultiplier;
 
+		// Snake Bite challenge: 10x score multiplier
+		if (Dungeon.isChallenged(Challenges.SNAKE_BITE)) {
+			Statistics.totalScore *= 10;
+		}
+
 		return Statistics.totalScore;
 	}
 

@@ -95,7 +95,7 @@ public class PotionOfCleansing extends ExoticPotion {
 		public static final float DURATION = 5f;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.IMMUNITY;
 		}
 

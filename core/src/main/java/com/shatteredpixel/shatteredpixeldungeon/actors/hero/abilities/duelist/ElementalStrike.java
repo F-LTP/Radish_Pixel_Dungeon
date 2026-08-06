@@ -571,7 +571,7 @@ public class ElementalStrike extends ArmorAbility {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return HeroIcon.ELEMENTAL_STRIKE;
 	}
 

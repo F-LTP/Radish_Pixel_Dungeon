@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.ui.DiceMageUI;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
@@ -74,6 +75,11 @@ public class WndOptions extends Window {
 	}
 
 	protected void layoutBody(float pos, String message, String... options){
+		if (DiceMageUI.active()) {
+			layoutDiceBody(pos, message, options);
+			return;
+		}
+
 		int width = PixelScene.landscape() ? WIDTH_L : WIDTH_P;
 
 		RenderedTextBlock tfMesage = PixelScene.renderTextBlock( 6 );
@@ -114,6 +120,101 @@ public class WndOptions extends Window {
 		}
 
 		resize( width, (int)(pos - MARGIN) );
+	}
+
+	private void layoutDiceBody(float pos, String message, String... options) {
+		int width = PixelScene.landscape() ? WIDTH_L : WIDTH_P;
+		boolean twoCards = options.length == 2 && PixelScene.landscape();
+		if (twoCards) {
+			width = 164;
+		}
+		chrome.hardlight(DiceMageUI.DARK);
+
+		RenderedTextBlock tfMessage = PixelScene.renderTextBlock(6);
+		tfMessage.text(message, width - MARGIN * 2);
+		tfMessage.hardlight(DiceMageUI.CREAM);
+		tfMessage.setPos(MARGIN, pos);
+		add(tfMessage);
+
+		pos = tfMessage.bottom() + 2*MARGIN;
+
+		int cardWidth = twoCards ? (width - MARGIN) / 2 : width;
+		float rowBottom = pos;
+		for (int i=0; i < options.length; i++) {
+			final int index = i;
+			float x = twoCards ? i * (cardWidth + MARGIN) : 0;
+			float y = twoCards ? pos : rowBottom;
+			int lineColor = DiceMageUI.optionLineColor(i);
+
+			DiceMageUI.Frame frame = new DiceMageUI.Frame(DiceMageUI.BLACK, lineColor);
+			frame.setRect(x, y, cardWidth, BUTTON_HEIGHT + MARGIN * 2);
+			add(frame);
+
+			RedButton btn = new DiceOptionButton( options[i], lineColor) {
+				@Override
+				protected void onClick() {
+					hide();
+					onSelect( index );
+				}
+			};
+			if (hasIcon(i)) btn.icon(getIcon(i));
+			btn.enable(enabled(i));
+			add(btn);
+
+			if (!hasInfo(i)) {
+				btn.setRect(x + MARGIN, y + MARGIN, cardWidth - MARGIN * 2, BUTTON_HEIGHT);
+			} else {
+				btn.setRect(x + MARGIN, y + MARGIN, cardWidth - BUTTON_HEIGHT - MARGIN * 2, BUTTON_HEIGHT);
+				IconButton info = new IconButton(Icons.get(Icons.INFO)){
+					@Override
+					protected void onClick() {
+						onInfo( index );
+					}
+				};
+				info.setRect(x + cardWidth - BUTTON_HEIGHT - MARGIN, y + MARGIN, BUTTON_HEIGHT, BUTTON_HEIGHT);
+				add(info);
+			}
+
+			if (twoCards) {
+				rowBottom = Math.max(rowBottom, y + BUTTON_HEIGHT + MARGIN * 2);
+			} else {
+				rowBottom = y + BUTTON_HEIGHT + MARGIN * 3;
+			}
+		}
+
+		resize(width, (int)(rowBottom - MARGIN));
+	}
+
+	private static class DiceOptionButton extends RedButton {
+
+		private final int lineColor;
+
+		public DiceOptionButton(String label, int lineColor) {
+			super(label, 8);
+			this.lineColor = lineColor;
+			leftJustify = true;
+			textColor(DiceMageUI.CREAM);
+			bg.hardlight(DiceMageUI.BLACK);
+		}
+
+		@Override
+		public void enable(boolean value) {
+			super.enable(value);
+			bg.alpha(value ? 1.0f : 0.35f);
+			textColor(value ? DiceMageUI.CREAM : DiceMageUI.GREY_LINE);
+		}
+
+		@Override
+		protected void onPointerDown() {
+			super.onPointerDown();
+			bg.hardlight(lineColor);
+		}
+
+		@Override
+		protected void onPointerUp() {
+			super.onPointerUp();
+			bg.hardlight(DiceMageUI.BLACK);
+		}
 	}
 
 	protected boolean enabled( int index ){

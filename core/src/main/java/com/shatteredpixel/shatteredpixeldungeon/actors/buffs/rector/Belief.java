@@ -332,38 +332,7 @@ public class Belief extends Buff implements ActionIndicator.Action {
                 GameScene.selectCell(Item.thrower);
                 break;
             case DEADKILL:
-                boolean foundMobs = false;
-                for (Mob mob : Dungeon.level.mobs.toArray( new Mob[0] )) {
-                    foundMobs = true;
-                    if(hero.belongings.weapon != null){
-                        if(hero.belongings.weapon.canReach(hero, mob.pos)){
-                            if(mob.HP < mob.HT * 0.6f && !(mob.properties().contains(Char.Property.BOSS) || mob.properties().contains(Char.Property.MINIBOSS)) ) {
-                                mob.die(true);
-                                GLog.n(Messages.get(Belief.class, "deadkill_success", mob.name()));
-                                if (hero.buff(Talent.NoBeliefUsedCooldown.class) == null
-                                        && credibility>=4) {
-                                    DownBelief(4);
-                                }
-                            } else {
-                                GLog.w(Messages.get(Belief.class, "deadkill_noattack"));
-                            }
-                        }
-                    } else if(Dungeon.level.distance(hero.pos, mob.pos) <= 1){
-                        if(mob.HP < mob.HT * 0.6f && !(mob.properties().contains(Char.Property.BOSS) || mob.properties().contains(Char.Property.MINIBOSS))){
-                            mob.die(true);
-                            GLog.n(Messages.get(Belief.class, "deadkill_success",mob.name()));
-                            if (hero.buff(Talent.NoBeliefUsedCooldown.class) == null
-                                    && credibility>=4) {
-                                DownBelief(4);
-                            }
-                        } else {
-                            GLog.w(Messages.get(Belief.class, "deadkill_noattack"));
-                        }
-                    }
-                }
-                if(!foundMobs){
-                    GLog.w(Messages.get(Belief.class, "deadkill_nomobs"));
-                }
+                GameScene.selectCell(deadkillTargeter);
                 break;
             case BACK:
                 curUser = hero;
@@ -542,7 +511,7 @@ public class Belief extends Buff implements ActionIndicator.Action {
         if(hero.pointsInTalent(Talent.IRON_SUN)>=1){
             int buffCnt = 0;
             for(Object i: hero.buffs(Buff.class).toArray()) {
-                if(((Buff) i).icon()!= BuffIndicator.NONE){
+                if(!BuffIndicator.NONE.equals(((Buff) i).icon())){
                     buffCnt+=3;
                 }
             }
@@ -552,7 +521,7 @@ public class Belief extends Buff implements ActionIndicator.Action {
     }
 
     @Override
-    public int icon() {
+    public String icon() {
         return not_link ? BuffIndicator.NONE : BuffIndicator.BELIEF_LINK;
     }
 
@@ -562,7 +531,7 @@ public class Belief extends Buff implements ActionIndicator.Action {
     }
 
     @Override
-    public int actionIcon() {
+    public String actionIcon() {
         return HeroIcon.BLESS;
     }
 
@@ -691,6 +660,64 @@ public class Belief extends Buff implements ActionIndicator.Action {
         @Override
         public String prompt() {
             return Messages.get(Wand.class, "prompt");
+        }
+    };
+
+    protected static CellSelector.Listener deadkillTargeter = new CellSelector.Listener() {
+        @Override
+        public void onSelect(Integer target) {
+            if (target == null) return;
+
+            Char ch = Actor.findChar(target);
+            if (ch == null) {
+                GLog.w(Messages.get(Belief.class, "deadkill_nomobs"));
+                return;
+            }
+
+            if (ch == hero || ch.alignment != Char.Alignment.ENEMY) {
+                GLog.w(Messages.get(Belief.class, "deadkill_nomobs"));
+                return;
+            }
+
+            // 检查是否在攻击范围内
+            boolean inRange = false;
+            if (hero.belongings.weapon != null && hero.belongings.weapon.canReach(hero, ch.pos)) {
+                inRange = true;
+            } else if (Dungeon.level.distance(hero.pos, ch.pos) <= 1) {
+                inRange = true;
+            }
+
+            if (!inRange) {
+                GLog.w(Messages.get(Belief.class, "deadkill_noattack"));
+                return;
+            }
+
+            // 检查是否符合击杀条件：HP < 60% 且非Boss/MiniBoss
+            if (ch.HP >= ch.HT * 0.6f) {
+                GLog.w(Messages.get(Belief.class, "deadkill_noattack"));
+                return;
+            }
+
+            if (ch.properties().contains(Char.Property.BOSS) || ch.properties().contains(Char.Property.MINIBOSS)) {
+                GLog.w(Messages.get(Belief.class, "deadkill_noattack"));
+                return;
+            }
+
+            ch.die(true);
+            GLog.n(Messages.get(Belief.class, "deadkill_success", ch.name()));
+
+            // 扣减信仰值（如果不在冷却中且有足够信仰）
+            Belief belief = hero.buff(Belief.class);
+            if (belief != null) {
+                if (hero.buff(Talent.NoBeliefUsedCooldown.class) == null && belief.credibility >= 4) {
+                    belief.DownBelief(4);
+                }
+            }
+        }
+
+        @Override
+        public String prompt() {
+            return Messages.get(Belief.class, "deadkill_prompt");
         }
     };
 }

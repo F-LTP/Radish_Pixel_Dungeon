@@ -42,6 +42,7 @@ import com.watabou.noosa.audio.Sample;
 import java.util.ArrayList;
 
 public class Food extends Item {
+	private boolean splitByMealUtilization;
 
 	public static final float TIME_TO_EAT	= 3f;
 	
@@ -71,6 +72,27 @@ public class Food extends Item {
 		super.execute( hero, action );
 
 		if (action.equals( AC_EAT )) {
+			if (hero.hasTalent(Talent.MEAL_UTILIZATION) && !(this instanceof HalfFood)) {
+				splitByMealUtilization = true;
+				Food eaten = (Food) detach( hero.belongings.backpack );
+				if (eaten == null) return;
+				satisfyBase(hero, eaten.energy / 2f);
+				GLog.i( Messages.get(this, "eat_msg") );
+				hero.sprite.operate( hero.pos );
+				hero.busy();
+				SpellSprite.show( hero, SpellSprite.FOOD );
+				eatSFX();
+				hero.spend( 1f );
+				Talent.onFoodEaten(hero, eaten.energy / 2f, eaten);
+				Statistics.foodEaten++;
+				Badges.validateFoodEaten();
+
+				HalfFood half = new HalfFood(eaten);
+				if (!half.collect(hero.belongings.backpack)) {
+					Dungeon.level.drop(half, hero.pos).sprite.drop();
+				}
+				return;
+			}
 			
 			detach( hero.belongings.backpack );
 			
@@ -92,6 +114,12 @@ public class Food extends Item {
 		}
 	}
 
+	protected boolean consumeMealUtilizationSplit() {
+		boolean split = splitByMealUtilization;
+		splitByMealUtilization = false;
+		return split;
+	}
+
 	protected void eatSFX(){
 		Sample.INSTANCE.play( Assets.Sounds.EAT );
 	}
@@ -110,7 +138,11 @@ public class Food extends Item {
 	}
 	
 	protected void satisfy( Hero hero ){
-		float foodVal = energy;
+		satisfyBase(hero, energy);
+	}
+
+	protected void satisfyBase( Hero hero, float foodValue ){
+		float foodVal = foodValue;
 		if (Dungeon.isChallenged(Challenges.NO_FOOD)){
 			foodVal /= 3f;
 		}

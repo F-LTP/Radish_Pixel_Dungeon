@@ -16,12 +16,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -46,7 +48,7 @@ public class Corruption extends AllyBuff {
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean act() {
 		buildToDamage += target.HT/100f;
@@ -55,7 +57,7 @@ public class Corruption extends AllyBuff {
 		buildToDamage -= damage;
 
 		if (damage > 0)
-			target.damage(damage, this);
+			target.damage(new DamageInfo(damage, DamageType.CORRUPTION, null, null, this));
 
 		spend(TICK);
 
@@ -69,7 +71,7 @@ public class Corruption extends AllyBuff {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.CORRUPT;
 	}
 

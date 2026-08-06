@@ -40,13 +40,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Amulet extends Item {
-	
+
 	private static final String AC_END = "END";
-	
+
 	{
 		image = ItemSpriteSheet.AMULET;
-		
+
 		unique = true;
+	}
+	@Override
+	public String image() {
+		return Dungeon.isChallenged(Challenges.SNAKE_BITE) ?
+				ItemSpriteSheet.SNAKE_BITED_YENDOR : image;
 	}
 	
 	@Override

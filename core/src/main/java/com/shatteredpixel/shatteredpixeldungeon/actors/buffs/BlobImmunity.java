@@ -48,7 +48,7 @@ public class BlobImmunity extends FlavourBuff {
 	public static final float DURATION	= 20f;
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.IMMUNITY;
 	}
 

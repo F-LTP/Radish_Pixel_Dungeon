@@ -36,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awareness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CrossLevelChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicalSight;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
@@ -79,6 +80,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfRegrowth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.HeavyBoomerang;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Deviloon;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branch;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.HighGrass;
@@ -113,6 +116,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.depth;
 
 public abstract class Level implements Bundlable {
 
@@ -211,7 +216,7 @@ public abstract class Level implements Bundlable {
 		Random.pushGenerator( Dungeon.seedCurDepth() );
 
 		//TODO maybe just make this part of RegularLevel?
-		if (!Dungeon.bossLevel() && Dungeon.branch == 0) {
+		if (!Dungeon.bossLevel() && Dungeon.branchId.equals(Branches.MAIN)) {
 
 			addItemToSpawn(Generator.random(Generator.Category.FOOD));
 
@@ -258,7 +263,7 @@ public abstract class Level implements Bundlable {
 				addItemToSpawn( new TrinketCatalyst());
 			}
 
-			if (Dungeon.depth > 1) {
+			if (depth > 1) {
 				//50% chance of getting a level feeling
 				//~7.15% chance for each feeling
 				switch (Random.Int( 14 )) {
@@ -312,7 +317,11 @@ public abstract class Level implements Bundlable {
 			customTiles = new HashSet<>();
 			customWalls = new HashSet<>();
 
-		} while (!build());
+		} while (!build() && !Thread.currentThread().isInterrupted());
+
+		// Branch endpoints have no lower floor, so finalize their terrain before
+		// deriving passability, pit, and other behavior flags from the map.
+		convertChasmOnBranchEnd();
 
 		buildFlagMaps();
 		cleanWalls();
@@ -513,7 +522,48 @@ public abstract class Level implements Bundlable {
 
 	public Mob createMob() {
 		if (mobsToSpawn == null || mobsToSpawn.isEmpty()) {
-			mobsToSpawn = Bestiary.getMobRotation(Dungeon.depth);
+			mobsToSpawn = Bestiary.getMobRotation(depth);
+
+			// Snake Bite challenge: cross-region monster spawning
+			if (Dungeon.isChallenged(Challenges.SNAKE_BITE) && !Dungeon.bossLevel()) {
+				int floorMod = depth % 5;
+				int currentRegion = (depth - 1) / 5 + 1;
+				int crossRegionDirection = 0; // 0: none, 1: next region, 2: previous region
+
+				// Near region end (floor 3,4 of each region): can spawn next region monsters
+				if (floorMod == 3 && Random.Float() < 0.01f && currentRegion < 5) {
+					// 1% chance to spawn next region monsters
+					int nextRegionDepth = currentRegion * 5 + Random.Int(1, 5);
+					mobsToSpawn = Bestiary.getMobRotation(nextRegionDepth);
+					crossRegionDirection = 1;
+				} else if (floorMod == 4 && Random.Float() < 0.02f && currentRegion < 5) {
+					// 2% chance to spawn next region monsters
+					int nextRegionDepth = currentRegion * 5 + Random.Int(1, 5);
+					mobsToSpawn = Bestiary.getMobRotation(nextRegionDepth);
+					crossRegionDirection = 1;
+				}
+
+				// Near region start (floor 1,2 of each region): can spawn previous region monsters
+				else if (floorMod == 1 && Random.Float() < 0.02f && currentRegion > 1) {
+					// 2% chance to spawn previous region monsters
+					int prevRegionDepth = (currentRegion - 2) * 5 + Random.Int(1, 5);
+					mobsToSpawn = Bestiary.getMobRotation(prevRegionDepth);
+					crossRegionDirection = 2;
+				} else if (floorMod == 2 && Random.Float() < 0.01f && currentRegion > 1) {
+					// 1% chance to spawn previous region monsters
+					int prevRegionDepth = (currentRegion - 2) * 5 + Random.Int(1, 5);
+					mobsToSpawn = Bestiary.getMobRotation(prevRegionDepth);
+					crossRegionDirection = 2;
+				}
+
+				// Apply cross-region challenge to the monster
+				Mob m = Reflection.newInstance(mobsToSpawn.remove(0));
+				ChampionEnemy.rollForChampion(m);
+				if (crossRegionDirection != 0) {
+					CrossLevelChallenge.setDirection(m, crossRegionDirection);
+				}
+				return m;
+			}
 		}
 
 		Mob m = Reflection.newInstance(mobsToSpawn.remove(0));
@@ -526,7 +576,8 @@ public abstract class Level implements Bundlable {
 	abstract protected void createItems();
 
 	public int entrance(){
-		LevelTransition l = getTransition(null);
+		LevelTransition l = getTransitionByDirection(LevelTransition.Direction.UP);
+		if (l == null) l = getTransitionByDirection(LevelTransition.Direction.SURFACE);
 		if (l != null){
 			return l.cell();
 		}
@@ -534,7 +585,7 @@ public abstract class Level implements Bundlable {
 	}
 
 	public int exit(){
-		LevelTransition l = getTransition(LevelTransition.Type.REGULAR_EXIT);
+		LevelTransition l = getTransitionByDirection(LevelTransition.Direction.DOWN);
 		if (l != null){
 			return l.cell();
 		}
@@ -559,6 +610,13 @@ public abstract class Level implements Bundlable {
 		return type != null ? getTransition(null) : transitions.get(0);
 	}
 
+	public LevelTransition getTransitionByDirection(LevelTransition.Direction direction){
+		for (LevelTransition transition : transitions) {
+			if (transition.direction == direction) return transition;
+		}
+		return null;
+	}
+
 	public LevelTransition getTransition(int cell){
 		for (LevelTransition transition : transitions){
 			if (transition.inside(cell)){
@@ -566,6 +624,55 @@ public abstract class Level implements Bundlable {
 			}
 		}
 		return null;
+	}
+
+	public LevelTransition requireTransition(String linkId){
+		LevelTransition result = null;
+		for (LevelTransition transition : transitions){
+			if (linkId.equals(transition.linkId)) {
+				if (result != null) throw new IllegalStateException("Duplicate transition " + linkId
+						+ " on " + Dungeon.branchId + ":" + Dungeon.depth);
+				result = transition;
+			}
+		}
+		if (result == null) throw new IllegalStateException("Missing transition " + linkId
+				+ " on " + Dungeon.branchId + ":" + Dungeon.depth);
+		return result;
+	}
+	/**
+	 * 找一个合适的位置放置分支入口楼梯
+	 */
+	protected int findBranchEntranceCell() {
+		// 默认实现：找任意空位
+		for (int i = 0; i < length(); i++) {
+			if (map[i] == Terrain.EMPTY && !solid[i]) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * 支线终点：将 Chasm 转换为普通地板
+	 * 如果当前分支没有下一层，玩家不应该掉落，所以移除 Chasm
+	 */
+	protected void convertChasmOnBranchEnd() {
+		// 主线不处理
+		if (Dungeon.branchId.equals(Branches.MAIN)) return;
+		
+		// 检查是否有下一层
+		Branch branch = Branches.get(Dungeon.branchId);
+		if (branch != null && branch.hasMoreDepth(Dungeon.depth)) {
+			// 有下一层，保留 Chasm
+			return;
+		}
+		
+		// 没有下一层，将 Chasm 转换为 EMPTY
+		for (int i = 0; i < length(); i++) {
+			if (map[i] == Terrain.CHASM) {
+				map[i] = Terrain.EMPTY;
+			}
+		}
 	}
 
 	//returns true if we immediately transition, false otherwise
@@ -576,8 +683,7 @@ public abstract class Level implements Bundlable {
 
 		beforeTransition();
 		InterlevelScene.curTransition = transition;
-		if (transition.type == LevelTransition.Type.REGULAR_EXIT
-				|| transition.type == LevelTransition.Type.BRANCH_EXIT) {
+		if (transition.direction == LevelTransition.Direction.DOWN) {
 			InterlevelScene.mode = InterlevelScene.Mode.DESCEND;
 		} else {
 			InterlevelScene.mode = InterlevelScene.Mode.ASCEND;
@@ -636,7 +742,7 @@ public abstract class Level implements Bundlable {
 			}
 		}
 		for (HeavyBoomerang.CircleBack b : Dungeon.hero.buffs(HeavyBoomerang.CircleBack.class)){
-			if (b.activeDepth() == Dungeon.depth) items.add(b.cancel());
+			if (b.activeDepth() == depth) items.add(b.cancel());
 		}
 		return items;
 	}
@@ -742,7 +848,7 @@ public abstract class Level implements Bundlable {
 	public float respawnCooldown(){
 		float cooldown;
 		if (Statistics.amuletObtained){
-			if (Dungeon.depth == 1){
+			if (depth == 1){
 				//very fast spawns on floor 1! 0/2/4/6/8/10/12, etc.
 				cooldown = (Dungeon.level.mobCount()) * (TIME_TO_RESPAWN / 25f);
 			} else {
@@ -1466,7 +1572,7 @@ public abstract class Level implements Bundlable {
 			}
 
 			for (TalismanOfForesight.HeapAwareness h : c.buffs(TalismanOfForesight.HeapAwareness.class)){
-				if (Dungeon.depth != h.depth || Dungeon.branch != h.branch) continue;
+				if (depth != h.depth || !Dungeon.branchId.equals(h.branchId)) continue;
 				for (int i : PathFinder.NEIGHBOURS9) heroMindFov[h.pos+i] = true;
 			}
 
@@ -1483,7 +1589,7 @@ public abstract class Level implements Bundlable {
 			}
 
 			for (RevealedArea a : c.buffs(RevealedArea.class)){
-				if (Dungeon.depth != a.depth || Dungeon.branch != a.branch) continue;
+				if (depth != a.depth || !Dungeon.branchId.equals(a.branchId)) continue;
 				for (int i : PathFinder.NEIGHBOURS9) heroMindFov[a.pos+i] = true;
 			}
 

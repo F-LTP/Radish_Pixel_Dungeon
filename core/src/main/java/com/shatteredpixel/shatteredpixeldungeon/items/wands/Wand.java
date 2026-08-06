@@ -34,6 +34,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicWandBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicPoint;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicStick;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
@@ -46,6 +48,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.WildMagic;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.AshKing;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
@@ -62,6 +65,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EndGuard;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Morello;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToyEffects;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
@@ -388,14 +392,18 @@ public abstract class Wand extends Item {
 	public int buffedLvl() {
 		int lvl = super.buffedLvl();
 
-		if(Dungeon.hero.buff(Berserk.class) != null){
-			lvl += Dungeon.hero.buff(Berserk.class).WandBuffedLvl();
-			updateQuickslot();
-		}
+		boolean usedByHero = Dungeon.hero != null && (hero.belongings.contains(this)
+				|| charger != null && charger.target == hero);
+		if (usedByHero) {
+			if (Dungeon.hero.buff(Berserk.class) != null) {
+				lvl += Dungeon.hero.buff(Berserk.class).WandBuffedLvl();
+				updateQuickslot();
+			}
 
-		RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
-		if(riverGlass != null){
-			return super.buffedLvl() + riverGlass.level() + 1;
+			RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
+			if (riverGlass != null) {
+				return super.buffedLvl() + riverGlass.level() + 1;
+			}
 		}
 
 		if (charger != null && charger.target != null) {
@@ -495,6 +503,11 @@ public abstract class Wand extends Item {
 		updateQuickslot();
 	}
 	public void wandUsed() {
+		TieredToyEffects.onAbilityUsed(hero);
+
+		if (hero.subClass == HeroSubClass.DICE_MAGE){
+			Buff.affect(hero, MagicPoint.class).addPoints(0.5f + buffedLvl() * 0.05f);
+		}
 
 		if(hero.hasTalent(Talent.MAGIC_STICK) && hero.pointsInTalent(Talent.MAGIC_STICK) >=4 && ! isMagesStaff){
 			if(hero.buff(MagicStick.class) == null ){
@@ -524,11 +537,17 @@ public abstract class Wand extends Item {
 		if (hero.belongings.weapon() instanceof EndGuard) {
 			EndGuard w2 = (EndGuard) hero.belongings.weapon;
 			if (w2 != null) {
-				Buff.affect(hero, Barrier.class).setShield((int) (0.2f * ( w2.level() +1 )));
+				Buff.affect(hero, Barrier.class).setShield((int) (0.2f * ( w2.buffedLvl() +1 )));
 			}
 		}
 
-		curCharges -= cursed ? 1 : chargesPerCast();
+		//灵魂激流：免费施法消耗
+		AshKing.SoulStreamForm soulStream = hero.buff(AshKing.SoulStreamForm.class);
+		if (soulStream != null && soulStream.consumeFreeCast()) {
+			// 使用免费次数，不消耗充能
+		} else {
+			curCharges -= cursed ? 1 : chargesPerCast();
+		}
 		if (hero.hasTalent(Talent.SPELL_QUEUE)) {
 			SpellQueue mySq = hero.belongings.getItem(SpellQueue.class);
 			if (mySq != null) mySq.updateImage();
@@ -559,7 +578,7 @@ public abstract class Wand extends Item {
 						EndGuard w2 = (EndGuard) hero.belongings.weapon;
 						if (w2 != null) {
 							//grants 3/5 shielding
-							Buff.affect(hero, Barrier.class).setShield((int) (0.2f * ( w2.level() +1 )));
+							Buff.affect(hero, Barrier.class).setShield((int) (0.2f * ( w2.buffedLvl() +1 )));
 						}
 					} else {
 						//grants 3/5 shielding
@@ -578,7 +597,7 @@ public abstract class Wand extends Item {
 					&& hero.hasTalent(Talent.BACKUP_BARRIER)) {
 				boolean highest = true;
 				for (Item i : hero.belongings.getAllItems(Wand.class)) {
-					if (i.level() > level()) {
+					if (i.buffedLvl() > buffedLvl()) {
 						highest = false;
 					}
 				}
@@ -587,7 +606,7 @@ public abstract class Wand extends Item {
 						EndGuard w2 = (EndGuard) hero.belongings.weapon;
 						if (w2 != null) {
 							//grants 3/5 shielding
-							Buff.affect(hero, Barrier.class).setShield((int) (0.2f * ( w2.level() +1 )));
+							Buff.affect(hero, Barrier.class).setShield((int) (0.2f * ( w2.buffedLvl() +1 )));
 						}
 					} else {
 						//grants 3/5 shielding
@@ -748,7 +767,12 @@ public abstract class Wand extends Item {
 
 	public int collisionProperties(int target){
 		if (cursed)     return Ballistica.MAGIC_BOLT;
-		else            return collisionProperties;
+		//灵魂激流：法杖穿透敌人
+		AshKing.SoulStreamForm soulStream = Dungeon.hero != null ? Dungeon.hero.buff(AshKing.SoulStreamForm.class) : null;
+		if (soulStream != null) {
+			return Ballistica.STOP_SOLID | Ballistica.STOP_TARGET;
+		}
+		return collisionProperties;
 	}
 
 	public static class PlaceHolder extends Wand {
@@ -801,7 +825,7 @@ public abstract class Wand extends Item {
 						if(hero.belongings.weapon() instanceof EndGuard) {
 							EndGuard w2 = (EndGuard) hero.belongings.weapon;
 							if (w2 != null) {
-								Buff.affect(curUser, Barrier.class).setShield((int) (Math.round(shield) + (0.2f * ( w2.level() +1 ))));
+								Buff.affect(curUser, Barrier.class).setShield((int) (Math.round(shield) + (0.2f * ( w2.buffedLvl() +1 ))));
 							}
 						} else {
 							Buff.affect(curUser, Barrier.class).setShield(Math.round(shield));
@@ -932,13 +956,15 @@ public abstract class Wand extends Item {
 			}
 			//
 
+			float chargeMultiplier = MagicWandBuff.getChargeEfficiency();
+
 			LockedFloor lock = target.buff(LockedFloor.class);
 			if (lock == null || lock.regenOn())
-				partialCharge += (1f/turnsToCharge) * RingOfEnergy.wandChargeMultiplier(target);
+				partialCharge += (1f/turnsToCharge) * RingOfEnergy.wandChargeMultiplier(target) * chargeMultiplier;
 
 			for (Recharging bonus : target.buffs(Recharging.class)){
 				if (bonus != null && bonus.remainder() > 0f) {
-					partialCharge += CHARGE_BUFF_BONUS * bonus.remainder();
+					partialCharge += CHARGE_BUFF_BONUS * bonus.remainder() * chargeMultiplier;
 				}
 			}
 		}

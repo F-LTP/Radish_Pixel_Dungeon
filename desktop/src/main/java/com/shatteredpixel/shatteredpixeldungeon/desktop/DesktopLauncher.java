@@ -144,6 +144,7 @@ public class DesktopLauncher {
 
 		String basePath = "";
 		Files.FileType baseFileType = null;
+		//TODO 目前电脑端与破碎存档会有冲突 建议修改存储位置
 		if (SharedLibraryLoader.isWindows) {
 			if (System.getProperties().getProperty("os.name").equals("Windows XP")) {
 				basePath = "Application Data/." + vendor + "/" + title + "/";

@@ -76,7 +76,12 @@ public class Necromancer extends Mob {
 	protected boolean act() {
 		if (summoning && state != HUNTING){
 			summoning = false;
-			if (sprite instanceof NecromancerSprite) ((NecromancerSprite) sprite).cancelSummoning();
+			// Snake Bite challenge: call cancelSummoning() via reflection
+			try {
+				sprite.getClass().getMethod("cancelSummoning").invoke(sprite);
+			} catch (Exception e) {
+				if (sprite instanceof NecromancerSprite) ((NecromancerSprite) sprite).cancelSummoning();
+			}
 		}
 		return super.act();
 	}
@@ -198,7 +203,12 @@ public class Necromancer extends Mob {
 			//cancel if character cannot be moved
 			if (Char.hasProp(Actor.findChar(summoningPos), Property.IMMOVABLE)){
 				summoning = false;
-				((NecromancerSprite)sprite).finishSummoning();
+				// Snake Bite challenge: call finishSummoning() via reflection
+				try {
+					sprite.getClass().getMethod("finishSummoning").invoke(sprite);
+				} catch (Exception e) {
+					((NecromancerSprite)sprite).finishSummoning();
+				}
 				spend(TICK);
 				return;
 			}
@@ -244,7 +254,12 @@ public class Necromancer extends Mob {
 		mySkeleton.pos = summoningPos;
 		GameScene.add( mySkeleton );
 		Dungeon.level.occupyCell( mySkeleton );
-		((NecromancerSprite)sprite).finishSummoning();
+		// Snake Bite challenge: call finishSummoning() via reflection
+		try {
+			sprite.getClass().getMethod("finishSummoning").invoke(sprite);
+		} catch (Exception e) {
+			((NecromancerSprite)sprite).finishSummoning();
+		}
 
 		for (Buff b : buffs(AllyBuff.class)){
 			Buff.affect(mySkeleton, b.getClass());

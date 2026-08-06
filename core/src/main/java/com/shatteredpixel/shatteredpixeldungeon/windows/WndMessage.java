@@ -22,6 +22,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.ui.DiceMageUI;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 
@@ -30,10 +32,16 @@ public class WndMessage extends Window {
 	private static final int WIDTH_P = 120;
 	private static final int WIDTH_L = 144;
 	private static final int MARGIN = 4;
+	private static final int BUTTON_HEIGHT = 16;
 	
 	public WndMessage( String text ) {
 		
 		super();
+
+		if (DiceMageUI.active()) {
+			layoutDiceNotice(text);
+			return;
+		}
 		
 		RenderedTextBlock info = PixelScene.renderTextBlock( text, 6 );
 		info.maxWidth((PixelScene.landscape() ? WIDTH_L : WIDTH_P) - MARGIN * 2);
@@ -43,5 +51,36 @@ public class WndMessage extends Window {
 		resize(
 			(int)info.width() + MARGIN * 2,
 			(int)info.height() + MARGIN * 2 );
+	}
+
+	private void layoutDiceNotice(String text) {
+		int width = PixelScene.landscape() ? WIDTH_L : WIDTH_P;
+		chrome.hardlight(DiceMageUI.DARK);
+
+		RenderedTextBlock label = PixelScene.renderTextBlock("[MESSAGE]", 8);
+		label.hardlight(DiceMageUI.GOLD);
+		label.setPos(MARGIN, MARGIN);
+		add(label);
+
+		RenderedTextBlock info = PixelScene.renderTextBlock(text, 6);
+		info.hardlight(DiceMageUI.CREAM);
+		info.maxWidth(width - MARGIN * 4);
+		info.setPos(MARGIN * 2, label.bottom() + MARGIN * 2);
+
+		DiceMageUI.Frame messageFrame = new DiceMageUI.Frame(DiceMageUI.PANEL, DiceMageUI.GREY_LINE);
+		messageFrame.setRect(0, label.bottom() + MARGIN, width, info.height() + MARGIN * 4);
+		add(messageFrame);
+		add(info);
+
+		DiceMageUI.DiceButton ok = new DiceMageUI.DiceButton("哦") {
+			@Override
+			protected void onClick() {
+				hide();
+			}
+		};
+		ok.setRect((width - 30) / 2f, messageFrame.bottom() + MARGIN, 30, BUTTON_HEIGHT);
+		add(ok);
+
+		resize(width, (int)(ok.bottom() + MARGIN));
 	}
 }

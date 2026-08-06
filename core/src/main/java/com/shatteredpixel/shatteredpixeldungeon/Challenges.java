@@ -39,8 +39,9 @@ public class Challenges {
 	public static final int SPD_CHALLENGE_MAX = 511;
 
 	public static final int TEST_MODE			= 1<<9;
+	public static final int SNAKE_BITE			= 1<<10;
 
-	public static final int MAX_VALUE           = (1<<10)-1;
+	public static final int MAX_VALUE           = (1<<11)-1;
 
 	public static final String[] NAME_IDS = {
 			"champion_enemies",
@@ -52,12 +53,13 @@ public class Challenges {
 			"swarm_intelligence",
 			"darkness",
 			"no_scrolls",
-			"test_mode"
+			"test_mode",
+			"snake_bite"
 	};
 
 	public static final int[] MASKS = {
 			CHAMPION_ENEMIES, STRONGER_BOSSES, NO_FOOD, BAD_POINT, DAMAGE_NO, NO_HERBALISM, SWARM_INTELLIGENCE, DARKNESS, NO_SCROLLS,
-			TEST_MODE
+			TEST_MODE, SNAKE_BITE
 	};
 
 	public static int activeChallenges(){

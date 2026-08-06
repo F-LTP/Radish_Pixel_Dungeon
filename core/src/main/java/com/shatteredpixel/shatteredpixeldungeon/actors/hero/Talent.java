@@ -41,6 +41,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.Ratmogrify
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
+import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
+import com.shatteredpixel.shatteredpixeldungeon.events.HeroEatFoodEvent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
@@ -71,6 +73,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 
 public enum Talent {
 
@@ -78,206 +81,255 @@ public enum Talent {
 	 * [WARRIOR TALENT]
  	 */
 	//Warrior T1
-	HEARTY_MEAL(0), ARMSMASTERS_INTUITION(1), PROVOKED_ANGER(2), IRON_WILL(3),
+	HEARTY_MEAL, ARMSMASTERS_INTUITION, PROVOKED_ANGER, IRON_WILL,
 	//Warrior T2
-	IRON_STOMACH(4), EMERGENCY_PROTECTION(5), RUNIC_TRANSFERENCE(6), LETHAL_MOMENTUM(7), IMPROVISED_PROJECTILES(8),
+	IRON_STOMACH, EMERGENCY_PROTECTION, RUNIC_TRANSFERENCE, LETHAL_MOMENTUM, IMPROVISED_PROJECTILES,
 	//Warrior T3
-	HOLD_FAST(9, 3), STRONGMAN(10, 3),
+	HOLD_FAST(3), STRONGMAN(3),
 	//Warrior T4
-	IRON_MUSCLE(128,4),MOVING_DEFENSE(129,4),
+	IRON_MUSCLE(4),MOVING_DEFENSE(4),
+	HIGH_DIET(4), // 战士4-2重做：高端饮食
 	//Berserker T3
-	ENDLESS_RAGE(11, 3), PAIN_SCAR(12, 3), FANATICISM_MAGIC(13, 3),
+	ENDLESS_RAGE(3), PAIN_SCAR(3), FANATICISM_MAGIC(3),
 	//Berserker T4
-	REVENGE_ROAR(130,4),THIRSTY_BLADE(131,4),
+	REVENGE_ROAR(4),THIRSTY_BLADE(4),
 	//Gladiator T3
-	KEEP_VIGILANCE(14, 3), LETHAL_DEFENSE(15, 3), VENT_NOPLACE(16, 3),
+	KEEP_VIGILANCE(3), LETHAL_DEFENSE(3), VENT_NOPLACE(3),
 	//Gladiator T4
-	DEFENSIVE_STRIKE(132,4),DEVASTATE(133,4),
+	DEFENSIVE_STRIKE(4),DEVASTATE(4),
+	WEAPON_MASTER(4), // 角斗士4-4重做：武器大师
 	//Heroic Leap T4
-	BODY_SLAM(17, 4), IMPACT_WAVE(18, 4), DOUBLE_JUMP(19, 4),
+	BODY_SLAM(4), IMPACT_WAVE(4), DOUBLE_JUMP(4),
 	//Shockwave T4
-	EXPANDING_WAVE(20, 4), STRIKING_WAVE(21, 4), SHOCK_FORCE(22, 4),
+	EXPANDING_WAVE(4), STRIKING_WAVE(4), SHOCK_FORCE(4),
 	//Endure T4
-	SUSTAINED_RETRIBUTION(23, 4), SHRUG_IT_OFF(24, 4), EVEN_THE_ODDS(25, 4),
+	SUSTAINED_RETRIBUTION(4), SHRUG_IT_OFF(4), EVEN_THE_ODDS(4),
 
 	/**
 	 * [MAGE TALENT]
 	 */
 	//Mage T1
-	EMPOWERING_MEAL(32), SCHOLARS_INTUITION(33), LINGERING_MAGIC(34), BACKUP_BARRIER(35),
+	EMPOWERING_MEAL, SCHOLARS_INTUITION, LINGERING_MAGIC, BACKUP_BARRIER,
 	//Mage T2
-	ENERGIZING_MEAL(36), ENERGIZING_UPGRADE(37), WAND_PRESERVATION(38), ARCANE_VISION(39), SHIELD_BATTERY(40),
+	ENERGIZING_MEAL, ENERGIZING_UPGRADE, WAND_PRESERVATION, ARCANE_VISION, SHIELD_BATTERY,
 	//Mage T3
-	SPELL_QUEUE(41, 3), ALLY_WARP(42, 3),
+	SPELL_QUEUE(3), ALLY_WARP(3),
 	//TODO WARMAGE T4
-	MAGIC_REFINING(160,4 ),MAGIC_TACTICS(161,4),MAGIC_STICK(162,4),MAGIC_WORKMAN(163,4),
+	MAGIC_REFINING(4),MAGIC_TACTICS(4),MAGIC_STICK(4),MAGIC_WORKMAN(4),
+	WAND_DODGE(4), // 战法4-3：老魔杖闪避
 	//TODO MAGIC T4
-	DESPERATE_POWER(164,4),GHOST_ROOT(165,4),
+	DESPERATE_POWER(4),GHOST_ROOT(4),
+	CORRUPT_SPIRIT(4), // 术士4-4：腐化怨灵
 	//Battlemage T3
-	EMPOWERED_STRIKE(43, 3), MYSTICAL_CHARGE(44, 3), WAR_THROW(45, 3),
+	EMPOWERED_STRIKE(3), MYSTICAL_CHARGE(3), WAR_THROW(3),
 	//Warlock T3
-	SOUL_EATER(46, 3), SOUL_SIPHON(47, 3), NECROMANCERS_MINIONS(48, 3),
+	SOUL_EATER(3), SOUL_SIPHON(3), NECROMANCERS_MINIONS(3),
 	//Elemental Blast T4
-	BLAST_RADIUS(49, 4), ELEMENTAL_POWER(50, 4), REACTIVE_BARRIER(51, 4),
+	BLAST_RADIUS(4), ELEMENTAL_POWER(4), REACTIVE_BARRIER(4),
 	//Wild Magic T4
-	WILD_POWER(52, 4), FIRE_EVERYTHING(53, 4), CONSERVED_MAGIC(54, 4),
+	WILD_POWER(4), FIRE_EVERYTHING(4), CONSERVED_MAGIC(4),
 	//Warp Beacon T4
-	TELEFRAG(55, 4), REMOTE_BEACON(56, 4), LONGRANGE_WARP(57, 4),
+	TELEFRAG(4), REMOTE_BEACON(4), LONGRANGE_WARP(4),
 
 	/**
 	 * [ROUGE TALENT]
 	 */
 	//Rogue T1
-	CACHED_RATIONS(64), THIEFS_INTUITION(65), SUCKER_PUNCH(66), PROTECTIVE_SHADOWS(67),
+	CACHED_RATIONS, THIEFS_INTUITION, SUCKER_PUNCH, PROTECTIVE_SHADOWS,
 	//Rogue T2
-	MYSTICAL_MEAL(68), DUEL_DANCE(69), WIDE_SEARCH(70), SILENT_STEPS(71), ROGUES_INSTINCT(72),
+	MYSTICAL_MEAL, DUEL_DANCE, WIDE_SEARCH, SILENT_STEPS, ROGUES_INSTINCT,
 	//Rogue T3
-	DEATHBLOW(73, 3), LIGHT_CLOAK(74, 3),
+	DEATHBLOW(3), LIGHT_CLOAK(3),
 	//Rogue T4
-	HIDE_IN_CROWD(192,4),DARK_ARMOR(193,4),
+	HIDE_IN_CROWD(4),DARK_ARMOR(4),
 	//Assassin T3
-	ENHANCED_LETHALITY(75, 3), ASSASSINS_REACH(76, 3), BOUNTY_HUNTER(77, 3),
+	ENHANCED_LETHALITY(3), ASSASSINS_REACH(3), BOUNTY_HUNTER(3),
 	//Assassin T4
-	BRACE_YOURSELF(194,4),POWER_RECYCLE(195,4),
+	BRACE_YOURSELF(4),POWER_RECYCLE(4),
 	//Freerunner T3
-	EVASIVE_ARMOR(78, 3), PROJECTILE_MOMENTUM(79, 3), SPEEDY_STEALTH(80, 3),
+	EVASIVE_ARMOR(3), PROJECTILE_MOMENTUM(3), SPEEDY_STEALTH(3),
 	//Freerunner T4
-	KINETIC_ENERGY(196,4),STORM_RUSH(197,4),
+	KINETIC_ENERGY(4),STORM_RUSH(4),
 	//Smoke Bomb T4
-	HASTY_RETREAT(81, 4), BODY_REPLACEMENT(82, 4), SHADOW_STEP(83, 4),
+	HASTY_RETREAT(4), BODY_REPLACEMENT(4), SHADOW_STEP(4),
 	//Death Mark T4
-	FEAR_THE_REAPER(84, 4), DEATHLY_DURABILITY(85, 4), DOUBLE_MARK(86, 4),
+	FEAR_THE_REAPER(4), DEATHLY_DURABILITY(4), DOUBLE_MARK(4),
 	//Shadow Clone T4
-	SHADOW_BLADE(87, 4), CLONED_ARMOR(88, 4), PERFECT_COPY(89, 4),
+	SHADOW_BLADE(4), CLONED_ARMOR(4), PERFECT_COPY(4),
 
 	/**
 	 * [HUNTRESS TALENT]
 	 */
 	//Huntress T1
-	NATURES_BOUNTY(96), SURVIVALISTS_INTUITION(97), FOLLOWUP_STRIKE(98), UNDERESTIMATED(99),
+	NATURES_BOUNTY, SURVIVALISTS_INTUITION, FOLLOWUP_STRIKE, UNDERESTIMATED,
 	//Huntress T2
-	INVIGORATING_MEAL(100), HERB_MIXTURE(101), REJUVENATING_STEPS(102), HEIGHTENED_SENSES(103), DURABLE_PROJECTILES(104),
+	INVIGORATING_MEAL, HERB_MIXTURE, REJUVENATING_STEPS, HEIGHTENED_SENSES, DURABLE_PROJECTILES,
 	//Huntress T3
-	HOLD_BREATH(105, 3), SEER_SHOT(106, 3),
+	HOLD_BREATH(3), SEER_SHOT(3),
 	//Huntress T4
-	BRISK_PACE(224,4),PHASE_FILLING(225,4),
-	BOW_DULES(226,4),
-	STORM_ATTACK(227,4),
-	MEDART_SPECIALIST(228,4),LAND_HEART(229,4),
+	BRISK_PACE(4),PHASE_FILLING(4),
+	BOW_DULES(4),
+	STORM_ATTACK(4),
+	MEDART_SPECIALIST(4),LAND_HEART(4),
+	COMMON_SHOT(4), // 狙击4-3重做：通识射击
+	MORE_DARTS(4),GRASS_VISION(4), // 守望4-3/4-4
 	//Sniper T3
-	FARSIGHT(107, 3), SHARED_ENCHANTMENT(108, 3), SHARED_UPGRADES(109, 3),
+	FARSIGHT(3), SHARED_ENCHANTMENT(3), SHARED_UPGRADES(3),
 	//Warden T3
-	DURABLE_TIPS(110, 3), BARKSKIN(111, 3), VINE_TRAP(112, 3),
+	DURABLE_TIPS(3), BARKSKIN(3), VINE_TRAP(3),
 	//Spectral Blades T4
-	FAN_OF_BLADES(113, 4), PROJECTING_BLADES(114, 4), SPIRIT_BLADES(115, 4),
+	FAN_OF_BLADES(4), PROJECTING_BLADES(4), SPIRIT_BLADES(4),
 	//Natures Power T4
-	GROWING_POWER(116, 4), NATURES_WRATH(117, 4), WILD_MOMENTUM(118, 4),
+	GROWING_POWER(4), NATURES_WRATH(4), WILD_MOMENTUM(4),
 	//Spirit Hawk T4
-	EAGLE_EYE(119, 4), GO_FOR_THE_EYES(120, 4), SWIFT_SPIRIT(121, 4),
+	EAGLE_EYE(4), GO_FOR_THE_EYES(4), SWIFT_SPIRIT(4),
 	//universal T4
-	HEROIC_ENERGY(26, 4), //See icon() and title() for special logic for this one
+	HEROIC_ENERGY(4), //See icon() and title() for special logic for this one
 	//Ratmogrify T4
-	RATSISTANCE(124, 4), RATLOMACY(125, 4), RATFORCEMENTS(126, 4),
+	RATSISTANCE(4), RATLOMACY(4), RATFORCEMENTS(4),
 
 	/**
 	 * [DUELIST TALENT]
 	 */
 	//Duelist T1
-	STRENGTHENING_MEAL(128), ADVENTURERS_INTUITION(129), PATIENT_STRIKE(130), AGGRESSIVE_BARRIER(131),
+	STRENGTHENING_MEAL, ADVENTURERS_INTUITION, PATIENT_STRIKE, AGGRESSIVE_BARRIER,
 	//Duelist T2
-	FOCUSED_MEAL(132), LIQUID_AGILITY(133), WEAPON_RECHARGING(134), LETHAL_HASTE(135), SWIFT_EQUIP(136),
+	FOCUSED_MEAL, LIQUID_AGILITY, WEAPON_RECHARGING, LETHAL_HASTE, SWIFT_EQUIP,
 	//Duelist T3
-	PRECISE_ASSAULT(137, 3), DEADLY_FOLLOWUP(138, 3),
+	PRECISE_ASSAULT(3), DEADLY_FOLLOWUP(3),
 	//Champion T3
-	VARIED_CHARGE(139, 3), TWIN_UPGRADES(140, 3), COMBINED_LETHALITY(141, 3),
+	VARIED_CHARGE(3), TWIN_UPGRADES(3), COMBINED_LETHALITY(3),
 	//Monk T3
-	UNENCUMBERED_SPIRIT(142, 3), MONASTIC_VIGOR(143, 3), COMBINED_ENERGY(144, 3),
+	UNENCUMBERED_SPIRIT(3), MONASTIC_VIGOR(3), COMBINED_ENERGY(3),
 	//Challenge T4
-	CLOSE_THE_GAP(145, 4), INVIGORATING_VICTORY(146, 4), ELIMINATION_MATCH(147, 4),
+	CLOSE_THE_GAP(4), INVIGORATING_VICTORY(4), ELIMINATION_MATCH(4),
 	//Elemental Strike T4
-	ELEMENTAL_REACH(148, 4), STRIKING_FORCE(149, 4), DIRECTED_POWER(150, 4),
+	ELEMENTAL_REACH(4), STRIKING_FORCE(4), DIRECTED_POWER(4),
 	//Duelist A3 T4
-	FEIGNED_RETREAT(151, 4), EXPOSE_WEAKNESS(152, 4), COUNTER_ABILITY(153, 4),
+	FEIGNED_RETREAT(4), EXPOSE_WEAKNESS(4), COUNTER_ABILITY(4),
 
 	/**
 	 * [RECTOR TALENT]
 	 */
-	PRAYER_BEFORE_MEALS(288,2),MENTAL_TELEPATHY(289,2), RAIN_GRACE(290,2),DEVOTIONAL(291,2),
+	PRAYER_BEFORE_MEALS,MENTAL_TELEPATHY, RAIN_GRACE,DEVOTIONAL,
 
-	BLESS_FOOD(320,2),SOUL_NOWIFI(321,2),LIGHT_STEP(322,2),GOD_BODY(323,2),NOHOPE_LANG(324,2),
+	BLESS_FOOD,SOUL_NOWIFI,LIGHT_STEP,GOD_BODY,NOHOPE_LANG,
 
 	//T3牧师通用
-	ACT_GODPROGRESS(352,3),SMART_BLESSING(353,3),
+	ACT_GODPROGRESS(3),SMART_BLESSING(3),
 
 	//BATTLE RECTOR
-	IRON_SUN(354,3),PHARCIS_BLESS(355,3),BEN_WORK(356,3),
+	IRON_SUN(3),PHARCIS_BLESS(3),BEN_WORK(3),
 
 	//RED MASTER
-	FIRE_GLASS(386,3),LIGHT_WASH(387,3),SKY_TOWER(388,3),
+	FIRE_GLASS(3),LIGHT_WASH(3),SKY_TOWER(3),
 
 	//DEAD DIFE
-	BLACK_LOVE(418,3),DEAD_POWER(419,3),EXP_IMPOTION(420,3),
+	BLACK_LOVE(3),DEAD_POWER(3),EXP_IMPOTION(3),
 
 	// T4 rector universal
 	// T4 牧师通用(星界沟通，生命坚壁)
-	SUPERSTITION(358,4),VITAE_BOOST(359,4),
+	SUPERSTITION(4),VITAE_BOOST(4),
 
 	// T4 战斗牧师(战斗兴奋,神赐之礼)
 	// T4 BATTLE RECTOR
-	ADRENAL_COMBAT(360,4),GIFT(361,4),
+	ADRENAL_COMBAT(4),GIFT(4),
 
 
 	// T4 红衣主教(圣化转变,圣光障壁)
 	// T4 Cardinal
-	SOUL_POSSESSION(392,4),BLOODY_VITAE(393,4),
+	SOUL_POSSESSION(4),BLOODY_VITAE(4),
 
 	// T4 执行者(无情扫除,信仰收割)
 	// T4 DEAD DIFE
-	PRESS_ON(390,4),BRIEF_HARVEST(391,4),
+	PRESS_ON(4),BRIEF_HARVEST(4),
 
 	// T4 rector
 	// last prayer
 	// 高效回复	借力疾驰	  圣灵赐福
-	EFFICIENT_HEALING(364,4), INERTIAL_CHARGE(365,4),BLESS_RETURN(366,4),
+	EFFICIENT_HEALING(4), INERTIAL_CHARGE(4),BLESS_RETURN(4),
 
 	// T4 rector
 	// shadow hymn
 	// 暗色契约	潜心苦读	双修牧师
-	SACRIFICE(396,4),BLOCKING_READING(397,4),TAI_CHI_POISE(398,4),
+	SACRIFICE(4),BLOCKING_READING(4),TAI_CHI_POISE(4),
 
 	// T4 Rector
 	// gods possession
 	// 治愈圣启	无可侵犯	神灵之触
-	HOLY_SHOCKWAVE(428,4),GODHOOD(429,4),AVATAR(430,4),
+	HOLY_SHOCKWAVE(4),GODHOOD(4),AVATAR(4),
 
-	ERROR(294,4);
+	/**
+	 * [MOONLIGHT TALENT]
+	 */
+	//Moonlight T1
+	// 猎杀直觉 砥砺锋芒 武器掌握 战争践踏
+	HUNTING_INTUITION, SHARPENING_EDGE, WEAPON_MASTERY, WAR_TRAMPLE,
+	//Moonlight T2
+	// 利用一餐 强壮肉体 神圣泉水 三重保险 弹射起步
+	MEAL_UTILIZATION, STRONG_BODY, HOLY_SPRING, TRIPLE_INSURANCE, CATAPULT_START,
+	//Moonlight T3 (Universal)
+	// 剑盾骑士 轮椅翻车
+	SWORD_SHIELD_KNIGHT(3), WHEELCHAIR_CRASH(3),
+	//Moonlight T4 (Universal)
+
+	HEROIC_ENERGY_MOONLIGHT(4),
+	LIGHT_ETERNITY(4), MOON_GLORY(4), // 月华4-1/4-2
+
+	// Little Knight T3
+	// 我不会输 濡湿附魔 左弓连射
+	WONT_LOSE(3), WET_ENCHANT(3), LEFT_BOW_RAPID(3),
+	SHIELD_POKE(4), KNIGHT_SPIRIT(4), // 小骑士4-3/4-4
+
+	//Dice Mage T3
+	LEARN_SOOTHE(3), LEARN_LIQUOR(3), LEARN_OPERATE(3), LEARN_MIASMA(3), LEARN_CRUSH(3), LEARN_BLAZE(3),
+	SPELL_EMPOWER(4), EGG_BASKET(4), // 骰子法师4-3/4-4
+
+	//Jutte Champion T3
+	ONE_JUTTE(3), IRON_QUENCH(3), SURPRISE_JUTTE(3),
+
+	//注定一抽 T4
+	FATED_TWICE(4), LOOT_GROUND(4), TIME_PAUSE(4),
+
+	//玩具背包 T4
+	BETTER_ITEM(4), EXTRA_POCKET(4), ACCEPT_CHALLENGE(4),
+
+	//薪王化身 T4
+	HOLY_LANCE(4), SOUL_STREAM(4), FATAL_BLADE(4),
+
+	ERROR;
 
 
 	public static class MagicRootDropped extends CounterBuff{{revivePersists = true;}};
 
 	public static class ImprovisedProjectileCooldown extends FlavourBuff{
-		public int icon() { return BuffIndicator.TIME; }
+		public String icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0.15f, 0.2f, 0.5f); }
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 50); }
 	};
 
 	public static class NoBeliefUsedCooldown extends FlavourBuff{
-		public int icon() { return BuffIndicator.TIME; }
+		public String icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0.75f, 0f, 0f); }
 	};
 
 	public static class HideInCrowdCooldown extends FlavourBuff{
-		public int icon() { return BuffIndicator.TIME; }
+		public String icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0x5562F6); }
 	};
 
 	public static class SlowHealingDeadCooldown extends FlavourBuff{
-		public int icon() { return BuffIndicator.TIME; }
+		public String icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0f, 0.55f, 0f); }
 	};
 
+	public static class ThirstyBladeCooldown extends FlavourBuff{
+		public String icon() { return BuffIndicator.TIME; }
+		public void tintIcon(Image icon) { icon.hardlight(0.8f, 0f, 0f); }
+	};
+
 	public static class Rain_Grace_Cooldown extends FlavourBuff{
-		public int icon() { return BuffIndicator.TIME; }
+		public String icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0f, 0.6f, 0f); }
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 50); }
 	};
@@ -328,13 +380,13 @@ public enum Talent {
 	}
 	public static class BountyHunterTracker extends FlavourBuff{};
 	public static class RejuvenatingStepsCooldown extends FlavourBuff{
-		public int icon() { return BuffIndicator.TIME; }
+		public String icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0f, 0.35f, 0.15f); }
 		public float iconFadePercent() { return GameMath.gate(0, visualcooldown() / (15 - 5*Dungeon.hero.pointsInTalent(REJUVENATING_STEPS)), 1); }
 	};
 	public static class RejuvenatingStepsFurrow extends CounterBuff{{revivePersists = true;}};
 	public static class SeerShotCooldown extends FlavourBuff{
-		public int icon() { return target.buff(RevealedArea.class) != null ? BuffIndicator.NONE : BuffIndicator.TIME; }
+		public String icon() { return target.buff(RevealedArea.class) != null ? BuffIndicator.NONE : BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0.7f, 0.4f, 0.7f); }
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 20); }
 	};
@@ -342,7 +394,7 @@ public enum Talent {
 	public static class PatientStrikeTracker extends Buff {
 		public int pos;
 		{ type = Buff.buffType.POSITIVE; }
-		public int icon() { return BuffIndicator.TIME; }
+		public String icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0.5f, 0f, 1f); }
 		@Override
 		public boolean act() {
@@ -366,7 +418,7 @@ public enum Talent {
 		}
 	};
 	public static class AggressiveBarrierCooldown extends FlavourBuff{
-		public int icon() { return BuffIndicator.TIME; }
+		public String icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0.35f, 0f, 0.7f); }
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 50); }
 	};
@@ -375,7 +427,7 @@ public enum Talent {
 
 	public static class RestoredAgilityTracker extends FlavourBuff{};
 	public static class LethalHasteCooldown extends FlavourBuff{
-		public int icon() { return BuffIndicator.TIME; }
+		public String icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0.35f, 0f, 0.7f); }
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 100); }
 	};
@@ -385,7 +437,7 @@ public enum Talent {
 			return secondUse && cooldown() > 14f;
 		}
 
-		public int icon() { return BuffIndicator.TIME; }
+		public String icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) {
 			if (hasSecondUse()) icon.hardlight(0.85f, 0f, 1.0f);
 			else                icon.hardlight(0.35f, 0f, 0.7f);
@@ -407,7 +459,7 @@ public enum Talent {
 	public static class DeadlyFollowupTracker extends FlavourBuff{
 		public int object;
 		{ type = Buff.buffType.POSITIVE; }
-		public int icon() { return BuffIndicator.INVERT_MARK; }
+		public String icon() { return BuffIndicator.INVERT_MARK; }
 		public void tintIcon(Image icon) { icon.hardlight(0.5f, 0f, 1f); }
 		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
 		private static final String OBJECT    = "object";
@@ -424,7 +476,7 @@ public enum Talent {
 	}
 	public static class PreciseAssaultTracker extends FlavourBuff{
 		{ type = buffType.POSITIVE; }
-		public int icon() { return BuffIndicator.INVERT_MARK; }
+		public String icon() { return BuffIndicator.INVERT_MARK; }
 		public void tintIcon(Image icon) { icon.hardlight(1f, 1f, 0.0f); }
 		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
 	};
@@ -448,7 +500,7 @@ public enum Talent {
 	};
 	public static class CombinedLethalityTriggerTracker extends FlavourBuff{
 		{ type = buffType.POSITIVE; }
-		public int icon() { return BuffIndicator.CORRUPT; }
+		public String icon() { return BuffIndicator.CORRUPT; }
 		public void tintIcon(Image icon) { icon.hardlight(0.6f, 0.15f, 0.6f); }
 		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
 	};
@@ -459,43 +511,41 @@ public enum Talent {
 	public static class CounterAbilityTacker extends FlavourBuff{};
 
 	public static class HIGHGRSS_SPEED extends FlavourBuff{
-		public int icon() { return BuffIndicator.HASTE;}
+		public String icon() { return BuffIndicator.HASTE;}
 		public void tintIcon(Image icon) { icon.hardlight(0xFfa500);
 		}
 	};
-	int icon;
 	int maxPoints;
 
 	// tiers 1/2/3/4 start at levels 2/7/13/21
 	public static int[] tierLevelThresholds = new int[]{0, 2, 7, 13, 21, 31};
 
-	Talent( int icon ){
-		this(icon, 2);
+	Talent(){
+		this(2);
 	}
 
-	Talent( int icon, int maxPoints ){
-		this.icon = icon;
+	Talent( int maxPoints ){
 		this.maxPoints = maxPoints;
 	}
 
-	public int icon(){
+	public String icon(){
 		if (this == HEROIC_ENERGY){
 			if (Ratmogrify.useRatroicEnergy){
-				return 218;
+				return "heroic_energy_rat";
 			}
 			HeroClass cls = Dungeon.hero != null ? Dungeon.hero.heroClass : GamesInProgress.selectedClass;
 			switch (cls){
 				case WARRIOR: default:
-					return 26;
+					return "heroic_energy_warrior";
 				case MAGE:
-					return 58;
+					return "heroic_energy_mage";
 				case ROGUE:
-					return 90;
+					return "heroic_energy_rogue";
 				case HUNTRESS:
-					return 122;
+					return "heroic_energy_huntress";
 			}
 		} else {
-			return icon;
+			return name().toLowerCase(Locale.ROOT);
 		}
 	}
 
@@ -613,6 +663,7 @@ public enum Talent {
 	public static class NatureBerriesDropped extends CounterBuff{{revivePersists = true;}};
 
 	public static void onFoodEaten( Hero hero, float foodVal, Item foodSource ){
+		EventManager.emit(new HeroEatFoodEvent(hero, foodVal, foodSource));
 		if (hero.hasTalent(HEARTY_MEAL)){
 			//3/5 HP healed, when hero is below 25% health
 			if (hero.HP <= hero.HT/4) {
@@ -726,7 +777,7 @@ public enum Talent {
 		}
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.HOLD_BREATH;
 		}
 
@@ -854,13 +905,15 @@ public enum Talent {
 			hero.buff(LingeringMagicTracker.class).detach();
 		}
 
-		if (hero.hasTalent(THIRSTY_BLADE)){
+		if (hero.hasTalent(THIRSTY_BLADE) && hero.buff(ThirstyBladeCooldown.class) == null){
 			int restoration = Math.round(dmg* hero.pointsInTalent(THIRSTY_BLADE)*0.02f);
 			if (restoration > 0) {
 				int preHp=hero.HP;
 				hero.HP = Math.min(hero.HT, hero.HP + restoration);
 				hero.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", hero.HP-preHp);
 				hero.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
+				// 添加20回合冷却
+				Buff.affect(hero, ThirstyBladeCooldown.class, 20f);
 			}
 		}
 
@@ -907,6 +960,18 @@ public enum Talent {
 			}
 		}
 
+		// 狙击4-3 通识射击：近战攻击有概率给予狙击标记
+		if (hero.hasTalent(COMMON_SHOT) && hero.subClass == HeroSubClass.SNIPER) {
+			if (!(hero.belongings.attackingWeapon() instanceof MissileWeapon)) {
+				int points = hero.pointsInTalent(COMMON_SHOT);
+				// +1: 33%, +2: 66%, +3: 100%
+				int chance = points * 33;
+				if (Random.Int(100) < chance) {
+					Buff.prolong(enemy, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SnipersMark.class, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SnipersMark.DURATION).set(enemy.id(), Dungeon.hero.belongings.weapon() != null ? Dungeon.hero.belongings.weapon().buffedLvl() : 0);
+				}
+			}
+		}
+
 		return dmg;
 	}
 
@@ -916,31 +981,43 @@ public enum Talent {
 		}*/
 	}
 
+	/**
+	 * 术士4-4 腐化怨灵：进入新层时生成怨灵
+	 */
+	public static void onNewFloor(Hero hero) {
+		if (hero.hasTalent(CORRUPT_SPIRIT)) {
+			int points = hero.pointsInTalent(CORRUPT_SPIRIT);
+			// +1/+2: 2只怨灵, +3/+4: 3只怨灵
+			int count = (points >= 3) ? 3 : 2;
+			com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CorruptSpirit.spawnAround(hero.pos, count);
+		}
+	}
+
 	public static class ProvokedAngerTracker extends FlavourBuff{
 		{ type = Buff.buffType.POSITIVE; }
-		public int icon() { return BuffIndicator.WEAPON; }
+		public String icon() { return BuffIndicator.WEAPON; }
 		public void tintIcon(Image icon) { icon.hardlight(1.43f, 1.43f, 1.43f); }
 		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
 	}
 	public static class LingeringMagicTracker extends FlavourBuff{
 		{ type = Buff.buffType.POSITIVE; }
-		public int icon() { return BuffIndicator.WEAPON; }
+		public String icon() { return BuffIndicator.WEAPON; }
 		public void tintIcon(Image icon) { icon.hardlight(1.43f, 1.43f, 0f); }
 		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
 	}
 
 	public static class DuelDanceWandTracker extends FlavourBuff{
-		public int icon() { return BuffIndicator.DUEL_DANCE;}
+		public String icon() { return BuffIndicator.DUEL_DANCE;}
 	};
 	public static class DuelDanceMissileTracker extends FlavourBuff{
-		public int icon() { return BuffIndicator.DUEL_DANCE; }
+		public String icon() { return BuffIndicator.DUEL_DANCE; }
 	};
 
 	public static class SuckerPunchTracker extends Buff{};
 	public static class FollowupStrikeTracker extends FlavourBuff{
 		public int object;
 		{ type = Buff.buffType.POSITIVE; }
-		public int icon() { return BuffIndicator.INVERT_MARK; }
+		public String icon() { return BuffIndicator.INVERT_MARK; }
 		public void tintIcon(Image icon) { icon.hardlight(0f, 0.75f, 1f); }
 		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
 		private static final String OBJECT    = "object";
@@ -990,6 +1067,9 @@ public enum Talent {
 			case RECTOR:
 				Collections.addAll(tierTalents, PRAYER_BEFORE_MEALS,MENTAL_TELEPATHY,RAIN_GRACE,DEVOTIONAL);
 				break;
+			case MOONLIGHT:
+				Collections.addAll(tierTalents, HUNTING_INTUITION, SHARPENING_EDGE, WEAPON_MASTERY, WAR_TRAMPLE);
+				break;
 		}
 		for (Talent talent : tierTalents){
 			if (replacements.containsKey(talent)){
@@ -1016,6 +1096,9 @@ public enum Talent {
 			case RECTOR:
 				Collections.addAll(tierTalents, BLESS_FOOD,SOUL_NOWIFI,LIGHT_STEP,GOD_BODY,NOHOPE_LANG);
 				break;
+			case MOONLIGHT:
+				Collections.addAll(tierTalents, MEAL_UTILIZATION, STRONG_BODY, HOLY_SPRING, TRIPLE_INSURANCE, CATAPULT_START);
+				break;
 		}
 		for (Talent talent : tierTalents){
 			if (replacements.containsKey(talent)){
@@ -1041,6 +1124,9 @@ public enum Talent {
 				break;
 			case RECTOR:
 				Collections.addAll(tierTalents, ACT_GODPROGRESS, SMART_BLESSING);
+				break;
+			case MOONLIGHT:
+				Collections.addAll(tierTalents, SWORD_SHIELD_KNIGHT, WHEELCHAIR_CRASH);
 				break;
 		}
 		for (Talent talent : tierTalents){
@@ -1103,6 +1189,15 @@ public enum Talent {
 			case DEAD_KNIGHT:
 				Collections.addAll(tierTalents,BLACK_LOVE,DEAD_POWER,EXP_IMPOTION);
 				break;
+			case LITTLE_KNIGHT:
+				Collections.addAll(tierTalents, WONT_LOSE, WET_ENCHANT, LEFT_BOW_RAPID);
+				break;
+			case DICE_MAGE:
+				Collections.addAll(tierTalents, LEARN_SOOTHE, LEARN_LIQUOR, LEARN_OPERATE, LEARN_BLAZE, LEARN_CRUSH, LEARN_MIASMA);
+				break;
+			case JUTTE_CHAMPION:
+				Collections.addAll(tierTalents, ONE_JUTTE, IRON_QUENCH, SURPRISE_JUTTE);
+				break;
 		}
 		for (Talent talent : tierTalents){
 			talents.get(2).put(talent, 0);
@@ -1146,7 +1241,7 @@ public enum Talent {
 		//tier 4
 		switch (cls){
 			case WARRIOR: default:
-				Collections.addAll(tierTalents, IRON_MUSCLE, MOVING_DEFENSE);
+				Collections.addAll(tierTalents, IRON_MUSCLE, HIGH_DIET); // 4-2重做
 				break;
 			case ROGUE:
 				Collections.addAll(tierTalents, HIDE_IN_CROWD,DARK_ARMOR);
@@ -1163,16 +1258,19 @@ public enum Talent {
 			case RECTOR:
 				Collections.addAll(tierTalents,SUPERSTITION,VITAE_BOOST);
 				break;
+			case MOONLIGHT:
+				Collections.addAll(tierTalents, LIGHT_ETERNITY, MOON_GLORY); // 4-1/4-2重做
+				break;
 		}
 		//tier 4
 		switch (subcls){
 			case BERSERKER: default:
-				Collections.addAll(tierTalents, REVENGE_ROAR, THIRSTY_BLADE);
+				Collections.addAll(tierTalents, REVENGE_ROAR, THIRSTY_BLADE); // THIRSTY_BLADE加冷却
 
 				//GLog.p("5");
 				break;
 			case GLADIATOR:
-				Collections.addAll(tierTalents, DEFENSIVE_STRIKE, DEVASTATE);
+				Collections.addAll(tierTalents, DEFENSIVE_STRIKE, WEAPON_MASTER); // 4-4重做
 				break;
 			case ASSASSIN:
 				Collections.addAll(tierTalents, BRACE_YOURSELF,POWER_RECYCLE);
@@ -1183,18 +1281,18 @@ public enum Talent {
 				break;
 
 			case BATTLEMAGE:
-				Collections.addAll(tierTalents,MAGIC_STICK,MAGIC_WORKMAN);
+				Collections.addAll(tierTalents,WAND_DODGE, MAGIC_WORKMAN); // 4-3重做
 				break;
 			case WARLOCK:
-				Collections.addAll(tierTalents, DESPERATE_POWER,GHOST_ROOT);
+				Collections.addAll(tierTalents, DESPERATE_POWER, CORRUPT_SPIRIT); // 4-4重做
 				break;
 
 			case SNIPER:
-				Collections.addAll(tierTalents, BOW_DULES,STORM_ATTACK);
+				Collections.addAll(tierTalents, COMMON_SHOT, STORM_ATTACK); // 4-3重做
 				break;
 
 			case WARDEN:
-				Collections.addAll(tierTalents, MEDART_SPECIALIST, LAND_HEART);
+				Collections.addAll(tierTalents, MORE_DARTS, GRASS_VISION); // 4-3/4-4重做
 				break;
 
 			case REDCARDINAL:
@@ -1206,6 +1304,18 @@ public enum Talent {
 				break;
 
 			case DEAD_KNIGHT:
+				Collections.addAll(tierTalents,ERROR);
+				break;
+
+			case LITTLE_KNIGHT:
+				Collections.addAll(tierTalents, SHIELD_POKE, KNIGHT_SPIRIT); // 4-3/4-4重做
+				break;
+
+			case DICE_MAGE:
+				Collections.addAll(tierTalents, SPELL_EMPOWER, EGG_BASKET); // 4-3/4-4重做
+				break;
+
+			case JUTTE_CHAMPION:
 				Collections.addAll(tierTalents,ERROR);
 				break;
 		}

@@ -279,7 +279,7 @@ public class CloakOfShadows extends Artifact {
 		int turnsToCost = 0;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.INVISIBLE;
 		}
 

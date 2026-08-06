@@ -46,6 +46,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.DeviloonSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
@@ -152,7 +153,11 @@ public class Deviloon extends Mob {
         if (blastCooldown > 0) {
             return super.doAttack(enemy);
         } else if (!blastCharged){
-            ((DeviloonSprite)sprite).charge( enemy.pos );
+            if (sprite instanceof DeviloonSprite) {
+                ((DeviloonSprite)sprite).charge( enemy.pos );
+            } else if (sprite instanceof SnakeSprite) {
+                ((SnakeSprite)sprite).charge( enemy.pos );
+            }
             spend( attackDelay() );
             blastCharged = true;
             return true;
@@ -530,7 +535,7 @@ public class Deviloon extends Mob {
             dropsDownHeap = true;
             unique = true;
             fuse = new Fuse();
-            image = ItemSpriteSheet.DARTS+13;
+            image = ItemSpriteSheet.DEVILOON_ITEM;
         }
 
         public BlastRune set_pos(int pos){

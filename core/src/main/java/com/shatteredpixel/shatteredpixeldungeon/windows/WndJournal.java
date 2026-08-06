@@ -21,7 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -280,7 +279,7 @@ public class WndJournal extends WndTabbed {
 		private RedButton[] pageButtons;
 		private static final int NUM_BUTTONS = 9;
 
-		private static final int[] sprites = {
+		private static final String[] sprites = {
 				ItemSpriteSheet.SEED_HOLDER,
 				ItemSpriteSheet.STONE_HOLDER,
 				ItemSpriteSheet.FOOD_HOLDER,
@@ -792,9 +791,8 @@ public class WndJournal extends WndTabbed {
 						sprite.frame(frame);
 					}
 
-					if (item.icon != -1) {
-						secondIcon = new Image(Assets.Sprites.ITEM_ICONS);
-						secondIcon.frame(ItemSpriteSheet.Icons.film.get(item.icon));
+					if (item.icon != null) {
+						secondIcon = ItemSpriteSheet.Icons.image(item.icon);
 					}
 				}
 

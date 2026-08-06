@@ -24,7 +24,9 @@ package com.shatteredpixel.shatteredpixeldungeon.scenes;
 import com.badlogic.gdx.Input;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BadgeBanner;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -161,6 +163,9 @@ public class PixelScene extends Scene {
 				Messages.lang() == Languages.JAPANESE){
 			renderedTextPageSize *= 2;
 		}
+		Game.platform.setTannFontMode(inGameScene
+				&& Dungeon.hero != null
+				&& Dungeon.hero.subClass == HeroSubClass.DICE_MAGE);
 		Game.platform.setupFontGenerators(renderedTextPageSize, SPDSettings.systemFont());
 
 		Tooltip.resetLastUsedTime();

@@ -107,6 +107,7 @@ public class PotionOfDragonsBreath extends ExoticPotion {
 									case 0:
 										curUser.spendAndNext(1f);
 										identifiedByUse = false;
+										emitDrinkEvent(curUser);
 										break;
 									case 1:
 										GameScene.selectCell( targeter );
@@ -123,6 +124,7 @@ public class PotionOfDragonsBreath extends ExoticPotion {
 				}
 				potionAlreadyUsed = true;
 				identifiedByUse = false;
+				emitDrinkEvent(curUser);
 				curUser.busy();
 				Sample.INSTANCE.play( Assets.Sounds.DRINK );
 				curUser.sprite.operate(curUser.pos, new Callback() {

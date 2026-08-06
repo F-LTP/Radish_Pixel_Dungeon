@@ -136,7 +136,7 @@ public class ScrollOfSirensSong extends ExoticScroll {
 		}
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.HEART;
 		}
 	}

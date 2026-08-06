@@ -25,7 +25,7 @@ import java.util.Set;
 public class GodsPossesion extends ArmorAbility {
 
     @Override
-    public int icon() {
+    public String icon() {
         return HeroIcon.POSSESSION;
     }
 

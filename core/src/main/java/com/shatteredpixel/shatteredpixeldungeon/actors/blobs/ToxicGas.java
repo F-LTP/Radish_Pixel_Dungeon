@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.blobs;
@@ -26,6 +26,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -48,30 +50,30 @@ public class ToxicGas extends Blob implements Hero.Doom {
 				if (cur[cell] > 0 && (ch = Actor.findChar( cell )) != null) {
 					if (!ch.isImmune(this.getClass())) {
 
-						ch.damage(damage, this);
+						ch.damage(new DamageInfo(damage, DamageType.TOXIC, null, null, this));
 					}
 				}
 			}
 		}
 	}
-	
+
 	@Override
 	public void use( BlobEmitter emitter ) {
 		super.use( emitter );
 
 		emitter.pour( Speck.factory( Speck.TOXIC ), 0.4f );
 	}
-	
+
 	@Override
 	public String tileDesc() {
 		return Messages.get(this, "desc");
 	}
-	
+
 	@Override
 	public void onDeath() {
-		
+
 		Badges.validateDeathFromGas();
-		
+
 		Dungeon.fail( this );
 		GLog.n( Messages.get(this, "ondeath") );
 	}

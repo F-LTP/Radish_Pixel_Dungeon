@@ -54,9 +54,11 @@ public class EnemyFlag extends MeleeWeapon {
         @Override
         public boolean act() {
             for (Mob mob : Dungeon.level.mobs.toArray( new Mob[0] )) {
-                if (mob.alignment != Char.Alignment.ALLY && Dungeon.level.heroFOV[mob.pos] && mob.state == mob.SLEEPING) {
-                    mob.state = mob.HUNTING;
-                    mob.beckon(mob.pos);
+                if (mob.alignment != Char.Alignment.ALLY && mob.state == mob.SLEEPING) {
+                    if (mob.fieldOfView != null && mob.fieldOfView.length > hero.pos && mob.fieldOfView[hero.pos]) {
+                        mob.state = mob.HUNTING;
+                        mob.beckon(mob.pos);
+                    }
                 }
             }
             spend( TICK );

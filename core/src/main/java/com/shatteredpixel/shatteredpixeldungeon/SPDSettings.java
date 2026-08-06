@@ -495,4 +495,211 @@ public class SPDSettings extends GameSettings {
 		return getBoolean( KEY_NORMAL, false );
 	}
 
+
+	public static final String KEY_UNLOCKITEM = "forever_unlock_item";
+
+	public static final String KEY_CURRENTHEROSKIN = "current_hero_skin";
+
+	// 1. 更新默认值，增加第 6 个英雄的数据 (0;0;0;0;0;0)
+	public static String getSkin(){
+		// 注意：这里建议不要以分号结尾，避免 split 的陷阱，或者配合 split(";", -1) 使用
+		// 这里改为 6 个 0，对应 6 个英雄
+		return getString( KEY_CURRENTHEROSKIN, "0;0;0;0;0;0");
+	}
+
+	public static int getHeroSkin(int hero){
+		String[] itemArray = getSkin().split( ";", -1 ); // 使用 -1 防止末尾空字符串丢失
+
+
+		if (hero < 0 || hero >= itemArray.length) {
+			return 0;
+		}
+
+		try {
+			return Integer.parseInt(itemArray[hero]);
+		} catch (NumberFormatException e) {
+			return 0; // 防止数据损坏导致解析失败
+		}
+	}
+
+	// 3. 重写设置皮肤的逻辑，不再使用字符位置计算，而是使用数组操作
+	public static void setHeroSkin(int hero, int skinIndex) {
+		String[] currentSkins = getSkin().split(";", -1);
+
+		// 动态扩容：如果当前数组长度不够（例如旧存档只有5个，现在要设置第6个），扩容数组
+		if (hero >= currentSkins.length) {
+			String[] newArray = new String[hero + 1];
+			System.arraycopy(currentSkins, 0, newArray, 0, currentSkins.length);
+			// 将新增的位置填充为默认值 "0"
+			for (int i = currentSkins.length; i < newArray.length; i++) {
+				newArray[i] = "0";
+			}
+			currentSkins = newArray;
+		}
+
+		// 更新指定英雄的皮肤
+		currentSkins[hero] = String.valueOf(skinIndex);
+
+		// 重新组合成字符串
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < currentSkins.length; i++) {
+			sb.append(currentSkins[i]);
+			if (i < currentSkins.length - 1) {
+				sb.append(";");
+			}
+		}
+
+		put(KEY_CURRENTHEROSKIN, sb.toString());
+	}
+
+
+	//TODO: 使用新接口替换物品解锁的旧方法
+	/*
+	 * @Breif 永久解锁物品，允许批量解锁，以","作为元素分隔符,";"作为物品分隔符
+	 * 输入格式为String itemName1,boolean allowMulti1,int itemLimit1;String itemName2,boolean allowMulti2,int itemLimit2;...
+	 * @Pramas String
+	 * @NativeName: unlockItem
+	 * @NativeFunction: void unlockItem(String)
+	 */
+	public static void unlockItem( String itemName ){
+		String[] itemArray = itemName.split( ";" );
+		StringBuilder items = new StringBuilder( unlockItem() );
+
+		for( String item : itemArray) {
+			String[] tempItem = item.split( "," );
+			if( !isItemUnlock( tempItem[0] ) ){
+				switch( tempItem.length ){
+					case 1:
+						items.append( item ).append( ",false,1;" );
+						break;
+					case 2:
+						if( tempItem[1].matches( "\\d+" ) ){
+							items.append( tempItem[0] ).append( ",false," ).append( tempItem[1] ).append( ";" );
+						}else if( tempItem[1].equals( "true" ) || tempItem[1].equals( "false" ) ){
+							items.append( item ).append( ",1;" );
+						}else {
+							continue;
+						}
+						break;
+					case 3:
+						items.append( item ).append( ";" );
+						break;
+				}
+			}
+		}
+
+		put( KEY_UNLOCKITEM, items.toString() );
+	}
+
+	/*
+	 * @Breif 永久解锁物品，第一个参数为itemName，即物品的名称；第二个参数为allowMulti，即是否允许多持该物品
+	 * @Pramas String,boolean
+	 * @NativeName: unlockItem
+	 * @NativeFunction: void unlockItem(String,boolean)
+	 */
+	public static void unlockItem( String itemName, boolean allowMulti ){
+		if( !isItemUnlock( itemName ) ){
+			StringBuilder items = new StringBuilder( unlockItem() );
+			items.append( itemName ).append( "," );
+			items.append( allowMulti ).append( ",1;" );
+			put( KEY_UNLOCKITEM, items.toString() );
+		}
+	}
+
+	/*
+	 * @Breif 永久解锁物品，第一个参数为itemName，即物品的名称；第二个参数为allowMulti，即是否允许多持该物品；第三个参数为limit，即持有该物品的上限
+	 * @Pramas String,boolean,int
+	 * @NativeName: unlockItem
+	 * @NativeFunction: void unlockItem(String,boolean,int)
+	 */
+	public static void unlockItem( String itemName, boolean allowMulti, int limit ){
+		if( !isItemUnlock( itemName ) ){
+			StringBuilder items = new StringBuilder( unlockItem() );
+			items.append( itemName ).append( "," );
+			items.append( allowMulti ).append( "," );
+			items.append( limit ).append( ";" );
+			put( KEY_UNLOCKITEM, items.toString() );
+		}
+	}
+
+	/*
+	 * @Breif 获取已解锁的物品列表，以","作为元素分隔符,";"作为物品分隔符
+	 * 输出格式为String itemName1,boolean allowMulti1,int itemLimit1;String itemName2,boolean allowMulti2,int itemLimit2;...
+	 * @Pramas
+	 * @NativeName: unlockItem
+	 * @NativeFunction: String unlockItem()
+	 */
+	public static String unlockItem(){ return getString( KEY_UNLOCKITEM, ""); }
+
+	/*
+	 * @Breif 返回目标物品是否已经解锁
+	 * @Pramas String
+	 * @NativeName: isItemUnlock
+	 * @NativeFunction: Boolean isItemUnlock(String)
+	 */
+	public static Boolean isItemUnlock( String itemName ){ return unlockItem().indexOf( itemName ) != -1; }
+
+	/*
+	 * @Breif 返回目标物品是否允许多持
+	 * @Pramas String
+	 * @NativeName: isUnlockItemAllowMulti
+	 * @NativeFunction: Boolean isUnlockItemAllowMulti(String)
+	 */
+	public static Boolean isUnlockItemAllowMulti( String itemName ){
+		if( !isItemUnlock( itemName ) ){
+			return false;
+		}
+
+		String[] items = unlockItem().split( ";" );
+		for( String item : items ){
+			if( item.indexOf( itemName ) != -1 ){
+				return Boolean.parseBoolean( item.split( "," )[1] );
+			}
+		}
+
+		return false;
+	}
+
+	/*
+	 * @Breif 返回目标物品的持有上限
+	 * @Pramas int
+	 * @NativeName: getUnlockItemLimit
+	 * @NativeFunction: int getUnlockItemLimit(String)
+	 */
+	public static int getUnlockItemLimit( String itemName ){
+		if( !isItemUnlock( itemName ) ){
+			return -1;
+		}
+
+		String[] items = unlockItem().split( ";" );
+		for( String item : items ){
+			if( item.indexOf( itemName ) != -1 ){
+				return Integer.parseInt( item.split( ",")[2] );
+			}
+		}
+
+		return -1;
+	}
+
+
+	/*
+	 * @Breif 将已解锁物品移除，允许同时移除多个物品
+	 * @Pramas String
+	 * @NativeName: removeUnlockItem
+	 * @NativeFunction: void removeUnlockItem(String)
+	 */
+	public static void removeUnlockItem( String itemName ){
+		String[] itemArray = itemName.split( ";" );
+		StringBuilder items = new StringBuilder( unlockItem() );
+
+		int index;
+		for( String target : itemArray ) {
+			if ( ( index = items.indexOf( target ) ) != -1 ) {
+				items.delete( index, index + items.indexOf( ";", index ) + 1 );
+			}
+		}
+
+		put( KEY_UNLOCKITEM, items.toString() );
+	}
+
 }

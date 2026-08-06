@@ -61,7 +61,7 @@ public abstract class ShieldBuff extends Buff {
 			if (Dungeon.hero.belongings.weapon() instanceof EndGuard) {
 				EndGuard w2 = (EndGuard) Dungeon.hero.belongings.weapon;
 				if (w2 != null) {
-					shield = (int) ( shield * ( 1.2f * ( w2.level() +1 ) ) );
+					shield += (int) ( shield * ( 0.2f * ( w2.level() +1 ) ) );
 				}
 			}
 		}

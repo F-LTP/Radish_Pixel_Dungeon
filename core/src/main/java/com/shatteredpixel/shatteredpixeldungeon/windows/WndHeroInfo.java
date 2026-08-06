@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ImpSprite;
@@ -78,6 +79,8 @@ public class WndHeroInfo extends WndTabbed {
 			case RECTOR:
 				tabIcon = new ItemSprite(ItemSpriteSheet.HOLYANKH, null);
 				break;
+			case MOONLIGHT:
+				tabIcon = new ItemSprite(ItemSpriteSheet.SNAKE_BITED_YENDOR, null);
 		}
 
 		int finalHeight = MIN_HEIGHT;
@@ -218,6 +221,11 @@ public class WndHeroInfo extends WndTabbed {
 							new BuffIcon(BuffIndicator.CORRUPT, true),
 							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 					break;
+				case MOONLIGHT:
+					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.THROWING_KNIFE),
+					new ItemSprite(ItemSpriteSheet.ARTIFACT_WHEELCHAIR),
+					new BuffIcon(BuffIndicator.CORRUPT, true),
+					new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 			}
 			for (Image im : icons) {
 				add(im);

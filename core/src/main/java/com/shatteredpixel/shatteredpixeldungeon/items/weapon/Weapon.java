@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.ElementalStrike;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.CustomWeapon;
@@ -69,6 +70,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocki
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Striking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Unstable;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Vampiric;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.WetEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CelestialSphere;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RunicBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scimitar;
@@ -117,6 +119,9 @@ abstract public class Weapon extends KindOfWeapon {
 	public Augment augment = Augment.NONE;
 	
 	private static final int USES_TO_ID = 20;
+
+	// 小骑士：无附魔武器使用的虚拟 Wet 附魔实例
+	private static final WetEnchantment WET_ENCHANT = new WetEnchantment();
 	private float usesLeftToID = USES_TO_ID;
 	private float availableUsesToID = USES_TO_ID/2f;
 	
@@ -131,6 +136,20 @@ abstract public class Weapon extends KindOfWeapon {
 	
 	@Override
 	public int proc( Char attacker, Char defender, int damage ) {
+
+		// 小骑士濡湿附魔天赋逻辑
+		if (attacker instanceof Hero && this instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon) {
+			Hero hero = (Hero) attacker;
+			if (hero.subClass == HeroSubClass.LITTLE_KNIGHT && hero.buff(MagicImmune.class) == null) {
+				int wetTalent = hero.pointsInTalent(Talent.WET_ENCHANT);
+				
+				// +1天赋：无附魔武器视为拥有濡湿
+				// +2天赋：武器始终拥有濡湿（与原有附魔叠加）
+				if (wetTalent >= 1 && (enchantment == null || wetTalent >= 2)) {
+					damage = WET_ENCHANT.proc(this, attacker, defender, damage);
+				}
+			}
+		}
 
 		if (enchantment != null && attacker.buff(MagicImmune.class) == null) {
 			damage = enchantment.proc( this, attacker, defender, damage );
@@ -328,37 +347,45 @@ abstract public class Weapon extends KindOfWeapon {
 	}
 	
 	@Override
-	public Item upgrade() {
-		return upgrade(false);
-	}
-	
-	public Item upgrade(boolean enchant ) {
-
-		if (enchant){
-			if (enchantment == null){
-				enchant(Enchantment.random());
-			}
-		} else if (enchantment != null) {
-			//chance to lose harden buff is 10/20/40/80/100% when upgrading from +6/7/8/9/10
-			if (enchantHardened){
-				if (level() >= 6 && Random.Float(10) < Math.pow(2, level()-6)){
-					enchantHardened = false;
-				}
-
-			//chance to remove curse is a static 33%
-			} else if (hasCurseEnchant()) {
-				if (Random.Int(3) == 0) enchant(null);
-
-			//otherwise chance to lose enchant is 10/20/40/80/100% when upgrading from +4/5/6/7/8
-			} else if (level() >= 4 && Random.Float(10) < Math.pow(2, level()-4)){
-				enchant(null);
-			}
+		public Item upgrade() {
+			return upgrade(false);
 		}
-		
-		cursed = false;
 
-		return super.upgrade();
-	}
+		public Item upgrade(boolean enchant ) {
+
+			if (enchant){
+				if (enchantment == null){
+					enchant(Enchantment.random());
+				}
+			} else if (enchantment != null) {
+				// 小骑士濡湿附魔+3天赋：升级不移除附魔
+				boolean wontLose = false;
+				if (Dungeon.hero != null && Dungeon.hero.subClass == HeroSubClass.LITTLE_KNIGHT) {
+					wontLose = Dungeon.hero.pointsInTalent(Talent.WET_ENCHANT) >= 3;
+				}
+			
+				if (!wontLose) {
+					//chance to lose harden buff is 10/20/40/80/100% when upgrading from +6/7/8/9/10
+					if (enchantHardened){
+						if (level() >= 6 && Random.Float(10) < Math.pow(2, level()-6)){
+							enchantHardened = false;
+						}
+
+					//chance to remove curse is a static 33%
+					} else if (hasCurseEnchant()) {
+						if (Random.Int(3) == 0) enchant(null);
+
+					//otherwise chance to lose enchant is 10/20/40/80/100% when upgrading from +4/5/6/7/8
+					} else if (level() >= 4 && Random.Float(10) < Math.pow(2, level()-4)){
+						enchant(null);
+					}
+				}
+			}
+		
+			cursed = false;
+
+			return super.upgrade();
+		}
 	
 	@Override
 	public String name() {

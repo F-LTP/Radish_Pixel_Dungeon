@@ -47,7 +47,7 @@ public enum Document {
 	HALLS_KING(ItemSpriteSheet.HALLS_PAGE, true),
 	LEGENDS_STORY(ItemSpriteSheet.LENGDS_PAGE, true);
 
-	Document( int sprite, boolean lore ){
+	Document( String sprite, boolean lore ){
 		pageIcon = null;
 		pageSprite = sprite;
 		loreDocument = lore;
@@ -55,7 +55,7 @@ public enum Document {
 
 	Document( Icons icon, boolean lore ){
 		pageIcon = icon;
-		pageSprite = 0;
+		pageSprite = null;
 		loreDocument = lore;
 	}
 
@@ -146,7 +146,7 @@ public enum Document {
 		return -1;
 	}
 
-	private int pageSprite;
+	private String pageSprite;
 	private Icons pageIcon;
 	public Image pageSprite(){
 		return pageSprite("");

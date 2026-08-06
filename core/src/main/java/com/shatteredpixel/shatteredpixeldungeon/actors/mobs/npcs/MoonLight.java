@@ -2,8 +2,10 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs;
 
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -15,7 +17,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWea
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MoonLightSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.TheCatistSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ItemButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
@@ -35,6 +39,25 @@ public class MoonLight extends NPC{
 
         properties.add(Property.IMMOVABLE);
     }
+
+    public static boolean heroIsMoonLight() {
+        return Dungeon.hero != null && Dungeon.hero.heroClass == HeroClass.MOONLIGHT;
+    }
+
+    private String getMessagePrefix() {
+        return heroIsMoonLight() ? "the_catist." : "";
+    }
+
+    @Override
+    public String name() {
+        return Messages.get(this, getMessagePrefix() + "name");
+    }
+
+    @Override
+    public String description() {
+        return Messages.get(this, getMessagePrefix() + "desc");
+    }
+
     @Override
     public void storeInBundle(Bundle bundle){
         super.storeInBundle(bundle);
@@ -64,6 +87,15 @@ public class MoonLight extends NPC{
     public boolean reset() {
         return true;
     }
+
+    // 月华去当英雄的时候 猫权主义者的猫来顶班
+    @Override
+    public CharSprite sprite() {
+        if (heroIsMoonLight()) {
+            return new TheCatistSprite();
+        }
+        return new MoonLightSprite();
+    }
     @Override
     public boolean interact(Char c){
         sprite.turnTo(pos,c.pos);
@@ -72,11 +104,13 @@ public class MoonLight extends NPC{
             return true;
         }
 
+        String prefix = getMessagePrefix();
+
         if (hastalk<2) {
-            GLog.i(Messages.get(this, "msg" + hastalk));
+            GLog.i(Messages.get(this, prefix + "msg" + hastalk));
             hastalk++;
         } else if (hastalk==2) {
-            GLog.p(Messages.get(this, "msg" + hastalk));
+            GLog.p(Messages.get(this, prefix + "msg" + hastalk));
             hastalk++;
             Game.runOnRenderThread(new Callback() {
                 @Override
@@ -115,14 +149,21 @@ public class MoonLight extends NPC{
             super();
             this.wndParent = wndParent;
 
+            String prefix = get.getMessagePrefix();
+
             IconTitle titlebar = new IconTitle();
-            titlebar.icon(new Image(new MoonLightSprite()));
-            titlebar.label(Messages.titleCase(Messages.get(this, "weapon_transform")));
+            // 根据职业选择不同的贴图
+            if (heroIsMoonLight()) {
+                titlebar.icon(new Image(new TheCatistSprite()));
+            } else {
+                titlebar.icon(new Image(new MoonLightSprite()));
+            }
+            titlebar.label(Messages.titleCase(Messages.get(this, prefix + "weapon_transform")));
             titlebar.setRect(0, 0, WIDTH, 0);
             add(titlebar);
 
             RenderedTextBlock message = PixelScene.renderTextBlock(
-                    Messages.get(this, "transform_message"), 6);
+                    Messages.get(this, prefix + "transform_message"), 6);
             message.maxWidth(WIDTH);
             message.setPos(0, titlebar.bottom() + GAP);
             add(message);
@@ -142,17 +183,17 @@ public class MoonLight extends NPC{
             );
             add(btnWeaponInput);
 
-            btnTransform = new RedButton(Messages.get(this, "transform")) {
+            btnTransform = new RedButton(Messages.get(this, prefix + "transform")) {
                 @Override
                 protected void onClick() {
                     if (btnWeaponInput.item() instanceof Weapon) {
-                        handleWeaponTransformation((Weapon) btnWeaponInput.item());
+                        handleWeaponTransformation((Weapon) btnWeaponInput.item(), get);
                         hide();
                         if (wndParent != null) {
                             wndParent.hide();
                         }
                         get.hastalk++;
-                        get.yell(Messages.get(get,"loop"));
+                        get.yell(Messages.get(get, get.getMessagePrefix() + "loop"));
                         get.die(true);
                     }
                 }
@@ -167,12 +208,12 @@ public class MoonLight extends NPC{
         /**
          * 处理武器转换逻辑：移除原武器，生成随机2阶武器
          */
-        private void handleWeaponTransformation(Weapon oldWeapon) {
+        private void handleWeaponTransformation(Weapon oldWeapon, MoonLight npc) {
             oldWeapon.detach(hero.belongings.backpack);
-            GLog.i(Messages.get(this, "weapon_removed", oldWeapon.name()));
+            GLog.i(Messages.get(this, npc.getMessagePrefix() + "weapon_removed", oldWeapon.name()));
             Weapon newWeapon = generateRandomTier2Weapon(oldWeapon);
             newWeapon.doPickUp(hero);
-            GLog.p(Messages.get(this, "new_weapon_gained", newWeapon.name()));
+            GLog.p(Messages.get(this, npc.getMessagePrefix() + "new_weapon_gained", newWeapon.name()));
         }
 
         /**
@@ -185,6 +226,8 @@ public class MoonLight extends NPC{
             } else if(newWeapon instanceof MissileWeapon){
                 newWeapon = (MissileWeapon)Generator.randomUsingDefaults(Generator.Category.MIS_T2);
             }
+            newWeapon.level = 0;
+            newWeapon.identify(false);
             ScrollOfRemoveCurse.uncurse( hero, newWeapon );
             return newWeapon;
         }

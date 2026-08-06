@@ -3,14 +3,16 @@ package com.shatteredpixel.shatteredpixeldungeon.custom.dict;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIcon;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 
 public class DictSpriteSheet {
-    public static Image createImage(int sheet){
-        if(sheet<10000) {
-            return new ItemSprite(sheet);
+    public static Image createImage(Object sheet){
+        if (sheet instanceof String) {
+            return new ItemSprite((String) sheet);
         }
-        return miscImages(sheet);
+        return miscImages((Integer) sheet);
     }
     
     public static Image miscImages(int sheet){
@@ -193,15 +195,15 @@ public class DictSpriteSheet {
             case CHASM:
                 return new Image(Assets.Environment.TILES_CAVES, 48, 48, 16, 16);
             case BUFF_POSITIVE:
-                return new Image(Assets.Interfaces.BUFFS_LARGE, 48 ,16, 16, 16);
+                return new BuffIcon(BuffIndicator.HERB_HEALING, true);
             case BUFF_NEUTRAL:
-                return new Image(Assets.Interfaces.BUFFS_LARGE, 112 ,32, 16, 16);
+                return new BuffIcon(BuffIndicator.SACRIFICE, true);
             case BUFF_NEGATIVE:
-                return new Image(Assets.Interfaces.BUFFS_LARGE, 224 ,0, 16, 16);
+                return new BuffIcon(BuffIndicator.WEAKNESS, true);
             case BUFF_AMULET_CURSE:
-                return new Image(Assets.Interfaces.BUFFS_LARGE, 176, 48, 16, 16);
+                return new BuffIcon(BuffIndicator.AMULET, true);
             case BUFF_SAC_FIRE:
-                return new Image(Assets.Interfaces.BUFFS_LARGE, 112, 32, 16, 16);
+                return new BuffIcon(BuffIndicator.SACRIFICE, true);
 
         }
         return new ItemSprite(ItemSpriteSheet.SOMETHING);

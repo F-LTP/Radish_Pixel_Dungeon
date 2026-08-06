@@ -11,7 +11,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 // 宵暗
 public class Showdarker extends LegacyItemArmor {
     {
-        image = ItemSpriteSheet.STONE_SHOCK+6;
+        image = ItemSpriteSheet.SUNLESS;
     }
 
     public Showdarker() {
@@ -52,7 +52,7 @@ public class Showdarker extends LegacyItemArmor {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.BLINDNESS;
         }
 

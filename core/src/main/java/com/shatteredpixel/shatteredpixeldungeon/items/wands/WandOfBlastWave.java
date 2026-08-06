@@ -27,10 +27,13 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfCompression;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Elastic;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
@@ -121,8 +124,23 @@ public class WandOfBlastWave extends DamageWand {
 		if (ch.properties().contains(Char.Property.BOSS)) {
 			power = (power+1)/2;
 		}
+		float damageMultiplier;
+		// 挤压之戒：对于非英雄单位增加击退距离，怪物都不会装备戒指所以不可能对英雄生效
+		if (!(ch instanceof Hero)){
+			Char attacker = Dungeon.hero;
+			// 挤压之戒：碰撞伤害倍率
+			damageMultiplier = RingOfCompression.collisionDamageMultiplier(attacker);
 
-		int dist = Math.min(trajectory.dist, power);
+			int compressionBonus = RingOfCompression.knockbackDistanceBonus(attacker);
+			if (compressionBonus > 0) {
+				power += compressionBonus;
+			}
+		} else {
+            damageMultiplier = 1;
+        }
+
+
+        int dist = Math.min(trajectory.dist, power);
 
 		boolean collided = dist == trajectory.dist;
 
@@ -156,6 +174,7 @@ public class WandOfBlastWave extends DamageWand {
 		final boolean finalCollided = collided && collideDmg;
 		final int initialpos = ch.pos;
 
+
 		Actor.add(new Pushing(ch, ch.pos, newPos, new Callback() {
 			public void call() {
 				if (initialpos != ch.pos || Actor.findChar(newPos) != null) {
@@ -166,7 +185,9 @@ public class WandOfBlastWave extends DamageWand {
 				int oldPos = ch.pos;
 				ch.pos = newPos;
 				if (finalCollided && ch.isActive()) {
-					ch.damage(Random.NormalIntRange(finalDist, 2*finalDist), new Knockback());
+					int baseDamage = Random.NormalIntRange(finalDist, 2*finalDist);
+					int boostedDamage = Math.round(baseDamage * damageMultiplier);
+					ch.damage(boostedDamage, new Knockback());
 					if (ch.isActive()) {
 						Paralysis.prolong(ch, Paralysis.class, 1 + finalDist/2f);
 					} else if (ch == Dungeon.hero){

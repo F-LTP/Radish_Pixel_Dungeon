@@ -77,7 +77,7 @@ public class Barkskin extends Buff {
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.BARKSKIN;
 	}
 

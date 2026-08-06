@@ -67,7 +67,9 @@ public class WingSword extends MeleeWeapon {
     @Override
     public ArrayList<String> actions(Hero hero) {
         ArrayList<String> actions = super.actions(hero);
-        actions.add(AC_DIVE_ATTACK);
+        if (hero.belongings.weapon() == this) {
+            actions.add(AC_DIVE_ATTACK);
+        }
         return actions;
     }
 
@@ -136,7 +138,6 @@ public class WingSword extends MeleeWeapon {
                                 Dungeon.level.occupyCell(hero);
                                 Dungeon.observe();
 
-                                hero.belongings.abilityWeapon = WingSword.this;
                                 if (enemy != null && hero.canAttack(enemy)) {
                                     hero.sprite.attack(enemy.pos, new Callback() {
                                         @Override

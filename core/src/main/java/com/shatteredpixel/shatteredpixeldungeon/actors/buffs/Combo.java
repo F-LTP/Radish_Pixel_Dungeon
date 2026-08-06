@@ -69,7 +69,7 @@ public class Combo extends Buff implements ActionIndicator.Action {
 	public int couldUseTime=0;//允许使用次数
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.COMBO;
 	}
 	//buff图标颜色
@@ -221,7 +221,7 @@ public class Combo extends Buff implements ActionIndicator.Action {
 	}
 
 	@Override
-	public int actionIcon() {
+	public String actionIcon() {
 		return HeroIcon.COMBO;
 	}
 	@Override
@@ -280,6 +280,15 @@ public class Combo extends Buff implements ActionIndicator.Action {
 	public int getComboCount(){
 		return count;
 	}
+
+	// 角斗士4-4 武器大师：设置连击数
+	public void setComboCount(int newCount) {
+		count = Math.max(0, newCount);
+		comboTime = 4f; // 重置连击计时
+		ActionIndicator.setAction(this);
+		BuffIndicator.refreshHero();
+	}
+
 	public boolean canUseMove(ComboMove move){
 		if (move == ComboMove.CRUSH && crushUsed)   return false;
 		if (move == ComboMove.PARRY && parryUsed)  return false;

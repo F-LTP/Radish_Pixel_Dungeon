@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.scenes;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Rankings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
@@ -43,6 +44,7 @@ import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Music;
+import com.watabou.utils.Bundle;
 import com.watabou.utils.GameMath;
 
 public class RankingsScene extends PixelScene {
@@ -223,7 +225,15 @@ public class RankingsScene extends PixelScene {
 			int odd = pos % 2;
 			
 			if (rec.win) {
-				shield.copy( new ItemSprite(ItemSpriteSheet.AMULET, null) );
+				// Snake Bite challenge: use special amulet sprite
+				String amuletImage = ItemSpriteSheet.AMULET;
+				if (rec.gameData != null) {
+					int challenges = rec.gameData.getInt(Rankings.CHALLENGES);
+					if ((challenges & Challenges.SNAKE_BITE) != 0) {
+						amuletImage = ItemSpriteSheet.SNAKE_BITED_YENDOR;
+					}
+				}
+				shield.copy( new ItemSprite(amuletImage, null) );
 				position.hardlight( TEXT_WIN[odd] );
 				desc.hardlight( TEXT_WIN[odd] );
 				depth.hardlight( TEXT_WIN[odd] );
@@ -244,7 +254,15 @@ public class RankingsScene extends PixelScene {
 				}
 
 				if (rec.ascending){
-					shield.copy( new ItemSprite(ItemSpriteSheet.AMULET, null) );
+					// Snake Bite challenge: use special amulet sprite for ascending
+					String amuletImage = ItemSpriteSheet.AMULET;
+					if (rec.gameData != null) {
+						int challenges = rec.gameData.getInt(Rankings.CHALLENGES);
+						if ((challenges & Challenges.SNAKE_BITE) != 0) {
+							amuletImage = ItemSpriteSheet.SNAKE_BITED_YENDOR;
+						}
+					}
+					shield.copy( new ItemSprite(amuletImage, null) );
 					shield.hardlight(0.4f, 0.4f, 0.7f);
 				}
 

@@ -38,6 +38,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branch;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
@@ -113,7 +115,12 @@ public abstract class RegularLevel extends Level {
 				r.connected.clear();
 			}
 			rooms = builder.build((ArrayList<Room>)initRooms.clone());
-		} while (rooms == null);
+		} while (rooms == null && !Thread.currentThread().isInterrupted());
+		
+		// 如果线程被中断，返回 false 表示构建失败
+		if (Thread.currentThread().isInterrupted()) {
+			return false;
+		}
 		
 		return painter().paint(this, rooms);
 		
@@ -122,7 +129,20 @@ public abstract class RegularLevel extends Level {
 	protected ArrayList<Room> initRooms() {
 		ArrayList<Room> initRooms = new ArrayList<>();
 		initRooms.add(roomEntrance = EntranceRoom.createEntrance());
-		initRooms.add(roomExit = ExitRoom.createExit());
+
+		// 检查是否需要生成出口房间
+		// 主线总是需要出口；支线只有还有下一层时才需要
+		boolean needExit = true;
+		if (!Dungeon.branchId.equals(Branches.MAIN)) {
+			Branch branch = Branches.get(Dungeon.branchId);
+			needExit = branch != null && branch.hasMoreDepth(Dungeon.depth);
+		}
+
+		if (needExit) {
+			initRooms.add(roomExit = ExitRoom.createExit());
+		} else {
+			roomExit = null;
+		}
 
 		// 计算当前区域（每5层为一个区域）
 		int region = (Dungeon.depth - 1) / 5 + 1;
@@ -905,8 +925,10 @@ public abstract class RegularLevel extends Level {
 				if (t.type == LevelTransition.Type.REGULAR_EXIT && roomEntrance.inside(t.center())){
 					set(t.centerCell, Terrain.ENTRANCE, this);
 					t.type = LevelTransition.Type.REGULAR_ENTRANCE;
+					t.direction = LevelTransition.Direction.UP;
+					t.linkId = LevelTransition.regularLinkId(Dungeon.branchId, Dungeon.depth - 1);
+					t.destBranch = Dungeon.branchId;
 					t.destDepth = Dungeon.depth-1;
-					t.destType =  LevelTransition.Type.REGULAR_EXIT;
 				}
 			}
 		}
@@ -916,8 +938,10 @@ public abstract class RegularLevel extends Level {
 				if (t.type == LevelTransition.Type.REGULAR_ENTRANCE && roomExit.inside(t.center())){
 					set(t.centerCell, Terrain.EXIT, this);
 					t.type = LevelTransition.Type.REGULAR_EXIT;
+					t.direction = LevelTransition.Direction.DOWN;
+					t.linkId = LevelTransition.regularLinkId(Dungeon.branchId, Dungeon.depth);
+					t.destBranch = Dungeon.branchId;
 					t.destDepth = Dungeon.depth+1;
-					t.destType =  LevelTransition.Type.REGULAR_ENTRANCE;
 				}
 			}
 		}

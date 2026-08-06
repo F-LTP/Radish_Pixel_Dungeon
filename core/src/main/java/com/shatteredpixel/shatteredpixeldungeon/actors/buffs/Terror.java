@@ -50,7 +50,7 @@ public class Terror extends FlavourBuff {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.TERROR;
 	}
 

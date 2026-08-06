@@ -47,7 +47,7 @@ public abstract class ChampionEnemy extends Buff {
 	protected int color;
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.CORRUPT;
 	}
 

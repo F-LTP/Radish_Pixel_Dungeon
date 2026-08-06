@@ -94,6 +94,7 @@ public class PotionOfMastery extends ExoticPotion {
 							case 0:
 								curUser.spendAndNext(1f);
 								identifiedByUse = false;
+								emitDrinkEvent(curUser);
 								break;
 							case 1:
 								GameScene.selectItem(itemSelector);
@@ -120,6 +121,7 @@ public class PotionOfMastery extends ExoticPotion {
 					curItem.detach(curUser.belongings.backpack);
 				}
 				identifiedByUse = false;
+				emitDrinkEvent(curUser);
 
 				if (!anonymous && Random.Float() < talentChance){
 					Talent.onPotionUsed(curUser, curUser.pos, talentFactor);

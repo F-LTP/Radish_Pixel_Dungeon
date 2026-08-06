@@ -1,0 +1,93 @@
+def atlasAssets = file('core/src/main/assets')
+def atlasJava = file('core/src/main/java/com/shatteredpixel/shatteredpixeldungeon')
+
+def atlasTargets = [
+        [directory: new File(atlasAssets, 'sprites/items'), exact: false],
+        [directory: new File(atlasAssets, 'interfaces/talents'), exact: true],
+        [directory: new File(atlasAssets, 'interfaces/buffs/small'), exact: true],
+        [directory: new File(atlasAssets, 'interfaces/buffs/large'), exact: true]
+]
+
+def javaStringConstants = { File sourceFile, String before = null ->
+    def source = sourceFile.getText('UTF-8')
+    if (before != null) {
+        source = source.split(java.util.regex.Pattern.quote(before), 2)[0]
+    }
+
+    def names = [] as Set
+    def matcher = source =~ /public\s+static\s+final\s+String\s+[A-Z][A-Z0-9_]*\s*=\s*"([a-z0-9_]+)"/
+    matcher.each { names.add(it[1]) }
+    return names
+}
+
+def talentNames = { File sourceFile ->
+    def source = sourceFile.getText('UTF-8')
+    def body = source.split('public enum Talent \\{', 2)[1].split('ERROR;', 2)[0]
+    body = body.replaceAll(/(?s)\/\*.*?\*\/|\/\/[^\n]*/, '')
+
+    def names = [] as Set
+    def matcher = body =~ /(?m)\b([A-Z][A-Z0-9_]*)(?:\(\d+\))?\s*(?=,|$)/
+    matcher.each { names.add(it[1].toLowerCase(Locale.ROOT)) }
+    names.addAll([
+            'error',
+            'developing',
+            'heroic_energy_warrior',
+            'heroic_energy_mage',
+            'heroic_energy_rogue',
+            'heroic_energy_huntress',
+            'heroic_energy_rat'
+    ])
+    return names
+}
+
+tasks.register('generateRuntimeAtlasManifests') {
+    group = 'build setup'
+    description = 'Generates and validates runtime-atlas manifests from PNG resources.'
+
+    atlasTargets.each { target ->
+        inputs.files(fileTree(target.directory) { include '*.png' })
+        outputs.file(new File(target.directory, 'manifest.txt'))
+    }
+    inputs.files(
+            new File(atlasJava, 'sprites/ItemSpriteSheet.java'),
+            new File(atlasJava, 'actors/hero/Talent.java'),
+            new File(atlasJava, 'ui/BuffIndicator.java')
+    )
+
+    doLast {
+        def itemNames = javaStringConstants(
+                new File(atlasJava, 'sprites/ItemSpriteSheet.java'),
+                'public static class Icons'
+        )
+        def requiredTalentNames = talentNames(new File(atlasJava, 'actors/hero/Talent.java'))
+        def buffNames = javaStringConstants(new File(atlasJava, 'ui/BuffIndicator.java'))
+        def requiredNames = [itemNames, requiredTalentNames, buffNames, buffNames]
+
+        atlasTargets.eachWithIndex { target, index ->
+            def pngFiles = fileTree(target.directory) { include '*.png' }.files.sort { it.name }
+            def invalidNames = pngFiles.findAll { !(it.name ==~ /[a-z0-9_]+\.png/) }*.name
+            if (!invalidNames.isEmpty()) {
+                throw new GradleException("Invalid runtime-atlas filenames in ${target.directory}: ${invalidNames}")
+            }
+
+            def pngNames = pngFiles.collect { it.name.substring(0, it.name.length() - 4) } as Set
+            def missing = (requiredNames[index] - pngNames).sort()
+            if (!missing.isEmpty()) {
+                throw new GradleException("Missing runtime-atlas PNGs in ${target.directory}: ${missing}")
+            }
+
+            if (target.exact) {
+                def unexpected = (pngNames - requiredNames[index]).sort()
+                if (!unexpected.isEmpty()) {
+                    throw new GradleException("Unexpected runtime-atlas PNGs in ${target.directory}: ${unexpected}")
+                }
+            }
+
+            def content = pngFiles.collect { it.name }.join('\n') + '\n'
+            def manifest = new File(target.directory, 'manifest.txt')
+            if (!manifest.exists() || manifest.getText('UTF-8') != content) {
+                manifest.setText(content, 'UTF-8')
+            }
+        }
+    }
+}

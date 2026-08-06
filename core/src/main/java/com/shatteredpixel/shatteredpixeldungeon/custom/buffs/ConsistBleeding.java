@@ -124,7 +124,7 @@ public class ConsistBleeding extends Buff{
     }
 
     @Override
-    public int icon(){
+    public String icon() {
         return BuffIndicator.BLEEDING;
     }
 

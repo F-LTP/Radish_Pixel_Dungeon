@@ -93,7 +93,7 @@ public class FireImbue extends Buff {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.IMBUE;
 	}
 

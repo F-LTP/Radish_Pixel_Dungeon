@@ -35,6 +35,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.VitaeBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.Soulstaker;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
+import com.shatteredpixel.shatteredpixeldungeon.events.ReadScrollEvent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -86,7 +88,7 @@ public abstract class Scroll extends Item {
 	public static void clearLabels(){
 		handler = null;
 	}
-	private static final LinkedHashMap<String, Integer> runes = new LinkedHashMap<String, Integer>() {
+	private static final LinkedHashMap<String, String> runes = new LinkedHashMap<String, String>() {
 		{
 			put("KAUNAN",ItemSpriteSheet.SCROLL_KAUNAN);
 			put("SOWILO",ItemSpriteSheet.SCROLL_SOWILO);
@@ -259,7 +261,10 @@ public abstract class Scroll extends Item {
 		curUser.busy();
 		((HeroSprite)curUser.sprite).read();
 
+		// TheCatist 2026/07/21 无序魔典的卷轴使用是anonymous不会触发天赋
 		if (!anonymous) {
+			// 发射阅读卷轴事件
+			EventManager.emit(new ReadScrollEvent((Hero)curUser, this));
 			Catalog.countUse(getClass());
 			if (Random.Float() < talentChance) {
 				Talent.onScrollUsed(curUser, curUser.pos, talentFactor);
@@ -273,6 +278,9 @@ public abstract class Scroll extends Item {
 		curUser.spend( TIME_TO_READ );
 		curUser.busy();
 		((HeroSprite)curUser.sprite).read();
+
+		// 发射阅读卷轴事件
+		EventManager.emit(new ReadScrollEvent((Hero)curUser, this));
 
 		/*if (curUser.hasTalent(Talent.SPELL_QUEUE)){
 			Buff.affect(curUser, ScrollEmpower.class).reset();

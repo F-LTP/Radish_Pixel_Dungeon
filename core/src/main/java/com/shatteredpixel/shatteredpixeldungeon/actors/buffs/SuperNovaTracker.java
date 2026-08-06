@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -44,7 +45,7 @@ public class SuperNovaTracker extends Buff {
 
     public int pos;
     private int depth = Dungeon.depth;
-    private int branch = Dungeon.branch;
+    private String branchId = Dungeon.branchId;
 
     private int turnsLeft = 10;
     public boolean harmsAllies = true;
@@ -57,7 +58,7 @@ public class SuperNovaTracker extends Buff {
     @Override
     public boolean act() {
 
-        if (branch != Dungeon.branch || depth != Dungeon.depth){
+        if (!branchId.equals(Dungeon.branchId) || depth != Dungeon.depth){
             spend(TICK);
             return true;
         }
@@ -138,7 +139,7 @@ public class SuperNovaTracker extends Buff {
 
     @Override
     public void fx(boolean on) {
-        if (on && depth == Dungeon.depth && branch == Dungeon.branch
+        if (on && depth == Dungeon.depth && branchId.equals(Dungeon.branchId)
                 && (halo == null || halo.parent == null)){
             halo = new NovaVFX();
             PointF p = DungeonTilemap.raisedTileCenterToWorld(pos);
@@ -153,7 +154,7 @@ public class SuperNovaTracker extends Buff {
 
     public static final String POS = "pos";
     public static final String DEPTH = "depth";
-    public static final String BRANCH = "branch";
+    public static final String BRANCH_ID = "branch_id";
 
     public static final String LEFT = "left";
     public static final String HARMS_ALLIES = "harms_allies";
@@ -163,7 +164,7 @@ public class SuperNovaTracker extends Buff {
         super.storeInBundle(bundle);
         bundle.put(POS, pos);
         bundle.put(DEPTH, depth);
-        bundle.put(BRANCH, branch);
+        bundle.put(BRANCH_ID, branchId);
         bundle.put(LEFT, turnsLeft);
         bundle.put(HARMS_ALLIES, harmsAllies);
     }
@@ -173,7 +174,7 @@ public class SuperNovaTracker extends Buff {
         super.restoreFromBundle(bundle);
         pos = bundle.getInt(POS);
         depth = bundle.getInt(DEPTH);
-        branch = bundle.getInt(BRANCH);
+		branchId = bundle.getString(BRANCH_ID);
         turnsLeft = bundle.getInt(LEFT);
         harmsAllies = bundle.getBoolean(HARMS_ALLIES);
     }

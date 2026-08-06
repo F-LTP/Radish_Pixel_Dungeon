@@ -46,7 +46,7 @@ public class KillBoatSwordWaitBuff extends Buff {
     }
 
     @Override
-    public int icon() {
+    public String icon() {
         return BuffIndicator.ARMOR;
     }
 

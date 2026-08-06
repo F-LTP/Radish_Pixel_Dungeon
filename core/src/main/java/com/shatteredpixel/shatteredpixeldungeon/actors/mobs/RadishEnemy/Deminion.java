@@ -358,7 +358,7 @@ public class Deminion extends Mob {
             announced = true;
         }
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.VULNERABLE;
         }
         @Override

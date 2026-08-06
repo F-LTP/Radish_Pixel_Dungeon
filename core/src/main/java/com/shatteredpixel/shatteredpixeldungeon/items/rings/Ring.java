@@ -74,7 +74,7 @@ public class Ring extends KindofMisc {
 		handler = null;
 	}
 
-	private static final LinkedHashMap<String, Integer> gems = new LinkedHashMap<String, Integer>() {
+	private static final LinkedHashMap<String, String> gems = new LinkedHashMap<String, String>() {
 		{
 			put("garnet", ItemSpriteSheet.RING_GARNET);
 			put("ruby", ItemSpriteSheet.RING_RUBY);
@@ -90,6 +90,9 @@ public class Ring extends KindofMisc {
 			put("diamond", ItemSpriteSheet.RING_DIAMOND);
 			put("coral", ItemSpriteSheet.RING_CORAL);
 			put("seed", ItemSpriteSheet.RING_PEARL);
+			put("jade", ItemSpriteSheet.RING_GARNET);
+			put("amber", ItemSpriteSheet.RING_RUBY);
+			put("ivory", ItemSpriteSheet.RING_TOPAZ);
 		}
 	};
 
@@ -359,7 +362,7 @@ public class Ring extends KindofMisc {
 	@Override
 	public int buffedLvl() {
 		int lvl = super.buffedLvl();
-		if (Dungeon.hero != null){
+		if (Dungeon.hero != null && hero.belongings.contains(this)){
 			if (hero.buff(EnhancedRings.class) != null) {
 				lvl++;
 			}

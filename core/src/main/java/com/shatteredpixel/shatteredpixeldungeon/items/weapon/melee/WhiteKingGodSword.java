@@ -18,7 +18,7 @@ public class WhiteKingGodSword extends MeleeWeapon {
 
     {
         tier = 3;
-        image = ItemSpriteSheet.DARTS+19;
+        image = ItemSpriteSheet.WHITE_KING_GOD_SWORD;
     }
 
     @Override
@@ -58,10 +58,10 @@ public class WhiteKingGodSword extends MeleeWeapon {
             for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
                 if (Dungeon.level.heroFOV[mob.pos] && mob.alignment == Char.Alignment.ENEMY && !mob.eyeAttack) {
                     if (Dungeon.hero.belongings.weapon instanceof WhiteKingGodSword) {
-                        WhiteKingGodSword weapon = (WhiteKingGodSword) Dungeon.hero.belongings.weapon;
-                        int vault_damage = (int) (weapon.damageRoll(Dungeon.hero) * 0.6f);
+                    			WhiteKingGodSword weapon = (WhiteKingGodSword) Dungeon.hero.belongings.weapon;
+                    			int vault_damage = (int) (weapon.damageRoll(Dungeon.hero) * 0.6f);
 
-                        int damage = Math.round(vault_damage * (weapon.augment == Augment.DAMAGE ? 1.5f : (weapon.augment == Augment.SPEED ? 0.7f : 1f)) + 0.1f * weapon.level());
+                    			int damage = Math.round(vault_damage * (weapon.augment == Augment.DAMAGE ? 1.5f : (weapon.augment == Augment.SPEED ? 0.7f : 1f)) + 0.1f * weapon.buffedLvl());
 
                         Buff.affect(mob, Paralysis.class, 100f);
                         ((MissileSprite)target.sprite.parent.recycle( MissileSprite.class )).resetFromAbove(mob,mob.pos, new WKNOR(), new Callback() {
@@ -83,14 +83,14 @@ public class WhiteKingGodSword extends MeleeWeapon {
 
 
     public String desc() {
-        String s;
-        if(Dungeon.hero != null){
-            int min = Math.round(((min() * 0.6f) * (augment == Augment.DAMAGE ? 1.5f : (augment == Augment.SPEED ? 0.7f : 1f))) + 0.1f * level());
-            int max = Math.round(((max() * 0.6f) * (augment == Augment.DAMAGE ? 1.5f : (augment == Augment.SPEED ? 0.7f : 1f))) + 0.1f * level());
-            s = Messages.get(this, "desc", min,max);
-        } else {
-            s = Messages.get(this, "desc", 0,0);
-        }
+    		String s;
+    		if(Dungeon.hero != null){
+    			int min = Math.round(((min() * 0.6f) * (augment == Augment.DAMAGE ? 1.5f : (augment == Augment.SPEED ? 0.7f : 1f))) + 0.1f * buffedLvl());
+    			int max = Math.round(((max() * 0.6f) * (augment == Augment.DAMAGE ? 1.5f : (augment == Augment.SPEED ? 0.7f : 1f))) + 0.1f * buffedLvl());
+    			s = Messages.get(this, "desc", min,max);
+    		} else {
+    			s = Messages.get(this, "desc", 0,0);
+    		}
        
         return s;
     }

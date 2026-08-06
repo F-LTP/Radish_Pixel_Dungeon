@@ -59,10 +59,10 @@ public class Rlyeh extends MeleeWeapon {
         String desc;
 
         if(isIdentified()){
-            desc = Messages.get(this, "desc",Math.min(15+3*level(),100));
-        } else {
-            desc = Messages.get(this, "normal_desc",15);
-        }
+        			desc = Messages.get(this, "desc",Math.min(15+3*buffedLvl(),100));
+        		} else {
+        			desc = Messages.get(this, "normal_desc",15);
+        		}
 
         return desc;
     }
@@ -80,8 +80,8 @@ public class Rlyeh extends MeleeWeapon {
             if(hero.belongings.weapon instanceof Rlyeh)
                 w2 = (Rlyeh) hero.belongings.weapon;
             if(w2 != null){
-                w2.chance = 0.15f + 0.03f * w2.level();
-            }
+            			w2.chance = 0.15f + 0.03f * w2.buffedLvl();
+            		}
             spend( TICK );
             return true;
         }

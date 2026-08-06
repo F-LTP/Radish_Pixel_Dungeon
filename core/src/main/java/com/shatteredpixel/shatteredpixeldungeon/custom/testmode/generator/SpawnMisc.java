@@ -1,5 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator;
 
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
@@ -368,7 +370,7 @@ public class SpawnMisc extends TestItem {
         }
     }
 
-    private int idToCategoryImage(int selected){
+    private String idToCategoryImage(int selected){
         switch (selected){
             case 0: return ItemSpriteSheet.POTION_AZURE;
             case 1: return ItemSpriteSheet.EXOTIC_CRIMSON;
@@ -505,8 +507,7 @@ public class SpawnMisc extends TestItem {
                         super.onClick();
                     }
                 };
-                Image im =  new Image(Assets.Sprites.ITEMS);
-                im.frame(ItemSpriteSheet.film.get(idToCategoryImage(i)));
+                Image im = new ItemSprite(idToCategoryImage(i));
                 im.scale.set(1.0f);
                 btn.icon(im);
 
@@ -536,88 +537,74 @@ public class SpawnMisc extends TestItem {
                 };
                 switch (cateSelected){
                     case 0 :{
-                        Image im = new Image(Assets.Sprites.ITEM_ICONS);
-                        im.frame(ItemSpriteSheet.Icons.film.get(Objects.requireNonNull(Reflection.newInstance(potionList.get(i))).icon));
+						Image im = ItemSpriteSheet.Icons.image(Objects.requireNonNull(Reflection.newInstance(potionList.get(i))).icon);
                         im.scale.set(1.6f);
                         btn.icon(im);
                     } break;
                     case 1:{
-                        Image im = new Image(Assets.Sprites.ITEM_ICONS);
-                        im.frame(ItemSpriteSheet.Icons.film.get(Objects.requireNonNull(Reflection.newInstance(exoticPotionList.get(i))).icon));
+						Image im = ItemSpriteSheet.Icons.image(Objects.requireNonNull(Reflection.newInstance(exoticPotionList.get(i))).icon);
                         im.scale.set(1.6f);
                         btn.icon(im);
                     } break;
                     case 2:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(seedList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(seedList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 3:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(dartList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(dartList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 4:{
                         Image im;
                         if(i<=11) {
-                            im = new Image(Assets.Sprites.ITEM_ICONS);
-                            im.frame(ItemSpriteSheet.Icons.film.get(Objects.requireNonNull(Reflection.newInstance(scrollList.get(i))).icon));
+							im = ItemSpriteSheet.Icons.image(Objects.requireNonNull(Reflection.newInstance(scrollList.get(i))).icon);
                             im.scale.set(1.6f);
                         }
                         else {
-                            im = new Image(Assets.Sprites.ITEMS);
-                            im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(scrollList.get(i))).image));
+                            im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(scrollList.get(i))).image);
                             im.scale.set(1.0f);
                         }
                         btn.icon(im);
                     }break;
                     case 5:{
-                        Image im = new Image(Assets.Sprites.ITEM_ICONS);
-                        im.frame(ItemSpriteSheet.Icons.film.get(Objects.requireNonNull(Reflection.newInstance(exoticScrollList.get(i))).icon));
+						Image im = ItemSpriteSheet.Icons.image(Objects.requireNonNull(Reflection.newInstance(exoticScrollList.get(i))).icon);
                         im.scale.set(1.6f);
                         btn.icon(im);
                     } break;
                     case 6:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(stoneList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(stoneList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 7:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(bombList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(bombList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 8:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(brewList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(brewList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 9: {
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(spellList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(spellList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 10: {
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(foodList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(foodList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 11:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(trList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(trList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     }break;
                     case 12: default:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(miscList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(miscList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     }

@@ -6,6 +6,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
@@ -36,12 +37,12 @@ public class WandOfShockBomb extends DamageWand {
 
     @Override
     public int min(int lvl) {
-        return 3+level();
+        return 3+buffedLvl();
     }
 
     @Override
     public int max(int lvl) {
-        return 10+level()*4;
+        return 10+buffedLvl()*4;
     }
 
     @Override
@@ -65,12 +66,12 @@ public class WandOfShockBomb extends DamageWand {
         // 创建新的爆炸区域
         ShockBombTracker tracker = Buff.affect(Dungeon.hero, ShockBombTracker.class);
         tracker.damage = damageRoll();
-        tracker.setPos(targetPos, level());
+        tracker.setPos(targetPos, buffedLvl());
     }
 
     @Override
     public void onHit(MagesStaff staff, Char attacker, Char defender, int damage) {
-        float triggerChance = 15 + (float) level() /4 + level();
+        float triggerChance = 15 + (float) buffedLvl() /4 + buffedLvl();
         triggerChance = Math.min(triggerChance, 100); // 限制最大概率为100%
 
         if (Random.Int(100) < triggerChance) {
@@ -83,7 +84,7 @@ public class WandOfShockBomb extends DamageWand {
             // 创建新的爆炸区域
             ShockBombTracker tracker = Buff.affect(Dungeon.hero, ShockBombTracker.class);
             tracker.damage = damageRoll();
-            tracker.setPos(defender.pos, level());
+            tracker.setPos(defender.pos, buffedLvl());
         }
     }
 
@@ -175,32 +176,36 @@ public class WandOfShockBomb extends DamageWand {
             // 使用相同的圆形范围
             for (int i = 0; i < PathFinder.CIRCLE5x.length; i++) {
                 int cell = pos + PathFinder.CIRCLE5x[i];
-                if (Dungeon.level.insideMap(cell)) {
-                    Char ch = Actor.findChar(cell);
-                    if (ch != null) {
-                        if (ch.alignment == Char.Alignment.ENEMY) {
-                            ch.damage(damage, new DM100.LightningBolt());
-                        }
-                        if (ch.alignment == Char.Alignment.ALLY) {
-                            int pushTarget = cell;
-                            for (int j = 0; j < 2; j++) {
-                                int nextCell = cell + PathFinder.CIRCLE5x[Random.Int(8)];
-                                if (Dungeon.level.passable[nextCell] && Actor.findChar(nextCell) == null) {
-                                    pushTarget = nextCell;
-                                }
-                            }
-                            if (pushTarget != cell) {
-                                Actor.addDelayed(new Pushing(ch, cell, pushTarget), -1);
-                                ch.pos = pushTarget;
-                            }
-                            WandOfBlastWave.BlastWave.blast(cell,2);
-                        }
-                    }
-                }
+                runExplode(damage, cell);
             }
 
             Dungeon.observe();
             GameScene.updateFog();
+        }
+
+        private static void runExplode(int damage, int cell) {
+            if (Dungeon.level.insideMap(cell)) {
+                Char ch = Actor.findChar(cell);
+                if (ch != null) {
+                    if (ch.alignment == Char.Alignment.ENEMY || (ch instanceof Mimic && ch.alignment == Char.Alignment.NEUTRAL)) {
+                        ch.damage(damage, new DM100.LightningBolt());
+                    }
+                    if (ch.alignment == Char.Alignment.ALLY) {
+                        int pushTarget = cell;
+                        for (int j = 0; j < 2; j++) {
+                            int nextCell = cell + PathFinder.CIRCLE5x[Random.Int(8)];
+                            if (Dungeon.level.passable[nextCell] && Actor.findChar(nextCell) == null) {
+                                pushTarget = nextCell;
+                            }
+                        }
+                        if (pushTarget != cell) {
+                            Actor.addDelayed(new Pushing(ch, cell, pushTarget), -1);
+                            ch.pos = pushTarget;
+                        }
+                        WandOfBlastWave.BlastWave.blast(cell,2);
+                    }
+                }
+            }
         }
 
         public int damage;
@@ -324,28 +329,7 @@ public class WandOfShockBomb extends DamageWand {
             // 使用相同的圆形范围
             for (int i = 0; i < PathFinder.CIRCLE7x.length; i++) {
                 int cell = pos + PathFinder.CIRCLE7x[i];
-                if (Dungeon.level.insideMap(cell)) {
-                    Char ch = Actor.findChar(cell);
-                    if (ch != null) {
-                        if (ch.alignment == Char.Alignment.ENEMY) {
-                            ch.damage(damage, new DM100.LightningBolt());
-                        }
-                        if (ch.alignment == Char.Alignment.ALLY) {
-                            int pushTarget = cell;
-                            for (int j = 0; j < 2; j++) {
-                                int nextCell = cell + PathFinder.CIRCLE5x[Random.Int(8)];
-                                if (Dungeon.level.passable[nextCell] && Actor.findChar(nextCell) == null) {
-                                    pushTarget = nextCell;
-                                }
-                            }
-                            if (pushTarget != cell) {
-                                Actor.addDelayed(new Pushing(ch, cell, pushTarget), -1);
-                                ch.pos = pushTarget;
-                            }
-                            WandOfBlastWave.BlastWave.blast(cell,2);
-                        }
-                    }
-                }
+                ShockBombTracker.runExplode(damage, cell);
             }
 
             Dungeon.observe();

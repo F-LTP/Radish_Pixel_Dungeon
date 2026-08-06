@@ -63,7 +63,7 @@ public class Radish extends Trinket {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.NONE;
         }
         public int critChance = 0;

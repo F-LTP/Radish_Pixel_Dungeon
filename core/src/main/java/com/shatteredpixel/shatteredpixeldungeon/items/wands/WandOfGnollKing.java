@@ -348,7 +348,7 @@ public class WandOfGnollKing extends DamageWand{
             }
 
             @Override
-            public int icon() {
+            public String icon() {
                 return BuffIndicator.NONE;
             }
         }

@@ -21,26 +21,28 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.ui;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.watabou.gltextures.AtlasFrame;
+import com.watabou.gltextures.AtlasSource;
+import com.watabou.gltextures.RuntimeAtlas;
+import com.watabou.gltextures.RuntimeAtlasRegistry;
 import com.watabou.noosa.Image;
-import com.watabou.noosa.TextureFilm;
 
 public class TalentIcon extends Image {
 
-	private static TextureFilm film;
-	private static final int SIZE = 16;
+	public static final AtlasSource ATLAS_SOURCE =
+			new AtlasSource("interfaces/talents", "developing");
+	private static final RuntimeAtlas ATLAS = RuntimeAtlasRegistry.get(ATLAS_SOURCE);
 
 	public TalentIcon(Talent talent){
 		this(talent.icon());
 	}
 
-	public TalentIcon(int icon){
-		super( Assets.Interfaces.TALENT_ICONS );
-
-		if (film == null) film = new TextureFilm(texture, SIZE, SIZE);
-
-		frame(film.get(icon));
+	public TalentIcon(String icon){
+		super();
+		AtlasFrame atlasFrame = ATLAS.frame(icon);
+		texture = atlasFrame.texture;
+		frame(atlasFrame.uv);
 	}
 
 }

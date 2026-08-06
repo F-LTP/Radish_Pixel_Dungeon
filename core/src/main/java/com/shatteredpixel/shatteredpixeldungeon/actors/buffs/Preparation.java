@@ -181,7 +181,7 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.PREPARATION;
 	}
 	
@@ -260,7 +260,7 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	}
 	
 	@Override
-	public int actionIcon() {
+	public String actionIcon() {
 		return HeroIcon.PREPARATION;
 	}
 

@@ -36,10 +36,10 @@ public class ItemStatusHandler<T extends Item> {
 
 	private Class<? extends T>[] items;
 	private LinkedHashMap<Class<? extends T>, String> itemLabels;
-	private LinkedHashMap<String, Integer> labelImages;
+	private LinkedHashMap<String, String> labelImages;
 	private LinkedHashSet<Class<? extends T>> known;
 
-	public ItemStatusHandler( Class<? extends T>[] items, HashMap<String, Integer> labelImages ) {
+	public ItemStatusHandler( Class<? extends T>[] items, HashMap<String, String> labelImages ) {
 
 		this.items = items;
 
@@ -61,7 +61,7 @@ public class ItemStatusHandler<T extends Item> {
 		}
 	}
 
-	public ItemStatusHandler( Class<? extends T>[] items, HashMap<String, Integer> labelImages, Bundle bundle ) {
+	public ItemStatusHandler( Class<? extends T>[] items, HashMap<String, String> labelImages, Bundle bundle ) {
 
 		this.items = items;
 
@@ -168,11 +168,11 @@ public class ItemStatusHandler<T extends Item> {
 		return false;
 	}
 	
-	public int image( T item ) {
+	public String image( T item ) {
 		return labelImages.get(label(item));
 	}
 	
-	public int image( Class<?extends T> itemCls ) {
+	public String image( Class<?extends T> itemCls ) {
 		return labelImages.get(label(itemCls));
 	}
 	

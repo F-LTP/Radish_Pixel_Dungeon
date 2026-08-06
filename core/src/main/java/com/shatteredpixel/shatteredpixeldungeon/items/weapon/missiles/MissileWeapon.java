@@ -30,17 +30,22 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Momentum;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.StormAttackArrow;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.TacticalThrowTalen4Battlemage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.AshKing;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RiverCrystal;
+import com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToy;
+import com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToyEffects;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
@@ -48,12 +53,15 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projec
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 abstract public class MissileWeapon extends Weapon {
 
@@ -68,6 +76,7 @@ abstract public class MissileWeapon extends Weapon {
 	}
 
 	protected boolean sticky = true;
+	private SplitShot splitShot;
 
 	public static final float MAX_DURABILITY = 100;
 	protected float durability = MAX_DURABILITY;
@@ -119,7 +128,7 @@ abstract public class MissileWeapon extends Weapon {
 	//use the parent item if this has been thrown from a parent
 	public int buffedLvl(){
 
-		if(Dungeon.hero != null){
+		if (Dungeon.hero != null && (hero.belongings.contains(this) || parent != null)) {
 			RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
 			if(riverGlass != null){
 				return super.buffedLvl() + riverGlass.level() + 1;
@@ -250,6 +259,7 @@ abstract public class MissileWeapon extends Weapon {
 	protected void onThrow( int cell ) {
 		Char enemy = Actor.findChar( cell );
 		if (enemy == null || enemy == curUser) {
+			resolveSplitProjectiles(null);
 			parent = null;
 
 			//metamorphed seer shot logic
@@ -266,7 +276,9 @@ abstract public class MissileWeapon extends Weapon {
 
 			super.onThrow( cell );
 		} else {
-			if (!curUser.shoot( enemy, this )) {
+			boolean hit = curUser.shoot(enemy, this);
+			resolveSplitProjectiles(hit ? enemy : null);
+			if (!hit) {
 				rangedMiss( cell );
 			} else {
 
@@ -284,8 +296,105 @@ abstract public class MissileWeapon extends Weapon {
 		}
 	}
 
+	public static class SplitShot {
+		private final Hero thrower;
+		private final HashMap<Integer, Integer> hitCounts = new HashMap<>();
+		private final ArrayList<Integer> pendingCells = new ArrayList<>();
+		private MissileWeapon weapon;
+		private boolean primaryResolved;
+
+		private SplitShot(Hero thrower) {
+			this.thrower = thrower;
+		}
+	}
+
+	public SplitShot launchSplitProjectiles(Hero thrower, int aimedCell) {
+		if (!TieredToyEffects.has(TieredToy.SplittingArrows.class)) return null;
+		final SplitShot shot = new SplitShot(thrower);
+		final int width = Dungeon.level.width();
+		final int height = Dungeon.level.height();
+		final int fromX = thrower.pos % width;
+		final int fromY = thrower.pos / width;
+		final int aimX = aimedCell % width;
+		final int aimY = aimedCell / width;
+		final double baseAngle = Math.atan2(aimY - fromY, aimX - fromX);
+
+		for (int direction : new int[]{-1, 1}) {
+			double angle = baseAngle + direction * Math.PI / 6d;
+			double dx = Math.cos(angle);
+			double dy = Math.sin(angle);
+			double xReach = dx > 0 ? (width - 1 - fromX) / dx : dx < 0 ? -fromX / dx : Double.MAX_VALUE;
+			double yReach = dy > 0 ? (height - 1 - fromY) / dy : dy < 0 ? -fromY / dy : Double.MAX_VALUE;
+			double reach = Math.min(xReach, yReach);
+			int endX = Math.max(0, Math.min(width - 1, fromX + (int) Math.round(dx * reach)));
+			int endY = Math.max(0, Math.min(height - 1, fromY + (int) Math.round(dy * reach)));
+			final int collision = new Ballistica(thrower.pos, endX + endY * width, Ballistica.MAGIC_BOLT).collisionPos;
+
+			((MissileSprite) thrower.sprite.parent.recycle(MissileSprite.class)).reset(
+					thrower.sprite, collision, this, () -> splitProjectileArrived(shot, collision));
+		}
+		return shot;
+	}
+
+	public void bindSplitShot(SplitShot shot) {
+		splitShot = shot;
+		if (shot != null) shot.weapon = this;
+	}
+
+	public void finishPendingSplitShot() {
+		resolveSplitProjectiles(null);
+	}
+
+	private void resolveSplitProjectiles(Char primaryTarget) {
+		if (splitShot == null) return;
+		if (primaryTarget != null) splitShot.hitCounts.put(primaryTarget.id(), 1);
+		splitShot.primaryResolved = true;
+		for (int cell : new ArrayList<>(splitShot.pendingCells)) resolveSplitProjectile(splitShot, cell);
+		splitShot.pendingCells.clear();
+		splitShot = null;
+	}
+
+	private static void splitProjectileArrived(SplitShot shot, int cell) {
+		if (!shot.primaryResolved || shot.weapon == null) {
+			shot.pendingCells.add(cell);
+		} else {
+			shot.weapon.resolveSplitProjectile(shot, cell);
+		}
+	}
+
+	private void resolveSplitProjectile(SplitShot shot, int cell) {
+		Char target = Actor.findChar(cell);
+		if (target == null || target == shot.thrower) return;
+
+		int previousHits = shot.hitCounts.containsKey(target.id()) ? shot.hitCounts.get(target.id()) : 0;
+		if (previousHits >= 2) return;
+		shot.hitCounts.put(target.id(), previousHits + 1);
+
+		try {
+			shot.thrower.belongings.thrownWeapon = this;
+			shot.thrower.attack(target, 0.75f, 0f, 1f);
+		} finally {
+			shot.thrower.belongings.thrownWeapon = null;
+		}
+	}
+
 	@Override
 	public int proc(Char attacker, Char defender, int damage) {
+		// 小骑士：投掷武器命中附加2+区域层中毒
+		if (attacker == Dungeon.hero && Dungeon.hero.subClass == HeroSubClass.LITTLE_KNIGHT) {
+			int poisonDuration = 2 + Dungeon.depth;
+			Buff.affect(defender, Poison.class).set(poisonDuration);
+		}
+
+		//索命弯刀：投武产生毒雾
+		AshKing.FatalBladeForm fatalBlade = attacker == Dungeon.hero ? Dungeon.hero.buff(AshKing.FatalBladeForm.class) : null;
+		if (fatalBlade != null) {
+			// 在目标位置生成毒雾 (250气体量)
+			Buff.affect(defender, Poison.class).set(5);
+			// 也可以在周围生成毒气blob
+			// Blob.seed(defender.pos, 250, ToxicGas.class);
+		}
+
 		if (attacker == Dungeon.hero && Random.Int(3) < Dungeon.hero.pointsInTalent(Talent.SHARED_ENCHANTMENT)){
 			if (this instanceof Dart && ((Dart) this).crossbowHasEnchant(Dungeon.hero)){
 				//do nothing

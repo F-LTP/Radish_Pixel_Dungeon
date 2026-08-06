@@ -28,8 +28,17 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroAction;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.talents.moonlight.SharpeningEdgeTalent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CancelAttackBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CancelAttackCooldown;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.KickTracker;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SnDSFX;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.JutteChampionWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Muramasa;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -40,14 +49,54 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.BArray;
 import com.watabou.utils.PathFinder;
 
+import java.util.ArrayList;
+import java.util.Objects;
+
+import static com.shatteredpixel.shatteredpixeldungeon.effects.SnDSFX.PlaySnDHitSoundVariant;
+
+
 abstract public class KindOfWeapon extends EquipableItem {
+
+	public static final String AC_SHARPENING_EDGE = "SHARPENING_EDGE";
+	public static final String AC_CONVERT_TO_JUTTE = "CONVERT_TO_JUTTE";
 
 	protected String hitSound = Assets.Sounds.HIT;
 	protected float hitSoundPitch = 1f;
-	
+
+	@Override
+	public ArrayList<String> actions(Hero hero) {
+		ArrayList<String> actions = super.actions(hero);
+		// 砥砺锋芒天赋：只有月华英雄且有天赋时显示，且仅对近战武器生效
+		if (SharpeningEdgeTalent.canUse(hero, this) && this instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon) {
+			actions.add(AC_SHARPENING_EDGE);
+		}
+		// 十手冠军：所有武器都可以转换为十手（但十手本身不能再转化）
+		if (hero.subClass == HeroSubClass.JUTTE_CHAMPION && !(this instanceof JutteChampionWeapon)) {
+			actions.add(AC_CONVERT_TO_JUTTE);
+		}
+		return actions;
+	}
+
+	@Override
+	public String actionName(String action, Hero hero) {
+		if (Objects.equals(action, AC_SHARPENING_EDGE)) {
+			return Messages.get(KindOfWeapon.class, "ac_" + action);
+		}
+		if (Objects.equals(action, AC_CONVERT_TO_JUTTE)) {
+			return Messages.get(KindOfWeapon.class, "ac_" + action);
+		}
+		return super.actionName(action, hero);
+	}
+
+
 	@Override
 	public void execute(Hero hero, String action) {
-		if (hero.subClass == HeroSubClass.CHAMPION && action.equals(AC_EQUIP)){
+		if (action.equals(AC_SHARPENING_EDGE)) {
+			usesTargeting = false;
+			SharpeningEdgeTalent.showTargetSelectionWindow(hero, this);
+		} else if (action.equals(AC_CONVERT_TO_JUTTE)) {
+			convertToJutte(hero);
+		} else if (hero.subClass == HeroSubClass.CHAMPION && action.equals(AC_EQUIP)){
 			usesTargeting = false;
 			String primaryName = Messages.titleCase(hero.belongings.weapon != null ? hero.belongings.weapon.trueName() : Messages.get(KindOfWeapon.class, "empty"));
 			String secondaryName = Messages.titleCase(hero.belongings.secondWep != null ? hero.belongings.secondWep.trueName() : Messages.get(KindOfWeapon.class, "empty"));
@@ -100,7 +149,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 	protected float timeToEquip( Hero hero ) {
 		return isSwiftEquipping ? 0f : super.timeToEquip(hero);
 	}
-	
+
 	@Override
 	public boolean doEquip( Hero hero ) {
 
@@ -121,14 +170,47 @@ abstract public class KindOfWeapon extends EquipableItem {
 			}
 		}
 
+		if (hero.heroClass == HeroClass.MOONLIGHT){
+			if (hero.buff(Talent.SwiftEquipCooldown.class) == null){
+				isSwiftEquipping = true;
+			}
+		}
+
 		detachAll( hero.belongings.backpack );
-		
+
 		if (hero.belongings.weapon == null || hero.belongings.weapon.doUnequip( hero, true )) {
-			
+
 			hero.belongings.weapon = this;
 			activate( hero );
 			Talent.onItemEquipped(hero, this);
 			updateQuickslot();
+
+			// 小骑士切换武器：给予取消攻击buff
+			if (hero.subClass == HeroSubClass.LITTLE_KNIGHT) {
+				// 检查冷却是否结束
+				if (hero.buff(CancelAttackCooldown.class) == null) {
+					Buff.affect(hero, CancelAttackBuff.class, 2f);
+					Buff.affect(hero, CancelAttackCooldown.class, CancelAttackCooldown.getDuration());
+					GLog.p(Messages.get("actors.hero.moonlight.cancel_attack_gained"));
+				}
+				// 检测踹飞技能
+				KickTracker.checkKick(hero);
+			}
+
+			// 角斗士4-4 武器大师：切换武器后连击数和攻速加成
+			if (hero.subClass == HeroSubClass.GLADIATOR && hero.hasTalent(Talent.WEAPON_MASTER)) {
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo combo = hero.buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo.class);
+				if (combo != null) {
+					int points = hero.pointsInTalent(Talent.WEAPON_MASTER);
+					// +1/+2: 连击数3, +3/+4: 连击数4
+					int comboCount = (points >= 3) ? 4 : 3;
+					combo.setComboCount(comboCount);
+					// 攻速加成持续时间: +1:2回合, +2/+3:3回合, +4:4回合
+					int duration = (points == 1) ? 2 : (points == 4) ? 4 : 3;
+					Buff.prolong(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste.class, duration);
+					GLog.p(Messages.get(Talent.class, "weapon_master_activated", comboCount, duration));
+				}
+			}
 
 			cursedKnown = true;
 			if (cursed) {
@@ -148,7 +230,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 				isSwiftEquipping = false;
 			}
 			return true;
-			
+
 		} else {
 			isSwiftEquipping = false;
 			collect( hero.belongings.backpack );
@@ -251,11 +333,11 @@ abstract public class KindOfWeapon extends EquipableItem {
 	public int damageRoll( Char owner ) {
 		return Char.combatRoll( min(), max() );
 	}
-	
+
 	public float accuracyFactor( Char owner, Char target ) {
 		return 1f;
 	}
-	
+
 	public float delayFactor( Char owner ) {
 		return 1f;
 	}
@@ -263,7 +345,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 	public int reachFactor( Char owner ){
 		return 1;
 	}
-	
+
 	public boolean canReach( Char owner, int target){
 		int reach = reachFactor(owner);
 		if (Dungeon.level.distance( owner.pos, target ) > reach){
@@ -273,9 +355,9 @@ abstract public class KindOfWeapon extends EquipableItem {
 			for (Char ch : Actor.chars()) {
 				if (ch != owner) passable[ch.pos] = false;
 			}
-			
+
 			PathFinder.buildDistanceMap(target, passable, reach);
-			
+
 			return PathFinder.distance[owner.pos] <= reach;
 		}
 	}
@@ -283,14 +365,22 @@ abstract public class KindOfWeapon extends EquipableItem {
 	public int defenseFactor( Char owner ) {
 		return 0;
 	}
-	
+
 	public int proc( Char attacker, Char defender, int damage ) {
 		return damage;
 	}
 
 	public void hitSound( float pitch ){
-		Sample.INSTANCE.play(hitSound, 1, pitch * hitSoundPitch);
+		// TheCatist 2026.7.30 武器音效在SnDUI的时候会额外变化
+		if (!SnDSFX.active()){
+			Sample.INSTANCE.play(hitSound, 1, pitch * hitSoundPitch);
+		} else {
+			PlaySnDHitSoundVariant(hitSound);
+		}
+
 	}
+
+
 
 	/**
 	 * 在攻击前调用，检查武器是否可以攻击
@@ -301,6 +391,86 @@ abstract public class KindOfWeapon extends EquipableItem {
 	 */
 	public boolean actAttack(Hero attacker, Char defender, HeroAction.Attack action) {
 		return true;
+	}
+
+	@Override
+	public String info() {
+		String info = super.info();
+		String swordShieldKnightInfo = swordShieldKnightInfo();
+		if (!swordShieldKnightInfo.equals("")) {
+			info += "\n\n" + swordShieldKnightInfo;
+		}
+		return info;
+	}
+
+	private String swordShieldKnightInfo() {
+		// 剑盾骑士天赋：显示护甲最小值提升（仅对近战武器生效）
+		if (this instanceof MeleeWeapon) {
+			if (Dungeon.hero != null && Dungeon.hero.heroClass == HeroClass.MOONLIGHT) {
+				int points = Dungeon.hero.pointsInTalent(Talent.SWORD_SHIELD_KNIGHT);
+				if (points > 0 && Dungeon.hero.belongings.armor != null) {
+					// 计算天赋加成后的护甲最小值
+					float multiplier = 1.0f + (points - 1) * 0.25f;
+					int talentArmorMin = Math.round(min() * multiplier);
+					int armorMax = Dungeon.hero.belongings.armor.DRMax();
+					int actualMin = Math.min(talentArmorMin, armorMax);
+					return Messages.get(KindOfWeapon.class, "sword_shield_knight", actualMin);
+				}
+			}
+		}
+
+		return "";
+	}
+
+	/**
+	 * 十手冠军：将当前武器转换为十手
+	 */
+	private void convertToJutte(Hero hero) {
+		// 计算阶数（基于武器等级）
+		int tier = Math.min(5, Math.max(1, level() + 1));
+		int originalLevel = level();
+
+		// 创建十手并立即鉴定
+		JutteChampionWeapon jutte = new JutteChampionWeapon(tier);
+		jutte.identify();
+
+		// 精铁淬炼天赋：让十手获得升级等级
+		if (originalLevel > 0 && hero.hasTalent(Talent.IRON_QUENCH)) {
+			jutte.level(originalLevel);
+		}
+
+		boolean converted = false;
+		boolean second = hero.belongings.secondWep == this;
+		int slot = Dungeon.quickslot.getSlot(this);
+
+		if (isEquipped(hero)) {
+			if (!doUnequip(hero, false, true)) {
+				return;
+			}
+
+			if (second) {
+				hero.belongings.secondWep = jutte;
+			} else {
+				hero.belongings.weapon = jutte;
+			}
+			jutte.activate(hero);
+			Talent.onItemEquipped(hero, jutte);
+			if (slot != -1) {
+				Dungeon.quickslot.setSlot(slot, jutte);
+			}
+			jutte.updateQuickslot();
+			converted = true;
+		} else {
+			detach(hero.belongings.backpack);
+			converted = jutte.collect();
+			if (!converted) {
+				collect(hero.belongings.backpack);
+			}
+		}
+
+		if (converted) {
+			GLog.p(Messages.get(KindOfWeapon.class, "jutte_converted", tier));
+		}
 	}
 
 }

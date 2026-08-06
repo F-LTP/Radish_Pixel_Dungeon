@@ -255,7 +255,12 @@ public class RenderedTextBlock extends Component {
 				
 				//Note that spacing currently doesn't factor in halfwidth and fullwidth characters
 				//(e.g. Ideographic full stop)
-				x -= 0.667f;
+				// 骰子法师模式下中文不减少间距，避免笔画重叠
+				if (DiceMageUI.active() && Messages.lang() == Languages.CHINESE) {
+					x += 1.33f;
+				} else {
+					x -= 0.667f;
+				}
 
 			}
 		}

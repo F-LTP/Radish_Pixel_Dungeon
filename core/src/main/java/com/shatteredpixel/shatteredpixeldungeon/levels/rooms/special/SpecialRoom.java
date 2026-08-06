@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
@@ -156,38 +157,38 @@ public abstract class SpecialRoom extends Room {
 	}
 	
 	public static SpecialRoom createRoom(){
-		if (Dungeon.depth == pitNeededDepth && Dungeon.branch == 0 ){
-			pitNeededDepth = -1;
+			if (Dungeon.depth == pitNeededDepth && Dungeon.branchId.equals(Branches.MAIN) ){
+				pitNeededDepth = -1;
 			
-			useType( PitRoom.class );
-			return new PitRoom();
+				useType( PitRoom.class );
+				return new PitRoom();
 			
-		} else if (floorSpecials.contains(LaboratoryRoom.class)) {
+			} else if (floorSpecials.contains(LaboratoryRoom.class)) {
+
+				useType(LaboratoryRoom.class);
+				return new LaboratoryRoom();
+
+			} else {
+				//TheCatist: 修复苔藓层生成跳楼房的bug
+				if (Dungeon.bossLevel(Dungeon.depth + 1) || !Dungeon.branchId.equals(Branches.MAIN)){
+					floorSpecials.remove(WeakFloorRoom.class);
+				}
+
+				//60% chance for front of queue, 30% chance for next, 10% for one after that
+				int index = Random.chances(new float[]{6, 3, 1});
+				while (index >= floorSpecials.size()) index--;
+
+				Room r = Reflection.newInstance(floorSpecials.get( index ));
+
+				if (r instanceof WeakFloorRoom){
+					pitNeededDepth = Dungeon.depth + 1;
+				}
+			
+				useType( r.getClass() );
+				return (SpecialRoom)r;
 		
-			useType(LaboratoryRoom.class);
-			return new LaboratoryRoom();
-		
-		} else {
-			
-			if (Dungeon.bossLevel(Dungeon.depth + 1)){
-				floorSpecials.remove(WeakFloorRoom.class);
 			}
-
-			//60% chance for front of queue, 30% chance for next, 10% for one after that
-			int index = Random.chances(new float[]{6, 3, 1});
-			while (index >= floorSpecials.size()) index--;
-
-			Room r = Reflection.newInstance(floorSpecials.get( index ));
-
-			if (r instanceof WeakFloorRoom){
-				pitNeededDepth = Dungeon.depth + 1;
-			}
-			
-			useType( r.getClass() );
-			return (SpecialRoom)r;
-		
 		}
-	}
 	
 	private static final String ROOMS	= "special_rooms";
 	private static final String PIT	    = "pit_needed";

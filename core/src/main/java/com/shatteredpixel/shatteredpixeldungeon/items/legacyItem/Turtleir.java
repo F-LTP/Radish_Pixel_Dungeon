@@ -17,7 +17,7 @@ import com.watabou.utils.PathFinder;
 // DoggingDog on 20250517
 public class Turtleir extends LegacyItemArmor {
     {
-        image = ItemSpriteSheet.STONE_SHOCK+5;
+        image = ItemSpriteSheet.TURTLEIR;
     }
 
     public Turtleir() {
@@ -82,7 +82,7 @@ public class Turtleir extends LegacyItemArmor {
         public static final int DURATION = 1;
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.ARMOR;
         }
 

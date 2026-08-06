@@ -125,7 +125,7 @@ public class RottenLance extends MeleeWeapon{// idea is from relic pd
             announced = true;
         }
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.ARMOR;
         }
 

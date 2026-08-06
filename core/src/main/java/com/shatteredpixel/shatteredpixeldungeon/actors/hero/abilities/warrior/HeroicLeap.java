@@ -136,7 +136,7 @@ public class HeroicLeap extends ArmorAbility {
 	public static class DoubleJumpTracker extends FlavourBuff{};
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return HeroIcon.HEROIC_LEAP;
 	}
 

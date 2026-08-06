@@ -101,7 +101,7 @@ public class MagicalSleep extends Buff {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.MAGIC_SLEEP;
 	}
 

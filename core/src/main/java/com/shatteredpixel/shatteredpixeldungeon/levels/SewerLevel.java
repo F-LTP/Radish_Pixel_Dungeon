@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SnDBGM;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
@@ -30,10 +31,12 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MoonLight;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Ripple;
 import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.SewerPainter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.BlessScrollRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MossExitRoomInMain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SmallGrassEnterRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.AlarmTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.ChillingTrap;
@@ -76,6 +79,7 @@ public class SewerLevel extends RegularLevel {
 	public static final float[] SEWER_TRACK_CHANCES = new float[]{1f, 1f, 0.5f, 0.25f, 1f, 0.5f};
 
 	public void playLevelMusic(){
+        if (SnDBGM.playLevelMusic()) return;
 		if (Ghost.Quest.active() || Statistics.amuletObtained){
 			if (Statistics.amuletObtained && Dungeon.depth == 1){
 				Music.INSTANCE.play(Assets.Music.THEME_FINALE, true);
@@ -91,12 +95,15 @@ public class SewerLevel extends RegularLevel {
 	protected ArrayList<Room> initRooms() {
 		ArrayList<Room> initRooms = super.initRooms();
 		if(Dungeon.depth == 2){
-			if(Dungeon.branch == 0){
+			if(Dungeon.branchId.equals(Branches.MAIN)){
 				initRooms.add(new SmallGrassEnterRoom());
 			}
-			if((Dungeon.branch == 2)){
+			if(Dungeon.branchId.equals(Branches.MOSS)){
 				initRooms.add(new BlessScrollRoom());
 			}
+		}
+		if (Dungeon.depth == 3 && Dungeon.branchId.equals(Branches.MAIN)) {
+			initRooms.add(new MossExitRoomInMain());
 		}
 		return initRooms;
 	}
@@ -155,10 +162,10 @@ public class SewerLevel extends RegularLevel {
 
 	@Override
 	protected void createMobs() {
-		if(Dungeon.branch == 0){
+		if(Dungeon.branchId.equals(Branches.MAIN)){
 			Ghost.Quest.spawn( this, roomExit );
 		}
-		if(Dungeon.depth == 1 ){
+		if(Dungeon.depth == 1 && Dungeon.branchId.equals(Branches.MAIN)){
 			MoonLight npc18 = new MoonLight();
 			npc18.pos = entrance()-1;
 			mobs.add(npc18);

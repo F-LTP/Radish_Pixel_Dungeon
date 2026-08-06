@@ -114,7 +114,7 @@ public class LastPrayer extends ArmorAbility {
     }
 
     @Override
-    public int icon() {
+    public String icon() {
         return HeroIcon.END_BLESS;
     }
 

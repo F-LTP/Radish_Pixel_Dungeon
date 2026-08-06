@@ -32,18 +32,18 @@ public class FogSword extends MeleeWeapon {
     }
 
     public int proc(Char attacker, Char defender, int damage) {
-        // 只有当伤害大于0时（即击中敌人）才触发效果
-        if (damage > 0) {
-            Buff.affect(attacker, ActBless.class, 2 + level());
-            if (defender instanceof Mob) {
-                Mob ks = (Mob) defender;
-                if (ks.onlyActDown) {
-                    ks.onlyActDown = false;
-                }
-            }
-        }
-        return super.proc(attacker, defender, damage);
-    }
+    		// 只有当伤害大于0时（即击中敌人）才触发效果
+    		if (damage > 0) {
+    			Buff.affect(attacker, ActBless.class, 2 + buffedLvl());
+    			if (defender instanceof Mob) {
+    				Mob ks = (Mob) defender;
+    				if (ks.onlyActDown) {
+    					ks.onlyActDown = false;
+    				}
+    			}
+    		}
+    		return super.proc(attacker, defender, damage);
+    	}
 
 
     public static class ActBless extends FlavourBuff {
@@ -56,19 +56,19 @@ public class FogSword extends MeleeWeapon {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.FOG_ROAD;
         }
 
         @Override
-        public String desc() {
-            float s = 0;
-            if(hero.belongings.weapon() instanceof FogSword) {
-                FogSword ks = (FogSword) hero.belongings.weapon;
-                s = (20 + (float) (ks.level() * 4));
-            }
-            return Messages.get(this, "desc", s , dispTurns());
-        }
+        	public String desc() {
+        		float s = 0;
+        		if(hero.belongings.weapon() instanceof FogSword) {
+        			FogSword ks = (FogSword) hero.belongings.weapon;
+        			s = (20 + (float) (ks.buffedLvl() * 4));
+        		}
+        		return Messages.get(this, "desc", s , dispTurns());
+        	}
 
         @Override
         public float iconFadePercent() {

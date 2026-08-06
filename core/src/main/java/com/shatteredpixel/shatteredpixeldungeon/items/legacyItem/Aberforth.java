@@ -47,7 +47,7 @@ public class Aberforth extends LegacyItemWeapon {
     public static final String AC_ADSORB		= "ADSORB";
 
     {
-        image = ItemSpriteSheet.DARTS+17;
+        image = ItemSpriteSheet.ABERFORTH;
         hitSound = Assets.Sounds.HIT_STAB;
         ACC = 1f;
         defaultAction = AC_ADSORB;

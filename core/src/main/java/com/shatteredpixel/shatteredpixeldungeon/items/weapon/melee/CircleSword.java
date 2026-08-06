@@ -9,7 +9,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 public class CircleSword extends MeleeWeapon {
 
     {
-        image = ItemSpriteSheet.RUNE_SLADE+1;
+        image = ItemSpriteSheet.CIRCLE_SWORD;
         tier = 4;
     }
 

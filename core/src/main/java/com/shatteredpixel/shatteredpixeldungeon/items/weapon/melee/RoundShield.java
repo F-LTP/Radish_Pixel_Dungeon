@@ -103,7 +103,7 @@ public class RoundShield extends MeleeWeapon {
 		public boolean hasBlocked = false;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.DUEL_GUARD;
 		}
 

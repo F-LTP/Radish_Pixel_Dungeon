@@ -91,7 +91,7 @@ public abstract class ArmorAbility implements Bundlable {
 		return Messages.get(this, "desc") + "\n\n" + Messages.get(this, "cost", (int)baseChargeUse);
 	}
 
-	public int icon(){
+	public String icon(){
 		return HeroIcon.NONE;
 	}
 

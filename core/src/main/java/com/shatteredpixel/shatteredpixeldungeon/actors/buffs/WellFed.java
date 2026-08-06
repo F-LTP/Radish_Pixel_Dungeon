@@ -74,7 +74,7 @@ public class WellFed extends Buff {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.WELL_FED;
 	}
 

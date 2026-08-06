@@ -239,16 +239,10 @@ public class CustomNoteButton extends IconButton {
     private static Comparator<Item> itemVisualcomparator = new Comparator<Item>() {
         @Override
         public int compare(Item i1, Item i2) {
-            int i1Idx = i1.image();
-            int i2Idx = i2.image();
-
-            if (i1 instanceof Scroll)   i1Idx += 1000;
-            if (i1 instanceof Ring)     i1Idx += 2000;
-
-            if (i2 instanceof Scroll)   i2Idx += 1000;
-            if (i2 instanceof Ring)     i2Idx += 2000;
-
-            return i1Idx - i2Idx;
+			int i1Group = i1 instanceof Ring ? 2 : i1 instanceof Scroll ? 1 : 0;
+			int i2Group = i2 instanceof Ring ? 2 : i2 instanceof Scroll ? 1 : 0;
+			if (i1Group != i2Group) return Integer.compare(i1Group, i2Group);
+			return i1.image().compareTo(i2.image());
         }
     };
 

@@ -4,25 +4,12 @@
  *
  * Shattered Pixel Dungeon
  * Copyright (C) 2014-2024 Evan Debenham
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-
 package com.shatteredpixel.shatteredpixeldungeon.levels.features;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Point;
@@ -30,78 +17,125 @@ import com.watabou.utils.Random;
 import com.watabou.utils.Rect;
 
 public class LevelTransition extends Rect implements Bundlable {
-
 	public enum Type {
-		SURFACE,
-		REGULAR_ENTRANCE,
-		REGULAR_EXIT,
-		BRANCH_ENTRANCE,
-		BRANCH_EXIT;
+		SURFACE, REGULAR_ENTRANCE, REGULAR_EXIT, BRANCH_ENTRANCE, BRANCH_EXIT
 	}
 
-	public Type type;
-	public int destDepth;
-	public int destBranch;
-	public Type destType;
+	public enum Direction {
+		UP, DOWN, SURFACE;
 
-	public int centerCell;
-
-	//for bundling
-	public LevelTransition(){
-		super();
-	}
-
-	public LevelTransition(Level level, int cell, Type type, int destDepth, int destBranch, Type destType){
-		centerCell = cell;
-		Point p = level.cellToPoint(cell);
-		set(p.x, p.y, p.x, p.y);
-		this.type = type;
-		this.destDepth = destDepth;
-		this.destBranch = destBranch;
-		this.destType = destType;
-	}
-
-	//gives default values for common transition types
-	public LevelTransition(Level level, int cell, Type type){
-		centerCell = cell;
-		Point p = level.cellToPoint(cell);
-		set(p.x, p.y, p.x, p.y);
-		this.type = type;
-		switch (type){
-			case REGULAR_ENTRANCE: default:
-				destDepth = Dungeon.depth-1;
-				destBranch = Dungeon.branch;
-				destType = Type.REGULAR_EXIT;
-				break;
-			case REGULAR_EXIT:
-				destDepth = Dungeon.depth+1;
-				destBranch = Dungeon.branch;
-				destType = Type.REGULAR_ENTRANCE;
-				break;
-			case SURFACE:
-				destDepth = 1;
-				destBranch = 0;
-				destType = null;
-				break;
+		public Direction opposite() {
+			if (this == UP) return DOWN;
+			if (this == DOWN) return UP;
+			return SURFACE;
 		}
 	}
 
-	//note that the center cell isn't always the actual center.
-	// It is important when game logic needs to pick a specific cell for some action
-	// e.g. where to place the hero
-	public int cell(){
+	public String linkId;
+	public Direction direction;
+	public String destBranch;
+	public int destDepth;
+	public int centerCell;
+	public Type type;
+
+	// for bundling
+	public LevelTransition() {
+		super();
+	}
+
+	public LevelTransition(Level level, int cell, Type type) {
+		this(type == Type.REGULAR_EXIT
+				? regularExit(level, cell)
+				: type == Type.REGULAR_ENTRANCE
+				? regularEntrance(level, cell)
+				: surface(level, cell));
+		this.type = type;
+	}
+
+	private LevelTransition(LevelTransition source) {
+		set(source.left, source.top, source.right, source.bottom);
+		centerCell = source.centerCell;
+		linkId = source.linkId;
+		direction = source.direction;
+		destBranch = source.destBranch;
+		destDepth = source.destDepth;
+		type = source.type;
+	}
+
+	private LevelTransition(Level level, int cell, String linkId, Direction direction,
+							String destBranch, int destDepth) {
+		if (linkId == null || linkId.isEmpty()) throw new IllegalArgumentException("Missing transition linkId");
+		if (!Branches.exists(destBranch)) throw new IllegalArgumentException("Unknown destination branch: " + destBranch);
+		if (direction != Direction.SURFACE
+				&& (destDepth < 1 || destDepth > Branches.get(destBranch).maxDepth)) {
+			throw new IllegalArgumentException("Invalid destination floor: " + destBranch + ":" + destDepth);
+		}
+		this.centerCell = cell;
+		Point p = level.cellToPoint(cell);
+		set(p.x, p.y, p.x, p.y);
+		this.linkId = linkId;
+		this.direction = direction;
+		this.destBranch = destBranch;
+		this.destDepth = destDepth;
+		this.type = direction == Direction.DOWN ? Type.REGULAR_EXIT
+				: direction == Direction.UP ? Type.REGULAR_ENTRANCE : Type.SURFACE;
+	}
+
+	public static LevelTransition up(Level level, int cell, String linkId,
+								 String destBranch, int destDepth) {
+		return new LevelTransition(level, cell, linkId, Direction.UP, destBranch, destDepth);
+	}
+
+	public static LevelTransition down(Level level, int cell, String linkId,
+								   String destBranch, int destDepth) {
+		return new LevelTransition(level, cell, linkId, Direction.DOWN, destBranch, destDepth);
+	}
+
+	public static LevelTransition regularEntrance(Level level, int cell) {
+		if (Dungeon.depth == 1 && Branches.MAIN.equals(Dungeon.branchId)) return surface(level, cell);
+		return up(level, cell, regularLinkId(Dungeon.branchId, Dungeon.depth - 1),
+				Dungeon.branchId, Dungeon.depth - 1);
+	}
+
+	public static LevelTransition regularExit(Level level, int cell) {
+		return down(level, cell, regularLinkId(Dungeon.branchId, Dungeon.depth),
+				Dungeon.branchId, Dungeon.depth + 1);
+	}
+
+	public static LevelTransition surface(Level level, int cell) {
+		return new LevelTransition(level, cell, "surface", Direction.SURFACE, Branches.MAIN, 0);
+	}
+
+	public static LevelTransition branchUp(Level level, int cell, String linkId,
+									   String destBranch, int destDepth) {
+		LevelTransition result = up(level, cell, linkId, destBranch, destDepth);
+		result.type = Type.BRANCH_ENTRANCE;
+		return result;
+	}
+
+	public static LevelTransition branchDown(Level level, int cell, String linkId,
+										 String destBranch, int destDepth) {
+		LevelTransition result = down(level, cell, linkId, destBranch, destDepth);
+		result.type = Type.BRANCH_EXIT;
+		return result;
+	}
+
+	public static String regularLinkId(String branch, int upperDepth) {
+		return branch + ":" + upperDepth + "-" + (upperDepth + 1);
+	}
+
+	public int cell() {
 		return centerCell;
 	}
 
-	//Transitions are inclusive to their right and bottom sides
 	@Override
 	public int width() {
-		return super.width()+1;
+		return super.width() + 1;
 	}
 
 	@Override
 	public int height() {
-		return super.height()+1;
+		return super.height() + 1;
 	}
 
 	@Override
@@ -109,48 +143,49 @@ public class LevelTransition extends Rect implements Bundlable {
 		return p.x >= left && p.x <= right && p.y >= top && p.y <= bottom;
 	}
 
-	public boolean inside(int cell){
+	public boolean inside(int cell) {
 		return inside(new Point(Dungeon.level.cellToPoint(cell)));
 	}
 
 	public Point center() {
 		return new Point(
-				(left + right) / 2 + (((right - left) % 2) == 1 ? Random.Int( 2 ) : 0),
-				(top + bottom) / 2 + (((bottom - top) % 2) == 1 ? Random.Int( 2 ) : 0) );
+				(left + right) / 2 + (((right - left) % 2) == 1 ? Random.Int(2) : 0),
+				(top + bottom) / 2 + (((bottom - top) % 2) == 1 ? Random.Int(2) : 0));
 	}
 
-	public static final String TYPE = "type";
-	public static final String DEST_DEPTH = "dest_depth";
-	public static final String DEST_BRANCH = "dest_branch";
-	public static final String DEST_TYPE = "dest_type";
+	private static final String LINK_ID = "link_id";
+	private static final String DIRECTION = "direction";
+	private static final String DEST_BRANCH = "dest_branch";
+	private static final String DEST_DEPTH = "dest_depth";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
-		bundle.put( "left", left );
-		bundle.put( "top", top );
-		bundle.put( "right", right );
-		bundle.put( "bottom", bottom );
-
-		bundle.put( "center", centerCell );
-
-		bundle.put(TYPE, type);
-		bundle.put(DEST_DEPTH, destDepth);
+		bundle.put("left", left);
+		bundle.put("top", top);
+		bundle.put("right", right);
+		bundle.put("bottom", bottom);
+		bundle.put("center", centerCell);
+		bundle.put(LINK_ID, linkId);
+		bundle.put("type", type);
+		bundle.put(DIRECTION, direction);
 		bundle.put(DEST_BRANCH, destBranch);
-		bundle.put(DEST_TYPE, destType);
+		bundle.put(DEST_DEPTH, destDepth);
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
-		left = bundle.getInt( "left" );
-		top = bundle.getInt( "top" );
-		right = bundle.getInt( "right" );
-		bottom = bundle.getInt( "bottom" );
-
-		centerCell = bundle.getInt( "center" );
-
-		type = bundle.getEnum(TYPE, Type.class);
+		left = bundle.getInt("left");
+		top = bundle.getInt("top");
+		right = bundle.getInt("right");
+		bottom = bundle.getInt("bottom");
+		centerCell = bundle.getInt("center");
+		linkId = bundle.getString(LINK_ID);
+		type = bundle.getEnum("type", Type.class);
+		direction = bundle.getEnum(DIRECTION, Direction.class);
+		destBranch = bundle.getString(DEST_BRANCH);
 		destDepth = bundle.getInt(DEST_DEPTH);
-		destBranch = bundle.getInt(DEST_BRANCH);
-		if (bundle.contains(DEST_TYPE)) destType = bundle.getEnum(DEST_TYPE, Type.class);
+		if (linkId == null || linkId.isEmpty() || type == null || direction == null || !Branches.exists(destBranch)) {
+			throw new IllegalStateException("Invalid level transition in save data");
+		}
 	}
 }

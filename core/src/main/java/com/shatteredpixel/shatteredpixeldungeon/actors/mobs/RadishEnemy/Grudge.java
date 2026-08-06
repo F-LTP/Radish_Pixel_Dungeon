@@ -278,7 +278,7 @@ public class Grudge extends Mob {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.TERROR;
         }
 

@@ -63,8 +63,8 @@ public class Bloodblade extends MeleeWeapon{
                 GLog.w(Messages.get(this,"not_equipped"));
             }
             else {
-                int true_HT = 20 + 5*(hero.lvl-1) + hero.HTBoost;
-                if (true_HT<=5){
+                // 使用 hero.HT 而非硬编码公式，兼容月华等非标准HP成长角色
+                if (hero.HT <= 5){
                     GLog.w(Messages.get(this,"low_ht"));
                 }
                 else {

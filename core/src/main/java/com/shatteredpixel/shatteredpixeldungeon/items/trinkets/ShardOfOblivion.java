@@ -144,7 +144,7 @@ public class ShardOfOblivion extends Trinket {
         public static float DURATION = 50f;
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.WAND;
         }
 

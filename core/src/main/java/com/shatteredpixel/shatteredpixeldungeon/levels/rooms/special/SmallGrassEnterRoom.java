@@ -5,6 +5,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -45,18 +46,18 @@ public class SmallGrassEnterRoom extends SpecialRoom {
         int cx = c.x;
         int cy = c.y;
 
-        int DragonPos = cx + cy * level.width();;
+        int DragonPos = cx + cy * level.width();
 
         DreamcatcherMaker vis = new DreamcatcherMaker();
         vis.pos(c.x, c.y);
         level.customTiles.add(vis);
 
-        level.transitions.add(new LevelTransition(level,
-                DragonPos,
-                LevelTransition.Type.BRANCH_EXIT,
-                2,
-                Dungeon.branch+1,
-                LevelTransition.Type.BRANCH_ENTRANCE));
+        // 创建通往 moss 分支的楼梯（BRANCH_ENTRANCE）
+        // branchId 设置为目标分支 MOSS，用于精确配对
+        LevelTransition transition = LevelTransition.branchDown(level, DragonPos,
+                "moss:main-2", Branches.MOSS, 1);
+
+        level.transitions.add(transition);
         Painter.set(level, DragonPos, Terrain.EXIT);
 
         Door door = entrance();
@@ -103,4 +104,3 @@ public class SmallGrassEnterRoom extends SpecialRoom {
         return false;
     }
 }
-

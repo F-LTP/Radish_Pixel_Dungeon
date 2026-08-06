@@ -43,6 +43,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.EyeSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
@@ -132,7 +133,11 @@ public class Eye extends Mob {
 		if (beamCooldown > 0 || (!beamCharged && !beam.subPath(1, beam.dist).contains(enemy.pos))) {
 			return super.doAttack(enemy);
 		} else if (!beamCharged){
-			((EyeSprite)sprite).charge( enemy.pos );
+			if (sprite instanceof EyeSprite) {
+				((EyeSprite)sprite).charge( enemy.pos );
+			} else if (sprite instanceof SnakeSprite) {
+				((SnakeSprite)sprite).charge( enemy.pos );
+			}
 			spend( attackDelay()*2f );
 			beamCharged = true;
 			return true;

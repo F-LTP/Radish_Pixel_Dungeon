@@ -163,7 +163,7 @@ public class AttributeModifier extends FlavourBuff {
     }
 
     @Override
-    public int icon() {
+    public String icon() {
         return BuffIndicator.COMBO;
     }
 

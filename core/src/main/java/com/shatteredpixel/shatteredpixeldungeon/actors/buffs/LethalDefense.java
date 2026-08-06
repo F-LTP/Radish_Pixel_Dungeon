@@ -41,7 +41,7 @@ public class LethalDefense extends Buff{
     }
 
     @Override
-    public int icon() {
+    public String icon() {
         return BuffIndicator.COMBO;
     }
 

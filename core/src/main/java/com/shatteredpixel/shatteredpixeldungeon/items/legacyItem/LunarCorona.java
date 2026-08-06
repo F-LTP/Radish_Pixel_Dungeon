@@ -40,7 +40,7 @@ public class LunarCorona extends LegacyItemRing {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.COMBO;
         }
 

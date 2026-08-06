@@ -65,14 +65,14 @@ public class HeavyBoomerang extends MissileWeapon {
 	protected void rangedHit(Char enemy, int cell) {
 		decrementDurability();
 		if (durability > 0){
-			Buff.append(Dungeon.hero, CircleBack.class).setup(this, cell, Dungeon.hero.pos, Dungeon.depth, Dungeon.branch);
+			Buff.append(Dungeon.hero, CircleBack.class).setup(this, cell, Dungeon.hero.pos, Dungeon.depth, Dungeon.branchId);
 		}
 	}
 	
 	@Override
 	protected void rangedMiss(int cell) {
 		parent = null;
-		Buff.append(Dungeon.hero, CircleBack.class).setup(this, cell, Dungeon.hero.pos, Dungeon.depth, Dungeon.branch);
+		Buff.append(Dungeon.hero, CircleBack.class).setup(this, cell, Dungeon.hero.pos, Dungeon.depth, Dungeon.branchId);
 	}
 	
 	public static class CircleBack extends Buff {
@@ -85,11 +85,11 @@ public class HeavyBoomerang extends MissileWeapon {
 		private int thrownPos;
 		private int returnPos;
 		private int returnDepth;
-		private int returnBranch;
+		private String returnBranch;
 		
 		private int left;
 		
-		public void setup( HeavyBoomerang boomerang, int thrownPos, int returnPos, int returnDepth, int returnBranch){
+		public void setup( HeavyBoomerang boomerang, int thrownPos, int returnPos, int returnDepth, String returnBranch){
 			this.boomerang = boomerang;
 			this.thrownPos = thrownPos;
 			this.returnPos = returnPos;
@@ -113,7 +113,7 @@ public class HeavyBoomerang extends MissileWeapon {
 		
 		@Override
 		public boolean act() {
-			if (returnDepth == Dungeon.depth && returnBranch == Dungeon.branch){
+			if (returnDepth == Dungeon.depth && returnBranch.equals(Dungeon.branchId)){
 				left--;
 				if (left <= 0){
 					final Char returnTarget = Actor.findChar(returnPos);
@@ -182,7 +182,7 @@ public class HeavyBoomerang extends MissileWeapon {
 			thrownPos = bundle.getInt(THROWN_POS);
 			returnPos = bundle.getInt(RETURN_POS);
 			returnDepth = bundle.getInt(RETURN_DEPTH);
-			returnBranch = bundle.contains(RETURN_BRANCH) ? bundle.getInt(RETURN_BRANCH) : 0;
+			returnBranch = bundle.contains(RETURN_BRANCH) ? bundle.getString(RETURN_BRANCH) : "main";
 		}
 	}
 	
