@@ -15,7 +15,9 @@ public class Seeking extends Weapon.Enchantment {
     @Override
     public int proc(Weapon weapon, Char attacker, Char defender, int damage ) {
         SeekingBuff buff = Buff.affect(defender, SeekingBuff.class);
-        buff.attackerID = attacker.id();
+        if (buff != null) {
+            buff.attackerID = attacker.id();
+        }
         return damage;
     }
     @Override

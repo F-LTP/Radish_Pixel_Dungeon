@@ -10,6 +10,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PlateArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Radish;
@@ -99,7 +100,12 @@ public class OrdinaryAttackDamage {
 				}
 			}
 		} else {
-			damage = attacker.damageRoll();
+			Item weapon = attacker.attackingWeapon();
+			if (attacker instanceof Mob && weapon instanceof KindOfWeapon) {
+				damage = ((KindOfWeapon) weapon).damageRoll(attacker);
+			} else {
+				damage = attacker.damageRoll();
+			}
 			if (attacker instanceof Hero) {
 				FatedDraw.FatedDrawTracker trackerA = attacker.buff(FatedDraw.FatedDrawTracker.class);
 				if (trackerA != null && trackerA.remainingChecks > 0) {
@@ -209,7 +215,7 @@ public class OrdinaryAttackDamage {
 		Item armor = Char.defendingArmor(defender);
 		if (armor instanceof PlateArmor) {
 			int before = info.getDamage();
-			info.addFinalAddModifier(((PlateArmor) armor).damageReduce(before) - before, "plate armor");
+			info.addFinalAddModifier(((PlateArmor) armor).damageReduce(defender, before) - before, "plate armor");
 		}
 	}
 

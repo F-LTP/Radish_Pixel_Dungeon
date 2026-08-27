@@ -49,7 +49,7 @@ public class BurnSpell extends DiceMageSpell {
         int hit = 0;
         for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
             if (!Dungeon.level.heroFOV[mob.pos] || mob.alignment != Char.Alignment.ENEMY) continue;
-            int dmg = Random.IntRange(7, 14);
+            int dmg = Random.IntRange(7, 14) + strBonusDamage(hero);
             mob.damage(DamageInfo.fire(dmg, BurnSpell.this));
             if (mob.isAlive()) {
                 CellEmitter.center(mob.pos).burst(FlameParticle.FACTORY, 6);

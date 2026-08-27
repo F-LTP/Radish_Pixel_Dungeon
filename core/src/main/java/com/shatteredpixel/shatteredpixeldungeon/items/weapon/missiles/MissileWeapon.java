@@ -88,12 +88,15 @@ abstract public class MissileWeapon extends Weapon {
 
 	//used to reduce durability from the source weapon stack, rather than the one being thrown.
 	protected MissileWeapon parent;
+	private transient Char damageOwner;
 
 	public int tier;
 
 	@Override
 	public int min() {
-		if(hero != null){
+		if(damageOwner != null){
+			return Math.max(0, min( buffedLvl() + RingOfSharpshooting.levelDamageBonus(damageOwner) ));
+		} else if(hero != null){
 			return Math.max(0, min( buffedLvl() + RingOfSharpshooting.levelDamageBonus(Dungeon.hero) ));
 		} else {
 			return Math.max(0, min( buffedLvl()  ));
@@ -111,7 +114,9 @@ abstract public class MissileWeapon extends Weapon {
 
 	@Override
 	public int max() {
-		if(hero != null){
+		if(damageOwner != null){
+			return Math.max(0, max( buffedLvl() + RingOfSharpshooting.levelDamageBonus(damageOwner) ));
+		} else if(hero != null){
 			return Math.max(0, max( buffedLvl() + RingOfSharpshooting.levelDamageBonus(Dungeon.hero) ));
 		}
 		return Math.max(0, max( buffedLvl() ));
@@ -549,6 +554,7 @@ abstract public class MissileWeapon extends Weapon {
 	
 	@Override
 	public int damageRoll(Char owner) {
+		damageOwner = owner;
 		int damage = augment.damageFactor(super.damageRoll( owner ));
 		
 		if (owner instanceof Hero) {

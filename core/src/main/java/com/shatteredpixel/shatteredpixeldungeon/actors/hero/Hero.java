@@ -709,7 +709,9 @@ public class Hero extends Char {
 
 	@Override
 	public void hitSound(float pitch) {
-		if (RingOfForce.getBuffedBonus(this, RingOfForce.Force.class) > 0) {
+		if (belongings.thrownWeapon != null) {
+			belongings.thrownWeapon.hitSound(pitch);
+		} else if (RingOfForce.getBuffedBonus(this, RingOfForce.Force.class) > 0) {
 			//pitch deepens by 2.5% (additive) per point of strength, down to 75%
 			super.hitSound( pitch * GameMath.gate( 0.75f, 1.25f - 0.025f*STR(), 1f) );
 		} else if (hero.belongings.weapon != null) {
@@ -764,8 +766,6 @@ public class Hero extends Char {
 		boolean hit = attack( enemy );
 		Invisibility.dispel();
 		belongings.thrownWeapon = null;
-
-		subClass.onAttackProc(this, enemy, 0, hit, wasEnemy);
 
 		Talent.HoldBreathTracker hb=buff(Talent.HoldBreathTracker.class);
 		if (hb!=null){
@@ -2091,7 +2091,7 @@ public class Hero extends Char {
 			if(wep != null){
 				int dmgRoll = Integer.MAX_VALUE;
 				for (int i = 0; i < riverGlass.judgeTimes(); i++){
-					int roll = (i == 0) ? wep.damageRoll(this) : Char.combatRoll(belongings.weapon().min(), belongings.weapon().max());
+					int roll = (i == 0) ? wep.damageRoll(this) : Char.combatRoll(wep.min(), wep.max());
 					dmgRoll = Math.min(dmgRoll, roll);
 				}
 				int dmg = dmgRoll;
@@ -2187,8 +2187,6 @@ public class Hero extends Char {
 					}
 				}
 			}
-
-		if (damage > 0) subClass.onAttackProc(this, enemy, damage, true, true);
 
 		damage = TieredToyEffects.attackProc(this, enemy, damage);
 

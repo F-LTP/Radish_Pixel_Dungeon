@@ -9,6 +9,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfConcealment;
@@ -48,7 +49,6 @@ public class JumbleChangeBuff extends Buff {
 	private static final float MAX_INTERVAL = 220;
 
 	private static final String TURNS = "turns";
-	private static final String CHANGING = "changing";
 
 	@Override
 	public boolean act() {
@@ -56,6 +56,9 @@ public class JumbleChangeBuff extends Buff {
 			turnsRemaining -= 1;
 			if (turnsRemaining <= 0) {
 				changing = true;
+				Hero hero = (Hero) target;
+				hero.interrupt();
+				hero.spend(TICK);
 				startChange();
 			}
 		}
@@ -116,14 +119,14 @@ public class JumbleChangeBuff extends Buff {
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(TURNS, turnsRemaining);
-		bundle.put(CHANGING, changing);
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		turnsRemaining = bundle.getFloat(TURNS);
-		changing = bundle.getBoolean(CHANGING);
+		// Animation callbacks cannot survive saving; retry an expired transformation after loading.
+		changing = false;
 	}
 
 	// ---- 变身流程 ----
@@ -187,7 +190,6 @@ public class JumbleChangeBuff extends Buff {
 			// 恢复英雄行动（通用"不消耗时间阻塞动画"的收尾）
 			hero.finishAnimationNoTime();
 		}
-		spend( TICK );
 	}
 
 	// ---- 天赋替换：逐天赋换成随机角色的随机天赋 ----
@@ -268,7 +270,17 @@ public class JumbleChangeBuff extends Buff {
 
 		Ring ring = hero.belongings.ring();
 		if (ring != null) {
+			boolean ringTypeKnown = ring.isKnown();
 			Item result = ScrollOfTransmutation.changeItem(ring);
+			if (result instanceof Ring) {
+				if (ringTypeKnown) {
+					// Ring type knowledge is stored separately from level/curse knowledge.
+					((Ring) result).setKnown();
+				}
+				result.cursed = ring.cursed;
+				result.cursedKnown = ring.cursedKnown;
+				result.levelKnown = ring.levelKnown;
+			}
 			replaceEquipped(hero, ring, result);
 		}
 
@@ -288,6 +300,11 @@ public class JumbleChangeBuff extends Buff {
 	private void transmuteArmor(Hero hero, Armor old) {
 		int tier = old.tier;
 		if (tier < 1 || tier > 5) return;
+
+		BrokenSeal seal = old.checkSeal();
+		if (seal != null) {
+			old.detachSeal(hero);
+		}
 
 		Generator.Category cat = Generator.armTiers[tier - 1];
 		Armor replacement;
@@ -309,6 +326,9 @@ public class JumbleChangeBuff extends Buff {
 		replacement.glyphHardened = old.glyphHardened;
 		replacement.masteryPotionBonus = old.masteryPotionBonus;
 		replacement.augment = old.augment;
+		if (seal != null) {
+			replacement.affixSeal(seal);
+		}
 
 		replaceEquipped(hero, old, replacement);
 	}
@@ -338,10 +358,11 @@ public class JumbleChangeBuff extends Buff {
 			replacement = (Artifact) Reflection.newInstance(Random.element(candidates));
 		} while (replacement.getClass() == old.getClass() && candidates.size() > 1);
 
-		replacement.cursed = old.cursed;
-		replacement.cursedKnown = old.cursedKnown;
 		replacement.levelKnown = old.levelKnown;
 		replacement.transferUpgrade(old.visiblyUpgraded());
+		//生成器可能默认生成诅咒神器；蜕变后必须严格继承原神器状态。
+		replacement.cursed = old.cursed;
+		replacement.cursedKnown = old.cursedKnown;
 
 		replaceEquipped(hero, old, replacement);
 	}

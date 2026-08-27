@@ -84,6 +84,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.*;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.LeatherArmor;
@@ -93,6 +94,10 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourg
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfHaste;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfMight;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfWealth;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
@@ -166,10 +171,15 @@ public abstract class Mob extends Char {
 	protected static final float TIME_TO_WAKE_UP = 1f;
 
 	protected boolean firstAdded = true;
+	public final MobEquipment mobEquipment = new MobEquipment(this);
 
 	public boolean eyeAttack = false;
 	protected void onAdd(){
 		if (firstAdded) {
+			if (Dungeon.isChallenged(Challenges.REAL_INTELLIGENCE)
+					&& alignment == Alignment.ENEMY) {
+				mobEquipment.generate();
+			}
 			//modify health for ascension challenge if applicable, only on first add
 			float percent = HP / (float) HT;
 			
@@ -182,6 +192,11 @@ public abstract class Mob extends Char {
 			// Apply both modifiers
 			HT = Math.round(HT * ascensionMod * crossLevelMod);
 			HP = Math.round(HT * percent);
+			float might = RingOfMight.HTMultiplier(this);
+			if (might != 1f) {
+				HT = Math.max(1, Math.round(HT * might));
+				HP = Math.min(HT, Math.round(HT * percent));
+			}
 			firstAdded = false;
 		}
 	}
@@ -233,6 +248,7 @@ public abstract class Mob extends Char {
 		}
 
 		bundle.put(ONLY_ACTDOWN,onlyActDown);
+		mobEquipment.storeInBundle(bundle);
 
 	}
 
@@ -270,6 +286,7 @@ public abstract class Mob extends Char {
 
 
 		eyeAttack = bundle.getBoolean(EYEATTACK);
+		mobEquipment.restoreFromBundle(bundle);
 		//no need to actually save this, must be false
 		firstAdded = false;
 	}
@@ -560,6 +577,9 @@ public abstract class Mob extends Char {
 		if (Dungeon.level.adjacent( pos, enemy.pos )){
 			return true;
 		}
+		if (mobEquipment.weapon != null && mobEquipment.weapon.canReach(this, enemy.pos)) {
+			return true;
+		}
 		for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
 			if (buff.canAttackWithExtraReach( enemy )){
 				return true;
@@ -748,6 +768,11 @@ public abstract class Mob extends Char {
 	public float attackDelay() {
 		float delay = 1f;
 		if ( buff(Adrenaline.class) != null) delay /= 1.5f;
+		if (mobEquipment.weapon != null) {
+			delay *= mobEquipment.weapon.delayFactor(this);
+		} else {
+			delay /= RingOfFuror.attackSpeedMultiplier(this);
+		}
 		return delay;
 	}
 
@@ -854,7 +879,9 @@ public abstract class Mob extends Char {
 
 		@Override
 		public float speed() {
-			return super.speed() * AscensionChallenge.enemySpeedModifier(this);
+			float speed = super.speed() * AscensionChallenge.enemySpeedModifier(this);
+			if (mobEquipment.armor != null) speed = mobEquipment.armor.speedFactor(this, speed);
+			return speed * RingOfHaste.speedMultiplier(this);
 		}
 
 		public final boolean surprisedBy( Char enemy ){
@@ -891,6 +918,24 @@ public abstract class Mob extends Char {
 
 	public Char getEnemy(){
 		return enemy;
+	}
+
+	@Override
+	public Item attackingWeapon() {
+		return mobEquipment.weapon != null ? mobEquipment.weapon : super.attackingWeapon();
+	}
+
+	@Override
+	public Armor armor() {
+		return mobEquipment.armor != null ? mobEquipment.armor : super.armor();
+	}
+
+	@Override
+	public int damageRoll() {
+		if (mobEquipment.weapon == null) {
+			return RingOfForce.damageRoll(this);
+		}
+		return super.damageRoll();
 	}
 
 	/** 查找当前可影响 AI 的修改器：先看 Buff，再看攻击武器的 aiTag。 */
@@ -1166,6 +1211,7 @@ public abstract class Mob extends Char {
 
 		if (alignment == Alignment.ENEMY){
 			rollToDropLoot();
+			mobEquipment.dropAll();
 
 			if (cause == Dungeon.hero || cause instanceof Weapon || cause instanceof Weapon.Enchantment){
 
@@ -1742,6 +1788,9 @@ public abstract class Mob extends Char {
 		@Override
 		public int attackProc( final Char enemy, int damage ) {
 			damage = super.attackProc(enemy,damage);
+			if (mobEquipment.weapon instanceof Weapon) {
+				damage = ((Weapon) mobEquipment.weapon).proc(this, enemy, damage);
+			}
 
 			return damage;
 		}
@@ -1763,4 +1812,3 @@ public abstract class Mob extends Char {
 		heldAllies.clear();
 	}
 }
-

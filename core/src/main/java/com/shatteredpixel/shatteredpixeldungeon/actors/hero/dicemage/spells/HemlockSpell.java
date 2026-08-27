@@ -56,7 +56,7 @@ public class HemlockSpell extends DiceMageSpell {
                 }
                 if (!spendMagic(hero)) return;
 
-                int dmg = Random.IntRange(3, 7);
+                int dmg = Random.IntRange(3, 7) + strBonusDamage(hero);
                 target.damage(DamageInfo.poison(dmg, HemlockSpell.this));
                 if (target.isAlive()) {
                     Buff.affect(target, Poison.class).set(dmg);

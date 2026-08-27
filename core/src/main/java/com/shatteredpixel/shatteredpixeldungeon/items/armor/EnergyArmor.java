@@ -1,6 +1,5 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
@@ -70,7 +69,7 @@ public class EnergyArmor extends Armor{
 
     @Override
     public String image(){
-        if (Dungeon.hero != null && Dungeon.hero.buff(myShield.class) != null){
+        if (buff != null && buff.target != null && buff.target.buff(myShield.class) != null){
             image = ItemSpriteSheet.ARMOR_ENERGY2;
         } else {
             image = ItemSpriteSheet.ARMOR_ENERGY1;
@@ -106,7 +105,9 @@ public class EnergyArmor extends Armor{
         @Override
         public boolean act() {
             spend( TICK);
-            if (((Hero)target).STR()>=EnergyArmor.this.STRReq() && EnergyArmor.this.energyLeft>0){
+            boolean strengthMet = !(target instanceof Hero)
+                    || ((Hero) target).STR() >= EnergyArmor.this.STRReq();
+            if (strengthMet && EnergyArmor.this.energyLeft > 0){
                 chargeCount++;
                 EnergyArmor.this.energyLeft--;
             }

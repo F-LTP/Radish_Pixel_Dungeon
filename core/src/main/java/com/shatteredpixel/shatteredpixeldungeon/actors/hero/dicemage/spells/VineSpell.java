@@ -68,7 +68,7 @@ public class VineSpell extends DiceMageSpell {
                     GLog.p(Messages.get(VineSpell.this, "shield", shield));
                 } else {
                     playLasherVisual(target.pos);
-                    int dmg = Random.IntRange(3, 7) + 2 * (hero.STR() - 10);
+                    int dmg = Random.IntRange(3, 7) + strBonusDamage(hero);
                     target.damage(DamageInfo.physicalNoArmor(dmg, VineSpell.this));
                     if (target.isAlive()) {
                         if (Random.Float() < 0.33f) {

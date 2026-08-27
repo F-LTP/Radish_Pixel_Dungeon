@@ -47,7 +47,7 @@ public class ScaldSpell extends DiceMageSpell {
         for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
             if (!Dungeon.level.heroFOV[mob.pos] || mob.alignment != Char.Alignment.ENEMY) continue;
             if (mob.HP >= mob.HT * 0.8f) continue;
-            int dmg = Random.IntRange(15, 21);
+            int dmg = Random.IntRange(15, 21) + strBonusDamage(hero);
             mob.damage(DamageInfo.fire(dmg, ScaldSpell.this));
             if (mob.isAlive()) {
                 CellEmitter.center(mob.pos).burst(FlameParticle.FACTORY, 6);

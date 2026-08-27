@@ -57,7 +57,7 @@ public class RingOfTenacity extends Ring {
 	}
 
 	private static boolean wieldingCircleSword( Char t ){
-		return t instanceof Hero && ((Hero)t).belongings.weapon() instanceof CircleSword;
+		return t != null && t.attackingWeapon() instanceof CircleSword;
 	}
 
 	@Override
@@ -95,4 +95,3 @@ public class RingOfTenacity extends Ring {
 		}
 	}
 }
-

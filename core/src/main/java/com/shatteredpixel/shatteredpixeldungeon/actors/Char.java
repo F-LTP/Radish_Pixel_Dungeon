@@ -21,90 +21,58 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.*;
-import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
-import com.shatteredpixel.shatteredpixeldungeon.damage.DamagePipeline;
-import com.shatteredpixel.shatteredpixeldungeon.damage.DamageResult;
-import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
-import com.shatteredpixel.shatteredpixeldungeon.damage.MixedDamage;
-import com.shatteredpixel.shatteredpixeldungeon.events.AttackEvent;
-import com.shatteredpixel.shatteredpixeldungeon.events.CharFinalDamageEvent;
-import com.shatteredpixel.shatteredpixeldungeon.events.CharUnprocedDamageEvent;
-import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
-import com.shatteredpixel.shatteredpixeldungeon.events.HeroHealEvent;
-import com.shatteredpixel.shatteredpixeldungeon.damage.OrdinaryAttackDamage;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.*;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Challenge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.FatedDraw;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.*;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Deminion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.RoyalGuard;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.ImmortalShieldAffecter;
+import com.shatteredpixel.shatteredpixeldungeon.damage.*;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SnDSFX;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.events.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.PlateArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Potential;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
-
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.LunarCorona;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Masamune;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Sunless;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Turtleir;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfElements;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRetribution;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfPsionicBlast;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.FerretTuft;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.LightKing;
-import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Radish;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ThirteenLeafClover;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.FatedDraw;
-
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFireblast;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFrost;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLightning;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.YetWand.HolyLand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.ShockingDart;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
-
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GrimTrap;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Earthroot;
@@ -117,16 +85,11 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
-import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.LinkedHashSet;
+import java.util.*;
+
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
 public abstract class Char extends Actor {
 
@@ -161,11 +124,11 @@ public abstract class Char extends Actor {
     ;
 
     protected float critSkill() {
-        return critSkill;
-    }
+		return critSkill + com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfConcentration.critBonus(this);
+	}
 
     protected float critDamage() {
-        return Math.min(critDamage, critDamageCap);
+		return Math.min(critDamage + com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfConcentration.critDamgeBonus(this), critDamageCap);
     }
 
     public float baseCritSkill() {
@@ -568,11 +531,24 @@ public abstract class Char extends Actor {
         float acuStat = attacker.attackSkill(defender);
         float defStat = defender.defenseSkill(attacker);
 
+		if (attacker instanceof Mob) {
+			Item mobWeapon = attacker.attackingWeapon();
+			if (mobWeapon instanceof KindOfWeapon) {
+				acuStat *= ((KindOfWeapon) mobWeapon).accuracyFactor(attacker, defender);
+			}
+			acuStat *= RingOfAccuracy.accuracyMultiplier(attacker);
+		}
+		if (defender instanceof Mob) {
+			Armor mobArmor = defender.armor();
+			if (mobArmor != null) defStat = mobArmor.evasionFactor(defender, defStat);
+			defStat *= RingOfEvasion.evasionMultiplier(defender);
+		}
+
 		Item attackWeapon = attacker instanceof Hero
 				? ((Hero) attacker).belongings.attackingWeapon()
 				: attacker.attackingWeapon();
 		AfterImage.absoluteEvasion attackEvasion = attacker.buff(AfterImage.absoluteEvasion.class);
-		if (attacker instanceof Hero && !magic && attackEvasion != null
+		if (!magic && attackEvasion != null
 				&& attacker.buff(AfterImage.AnotabsoluteEvasion.class) == null
 				&& attackWeapon instanceof CircleSword) {
 			attackEvasion.detach();
@@ -589,8 +565,7 @@ public abstract class Char extends Actor {
             return false;
         }
 
-        boolean defenderWieldsCircleSword = defender instanceof Hero
-				&& ((Hero) defender).belongings.attackingWeapon() instanceof CircleSword;
+		boolean defenderWieldsCircleSword = defender.wieldsCircleSword();
 		if (defender.buff(AfterImage.absoluteEvasion.class) != null
 				&& !defenderWieldsCircleSword) {
             Buff.detach(defender, AfterImage.absoluteEvasion.class);
@@ -735,8 +710,16 @@ public abstract class Char extends Actor {
         if (!(this instanceof Hero)) {
             Item armorItem = defendingArmor(this);
             if (armorItem != null) {
-                dr += combatRoll(((Armor) armorItem).DRMin(), ((Armor) armorItem).DRMax());
+				int armorDr = combatRoll(((Armor) armorItem).DRMin(), ((Armor) armorItem).DRMax());
+				dr += armorDr;
+				if (com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Resonance.isResonanceActive(this)) {
+					dr += Math.round(armorDr * 0.5f);
+				}
             }
+			Item weaponItem = defendingWeapon(this);
+			if (weaponItem instanceof KindOfWeapon) {
+				dr += combatRoll(0, ((KindOfWeapon) weaponItem).defenseFactor(this));
+			}
         }
 
         return dr;
@@ -835,6 +818,9 @@ public abstract class Char extends Actor {
         if (defender instanceof RoyalGuard) {
             return ((RoyalGuard) defender).equipment;
         }
+		if (defender instanceof Mob) {
+			return defender.attackingWeapon();
+		}
         return null;
     }
 
@@ -1010,6 +996,13 @@ public abstract class Char extends Actor {
                 armorBlocked = before - dmg;
             }
         }
+
+		Armor wornArmor = armor();
+		if (!(this instanceof Hero) && src != null && wornArmor != null
+				&& wornArmor.hasGlyph(AntiMagic.class, this)
+				&& AntiMagic.RESISTS.contains(src.getClass())) {
+			dmg = Math.max(0, dmg - AntiMagic.drRoll(this, wornArmor.procLvl()));
+		}
 
         // —— 黏稠刻印：在护甲之后结算延迟伤害（优先级在护甲之后，护甲先阻挡再延迟剩余部分）——
         if (buff(Viscosity.ViscosityTracker.class) != null) {
@@ -1318,6 +1311,10 @@ public abstract class Char extends Actor {
         HP = Math.min(HT, HP + amount);
         int healed = HP - before;
         if (healed > 0) {
+			AfterGlow.Warmth warmth = buff(AfterGlow.Warmth.class);
+			if (!(this instanceof Hero) && warmth != null) {
+				warmth.getWarmth();
+			}
             // 统一在此显示治疗绿字
             if (showText && sprite != null) {
                 sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(healed), FloatingText.HEALING);
@@ -1644,6 +1641,11 @@ public abstract class Char extends Actor {
     protected final HashSet<Class> immunities = new HashSet<>();
 
     public boolean isImmune(Class effect) {
+		Armor wornArmor = armor();
+		if (effect == Burning.class && wornArmor != null
+				&& wornArmor.hasGlyph(Brimstone.class, this)) {
+			return true;
+		}
         HashSet<Class> immunes = new HashSet<>(immunities);
         for (Property p : properties()) {
             immunes.addAll(p.immunities());

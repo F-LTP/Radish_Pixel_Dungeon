@@ -73,13 +73,25 @@ public class WndCellContents extends Window {
 
 		Heap heap = Dungeon.level.heaps.get(cell);
 		if (heap != null && heap.seen) {
-			for (final Item item : heap.items.toArray(new Item[0])) {
-				pos = addRow(pos, item.title(), new ItemSprite(item), new Runnable() {
+			if (heap.type == Heap.Type.CHEST
+					|| heap.type == Heap.Type.LOCKED_CHEST
+					|| heap.type == Heap.Type.CRYSTAL_CHEST) {
+				// Chest contents remain hidden until the chest is opened.
+				pos = addRow(pos, heap.title(), new ItemSprite(heap), new Runnable() {
 					@Override
 					public void run() {
-						GameScene.show(new WndInfoItem(item));
+						GameScene.show(new WndInfoItem(heap));
 					}
 				});
+			} else {
+				for (final Item item : heap.items.toArray(new Item[0])) {
+					pos = addRow(pos, item.title(), new ItemSprite(item), new Runnable() {
+						@Override
+						public void run() {
+							GameScene.show(new WndInfoItem(item));
+						}
+					});
+				}
 			}
 		}
 

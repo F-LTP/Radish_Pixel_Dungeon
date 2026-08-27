@@ -60,7 +60,7 @@ public class BlazeSpell extends DiceMageSpell {
                     return;
                 }
 
-                int damage = Random.IntRange(100, 150);
+                int damage = Random.IntRange(100, 150) + strBonusDamage(hero);
 
                 if (!spendMagic(hero)) return;
 

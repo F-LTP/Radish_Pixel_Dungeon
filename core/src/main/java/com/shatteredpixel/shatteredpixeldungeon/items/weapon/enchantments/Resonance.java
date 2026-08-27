@@ -35,9 +35,11 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
  */
 public class Resonance extends Weapon.Enchantment {
 
+	private static final ItemSprite.Glowing RESONANCE = new ItemSprite.Glowing(0x66CCFF);
+
 	@Override
 	public int proc(Weapon weapon, Char attacker, Char defender, int damage) {
-		if (attacker instanceof Hero && isResonanceActive((Hero) attacker)) {
+		if (isResonanceActive(attacker, weapon)) {
 			damage = Math.round(damage * 1.5f);
 		}
 		return damage;
@@ -47,18 +49,25 @@ public class Resonance extends Weapon.Enchantment {
 	 * 共鸣是否激活：需要同时装备共鸣附魔武器与共鸣刻印护甲。
 	 */
 	public static boolean isResonanceActive(Hero hero) {
-		if (hero == null) return false;
-		com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon wep = hero.belongings.weapon();
-		Armor arm = hero.belongings.armor();
-		if (wep == null || arm == null) return false;
-		boolean weaponHasResonance = wep instanceof Weapon
-				&& ((Weapon) wep).enchantment instanceof Resonance;
+		if (hero == null || hero.belongings == null) return false;
+		if (!(hero.belongings.weapon() instanceof Weapon)) return false;
+		return isResonanceActive(hero, (Weapon) hero.belongings.weapon());
+	}
+
+	/** 角色当前使用的武器与护甲是否组成共鸣，适用于英雄和装备武器的怪物。 */
+	public static boolean isResonanceActive(Char owner, Weapon weapon) {
+		if (owner == null || weapon == null) return false;
+		Armor arm = owner instanceof Hero
+				? ((Hero) owner).belongings.armor()
+				: owner.armor();
+		if (arm == null) return false;
+		boolean weaponHasResonance = weapon.enchantment instanceof Resonance;
 		boolean armorHasResonance = arm.glyph instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Resonance;
 		return weaponHasResonance && armorHasResonance;
 	}
 
 	@Override
 	public ItemSprite.Glowing glowing() {
-		return null; // 平时不显露能量
+		return RESONANCE;
 	}
 }

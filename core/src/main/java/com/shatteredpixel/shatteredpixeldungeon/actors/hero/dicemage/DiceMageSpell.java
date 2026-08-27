@@ -179,11 +179,12 @@ public abstract class DiceMageSpell {
         return target != null && target.alignment == Char.Alignment.ENEMY;
     }
 
-    /**
-     * 力量加成伤害：每点力量 0-2 点物理伤害（刀刃/物理学派法术）。
-     */
+    /** 傻福：按天赋等级提高力量阈值以上的法术伤害。 */
     protected int strBonusDamage(Hero hero) {
-        return Random.IntRange(0, 2 * hero.STR());
+        int points = hero.pointsInTalent(Talent.SPELL_EMPOWER);
+        if (points <= 0) return 0;
+        int[] thresholds = {16, 14, 12, 10};
+        return Random.IntRange(0, 2 * Math.max(0, hero.STR() - thresholds[points - 1]));
     }
 
     /**

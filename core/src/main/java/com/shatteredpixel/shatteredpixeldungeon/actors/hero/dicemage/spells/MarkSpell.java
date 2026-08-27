@@ -57,7 +57,7 @@ public class MarkSpell extends DiceMageSpell {
                     GLog.w(Messages.get(MarkSpell.this, "invalid_target"));
                     return;
                 }
-                int dmg = Random.IntRange(17, 31);
+                int dmg = Random.IntRange(17, 31) + strBonusDamage(hero);
                 if (!spendMagic(hero)) return;
                 MagicMissile.boltFromChar(hero.sprite.parent, MagicMissile.SHADOW, hero.sprite, target.pos, new Callback() {
                     @Override

@@ -33,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
@@ -55,7 +56,9 @@ public class MakeshiftSlingshot extends Item {
 		usesTargeting = true;
 
 		image = ItemSpriteSheet.MAKESHIFT_SLINGSHOT;
-		stackable = false;
+		stackable = true;
+		levelKnown = true;
+		cursedKnown = true;
 
 		bones = true;
 	}
@@ -100,23 +103,20 @@ public class MakeshiftSlingshot extends Item {
 				return;
 			}
 
-			// 消耗石头和投石索
+			// 消耗一颗石头和一个投石索
 			stone.detach(curUser.belongings.backpack);
 			curItem.detach(curUser.belongings.backpack);
 
 			curUser.spendAndNext(1f);
 			
-			// 播放投掷音效
 			Sample.INSTANCE.play(Assets.Sounds.HIT);
-			
-			// 执行投掷动画
-			curUser.sprite.zap(cell, new Callback() {
+			MissileSprite missile = (MissileSprite) curUser.sprite.parent.recycle(MissileSprite.class);
+			missile.reset(curUser.sprite, cell, stone, new Callback() {
 				@Override
 				public void call() {
-					// 投掷到达目标
 					onThrowReached(cell);
 				}
-			});
+			}, 2f);
 		}
 
 		@Override

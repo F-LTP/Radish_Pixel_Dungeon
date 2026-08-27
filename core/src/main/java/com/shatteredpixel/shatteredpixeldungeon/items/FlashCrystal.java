@@ -124,6 +124,7 @@ public class FlashCrystal extends Item {
 			curUser.sprite.emitter().start(Speck.factory(Speck.LIGHT), 0.2f, 3);
 
 			float roll = Random.Float();
+			boolean destroyed = false;
 
 			if (roll < 0.33f) {
 				// 33% 上升一级
@@ -132,18 +133,30 @@ public class FlashCrystal extends Item {
 				GLog.p(Messages.get(FlashCrystal.class, "up", item.name(), item.level()));
 			} else if (roll < 0.66f) {
 				// 33% 下降一级
-				item.degrade();
-				Item.updateQuickslot();
-				GLog.w(Messages.get(FlashCrystal.class, "down", item.name(), item.level()));
+				if (item.trueLevel() == 0) {
+					destroyed = true;
+				} else {
+					item.degrade();
+					Item.updateQuickslot();
+					GLog.w(Messages.get(FlashCrystal.class, "down", item.name(), item.level()));
+				}
 			} else {
 				// 33% 无事发生
 				GLog.i(Messages.get(FlashCrystal.class, "nothing"));
 			}
 
-			// 0级装备会被摧毁（降级到0级以下）
-			if (item.level() < 0) {
+			// 0级装备降级失败时会被直接摧毁
+			if (destroyed) {
 				GLog.n(Messages.get(FlashCrystal.class, "destroyed", item.name()));
-				item.detachAll(curUser.belongings.backpack);
+				if (item.isEquipped(curUser)) {
+					// Use the normal unequip path so equipment buffs and slot references are cleared.
+					if (((EquipableItem) item).doUnequip(curUser, false, false)) {
+						curUser.spend(-curUser.cooldown());
+					}
+				} else {
+					item.detachAll(curUser.belongings.backpack);
+				}
+				Item.updateQuickslot();
 			}
 
 			curUser.spendAndNext(1f);
