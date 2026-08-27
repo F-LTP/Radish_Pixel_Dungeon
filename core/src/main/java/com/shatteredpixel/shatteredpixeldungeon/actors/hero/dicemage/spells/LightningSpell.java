@@ -62,7 +62,7 @@ public class LightningSpell extends DiceMageSpell {
 
                 MagicPoint mp = hero.buff(MagicPoint.class);
                 int mpBonus = mp != null ? mp.getIntPoints() : 0;
-                final int dmg = Random.IntRange(15, 25) + mpBonus * 2;
+                final int dmg = Random.IntRange(15, 25) + mpBonus * 2 + strBonusDamage(hero);
 
                 MagicMissile.boltFromChar(hero.sprite.parent, MagicMissile.STAR, hero.sprite, target.pos, new Callback() {
                     @Override

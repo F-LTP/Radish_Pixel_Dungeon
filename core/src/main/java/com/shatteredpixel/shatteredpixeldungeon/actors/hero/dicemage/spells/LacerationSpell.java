@@ -70,7 +70,7 @@ public class LacerationSpell extends DiceMageSpell {
         if (hero.sprite != null) hero.sprite.showStatus(CharSprite.NEGATIVE, Integer.toString(selfDmg));
 
         Mob target = topMobs.get(Random.Int(topMobs.size()));
-        int dmg = Random.IntRange(17, 31);
+        int dmg = Random.IntRange(17, 31) + strBonusDamage(hero);
         target.damage(DamageInfo.physicalNoArmor(dmg, LacerationSpell.this));
         CellEmitter.center(target.pos).burst(BloodParticle.BURST, 10);
         startCooldown(hero, COOLDOWN);

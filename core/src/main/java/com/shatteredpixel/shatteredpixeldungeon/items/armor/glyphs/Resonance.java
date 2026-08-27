@@ -22,7 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -35,28 +35,31 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
  */
 public class Resonance extends Armor.Glyph {
 
+	private static final ItemSprite.Glowing RESONANCE = new ItemSprite.Glowing(0x66CCFF);
+
 	@Override
 	public int proc(Armor armor, Char attacker, Char defender, int damage) {
-		// 格挡提升在 Hero.drRoll 中通过 isResonanceActive 判定生效
+		// 格挡提升在角色的 drRoll 中通过 isResonanceActive 判定生效
 		return damage;
 	}
 
 	/**
 	 * 共鸣是否激活：需要同时装备共鸣附魔武器与共鸣刻印护甲。
 	 */
-	public static boolean isResonanceActive(Hero hero) {
-		if (hero == null) return false;
-		com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon wep = hero.belongings.weapon();
-		Armor arm = hero.belongings.armor();
-		if (wep == null || arm == null) return false;
-		boolean weaponHasResonance = wep instanceof Weapon
-				&& ((Weapon) wep).enchantment instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Resonance;
+	public static boolean isResonanceActive(Char wearer) {
+		if (wearer == null) return false;
+		Item weapon = wearer.attackingWeapon();
+		Item armor = Char.defendingArmor(wearer);
+		Armor arm = armor instanceof Armor ? (Armor) armor : null;
+		if (weapon == null || arm == null) return false;
+		boolean weaponHasResonance = weapon instanceof Weapon
+				&& ((Weapon) weapon).enchantment instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Resonance;
 		boolean armorHasResonance = arm.glyph instanceof Resonance;
 		return weaponHasResonance && armorHasResonance;
 	}
 
 	@Override
 	public ItemSprite.Glowing glowing() {
-		return null; // 平时不显露能量
+		return RESONANCE;
 	}
 }

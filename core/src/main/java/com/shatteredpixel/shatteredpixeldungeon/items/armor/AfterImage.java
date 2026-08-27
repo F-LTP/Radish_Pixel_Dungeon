@@ -1,6 +1,5 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CircleSword;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -71,8 +70,8 @@ public class AfterImage extends Armor{
 		@Override
 		public String desc() {
 			if (!(this instanceof AnotabsoluteEvasion)
-					&& target == Dungeon.hero
-					&& Dungeon.hero.belongings.attackingWeapon() instanceof CircleSword) {
+					&& target != null
+					&& target.attackingWeapon() instanceof CircleSword) {
 				return Messages.get(this, "circle_desc");
 			}
 			return super.desc();

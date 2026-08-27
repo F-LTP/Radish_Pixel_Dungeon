@@ -28,7 +28,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -102,15 +101,7 @@ public class ArmoredStatue extends Statue {
 
 	@Override
 	public void damage(DamageInfo info) {
-		//TODO improve this when I have proper damage source logic
-		int dmg = info.getDamage();
-		Object src = info.getSource();
-		if (armor != null && armor.hasGlyph(AntiMagic.class, this)
-				&& AntiMagic.RESISTS.contains(src.getClass())){
-			dmg -= AntiMagic.drRoll(this, armor.procLvl());
-		}
-
-		super.damage( DamageInfo.of(dmg, info.getType(), info.getAttacker(), src) );
+		super.damage(info);
 
 		//for the rose status indicator
 		Item.updateQuickslot();

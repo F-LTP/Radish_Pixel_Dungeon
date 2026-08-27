@@ -67,7 +67,7 @@ public class ShineSpell extends DiceMageSpell {
                         if (Math.max(Math.abs(x - cx), Math.abs(y - cy)) > 5) continue;
                         Char ch = Actor.findChar(pos);
                         if (ch == null || ch.alignment != Char.Alignment.ENEMY) continue;
-                        int dmg = Random.IntRange(30, 50);
+                        int dmg = Random.IntRange(30, 50) + strBonusDamage(hero);
                         ch.damage(DamageInfo.magical(dmg, ShineSpell.this));
                         if (ch.isAlive()) {
                             Buff.affect(ch, Blindness.class, 5f);

@@ -21,11 +21,13 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -63,7 +65,7 @@ public class WndInfoMob extends Window {
 		add(titlebar);
 
 		RenderedTextBlock text = PixelScene.renderTextBlock( 6 );
-		text.text( mob.info(), width );
+		text.text( info(mob), width );
 		text.setPos( titlebar.left(), titlebar.bottom() + 2*GAP );
 		add( text );
 
@@ -127,7 +129,7 @@ public class WndInfoMob extends Window {
 		buffs.setPos(name.left(), health.bottom() + 1);
 		add(buffs);
 
-		RenderedTextBlock info = PixelScene.renderTextBlock(mob.info(), 6);
+		RenderedTextBlock info = PixelScene.renderTextBlock(info(mob), 6);
 		info.hardlight(DiceMageUI.CREAM);
 		info.maxWidth(width - DICE_PAD * 4);
 		info.setPos(DICE_PAD * 2, DICE_PORTRAIT + DICE_PAD * 4 + 8);
@@ -144,6 +146,22 @@ public class WndInfoMob extends Window {
 		add(info);
 
 		resize(width, (int)(body.bottom() + DICE_PAD));
+	}
+
+	private String info(Mob mob) {
+		String info = mob.info();
+		if (!Dungeon.isChallenged(Challenges.REAL_INTELLIGENCE)) return info;
+
+		StringBuilder items = new StringBuilder();
+		String separator = Messages.get(WndInfoMob.class, "item_separator");
+		for (Item item : mob.mobEquipment.carriedItems()) {
+			if (items.length() > 0) items.append(separator);
+			items.append(Messages.titleCase(item.title()));
+		}
+		if (items.length() > 0) {
+			info += "\n\n" + Messages.get(WndInfoMob.class, "carried_items", items);
+		}
+		return info;
 	}
 	
 	private static class MobTitle extends Component {

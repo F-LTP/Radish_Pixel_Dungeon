@@ -69,7 +69,7 @@ public class BurstSpell extends DiceMageSpell {
                     CellEmitter.center(target.pos).burst(SparkParticle.FACTORY, 5);
                     GLog.p(Messages.get(BurstSpell.this, "shield", SHIELD_AMOUNT));
                 } else {
-                    int damage = Random.IntRange(14, 21);
+                    int damage = Random.IntRange(14, 21) + strBonusDamage(hero);
                     target.damage(DamageInfo.fire(damage, BurstSpell.this));
                     if (target.isAlive()) {
                         CellEmitter.center(target.pos).burst(FlameParticle.FACTORY, 8);

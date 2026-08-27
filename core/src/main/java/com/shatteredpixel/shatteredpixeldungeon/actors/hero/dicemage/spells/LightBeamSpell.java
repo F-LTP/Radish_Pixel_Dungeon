@@ -55,7 +55,7 @@ public class LightBeamSpell extends DiceMageSpell {
                     GLog.w(Messages.get(LightBeamSpell.this, "invalid_target"));
                     return;
                 }
-                int dmg = Random.IntRange(45, 60); // 近似 +10 法杖
+                int dmg = Random.IntRange(45, 60) + strBonusDamage(hero); // 近似 +10 法杖
                 if (!spendMagic(hero)) return;
                 MagicMissile.boltFromChar(hero.sprite.parent, MagicMissile.FORCE, hero.sprite, target.pos, new Callback() {
                     @Override
