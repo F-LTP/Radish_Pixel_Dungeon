@@ -3,7 +3,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero.dicemage.spells;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.NonDecayingPoison;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.dicemage.DiceMageSpell;
@@ -59,7 +59,7 @@ public class HemlockSpell extends DiceMageSpell {
                 int dmg = Random.IntRange(3, 7) + strBonusDamage(hero);
                 target.damage(DamageInfo.poison(dmg, HemlockSpell.this));
                 if (target.isAlive()) {
-                    Buff.affect(target, Poison.class).set(dmg);
+                    Buff.affect(target, NonDecayingPoison.class).set(dmg);
                     CellEmitter.center(target.pos).burst(PoisonParticle.SPLASH, 8);
                 }
                 startCooldown(hero, COOLDOWN);
