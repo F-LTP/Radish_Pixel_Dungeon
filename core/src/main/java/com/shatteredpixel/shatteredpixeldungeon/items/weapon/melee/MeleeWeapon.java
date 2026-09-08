@@ -37,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroAction;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -244,11 +245,11 @@ public class MeleeWeapon extends Weapon {
 			RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
 			// 塑形玻璃的虚拟等级需要与国王之戒的虚拟等级叠加
 			if(riverGlass != null && hero.buff(BlessAWP.WeaponGetReady.class)!=null && hero.belongings.weapon() == this) {
-				return super.buffedLvl() + 1 + riverGlass.level() + 1 + RingOfKing.updateMultiplier(Dungeon.hero);
+				return super.buffedLvl() + 1 + riverGlass.virtualLevel() + RingOfKing.updateMultiplier(Dungeon.hero);
 			} else if(hero.buff(BlessAWP.WeaponGetReady.class)!=null && hero.belongings.weapon() == this){
 				return super.buffedLvl() + 1 + RingOfKing.updateMultiplier(Dungeon.hero);
 			} else if(riverGlass != null){
-				return super.buffedLvl() + riverGlass.level() + 1 + RingOfKing.updateMultiplier(Dungeon.hero);
+				return super.buffedLvl() + riverGlass.virtualLevel() + RingOfKing.updateMultiplier(Dungeon.hero);
 			}
 
 			if (hero.pointsInTalent(Talent.GIFT) > 0) {
@@ -364,7 +365,7 @@ public class MeleeWeapon extends Weapon {
 			info += "\n\n" + Messages.get(Weapon.class, "cursed_worn");
 		} else if (cursedKnown && cursed) {
 			info += "\n\n" + Messages.get(Weapon.class, "cursed");
-		} else if (!isIdentified() && cursedKnown){
+		} else if (!isIdentified() && cursedKnown && !cursed){
 			if (enchantment != null && enchantment.curse()) {
 				info += "\n\n" + Messages.get(Weapon.class, "weak_cursed");
 			} else {
@@ -425,7 +426,7 @@ public class MeleeWeapon extends Weapon {
 					float chargeToGain = 1/(60f-1.5f*(chargeCap()-charges));
 
 					//40 to 30 turns per charge for champion
-					if (Dungeon.hero.subClass == HeroSubClass.CHAMPION){
+					if (Dungeon.hero.subClass == HeroSubClasses.CHAMPION){
 						chargeToGain *= 1.5f;
 					}
 
@@ -447,7 +448,7 @@ public class MeleeWeapon extends Weapon {
 				partialCharge = 0;
 			}
 
-			if (ActionIndicator.action != this && Dungeon.hero.subClass == HeroSubClass.CHAMPION) {
+			if (ActionIndicator.action != this && Dungeon.hero.subClass == HeroSubClasses.CHAMPION) {
 				ActionIndicator.setAction(this);
 			}
 
@@ -457,7 +458,7 @@ public class MeleeWeapon extends Weapon {
 
 		@Override
 		public void fx(boolean on) {
-			if (on && Dungeon.hero.subClass == HeroSubClass.CHAMPION) {
+			if (on && Dungeon.hero.subClass == HeroSubClasses.CHAMPION) {
 				ActionIndicator.setAction(this);
 			}
 		}
@@ -470,7 +471,7 @@ public class MeleeWeapon extends Weapon {
 
 		public int chargeCap(){
 			//caps at level 19 with 8 or 10 charges
-			if (Dungeon.hero.subClass == HeroSubClass.CHAMPION){
+			if (Dungeon.hero.subClass == HeroSubClasses.CHAMPION){
 				return Math.min(10, 4 + (Dungeon.hero.lvl - 1) / 3);
 			} else {
 				return Math.min(8, 2 + (Dungeon.hero.lvl - 1) / 3);
@@ -551,7 +552,7 @@ public class MeleeWeapon extends Weapon {
 
 		@Override
 		public void doAction() {
-			if (Dungeon.hero.subClass != HeroSubClass.CHAMPION){
+			if (Dungeon.hero.subClass != HeroSubClasses.CHAMPION){
 				return;
 			}
 

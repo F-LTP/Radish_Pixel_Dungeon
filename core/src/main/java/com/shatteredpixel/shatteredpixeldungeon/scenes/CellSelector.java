@@ -38,12 +38,15 @@ import com.watabou.input.ScrollEvent;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.ScrollArea;
+import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.Point;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Signal;
 
 public class CellSelector extends ScrollArea {
+
+	private static final float LONG_PRESS_TIME = 0.55f;
 
 	public Listener listener = null;
 	
@@ -77,6 +80,13 @@ public class CellSelector extends ScrollArea {
 	
 	@Override
 	protected void onClick( PointerEvent event ) {
+		if (longPressCandidate && listener != null && listener.supportsLongPressRightClick()
+				&& Game.timeTotal - longPressStart >= LONG_PRESS_TIME) {
+			event.button = PointerEvent.RIGHT;
+			PointerEvent.setHoverPos(event.current);
+		}
+		longPressCandidate = false;
+
 		if (dragging) {
 			
 			dragging = false;
@@ -171,6 +181,8 @@ public class CellSelector extends ScrollArea {
 	}
 	
 	private boolean pinching = false;
+	private boolean longPressCandidate = false;
+	private float longPressStart;
 	private PointerEvent another;
 	private float startZoom;
 	private float startSpan;
@@ -178,6 +190,10 @@ public class CellSelector extends ScrollArea {
 	@Override
 	protected void onPointerDown( PointerEvent event ) {
 		camera.edgeScroll.set(-1);
+		if (curEvent == event) {
+			longPressCandidate = !DeviceCompat.isDesktop() && event.button == PointerEvent.LEFT;
+			longPressStart = Game.timeTotal;
+		}
 		if (event != curEvent && another == null) {
 					
 			if (curEvent.type == PointerEvent.Type.UP) {
@@ -187,6 +203,7 @@ public class CellSelector extends ScrollArea {
 			}
 			
 			pinching = true;
+			longPressCandidate = false;
 			
 			another = event;
 			startSpan = PointF.distance( curEvent.current, another.current );
@@ -236,6 +253,7 @@ public class CellSelector extends ScrollArea {
 			if (!dragging && PointF.distance( event.current, event.start ) > dragThreshold) {
 				
 				dragging = true;
+				longPressCandidate = false;
 				lastPos.set( event.current );
 				
 			} else if (dragging) {
@@ -495,6 +513,7 @@ public class CellSelector extends ScrollArea {
 	@Override
 	public void reset() {
 		super.reset();
+		longPressCandidate = false;
 		another = null;
 		if (pinching){
 			pinching = false;
@@ -519,6 +538,8 @@ public class CellSelector extends ScrollArea {
 		public abstract void onSelect( Integer cell );
 
 		public void onRightClick( Integer cell ){} //do nothing by default
+
+		public boolean supportsLongPressRightClick() { return false; }
 
 		public abstract String prompt();
 	}

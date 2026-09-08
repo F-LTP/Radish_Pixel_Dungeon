@@ -104,7 +104,11 @@ public class ExoticPotion extends Potion {
 	public void reset() {
 		super.reset();
 		if (handler != null && handler.contains(exoToReg.get(this.getClass()))) {
-			image = handler.image(exoToReg.get(this.getClass())) + 32;
+			String regularImage = handler.image(exoToReg.get(this.getClass()));
+			// The old sprite sheet used a numeric row offset. RuntimeAtlas uses names.
+			image = regularImage.startsWith("potion_")
+					? "exotic_" + regularImage.substring("potion_".length())
+					: regularImage;
 			color = handler.label(exoToReg.get(this.getClass()));
 		}
 	}

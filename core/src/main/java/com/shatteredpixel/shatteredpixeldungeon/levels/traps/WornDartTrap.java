@@ -20,6 +20,8 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.traps;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -81,7 +83,7 @@ public class WornDartTrap extends Trap {
 									@Override
 									public void call() {
 										int dmg = Char.combatRoll(4, 8) - finalTarget.drRoll();
-										finalTarget.damage(dmg, WornDartTrap.this);
+										finalTarget.damage(new DamageInfo(dmg, DamageType.PHYSICAL, null, null, WornDartTrap.this));
 										if (finalTarget == Dungeon.hero && !finalTarget.isAlive()){
 											Dungeon.fail( WornDartTrap.this  );
 										}
@@ -93,7 +95,7 @@ public class WornDartTrap extends Trap {
 								});
 						return false;
 					} else {
-						finalTarget.damage(Char.combatRoll(4, 8) - finalTarget.drRoll(), WornDartTrap.this);
+						finalTarget.damage(new DamageInfo(Char.combatRoll(4, 8) - finalTarget.drRoll(), DamageType.PHYSICAL, null, null, WornDartTrap.this));
 						return true;
 					}
 				} else {

@@ -21,7 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
@@ -53,11 +52,16 @@ public class Corrupting extends Weapon.Enchantment {
 				&& defender.isAlive()){
 			
 			Mob enemy = (Mob) defender;
-			Hero hero = (attacker instanceof Hero) ? (Hero) attacker : Dungeon.hero;
-
 			Corruption.corruptionHeal(enemy);
 
-			AllyBuff.affectAndLoot(enemy, hero, Corruption.class);
+			if (attacker instanceof Hero) {
+				AllyBuff.affectAndLoot(enemy, (Hero) attacker, Corruption.class);
+			} else {
+				Buff.affect(enemy, Corruption.class);
+				if (enemy.buff(Corruption.class) != null) {
+					enemy.alignment = attacker.alignment;
+				}
+			}
 
 			float powerMulti = Math.max(1f, procChance);
 			if (powerMulti > 1.1f){

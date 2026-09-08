@@ -3,6 +3,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero.talents.moonlight;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
@@ -11,15 +12,24 @@ import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.utils.Bundle;
 
 public class HuntingIntuitionTalent {
     public static class ExperienceCounter extends Buff {
         public int count = 0;
 
+        private static final String COUNT = "count";
+
         @Override
-        public boolean act() {
-            spend(TICK);
-            return true;
+        public void storeInBundle(Bundle bundle) {
+            super.storeInBundle(bundle);
+            bundle.put(COUNT, count);
+        }
+
+        @Override
+        public void restoreFromBundle(Bundle bundle) {
+            super.restoreFromBundle(bundle);
+            count = bundle.getInt(COUNT);
         }
     }
 
@@ -27,7 +37,7 @@ public class HuntingIntuitionTalent {
     public static void onGainExperience(HeroGainExperienceEvent event) {
         Hero hero = event.getHero();
 
-        if (hero.heroClass != HeroClass.MOONLIGHT) return;
+        if (hero.heroClass != HeroClasses.MOONLIGHT) return;
 
         int points = hero.pointsInTalent(Talent.HUNTING_INTUITION);
         if (points <= 0) return;

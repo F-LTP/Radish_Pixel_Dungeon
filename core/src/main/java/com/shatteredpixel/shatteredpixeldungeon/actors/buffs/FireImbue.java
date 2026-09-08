@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -118,7 +119,7 @@ public class FireImbue extends Buff {
 	}
 
 	{
-		immunities.add( Burning.class );
+		immunities.add(Burning.class); typeImmunities.add(DamageType.BURNING_STATUS);
 	}
 
 	@Override

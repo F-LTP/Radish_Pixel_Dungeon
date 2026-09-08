@@ -1,12 +1,9 @@
 package com.shatteredpixel.shatteredpixeldungeon.ui;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
-import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.ui.Component;
 
@@ -21,6 +18,7 @@ public class DiceMageUI {
     public static final int ORANGE     = 0xC45E16;
     public static final int RED        = 0xAD1F1F;
     public static final int BLUE       = 0x217B91;
+    public static final int SKY_BLUE   = 0x66CCFF;
     public static final int PURPLE     = 0x6A4484;
     public static final int GREEN      = 0x388044;
     public static final int GREY_LINE  = 0x51464D;
@@ -34,7 +32,7 @@ public class DiceMageUI {
     private static final int PIP_PER_HP = 10; // 每格代表10点血
 
     public static boolean active() {
-        return Dungeon.hero != null && Dungeon.hero.subClass == HeroSubClass.DICE_MAGE;
+        return UITheme.isDiceMage();
     }
 
     public static int itemLineColor(Item item, boolean equipped) {
@@ -154,69 +152,11 @@ public class DiceMageUI {
         }
     }
 
-    public static class Frame extends Component {
-
-        private final int fillColor;
-        private final int lineColor;
-        private ColorBlock fill;
-        private ColorBlock top;
-        private ColorBlock bottom;
-        private ColorBlock left;
-        private ColorBlock right;
-
+    /** @deprecated Use {@link RoundedFrame}; retained for incremental migration. */
+    @Deprecated
+    public static class Frame extends RoundedFrame {
         public Frame(int fillColor, int lineColor) {
-            super();
-            this.fillColor = fillColor;
-            this.lineColor = lineColor;
-            fill.hardlight(fillColor);
-            top.hardlight(lineColor);
-            bottom.hardlight(lineColor);
-            left.hardlight(lineColor);
-            right.hardlight(lineColor);
-        }
-
-        @Override
-        protected void createChildren() {
-            fill = new ColorBlock(1, 1, 0xFFFFFFFF);
-            add(fill);
-            top = new ColorBlock(1, 1, 0xFFFFFFFF);
-            add(top);
-            bottom = new ColorBlock(1, 1, 0xFFFFFFFF);
-            add(bottom);
-            left = new ColorBlock(1, 1, 0xFFFFFFFF);
-            add(left);
-            right = new ColorBlock(1, 1, 0xFFFFFFFF);
-            add(right);
-        }
-
-        @Override
-        protected void layout() {
-            fill.x = x;
-            fill.y = y;
-            fill.size(width, height);
-
-            top.x = x;
-            top.y = y;
-            top.size(width, 1);
-
-            bottom.x = x;
-            bottom.y = y + height - 1;
-            bottom.size(width, 1);
-
-            left.x = x;
-            left.y = y;
-            left.size(1, height);
-
-            right.x = x + width - 1;
-            right.y = y;
-            right.size(1, height);
-        }
-        public void alpha(float value) {
-            fill.alpha(value);
-            top.alpha(value);
-            bottom.alpha(value);
-            left.alpha(value);
-            right.alpha(value);
+            super(fillColor, lineColor);
         }
     }
 
@@ -267,18 +207,12 @@ public class DiceMageUI {
 
         @Override
         protected void onPointerDown() {
-            bg.top.hardlight(GOLD);
-            bg.bottom.hardlight(GOLD);
-            bg.left.hardlight(GOLD);
-            bg.right.hardlight(GOLD);
+            bg.setLineColor(GOLD);
         }
 
         @Override
         protected void onPointerUp() {
-            bg.top.hardlight(GREY_LINE);
-            bg.bottom.hardlight(GREY_LINE);
-            bg.left.hardlight(GREY_LINE);
-            bg.right.hardlight(GREY_LINE);
+            bg.setLineColor(GREY_LINE);
         }
     }
 }

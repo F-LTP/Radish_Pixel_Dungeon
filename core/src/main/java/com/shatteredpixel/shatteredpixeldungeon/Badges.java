@@ -22,7 +22,9 @@
 package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
@@ -777,32 +779,32 @@ public class Badges {
 
 	private static LinkedHashMap<HeroClass, Badge> firstBossClassBadges = new LinkedHashMap<>();
 	static {
-		firstBossClassBadges.put(HeroClass.WARRIOR, Badge.BOSS_SLAIN_1_WARRIOR);
-		firstBossClassBadges.put(HeroClass.MAGE, Badge.BOSS_SLAIN_1_MAGE);
-		firstBossClassBadges.put(HeroClass.ROGUE, Badge.BOSS_SLAIN_1_ROGUE);
-		firstBossClassBadges.put(HeroClass.HUNTRESS, Badge.BOSS_SLAIN_1_HUNTRESS);
+		firstBossClassBadges.put(HeroClasses.WARRIOR, Badge.BOSS_SLAIN_1_WARRIOR);
+		firstBossClassBadges.put(HeroClasses.MAGE, Badge.BOSS_SLAIN_1_MAGE);
+		firstBossClassBadges.put(HeroClasses.ROGUE, Badge.BOSS_SLAIN_1_ROGUE);
+		firstBossClassBadges.put(HeroClasses.HUNTRESS, Badge.BOSS_SLAIN_1_HUNTRESS);
 	}
 
 	private static LinkedHashMap<HeroClass, Badge> victoryClassBadges = new LinkedHashMap<>();
 	static {
-		victoryClassBadges.put(HeroClass.WARRIOR, Badge.VICTORY_WARRIOR);
-		victoryClassBadges.put(HeroClass.MAGE, Badge.VICTORY_MAGE);
-		victoryClassBadges.put(HeroClass.ROGUE, Badge.VICTORY_ROGUE);
-		victoryClassBadges.put(HeroClass.HUNTRESS, Badge.VICTORY_HUNTRESS);
+		victoryClassBadges.put(HeroClasses.WARRIOR, Badge.VICTORY_WARRIOR);
+		victoryClassBadges.put(HeroClasses.MAGE, Badge.VICTORY_MAGE);
+		victoryClassBadges.put(HeroClasses.ROGUE, Badge.VICTORY_ROGUE);
+		victoryClassBadges.put(HeroClasses.HUNTRESS, Badge.VICTORY_HUNTRESS);
 	}
 
 	private static LinkedHashMap<HeroSubClass, Badge> thirdBossSubclassBadges = new LinkedHashMap<>();
 	static {
-		thirdBossSubclassBadges.put(HeroSubClass.BERSERKER, Badge.BOSS_SLAIN_3_BERSERKER);
-		thirdBossSubclassBadges.put(HeroSubClass.GLADIATOR, Badge.BOSS_SLAIN_3_GLADIATOR);
-		thirdBossSubclassBadges.put(HeroSubClass.BATTLEMAGE, Badge.BOSS_SLAIN_3_BATTLEMAGE);
-		thirdBossSubclassBadges.put(HeroSubClass.WARLOCK, Badge.BOSS_SLAIN_3_WARLOCK);
-		thirdBossSubclassBadges.put(HeroSubClass.ASSASSIN, Badge.BOSS_SLAIN_3_ASSASSIN);
-		thirdBossSubclassBadges.put(HeroSubClass.FREERUNNER, Badge.BOSS_SLAIN_3_FREERUNNER);
-		thirdBossSubclassBadges.put(HeroSubClass.SNIPER, Badge.BOSS_SLAIN_3_SNIPER);
-		thirdBossSubclassBadges.put(HeroSubClass.WARDEN, Badge.BOSS_SLAIN_3_WARDEN);
-		thirdBossSubclassBadges.put(HeroSubClass.CHAMPION, Badge.BOSS_SLAIN_3_CHAMPION);
-		thirdBossSubclassBadges.put(HeroSubClass.MONK, Badge.BOSS_SLAIN_3_MONK);
+		thirdBossSubclassBadges.put(HeroSubClasses.BERSERKER, Badge.BOSS_SLAIN_3_BERSERKER);
+		thirdBossSubclassBadges.put(HeroSubClasses.GLADIATOR, Badge.BOSS_SLAIN_3_GLADIATOR);
+		thirdBossSubclassBadges.put(HeroSubClasses.BATTLEMAGE, Badge.BOSS_SLAIN_3_BATTLEMAGE);
+		thirdBossSubclassBadges.put(HeroSubClasses.WARLOCK, Badge.BOSS_SLAIN_3_WARLOCK);
+		thirdBossSubclassBadges.put(HeroSubClasses.ASSASSIN, Badge.BOSS_SLAIN_3_ASSASSIN);
+		thirdBossSubclassBadges.put(HeroSubClasses.FREERUNNER, Badge.BOSS_SLAIN_3_FREERUNNER);
+		thirdBossSubclassBadges.put(HeroSubClasses.SNIPER, Badge.BOSS_SLAIN_3_SNIPER);
+		thirdBossSubclassBadges.put(HeroSubClasses.WARDEN, Badge.BOSS_SLAIN_3_WARDEN);
+		thirdBossSubclassBadges.put(HeroSubClasses.CHAMPION, Badge.BOSS_SLAIN_3_CHAMPION);
+		thirdBossSubclassBadges.put(HeroSubClasses.MONK, Badge.BOSS_SLAIN_3_MONK);
 	}
 
 	public static void validateBossSlain() {
@@ -906,25 +908,18 @@ public class Badges {
 	public static void validateMastery() {
 
 		Badge badge = null;
-		switch (Dungeon.hero.heroClass) {
-			case WARRIOR:
-				badge = Badge.MASTERY_WARRIOR;
-				break;
-			case MAGE:
-				badge = Badge.MASTERY_MAGE;
-				break;
-			case ROGUE:
-				badge = Badge.MASTERY_ROGUE;
-				break;
-			case HUNTRESS:
-				badge = Badge.MASTERY_HUNTRESS;
-				break;
-			case RECTOR:
-				badge = Badge.MASTERY_RECTOR;
-				break;
-			case MOONLIGHT:
-				badge = Badge.MASTERY_MOONLIGHT;
-				break;
+		if (Dungeon.hero.heroClass == HeroClasses.WARRIOR) {
+			badge = Badge.MASTERY_WARRIOR;
+		} else if (Dungeon.hero.heroClass == HeroClasses.MAGE) {
+			badge = Badge.MASTERY_MAGE;
+		} else if (Dungeon.hero.heroClass == HeroClasses.ROGUE) {
+			badge = Badge.MASTERY_ROGUE;
+		} else if (Dungeon.hero.heroClass == HeroClasses.HUNTRESS) {
+			badge = Badge.MASTERY_HUNTRESS;
+		} else if (Dungeon.hero.heroClass == HeroClasses.RECTOR) {
+			badge = Badge.MASTERY_RECTOR;
+		} else if (Dungeon.hero.heroClass == HeroClasses.MOONLIGHT) {
+			badge = Badge.MASTERY_MOONLIGHT;
 		}
 
 		unlock(badge);
@@ -1277,7 +1272,7 @@ public class Badges {
 		String result = "\n";
 
 		if (badge == Badge.BOSS_SLAIN_1_ALL_CLASSES){
-			for (HeroClass cls : HeroClass.values()){
+			for (HeroClass cls : HeroClasses.ALL){
 				result += "\n";
 				if (isUnlocked(firstBossClassBadges.get(cls)))  result += "_" + Messages.titleCase(cls.title()) + "_";
 				else                                            result += Messages.titleCase(cls.title());
@@ -1287,7 +1282,7 @@ public class Badges {
 
 		} else if (badge == Badge.VICTORY_ALL_CLASSES) {
 
-			for (HeroClass cls : HeroClass.values()){
+			for (HeroClass cls : HeroClasses.ALL){
 				result += "\n";
 				if (isUnlocked(victoryClassBadges.get(cls)))    result += "_" + Messages.titleCase(cls.title()) + "_";
 				else                                            result += Messages.titleCase(cls.title());
@@ -1297,8 +1292,8 @@ public class Badges {
 
 		} else if (badge == Badge.BOSS_SLAIN_3_ALL_SUBCLASSES){
 
-			for (HeroSubClass cls : HeroSubClass.values()){
-				if (cls == HeroSubClass.NONE) continue;
+			for (HeroSubClass cls : HeroSubClasses.ALL){
+				if (cls == HeroSubClasses.NONE) continue;
 				result += "\n";
 				if (isUnlocked(thirdBossSubclassBadges.get(cls)))   result += "_" + Messages.titleCase(cls.title()) + "_";
 				else                                                result += Messages.titleCase(cls.title()) ;

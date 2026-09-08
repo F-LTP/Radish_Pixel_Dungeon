@@ -21,7 +21,11 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.rings;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CircleSword;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
@@ -35,6 +39,10 @@ public class RingOfTenacity extends Ring {
 
 	public String statsInfo() {
 		if (isIdentified()){
+			if (wieldingCircleSword()){
+				int effLevel = 2*soloBuffedBonus() + 1;
+				return Messages.get(this, "stats_sword", new DecimalFormat("#.##").format(100f * (Math.pow(1.05f, effLevel) - 1f)));
+			}
 			if (!cursed)
 				return Messages.get(this, "stats", new DecimalFormat("#.##").format(100f * (Math.pow(1.05f, soloBuffedBonus()) - 1f)),new DecimalFormat("#.##").format(100f*(1.1f-Math.max(0.11f,Math.pow(0.944, soloBuffedBonus()-1f)))));
 			else
@@ -42,6 +50,14 @@ public class RingOfTenacity extends Ring {
 		} else {
 			return Messages.get(this, "typical_stats", new DecimalFormat("#.##").format(5f),new DecimalFormat("#.##").format(10f));
 		}
+	}
+
+	private boolean wieldingCircleSword(){
+		return Dungeon.hero != null && Dungeon.hero.belongings.weapon() instanceof CircleSword;
+	}
+
+	private static boolean wieldingCircleSword( Char t ){
+		return t != null && t.attackingWeapon() instanceof CircleSword;
 	}
 
 	@Override
@@ -56,6 +72,7 @@ public class RingOfTenacity extends Ring {
 	}
 
 	public static float damageMultiplier( Char t ){
+		if (wieldingCircleSword(t)) return 1f;
 		int gbb=getBuffedBonus( t, Tenacity.class);
 		if (gbb>0)
 			return Math.max(0.01f,(float)Math.pow(0.944,gbb-1)-0.1f);
@@ -64,10 +81,17 @@ public class RingOfTenacity extends Ring {
 	}
 	public static float attackMultiplier( Char t ){
 		int gbb=getBuffedBonus( t, Tenacity.class);
+		if (wieldingCircleSword(t)) {
+			gbb = 2*gbb + 1;
+		}
 		return (float)Math.pow(1.05,gbb);
 	}
 
 	public class Tenacity extends RingBuff {
+
+		@Override
+		public void modifyOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+			info.addDirectMultModifier(attackMultiplier(attacker), "tenacity", this);
+		}
 	}
 }
-

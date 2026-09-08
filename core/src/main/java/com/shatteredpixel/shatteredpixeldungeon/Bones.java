@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -76,7 +77,7 @@ public class Bones {
 		bundle.put( LEVEL, depth );
 		bundle.put( BRANCH_ID, branchId );
 		bundle.put( ITEM, item );
-		bundle.put( HERO_CLASS, heroClass );
+		bundle.put( HERO_CLASS, heroClass.name() );
 
 		try {
 			FileUtils.bundleToFile( BONES_FILE, bundle );
@@ -175,7 +176,7 @@ public class Bones {
 						item = null;
 					}
 					if (bundle.contains(HERO_CLASS)){
-						heroClass = bundle.getEnum(HERO_CLASS, HeroClass.class);
+						heroClass = HeroClasses.fromSaveName(bundle.getString(HERO_CLASS));
 					} else {
 						heroClass = null;
 					}

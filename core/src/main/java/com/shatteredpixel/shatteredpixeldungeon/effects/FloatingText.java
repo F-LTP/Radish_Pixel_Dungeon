@@ -84,7 +84,7 @@ public class FloatingText extends RenderedTextBlock {
 	public static int EX_EXP    = 27;
 	public static int BELIEF    = 28;
 
-	private Image icon;
+	private final ArrayList<Image> icons = new ArrayList<>();
 	private boolean iconLeft;
 
 	private float timeLeft;
@@ -115,9 +115,9 @@ public class FloatingText extends RenderedTextBlock {
 					t.y -= yMove;
 				}
 
-				if (icon != null){
-					icon.alpha(p > 0.5f ? 1 : p * 2);
-					icon.y -= yMove;
+				for (Image ic : icons){
+					ic.alpha(p > 0.5f ? 1 : p * 2);
+					ic.y -= yMove;
 				}
 			}
 		}
@@ -126,22 +126,28 @@ public class FloatingText extends RenderedTextBlock {
 	@Override
 	protected synchronized void layout() {
 		super.layout();
-		if (icon != null){
+		if (!icons.isEmpty()){
+			float startX;
 			if (iconLeft){
-				icon.x = left();
+				//图标在左侧，自左向右排列，最右一个贴近文字
+				startX = left();
 			} else {
-				icon.x = left() + width() - icon.width();
+				startX = left() + width() - icons.size() * ICON_SIZE;
 			}
-			icon.y = top();
-			PixelScene.align(icon);
+			for (int i = 0; i < icons.size(); i++) {
+				Image ic = icons.get(i);
+				ic.x = startX + i * ICON_SIZE;
+				ic.y = top();
+				PixelScene.align(ic);
+			}
 		}
 	}
 
 	@Override
 	public float width() {
 		float width = super.width();
-		if (icon != null){
-			width += icon.width()-0.5f;
+		if (!icons.isEmpty()){
+			width += icons.size() * (ICON_SIZE - 0.5f);
 		}
 		return width;
 	}
@@ -164,7 +170,11 @@ public class FloatingText extends RenderedTextBlock {
 	}
 	
 	public void reset( float x, float y, String text, int color, int iconIdx, boolean left ) {
-		
+		reset(x, y, text, color, new int[]{iconIdx}, left);
+	}
+
+	public void reset( float x, float y, String text, int color, int[] iconIdxs, boolean left ) {
+
 		revive();
 		
 		zoom( 1 / (float)PixelScene.defaultZoom );
@@ -172,16 +182,20 @@ public class FloatingText extends RenderedTextBlock {
 		text( text );
 		hardlight( color );
 
-		if (iconIdx != NO_ICON){
-			icon = new Image( Assets.Effects.TEXT_ICONS);
-			icon.frame(iconFilm.get(iconIdx));
-			add(icon);
+		icons.clear();
+		boolean hasIcon = iconIdxs != null && iconIdxs.length > 0 && iconIdxs[0] != NO_ICON;
+		if (hasIcon){
+			for (int idx : iconIdxs){
+				if (idx == NO_ICON) continue;
+				Image ic = new Image( Assets.Effects.TEXT_ICONS);
+				ic.frame(iconFilm.get(idx));
+				add(ic);
+				icons.add(ic);
+			}
 			iconLeft = left;
 			if (iconLeft){
 				align(RIGHT_ALIGN);
 			}
-		} else {
-			icon = null;
 		}
 
 		setPos(
@@ -209,6 +223,19 @@ public class FloatingText extends RenderedTextBlock {
 				FloatingText txt = GameScene.status();
 				if (txt != null){
 					txt.reset(x, y, text, color, iconIdx, left);
+					if (key != -1) push(txt, key);
+				}
+			}
+		});
+	}
+
+	public static void show( float x, float y, int key, String text, int color, int[] iconIdxs, boolean left ) {
+		Game.runOnRenderThread(new Callback() {
+			@Override
+			public void call() {
+				FloatingText txt = GameScene.status();
+				if (txt != null){
+					txt.reset(x, y, text, color, iconIdxs, left);
 					if (key != -1) push(txt, key);
 				}
 			}

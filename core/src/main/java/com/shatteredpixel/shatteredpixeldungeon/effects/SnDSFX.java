@@ -4,6 +4,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.ClusteredSkeleton;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Rat;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Skeleton;
@@ -176,7 +177,7 @@ public class SnDSFX {
      * Check if Dice Mage audio layer is active.
      */
     public static boolean active() {
-        return Dungeon.hero != null && Dungeon.hero.subClass == HeroSubClass.DICE_MAGE;
+        return Dungeon.hero != null && Dungeon.hero.subClass == HeroSubClasses.DICE_MAGE;
     }
 
     // ========== Core API ==========
@@ -200,8 +201,8 @@ public class SnDSFX {
      * @return true if sound was played, false if not found
      */
     public static boolean play(String name) {
-        return play(name, 1f, 1f);
-    }
+            return play(name, 1.5f, 1f);
+        }
 
     /**
      * Play a random variant of the specified sound with volume and pitch.

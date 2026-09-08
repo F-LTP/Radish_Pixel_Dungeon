@@ -1,6 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.ArmoredStatue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CrystalMimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.GoldenMimic;
@@ -35,6 +36,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branch;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.utils.DungeonSeed;
 import com.watabou.utils.Random;
@@ -265,7 +268,7 @@ public class SeedFinder {
 
     private boolean testSeed(String seed, int floors) {
         SPDSettings.customSeed(seed);
-        GamesInProgress.selectedClass = HeroClass.WARRIOR;
+        GamesInProgress.selectedClass = HeroClasses.WARRIOR;
         Dungeon.init();
 
         boolean[] itemsFound = new boolean[itemList.size()];
@@ -379,7 +382,7 @@ public class SeedFinder {
 
     private boolean testSeedALL(String seed, int floors) {
         SPDSettings.customSeed(seed);
-        GamesInProgress.selectedClass = HeroClass.WARRIOR;
+        GamesInProgress.selectedClass = HeroClasses.WARRIOR;
         Dungeon.init();
 
         boolean[] itemsFound = new boolean[itemList.size()];
@@ -528,8 +531,13 @@ public class SeedFinder {
     public String logSeedItems(String seed, int floors) {
 
         SPDSettings.customSeed(seed);
-        GamesInProgress.selectedClass = HeroClass.WARRIOR;
+        GamesInProgress.selectedClass = HeroClasses.WARRIOR;
         Dungeon.init();
+        Branch branch = Branches.get(Dungeon.branchId);
+        if (branch != null) {
+            floors = Math.min(floors, branch.maxDepth - Dungeon.depth + 1);
+        }
+        floors = Math.max(0, floors);
         StringBuilder result = new StringBuilder(Messages.get(this, "seed") + DungeonSeed.convertToCode(Dungeon.seed) + " (" + Dungeon.seed + ") " + Messages.get(this, "items") + ":\n\n");
 
         blacklist = Arrays.asList(Gold.class, Dewdrop.class, IronKey.class, GoldenKey.class, CrystalKey.class, EnergyCrystal.class,

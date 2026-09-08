@@ -105,6 +105,11 @@ public enum DamageType {
 	// ========== 真实伤害 ==========
 	/** 真实伤害：无视一切减免（护甲、抗性、护盾等） */
 	TRUE("true", FloatingText.PHYS_DMG, true, true),
+
+	// ========== 混合伤害 ==========
+	/** 混合伤害：由多种类型按百分比构成，减免与跳字按各成分分别处理。
+	 *  具体成分存于 DamageInfo 的 MixedDamage 中（本枚举仅为哨兵）。 */
+	MIXED("mixed", FloatingText.NO_ICON, false, false),
 	
 	// ========== 其他 ==========
 	/** 未知/默认类型 */
@@ -147,6 +152,11 @@ public enum DamageType {
 		return this == TRUE;
 	}
 	
+	/** Whether this damage skips shield buffers. */
+	public boolean ignoresShields() {
+		return this == TRUE || this == HUNGER;
+	}
+
 	/** 是否为物理伤害 */
 	public boolean isPhysical() {
 		return !magical && this != TRUE && this != UNKNOWN;
@@ -162,107 +172,5 @@ public enum DamageType {
 	public boolean isDoT() {
 		return this == BLEEDING || this == POISON || this == OOZE 
 			|| this == BURNING_STATUS || this == CHILL;
-	}
-	
-	// ========== 静态方法：从来源判断类型 ==========
-	
-	/**
-	 * 根据来源对象自动判断伤害类型
-	 * 用于兼容现有代码的迁移
-	 */
-	public static DamageType fromSource(Object source) {
-		if (source == null) {
-			return UNKNOWN;
-		}
-		if (source instanceof DamageType) {
-			return (DamageType) source;
-		}
-		
-		String className = source.getClass().getSimpleName();
-
-		// Status and special sources must be checked before their broader elements.
-		if (className.contains("Bleeding")) return BLEEDING;
-		if (className.contains("Poison")) return POISON;
-		if (className.contains("Ooze")) return OOZE;
-		if (className.contains("Chill")) return CHILL;
-		if (className.contains("Burning")) return BURNING_STATUS;
-		if (className.contains("Toxic")) return TOXIC;
-		if (className.contains("Corrosion") || className.contains("Corrosive")) return CORROSIVE;
-		if (className.contains("StormCloud") || className.contains("Geyser")
-				|| className.contains("Water")) return WATER;
-		if (className.contains("Deferred") || className.contains("Defered")
-				|| className.contains("Viscosity")) return DEFERRED;
-		if (className.contains("Ascension") || className.contains("Amulet")) return AMULET;
-		
-		// 闪电相关
-		if (className.contains("Lightning") || className.contains("Electricity")
-			|| className.contains("Shocking") || className.contains("Shock")) {
-			return LIGHTNING;
-		}
-		
-		// 火焰相关
-		if (className.contains("Fire") || className.contains("Burning")
-			|| className.contains("BlastWave") || className.contains("Blazing")) {
-			return FIRE;
-		}
-		
-		// 冰霜相关
-		if (className.contains("Frost")
-			|| className.contains("FrostImbue")) {
-			return FROST;
-		}
-		
-		// 毒素相关
-		if (className.contains("Poison")) {
-			return POISON;
-		}
-		
-		// 腐蚀相关
-		if (className.contains("Corrosion") || className.contains("Corrosive")) {
-			return CORROSIVE;
-		}
-		
-		// 流血
-		if (className.contains("Bleeding")) {
-			return BLEEDING;
-		}
-		
-		// 饥饿
-		if (className.contains("Hunger")) {
-			return HUNGER;
-		}
-		
-		// 坠落/深渊
-		if (className.contains("Chasm") || className.contains("Fall")) {
-			return CHASM;
-		}
-		
-		// 腐化
-		if (className.contains("Corruption") || className.contains("Doom")) {
-			return CORRUPTION;
-		}
-		
-		// 钴镐
-		if (className.contains("Pickaxe")) {
-			return PICK;
-		}
-		
-		// 魔法类（法杖、卷轴等）
-		if (className.contains("Wand") || className.contains("Scroll")
-			|| className.contains("Gaze") || className.contains("Beam")
-			|| className.contains("Bolt") && !className.contains("Lightning")
-			|| className.contains("Magic") || className.contains("Psionic")) {
-			return MAGICAL;
-		}
-		
-		// 无视护甲的物理伤害
-		if (className.contains("Spike") || className.contains("Rockfall")
-			|| className.contains("Boulder") || className.contains("Grim")
-			|| className.contains("KingDamager")) {
-			return PHYSICAL_NO_ARMOR;
-		}
-		
-		// 默认物理
-		return PHYSICAL;
 	}
 }

@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -156,7 +157,7 @@ public class Piranha extends Mob {
 				immunities.add(c);
 			}
 		}
-		immunities.add( Burning.class );
+		immunities.add(Burning.class); typeImmunities.add(DamageType.BURNING_STATUS);
 	}
 	
 	//if there is not a path to the enemy, piranhas act as if they can't see them

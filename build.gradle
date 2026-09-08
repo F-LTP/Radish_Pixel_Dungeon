@@ -22,10 +22,10 @@ allprojects {
 
     ext {
         appName = 'Radish Pixel Dungeon'
-        appPackageName = 'com.thecatist.radishpixeldungeon'
+        appPackageName = 'com.shatteredpixel.radishpixeldungeon'
 
         appVersionCode = 2608060
-        appVersionName = '0.8.0-test'
+        appVersionName = '0.8.3-base2.4.2'
 
         appJavaCompatibility = JavaVersion.VERSION_1_8
 

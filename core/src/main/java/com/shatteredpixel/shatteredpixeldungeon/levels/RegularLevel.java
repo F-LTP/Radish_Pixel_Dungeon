@@ -51,6 +51,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.journal.GuidePage;
 import com.shatteredpixel.shatteredpixeldungeon.items.journal.RegionLorePage;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.GoldenKey;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.Key;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.CrackedSpyglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.MimicTooth;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
@@ -748,6 +749,19 @@ public abstract class RegularLevel extends Level {
 			}
 		Random.popGenerator();
 
+		//extra spyglass loot
+		Random.pushGenerator(Random.Long());
+			int items = (int)(Random.Float() + CrackedSpyglass.extraLootChance());
+			for (int i = 0; i < items; i++){
+				int cell = randomDropCell();
+				if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
+					map[cell] = Terrain.GRASS;
+					losBlocking[cell] = false;
+				}
+				drop( Generator.randomUsingDefaults(), cell).hidden = true;
+			}
+		Random.popGenerator();
+
 	}
 
 	private static HashMap<Document, Dungeon.LimitedDrops> limitedDocs = new HashMap<>();
@@ -889,7 +903,7 @@ public abstract class RegularLevel extends Level {
 
 		//There are no unused keys for this depth in the journal
 		for (Notes.KeyRecord rec : Notes.getRecords(Notes.KeyRecord.class)){
-			if (rec.depth() == depth){
+			if (rec.depth() == depth && Dungeon.branchId.equals(rec.branchId())){
 				return false;
 			}
 		}

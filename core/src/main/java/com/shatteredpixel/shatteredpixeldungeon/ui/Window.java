@@ -47,6 +47,7 @@ public class Window extends Group implements Signal.Listener<KeyEvent> {
 	protected PointerArea blocker;
 	protected ShadowBox shadow;
 	protected NinePatch chrome;
+	protected RoundedFrame themedChrome;
 
 	public static final int WHITE = 0xFFFFFF;
 	public static final int TITLE_COLOR = 0xFFFF44;
@@ -96,6 +97,10 @@ public class Window extends Group implements Signal.Listener<KeyEvent> {
 			width - chrome.x + chrome.marginRight(),
 			height - chrome.y + chrome.marginBottom() );
 		add( chrome );
+
+		themedChrome = UITheme.roundedFrame(DiceMageUI.BLACK, DiceMageUI.ORANGE);
+		add(themedChrome);
+		layoutChromeTheme();
 		
 		camera = new Camera( 0, 0,
 			(int)chrome.width,
@@ -122,6 +127,7 @@ public class Window extends Group implements Signal.Listener<KeyEvent> {
 		chrome.size(
 			width + chrome.marginHor(),
 			height + chrome.marginVer() );
+		layoutChromeTheme();
 		
 		camera.resize( (int)chrome.width, (int)chrome.height );
 
@@ -132,6 +138,13 @@ public class Window extends Group implements Signal.Listener<KeyEvent> {
 		camera.y += yOffset * camera.zoom;
 
 		shadow.boxRect( camera.x / camera.zoom, camera.y / camera.zoom, chrome.width(), chrome.height );
+	}
+
+	protected final void layoutChromeTheme() {
+		boolean themed = UITheme.isDiceMage();
+		chrome.alpha(themed ? 0f : 1f);
+		themedChrome.visible = themed;
+		themedChrome.setRect(chrome.x, chrome.y, chrome.width, chrome.height);
 	}
 
 	public Point getOffset(){

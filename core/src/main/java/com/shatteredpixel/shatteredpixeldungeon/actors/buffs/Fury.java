@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 
 public class Fury extends Buff {
@@ -46,5 +48,10 @@ public class Fury extends Buff {
 	@Override
 	public String icon() {
 		return BuffIndicator.FURY;
+	}
+
+	@Override
+	public void modifyOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+		info.addDirectMultModifier(1.5f, "fury", this);
 	}
 }

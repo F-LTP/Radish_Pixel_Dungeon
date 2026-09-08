@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicPoint;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SparkParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -447,7 +448,7 @@ public class AlchemyScene extends PixelScene {
 
 			@Override
 			protected void onClick() {
-				if (Dungeon.hero.subClass == HeroSubClass.DICE_MAGE && Dungeon.energy > 0){
+				if (Dungeon.hero.subClass == HeroSubClasses.DICE_MAGE && Dungeon.energy > 0){
 					AlchemyScene.this.addToFront(new WndOptions(Messages.get(AlchemyScene.class, "dice_mage_title"),
 							Messages.get(AlchemyScene.class, "dice_mage_message"),
 							Messages.get(AlchemyScene.class, "dice_mage_convert"),

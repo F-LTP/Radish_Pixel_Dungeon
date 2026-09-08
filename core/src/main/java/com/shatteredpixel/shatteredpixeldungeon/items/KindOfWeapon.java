@@ -29,7 +29,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroAction;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.talents.moonlight.SharpeningEdgeTalent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CancelAttackBuff;
@@ -71,7 +73,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 			actions.add(AC_SHARPENING_EDGE);
 		}
 		// 十手冠军：所有武器都可以转换为十手（但十手本身不能再转化）
-		if (hero.subClass == HeroSubClass.JUTTE_CHAMPION && !(this instanceof JutteChampionWeapon)) {
+		if (hero.subClass == HeroSubClasses.JUTTE_CHAMPION && !(this instanceof JutteChampionWeapon)) {
 			actions.add(AC_CONVERT_TO_JUTTE);
 		}
 		return actions;
@@ -96,7 +98,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 			SharpeningEdgeTalent.showTargetSelectionWindow(hero, this);
 		} else if (action.equals(AC_CONVERT_TO_JUTTE)) {
 			convertToJutte(hero);
-		} else if (hero.subClass == HeroSubClass.CHAMPION && action.equals(AC_EQUIP)){
+		} else if (hero.subClass == HeroSubClasses.CHAMPION && action.equals(AC_EQUIP)){
 			usesTargeting = false;
 			String primaryName = Messages.titleCase(hero.belongings.weapon != null ? hero.belongings.weapon.trueName() : Messages.get(KindOfWeapon.class, "empty"));
 			String secondaryName = Messages.titleCase(hero.belongings.secondWep != null ? hero.belongings.secondWep.trueName() : Messages.get(KindOfWeapon.class, "empty"));
@@ -141,7 +143,8 @@ abstract public class KindOfWeapon extends EquipableItem {
 
 	@Override
 	public boolean isEquipped( Hero hero ) {
-		return hero.belongings.weapon() == this || hero.belongings.secondWep() == this;
+		return hero != null && hero.belongings != null
+				&& (hero.belongings.weapon() == this || hero.belongings.secondWep() == this);
 	}
 
 	private static boolean isSwiftEquipping = false;
@@ -170,7 +173,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 			}
 		}
 
-		if (hero.heroClass == HeroClass.MOONLIGHT){
+		if (hero.heroClass == HeroClasses.MOONLIGHT){
 			if (hero.buff(Talent.SwiftEquipCooldown.class) == null){
 				isSwiftEquipping = true;
 			}
@@ -186,7 +189,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 			updateQuickslot();
 
 			// 小骑士切换武器：给予取消攻击buff
-			if (hero.subClass == HeroSubClass.LITTLE_KNIGHT) {
+			if (hero.subClass == HeroSubClasses.LITTLE_KNIGHT) {
 				// 检查冷却是否结束
 				if (hero.buff(CancelAttackCooldown.class) == null) {
 					Buff.affect(hero, CancelAttackBuff.class, 2f);
@@ -198,7 +201,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 			}
 
 			// 角斗士4-4 武器大师：切换武器后连击数和攻速加成
-			if (hero.subClass == HeroSubClass.GLADIATOR && hero.hasTalent(Talent.WEAPON_MASTER)) {
+			if (hero.subClass == HeroSubClasses.GLADIATOR && hero.hasTalent(Talent.WEAPON_MASTER)) {
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo combo = hero.buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo.class);
 				if (combo != null) {
 					int points = hero.pointsInTalent(Talent.WEAPON_MASTER);
@@ -406,7 +409,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 	private String swordShieldKnightInfo() {
 		// 剑盾骑士天赋：显示护甲最小值提升（仅对近战武器生效）
 		if (this instanceof MeleeWeapon) {
-			if (Dungeon.hero != null && Dungeon.hero.heroClass == HeroClass.MOONLIGHT) {
+			if (Dungeon.hero != null && Dungeon.hero.heroClass == HeroClasses.MOONLIGHT) {
 				int points = Dungeon.hero.pointsInTalent(Talent.SWORD_SHIELD_KNIGHT);
 				if (points > 0 && Dungeon.hero.belongings.armor != null) {
 					// 计算天赋加成后的护甲最小值

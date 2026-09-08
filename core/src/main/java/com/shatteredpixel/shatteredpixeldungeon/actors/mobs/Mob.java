@@ -32,6 +32,8 @@ import com.shatteredpixel.shatteredpixeldungeon.challenge.SnakeBiteChallengeMana
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
@@ -62,7 +64,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.VitaeBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.Belief;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.dicemage.DiceMageSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Feint;
@@ -73,12 +77,14 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishBoss.GnollShamanKing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishBoss.GnollKing;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.ai.AIModifier;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SentryRoom;
 import com.shatteredpixel.shatteredpixeldungeon.effects.*;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.LeatherArmor;
@@ -88,6 +94,10 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourg
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfHaste;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfMight;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfWealth;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
@@ -101,7 +111,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
@@ -113,6 +122,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -161,10 +171,15 @@ public abstract class Mob extends Char {
 	protected static final float TIME_TO_WAKE_UP = 1f;
 
 	protected boolean firstAdded = true;
+	public final MobEquipment mobEquipment = new MobEquipment(this);
 
 	public boolean eyeAttack = false;
 	protected void onAdd(){
 		if (firstAdded) {
+			if (Dungeon.isChallenged(Challenges.REAL_INTELLIGENCE)
+					&& alignment == Alignment.ENEMY) {
+				mobEquipment.generate();
+			}
 			//modify health for ascension challenge if applicable, only on first add
 			float percent = HP / (float) HT;
 			
@@ -177,6 +192,11 @@ public abstract class Mob extends Char {
 			// Apply both modifiers
 			HT = Math.round(HT * ascensionMod * crossLevelMod);
 			HP = Math.round(HT * percent);
+			float might = RingOfMight.HTMultiplier(this);
+			if (might != 1f) {
+				HT = Math.max(1, Math.round(HT * might));
+				HP = Math.min(HT, Math.round(HT * percent));
+			}
 			firstAdded = false;
 		}
 	}
@@ -228,6 +248,7 @@ public abstract class Mob extends Char {
 		}
 
 		bundle.put(ONLY_ACTDOWN,onlyActDown);
+		mobEquipment.storeInBundle(bundle);
 
 	}
 
@@ -265,6 +286,7 @@ public abstract class Mob extends Char {
 
 
 		eyeAttack = bundle.getBoolean(EYEATTACK);
+		mobEquipment.restoreFromBundle(bundle);
 		//no need to actually save this, must be false
 		firstAdded = false;
 	}
@@ -555,6 +577,9 @@ public abstract class Mob extends Char {
 		if (Dungeon.level.adjacent( pos, enemy.pos )){
 			return true;
 		}
+		if (mobEquipment.weapon != null && mobEquipment.weapon.canReach(this, enemy.pos)) {
+			return true;
+		}
 		for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
 			if (buff.canAttackWithExtraReach( enemy )){
 				return true;
@@ -743,6 +768,11 @@ public abstract class Mob extends Char {
 	public float attackDelay() {
 		float delay = 1f;
 		if ( buff(Adrenaline.class) != null) delay /= 1.5f;
+		if (mobEquipment.weapon != null) {
+			delay *= mobEquipment.weapon.delayFactor(this);
+		} else {
+			delay /= RingOfFuror.attackSpeedMultiplier(this);
+		}
 		return delay;
 	}
 
@@ -779,101 +809,105 @@ public abstract class Mob extends Char {
 		}
 	}
 
-	@Override
-	public int defenseProc( Char enemy, int damage ) {
+		@Override
+		public int defenseProc( Char enemy, int damage ) {
 
-		if (enemy instanceof Hero
-				&& ((Hero) enemy).belongings.attackingWeapon() instanceof MissileWeapon){
-			Statistics.thrownAttacks++;
-			Badges.validateHuntressUnlock();
-		}
+			// 拉莱耶反弹已迁移至 Rlyeh 订阅 AttackEvent 处理
 
-		if (surprisedBy(enemy)) {
-			Statistics.sneakAttacks++;
-			Badges.validateRogueUnlock();
-			//TODO this is somewhat messy, it would be nicer to not have to manually handle delays here
-			// playing the strong hit sound might work best as another property of weapon?
-			if (Dungeon.hero.belongings.attackingWeapon() instanceof SpiritBow.SpiritArrow
-					|| Dungeon.hero.belongings.attackingWeapon() instanceof Dart){
-				Sample.INSTANCE.playDelayed(Assets.Sounds.HIT_STRONG, 0.125f);
-			} else {
-				Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
-			}
-			if (enemy.buff(Preparation.class) != null) {
-				Wound.hit(this);
-			} else {
-				Surprise.hit(this);
-			}
-		}
-
-		//if attacked by something else than current target, and that thing is closer, switch targets
-		if (this.enemy == null
-				|| (enemy != this.enemy && (Dungeon.level.distance(pos, enemy.pos) < Dungeon.level.distance(pos, this.enemy.pos)))) {
-			aggro(enemy);
-			target = enemy.pos;
-		}
-
-		if (buff(SoulMark.class) != null) {
-			int restoration = Math.min(damage, HP+shielding());
-
-			//physical damage that doesn't come from the hero is less effective
-			if (enemy != Dungeon.hero){
-				restoration = Math.round(restoration * 0.4f*Dungeon.hero.pointsInTalent(Talent.SOUL_SIPHON)/3f);
+			if (enemy instanceof Hero
+					&& ((Hero) enemy).belongings.attackingWeapon() instanceof MissileWeapon){
+				Statistics.thrownAttacks++;
+				Badges.validateHuntressUnlock();
 			}
 
-			if (restoration > 0) {
-				Buff.affect(Dungeon.hero, Hunger.class).affectHunger(restoration*Dungeon.hero.pointsInTalent(Talent.SOUL_EATER)/3f);
-				int preHp=Dungeon.hero.HP;
+			if (surprisedBy(enemy)) {
+				Statistics.sneakAttacks++;
+				Badges.validateRogueUnlock();
+				//TODO this is somewhat messy, it would be nicer to not have to manually handle delays here
+				// playing the strong hit sound might work best as another property of weapon?
+				if (Dungeon.hero.belongings.attackingWeapon() instanceof SpiritBow.SpiritArrow
+						|| Dungeon.hero.belongings.attackingWeapon() instanceof Dart){
+					Sample.INSTANCE.playDelayed(Assets.Sounds.HIT_STRONG, 0.125f);
+				} else {
+					Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
+				}
+				if (enemy.buff(Preparation.class) != null) {
+					Wound.hit(this);
+				} else {
+					Surprise.hit(this);
+				}
+			}
 
-				if(hero.hasTalent(Talent.DESPERATE_POWER)){
-					float mulRate =mul4DesperatePower(this);
-					restoration = (int)(restoration * mulRate);
+			//if attacked by something else than current target, and that thing is closer, switch targets
+			if (this.enemy == null
+					|| (enemy != this.enemy && (Dungeon.level.distance(pos, enemy.pos) < Dungeon.level.distance(pos, this.enemy.pos)))) {
+				aggro(enemy);
+				target = enemy.pos;
+			}
+
+			if (buff(SoulMark.class) != null) {
+				int restoration = Math.min(damage, HP+shielding());
+
+				//physical damage that doesn't come from the hero is less effective
+				if (enemy != Dungeon.hero){
+					restoration = Math.round(restoration * 0.4f*Dungeon.hero.pointsInTalent(Talent.SOUL_SIPHON)/3f);
 				}
 
-				Dungeon.hero.HP = (int) Math.ceil(Math.min(Dungeon.hero.HT, Dungeon.hero.HP + (restoration * 0.4f)));
+				if (restoration > 0) {
+					Buff.affect(Dungeon.hero, Hunger.class).affectHunger(restoration*Dungeon.hero.pointsInTalent(Talent.SOUL_EATER)/3f);
+					int preHp=Dungeon.hero.HP;
 
-				Dungeon.hero.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", Dungeon.hero.HP-preHp);
-				if (Dungeon.hero.buff(AfterGlow.Warmth.class)!=null){
-					Dungeon.hero.buff(AfterGlow.Warmth.class).getWarmth();
+					if(hero.hasTalent(Talent.DESPERATE_POWER)){
+						float mulRate =mul4DesperatePower(this);
+						restoration = (int)(restoration * mulRate);
+					}
+
+					Dungeon.hero.HP = (int) Math.ceil(Math.min(Dungeon.hero.HT, Dungeon.hero.HP + (restoration * 0.4f)));
+
+					Dungeon.hero.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", Dungeon.hero.HP-preHp);
+					if (Dungeon.hero.buff(AfterGlow.Warmth.class)!=null){
+						Dungeon.hero.buff(AfterGlow.Warmth.class).getWarmth();
+					}
+
+					Dungeon.hero.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
 				}
 
-				Dungeon.hero.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
 			}
 
+			return super.defenseProc(enemy, damage);
 		}
 
-		return super.defenseProc(enemy, damage);
-	}
-
-	@Override
-	public float speed() {
-		return super.speed() * AscensionChallenge.enemySpeedModifier(this);
-	}
-
-	public final boolean surprisedBy( Char enemy ){
-		return surprisedBy( enemy, true);
-	}
-
-	public boolean surprisedBy( Char enemy, boolean attacking ){
-		return enemy == Dungeon.hero
-				&& (enemy.invisible > 0 || !enemySeen || (fieldOfView != null && fieldOfView.length == Dungeon.level.length() && !fieldOfView[enemy.pos]))
-				&& (!attacking || enemy.canSurpriseAttack());
-	}
-
-	//whether the hero should interact with the mob (true) or attack it (false)
-	public boolean heroShouldInteract(){
-		return alignment != Alignment.ENEMY && buff(Amok.class) == null;
-	}
-
-	public void aggro( Char ch ) {
-		enemy = ch;
-		if (state != PASSIVE){
-			state = HUNTING;
+		@Override
+		public float speed() {
+			float speed = super.speed() * AscensionChallenge.enemySpeedModifier(this);
+			if (mobEquipment.armor != null) speed = mobEquipment.armor.speedFactor(this, speed);
+			return speed * RingOfHaste.speedMultiplier(this);
 		}
-	}
 
-	public void clearEnemy(){
-		enemy = null;
+		public final boolean surprisedBy( Char enemy ){
+			return surprisedBy( enemy, true);
+		}
+
+		public boolean surprisedBy( Char enemy, boolean attacking ){
+			return enemy == Dungeon.hero
+					&& (enemy.invisible > 0 || !enemySeen || (fieldOfView != null && fieldOfView.length == Dungeon.level.length() && !fieldOfView[enemy.pos]))
+					&& (!attacking || enemy.canSurpriseAttack());
+		}
+
+		//whether the hero should interact with the mob (true) or attack it (false)
+		public boolean heroShouldInteract(){
+			return alignment != Alignment.ENEMY && buff(Amok.class) == null;
+		}
+
+		public void aggro( Char ch ) {
+			enemy = ch;
+			if (state != PASSIVE){
+				state = HUNTING;
+			}
+		}
+
+		public void clearEnemy(){
+			enemy = null;
 		enemySeen = false;
 		if (state == HUNTING) state = WANDERING;
 	}
@@ -882,8 +916,57 @@ public abstract class Mob extends Char {
 		return enemy == ch;
 	}
 
+	public Char getEnemy(){
+		return enemy;
+	}
+
 	@Override
-	public void damage( int dmg, Object src ) {
+	public Item attackingWeapon() {
+		return mobEquipment.weapon != null ? mobEquipment.weapon : super.attackingWeapon();
+	}
+
+	@Override
+	public Armor armor() {
+		return mobEquipment.armor != null ? mobEquipment.armor : super.armor();
+	}
+
+	@Override
+	public int damageRoll() {
+		if (mobEquipment.weapon == null) {
+			return RingOfForce.damageRoll(this);
+		}
+		return super.damageRoll();
+	}
+
+	/** 查找当前可影响 AI 的修改器：先看 Buff，再看攻击武器的 aiTag。 */
+	public AIModifier aiModifier() {
+		for (Buff b : buffs()) {
+			if (b instanceof AIModifier) return (AIModifier) b;
+		}
+		Item w = attackingWeapon();
+		if (w instanceof Weapon) return ((Weapon) w).aiModifier();
+		return null;
+	}
+
+	/** AIModifier 执行原语：朝目标移动一步（走原有路径/开门逻辑），返回是否成功移动。 */
+	public boolean aiMoveTo(int target) {
+		int oldPos = pos;
+		if (getCloser(target)) {
+			spend(1f / speed());
+			moveSprite(oldPos, pos);
+			return true;
+		}
+		return false;
+	}
+
+	/** AIModifier 执行原语：原地等待一段时间。 */
+	public void aiWait(float time) {
+		spend(time);
+	}
+
+	@Override
+	public void damage( DamageInfo info ) {
+		Object src = info.getSource();
 		if (!isInvulnerable(src.getClass())) {
 			if (state == SLEEPING) {
 				state = WANDERING;
@@ -894,10 +977,10 @@ public abstract class Mob extends Char {
 		}
 
 		if(buff(HolyLowBurinng.class) !=null || buff(HalomethaneBurning.class)!=null){
-			dmg *= 1.3f;
+			info.addFinalMultModifier(1.3f, "holy burn");
 		}
 
-		super.damage( dmg, src );
+		super.damage( info );
 	}
 
 
@@ -939,14 +1022,14 @@ public abstract class Mob extends Char {
 				}
 
 				float Rbelief = Dungeon.hero.lvl <= maxLvl ? 1f+0.2f*Dungeon.depth/5f : 0f;
-				if(hero.heroClass == HeroClass.RECTOR){
+				if(hero.heroClass == HeroClasses.RECTOR){
 					Belief belief = Dungeon.hero.buff(Belief.class);
 					if(belief != null){
 						belief.getBelief(Rbelief);
 					}
 
 					int exExp = 10;
-					if(hero.subClass == HeroSubClass.REDCARDINAL){
+					if(hero.subClass == HeroSubClasses.REDCARDINAL){
 						if( exp >= exExp){
 							belief.getBelief(1f);
 						}
@@ -963,7 +1046,7 @@ public abstract class Mob extends Char {
 
 				Dungeon.hero.earnExp(hero.rectorDeadKngithDeadMode ? 0 : exp, getClass());
 
-				if (Dungeon.hero.subClass == HeroSubClass.MONK){
+				if (Dungeon.hero.subClass == HeroSubClasses.MONK){
 					Buff.affect(Dungeon.hero, MonkEnergy.class).gainEnergy(this);
 				}
 			}
@@ -976,36 +1059,47 @@ public abstract class Mob extends Char {
 		// DiceMage 死亡着色器效果：根据伤害类型应用 shader
 		if (alignment == Alignment.ENEMY
 				&& Dungeon.hero != null
-				&& Dungeon.hero.subClass == HeroSubClass.DICE_MAGE
+				&& Dungeon.hero.subClass == HeroSubClasses.DICE_MAGE
 				&& sprite != null
 				&& sprite.parent != null) {
-			com.shatteredpixel.shatteredpixeldungeon.damage.DamageType dmgType = 
-				com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.fromSource(cause);
-			
-			// 根据伤害类型选择 shader
+			com.shatteredpixel.shatteredpixeldungeon.damage.DamageType dmgType = this.lastDamageType;
+
+			// 根据伤害类型选择 shader（含火/毒等持续伤害状态：烧死、毒死等）
 			com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType shaderType = null;
-			if (dmgType.isElemental()) {
+			if (dmgType != null) {
 				switch (dmgType) {
 					case FIRE:
+					case BURNING_STATUS:
 						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.BURN;
 						break;
 					case FROST:
+					case CHILL:
 						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.ALPHA;
 						break;
 					case LIGHTNING:
-						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.NOISE;
+						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.SINGULARITY;
 						break;
 					case TOXIC:
 					case CORROSIVE:
+					case POISON:
+					case OOZE:
 						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.ACID;
 						break;
+					case MAGICAL:
+					case CORRUPTION:
+						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.NOISE;
+						break;
+					case PHYSICAL:
+					case PHYSICAL_NO_ARMOR:
+					case BLEEDING:
+					case FALL:
+					case CHASM:
+					case PICK:
+						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.CUT;
+						break;
 					default:
-						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.ALPHA;
+						shaderType = null;
 				}
-			} else if (dmgType == com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.MAGICAL) {
-				shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.SINGULARITY;
-			} else if (dmgType.isPhysical() || dmgType == com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.PHYSICAL_NO_ARMOR) {
-				shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.CUT;
 			}
 			
 			// 应用 shader 效果
@@ -1015,12 +1109,19 @@ public abstract class Mob extends Char {
 		}
 
 		if (alignment == Alignment.ENEMY
-				&& hero.subClass == HeroSubClass.DICE_MAGE
+				&& hero.subClass == HeroSubClasses.DICE_MAGE
 				&& (cause == hero || cause instanceof Weapon || cause instanceof Wand || cause instanceof DiceMageSpell)){
 			Buff.affect(hero, MagicPoint.class).recordKill(getClass());
 		}
 
-		if(hero.subClass == HeroSubClass.SNIPER){
+		// 骰子法师：视野内的怪物死亡时获得 1 魔力点
+		if (hero.subClass == HeroSubClasses.DICE_MAGE
+				&& alignment == Alignment.ENEMY
+				&& Dungeon.level.heroFOV[pos]){
+			Buff.affect(hero, MagicPoint.class).gainKillPoint();
+		}
+
+		if(hero.subClass == HeroSubClasses.SNIPER){
 			next();
 		}
 
@@ -1035,7 +1136,7 @@ public abstract class Mob extends Char {
 			for (Mob mob : Dungeon.level.mobs.toArray( new Mob[0] )) {
 				if (mob.alignment == Char.Alignment.ENEMY && Dungeon.level.heroFOV[mob.pos]) {
 					CellEmitter.center( mob.pos ).start( ShadowParticle.UP, 0.05f, 10 );
-					mob.damage(mob.EXP, new DM100.LightningBolt() );
+					mob.damage(DamageInfo.of(mob.EXP, DamageType.LIGHTNING, this, new DM100.LightningBolt()));
 				}
 				if(hero.hasTalent(Talent.BLACK_LOVE)){
 					Buff.affect(mob, Bleeding.class).set(2 * hero.pointsInTalent(Talent.BLACK_LOVE));
@@ -1063,7 +1164,7 @@ public abstract class Mob extends Char {
 
 
 		//击杀boss会直接获取15点信仰值
-		if(hero.heroClass == HeroClass.RECTOR){
+		if(hero.heroClass == HeroClasses.RECTOR){
 			Belief belief = Dungeon.hero.buff(Belief.class);
 			if(belief != null){
 				if(properties.contains(Property.BOSS)){
@@ -1083,9 +1184,8 @@ public abstract class Mob extends Char {
 					}
 				}
 				int effect = Math.min( hero.HT - hero.HP,hero.pointsInTalent(Talent.RAIN_GRACE));
-				hero.HP += effect;
+				hero.heal(effect);
 				hero.sprite.emitter().start( Speck.factory( Speck.HEALING ), 0.4f, 4 );
-				hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(hero.pointsInTalent(Talent.RAIN_GRACE)), FloatingText.HEALING);
 				Buff.affect(hero, Talent.Rain_Grace_Cooldown.class, 5f);
 			}
 		}
@@ -1111,6 +1211,7 @@ public abstract class Mob extends Char {
 
 		if (alignment == Alignment.ENEMY){
 			rollToDropLoot();
+			mobEquipment.dropAll();
 
 			if (cause == Dungeon.hero || cause instanceof Weapon || cause instanceof Weapon.Enchantment){
 
@@ -1395,6 +1496,11 @@ public abstract class Mob extends Char {
 
 			} else {
 
+				AIModifier ai = aiModifier();
+				if (ai != null && ai.onWander(Mob.this)) {
+					return true;
+				}
+
 				return continueWandering();
 
 			}
@@ -1652,74 +1758,45 @@ public abstract class Mob extends Char {
 		heldAllies.clear();
 	}
 
-	/**
-	 * 拉莱耶文本 自相残杀伤害 生物<br>
-	 * @param enemy 敌人<br>
-	 * @param damage 伤害
-	 */
-	public void RlyehMobDamage (Char enemy,int damage){
-		if (hero.belongings.weapon() instanceof Rlyeh) {
-			Rlyeh w2 = (Rlyeh) hero.belongings.weapon;
-			if (w2.chance()) {
-				damage(damage, new Rlyeh());
-				//因为再处理无伤害会更麻烦，所以这里改成打多少回多少
-				enemy.HP += Math.min(enemy.HT, damage);
-			}
-		} else {
-			for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
-				if (mob instanceof Statue) {
-					if (((Statue) mob).weapon instanceof Rlyeh) {
-						Rlyeh w2 =(Rlyeh) ((Statue) mob).weapon;
-						if (w2.chance()) {
-							damage(((Statue) mob).weapon.damageRoll(mob), new Rlyeh());
-							enemy.HP += Math.min(enemy.HT, damage);
-						}
+		//精英证章充能方法
+		private void EliteBadgeGetEnergy(){
+			EliteBadge.badgeRecharge bad = Dungeon.hero.buff(EliteBadge.badgeRecharge.class);
+			if (bad != null && this.alignment==Alignment.ENEMY) {
+				int ge=10;
+				float gc=0.5f+bad.itemLevel()*0.1f;
+				boolean iselite=false;
+				for (Buff b:buffs()){
+					if (b instanceof ChampionEnemy){
+						iselite=true;
 					}
 				}
-			}
-		}
-	}
-
-	//精英证章充能方法
-	private void EliteBadgeGetEnergy(){
-		EliteBadge.badgeRecharge bad = Dungeon.hero.buff(EliteBadge.badgeRecharge.class);
-		if (bad != null && this.alignment==Alignment.ENEMY) {
-			int ge=10;
-			float gc=0.5f+bad.itemLevel()*0.1f;
-			boolean iselite=false;
-			for (Buff b:buffs()){
-				if (b instanceof ChampionEnemy){
-					iselite=true;
+				if (iselite) {
+					ge=(5+(Dungeon.scalingDepth()-1)/5)*10;
+					gc=4f+bad.itemLevel()*0.4f;
+				}
+				if ( this instanceof RipperDemon || this instanceof Ghoul){
+					ge/=2;
+					gc/=2f;
+				}
+				if (!(this instanceof Wraith)) {
+					bad.gainExp(ge);
+					bad.gainCharge(gc*0.85f);
 				}
 			}
-			if (iselite) {
-				ge=(5+(Dungeon.scalingDepth()-1)/5)*10;
-				gc=4f+bad.itemLevel()*0.4f;
-			}
-			if ( this instanceof RipperDemon || this instanceof Ghoul){
-				ge/=2;
-				gc/=2f;
-			}
-			if (!(this instanceof Wraith)) {
-				bad.gainExp(ge);
-				bad.gainCharge(gc*0.85f);
-			}
-		}
-	}
-
-	@Override
-	public int attackProc( final Char enemy, int damage ) {
-		damage = super.attackProc(enemy,damage);
-
-		if(Dungeon.level.distance(enemy.pos,pos)<=1){
-			RlyehMobDamage(enemy,damage);
 		}
 
-		return damage;
-	}
+		@Override
+		public int attackProc( final Char enemy, int damage ) {
+			damage = super.attackProc(enemy,damage);
+			if (mobEquipment.weapon instanceof Weapon) {
+				damage = ((Weapon) mobEquipment.weapon).proc(this, enemy, damage);
+			}
+
+			return damage;
+		}
 
 
-	public float mul4DesperatePower(Char enemy){
+		public float mul4DesperatePower(Char enemy){
 		float lvDesPow = (float) hero.pointsInTalent(Talent.DESPERATE_POWER);
 		float stolenHpRate = ((float) this.HT-(float) this.HP)/(float) this.HT*2f;
 		float howMobDesperateThanBeforeMul = 1/(1-lvDesPow*0.125f) - 1;
@@ -1735,4 +1812,3 @@ public abstract class Mob extends Char {
 		heldAllies.clear();
 	}
 }
-

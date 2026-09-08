@@ -21,36 +21,28 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
-import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndUseItem;
-import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 
 import java.util.ArrayList;
 
 public class BrokenSeal extends ItemArmorAttachable {
 
-	public static final String AC_AFFIX = "AFFIX";
 	public boolean hasCurseGlyph(){
 		return glyph != null && glyph.curse();
 	}
 	//only to be used from the quickslot, for tutorial purposes mostly.
-	public static final String AC_INFO = "INFO_WINDOW";
 
 	{
 		image = ItemSpriteSheet.SEAL;
@@ -58,8 +50,6 @@ public class BrokenSeal extends ItemArmorAttachable {
 		cursedKnown = levelKnown = true;
 		unique = true;
 		bones = false;
-
-		defaultAction = AC_INFO;
 	}
 
 	private Armor.Glyph glyph;
@@ -99,7 +89,6 @@ public class BrokenSeal extends ItemArmorAttachable {
 	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions =  super.actions(hero);
-		actions.add(AC_AFFIX);
 		return actions;
 	}
 
@@ -107,13 +96,6 @@ public class BrokenSeal extends ItemArmorAttachable {
 	public void execute(Hero hero, String action) {
 
 		super.execute(hero, action);
-
-		if (action.equals(AC_AFFIX)){
-			curItem = this;
-			GameScene.selectItem(armorSelector);
-		} else if (action.equals(AC_INFO)) {
-			GameScene.show(new WndUseItem(null, this));
-		}
 	}
 
 	@Override
@@ -121,45 +103,6 @@ public class BrokenSeal extends ItemArmorAttachable {
 	public boolean isUpgradable() {
 		return level() == 0;
 	}
-
-	protected static WndBag.ItemSelector armorSelector = new WndBag.ItemSelector() {
-
-		@Override
-		public String textPrompt() {
-			return  Messages.get(BrokenSeal.class, "prompt");
-		}
-
-		@Override
-		public Class<?extends Bag> preferredBag(){
-			return Belongings.Backpack.class;
-		}
-
-		@Override
-		public boolean itemSelectable(Item item) {
-			return item instanceof Armor;
-		}
-
-		@Override
-		public void onSelect( Item item ) {
-			BrokenSeal seal = (BrokenSeal) curItem;
-			if (item instanceof Armor) {
-				Armor armor = (Armor)item;
-				if (!armor.levelKnown){
-					GLog.w(Messages.get(BrokenSeal.class, "unknown_armor"));
-
-				} else if (armor.cursed && (seal.getGlyph() == null || !seal.getGlyph().curse())){
-					GLog.w(Messages.get(BrokenSeal.class, "cursed_armor"));
-
-				} else {
-					GLog.p(Messages.get(BrokenSeal.class, "affix"));
-					Dungeon.hero.sprite.operate(Dungeon.hero.pos);
-					Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-					armor.affixSeal((BrokenSeal)curItem);
-					curItem.detach(Dungeon.hero.belongings.backpack);
-				}
-			}
-		}
-	};
 
 	private static final String GLYPH = "glyph";
 

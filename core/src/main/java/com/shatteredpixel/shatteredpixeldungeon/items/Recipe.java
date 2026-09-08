@@ -216,7 +216,8 @@ public abstract class Recipe {
 		new Potion.SeedToPotion(),
 		new StewedMeat.threeMeat(),
 		new MeatPie.Recipe(),
-		new ArcaneResin.TalentRecipe()
+		new ArcaneResin.TalentRecipe(),
+		new com.shatteredpixel.shatteredpixeldungeon.items.potions.MagicPotion.Recipe()
 	};
 	
 	public static ArrayList<Recipe> findRecipes(ArrayList<Item> ingredients){

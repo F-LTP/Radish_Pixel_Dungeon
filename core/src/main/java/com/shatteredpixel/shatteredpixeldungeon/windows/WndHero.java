@@ -206,7 +206,7 @@ public class WndHero extends WndTabbed {
 			Hunger hunger = Dungeon.hero.buff(Hunger.class);
 			String hunger_str = "null";
 			if(hunger != null){
-				hunger_str = hunger.hunger() + "/" + Hunger.STARVING;
+				hunger_str = hunger.hunger() + "/" + (int) hunger.getMaxHunger();
 			}
 			statSlot( M.L(HeroStat.class, "hunger"), hunger_str);
 			if (Dungeon.isChallenged(Challenges.TEST_MODE)) {

@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -32,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PrismaticGuard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
@@ -46,6 +48,11 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 
 public class PrismaticImage extends NPC {
+
+	@Override
+	protected boolean isDamageable() {
+		return true;
+	}
 	
 	{
 		spriteClass = PrismaticSprite.class;
@@ -204,16 +211,17 @@ public class PrismaticImage extends NPC {
 	}
 	
 	@Override
-	public void damage(int dmg, Object src) {
+	public void damage(DamageInfo info) {
 		
+		int dmg = info.getDamage();
 		//TODO improve this when I have proper damage source logic
 		if (hero != null && hero.belongings.armor() != null && hero.belongings.armor().hasGlyph(AntiMagic.class, this)
-				&& AntiMagic.RESISTS.contains(src.getClass())){
+				&& info.getSource() != null && AntiMagic.RESISTS.contains(info.getSource().getClass())){
 			dmg -= AntiMagic.drRoll(hero, hero.belongings.armor().buffedLvl());
 			dmg = Math.max(dmg, 0);
 		}
 		
-		super.damage(dmg, src);
+		super.damage(DamageInfo.of(dmg, info.getType(), info.getAttacker(), info.getSource()));
 	}
 	
 	@Override
@@ -266,9 +274,9 @@ public class PrismaticImage extends NPC {
 	}
 	
 	{
-		immunities.add( ToxicGas.class );
-		immunities.add( CorrosiveGas.class );
-		immunities.add( Burning.class );
+		typeImmunities.add(DamageType.TOXIC);
+		immunities.add(CorrosiveGas.class); typeImmunities.add(DamageType.CORROSIVE);
+		immunities.add(Burning.class); typeImmunities.add(DamageType.BURNING_STATUS);
 		immunities.add( AllyBuff.class );
 	}
 	

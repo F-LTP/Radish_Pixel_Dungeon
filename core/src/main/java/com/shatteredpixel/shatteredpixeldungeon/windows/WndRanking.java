@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -290,7 +291,7 @@ public class WndRanking extends WndTabbed {
 
 			int tiers = 1;
 			if (Dungeon.hero.lvl >= 6) tiers++;
-			if (Dungeon.hero.lvl >= 12 && Dungeon.hero.subClass != HeroSubClass.NONE) tiers++;
+			if (Dungeon.hero.lvl >= 12 && Dungeon.hero.subClass != HeroSubClasses.NONE) tiers++;
 			if (Dungeon.hero.lvl >= 20 && Dungeon.hero.armorAbility != null) tiers++;
 			if (Dungeon.hero.lvl >= 20 && (Dungeon.hero.armorAbility == null && Dungeon.hero.powerOfImp) ) tiers++;
 			while (Dungeon.hero.talents.size() > tiers){

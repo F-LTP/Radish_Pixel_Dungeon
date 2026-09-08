@@ -164,6 +164,7 @@ public class HeavyBoomerang extends MissileWeapon {
 		private static final String RETURN_POS = "return_pos";
 		private static final String RETURN_DEPTH = "return_depth";
 		private static final String RETURN_BRANCH = "return_branch";
+		private static final String LEFT = "left";
 
 		@Override
 		public void storeInBundle(Bundle bundle) {
@@ -173,6 +174,7 @@ public class HeavyBoomerang extends MissileWeapon {
 			bundle.put(RETURN_POS, returnPos);
 			bundle.put(RETURN_DEPTH, returnDepth);
 			bundle.put(RETURN_BRANCH, returnBranch);
+			bundle.put(LEFT, left);
 		}
 		
 		@Override
@@ -183,6 +185,8 @@ public class HeavyBoomerang extends MissileWeapon {
 			returnPos = bundle.getInt(RETURN_POS);
 			returnDepth = bundle.getInt(RETURN_DEPTH);
 			returnBranch = bundle.contains(RETURN_BRANCH) ? bundle.getString(RETURN_BRANCH) : "main";
+			// Older saves did not persist this value and returned on their next turn.
+			left = bundle.contains(LEFT) ? bundle.getInt(LEFT) : 1;
 		}
 	}
 	

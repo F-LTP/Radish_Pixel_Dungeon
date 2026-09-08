@@ -2,6 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero.talents.moonlight;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
@@ -38,7 +39,7 @@ public class TripleInsuranceTalent {
 
     private static void applyShield(Hero hero) {
         if (hero == null) return;
-        if (hero.heroClass != HeroClass.MOONLIGHT) return;
+        if (hero.heroClass != HeroClasses.MOONLIGHT) return;
 
         int points = hero.pointsInTalent(Talent.TRIPLE_INSURANCE);
         if (points <= 0) return;

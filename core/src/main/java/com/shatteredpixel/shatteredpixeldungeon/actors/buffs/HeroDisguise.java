@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -58,7 +59,7 @@ public class HeroDisguise extends FlavourBuff {
         if (target instanceof Hero && target.sprite instanceof HeroSprite){
             if (cls == null) {
                 do {
-                    cls = Random.oneOf(HeroClass.values());
+                    cls = Random.oneOf(HeroClasses.ALL.toArray(new HeroClass[0]));
                 } while (cls == ((Hero) target).heroClass);
             }
 
@@ -73,12 +74,12 @@ public class HeroDisguise extends FlavourBuff {
     @Override
     public void storeInBundle(Bundle bundle) {
         super.storeInBundle(bundle);
-        bundle.put(CLASS, cls);
+        bundle.put(CLASS, cls.name());
     }
 
     @Override
     public void restoreFromBundle(Bundle bundle) {
         super.restoreFromBundle(bundle);
-        cls = bundle.getEnum(CLASS, HeroClass.class);
+        cls = HeroClasses.fromSaveName(bundle.getString(CLASS));
     }
 }

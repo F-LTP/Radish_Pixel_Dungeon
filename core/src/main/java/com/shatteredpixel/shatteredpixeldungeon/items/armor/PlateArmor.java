@@ -22,7 +22,6 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.audio.Sample;
@@ -42,8 +41,8 @@ public class PlateArmor extends Armor {
 	 * @param damage 原始伤害
 	 * @return 如果伤害低于阈值返回 0（完全免疫），否则返回原始伤害
 	 */
-	public float damageReduce(float damage) {
-		if (Dungeon.hero != null && Dungeon.hero.belongings.armor() == this) {
+	public float damageReduce(Char wearer, float damage) {
+		if (wearer != null && Char.defendingArmor(wearer) == this) {
 			int threshold = 4 + (int)(buffedLvl() * 0.5f);
 			if (damage < threshold) {
 				Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY);

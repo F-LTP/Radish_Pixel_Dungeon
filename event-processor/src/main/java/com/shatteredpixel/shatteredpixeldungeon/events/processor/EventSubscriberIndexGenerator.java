@@ -36,7 +36,7 @@ public class EventSubscriberIndexGenerator {
                 registerMethod.addStatement(
                     "EventManager.registerSubscriber($T.class, $T.class, $S, $L)",
                     ClassName.bestGuess(info.eventTypeName),
-                    ClassName.bestGuess(info.className),
+                    ClassName.get(info.packageName, info.simpleClassName),
                     info.methodName,
                     info.priority
                 );

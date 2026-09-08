@@ -86,6 +86,8 @@ bolas.png
 bomb.png
 bomb_holder.png
 bone_claw.png
+bone_pile.png
+bone_spear.png
 bones.png
 boomerang.png
 bow_fragment.png
@@ -137,6 +139,7 @@ dirk.png
 dirk_b.png
 displacing_dart.png
 document_holder.png
+dog_leg.png
 dual_duel_daggers.png
 dust.png
 easter_egg.png
@@ -180,10 +183,12 @@ exotic_turquoise.png
 exotic_yngvi.png
 eye_of_newt.png
 feather_fall.png
+ferret_tuft.png
 fire_bomb.png
 fish_leftover.png
 fishing_spear.png
 flail.png
+flash_crystal.png
 flashbang.png
 fogsword.png
 food_holder.png
@@ -200,6 +205,7 @@ gloves.png
 gold.png
 gold_radish.png
 golden_key.png
+grappling_hook.png
 grave.png
 greataxe.png
 greatshield.png
@@ -209,6 +215,7 @@ halls_page.png
 hand_axe.png
 headcleaver.png
 healing_dart.png
+heavy_cannon.png
 herb.png
 herb_maker.png
 holder.png
@@ -230,6 +237,7 @@ kill_boat.png
 kit.png
 knight_gs.png
 kunai.png
+law_fragment.png
 lengds_page.png
 light_king.png
 lightimuee.png
@@ -243,10 +251,12 @@ mages_staff.png
 magic_infuse.png
 magic_root.png
 magnetic_crown.png
+makeshift_slingshot.png
 mask.png
 mastery.png
 meat.png
 meat_pie.png
+mechanic_shard.png
 mimic_tooth.png
 missile_holder.png
 mob_holder.png
@@ -378,6 +388,7 @@ snake_bite_amulet.png
 snake_bited_yendor.png
 snakespear.png
 something.png
+soul_ember.png
 sparkling_potion.png
 spear.png
 spell_holder.png
@@ -387,6 +398,7 @@ spirit_alt_arrow.png
 spirit_arrow.png
 spirit_bow.png
 spotoa.png
+spyglass.png
 starlight.png
 steak.png
 steamed_fish.png

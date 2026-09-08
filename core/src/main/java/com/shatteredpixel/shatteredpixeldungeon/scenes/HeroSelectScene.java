@@ -30,6 +30,8 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.HeroDefinition;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Fireball;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Journal;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -65,6 +67,7 @@ import com.watabou.noosa.audio.Music;
 import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
+import com.watabou.utils.RectF;
 
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
@@ -75,12 +78,12 @@ import java.util.List;
 public class HeroSelectScene extends PixelScene {
 
 	private static HeroClass[] heroClasses = new HeroClass[] {
-			HeroClass.WARRIOR,
-			HeroClass.MAGE,
-			HeroClass.ROGUE,
-			HeroClass.HUNTRESS,
-			HeroClass.RECTOR,
-			HeroClass.MOONLIGHT
+			HeroClasses.WARRIOR,
+			HeroClasses.MAGE,
+			HeroClasses.ROGUE,
+			HeroClasses.HUNTRESS,
+			HeroClasses.RECTOR,
+			HeroClasses.MOONLIGHT
 	};
 	private static int heroClassIndex = 0;
 	private static void addHeroClassIndex(int add) {
@@ -102,6 +105,10 @@ public class HeroSelectScene extends PixelScene {
 	private static final int FRAME_MARGIN_X        = 4;
 
 	private static final int BUTTON_HEIGHT    = 20;
+	private static final int TITLE_HEIGHT = 32;
+	private static final int TITLE_BOTTOM_GAP = 4;
+	private static final int TITLE_OFFSET_UP = 8;
+	private static final int SELECT_UI_OFFSET_DOWN = 8;
 
 	private static final int SKY_WIDTH    = 80;
 	private static final int SKY_HEIGHT    = 112;
@@ -150,7 +157,11 @@ public class HeroSelectScene extends PixelScene {
 		add( archs );
 
 		float vx = align((w - SKY_WIDTH) / 2f);
-		float vy = align((h - SKY_HEIGHT - BUTTON_HEIGHT) / 2f);
+		float centeredVy = align((h - SKY_HEIGHT - BUTTON_HEIGHT) / 2f + SELECT_UI_OFFSET_DOWN);
+		float titleY = Math.max(2, centeredVy - FRAME_MARGIN_TOP + FRAME_HEIGHT / 8f
+				- BUTTON_HEIGHT - 25 - SELECT_UI_OFFSET_DOWN - TITLE_OFFSET_UP);
+		float vy = Math.max(centeredVy,
+				titleY + TITLE_HEIGHT + TITLE_BOTTOM_GAP + FRAME_MARGIN_TOP);
 
 		Point s = Camera.main.cameraToScreen( vx, vy );
 		viewport = new Camera( s.x, s.y, SKY_WIDTH, SKY_HEIGHT, defaultZoom );
@@ -194,11 +205,6 @@ public class HeroSelectScene extends PixelScene {
 		}
 
 		a = new Avatar(heroClass());
-		// Removing semitransparent contour
-		a.am = 2; a.aa = -1;
-		a.x = (SKY_WIDTH - a.width) / 2;
-		a.y = SKY_HEIGHT - a.height;
-		align(a);
 		window.add(a);
 
 		window.add( new PointerArea( a ) {
@@ -253,13 +259,13 @@ public class HeroSelectScene extends PixelScene {
 		startBtn.icon(Icons.get(Icons.ENTER));
 		add( startBtn );
 
-		skin = new StyledButton( Chrome.Type.BLANK,Messages.get(WndKeyBindings.class, "skin"),6 ){
+		skin = new StyledButton( Chrome.Type.GREY_BUTTON_TR,Messages.get(WndKeyBindings.class, "skin"),6 ){
 			private float time = 0;
 			@Override
 			protected void onClick() {
 				super.onClick();
 				heroClass().SetSkin(heroClass().GetSkin()+1);
-				a.heroClass(heroClass());
+				setSelectedHero();
 			}
 
 			@Override
@@ -300,7 +306,9 @@ public class HeroSelectScene extends PixelScene {
 				Icons.get( SPDSettings.challenges() > 0 ? Icons.CHALLENGE_ON :Icons.CHALLENGE_OFF)){
 			@Override
 			protected void onClick() {
-				if (DeviceCompat.isDebug() || Badges.isUnlocked(Badges.Badge.VICTORY)) {
+				//TheCatist 2026.8.8 取消胜利过一次才能开挑战的限制
+				if (true){
+//				if (DeviceCompat.isDebug() || Badges.isUnlocked(Badges.Badge.VICTORY)) {
 					ShatteredPixelDungeon.scene().addToFront(new WndChallenges(SPDSettings.challenges(), true) {
 						public void onBackPressed() {
 							super.onBackPressed();
@@ -391,7 +399,7 @@ public class HeroSelectScene extends PixelScene {
 		PixelScene.align(nextBtn);
 		add( nextBtn );
 
-		StyledButton seedButton = new StyledButton(Chrome.Type.BLANK, "", 6){
+		StyledButton seedButton = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "", 6){
 			@Override
 			protected void onClick() {
 				String existingSeedtext = SPDSettings.customSeed();
@@ -425,8 +433,8 @@ public class HeroSelectScene extends PixelScene {
 		buttons.add(seedButton);
 		add(seedButton);
 
-		Image title = new Image(Assets.Interfaces.BANNERS, 0, 0, 126, 32);
-		title.setPos(frame.x - frame.width / 5f + FRAME_MARGIN_X / 5f, frame.y + frame.height / 8 - BUTTON_HEIGHT - 25);
+		Image title = new Image(Assets.Interfaces.BANNERS, 0, 0, 126, TITLE_HEIGHT);
+		title.setPos(frame.x - frame.width / 5f + FRAME_MARGIN_X / 5f, titleY);
 		add(title);
 
 		placeTorch(title.x - 8, title.y + 42);
@@ -440,7 +448,7 @@ public class HeroSelectScene extends PixelScene {
 	@Override
 	public void update() {
 		super.update();
-		boolean shouldShowGrass = heroClass().GetSkin() != 4;
+		boolean shouldShowGrass = heroClass().activeDefinition().showGrass();
 		for (GrassPatch patch : grassPatches) {
 			if (patch != null) {
 				patch.visible = shouldShowGrass;
@@ -620,30 +628,11 @@ public class HeroSelectScene extends PixelScene {
 	}
 
 	private static class Avatar extends Image {
-		private static final int FRAME_W = 64;
-		private static final int FRAME_H = 64;
-		private static final int SPECIAL_FRAME_W = 88;
-		private static final int SPECIAL_FRAME_H = 120;
-
-		private static final class SkinConfig {
-			public final HeroClass heroClass;
-			public final int skinId;
-			public final String texPath;
-
-			public SkinConfig(HeroClass heroClass, int skinId, String texPath) {
-				this.heroClass = heroClass;
-				this.skinId = skinId;
-				this.texPath = texPath;
-			}
-		}
-
-		/**
-		 * 皮肤配置方法
-		 */
-		private static final SkinConfig[] SPECIAL_SKINS = {
-				//new SkinConfig(HeroClass.WARRIOR,  4, "splashes/skin/giftskin_warrior.png"),
-				//new SkinConfig(HeroClass.ROGUE,    4, "splashes/skin/giftskin_rogue.png"),
-		};
+		private RectF[] idleFrames;
+		private int frameIndex;
+		private float frameTimer;
+		private float frameDelay;
+		private float s;
 
 		public Avatar(HeroClass cl) {
 			super();
@@ -654,26 +643,59 @@ public class HeroSelectScene extends PixelScene {
 			updateAvatar(cl);
 		}
 
+		/**
+		 * 用可动的像素小人（游戏内模型）替换原大头像贴图。
+		 * 皮肤外观统一由 {@link HeroClass#activeDefinition()} 定义。
+		 */
 		private void updateAvatar(HeroClass cl) {
-			int skinId = cl.GetSkin();
-			SkinConfig matchSkin = null;
-			for (SkinConfig cfg : SPECIAL_SKINS) {
-				if (cfg.heroClass == cl && cfg.skinId == skinId) {
-					matchSkin = cfg;
-					break;
-				}
+			HeroDefinition si = cl.activeDefinition();
+			texture(si.customSprite() ? si.asset() : cl.spritesheet());
+			TextureFilm film = new TextureFilm(texture, si.frameW(), si.frameH());
+			int[] idle = si.idleFrames();
+			// 基础职业默认皮肤：统一使用穿戴布甲的站立动画。
+			// 标准职业的布甲在第1行；月华的光身子/布甲外观在第0行（见 HeroSprite.updateArmor）。
+			int row = 0;
+			if (!si.customSprite() && cl != HeroClasses.MOONLIGHT) {
+				row = 1;
 			}
-
-			if (matchSkin != null) {
-				texture(TextureCache.get(matchSkin.texPath));
-				frame(0, 0, SPECIAL_FRAME_W, SPECIAL_FRAME_H);
-				setPos(0, 0);
+			int cols = Math.max(1, texture.width / si.frameW());
+			RectF[] candidate = new RectF[idle.length];
+			for (int i = 0; i < idle.length; i++) {
+				candidate[i] = film.get(row * cols + idle[i]);
+			}
+			s = si.scale();
+			// 过滤掉 null 帧，防止帧索引未定义时崩溃（例如独立皮肤动画尚未划分）
+			ArrayList<RectF> valid = new ArrayList<>();
+			for (RectF r : candidate) {
+				if (r != null) valid.add(r);
+			}
+			if (valid.isEmpty()) {
+				idleFrames = new RectF[]{ new RectF(0, 0, 1, 1) };
 			} else {
-				texture(cl.GetSkinAssest());
-				TextureFilm film = new TextureFilm(texture, FRAME_W, FRAME_H);
-				frame(film.get(skinId));
-				x = (SKY_WIDTH - width()) / 2f;
-				y = SKY_HEIGHT - height();
+				idleFrames = valid.toArray(new RectF[0]);
+			}
+			frameIndex = 0;
+			frameTimer = 0;
+			frameDelay = 1f / 6f;
+			frame(idleFrames[0]);
+			scale.set(s);
+			// width()/height() 已包含 scale（width * scale.x），无需再乘 s
+			x = (SKY_WIDTH - width()) / 2f;
+			y = SKY_HEIGHT - height();
+		}
+
+		@Override
+		public void update() {
+			super.update();
+			frameTimer += Game.elapsed;
+			boolean changed = false;
+			while (frameTimer >= frameDelay) {
+				frameTimer -= frameDelay;
+				frameIndex = (frameIndex + 1) % idleFrames.length;
+				changed = true;
+			}
+			if (changed) {
+				frame(idleFrames[frameIndex]);
 			}
 		}
 	}

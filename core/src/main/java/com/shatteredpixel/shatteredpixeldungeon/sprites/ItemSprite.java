@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.HalfFood;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.CrackedSpyglass;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -36,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.watabou.gltextures.AtlasFrame;
 import com.watabou.gltextures.RuntimeAtlas;
 import com.watabou.gltextures.RuntimeAtlasRegistry;
+import com.watabou.gltextures.SmartTexture;
 import com.watabou.glwrap.Matrix;
 import com.watabou.glwrap.Vertexbuffer;
 import com.watabou.noosa.Camera;
@@ -47,6 +49,7 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
+import com.shatteredpixel.shatteredpixeldungeon.ui.UITheme;
 
 import java.nio.Buffer;
 
@@ -60,6 +63,7 @@ public class ItemSprite extends MovieClip {
 	private static final RuntimeAtlas ATLAS = RuntimeAtlasRegistry.get( ItemSpriteSheet.ATLAS );
 
 	private Glowing glowing;
+	private boolean invertDarkSprite;
 	//FIXME: a lot of this emitter functionality isn't very well implemented.
 	//right now I want to ship 0.3.0, but should refactor in the future.
 	protected Emitter emitter;
@@ -134,6 +138,10 @@ public class ItemSprite extends MovieClip {
 
 		if (other instanceof ItemSprite && ((ItemSprite) other).glowing != null){
 			glow(((ItemSprite) other).glowing);
+		}
+		if (other instanceof ItemSprite) {
+			invertDarkSprite = ((ItemSprite) other).invertDarkSprite;
+			applyDarkSpriteColor();
 		}
 
 	}
@@ -210,6 +218,7 @@ public class ItemSprite extends MovieClip {
 				this.texture = tex;
 				frame(sndFrame);
 				glow(item.glowing());
+				applyDarkSpriteColor();
 				com.watabou.noosa.particles.Emitter emitter = item.emitter();
 				if (emitter != null && parent != null) {
 					emitter.pos(this);
@@ -233,10 +242,12 @@ public class ItemSprite extends MovieClip {
 			parent.add( emitter );
 			this.emitter = emitter;
 		}
+		applyDarkSpriteColor();
 		return this;
 	}
 
 	public ItemSprite view( Heap heap ){
+		alpha( heap.hidden ? CrackedSpyglass.hiddenAlpha() : 1f);
 		if (heap.size() <= 0 || heap.items == null){
 			return view( ItemSpriteSheet.SOMETHING, null );
 		}
@@ -266,7 +277,42 @@ public class ItemSprite extends MovieClip {
 		emitter = null;
 		frame( image );
 		glow( glowing );
+		applyDarkSpriteColor();
 		return this;
+	}
+
+	/** Makes nearly-black, opaque item art visible on the Dice Mage dark panels. */
+	private void applyDarkSpriteColor() {
+		invertDarkSprite = false;
+		if (UITheme.isDiceMage() && texture instanceof SmartTexture) {
+			SmartTexture tex = (SmartTexture) texture;
+			int left = Math.max(0, (int) (frame.left * tex.width));
+			int right = Math.min(tex.width, (int) Math.ceil(frame.right * tex.width));
+			int top = Math.max(0, (int) (frame.top * tex.height));
+			int bottom = Math.min(tex.height, (int) Math.ceil(frame.bottom * tex.height));
+			boolean hasOpaque = false;
+			boolean dark = true;
+			for (int py = top; py < bottom && dark; py++) {
+				for (int px = left; px < right; px++) {
+					int color = tex.getPixel(px, py);
+					int alpha = (color >>> 24) & 0xFF;
+					if (alpha < MIN_VISIBLE_ALPHA) continue;
+					hasOpaque = true;
+					int red = (color >>> 16) & 0xFF;
+					int green = (color >>> 8) & 0xFF;
+					int blue = color & 0xFF;
+					if (red > 24 || green > 24 || blue > 24) {
+						dark = false;
+						break;
+					}
+				}
+			}
+			invertDarkSprite = hasOpaque && dark;
+		}
+		if (invertDarkSprite && glowing == null) {
+			rm = gm = bm = -1f;
+			ra = ga = ba = 1f;
+		}
 	}
 
 	public void frame( String image ){
@@ -402,10 +448,18 @@ public class ItemSprite extends MovieClip {
 
 			float value = phase / glowing.period * 0.6f;
 
-			rm = gm = bm = 1 - value;
-			ra = glowing.red * value;
-			ga = glowing.green * value;
-			ba = glowing.blue * value;
+			float base = 1 - value;
+			if (invertDarkSprite) {
+				rm = gm = bm = -base;
+				ra = base + glowing.red * value;
+				ga = base + glowing.green * value;
+				ba = base + glowing.blue * value;
+			} else {
+				rm = gm = bm = base;
+				ra = glowing.red * value;
+				ga = glowing.green * value;
+				ba = glowing.blue * value;
+			}
 		}
 	}
 

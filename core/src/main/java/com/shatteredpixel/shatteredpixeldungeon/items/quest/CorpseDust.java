@@ -130,7 +130,8 @@ public class CorpseDust extends Item {
 					}
 				}
 				if (!candidates.isEmpty()){
-					Wraith.spawnAt(Random.element(candidates), DustWraith.class);
+					Wraith w = Wraith.spawnAt(Random.element(candidates), DustWraith.class);
+					if (w != null) w.noSoulDrop = true;
 					Sample.INSTANCE.play(Assets.Sounds.CURSED);
 					spawnPower -= powerNeeded;
 				}

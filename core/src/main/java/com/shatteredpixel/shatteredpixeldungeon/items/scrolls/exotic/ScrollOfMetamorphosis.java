@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Transmuting;
@@ -177,8 +178,8 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 		//talents that can only be used by one hero class
 		private static HashMap<Talent, HeroClass> restrictedTalents = new HashMap<>();
 		static {
-			restrictedTalents.put(Talent.RUNIC_TRANSFERENCE, HeroClass.WARRIOR);
-			restrictedTalents.put(Talent.WAND_PRESERVATION, HeroClass.MAGE);
+			restrictedTalents.put(Talent.RUNIC_TRANSFERENCE, HeroClasses.WARRIOR);
+			restrictedTalents.put(Talent.WAND_PRESERVATION, HeroClasses.MAGE);
 		}
 
 		public static WndMetamorphReplace INSTANCE;
@@ -217,7 +218,7 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 			LinkedHashMap<Talent, Integer> options = new LinkedHashMap<>();
 			Set<Talent> curTalentsAtTier = Dungeon.hero.talents.get(tier-1).keySet();
 
-			for (HeroClass cls : HeroClass.values()){
+			for (HeroClass cls : HeroClasses.ALL){
 				ArrayList<LinkedHashMap<Talent, Integer>> clsTalents = new ArrayList<>();
 				Talent.initClassTalents(cls, clsTalents);
 

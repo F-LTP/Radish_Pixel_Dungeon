@@ -26,6 +26,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
@@ -204,7 +206,7 @@ public class GnollGeomancer extends Mob {
 
 					dmg = Math.min(dmg, buff(RockArmor.class).shielding());
 
-					damage(dmg, p);
+					damage(new DamageInfo(dmg, DamageType.PICK, GnollGeomancer.this, p, p));
 					sprite.bloodBurstA(Dungeon.hero.sprite.center(), dmg);
 					sprite.flash();
 
@@ -256,7 +258,8 @@ public class GnollGeomancer extends Mob {
 	}
 
 	@Override
-	public void damage(int dmg, Object src) {
+	public void damage(DamageInfo info) {
+		int dmg = info.getDamage();
 		int hpBracket = (HT == 0 ? 3 : HT) / 3;
 
 		int curbracket = HP / hpBracket;
@@ -264,7 +267,7 @@ public class GnollGeomancer extends Mob {
 
 		inFinalBracket = curbracket == 0;
 
-		super.damage(dmg, src);
+		super.damage(info);
 
 		abilityCooldown -= dmg/10f;
 
@@ -694,7 +697,7 @@ public class GnollGeomancer extends Mob {
 						}
 
 						if (ch != null && !(ch instanceof GnollGeomancer)){
-							ch.damage(Char.combatRoll(6, 12), new GnollGeomancer.Boulder());
+							ch.damage(DamageInfo.of(Char.combatRoll(6, 12), DamageType.PHYSICAL_NO_ARMOR, source, new GnollGeomancer.Boulder()));
 
 							if (ch.isAlive()){
 								Buff.prolong( ch, Paralysis.class, ch instanceof GnollGuard ? 10 : 3 );
@@ -797,7 +800,7 @@ public class GnollGeomancer extends Mob {
 
 		@Override
 		public void affectChar(Char ch) {
-			ch.damage(Char.combatRoll(6, 12), this);
+			ch.damage(DamageInfo.of(Char.combatRoll(6, 12), DamageType.PHYSICAL_NO_ARMOR, null, this));
 			if (ch.isAlive()) {
 				Buff.prolong(ch, Paralysis.class, ch instanceof GnollGuard ? 10 : 3);
 			} else if (ch == Dungeon.hero){

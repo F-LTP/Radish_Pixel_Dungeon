@@ -35,18 +35,24 @@ public class DamageModifier {
 	/**
 	 * Modifier类型枚举
 	 * 
-	 * 计算顺序：((基础 + 直接加算) × 直接乘算) × 最终乘算 + 最终加算
+	 * 计算顺序：(((基础 + 直接加算) × 直接乘算) + 最终乘算前加算) × 最终乘算 + 最终加算
 	 */
 	public enum Type {
-		/** 直接加算 - 在乘算前添加 */
+		/** 直接加算 - 在乘算前添加（护甲等平坦扣减） */
 		FLAT_ADDITIVE,
 		
 		/** 直接乘算 - 对加算后的结果乘算 */
 		DIRECT_MULTIPLICATIVE,
 		
+		/** 叠加乘区 - 多个百分比累加后一次乘算（1 + Σ(value-1)） */
+		STACK_MULTIPLICATIVE,
+		
 		/** 最终乘算 - 在最终加算前乘算 */
 		FINAL_MULTIPLICATIVE,
-		
+
+		/** 最终乘算前加算 - 在正向乘区/暴击后、负向乘区前添加固定值 */
+		PRE_FINAL_ADDITIVE,
+
 		/** 最终加算 - 最后添加固定值 */
 		FINAL_ADDITIVE
 	}
@@ -64,7 +70,6 @@ public class DamageModifier {
 	private final Object sourceObject;
 	
 	/** Modifier是否有效（可用于临时禁用） */
-	private boolean active = true;
 	
 	// ========== 构造函数 ==========
 	
@@ -103,6 +108,16 @@ public class DamageModifier {
 	public static DamageModifier directMult(float value, String source, Object sourceObject) {
 		return new DamageModifier(Type.DIRECT_MULTIPLICATIVE, value, source, sourceObject);
 	}
+
+	/** 创建叠加乘区modifier：value 为乘算值（如 1.5 表示 +50%），同一乘区内百分比累加后一次乘算 */
+	public static DamageModifier stackMult(float value, String source) {
+		return new DamageModifier(Type.STACK_MULTIPLICATIVE, value, source);
+	}
+
+	/** 创建叠加乘区modifier（带来源对象） */
+	public static DamageModifier stackMult(float value, String source, Object sourceObject) {
+		return new DamageModifier(Type.STACK_MULTIPLICATIVE, value, source, sourceObject);
+	}
 	
 	/** 创建最终乘算modifier */
 	public static DamageModifier finalMult(float value, String source) {
@@ -113,7 +128,17 @@ public class DamageModifier {
 	public static DamageModifier finalMult(float value, String source, Object sourceObject) {
 		return new DamageModifier(Type.FINAL_MULTIPLICATIVE, value, source, sourceObject);
 	}
-	
+
+	/** 创建最终乘算前加算modifier */
+	public static DamageModifier preFinalAdd(float value, String source) {
+		return new DamageModifier(Type.PRE_FINAL_ADDITIVE, value, source);
+	}
+
+	/** 创建最终乘算前加算modifier（带来源对象） */
+	public static DamageModifier preFinalAdd(float value, String source, Object sourceObject) {
+		return new DamageModifier(Type.PRE_FINAL_ADDITIVE, value, source, sourceObject);
+	}
+
 	/** 创建最终加算modifier */
 	public static DamageModifier finalAdd(float value, String source) {
 		return new DamageModifier(Type.FINAL_ADDITIVE, value, source);
@@ -142,15 +167,9 @@ public class DamageModifier {
 		return sourceObject;
 	}
 	
-	public boolean isActive() {
-		return active;
-	}
 	
 	// ========== Setter ==========
 	
-	public void setActive(boolean active) {
-		this.active = active;
-	}
 	
 	// ========== 工具方法 ==========
 	
@@ -162,9 +181,11 @@ public class DamageModifier {
 				prefix = "+";
 				break;
 			case DIRECT_MULTIPLICATIVE:
+			case STACK_MULTIPLICATIVE:
 			case FINAL_MULTIPLICATIVE:
 				prefix = "×";
 				break;
+			case PRE_FINAL_ADDITIVE:
 			case FINAL_ADDITIVE:
 				prefix = "+";
 				break;
@@ -174,6 +195,6 @@ public class DamageModifier {
 	
 	@Override
 	public String toString() {
-		return "DamageModifier{" + getDescription() + ", active=" + active + "}";
+		return "DamageModifier{" + getDescription() + "}";
 	}
 }

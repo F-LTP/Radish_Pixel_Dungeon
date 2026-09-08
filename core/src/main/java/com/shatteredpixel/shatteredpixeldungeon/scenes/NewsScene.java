@@ -283,13 +283,13 @@ public class NewsScene extends PixelScene {
 		protected void layout() {
 			super.layout();
 
-			icon.x = x + bg.marginLeft() + (16-icon.width())/2f;
+			icon.x = x + skin.marginLeft() + (16-icon.width())/2f;
 			PixelScene.align(icon);
-			text.setPos(x + bg.marginLeft() + 18, text.top());
+			text.setPos(x + skin.marginLeft() + 18, text.top());
 
 			if (date != null) {
-				date.x = x + width - bg.marginRight() - date.width() + 1;
-				date.y = y + height - bg.marginBottom() - date.height() + 2.5f;
+				date.x = x + width - skin.marginRight() - date.width() + 1;
+				date.y = y + height - skin.marginBottom() - date.height() + 2.5f;
 				align(date);
 			}
 		}

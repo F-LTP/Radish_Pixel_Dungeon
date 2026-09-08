@@ -13,6 +13,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.Belief;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
@@ -20,7 +21,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.stats.DM100H;
 import com.shatteredpixel.shatteredpixeldungeon.custom.messages.M;
-import com.shatteredpixel.shatteredpixeldungeon.custom.utils.timing.VirtualActor;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
@@ -54,7 +56,7 @@ public class WandOfCorret extends DamageWand {
     @Override
     public void wandUsed() {
         super.wandUsed();
-        if(hero.subClass == HeroSubClass.REDCARDINAL){
+        if(hero.subClass == HeroSubClasses.REDCARDINAL){
             float timeToZap;
             timeToZap = -hero.cooldown();
             curUser.spendAndNext(timeToZap);
@@ -107,18 +109,15 @@ public class WandOfCorret extends DamageWand {
                 if (ch.properties().contains(Char.Property.DEMONIC) || ch.properties().contains(Char.Property.UNDEAD)) {
                     fixedDamage = (int) (fixedDamage * 1.25f);
                 }
-                int finalFixedDamage = fixedDamage;
-                VirtualActor.delay(0f, ()->{
-                    float x = ch.sprite.center().x;
-                    float y = ch.sprite.center().y;
-                    ch.sprite.parent.add(new Lightning(ch.sprite.center(), new PointF( x, y-300f),null));
-                    ch.sprite.parent.add(new Lightning(new PointF(x-5f, y), new PointF( x-5f, y-300f),null));
-                    ch.sprite.parent.add(new Lightning(new PointF(x+5f, y), new PointF( x+5f, y-300f),null));
-                    Sample.INSTANCE.play( Assets.Sounds.LIGHTNING, 1.5f);
-                    ch.damage(finalFixedDamage + fixedDamagePlus, this);
-                    ch.sprite.centerEmitter().burst( SparkParticle.FACTORY, 32 );
-                    ch.sprite.flash();
-                });
+                float x = ch.sprite.center().x;
+                float y = ch.sprite.center().y;
+                ch.sprite.parent.add(new Lightning(ch.sprite.center(), new PointF( x, y-300f),null));
+                ch.sprite.parent.add(new Lightning(new PointF(x-5f, y), new PointF( x-5f, y-300f),null));
+                ch.sprite.parent.add(new Lightning(new PointF(x+5f, y), new PointF( x+5f, y-300f),null));
+                Sample.INSTANCE.play( Assets.Sounds.LIGHTNING, 1.5f);
+                ch.damage(new DamageInfo(fixedDamage + fixedDamagePlus, DamageType.LIGHTNING, curUser, this, this));
+                ch.sprite.centerEmitter().burst( SparkParticle.FACTORY, 32 );
+                ch.sprite.flash();
                 damageDealt = true;
                 if (Dungeon.hero.pointsInTalent(Talent.FIRE_GLASS) > 0 ){
                     GameScene.add(Blob.seed(ch.pos, 2, HalomethaneFire.class));
@@ -142,7 +141,7 @@ public class WandOfCorret extends DamageWand {
                     break;
             }
             Buff.affect(hero, Talent.NoBeliefUsedCooldown.class, cooldown);
-        } else if(creaditSkills!= null && !(hero.subClass == HeroSubClass.BATTLEPREIST)) {
+        } else if(creaditSkills!= null && !(hero.subClass == HeroSubClasses.BATTLEPREIST)) {
             creaditSkills.DownBelief(5);
         }
 
@@ -178,4 +177,3 @@ public class WandOfCorret extends DamageWand {
     }
 
 }
-

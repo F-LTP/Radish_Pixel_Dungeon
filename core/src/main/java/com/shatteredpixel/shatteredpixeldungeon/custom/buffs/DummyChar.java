@@ -2,6 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.custom.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.watabou.utils.Callback;
 
 //It's called char, but it serves for buffs, not chars.
@@ -28,7 +29,7 @@ public final class DummyChar extends Char {
     }
 
     @Override
-    public void damage(int dmg, Object src) {
+    public void damage(DamageInfo info) {
     }
 
     @Override

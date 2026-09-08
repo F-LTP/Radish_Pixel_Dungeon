@@ -26,11 +26,14 @@ import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.ai.AIModifier;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.ai.WeaponAITag;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.ElementalStrike;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.CustomWeapon;
@@ -65,6 +68,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kineti
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lamprey;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Resonance;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Seeking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Striking;
@@ -91,6 +95,17 @@ abstract public class Weapon extends KindOfWeapon {
 	public float    ACC = 1f;	// Accuracy modifier
 	public float	DLY	= 1f;	// Speed modifier
 	public int      RCH = 1;    // Reach modifier (only applies to melee hits)
+
+	// 怪物持有时授予的 AI 标签（由各武器子类在初始化块中设定）
+	public WeaponAITag aiTag = WeaponAITag.NONE;
+	// 按 aiTag 惰性创建、缓存在本武器实例上的 AI 行为（每武器/每怪独立，不序列化）
+	public transient AIModifier ai;
+
+	/** 返回本武器授予怪物的 AI 行为，无则 null。 */
+	public AIModifier aiModifier() {
+		if (ai == null) ai = aiTag.create();
+		return ai;
+	}
 
 	public enum Augment {
 		SPEED   (0.7f, 2/3f),
@@ -133,6 +148,10 @@ abstract public class Weapon extends KindOfWeapon {
 	public boolean readyToIdentify(){
 		return !isIdentified() && usesLeftToID <= 0;
 	}
+
+	public void completeIdentificationProgress(){
+		usesLeftToID = 0;
+	}
 	
 	@Override
 	public int proc( Char attacker, Char defender, int damage ) {
@@ -140,7 +159,7 @@ abstract public class Weapon extends KindOfWeapon {
 		// 小骑士濡湿附魔天赋逻辑
 		if (attacker instanceof Hero && this instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon) {
 			Hero hero = (Hero) attacker;
-			if (hero.subClass == HeroSubClass.LITTLE_KNIGHT && hero.buff(MagicImmune.class) == null) {
+			if (hero.subClass == HeroSubClasses.LITTLE_KNIGHT && hero.buff(MagicImmune.class) == null) {
 				int wetTalent = hero.pointsInTalent(Talent.WET_ENCHANT);
 				
 				// +1天赋：无附魔武器视为拥有濡湿
@@ -360,7 +379,7 @@ abstract public class Weapon extends KindOfWeapon {
 			} else if (enchantment != null) {
 				// 小骑士濡湿附魔+3天赋：升级不移除附魔
 				boolean wontLose = false;
-				if (Dungeon.hero != null && Dungeon.hero.subClass == HeroSubClass.LITTLE_KNIGHT) {
+				if (Dungeon.hero != null && Dungeon.hero.subClass == HeroSubClasses.LITTLE_KNIGHT) {
 					wontLose = Dungeon.hero.pointsInTalent(Talent.WET_ENCHANT) >= 3;
 				}
 			
@@ -478,7 +497,7 @@ abstract public class Weapon extends KindOfWeapon {
 	public static abstract class Enchantment implements Bundlable {
 
 		public static final Class<?>[] common = new Class<?>[]{
-				Blazing.class, Chilling.class, Kinetic.class, Shocking.class, Lamprey.class};
+				Blazing.class, Chilling.class, Kinetic.class, Shocking.class, Lamprey.class, Resonance.class};
 
 		public static final Class<?>[] uncommon = new Class<?>[]{
 				Blocking.class, Blooming.class, Elastic.class,
@@ -522,11 +541,13 @@ abstract public class Weapon extends KindOfWeapon {
 				attacker.buff(ElementalStrike.DirectedPowerTracker.class).detach();
 			}
 
-			if (attacker.buff(Talent.SpiritBladesTracker.class) != null
+			if (attacker instanceof Hero
+					&& attacker.buff(Talent.SpiritBladesTracker.class) != null
 					&& ((Hero)attacker).pointsInTalent(Talent.SPIRIT_BLADES) == 4){
 				multi += 0.1f;
 			}
-			if (attacker.buff(Talent.StrikingWaveTracker.class) != null
+			if (attacker instanceof Hero
+					&& attacker.buff(Talent.StrikingWaveTracker.class) != null
 					&& ((Hero)attacker).pointsInTalent(Talent.STRIKING_WAVE) == 4){
 				multi += 0.2f;
 			}

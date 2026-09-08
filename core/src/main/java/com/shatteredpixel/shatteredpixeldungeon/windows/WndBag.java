@@ -42,6 +42,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.InventorySlot;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RightClickMenu;
+import com.shatteredpixel.shatteredpixeldungeon.ui.UITheme;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.input.GameAction;
 import com.watabou.input.KeyBindings;
@@ -223,9 +224,9 @@ public class WndBag extends WndTabbed {
 
 		String title = selector != null ? selector.textPrompt() : null;
 		RenderedTextBlock txtTitle = PixelScene.renderTextBlock(
-				DiceMageUI.active() ? "[DICE BAG] " + (title != null ? Messages.titleCase(title) : Messages.titleCase( bag.name() ))
+				UITheme.isDiceMage() ? "[DICE BAG] " + (title != null ? Messages.titleCase(title) : Messages.titleCase( bag.name() ))
 						: title != null ? Messages.titleCase(title) : Messages.titleCase( bag.name() ), 8 );
-		txtTitle.hardlight( DiceMageUI.active() ? DiceMageUI.GOLD : TITLE_COLOR );
+		txtTitle.hardlight( UITheme.isDiceMage() ? DiceMageUI.GOLD : TITLE_COLOR );
 		txtTitle.maxWidth( (int)titleWidth - 2 );
 		txtTitle.setPos(
 				1,

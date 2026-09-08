@@ -111,7 +111,7 @@ public class Blandfruit extends Food {
 
 		super.execute(hero, action);
 
-		if (action.equals( AC_EAT ) && potionAttrib != null && !consumeMealUtilizationSplit()){
+		if (action.equals( AC_EAT ) && potionAttrib != null){
 
 			potionAttrib.apply(hero);
 

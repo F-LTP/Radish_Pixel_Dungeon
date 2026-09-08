@@ -1,5 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -16,8 +18,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Fury;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.damage.OrdinaryAttackDamage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
@@ -25,12 +29,12 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.TheGreatDead;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MakeshiftSlingshot;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingStone;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -109,7 +113,7 @@ public class Goblin extends Mob {
             dmg = Math.round(dmg * AscensionChallenge.statModifier(this));
             dmg = defenseProc(enemy,dmg);
             dmg -= enemy.drRoll();
-            enemy.damage(dmg, new ThrowingStone());
+            enemy.damage(DamageInfo.of(dmg, DamageType.PHYSICAL, this, new ThrowingStone()));
 
             if (!enemy.isAlive() && enemy == Dungeon.hero) {
                 Dungeon.fail(getClass());
@@ -120,7 +124,7 @@ public class Goblin extends Mob {
             Item dropStone = new ThrowingStone();
             Item greatStone = new TheGreatDead();
 //            if(Dungeon.hero != null){
-//                if (Dungeon.hero.heroClass == HeroClass.WARRIOR && Random.Int(0,10)>8)
+//                if (Dungeon.hero.heroClass == HeroClasses.WARRIOR && Random.Int(0,10)>8)
 //                    Dungeon.level.drop(greatStone,enemy.pos).sprite.drop();
 //                else
 //                    Dungeon.level.drop(dropStone,enemy.pos).sprite.drop();
@@ -153,6 +157,10 @@ public class Goblin extends Mob {
 
     @Override
     public void die( Object cause ) {
+        // 简易投石索 10% 掉落
+        if(Random.Float() < 0.1f){
+            Dungeon.level.drop(new MakeshiftSlingshot(), pos).sprite.drop();
+        }
         // Random drop
         if(Random.Float(0,10)<5) loot=Generator.Category.MIS_T3;
         super.die( cause );
@@ -185,93 +193,14 @@ public class Goblin extends Mob {
             if (enemy.buff(AfterImage.Blur.class)!=null){
                 enemy.buff(AfterImage.Blur.class).gainDodge();
             }
-            int dr = Math.round(enemy.drRoll() * AscensionChallenge.statModifier(enemy));
 
-            Barkskin bark = enemy.buff(Barkskin.class);
-            if (bark != null)   dr += Random.NormalIntRange( 0 , bark.level() );
+            OrdinaryAttackDamage.DamageRoll damageRoll = OrdinaryAttackDamage.rollBaseDamage(this);
+            OrdinaryAttackDamage.CriticalRoll criticalRoll = OrdinaryAttackDamage.rollCritical(this, enemy, damageRoll.damage);
+            Preparation prep = damageRoll.preparation;
+            DamageInfo attackDamage = OrdinaryAttackDamage.build(this, enemy, Math.round(criticalRoll.damage), criticalRoll.critical,
+                    criticalRoll.multiplier, dmgMulti, dmgBonus);
 
-            //we use a float here briefly so that we don't have to constantly round while
-            // potentially applying various multiplier effects
-            float dmg;
-            Preparation prep = buff(Preparation.class);
-            if (prep != null){
-                dmg = prep.damageRoll(this);
-            } else {
-                dmg = damageRoll();
-            }
-            boolean crit=false;
-            boolean surprise =enemy instanceof Mob && ((Mob) enemy).surprisedBy(this);
-            float current_crit=critSkill(),current_critdamage=critDamage();
-
-            current_critdamage=Math.min(current_critdamage,critDamageCap);
-            if (this.buff(Scythe.scytheSac.class)!=null){
-                current_crit+=10f;
-                current_critdamage+=0.1f;
-            }
-
-            if (this.buff(RingOfTenacity.Tenacity.class)!=null) {current_crit=0;}
-            if (Random.Float()*100<current_crit || crit) {
-                dmg*=current_critdamage;
-                crit = true;
-            }
-
-            dmg = Math.round(dmg*dmgMulti);
-
-            Berserk berserk = buff(Berserk.class);
-            if (berserk != null) dmg = berserk.damageFactor(dmg);
-
-            if (buff( Fury.class ) != null) {
-                dmg *= 1.5f;
-            }
-            if (buff(RingOfTenacity.Tenacity.class)!=null){
-                dmg*=RingOfTenacity.attackMultiplier(this);
-            }
-            for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
-                dmg *= buff.meleeDamageFactor();
-            }
-            for (ChampionHero buff : buffs(ChampionHero.class)){
-                dmg *= buff.meleeDamageFactor();
-            }
-            dmg *= AscensionChallenge.statModifier(this);
-
-            //flat damage bonus is applied after positive multipliers, but before negative ones
-            dmg += dmgBonus;
-
-            //friendly endure
-            Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
-            if (endure != null) dmg = endure.damageFactor(dmg);
-
-            //enemy endure
-            endure = enemy.buff(Endure.EndureTracker.class);
-            if (endure != null){
-                dmg = endure.adjustDamageTaken(dmg);
-            }
-
-            if (enemy.buff(ScrollOfChallenge.ChallengeArena.class) != null){
-                dmg *= 0.67f;
-            }
-
-            if ( buff(Weakness.class) != null ){
-                dmg *= 0.67f;
-            }
-
-            int effectiveDamage = enemy.defenseProc( this, Math.round(dmg) );
-
-            // created by DoggingDog on 20240718
-            // for Torturer using
-            effectiveDamage = Math.max( effectiveDamage - dr, 0 );
-
-            if (enemy.buff(Viscosity.ViscosityTracker.class) != null){
-                effectiveDamage = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(effectiveDamage);
-                enemy.buff(Viscosity.ViscosityTracker.class).detach();
-            }
-
-            //vulnerable specifically applies after armor reductions
-            if ( enemy.buff( Vulnerable.class ) != null){
-                effectiveDamage *= 1.33f;
-            }
-
-            effectiveDamage = attackProc( enemy, effectiveDamage );
+            int effectiveDamage = OrdinaryAttackDamage.foldPostProcessing(this, enemy, attackDamage);
 
             if (visibleFight) {
                 if (effectiveDamage > 0 || !enemy.blockSound(Random.Float(0.96f, 1.05f))) {
@@ -285,10 +214,10 @@ public class Goblin extends Mob {
                 return true;
             }
 
-            if(crit){
+            if(criticalRoll.critical){
                 enemy.sprite.showStatus(CharSprite.NEGATIVE,Messages.get(this,"crit"));
             }
-            enemy.damage( effectiveDamage, this );
+            enemy.damage(attackDamage);
 
             if (buff(FireImbue.class) != null)  buff(FireImbue.class).proc(enemy);
             if (buff(FrostImbue.class) != null) buff(FrostImbue.class).proc(enemy);
@@ -299,7 +228,7 @@ public class Goblin extends Mob {
                     enemy.die(this);
                 } else {
                     //helps with triggering any on-damage effects that need to activate
-                    enemy.damage(-1, this);
+                    enemy.damage(DamageInfo.of(-1, DamageType.TRUE, this, this));
                     DeathMark.processFearTheReaper(enemy);
                 }
                 enemy.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Preparation.class, "assassinated"));

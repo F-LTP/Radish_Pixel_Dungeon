@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
@@ -114,6 +115,14 @@ public class Endure extends ArmorAbility {
 			return damage;
 		}
 
+		@Override
+		public void modifyIncomingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+			int before = info.getDamage();
+			if (before > 0) {
+				info.addFinalMultModifier(adjustDamageTaken(before) / before, "defender endure", this);
+			}
+		}
+
 		public void endEnduring(){
 			if (!enduring){
 				return;
@@ -153,6 +162,14 @@ public class Endure extends ArmorAbility {
 					detach();
 				}
 				return damage + bonusDamage;
+			}
+		}
+
+		@Override
+		public void modifyFinalOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+			int before = info.getDamage();
+			if (before > 0) {
+				info.addFinalMultModifier(damageFactor(before) / before, "attacker endure", this);
 			}
 		}
 

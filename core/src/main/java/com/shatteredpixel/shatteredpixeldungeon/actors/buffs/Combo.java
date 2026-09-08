@@ -23,6 +23,8 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -431,9 +433,9 @@ public class Combo extends Buff implements ActionIndicator.Action {
 							if (ch.buff(Vulnerable.class) != null) aoeHit *= 1.33f;
 							if (ch instanceof DwarfKing){
 								//change damage type for DK so that crush AOE doesn't count for DK's challenge badge
-								ch.damage(aoeHit, this);
+								ch.damage(DamageInfo.of(aoeHit, DamageType.PHYSICAL, target, this));
 							} else {
-								ch.damage(aoeHit, target);
+								ch.damage(DamageInfo.of(aoeHit, DamageType.PHYSICAL, target, target));
 							}
 							ch.sprite.bloodBurstA(enemy.sprite.center(), aoeHit);
 							ch.sprite.flash();

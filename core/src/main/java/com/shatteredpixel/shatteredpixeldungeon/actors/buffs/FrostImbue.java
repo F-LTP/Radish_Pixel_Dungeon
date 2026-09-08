@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -65,8 +66,8 @@ public class FrostImbue extends FlavourBuff {
 	}
 	
 	{
-		immunities.add( Frost.class );
-		immunities.add( Chill.class );
+		immunities.add(Frost.class); typeImmunities.add(DamageType.FROST);
+		immunities.add(Chill.class); typeImmunities.add(DamageType.CHILL);
 	}
 
 	@Override

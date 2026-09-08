@@ -32,6 +32,7 @@ public class Tag extends Button {
 	private float g;
 	private float b;
 	protected NinePatch bg;
+	private RoundedFrame themedBg;
 	
 	protected float lightness = 0;
 
@@ -55,6 +56,10 @@ public class Tag extends Button {
 		bg = Chrome.get( Chrome.Type.TAG );
 		bg.hardlight( r, g, b );
 		add( bg );
+
+		themedBg = UITheme.roundedFrame(DiceMageUI.BLACK, DiceMageUI.ORANGE);
+		themedBg.visible = false;
+		add(themedBg);
 	}
 
 	@Override
@@ -70,6 +75,16 @@ public class Tag extends Button {
 		bg.x = x;
 		bg.y = y;
 		bg.size( width, height );
+		boolean themed = UITheme.isDiceMage();
+		// Keep the original tag visible for state checks, but make it transparent.
+		bg.alpha(themed ? 0f : 1f);
+		themedBg.visible = themed && bg.visible;
+		themedBg.setRect(x, y, width, height);
+	}
+
+	protected void backgroundVisible(boolean value) {
+		bg.visible = value;
+		themedBg.visible = value && UITheme.isDiceMage();
 	}
 	
 	public void flash() {
@@ -92,6 +107,7 @@ public class Tag extends Button {
 	@Override
 	public void update() {
 		super.update();
+		themedBg.visible = UITheme.isDiceMage() && bg.visible;
 		
 		if (visible && lightness > 0.5) {
 			if ((lightness -= Game.elapsed) > 0.5) {

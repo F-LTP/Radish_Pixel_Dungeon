@@ -15,8 +15,20 @@ void main() {
   vec4 col = texture2D(uTex, vUV);
   
   vec2 localUV = (vUV - uFrame.xy) / uFrame.zw;
-  float cutPosition = dot(localUV, normalize(uCutLine.zw)) / 1.41421356;
-  float edge = cutPosition - uCutAlpha;
+  vec2 start = uCutLine.xy;
+  vec2 dir = normalize(uCutLine.zw);
+
+  // 计算起点到帧四角沿方向的最大带符号投影距离，用于归一化到整张贴图
+  float d00 = dot(vec2(0.0, 0.0) - start, dir);
+  float d10 = dot(vec2(1.0, 0.0) - start, dir);
+  float d01 = dot(vec2(0.0, 1.0) - start, dir);
+  float d11 = dot(vec2(1.0, 1.0) - start, dir);
+  float halfSpan = max(max(d00, d10), max(d01, d11));
+  halfSpan = max(halfSpan, -min(min(d00, d10), min(d01, d11)));
+
+  // 以起点为中心的带符号距离，取绝对值使裂痕向两侧对称扩散
+  float dist = dot(localUV - start, dir) / halfSpan;
+  float edge = abs(dist) - uCutAlpha;
 
   if (edge < 0.0) {
     col.a = 0.0;

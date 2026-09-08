@@ -4,8 +4,10 @@ import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -41,7 +43,7 @@ public class MoonLight extends NPC{
     }
 
     public static boolean heroIsMoonLight() {
-        return Dungeon.hero != null && Dungeon.hero.heroClass == HeroClass.MOONLIGHT;
+        return Dungeon.hero != null && Dungeon.hero.heroClass == HeroClasses.MOONLIGHT;
     }
 
     private String getMessagePrefix() {
@@ -75,7 +77,7 @@ public class MoonLight extends NPC{
     }
 
     @Override
-    public void damage( int dmg, Object src ) {
+    public void damage( DamageInfo info ) {
     }
 
     @Override
@@ -228,6 +230,8 @@ public class MoonLight extends NPC{
             }
             newWeapon.level = 0;
             newWeapon.identify(false);
+            // 移除2次诅咒以避免顽疾诅咒出现的情况
+            ScrollOfRemoveCurse.uncurse( hero, newWeapon );
             ScrollOfRemoveCurse.uncurse( hero, newWeapon );
             return newWeapon;
         }

@@ -39,12 +39,15 @@ public class Friendly extends Weapon.Enchantment {
 		float procChance = 1/10f * procChanceMultiplier(attacker);
 		if (Random.Float() < procChance) {
 			
-			Buff.affect( attacker, Charm.class, Charm.DURATION ).object = defender.id();
+			Charm attackerCharm = Buff.affect(attacker, Charm.class, Charm.DURATION);
+			if (attackerCharm != null) attackerCharm.object = defender.id();
 			attacker.sprite.centerEmitter().start( Speck.factory( Speck.HEART ), 0.2f, 5 );
 			
 			Charm c = Buff.affect( defender, Charm.class, Charm.DURATION/2 );
-			c.ignoreNextHit = true;
-			c.object = attacker.id();
+			if (c != null) {
+				c.ignoreNextHit = true;
+				c.object = attacker.id();
+			}
 			defender.sprite.centerEmitter().start( Speck.factory( Speck.HEART ), 0.2f, 5 );
 			
 		}

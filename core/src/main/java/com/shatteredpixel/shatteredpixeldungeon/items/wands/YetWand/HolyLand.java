@@ -13,6 +13,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.Belief;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
@@ -106,7 +108,7 @@ public class HolyLand extends Item {
         public boolean act() {
             if (target.isAlive()) {
                 int dmgS = Dungeon.depth/5 == 0 ? 1 : Dungeon.depth/5;
-                target.damage(dmgS,new DM100.LightningBolt());
+                target.damage(new DamageInfo(dmgS, DamageType.LIGHTNING, null, null, new DM100.LightningBolt()));
                 spend(interval);
                 if (level <= 0) {
                     detach();

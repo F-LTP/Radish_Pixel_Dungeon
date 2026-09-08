@@ -180,7 +180,7 @@ public class AttackIndicator extends Tag {
 	}
 	
 	private synchronized void visible( boolean value ) {
-		bg.visible = value;
+		backgroundVisible(value);
 	}
 	
 	@Override

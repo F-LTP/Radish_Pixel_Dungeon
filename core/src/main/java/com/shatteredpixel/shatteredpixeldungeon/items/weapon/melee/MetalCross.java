@@ -17,7 +17,7 @@ public class MetalCross extends MeleeWeapon {
     {
         count = Math.round(2.5f);
         image = ItemSpriteSheet.HOLYANKH;
-        hitSound = Assets.Sounds.HIT_SLASH;
+        hitSound = Assets.Sounds.HIT_CRUSH;
         hitSoundPitch = 1.1f;
         tier = 1;
         bones = false;

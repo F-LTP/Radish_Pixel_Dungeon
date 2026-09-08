@@ -6,6 +6,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.Soulstaker;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 
@@ -30,7 +32,7 @@ public class ShadowHymn extends ArmorAbility {
         // Sacrifice
         if(hero.hasTalent(Talent.SACRIFICE)){
             int hpNeed = Math.min(hero.HP-1,hero.lvl * 2);
-            hero.damage(hpNeed,ShadowHymn.class);
+            hero.damage(DamageInfo.of(hpNeed, DamageType.TRUE, null, ShadowHymn.class));
         }
         if(hero.pointsInTalent(Talent.SACRIFICE) > 2){
             int shield = hero.pointsInTalent(Talent.SACRIFICE)/2;

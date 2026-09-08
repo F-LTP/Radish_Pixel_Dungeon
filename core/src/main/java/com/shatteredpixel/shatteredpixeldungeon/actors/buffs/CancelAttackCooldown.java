@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -44,7 +45,7 @@ public class CancelAttackCooldown extends FlavourBuff {
      * 根据天赋等级获取冷却时间
      */
     public static float getDuration() {
-        if (Dungeon.hero == null || Dungeon.hero.heroClass != HeroClass.MOONLIGHT) {
+        if (Dungeon.hero == null || Dungeon.hero.heroClass != HeroClasses.MOONLIGHT) {
             return BASE_DURATION;
         }
         int points = Dungeon.hero.pointsInTalent(Talent.WONT_LOSE);

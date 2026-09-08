@@ -1,6 +1,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator;
 
-import static com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass.NONE;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
+
+import static com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.NONE;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;

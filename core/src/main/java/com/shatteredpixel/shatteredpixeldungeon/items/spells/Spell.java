@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.Belief;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.FaithObstruction;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
@@ -67,7 +68,7 @@ public abstract class Spell extends Item {
 		super.execute( hero, action );
 		
 		if (action.equals( AC_CAST )) {
-			if(hero.heroClass == HeroClass.RECTOR){
+			if(hero.heroClass == HeroClasses.RECTOR){
 				FaithObstruction failed = Dungeon.hero.buff(FaithObstruction.class);
 				if(failed == null && !(Dungeon.hero.hasTalent(Talent.SMART_BLESSING))){
 					Buff.affect(curUser, FaithObstruction.class, FaithObstruction.DURATION);

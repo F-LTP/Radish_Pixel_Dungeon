@@ -8,6 +8,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.TieredToyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.items.ItemArmorAttachable;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.watabou.utils.Random;
@@ -55,7 +57,7 @@ public final class TieredToyEffects {
 			Buff.affect(hero, Barrier.class).incShield(3 + 3 * wounded);
 		}
 		if (has(TieredToy.Sponge.class)) hero.buff(TieredToyBuff.class).startSponge();
-		if (has(TieredToy.Doomblade.class)) hero.damage(20, TieredToy.Doomblade.class);
+		if (has(TieredToy.Doomblade.class)) hero.damage(new DamageInfo(20, DamageType.TRUE, hero, null, TieredToy.Doomblade.class));
 	}
 
 	public static int adjustMaxHealth(int health) {
@@ -106,7 +108,7 @@ public final class TieredToyEffects {
 		if (state != null && state.spongeTurns() > 0) amount = Math.round(amount * 1.5f);
 		if (state != null && has(TieredToy.Hourglass.class) && state.floorTurns() <= 10) amount = Math.round(amount * 1.5f);
 		int missing = hero.HT - hero.HP;
-		hero.HP += Math.min(missing, amount);
+		hero.heal(Math.min(missing, amount));
 		int overflow = amount - missing;
 		if (overflow > 0 && has(TieredToy.BloodChalice.class)) Buff.affect(hero, Barrier.class).incShield(overflow);
 	}
@@ -119,7 +121,7 @@ public final class TieredToyEffects {
 		}
 		@Override public boolean act() {
 			if (turns <= 0) { detach(); return true; }
-			target.damage(2, TieredToy.HissingRing.class);
+			target.damage(new DamageInfo(2, DamageType.POISON, null, null, TieredToy.HissingRing.class));
 			turns--;
 			spend(TICK);
 			return true;

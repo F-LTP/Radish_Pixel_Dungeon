@@ -28,6 +28,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
@@ -97,29 +99,22 @@ abstract public class ClassArmor extends Armor {
 
 		ClassArmor classArmor = null;
 
-		switch (owner.heroClass) {
-			case WARRIOR:
-				classArmor = new WarriorArmor();
-				BrokenSeal seal = armor.checkSeal();
-				if (seal != null) {
-					classArmor.affixSeal(seal);
-				}
-				break;
-			case ROGUE:
-				classArmor = new RogueArmor();
-				break;
-			case MAGE:
-				classArmor = new MageArmor();
-				break;
-			case HUNTRESS:
-				classArmor = new HuntressArmor();
-				break;
-			case RECTOR:
-				classArmor = new DuelistArmor();
-				break;
-			case MOONLIGHT:
-				classArmor = new MoonlightArmor();
-				break;
+		if (owner.heroClass == HeroClasses.WARRIOR) {
+			classArmor = new WarriorArmor();
+			BrokenSeal seal = armor.checkSeal();
+			if (seal != null) {
+				classArmor.affixSeal(seal);
+			}
+		} else if (owner.heroClass == HeroClasses.ROGUE) {
+			classArmor = new RogueArmor();
+		} else if (owner.heroClass == HeroClasses.MAGE) {
+			classArmor = new MageArmor();
+		} else if (owner.heroClass == HeroClasses.HUNTRESS) {
+			classArmor = new HuntressArmor();
+		} else if (owner.heroClass == HeroClasses.RECTOR) {
+			classArmor = new DuelistArmor();
+		} else if (owner.heroClass == HeroClasses.MOONLIGHT) {
+			classArmor = new MoonlightArmor();
 		}
 
 		classArmor.level(armor.trueLevel());

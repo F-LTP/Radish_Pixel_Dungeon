@@ -73,6 +73,7 @@ public class Assets {
 		public static final String WEAK_FLOOR       = "environment/custom_tiles/weak_floor.png";
 		public static final String SEWER_BOSS       = "environment/custom_tiles/sewer_boss.png";
 		public static final String PRISON_QUEST     = "environment/custom_tiles/prison_quest.png";
+		public static final String BLOOD_PRISON_QUEST = "environment/custom_tiles/blood_prison_quest.png";
 		public static final String PRISON_EXIT      = "environment/custom_tiles/prison_exit.png";
 		public static final String CAVES_QUEST      = "environment/custom_tiles/caves_quest.png";
 		public static final String CAVES_BOSS       = "environment/custom_tiles/caves_boss.png";
@@ -100,7 +101,15 @@ public class Assets {
 
 		public static final String CHROME   	 = "interfaces/Rapd_UI/chrome.png";
 		public static final String ICONS    	 = "interfaces/Rapd_UI/icons.png";
-		public static final String STATUS   	 = "interfaces/Rapd_UI/status_pane.png";
+
+		//状态栏面板风格（萝卜主题下可选）：
+		//STATUS=老版萝卜, STATUS_RADISH_GARDEN=萝卜园(默认), STATUS_WHITE_RADISH=白萝卜园, STATUS_RADISH=萝卜
+		public static final String STATUS_OLD_RADISH   	 = "interfaces/Rapd_UI/status_pane.png";
+		public static final String STATUS_SHATTERED   	 = "interfaces/status_pane.png";
+		public static final String STATUS_RADISH_GARDEN = "interfaces/Rapd_UI/radish_status_pane.png";
+		public static final String STATUS_WHITE_RADISH  = "interfaces/Rapd_UI/white_radish_status_pane.png";
+		public static final String STATUS_RADISH        = "interfaces/Rapd_UI/plain_radish_status_pane.png";
+
 		public static final String MENU     	 = "interfaces/Rapd_UI/menu_pane.png";
 		public static final String MENU_BTN 	 = "interfaces/Rapd_UI/menu_button.png";
 		public static final String TOOLBAR  	 = "interfaces/Rapd_UI/toolbar.png";
@@ -128,6 +137,7 @@ public class Assets {
 		public static final String HERO_ICONS       = "interfaces/hero_icons.png";
 
 		public static final String RADIAL_MENU      = "interfaces/radial_menu.png";
+		public static final String MAGIC_POINT      = "interfaces/magic_point.png";
 	}
 
 	//these points to resource bundles, not raw asset files
@@ -421,5 +431,12 @@ public class Assets {
 
 		public static final String GNOLL_KING ="sprites/RadishBossEnemySprite/gnollking.png";
 		public static final String GNOLL_SHAMAN_KING ="sprites/RadishBossEnemySprite/gnollshamanking.png";
+
+		//Radish SnD skins
+		public static final String GAMBLER = "sprites/RadishSnDSprite/gambler.png";
+		public static final String AGENT = "sprites/RadishSnDSprite/agent.png";
+		public static final String WANDERER = "sprites/RadishSnDSprite/wanderer.png";
+		public static final String SPHERE = "sprites/RadishSnDSprite/sphere.png";
+		public static final String JUMBLE = "sprites/RadishSnDSprite/jumble.png";
 	}
 }

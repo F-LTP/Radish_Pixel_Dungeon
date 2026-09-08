@@ -10,6 +10,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ToxicImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PoisonParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.SkeletonKey;
@@ -104,7 +106,7 @@ public class BigSnake_Zikk extends Mob {
 
         if (hit( this, enemy, true )) {
             int dmg = 0;
-            enemy.damage( dmg, new PoisonBolt() );
+            enemy.damage(DamageInfo.of(dmg, DamageType.POISON, this, new PoisonBolt()));
             Buff.affect(enemy, Poison.class).extend(4);
         } else {
             enemy.sprite.showStatus( CharSprite.NEUTRAL,  enemy.defenseVerb() );
@@ -138,16 +140,16 @@ public class BigSnake_Zikk extends Mob {
     }
 
     @Override
-    public void damage(int dmg, Object src) {
+    public void damage(DamageInfo info) {
         if (!BossHealthBar.isAssigned()){
             BossHealthBar.assignBoss( this );
             Dungeon.level.seal();
         }
-        super.damage(dmg, src);
+        super.damage(info);
         LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
-        if (lock != null && !isImmune(src.getClass()) && !isInvulnerable(src.getClass())){
-            if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES))   lock.addTime(dmg);
-            else                                                    lock.addTime(dmg*1.5f);
+        if (lock != null && !isImmune(info.getSource().getClass()) && !isInvulnerable(info.getSource().getClass())){
+            if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES))   lock.addTime(info.getDamage());
+            else                                                    lock.addTime(info.getDamage()*1.5f);
         }
     }
 

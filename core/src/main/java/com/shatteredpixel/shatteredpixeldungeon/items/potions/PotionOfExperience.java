@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.VitaeBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.Belief;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -52,7 +53,7 @@ public class PotionOfExperience extends Potion {
 		new Flare( 6, 32 ).color(0xFFFF00, true).show( hero.sprite, 2f );
 
 		//经验药剂 直接获取15点信仰值
-		if(hero.heroClass == HeroClass.RECTOR){
+		if(hero.heroClass == HeroClasses.RECTOR){
 			Belief belief = Dungeon.hero.buff(Belief.class);
 			if(belief != null){
 				belief.getBelief(15f);

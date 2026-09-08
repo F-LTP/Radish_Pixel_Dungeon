@@ -47,6 +47,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -283,7 +285,7 @@ public class ElementalBlast extends ArmorAbility {
 									* damageFactors.get(finalWandCls));
 
 							if (mob != null && damage > 0 && mob.alignment != Char.Alignment.ALLY){
-								mob.damage(damage, Reflection.newInstance(finalWandCls));
+								mob.damage(DamageInfo.of(damage, DamageType.MAGICAL, hero, Reflection.newInstance(finalWandCls)));
 								charsHit++;
 							}
 
@@ -371,7 +373,7 @@ public class ElementalBlast extends ArmorAbility {
 											mob.sprite.centerEmitter().start(Speck.factory(Speck.HEART), 0.2f, 3);
 										} else {
 											damage = Math.round(Hero.combatRoll(15, 25) * effectMulti);
-											mob.damage(damage, Reflection.newInstance(finalWandCls));
+											mob.damage(DamageInfo.of(damage, DamageType.MAGICAL, hero, Reflection.newInstance(finalWandCls)));
 											mob.sprite.emitter().start(ShadowParticle.UP, 0.05f, 10);
 										}
 									}
@@ -479,12 +481,7 @@ public class ElementalBlast extends ArmorAbility {
 								}
 							}
 						} else if (finalWandCls == WandOfShockBomb.class) {
-							WandOfShockBomb.ShockMageBombTracker existing = Dungeon.hero.buff(WandOfShockBomb.ShockMageBombTracker.class);
-							if (existing != null) {
-								existing.detach();
-							}
-
-							WandOfShockBomb.ShockMageBombTracker tracker = Buff.affect(Dungeon.hero, WandOfShockBomb.ShockMageBombTracker.class);
+							WandOfShockBomb.ShockMageBombTracker tracker = Buff.append(Dungeon.hero, WandOfShockBomb.ShockMageBombTracker.class);
 							WandOfShockBomb w = new WandOfShockBomb();
 							w.level = Random.Int(12,16);
 							tracker.damage = w.damageRoll();

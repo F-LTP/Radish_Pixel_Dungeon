@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RatSkull;
@@ -133,18 +134,16 @@ public class Statue extends Mob {
 
 	@Override
 	public int drRoll() {
+		if (wieldsCircleSword()) return 0;
 		return Random.NormalIntRange(0, Dungeon.depth + weapon.defenseFactor(this));
 	}
 
 
 	@Override
-	public void damage( int dmg, Object src ) {
-
-		if (state == PASSIVE) {
-			state = HUNTING;
-		}
-
-		super.damage( dmg, src );
+	public void damage(DamageInfo info) {
+		if (state == PASSIVE) state = HUNTING;
+		enemy = info.getAttacker() != null ? info.getAttacker() : Dungeon.hero;
+		super.damage(info);
 	}
 
 	@Override

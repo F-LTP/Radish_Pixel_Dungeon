@@ -143,6 +143,11 @@ public class Dungeon {
 		DM200_EQUIP,
 		GOLEM_EQUIP,
 
+		// 闪晶：每种怪物最多掉落6个
+		FLASH_CRYSTAL_GNOLL,
+		FLASH_CRYSTAL_KING,
+		FLASH_CRYSTAL_DWARF,
+
 		//containers
 		VELVET_POUCH,
 		SCROLL_HOLDER,
@@ -244,6 +249,7 @@ public class Dungeon {
 
 		initialVersion = version = Game.versionCode;
 		challenges = SPDSettings.challenges();
+		SnakeBiteChallengeManager.initializeMessageTheme();
 		mobsToChampion = -1;
 
 		if (daily) {
@@ -686,7 +692,13 @@ public class Dungeon {
 		private static final String LIMDROPS    = "limited_drops";
 		private static final String CHAPTERS	= "chapters";
 		private static final String QUESTS		= "quests";
-		private static final String BADGES		= "badges";
+	private static final String BADGES		= "badges";
+
+	public static class IncompatibleSaveException extends IOException {
+		public IncompatibleSaveException(String message) {
+			super(message);
+		}
+	}
 	
 		public static void saveGame( int save ) {
 			try {
@@ -745,6 +757,7 @@ public class Dungeon {
 
 				// Save Snake Bite Manager state
 				SnakeBiteChallengeManager.save(bundle);
+				Messages.storeInBundle(bundle);
 
 				// 保存已生成的楼层（String 格式）
 				String[] levelKeys = generatedLevels.toArray(new String[0]);
@@ -823,6 +836,9 @@ public class Dungeon {
 
 		// Restore Snake Bite Manager state
 		SnakeBiteChallengeManager.restore(bundle);
+		if (!Messages.restoreFromBundle(bundle)) {
+			SnakeBiteChallengeManager.initializeMessageTheme();
+		}
 
 		Dungeon.level = null;
 		Dungeon.depth = -1;
@@ -875,8 +891,10 @@ public class Dungeon {
 		hero = (Hero)bundle.get( HERO );
 		
 		depth = bundle.getInt( DEPTH );
-			branchId = bundle.getString(BRANCH_ID);
-			if (!Branches.exists(branchId)) throw new IllegalStateException("Invalid saved branch: " + branchId);
+		branchId = bundle.getString(BRANCH_ID);
+		if (!bundle.contains(BRANCH_ID) || !Branches.exists(branchId)) {
+			throw new IncompatibleSaveException("Invalid saved branch: " + branchId);
+		}
 
 		gold = bundle.getInt( GOLD );
 		energy = bundle.getInt( ENERGY );

@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -28,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EliteBadge;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -72,6 +74,11 @@ public abstract class ChampionEnemy extends Buff {
 
 	public float meleeDamageFactor(){
 		return 1f;
+	}
+
+	@Override
+	public void modifyOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+		info.addDirectMultModifier(meleeDamageFactor(), "champion enemy", this);
 	}
 
 	public float damageTakenFactor(){
@@ -146,7 +153,7 @@ public abstract class ChampionEnemy extends Buff {
 		}
 
 		{
-			immunities.add(Burning.class);
+			immunities.add(Burning.class); typeImmunities.add(DamageType.BURNING_STATUS);
 		}
 	}
 

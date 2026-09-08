@@ -29,6 +29,11 @@ import com.watabou.utils.Bundle;
 
 public class DirectableAlly extends NPC {
 
+	@Override
+	protected boolean isDamageable() {
+		return true;
+	}
+
 	{
 		alignment = Char.Alignment.ALLY;
 		intelligentAlly = true;

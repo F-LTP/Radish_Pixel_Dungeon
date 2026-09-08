@@ -4,6 +4,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.utils.LegacyItemArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -54,7 +56,7 @@ public class Turtleir extends LegacyItemArmor {
             for (int i  : PathFinder.NEIGNBOURS24){
                 Char ch = Actor.findChar(pos + i);
                 if (ch != null && ch != Dungeon.hero){
-                    ch.damage(((Mass_Energy) buff).blastDamage(),this);
+                    ch.damage(DamageInfo.of(((Mass_Energy) buff).blastDamage(), DamageType.MAGICAL, attacker, this));
                 }
             }
             ((Mass_Energy) buff).clr();

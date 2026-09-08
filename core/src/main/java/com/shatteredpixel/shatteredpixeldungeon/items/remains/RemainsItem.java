@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.remains;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 
 import java.util.ArrayList;
@@ -77,15 +78,14 @@ public abstract class RemainsItem extends Item {
 	}
 
 	public static RemainsItem get(HeroClass cls){
-		switch (cls){
-			case WARRIOR: default:
-				return new SealShard();
-			case MAGE:
-				return new BrokenStaff();
-			case ROGUE:
-				return new CloakScrap();
-			case HUNTRESS:
-				return new BowFragment();
+		if (cls == HeroClasses.MAGE){
+			return new BrokenStaff();
+		} else if (cls == HeroClasses.ROGUE){
+			return new CloakScrap();
+		} else if (cls == HeroClasses.HUNTRESS){
+			return new BowFragment();
+		} else {
+			return new SealShard();
 		}
 	}
 

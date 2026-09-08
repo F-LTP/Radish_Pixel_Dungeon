@@ -35,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.StatusPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentsPane;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndHero;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndDiceMageTalentChoice;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
@@ -134,6 +135,10 @@ public class PotionOfDivineInspiration extends ExoticPotion {
 					Sample.INSTANCE.playDelayed(Assets.Sounds.LEVELUP, 0.6f, 0.7f, 1.2f);
 					new Flare( 6, 32 ).color(0xFFFF00, true).show( curUser.sprite, 2f );
 					GLog.p(Messages.get(PotionOfDivineInspiration.class, "bonus"));
+
+					if (index == 2 && WndDiceMageTalentChoice.canShow()) {
+						WndDiceMageTalentChoice.show();
+					}
 
 					if (!anonymous && Random.Float() < talentChance){
 						Talent.onPotionUsed(curUser, curUser.pos, talentFactor);

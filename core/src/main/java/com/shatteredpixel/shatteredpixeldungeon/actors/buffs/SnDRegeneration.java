@@ -25,9 +25,7 @@ public class SnDRegeneration extends Buff {
     @Override
     public boolean act() {
         if (target.HP < target.HT && healPerTurn > 0) {
-            target.HP = Math.min(target.HT, target.HP + healPerTurn);
-
-            target.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(healPerTurn), FloatingText.HEALING);
+            target.heal(healPerTurn);
 
             if (target.HP == target.HT && target instanceof Hero) {
                 ((Hero) target).resting = false;

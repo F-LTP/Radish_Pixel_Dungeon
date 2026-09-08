@@ -161,7 +161,9 @@ public enum Catalog {
 	//should only be used when initializing
 	private void addItems( Class<?>... items){
 		for (Class<?> item : items){
-			seen.put(item, false);
+			// seen.put(item, false); // Original behavior: unlock after obtaining the item.
+			// TheCatist modified on 2026.8.6: unlock catalog entries by default.
+			seen.put(item, true);
 			useCount.put(item, 0);
 		}
 	}
@@ -415,13 +417,16 @@ public enum Catalog {
 
 		if (bundle.contains(CATALOG_CLASSES)){
 			Class<?>[] classes = bundle.getClassArray(CATALOG_CLASSES);
-			boolean[] seen = bundle.getBooleanArray(CATALOG_SEEN);
+			// boolean[] seen = bundle.getBooleanArray(CATALOG_SEEN); // Original behavior.
 			int[] uses = bundle.getIntArray(CATALOG_USES);
 
 			for (int i = 0; i < classes.length; i++){
 				for (Catalog cat : values()) {
 					if (cat.seen.containsKey(classes[i])) {
-						cat.seen.put(classes[i], seen[i]);
+						// cat.seen.put(classes[i], seen[i]); // Original behavior.
+						// TheCatist modified on 2026.8.6: do not restore a locked state.
+						// Entries are unlocked by default; preserve usage data only.
+						cat.seen.put(classes[i], true);
 						cat.useCount.put(classes[i], uses[i]);
 					}
 				}

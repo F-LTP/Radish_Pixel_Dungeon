@@ -2,7 +2,6 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -18,16 +17,15 @@ public class DarkShadowSword extends MeleeWeapon {
     @Override
     public float delayFactor(Char user) {
         float delay = super.delayFactor(user);
-        if (user instanceof Hero) {
-            int visibleMobs = 0;
-            for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])){
-                if(Dungeon.level.heroFOV[mob.pos] && mob.alignment == Char.Alignment.ENEMY){
-                    visibleMobs++;
-                }
+        boolean[] fov = user.fieldOfView != null ? user.fieldOfView : Dungeon.level.heroFOV;
+        int visibleMobs = 0;
+        for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])){
+            if(fov[mob.pos] && mob.alignment == Char.Alignment.ENEMY){
+                visibleMobs++;
             }
-            float speedBonus = (0.2f + 0.05f * level()) * visibleMobs;
-            delay = 1 - speedBonus;
         }
+        float speedBonus = (0.2f + 0.05f * level()) * visibleMobs;
+        delay = 1 - speedBonus;
         return Math.max(0.25f, delay);
     }
 

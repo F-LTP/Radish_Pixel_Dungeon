@@ -26,6 +26,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ChallengeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.SoulEmber;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RatSkull;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.WraithSprite;
@@ -40,6 +42,9 @@ public class Wraith extends Mob {
 	private static final float SPAWN_DELAY	= 2f;
 	
 	protected int level;
+
+	// 诅咒玫瑰/尸尘生成的怨灵不掉落灵魂余烬
+	public boolean noSoulDrop = false;
 	
 	{
 		spriteClass = WraithSprite.class;
@@ -145,6 +150,19 @@ public class Wraith extends Mob {
 		} else {
 			return null;
 		}
+	}
+
+	@Override
+	public void die( Object cause ) {
+		// 灵魂余烬：怨灵35%、缠怨灵70%掉落1～3个；诅咒玫瑰/尸尘生成的怨灵不掉落
+		if (!noSoulDrop && Dungeon.hero != null && Dungeon.level != null){
+			float chance = (this instanceof TormentedSpirit) ? 0.7f : 0.35f;
+			if(Random.Float() < chance){
+				Item ember = new SoulEmber().quantity(Random.Int(1, 3));
+				Dungeon.level.drop(ember, pos).sprite.drop();
+			}
+		}
+		super.die( cause );
 	}
 
 }

@@ -35,7 +35,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.AshKing;
 import com.shatteredpixel.shatteredpixeldungeon.challenge.SnakeBiteChallengeManager;
@@ -224,6 +226,13 @@ public class Item implements Bundlable {
 		GameScene.cancel();
 		curUser = hero;
 		curItem = this;
+
+		// 圆球皮肤：使用物品前需旋转到默认正前方（丢弃/投掷不在此列，此处仅拦截默认使用动作）
+		if (hero.isSphereSkin() && action != null && action.equals(defaultAction())) {
+			if (hero.sphereRotateTo( 0f )) {
+				return;
+			}
+		}
 		
 		if (action.equals( AC_DROP )) {
 			
@@ -616,6 +625,20 @@ public class Item implements Bundlable {
 		return desc();
 	}
 
+	public final String displayInfo() {
+		if (SnakeBiteChallengeManager.shouldReplaceItemText(this)) {
+			return Messages.getSnakeBiteItemDescription();
+		}
+		return info();
+	}
+
+	public final String displayDesc() {
+		if (SnakeBiteChallengeManager.shouldReplaceItemText(this)) {
+			return Messages.getSnakeBiteItemDescription();
+		}
+		return desc();
+	}
+
 	public String desc() {
 		return Messages.get(this, "desc");
 	}
@@ -758,8 +781,8 @@ public class Item implements Bundlable {
 								}
 							}
 							// 左弓连射天赋：投掷武器不消耗回合（如果目标有足够中矢层数）
-							if (user.heroClass == HeroClass.MOONLIGHT
-									&& user.subClass == HeroSubClass.LITTLE_KNIGHT
+							if (user.heroClass == HeroClasses.MOONLIGHT
+									&& user.subClass == HeroSubClasses.LITTLE_KNIGHT
 									&& user.hasTalent(Talent.LEFT_BOW_RAPID)
 									&& enemy != null
 									&& Item.this instanceof MissileWeapon) {

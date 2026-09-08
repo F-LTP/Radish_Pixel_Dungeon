@@ -1,50 +1,23 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
-
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BlessAWP;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChallengeToyEffects;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Momentum;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.*;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.talents.moonlight.SharpeningEdgeTalent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.ToyBackpack;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.talents.moonlight.SharpeningEdgeTalent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.ItemArmorAttachable;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.AntiEntropy;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Bulk;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Corrosion;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Displacement;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Metabolism;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Multiplicity;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Overgrowth;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Stench;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Affection;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Camouflage;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Entanglement;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Flow;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Obfuscation;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Potential;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Repulsion;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.SkyWalker;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Stone;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Swiftness;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Thorns;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Muramasa;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
@@ -63,19 +36,16 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.watabou.noosa.particles.Emitter;
-import com.watabou.utils.Bundlable;
-import com.watabou.utils.Bundle;
-import com.watabou.utils.PathFinder;
-import com.watabou.utils.Random;
-import com.watabou.utils.Reflection;
+import com.watabou.utils.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
 public class Armor extends EquipableItem {
 
@@ -225,6 +195,10 @@ public class Armor extends EquipableItem {
 		return !isIdentified() && usesLeftToID <= 0;
 	}
 
+	public void completeIdentificationProgress(){
+		usesLeftToID = 0;
+	}
+
 	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions(hero);
@@ -343,13 +317,6 @@ public class Armor extends EquipableItem {
 	}
 
 	public void affixSeal(BrokenSeal seal){
-		// 升级传递逻辑：纹章等级传递给护甲，但卸下时会返还
-		if (seal.level() > 0){
-			//doesn't trigger upgrading logic such as affecting curses/glyphs
-			int newLevel = trueLevel()+1;
-			level(newLevel);
-			Badges.validateItemLevelAquired(this);
-		}
 		attachToy(seal);
 	}
 
@@ -396,6 +363,16 @@ public class Armor extends EquipableItem {
 	 * 将玩具附着到护甲上
 	 */
 	public void attachToy(ItemArmorAttachable toy) {
+		// 破损纹章升级传递：纹章等级传递给护甲，但卸下时会返还
+		if (toy instanceof BrokenSeal){
+			BrokenSeal seal = (BrokenSeal) toy;
+			if (seal.level() > 0){
+				//doesn't trigger upgrading logic such as affecting curses/glyphs
+				int newLevel = trueLevel()+1;
+				level(newLevel);
+				Badges.validateItemLevelAquired(this);
+			}
+		}
 		attachedToys.add(toy);
 		toy.attachToArmor(this);
 		if (Dungeon.hero != null && isEquipped(Dungeon.hero)) {
@@ -608,6 +585,9 @@ public class Armor extends EquipableItem {
 			if (index < 0 || index >= armor.attachedToys.size()) return;
 			ItemArmorAttachable item = armor.attachedToys.get(index);
 
+			// 若卸下会导致死亡则拒绝卸下
+			if (!item.tryDetach(hero)) return;
+
 			// 破损纹章有特殊卸下逻辑
 			if (item instanceof BrokenSeal) {
 				armor.detachSeal(hero);
@@ -760,7 +740,7 @@ public class Armor extends EquipableItem {
 		}
 
 		// 剑盾骑士天赋：月华护甲最小值至少为武器伤害最小值的倍数
-		if (Dungeon.hero != null && Dungeon.hero.heroClass == HeroClass.MOONLIGHT) {
+		if (Dungeon.hero != null && Dungeon.hero.heroClass == HeroClasses.MOONLIGHT) {
 			int points = Dungeon.hero.pointsInTalent(Talent.SWORD_SHIELD_KNIGHT);
 			if (points > 0 && Dungeon.hero.belongings.weapon instanceof MeleeWeapon) {
 				// 获取武器伤害最小值
@@ -858,11 +838,11 @@ public class Armor extends EquipableItem {
 			RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
 			// 塑形玻璃的虚拟等级需要与国王之戒的虚拟等级叠加
 			if(hero.buff(BlessAWP.ArmorGetReady.class)!=null && hero.belongings.armor() == this && riverGlass != null){
-				return super.buffedLvl()+1 + riverGlass.level() + 1 + RingOfKing.updateMultiplier(Dungeon.hero);
+				return super.buffedLvl()+1 + riverGlass.virtualLevel() + RingOfKing.updateMultiplier(Dungeon.hero);
 			} else if(hero.buff(BlessAWP.ArmorGetReady.class)!=null && hero.belongings.armor() == this) {
 				return super.buffedLvl()+1 + RingOfKing.updateMultiplier(Dungeon.hero);
 			} else if(riverGlass != null){
-				return super.buffedLvl() + riverGlass.level() + 1 + RingOfKing.updateMultiplier(Dungeon.hero);
+				return super.buffedLvl() + riverGlass.virtualLevel() + RingOfKing.updateMultiplier(Dungeon.hero);
 			}
 
 
@@ -930,8 +910,22 @@ public class Armor extends EquipableItem {
 
 	public int proc( Char attacker, Char defender, int damage ) {
 
-		if (glyph != null && defender.buff(MagicImmune.class) == null) {
+		boolean magicImmune = defender.buff(MagicImmune.class) != null;
+
+		if (glyph != null && !magicImmune) {
 			damage = glyph.proc( this, attacker, defender, damage );
+		}
+
+		// 符文传递：纹章刻印/诅咒与护甲刻印/诅咒共存，各自触发
+		// （若纹章刻印与护甲刻印相同则只触发一次，由 procLvl 提供 +1 等级加成）
+		if (!magicImmune) {
+			BrokenSeal s = checkSeal();
+			if (s != null) {
+				Armor.Glyph sealGlyph = s.getGlyph();
+				if (sealGlyph != null && sealGlyph != glyph) {
+					damage = sealGlyph.proc( this, attacker, defender, damage );
+				}
+			}
 		}
 
 		if (!levelKnown && defender == Dungeon.hero) {
@@ -1025,7 +1019,7 @@ public class Armor extends EquipableItem {
 			}
 		}
 
-		if (!isIdentified() && cursedKnown) {
+		if (!isIdentified() && cursedKnown && !cursed) {
 			if (glyph != null && glyph.curse()) {
 				info += "\n\n" + Messages.get(Armor.class, "weak_cursed");
 			} else {
@@ -1190,7 +1184,7 @@ public class Armor extends EquipableItem {
 
 
 		public static final Class<?>[] common = new Class<?>[]{
-				Obfuscation.class, Swiftness.class, Viscosity.class, Potential.class , SkyWalker.class};
+				Obfuscation.class, Swiftness.class, Viscosity.class, Potential.class , SkyWalker.class, Resonance.class};
 
 		public static final Class<?>[] uncommon = new Class<?>[]{
 				Brimstone.class, Stone.class, Entanglement.class,

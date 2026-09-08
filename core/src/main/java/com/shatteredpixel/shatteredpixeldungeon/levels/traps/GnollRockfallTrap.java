@@ -29,6 +29,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.GnollGeomancer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.GnollGuard;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
@@ -82,7 +84,7 @@ public class GnollRockfallTrap extends RockfallTrap {
 			if (ch != null && ch.isAlive() && !(ch instanceof GnollGeomancer)){
 				//deals notably less damage than a regular rockfall trap, but ignores armor
 				int damage = Char.combatRoll(6, 12);
-				ch.damage( Math.max(damage, 0) , this);
+				ch.damage(new DamageInfo(Math.max(damage, 0), DamageType.PHYSICAL_NO_ARMOR, null, null, this));
 
 				//guards take full paralysis, otherwise just a little
 				Buff.prolong(ch, Paralysis.class, ch instanceof GnollGuard ? 10 : 3);

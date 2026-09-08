@@ -21,76 +21,65 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
-import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
-import com.watabou.noosa.Game;
 
-public enum HeroSubClass {
+/**
+ * 子职业基类（Base）- 每个子职业由一个定义类继承本类。
+ *
+ * <p>只承载子职业的<b>身份与行为</b>：名称/图标、T3/T4 天赋、战斗钩子。
+ * 各子职业单例常量与查找统一由 {@link HeroSubClasses}（Manager）持有。</p>
+ */
+public abstract class HeroSubClass {
 
-	NONE(HeroIcon.NONE),
+	private final String name;
+	private final String icon;
 
-	BERSERKER(HeroIcon.BERSERKER),
-	GLADIATOR(HeroIcon.GLADIATOR),
-
-	BATTLEMAGE(HeroIcon.BATTLEMAGE),
-	WARLOCK(HeroIcon.WARLOCK),
-
-	ASSASSIN(HeroIcon.ASSASSIN),
-	FREERUNNER(HeroIcon.FREERUNNER),
-
-	SNIPER(HeroIcon.SNIPER),
-	WARDEN(HeroIcon.WARDEN),
-
-	//Rector Sub Class
-	BATTLEPREIST(HeroIcon.BATTLE_PRIEST),
-	REDCARDINAL(HeroIcon.RED_CARDINAL),
-	DEAD_KNIGHT(HeroIcon.DEAD_KNIGHT),
-
-	//Moonlight SubClasses
-	LITTLE_KNIGHT(HeroIcon.LITTLE_KNIGHT),
-	DICE_MAGE(HeroIcon.DICE_MAGE),
-	JUTTE_CHAMPION(HeroIcon.JUTTE_CHAMPION),
-
-	//Never Used Duelist
-	CHAMPION(HeroIcon.CHAMPION),
-	MONK(HeroIcon.MONK);
-
-	String icon;
-
-	HeroSubClass(String icon){
+	protected HeroSubClass(String name, String icon){
+		this.name = name;
 		this.icon = icon;
 	}
 
+	//各子职业提供的 T3/T4 天赋
+	public abstract Talent[] subclassT3();
+	public abstract Talent[] subclassT4();
+
+	/**
+	 * 攻击命中后的子职业钩子。
+	 */
+	public void onAttackProc(Hero hero, Char enemy, int damage, boolean hit, boolean wasEnemy) { }
+
+	/**
+	 * 受到伤害时的子职业钩子（护甲 proc 之后调用）。
+	 */
+	public void onDefenseProc(Hero hero, Char enemy, int damage) { }
+
+	/**
+	 * 移动一步时的子职业钩子。
+	 */
+	public void onMove(Hero hero) { }
+
+	/**
+	 * 计算攻击回合消耗倍率。默认 1.0。
+	 */
+	public float attackDelayMultiplier(Hero hero, Char enemy, boolean surpriseAttack) { return 1f; }
+
+	public String name() { return name; }
+
 	public String title() {
-		return Messages.get(this, name());
+		return Messages.get(HeroSubClass.class, name());
 	}
 
 	public String super_desc() {
-		return Messages.get(this, "super_desc",title());
+		return Messages.get(HeroSubClass.class, "super_desc",title());
 	}
 
 	public String shortDesc() {
-		return Messages.get(this, name()+"_short_desc");
+		return Messages.get(HeroSubClass.class, name()+"_short_desc");
 	}
 
 	public String desc() {
-		//Include the staff effect description in the battlemage's desc if possible
-		if (this == BATTLEMAGE){
-			String desc = Messages.get(this, name() + "_desc");
-			if (Game.scene() instanceof GameScene){
-				MagesStaff staff = Dungeon.hero.belongings.getItem(MagesStaff.class);
-				if (staff != null && staff.wandClass() != null){
-					desc += "\n\n" + Messages.get(staff.wandClass(), "bmage_desc");
-					desc = desc.replaceAll("_", "");
-				}
-			}
-			return desc;
-		} else {
-			return Messages.get(this, name() + "_desc");
-		}
+		return Messages.get(HeroSubClass.class, name() + "_desc");
 	}
 
 	public String icon(){

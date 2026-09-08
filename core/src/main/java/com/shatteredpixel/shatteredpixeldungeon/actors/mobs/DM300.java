@@ -20,6 +20,8 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
@@ -471,13 +473,14 @@ public class DM300 extends Mob {
 	private boolean invulnWarned = false;
 
 	@Override
-	public void damage(int dmg, Object src) {
+	public void damage(DamageInfo info) {
+		Object src = info.getSource();
 		if (!BossHealthBar.isAssigned()){
 			notice();
 		}
 
 		int preHP = HP;
-		super.damage(dmg, src);
+		super.damage(info);
 		if (isInvulnerable(src.getClass())){
 			return;
 		}

@@ -1,6 +1,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CircleSword;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
@@ -64,6 +66,16 @@ public class AfterImage extends Armor{
         public String icon() {
             return BuffIndicator.A_EVA;
         }
+
+		@Override
+		public String desc() {
+			if (!(this instanceof AnotabsoluteEvasion)
+					&& target != null
+					&& target.attackingWeapon() instanceof CircleSword) {
+				return Messages.get(this, "circle_desc");
+			}
+			return super.desc();
+		}
     }
 
     public static class AnotabsoluteEvasion extends absoluteEvasion {

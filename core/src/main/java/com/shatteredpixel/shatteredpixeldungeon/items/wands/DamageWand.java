@@ -67,9 +67,10 @@ public abstract class DamageWand extends Wand{
 
 		RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
 		if(riverGlass != null){
-			int originalDamage = Char.combatRoll(min(lvl), max(lvl));
-			int secondRoll = Char.combatRoll(min(lvl), max(lvl));
-			dmg = Math.min(originalDamage, secondRoll);
+			dmg = Integer.MAX_VALUE;
+			for (int i = 0; i < riverGlass.judgeTimes(); i++){
+				dmg = Math.min(dmg, Char.combatRoll(min(lvl), max(lvl)));
+			}
 		}
 
 

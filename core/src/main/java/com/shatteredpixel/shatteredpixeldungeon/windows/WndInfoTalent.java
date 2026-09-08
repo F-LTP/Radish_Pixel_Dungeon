@@ -23,13 +23,16 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.dicemage.DiceMageSchools;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
+import com.shatteredpixel.shatteredpixeldungeon.ui.SNDItems;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import com.watabou.noosa.Image;
 import com.watabou.utils.Callback;
 
 public class WndInfoTalent extends Window {
@@ -38,12 +41,26 @@ public class WndInfoTalent extends Window {
 
 	private static final int WIDTH = 120;
 
+	/** 学派天赋显示"即将解锁"法术的 SND 图标；非学派或找不到时返回 null。 */
+	private static Image schoolIcon(Talent talent, int points) {
+		if (!Talent.isDiceMageSpellTalent(talent)) return null;
+		String sndName = DiceMageSchools.nextSpellSndName(talent, points);
+		if (sndName == null) return null;
+		Image img = SNDItems.get(sndName);
+		if (img == null) return null;
+		// 将 SND 贴图放大到与天赋图标(16px)相同的显示尺寸
+		float s = 16f / img.width();
+		img.scale.set(s);
+		return img;
+	}
+
 	public WndInfoTalent(Talent talent, int points, TalentButtonCallback buttonCallback){
 		super();
 
 		IconTitle titlebar = new IconTitle();
 
-		titlebar.icon( new TalentIcon( talent ) );
+		Image icon = schoolIcon(talent, points);
+		titlebar.icon( icon != null ? icon : new TalentIcon( talent ) );
 		String title = Messages.titleCase(talent.title());
 		if (points > 0){
 			title += " +" + points;

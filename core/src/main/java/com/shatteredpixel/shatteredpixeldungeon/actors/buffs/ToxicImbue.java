@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
@@ -113,7 +114,7 @@ public class ToxicImbue extends Buff {
 	}
 
 	{
-		immunities.add( ToxicGas.class );
-		immunities.add( Poison.class );
+		typeImmunities.add(DamageType.TOXIC);
+		immunities.add(Poison.class); typeImmunities.add(DamageType.POISON);
 	}
 }

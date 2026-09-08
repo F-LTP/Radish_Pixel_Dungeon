@@ -48,6 +48,7 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Burning extends Buff implements Hero.Doom {
 	
@@ -57,7 +58,10 @@ public class Burning extends Buff implements Hero.Doom {
 	
 	//for tracking burning of hero items
 	private int burnIncrement = 0;
-	
+
+	// 火焰伤害来源链：记录点燃者、点燃来源（附魔/法杖/环境）等，随火传导/伤害逐层传递
+	private List<Object> causeChain = new ArrayList<>();
+
 	private static final String LEFT	= "left";
 	private static final String BURN	= "burnIncrement";
 
@@ -96,6 +100,7 @@ public class Burning extends Buff implements Hero.Doom {
 			Buff.detach( target, Chill.class);
 
 			DamageInfo dmgInfo = DamageInfo.burningStatus(damage, this);
+			dmgInfo.setCauseChain(causeChain);
 
 			if (target instanceof Hero
 					&& target.buff(TimekeepersHourglass.timeStasis.class) == null
@@ -175,8 +180,19 @@ public class Burning extends Buff implements Hero.Doom {
 	public void reignite( Char ch ) {
 		reignite( ch, DURATION );
 	}
-	
+
 	public void reignite( Char ch, float duration ) {
+		reignite( ch, duration, null );
+	}
+
+	/** reignite 并携带一条伤害来源链（点燃者、点燃来源等）。 */
+	public void reignite( Char ch, float duration, List<?> chain ) {
+		if (chain != null) {
+			causeChain.clear();
+			for (Object c : chain) {
+				if (c != null) causeChain.add(c);
+			}
+		}
 		if (ch.isImmune(Burning.class)){
 			//TODO this only works for the hero, not others who can have brimstone+arcana effect
 			// e.g. prismatic image, shadow clone
@@ -198,10 +214,25 @@ public class Burning extends Buff implements Hero.Doom {
 		}
 		left = duration;
 	}
+
+	/** 剩余引燃将持续造成的总火焰伤害（供"烧焦"等法术立即结算）。 */
+	public int remainingDamage() {
+		int turns = Math.max(1, (int) Math.ceil(left));
+		int total = 0;
+		for (int i = 0; i < turns; i++) {
+			total += Char.combatRoll( 1, 3 + Dungeon.scalingDepth()/4 );
+		}
+		return total;
+	}
 	
 	@Override
 	public String icon() {
 		return BuffIndicator.FIRE;
+	}
+
+	/** 火焰伤害来源链（供 DamageInfo 注入与传导）。 */
+	public List<Object> getCauseChain() {
+		return new ArrayList<>(causeChain);
 	}
 
 	@Override

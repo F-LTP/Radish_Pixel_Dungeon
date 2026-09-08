@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.sprites;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.watabou.noosa.TextureFilm;
+import com.watabou.utils.Callback;
 
 public class RotLasherSprite extends MobSprite {
 
@@ -51,5 +52,11 @@ public class RotLasherSprite extends MobSprite {
 	@Override
 	public int blood() {
 		return 0xFF88CC44;
+	}
+
+	/** Plays the attack animation for a temporary, visual-only lasher. */
+	public void playVisualAttack(Callback callback) {
+		animCallback = callback;
+		play(attack);
 	}
 }

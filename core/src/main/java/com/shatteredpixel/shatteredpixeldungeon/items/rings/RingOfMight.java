@@ -69,8 +69,15 @@ public class RingOfMight extends Ring {
 	}
 	
 	private void updateTargetHT(){
-		if (buff != null && buff.target instanceof Hero){
-			((Hero) buff.target).updateHT( false );
+		if (buff != null && buff.target != null){
+			if (buff.target instanceof Hero) {
+				((Hero) buff.target).updateHT(false);
+			} else {
+				int oldHT = buff.target.HT;
+				buff.target.HT = Math.max(1, Math.round(buff.target.HT / HTMultiplier(buff.target)));
+				buff.target.HT = Math.max(1, Math.round(buff.target.HT * HTMultiplier(buff.target)));
+				buff.target.HP = Math.min(buff.target.HT, buff.target.HP + buff.target.HT - oldHT);
+			}
 		}
 	}
 	
@@ -116,4 +123,3 @@ public class RingOfMight extends Ring {
 	public class Might extends RingBuff {
 	}
 }
-

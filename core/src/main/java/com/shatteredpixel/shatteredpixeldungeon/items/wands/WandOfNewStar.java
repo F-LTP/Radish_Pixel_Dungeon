@@ -4,13 +4,14 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Healing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
-import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.WondrousResin;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
@@ -78,7 +79,7 @@ public class WandOfNewStar extends DamageWand {
                             boolean isHiddenMimic = target instanceof Mimic
                                     && target.alignment == Char.Alignment.NEUTRAL;
                             if (isHiddenMimic || target.alignment == Char.Alignment.ENEMY) {
-                                target.damage(damageRoll() == 0 ? 1 : damageRoll(), DamageType.MAGICAL);
+                                target.damage(DamageInfo.of(damageRoll() == 0 ? 1 : damageRoll(), DamageType.MAGICAL, curUser, this));
                                 target.sprite.burst(0xFFFFFFFF, buffedLvl() / 2 + 2);
                             } else if (target.alignment == Char.Alignment.ALLY || target instanceof Hero) {
                                 Buff.affect(target, Barrier.class).setShield(shield);

@@ -114,8 +114,8 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndGame;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndHero;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndCellContents;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoCell;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoItem;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoMob;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoPlant;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoTrap;
@@ -301,7 +301,7 @@ public class GameScene extends PixelScene {
 		mobs = new Group();
 		add( mobs );
 
-		hero = new HeroSprite();
+		hero = Dungeon.hero.heroClass.createSkinSprite();
 		hero.place( Dungeon.hero.pos );
 		hero.updateArmor();
 		mobs.add( hero );
@@ -1586,21 +1586,12 @@ public class GameScene extends PixelScene {
 
 		if (objects.isEmpty()) {
 			GameScene.show(new WndInfoCell(cell));
-		} else if (objects.size() == 1){
+		} else if (objects.size() == 1 && !(objects.get(0) instanceof Heap)) {
+			//单对象直接检视
 			examineObject(objects.get(0));
 		} else {
-			String[] names = getObjectNames(objects).toArray(new String[0]);
-
-			GameScene.show(new WndOptions(Icons.get(Icons.INFO),
-					Messages.get(GameScene.class, "choose_examine"),
-					Messages.get(GameScene.class, "multiple_examine"),
-					names){
-				@Override
-				protected void onSelect(int index) {
-					examineObject(objects.get(index));
-				}
-			});
-
+			//多对象（或多物品堆）弹统一列表窗口，各对象作为列表成员
+			GameScene.show(new WndCellContents(cell));
 		}
 	}
 
@@ -1648,7 +1639,7 @@ public class GameScene extends PixelScene {
 				GameScene.flashForDocument(Document.ADVENTURERS_GUIDE, Document.GUIDE_SURPRISE_ATKS);
 			}
 		} else if ( o instanceof Heap && !((Heap) o).isEmpty() ){
-			GameScene.show(new WndInfoItem((Heap)o));
+			GameScene.show(new WndCellContents(((Heap) o).pos));
 		} else if ( o instanceof Plant ){
 			GameScene.show( new WndInfoPlant((Plant) o) );
 			//plants can be harmful to trample, so let the player ID just by examine
@@ -1682,6 +1673,12 @@ public class GameScene extends PixelScene {
 
 			ArrayList<Object> objects = getObjectsAtCell(cell);
 			ArrayList<String> textLines = getObjectNames(objects);
+
+			//多对象格子：不再弹多重目标菜单，直接打开高级检视（地形+怪物+物品列表）
+			if (objects.size() > 1) {
+				GameScene.show(new WndCellContents(cell));
+				return;
+			}
 
 			//determine title and image
 			String title = null;
@@ -1777,6 +1774,11 @@ public class GameScene extends PixelScene {
 			mousePos = menu.camera.screenToCamera((int)mousePos.x, (int)mousePos.y);
 			menu.setPos(mousePos.x-3, mousePos.y-3);
 
+		}
+
+		@Override
+		public boolean supportsLongPressRightClick() {
+			return true;
 		}
 
 		@Override

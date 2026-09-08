@@ -8,6 +8,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Healing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
@@ -68,7 +70,7 @@ public class Soulstaker extends FlavourBuff {
         Set<Mob> mobs = Collections.synchronizedSet(Dungeon.level.mobs);
         for(Mob mob:mobs){
             if(target.fieldOfView[mob.pos] && mob.alignment == Char.Alignment.ENEMY && healTick > 0){
-                mob.damage(healTick,Soulstaker.class);
+                mob.damage(DamageInfo.of(healTick, DamageType.MAGICAL, target, this));
             }
         }
 

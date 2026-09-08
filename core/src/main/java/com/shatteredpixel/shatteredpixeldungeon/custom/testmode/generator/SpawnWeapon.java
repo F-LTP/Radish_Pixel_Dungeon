@@ -227,6 +227,7 @@ public class SpawnWeapon extends TestItem {
         private OptionSlider OptionSlider_Tier; // 武器阶数选项滑块
         private RenderedTextBlock Text_EnchantInfo; // 附魔信息文本块
         private boolean initialized = false; // 初始化完成标志
+        private boolean destroyed = false;
 
         /**
          * 构造函数，用于初始化窗口。
@@ -241,6 +242,7 @@ public class SpawnWeapon extends TestItem {
             OptionSlider_Tier = new OptionSlider(Messages.get(this, "weapon_tier"), "1", "5", 1, 5) {
                 @Override
                 protected void onChange() {
+                    if (destroyed) return;
                     tier = getSelectedValue();
                     clearImage();
                     createWeaponImage(getWeapon(tier));
@@ -262,7 +264,7 @@ public class SpawnWeapon extends TestItem {
             OptionSlider_EnchantRarity = new OptionSlider(Messages.get(this, "enchant_rarity"), "1", "5", 0, 4) {
                 @Override
                 protected void onChange() {
-                    if (!initialized) return; // 初始化未完成时不执行回调
+                    if (!initialized || destroyed) return;
                     enchant_rarity = getSelectedValue();
                     updateEnchantIdSlider();
                     updateEnchantText();
@@ -367,11 +369,12 @@ public class SpawnWeapon extends TestItem {
             int maxId = getEnchantCount(enchant_rarity) - 1;
             if (OptionSlider_EnchantId != null) {
                 remove(OptionSlider_EnchantId);
+                OptionSlider_EnchantId.destroy();
             }
             OptionSlider_EnchantId = new OptionSlider(Messages.get(this, "enchant_id"), "1", String.valueOf(maxId + 1), 0, maxId) {
                 @Override
                 protected void onChange() {
-                    if (!initialized) return; // 初始化未完成时不执行回调
+                    if (!initialized || destroyed) return;
                     enchant_id = getSelectedValue();
                     updateEnchantText();
                 }
@@ -472,6 +475,7 @@ public class SpawnWeapon extends TestItem {
         }
 
         private void updateEnchantText() {
+            if (destroyed || Text_EnchantInfo == null || !Text_EnchantInfo.exists) return;
             StringBuilder info = new StringBuilder();
             if (enchant_rarity == 0) {
                 info.append(Messages.get(this, "no_enchant"));
@@ -486,6 +490,13 @@ public class SpawnWeapon extends TestItem {
                 info.append(Messages.get(this, "current_enchant",getEnchantInfo(getEnchant(enchant_rarity, enchant_id))));
             }
             Text_EnchantInfo.text(info.toString());
+        }
+
+        @Override
+        public synchronized void destroy() {
+            destroyed = true;
+            initialized = false;
+            super.destroy();
         }
 
         @Override

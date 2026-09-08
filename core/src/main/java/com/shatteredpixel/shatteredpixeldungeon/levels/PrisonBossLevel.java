@@ -89,6 +89,7 @@ public class PrisonBossLevel extends Level {
 	
 	private State state;
 	private Tengu tengu;
+	private int fightPauseStartPos = -1;
 
 	@Override
 	public void playLevelMusic() {
@@ -120,6 +121,7 @@ public class PrisonBossLevel extends Level {
 	private static final String TENGU	        = "tengu";
 	private static final String STORED_ITEMS    = "storeditems";
 	private static final String TRIGGERED       = "triggered";
+	private static final String FIGHT_PAUSE_START_POS = "fight_pause_start_pos";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -128,6 +130,7 @@ public class PrisonBossLevel extends Level {
 		bundle.put( TENGU, tengu );
 		bundle.put( STORED_ITEMS, storedItems);
 		bundle.put(TRIGGERED, triggered );
+		bundle.put(FIGHT_PAUSE_START_POS, fightPauseStartPos);
 	}
 	
 	@Override
@@ -152,6 +155,7 @@ public class PrisonBossLevel extends Level {
 		}
 		
 		triggered = bundle.getBooleanArray(TRIGGERED);
+		fightPauseStartPos = bundle.getInt(FIGHT_PAUSE_START_POS);
 		
 	}
 	
@@ -449,6 +453,7 @@ public class PrisonBossLevel extends Level {
 				Sample.INSTANCE.play(Assets.Sounds.BLAST);
 				
 				state = State.FIGHT_PAUSE;
+				fightPauseStartPos = Dungeon.hero.pos;
 				break;
 
 			case FIGHT_PAUSE:
@@ -548,7 +553,11 @@ public class PrisonBossLevel extends Level {
 					break;
 				case FIGHT_PAUSE:
 					
-					if (cellToPoint(ch.pos).y <= startHallway.top+1){
+					// A map refresh can re-occupy the hero's current cell immediately after
+					// phase one ends. Require actual movement during the pause before the
+					// arena transition can fire.
+					if (ch.pos != fightPauseStartPos
+							&& cellToPoint(ch.pos).y <= startHallway.top+1){
 						progress();
 					}
 					break;

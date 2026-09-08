@@ -32,13 +32,14 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.items.LawFragment;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.GuardSprite;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
+import com.watabou.utils.Random;
 
 public class Guard extends Mob {
 
@@ -151,6 +152,15 @@ public class Guard extends Mob {
 	public Item createLoot() {
 		Dungeon.LimitedDrops.GUARD_ARM.count++;
 		return super.createLoot();
+	}
+
+	@Override
+	public void die( Object cause ) {
+		// 律法残页 15% 掉落
+		if(Random.Float() < 0.15f){
+			Dungeon.level.drop(new LawFragment(), pos).sprite.drop();
+		}
+		super.die( cause );
 	}
 
 	private final String CHAINSUSED = "chainsused";

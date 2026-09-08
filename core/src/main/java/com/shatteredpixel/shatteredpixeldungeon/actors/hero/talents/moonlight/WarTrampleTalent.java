@@ -2,6 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero.talents.moonlight;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
@@ -22,7 +23,7 @@ public class WarTrampleTalent {
     @SubscribeEvent(event = HeroTrampleGrassEvent.class, priority = 0)
     public static void onTrampleGrass(HeroTrampleGrassEvent event) {
         Hero hero = event.getHero();
-        if (hero.heroClass != HeroClass.MOONLIGHT) return;
+        if (hero.heroClass != HeroClasses.MOONLIGHT) return;
 
         int points = hero.pointsInTalent(Talent.WAR_TRAMPLE);
         if (points <= 0) return;

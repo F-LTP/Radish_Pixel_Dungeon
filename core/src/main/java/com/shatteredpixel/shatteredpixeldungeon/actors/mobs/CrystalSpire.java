@@ -25,6 +25,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
@@ -129,7 +131,7 @@ public class CrystalSpire extends Mob {
 						dmg += 12; //18-27 damage
 						Buff.prolong(ch, Cripple.class, 30f);
 					}
-					ch.damage(dmg, new SpireSpike());
+					ch.damage(DamageInfo.of(dmg, DamageType.PHYSICAL_NO_ARMOR, this, new SpireSpike()));
 
 					int movePos = i;
 					//crystal guardians get knocked away from the hero, others get knocked away from the spire
@@ -285,11 +287,13 @@ public class CrystalSpire extends Mob {
 	}
 
 	@Override
-	public void damage(int dmg, Object src) {
+	public void damage(DamageInfo info) {
+		int dmg = info.getDamage();
+		Object src = info.getSource();
 		if (!(src instanceof Pickaxe) ){
 			dmg = 0;
 		}
-		super.damage(dmg, src);
+		super.damage(DamageInfo.of(dmg, info.getType(), info.getAttacker(), src));
 	}
 
 	@Override
@@ -320,7 +324,7 @@ public class CrystalSpire extends Mob {
 					//we pretend the spire is the owner here so that properties like hero str or or other equipment do not factor in
 					int dmg = p.damageRoll(CrystalSpire.this);
 
-					damage(dmg, p);
+					damage(DamageInfo.physical(dmg, CrystalSpire.this, p));
 					abilityCooldown -= dmg/10f;
 					sprite.bloodBurstA(Dungeon.hero.sprite.center(), dmg);
 					sprite.flash();
@@ -352,7 +356,7 @@ public class CrystalSpire extends Mob {
 						for (Char ch : Actor.chars()){
 							if (fieldOfView[ch.pos]) {
 								if (ch instanceof CrystalGuardian) {
-									ch.damage(ch.HT, new SpireSpike());
+									ch.damage(DamageInfo.of(ch.HT, DamageType.PHYSICAL_NO_ARMOR, CrystalSpire.this, new SpireSpike()));
 								}
 								if (ch instanceof CrystalWisp) {
 									Buff.affect(ch, Blindness.class, 5f);

@@ -45,7 +45,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SoulMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.FaithObstruction;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.WildMagic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.AshKing;
@@ -244,7 +246,7 @@ public abstract class Wand extends Item {
 		}
 
 		if (target != hero &&
-				hero.subClass == HeroSubClass.WARLOCK &&
+				hero.subClass == HeroSubClasses.WARLOCK &&
 				//standard 1 - 0.92^x chance, plus 7%. Starts at 15%
 				Random.Float() > (Math.pow(0.92f, (wandLevel*chargesUsed)+1) - 0.07f)){
 			SoulMark.prolong(target, SoulMark.class, SoulMark.DURATION + wandLevel);
@@ -320,7 +322,7 @@ public abstract class Wand extends Item {
 		}
 
 		if(hero != null){
-			if (hero.subClass == HeroSubClass.BATTLEMAGE){
+			if (hero.subClass == HeroSubClasses.BATTLEMAGE){
 				desc += "\n\n" + Messages.get(this, "bmage_desc");
 			}
 		}
@@ -402,7 +404,7 @@ public abstract class Wand extends Item {
 
 			RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
 			if (riverGlass != null) {
-				return super.buffedLvl() + riverGlass.level() + 1;
+				return super.buffedLvl() + riverGlass.virtualLevel();
 			}
 		}
 
@@ -505,8 +507,8 @@ public abstract class Wand extends Item {
 	public void wandUsed() {
 		TieredToyEffects.onAbilityUsed(hero);
 
-		if (hero.subClass == HeroSubClass.DICE_MAGE){
-			Buff.affect(hero, MagicPoint.class).addPoints(0.5f + buffedLvl() * 0.05f);
+		if (hero.subClass == HeroSubClasses.DICE_MAGE){
+			Buff.affect(hero, MagicPoint.class).addPoints(0.2f + buffedLvl() * 0.2f);
 		}
 
 		if(hero.hasTalent(Talent.MAGIC_STICK) && hero.pointsInTalent(Talent.MAGIC_STICK) >=4 && ! isMagesStaff){
@@ -593,7 +595,7 @@ public abstract class Wand extends Item {
 
 				//otherwise process logic for metamorphed backup barrier
 			} else if (curCharges == 0
-					&& hero.heroClass != HeroClass.MAGE
+					&& hero.heroClass != HeroClasses.MAGE
 					&& hero.hasTalent(Talent.BACKUP_BARRIER)) {
 				boolean highest = true;
 				for (Item i : hero.belongings.getAllItems(Wand.class)) {
@@ -654,7 +656,7 @@ public abstract class Wand extends Item {
 		if (hero.hasTalent(Talent.DUEL_DANCE) && hero.cooldown() >= 0)
 			Buff.affect(hero, Talent.DuelDanceMissileTracker.class, hero.cooldown());
 
-		if(hero.heroClass == HeroClass.RECTOR){
+		if(hero.heroClass == HeroClasses.RECTOR){
 			FaithObstruction failed = Dungeon.hero.buff(FaithObstruction.class);
 			if(failed == null){
 				if(getClass() != WandOfCorret.class && !(Dungeon.hero.hasTalent(Talent.SMART_BLESSING))){

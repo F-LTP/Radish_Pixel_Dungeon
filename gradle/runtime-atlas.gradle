@@ -3,6 +3,8 @@ def atlasJava = file('core/src/main/java/com/shatteredpixel/shatteredpixeldungeo
 
 def atlasTargets = [
         [directory: new File(atlasAssets, 'sprites/items'), exact: false],
+        [directory: new File(atlasAssets, 'sprites/item_icons'), exact: false],
+        [directory: new File(atlasAssets, 'interfaces/hero_icons'), exact: false],
         [directory: new File(atlasAssets, 'interfaces/talents'), exact: true],
         [directory: new File(atlasAssets, 'interfaces/buffs/small'), exact: true],
         [directory: new File(atlasAssets, 'interfaces/buffs/large'), exact: true]
@@ -20,13 +22,21 @@ def javaStringConstants = { File sourceFile, String before = null ->
     return names
 }
 
+def javaStringConstantsAfter = { File sourceFile, String after ->
+    def source = sourceFile.getText('UTF-8').split(java.util.regex.Pattern.quote(after), 2)[1]
+    def names = [] as Set
+    def matcher = source =~ /public\s+static\s+final\s+String\s+[A-Z][A-Z0-9_]*\s*=\s*"([a-z0-9_]+)"/
+    matcher.each { names.add(it[1]) }
+    return names
+}
+
 def talentNames = { File sourceFile ->
     def source = sourceFile.getText('UTF-8')
-    def body = source.split('public enum Talent \\{', 2)[1].split('ERROR;', 2)[0]
-    body = body.replaceAll(/(?s)\/\*.*?\*\/|\/\/[^\n]*/, '')
-
     def names = [] as Set
-    def matcher = body =~ /(?m)\b([A-Z][A-Z0-9_]*)(?:\(\d+\))?\s*(?=,|$)/
+    // Talent 已从枚举重构为类：提取形如
+    //   public static final Talent HEARTY_MEAL = new Talent("HEARTY_MEAL");
+    //   public static final Talent HOLD_FAST   = new Talent("HOLD_FAST", 3);
+    def matcher = source =~ /public\s+static\s+final\s+Talent\s+[A-Z][A-Z0-9_]*\s*=\s*new\s+Talent\("([A-Za-z0-9_]+)"/
     matcher.each { names.add(it[1].toLowerCase(Locale.ROOT)) }
     names.addAll([
             'error',
@@ -36,6 +46,23 @@ def talentNames = { File sourceFile ->
             'heroic_energy_rogue',
             'heroic_energy_huntress',
             'heroic_energy_rat'
+    ])
+    // 这些天赋通过 icon() 重写复用了其他天赋的图标，本身不参与 runtime-atlas 打包，无需专属 PNG。
+    names.removeAll([
+            'd3_skipped',
+            'gather',
+            'learn_cut',
+            'learn_heal',
+            'school_blades',
+            'school_blood',
+            'school_conjuration',
+            'school_emergency',
+            'school_fire',
+            'school_mana',
+            'school_medical',
+            'school_nature',
+            'school_physical',
+            'school_special'
     ])
     return names
 }
@@ -50,6 +77,7 @@ tasks.register('generateRuntimeAtlasManifests') {
     }
     inputs.files(
             new File(atlasJava, 'sprites/ItemSpriteSheet.java'),
+            new File(atlasJava, 'ui/HeroIcon.java'),
             new File(atlasJava, 'actors/hero/Talent.java'),
             new File(atlasJava, 'ui/BuffIndicator.java')
     )
@@ -59,9 +87,14 @@ tasks.register('generateRuntimeAtlasManifests') {
                 new File(atlasJava, 'sprites/ItemSpriteSheet.java'),
                 'public static class Icons'
         )
+        def itemIconNames = javaStringConstantsAfter(
+                new File(atlasJava, 'sprites/ItemSpriteSheet.java'),
+                'public static class Icons'
+        )
         def requiredTalentNames = talentNames(new File(atlasJava, 'actors/hero/Talent.java'))
+        def heroIconNames = javaStringConstants(new File(atlasJava, 'ui/HeroIcon.java'))
         def buffNames = javaStringConstants(new File(atlasJava, 'ui/BuffIndicator.java'))
-        def requiredNames = [itemNames, requiredTalentNames, buffNames, buffNames]
+        def requiredNames = [itemNames, itemIconNames, heroIconNames, requiredTalentNames, buffNames, buffNames]
 
         atlasTargets.eachWithIndex { target, index ->
             def pngFiles = fileTree(target.directory) { include '*.png' }.files.sort { it.name }

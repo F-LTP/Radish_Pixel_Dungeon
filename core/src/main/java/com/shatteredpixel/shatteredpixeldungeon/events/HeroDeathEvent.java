@@ -2,6 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.events;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 /**
  * 英雄死亡事件
@@ -38,5 +39,34 @@ public class HeroDeathEvent extends GameEvent {
         FALLING,        // 掉落
         STARVATION,     // 饥饿
         OTHER           // 其他原因
+        ;
+
+        /**
+         * 根据伤害类型推导死亡原因。
+         * 无法归类的类型（普通物理/魔法战斗伤害等）返回 null，
+         * 由调用方结合凶手是否为 Char 决定 COMBAT 或 OTHER。
+         */
+        public static DeathCause fromDamageType(DamageType type) {
+            if (type == null) return null;
+            switch (type) {
+                case POISON:
+                case OOZE:
+                    return POISON;
+                case FIRE:
+                case BURNING_STATUS:
+                case TOXIC:
+                case CORROSIVE:
+                    return FIRE;
+                case LIGHTNING:
+                    return ELECTRICITY;
+                case FALL:
+                case CHASM:
+                    return FALLING;
+                case HUNGER:
+                    return STARVATION;
+                default:
+                    return null;
+            }
+        }
     }
 }

@@ -1,13 +1,16 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.talents.moonlight;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.events.HeroActEvent;
 import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -60,6 +63,22 @@ public class WeaponMasteryTalent {
 			return stacks > 0 ? Random.Int(stacks + 1) : 0;
 		}
 
+		@Override
+		public void modifyPreFinalOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+			if (!(attacker instanceof Hero)) return;
+
+			Hero hero = (Hero) attacker;
+			if (hero.heroClass != HeroClasses.MOONLIGHT || !hero.hasTalent(Talent.WEAPON_MASTERY)) return;
+			if (!(hero.belongings.weapon instanceof MeleeWeapon)) return;
+			if (info.getSourceItem() != hero.belongings.weapon) return;
+
+			int bonus = getBonusDamage();
+			if (bonus > 0) {
+				if (turnCount >= 500) ((HeroSprite) hero.sprite).updateArmor();
+				info.addPreFinalAddModifier(bonus, "weapon mastery", this);
+			}
+		}
+
 		public void reset() { turnCount = 0; }
 
 		public void setTrackedWeapon(KindOfWeapon weapon) {
@@ -99,7 +118,7 @@ public class WeaponMasteryTalent {
 	public static void onHeroAct(HeroActEvent event) {
 		Hero hero = event.getHero();
 
-		if (hero.heroClass != HeroClass.MOONLIGHT || !hero.hasTalent(Talent.WEAPON_MASTERY)) return;
+		if (hero.heroClass != HeroClasses.MOONLIGHT || !hero.hasTalent(Talent.WEAPON_MASTERY)) return;
 
 		KindOfWeapon weapon = hero.belongings.weapon();
 
@@ -108,20 +127,11 @@ public class WeaponMasteryTalent {
 		if (tracker.getTrackedWeapon() == null) {
 			tracker.trackedWeapon = weapon;
 		}
-		// 这里直接检测相等不行， 因为武器的equals方法没定义好
+		// 这里直接检测相等不行， 因为武器的equals方法没定义好,所以检测武器类型 倒也算是合理
 		if (weapon != null && weapon.getClass() != tracker.getTrackedWeapon().getClass()) {
 			tracker.reset();
 			tracker.setTrackedWeapon(weapon);
+			((HeroSprite) hero.sprite).updateArmor();
 		}
-	}
-
-	public static int getBonusDamage(Hero hero) {
-		if (hero.heroClass != HeroClass.MOONLIGHT || !hero.hasTalent(Talent.WEAPON_MASTERY)) return 0;
-		MasteryTracker tracker = hero.buff(MasteryTracker.class);
-		if (tracker != null) {
-			if (tracker.turnCount >= 500) ((HeroSprite) Dungeon.hero.sprite).updateArmor();
-			return tracker.getBonusDamage();
-		}
-		return 0;
 	}
 }

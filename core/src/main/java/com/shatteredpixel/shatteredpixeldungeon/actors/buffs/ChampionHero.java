@@ -20,11 +20,13 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EliteBadge;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Wayward;
@@ -106,6 +108,11 @@ public abstract class ChampionHero extends Buff {
         return 1f;
     }
 
+    @Override
+    public void modifyOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+        info.addDirectMultModifier(meleeDamageFactor(), "champion hero", this);
+    }
+
     public float damageTakenFactor(){
         return 1f;
     }
@@ -173,7 +180,7 @@ public abstract class ChampionHero extends Buff {
         }
 
         {
-            immunities.add(Burning.class);
+            immunities.add(Burning.class); typeImmunities.add(DamageType.BURNING_STATUS);
         }
     }
 

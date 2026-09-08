@@ -30,6 +30,8 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BlastParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.RainbowParticle;
@@ -199,7 +201,7 @@ public class Bomb extends Item {
 				dmg -= ch.drRoll();
 
 				if (dmg > 0) {
-					ch.damage(dmg, this);
+					ch.damage(new DamageInfo(dmg, DamageType.PHYSICAL_NO_ARMOR, null, null, this));
 				}
 				
 				if (ch == Dungeon.hero && !ch.isAlive()) {
@@ -262,7 +264,7 @@ public class Bomb extends Item {
 
 				if (dmg > 0) {
 					if (ch != hero) {
-						ch.damage(dmg, this);
+						ch.damage(new DamageInfo(dmg, DamageType.PHYSICAL_NO_ARMOR, null, null, this));
 					}
 
 				}

@@ -42,8 +42,6 @@ import com.watabou.noosa.audio.Sample;
 import java.util.ArrayList;
 
 public class Food extends Item {
-	private boolean splitByMealUtilization;
-
 	public static final float TIME_TO_EAT	= 3f;
 	
 	public static final String AC_EAT	= "EAT";
@@ -73,10 +71,9 @@ public class Food extends Item {
 
 		if (action.equals( AC_EAT )) {
 			if (hero.hasTalent(Talent.MEAL_UTILIZATION) && !(this instanceof HalfFood)) {
-				splitByMealUtilization = true;
 				Food eaten = (Food) detach( hero.belongings.backpack );
 				if (eaten == null) return;
-				satisfyBase(hero, eaten.energy / 2f);
+				eaten.satisfyPortion(hero, eaten.energy / 2f);
 				GLog.i( Messages.get(this, "eat_msg") );
 				hero.sprite.operate( hero.pos );
 				hero.busy();
@@ -114,12 +111,6 @@ public class Food extends Item {
 		}
 	}
 
-	protected boolean consumeMealUtilizationSplit() {
-		boolean split = splitByMealUtilization;
-		splitByMealUtilization = false;
-		return split;
-	}
-
 	protected void eatSFX(){
 		Sample.INSTANCE.play( Assets.Sounds.EAT );
 	}
@@ -139,6 +130,17 @@ public class Food extends Item {
 	
 	protected void satisfy( Hero hero ){
 		satisfyBase(hero, energy);
+	}
+
+	/** Applies this food's complete effect while restoring only the requested energy. */
+	protected void satisfyPortion( Hero hero, float portionEnergy ) {
+		float originalEnergy = energy;
+		try {
+			energy = portionEnergy;
+			satisfy(hero);
+		} finally {
+			energy = originalEnergy;
+		}
 	}
 
 	protected void satisfyBase( Hero hero, float foodValue ){

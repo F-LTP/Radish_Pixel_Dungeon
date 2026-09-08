@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal.WarriorShield;
@@ -181,6 +183,14 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 	public float damageFactor(float dmg){
 		return dmg * Math.min(1.5f, 1f + (power / 2f));
+	}
+
+	@Override
+	public void modifyOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+		int before = info.getDamage();
+		if (before > 0) {
+			info.addDirectMultModifier(damageFactor(before) / before, "berserk", this);
+		}
 	}
 
 	public boolean berserking(){
@@ -400,7 +410,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				if (p>1){
 					Buff.affect( mob, Blindness.class,5f);
 					if (p>3){
-						mob.damage(Dungeon.hero.damageRoll(),Dungeon.hero);
+						mob.damage(DamageInfo.of(Dungeon.hero.damageRoll(), DamageType.PHYSICAL, Dungeon.hero, this));
 					}
 				}
 			}

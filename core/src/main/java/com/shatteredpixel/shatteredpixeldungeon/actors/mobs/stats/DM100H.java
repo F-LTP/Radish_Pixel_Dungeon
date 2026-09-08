@@ -11,6 +11,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CounterBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.custom.messages.M;
 import com.shatteredpixel.shatteredpixeldungeon.custom.utils.timing.VirtualActor;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Lightning;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -89,11 +91,12 @@ public class DM100H extends Mob implements Callback {
     }
 
     @Override
-    public void damage(int damage, Object src){
+    public void damage(DamageInfo info){
+        int damage = info.getDamage();
         if(buff(LightningPrediction.class)!=null){
             damage = 1;
         }
-        super.damage(damage, src);
+        super.damage(DamageInfo.of(damage, info.getType(), info.getAttacker(), info.getSource()));
     }
 
     @Override
@@ -174,7 +177,7 @@ public class DM100H extends Mob implements Callback {
                 Sample.INSTANCE.play( Assets.Sounds.LIGHTNING, 1.5f);
                 boolean alive = aim.isAlive();
 
-                aim.damage(Random.Int(25, 35), new SkyLightning());
+                aim.damage(DamageInfo.of(Random.Int(25, 35), DamageType.LIGHTNING, target, new SkyLightning()));
                 aim.sprite.centerEmitter().burst( SparkParticle.FACTORY, 32 );
                 aim.sprite.flash();
 
@@ -264,7 +267,7 @@ public class DM100H extends Mob implements Callback {
             if (hit( this, enemy, true )) {
                 int dmg = Random.NormalIntRange(3, 10);
                 dmg = Math.round(dmg * AscensionChallenge.statModifier(this));
-                enemy.damage( dmg, new DM100H.LightningBolt() );
+                enemy.damage( DamageInfo.of(dmg, DamageType.LIGHTNING, this, new DM100H.LightningBolt()) );
 
                 if (enemy.sprite.visible) {
                     enemy.sprite.centerEmitter().burst(SparkParticle.FACTORY, 3);

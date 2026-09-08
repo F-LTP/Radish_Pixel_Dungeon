@@ -28,6 +28,9 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.dicemage.DiceMageSchools;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.dicemage.DiceMageSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CrystalSpire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
@@ -69,6 +72,8 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollingGridPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollingListPane;
+import com.shatteredpixel.shatteredpixeldungeon.ui.SNDItems;
+import com.shatteredpixel.shatteredpixeldungeon.ui.TalentIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.input.KeyBindings;
 import com.watabou.input.KeyEvent;
@@ -558,7 +563,7 @@ public class WndJournal extends WndTabbed {
 	public static class CatalogTab extends Component{
 
 		private RedButton[] itemButtons;
-		private static final int NUM_BUTTONS = 4;
+		private static final int NUM_BUTTONS = 5;
 
 		public static int currentItemIdx   = 0;
 		private static float[] scrollPositions = new float[NUM_BUTTONS];
@@ -568,6 +573,7 @@ public class WndJournal extends WndTabbed {
 		private static final int CONSUM_IDX = 1;
 		private static final int BESTIARY_IDX = 2;
 		private static final int LORE_IDX = 3;
+		private static final int SPELLS_IDX = 4;
 
 		private ScrollingGridPane grid;
 
@@ -589,6 +595,7 @@ public class WndJournal extends WndTabbed {
 			itemButtons[CONSUM_IDX].icon(new ItemSprite(ItemSpriteSheet.POTION_HOLDER));
 			itemButtons[BESTIARY_IDX].icon(new ItemSprite(ItemSpriteSheet.MOB_HOLDER));
 			itemButtons[LORE_IDX].icon(new ItemSprite(ItemSpriteSheet.DOCUMENT_HOLDER));
+			itemButtons[SPELLS_IDX].icon(new ItemSprite(ItemSpriteSheet.SPELL_HOLDER));
 
 			grid = new ScrollingGridPane(){
 				@Override
@@ -676,7 +683,7 @@ public class WndJournal extends WndTabbed {
 					addGridEntities(grid, bestiary.entities());
 				}
 
-			} else {
+			} else if (currentItemIdx == LORE_IDX) {
 				int totalItems = 0;
 				int totalSeen = 0;
 				for (Document doc : Document.values()){
@@ -722,6 +729,10 @@ public class WndJournal extends WndTabbed {
 					}
 					addGridDocuments(grid, doc);
 				}
+
+			} else if (currentItemIdx == SPELLS_IDX){
+				grid.addHeader("_" + Messages.get(this, "title_spells") + "_", 9, true);
+				addGridSpells(grid);
 			}
 
 			grid.setRect(x, itemButtons[NUM_BUTTONS-1].bottom() + 1, width,
@@ -765,9 +776,9 @@ public class WndJournal extends WndTabbed {
 					title = Messages.titleCase(item.trueName());
 					//some items don't include direct stats, generally when they're not applicable
 					if (item instanceof ClassArmor || item instanceof SpiritBow){
-						desc += item.desc();
+						desc += item.displayDesc();
 					} else {
-						desc += item.info();
+						desc += item.displayInfo();
 					}
 
 					if (Catalog.useCount(itemClass) > 1) {
@@ -984,6 +995,73 @@ public class WndJournal extends WndTabbed {
 			grid.addItem(gridItem);
 		}
 	};
+
+	/** 骰子法师法术图鉴：列出所有法术，含图标、名称、描述与所属学派。 */
+	private static void addGridSpells( ScrollingGridPane grid ){
+		java.util.List<Class<? extends DiceMageSpell>> spells = DiceMageSchools.allSpells();
+
+		for (Class<? extends DiceMageSpell> spellCls : spells){
+			DiceMageSpell spell = null;
+			try {
+				spell = spellCls.newInstance();
+			} catch (Exception e){
+				continue;
+			}
+
+			Image icon = null;
+			String sndName = spell.sndImageName();
+			if (sndName != null){
+				icon = SNDItems.get(sndName);
+				if (icon != null){
+					// 放大 SND 小贴图到与物品图标相近的显示尺寸
+					float s = 16f / icon.width();
+					icon.scale.set(s);
+				}
+			}
+			if (icon == null){
+				// 回退：使用学派天赋图标
+				Talent schoolTalent = spell.school();
+				if (schoolTalent != null){
+					icon = new TalentIcon(schoolTalent);
+				}
+			}
+			if (icon == null){
+				icon = new ItemSprite(ItemSpriteSheet.SPELL_HOLDER);
+			}
+
+			String title = Messages.titleCase(spell.name());
+			String desc = spell.desc();
+
+			// 所属学派标签
+			Talent schoolTalent = spell.school();
+			if (schoolTalent != null){
+				desc = Messages.get(WndJournal.CatalogTab.class, "school_of") + Messages.titleCase(schoolTalent.title()) + "\n\n" + desc;
+			} else {
+				desc = Messages.get(WndJournal.CatalogTab.class, "school_none") + "\n\n" + desc;
+			}
+
+			String finalTitle = title;
+			String finalDesc = desc;
+			final Image spellIcon = icon;
+			ScrollingGridPane.GridItem gridItem = new ScrollingGridPane.GridItem(icon) {
+				@Override
+				public boolean onClick(float x, float y) {
+					if (inside(x, y)) {
+						Image sprite = new Image(spellIcon);
+						if (ShatteredPixelDungeon.scene() instanceof GameScene){
+							GameScene.show(new WndJournalItem(sprite, finalTitle, finalDesc));
+						} else {
+							ShatteredPixelDungeon.scene().addToFront(new WndJournalItem(sprite, finalTitle, finalDesc));
+						}
+						return true;
+					} else {
+						return false;
+					}
+				}
+			};
+			grid.addItem(gridItem);
+		}
+	}
 
 	private static void addGridDocuments( ScrollingGridPane grid, Document doc ){
 		for (String page : doc.pageNames()){

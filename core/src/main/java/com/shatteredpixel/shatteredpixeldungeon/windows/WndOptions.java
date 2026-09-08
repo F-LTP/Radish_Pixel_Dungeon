@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RoundedFrame;
+import com.shatteredpixel.shatteredpixeldungeon.ui.UITheme;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.noosa.Image;
 
@@ -75,7 +77,7 @@ public class WndOptions extends Window {
 	}
 
 	protected void layoutBody(float pos, String message, String... options){
-		if (DiceMageUI.active()) {
+		if (UITheme.isDiceMage()) {
 			layoutDiceBody(pos, message, options);
 			return;
 		}
@@ -146,7 +148,7 @@ public class WndOptions extends Window {
 			float y = twoCards ? pos : rowBottom;
 			int lineColor = DiceMageUI.optionLineColor(i);
 
-			DiceMageUI.Frame frame = new DiceMageUI.Frame(DiceMageUI.BLACK, lineColor);
+			RoundedFrame frame = UITheme.roundedFrame(DiceMageUI.BLACK, lineColor);
 			frame.setRect(x, y, cardWidth, BUTTON_HEIGHT + MARGIN * 2);
 			add(frame);
 
@@ -194,26 +196,28 @@ public class WndOptions extends Window {
 			this.lineColor = lineColor;
 			leftJustify = true;
 			textColor(DiceMageUI.CREAM);
-			bg.hardlight(DiceMageUI.BLACK);
+			skin.chrome().hardlight(DiceMageUI.BLACK);
+			// 卡片已自带蓝色/紫色外框，隐藏按钮自身的橙色主题边框
+			skin.setThemedFrameVisible(false);
 		}
 
 		@Override
 		public void enable(boolean value) {
 			super.enable(value);
-			bg.alpha(value ? 1.0f : 0.35f);
+			skin.chrome().alpha(value ? 1.0f : 0.35f);
 			textColor(value ? DiceMageUI.CREAM : DiceMageUI.GREY_LINE);
 		}
 
 		@Override
 		protected void onPointerDown() {
 			super.onPointerDown();
-			bg.hardlight(lineColor);
+			skin.chrome().hardlight(lineColor);
 		}
 
 		@Override
 		protected void onPointerUp() {
 			super.onPointerUp();
-			bg.hardlight(DiceMageUI.BLACK);
+			skin.chrome().hardlight(DiceMageUI.BLACK);
 		}
 	}
 

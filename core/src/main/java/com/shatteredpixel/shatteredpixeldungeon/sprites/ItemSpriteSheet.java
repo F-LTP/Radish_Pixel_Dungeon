@@ -371,6 +371,19 @@ public class ItemSpriteSheet {
 	public static final String SNAKE_BITED_YENDOR = "snake_bited_yendor";
 	public static final String SNAKE_BITE = "snake_bite";
 	public static final String SNAKE_BITE_AMULET = "snake_bite_amulet";
+	public static final String SNAKE_BITED_AMULET = SNAKE_BITE_AMULET;
+
+	public static final String MAKESHIFT_SLINGSHOT = "makeshift_slingshot";
+	public static final String DOG_LEG = "dog_leg";
+	public static final String LAW_FRAGMENT = "law_fragment";
+	public static final String SOUL_EMBER = "soul_ember";
+	public static final String MECHANICAL_FRAGMENT = "mechanic_shard";
+	public static final String BONE_PILE = "bone_pile";
+	public static final String FLASH_CRYSTAL = "flash_crystal";
+	public static final String HEAVY_CANNON = "heavy_cannon";
+	public static final String BONE_SPEAR = "bone_spear";
+	public static final String GRAPPLING_HOOK = "grappling_hook";
+
 	public static final String ARTIFACT_WHEELCHAIR = "artifact_wheelchair";
 
 	public static final String RAT_SKULL = "rat_skull";
@@ -390,6 +403,8 @@ public class ItemSpriteSheet {
 
 	public static final String RADISH = "radish";
 	public static final String GOLD_RADISH = "gold_radish";
+	public static final String FERRET_TUFT = "ferret_tuft";
+	public static final String SPYGLASS = "spyglass";
 
 	public static final String LIGHT_KING = "light_king";
 	public static final String RIVER_GLASS = "river_glass";

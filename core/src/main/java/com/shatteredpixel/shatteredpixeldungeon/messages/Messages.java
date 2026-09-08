@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.challenge.SnakeBiteChallengeMana
 import com.shatteredpixel.shatteredpixeldungeon.ui.DiceMageUI;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.DeviceCompat;
+import com.watabou.utils.Bundle;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -74,6 +75,12 @@ public class Messages {
      * Resource grabbing methods
      */
     public static String errorName;
+    private static final String MESSAGE_THEME = "message_theme";
+    private static String theme = "";
+    // snake_bite 拥有最高优先级
+    private static final String THEME_SNAKE_BITE = ".snake_bite";
+    // 其余激活主题（按字母顺序），如 DiceMageUI 激活时的 dice_mage
+    private static final String THEME_DICE_MAGE = ".dice_mage";
     private static ArrayList<I18NBundle> bundles;
     private static Languages lang;
     private static Locale locale;
@@ -108,6 +115,50 @@ public class Messages {
 
     public static Locale locale() {
         return locale;
+    }
+
+    public static void useTextVariant(String suffix) {
+        if (suffix == null || suffix.trim().isEmpty()) {
+            theme = "";
+        } else {
+            theme = suffix.startsWith(".") ? suffix : "." + suffix;
+        }
+    }
+
+    public static String theme() {
+        return theme;
+    }
+
+    /**
+     * 按优先级返回当前激活的主题后缀列表。
+     * useTheme 设置的主题（snake_bite）拥有最高优先级，其余主题按字母顺序排列。
+     */
+    private static List<String> activeThemes() {
+        List<String> result = new ArrayList<>();
+        if (!theme.isEmpty()) result.add(theme);
+        if (DiceMageUI.active()) result.add(THEME_DICE_MAGE);
+        // 未来新增主题在此追加即可
+        if (result.size() > 1) {
+            Collections.sort(result.subList(1, result.size()));
+        }
+        return result;
+    }
+
+    public static void storeInBundle(Bundle bundle) {
+        bundle.put(MESSAGE_THEME, theme);
+    }
+
+    public static boolean restoreFromBundle(Bundle bundle) {
+        if (!bundle.contains(MESSAGE_THEME)) return false;
+        useTextVariant(bundle.getString(MESSAGE_THEME));
+        return true;
+    }
+
+    public static String findVariant(String key, Object... args) {
+        String value = findVariantValue(key);
+        if (value == null) value = getFromBundle(key.toLowerCase(Locale.CHINESE));
+        if (value == null) return NO_TEXT_FOUND;
+        return args.length > 0 ? format(value, args) : value;
     }
 
     public static void setup(Languages lang) {
@@ -154,17 +205,13 @@ public class Messages {
         String keyLower = key.toLowerCase(Locale.CHINESE);
         String localKey = k != null ? k.toLowerCase(Locale.CHINESE) : null;
 
+        String variantValue = findVariantValue(key);
+        if (variantValue != null) {
+            return args.length > 0 ? format(variantValue, args) : variantValue;
+        }
+
         if (keyLower.startsWith("items.") && localKey != null) {
             if (SnakeBiteChallengeManager.shouldReplaceItemText()) {
-                // First check if key.snake_bite exists (for special overrides)
-                String specialSnakeKey = key + ".snake_bite";
-                String specialValue = getFromBundle(specialSnakeKey.toLowerCase(Locale.CHINESE));
-                if (specialValue != null) {
-                    if (args.length > 0) return format(specialValue, args);
-                    else return specialValue;
-                }
-
-                // Then apply normal transformation logic
                 String snakeItemKey = getSnakeBiteItemKey(key, localKey);
                 if (snakeItemKey != null) {
                     String snakeValue = getFromBundle(snakeItemKey.toLowerCase(Locale.CHINESE));
@@ -174,25 +221,20 @@ public class Messages {
                     }
                 }
             }
-            // Transform mobs
-            else if (keyLower.startsWith("actors.mobs.")) {
-                if (SnakeBiteChallengeManager.shouldReplaceMobText()) {
-                    String snakeMobKey = getSnakeBiteMobKey(key, localKey);
-                    if (snakeMobKey != null) {
-                        String snakeValue = getFromBundle(snakeMobKey.toLowerCase(Locale.CHINESE));
-                        if (snakeValue != null) {
-                            if (args.length > 0) return format(snakeValue, args);
-                            else return snakeValue;
-                        }
-                    }
+        } else if (keyLower.startsWith("actors.mobs.") && localKey != null
+                && SnakeBiteChallengeManager.shouldReplaceMobText()) {
+            String snakeMobKey = getSnakeBiteMobKey(key, localKey);
+            if (snakeMobKey != null) {
+                String snakeValue = getFromBundle(snakeMobKey.toLowerCase(Locale.CHINESE));
+                if (snakeValue != null) {
+                    if (args.length > 0) return format(snakeValue, args);
+                    else return snakeValue;
                 }
             }
         }
 
         String value = getFromBundle(key.toLowerCase(Locale.CHINESE));
         if (value != null) {
-            // 骰子法师模式：将无法渲染的"祛"替换为"驱"
-            value = fixTannFontChars(value);
             if (args.length > 0) return format(value, args);
             else return value;
         } else {
@@ -217,6 +259,34 @@ public class Messages {
             }
 
         }
+    }
+
+    /**
+     * 检查指定键是否有可用文本（非缺失）。用于皮肤等场景的"可选文本键"判断。
+     */
+    public static boolean isAvailable(Class c, String k) {
+        String key = c.getName();
+        key = key.replace("com.shatteredpixel.shatteredpixeldungeon.", "");
+        key += "." + k;
+        return getFromBundle(key.toLowerCase(Locale.CHINESE)) != null;
+    }
+
+    private static String findVariantValue(String key) {
+        if (key == null) return null;
+        String keyLower = key.toLowerCase(Locale.CHINESE);
+
+        // 按优先级遍历激活主题：snake_bite 最高，其余按字母顺序
+        for (String t : activeThemes()) {
+            if (t.equals(THEME_SNAKE_BITE)) {
+                // snake_bite 只替换它应覆盖的键
+                boolean excluded = (keyLower.startsWith("items.") && !SnakeBiteChallengeManager.shouldReplaceItemText())
+                        || (keyLower.startsWith("actors.mobs.") && !SnakeBiteChallengeManager.shouldReplaceMobText());
+                if (excluded) continue;
+            }
+            String variant = getFromBundle((key + t).toLowerCase(Locale.CHINESE));
+            if (variant != null) return variant;
+        }
+        return null;
     }
 
     /**
@@ -253,6 +323,11 @@ public class Messages {
             return "items.snake_bite.empty";
         }
         return null;
+    }
+
+    public static String getSnakeBiteItemDescription() {
+        String value = getFromBundle("items.snake_bite.desc");
+        return value != null ? value : NO_TEXT_FOUND;
     }
 
     /**
@@ -336,16 +411,5 @@ public class Messages {
 
     public static String lowerCase(String str) {
         return str.toLowerCase(locale);
-    }
-
-    /**
-     * 修复 TannFont 无法渲染的字符（骰子法师模式）
-     * 将"祛"替换为"驱"
-     */
-    private static String fixTannFontChars(String text) {
-        if (DiceMageUI.active() && lang == Languages.CHINESE) {
-            return text.replace("祛", "驱");
-        }
-        return text;
     }
 }

@@ -32,6 +32,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
@@ -119,7 +121,7 @@ public class WandOfLivingEarth extends DamageWand {
 				ch.sprite.centerEmitter().burst(MagicMissile.EarthParticle.BURST, 5 + buffedLvl()/2);
 
 				wandProc(ch, chargesPerCast());
-				ch.damage(damage, this);
+				ch.damage(new DamageInfo(damage, DamageType.MAGICAL, curUser, this, this));
 
 				int closest = -1;
 				boolean[] passable = Dungeon.level.passable;
@@ -163,7 +165,7 @@ public class WandOfLivingEarth extends DamageWand {
 				ch.sprite.centerEmitter().burst(MagicMissile.EarthParticle.BURST, 5 + buffedLvl() / 2);
 
 				wandProc(ch, chargesPerCast());
-				ch.damage(damage, this);
+				ch.damage(new DamageInfo(damage, DamageType.MAGICAL, curUser, this, this));
 				Sample.INSTANCE.play( Assets.Sounds.HIT_MAGIC, 1, 0.8f * Random.Float(0.87f, 1.15f) );
 
 				if (guardian == null) {
@@ -313,6 +315,11 @@ public class WandOfLivingEarth extends DamageWand {
 	}
 
 	public static class EarthGuardian extends NPC {
+
+		@Override
+		protected boolean isDamageable() {
+			return true;
+		}
 
 		{
 			spriteClass = EarthGuardianSprite.class;

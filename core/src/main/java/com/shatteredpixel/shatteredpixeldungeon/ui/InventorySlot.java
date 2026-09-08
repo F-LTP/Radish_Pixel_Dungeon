@@ -42,6 +42,7 @@ public class InventorySlot extends ItemSlot {
 	private ColorBlock lineBottom;
 	private ColorBlock lineLeft;
 	private ColorBlock lineRight;
+	private RoundedFrame roundedFrame;
 
 	public InventorySlot( Item item ) {
 
@@ -63,6 +64,10 @@ public class InventorySlot extends ItemSlot {
 		add( lineLeft );
 		lineRight = new ColorBlock( 1, 1, 0xFF000000 | DiceMageUI.GREY_LINE );
 		add( lineRight );
+
+		roundedFrame = UITheme.roundedFrame(DiceMageUI.BLACK, DiceMageUI.GREY_LINE);
+		roundedFrame.visible = false;
+		addToBack( roundedFrame );
 	}
 
 	@Override
@@ -87,6 +92,8 @@ public class InventorySlot extends ItemSlot {
 		lineRight.y = y;
 		lineRight.size(1, height);
 
+		roundedFrame.setRect(x, y, width, height);
+
 		super.layout();
 	}
 
@@ -98,6 +105,7 @@ public class InventorySlot extends ItemSlot {
 		lineBottom.alpha(value);
 		lineLeft.alpha(value);
 		lineRight.alpha(value);
+		roundedFrame.alpha(value);
 	}
 
 	@Override
@@ -105,12 +113,14 @@ public class InventorySlot extends ItemSlot {
 
 		super.item( item );
 
-		boolean diceMage = DiceMageUI.active();
-		bg.visible = diceMage || !(item instanceof Gold || item instanceof Bag);
+		boolean diceMage = UITheme.isDiceMage();
+		bg.visible = !diceMage && !(item instanceof Gold || item instanceof Bag);
 		lineTop.visible = diceMage;
 		lineBottom.visible = diceMage;
 		lineLeft.visible = diceMage;
 		lineRight.visible = diceMage;
+		roundedFrame.visible = diceMage;
+		bg.visible = !diceMage && !(item instanceof Gold || item instanceof Bag);
 
 		if (item != null) {
 
@@ -123,9 +133,11 @@ public class InventorySlot extends ItemSlot {
 					item == Dungeon.hero.belongings.secondWep;
 
 			if (diceMage) {
-				bg.texture( TextureCache.createSolid( equipped ? DiceMageUI.PANEL_ALT : DiceMageUI.BLACK ) );
+				int fillColor = equipped ? DiceMageUI.PANEL_ALT : DiceMageUI.BLACK;
+				bg.texture( TextureCache.createSolid( fillColor ) );
 				bg.resetColor();
-				hardlightLines(DiceMageUI.itemLineColor(item, equipped));
+				roundedFrame.setFillColor(fillColor);
+				roundedFrame.setLineColor(DiceMageUI.itemLineColor(item, equipped));
 			} else {
 				bg.texture( TextureCache.createSolid( equipped ? EQUIPPED : NORMAL ) );
 				bg.resetColor();
@@ -157,6 +169,8 @@ public class InventorySlot extends ItemSlot {
 			bg.texture( TextureCache.createSolid( diceMage ? DiceMageUI.BLACK : NORMAL ) );
 			bg.resetColor();
 			hardlightLines(DiceMageUI.GREY_LINE);
+			roundedFrame.setFillColor(DiceMageUI.BLACK);
+			roundedFrame.setLineColor(DiceMageUI.GREY_LINE);
 		}
 	}
 

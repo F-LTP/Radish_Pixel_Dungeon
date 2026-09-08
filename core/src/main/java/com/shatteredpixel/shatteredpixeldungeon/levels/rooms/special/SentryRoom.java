@@ -30,6 +30,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Eye;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -215,6 +217,11 @@ public class SentryRoom extends SpecialRoom {
 
 	public static class Sentry extends NPC {
 
+		@Override
+		protected boolean isDamageable() {
+			return true;
+		}
+
 		{
 			spriteClass = SentrySprite.class;
 
@@ -277,7 +284,7 @@ public class SentryRoom extends SpecialRoom {
 
 		public void onZapComplete(){
 			if (hit(this, Dungeon.hero, true)) {
-				Dungeon.hero.damage(Char.combatRoll(2 + Dungeon.depth / 2, 4 + Dungeon.depth), new Eye.DeathGaze());
+				Dungeon.hero.damage(DamageInfo.of(Char.combatRoll(2 + Dungeon.depth / 2, 4 + Dungeon.depth), DamageType.MAGICAL, this, new Eye.DeathGaze()));
 				if (!Dungeon.hero.isAlive()) {
 					Badges.validateDeathFromEnemyMagic();
 					Dungeon.fail(this);
@@ -299,8 +306,8 @@ public class SentryRoom extends SpecialRoom {
 		}
 
 		@Override
-		public void damage( int dmg, Object src ) {
-			//do nothing
+		public void damage(DamageInfo info) {
+			return;
 		}
 
 		@Override

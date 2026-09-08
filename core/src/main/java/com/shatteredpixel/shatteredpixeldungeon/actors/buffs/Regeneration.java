@@ -76,15 +76,14 @@ public class Regeneration extends Buff {
 			}
 
 			if (target.HP < regencap() && !((Hero)target).isStarving()) {
-				if (regenOn()) {
+				if (regenOn() && !HealingBlocked.isBlocked(target)) {
 					if (target.buff(Sprouted_Potato.Potato_Poison.class)!=null){
 						target.buff(Sprouted_Potato.Potato_Poison.class).reduce(1*Sprouted_Potato.regenerationMultiplier());
 					}
-					target.HP += 1;
+					target.heal(1, false);
 					if (target.HP == regencap()) {
 						((Hero) target).resting = false;
-					}
-				}
+					}				}
 			}
 
 			ChaliceOfBlood.chaliceRegen regenBuff = Dungeon.hero.buff( ChaliceOfBlood.chaliceRegen.class);

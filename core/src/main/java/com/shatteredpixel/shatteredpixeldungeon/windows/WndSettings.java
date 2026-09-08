@@ -25,7 +25,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
-import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -34,26 +33,18 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.SeedFindScene;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.News;
 import com.shatteredpixel.shatteredpixeldungeon.services.updates.Updates;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CheckBox;
-import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.GameLog;
-import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.OptionSlider;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Toolbar;
-import com.shatteredpixel.shatteredpixeldungeon.ui.TalentIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
-import com.watabou.gltextures.TextureCache;
-import com.watabou.gltextures.RuntimeAtlasRegistry;
 import com.watabou.input.ControllerHandler;
 import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
-import com.watabou.noosa.TextureFilm;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.ui.Component;
 import com.watabou.utils.DeviceCompat;
@@ -78,7 +69,6 @@ public class WndSettings extends WndTabbed {
 	private DataTab     data;
 	private AudioTab    audio;
 	private LangsTab    langs;
-	private DebugTab    debug;
 
 	public static int last_index = 0;
 
@@ -121,7 +111,8 @@ public class WndSettings extends WndTabbed {
 		input.setSize(width, 0);
 		height = Math.max(height, input.height());
 
-		if (DeviceCompat.hasHardKeyboard() || ControllerHandler.isControllerConnected()) {
+		boolean inputTabVisible = DeviceCompat.hasHardKeyboard() || ControllerHandler.isControllerConnected();
+		if (inputTabVisible) {
 			add( input );
 			Image icon;
 			if (ControllerHandler.controllerActive || !DeviceCompat.hasHardKeyboard()){
@@ -197,35 +188,15 @@ public class WndSettings extends WndTabbed {
 		};
 		add( langsTab );
 
-		debug = new DebugTab();
-		debug.setSize(width, 0);
-		height = Math.max(height, debug.height());
-		add( debug );
-
-		add( new IconTab(Icons.get(Icons.WARNING)){
-			@Override
-			protected void select(boolean value) {
-				super.select(value);
-				debug.visible = debug.active = value;
-				if (value) last_index = 6;
-			}
-			@Override
-			protected void createChildren() {
-				super.createChildren();
-				icon.hardlight(0.5f, 0.5f, 1.0f);
-			}
-		});
-
 		resize(width, (int)Math.ceil(height));
 
 		layoutTabs();
 
-		if (tabs.size() == 5 && last_index >= 3){
-			//input tab isn't visible
-			select(last_index-1);
-		} else {
-			select(last_index);
+		int selectedIndex = last_index;
+		if (!inputTabVisible && selectedIndex >= 3) {
+			selectedIndex--;
 		}
+		select(Math.max(0, Math.min(selectedIndex, tabs.size() - 1)));
 
 	}
 
@@ -449,7 +420,8 @@ public class WndSettings extends WndTabbed {
 		CheckBox chkFont;
 		CheckBox chkVibrate;
 		CheckBox origri_map;
-		CheckBox origri_normal;
+		RedButton btnStatusStyle;
+		CheckBox chkDetourPrompt;
 
 		@Override
 		protected void createChildren() {
@@ -694,15 +666,59 @@ public class WndSettings extends WndTabbed {
 			origri_map.checked(SPDSettings.origin_map());
 			add(origri_map);
 
-			origri_normal = new CheckBox(Messages.get(this, "origin_normal")){
+			btnStatusStyle = new RedButton( statusStyleLabel() ) {
 				@Override
 				protected void onClick() {
 					super.onClick();
-					SPDSettings.NORMAL_SKIN(checked());
+					ShatteredPixelDungeon.scene().addToFront(new WndOptions(
+							Messages.get(WndSettings.UITab.this, "status_style_title"),
+							Messages.get(WndSettings.UITab.this, "status_style_desc"),
+							Messages.get(WndSettings.UITab.this, "status_style_shattered"),
+							Messages.get(WndSettings.UITab.this, "status_style_old_radish"),
+							Messages.get(WndSettings.UITab.this, "status_style_garden"),
+							Messages.get(WndSettings.UITab.this, "status_style_white"),
+							Messages.get(WndSettings.UITab.this, "status_style_plain")) {
+						@Override
+						protected void onSelect(int index) {
+							SPDSettings.statusStyle(index);
+							//破碎风格=启用原版主题；其余萝卜主题风格=关闭原版主题
+							SPDSettings.NORMAL_SKIN(index == SPDSettings.STYLE_SHATTERED);
+							//切换贴图需重建场景才能刷新
+							ShatteredPixelDungeon.seamlessResetScene();
+						}
+					});
 				}
 			};
-			origri_normal.checked(SPDSettings.NORMAL_SKIN());
-			add(origri_normal);
+			add(btnStatusStyle);
+
+			chkDetourPrompt = new CheckBox(Messages.get(this, "detour_prompt")) {
+				@Override protected void onClick() {
+					super.onClick();
+					SPDSettings.detourPrompt(checked());
+				}
+			};
+			chkDetourPrompt.checked(SPDSettings.detourPrompt());
+			add(chkDetourPrompt);
+		}
+
+		private String statusStyleLabel(){
+			String style;
+			switch (SPDSettings.statusStyle()){
+				case SPDSettings.STYLE_SHATTERED:
+					style = Messages.get(this, "status_style_shattered");
+					break;
+				case SPDSettings.STYLE_WHITE_RADISH:
+					style = Messages.get(this, "status_style_white");
+					break;
+				case SPDSettings.STYLE_RADISH:
+					style = Messages.get(this, "status_style_plain");
+					break;
+				case SPDSettings.STYLE_RADISH_GARDEN:
+				default:
+					style = Messages.get(this, "status_style_garden");
+					break;
+			}
+			return Messages.get(this, "status_style") + ": " + style;
 		}
 
 		@Override
@@ -744,14 +760,16 @@ public class WndSettings extends WndTabbed {
 				chkFont.setRect(0, sep2.y + 1 + GAP, width/2-1, BTN_HEIGHT);
 				chkVibrate.setRect(chkFont.right()+2, chkFont.top(), width/2-1, BTN_HEIGHT);
 				origri_map.setRect(0, chkVibrate.bottom(), width/2-1, BTN_HEIGHT);
-				origri_normal.setRect(origri_map.right()+2, origri_map.top(), width/2-1, BTN_HEIGHT);
+				btnStatusStyle.setRect(origri_map.right()+2, origri_map.top(), width/2-1, BTN_HEIGHT);
+				chkDetourPrompt.setRect(0, btnStatusStyle.bottom() + GAP, width/2-1, BTN_HEIGHT);
             } else {
 				chkFont.setRect(0, sep2.y + 1 + GAP, width, BTN_HEIGHT);
 				chkVibrate.setRect(0, chkFont.bottom() + GAP, width, BTN_HEIGHT);
 				origri_map.setRect(0, chkVibrate.bottom() + GAP, width, BTN_HEIGHT);
-				origri_normal.setRect(0, origri_map.bottom() + GAP, width, BTN_HEIGHT);
+				btnStatusStyle.setRect(0, origri_map.bottom() + GAP, width, BTN_HEIGHT);
+				chkDetourPrompt.setRect(0, btnStatusStyle.bottom() + GAP, width, BTN_HEIGHT);
             }
-            height = origri_normal.bottom();
+            height = chkDetourPrompt.bottom();
         }
 
 	}
@@ -1381,112 +1399,4 @@ public class WndSettings extends WndTabbed {
 		}
 	}
 
-	private static class DebugTab extends Component {
-
-		RenderedTextBlock title;
-		ColorBlock sep1;
-		RedButton btnReloadTexture;
-		RedButton btnReloadAllTextures;
-		RedButton btnResetScene;
-
-		@Override
-		protected void createChildren() {
-			title = PixelScene.renderTextBlock(Messages.get(this, "title"), 9);
-			title.hardlight(TITLE_COLOR);
-			add(title);
-
-			sep1 = new ColorBlock(1, 1, 0xFF000000);
-			add(sep1);
-
-			btnReloadTexture = new RedButton(Messages.get(this, "reload_texture"), 6) {
-				@Override
-				protected void onClick() {
-					super.onClick();
-					ShatteredPixelDungeon.scene().addToFront(new WndTextInput(
-							Messages.get(DebugTab.this, "reload_texture_title"),
-							Messages.get(DebugTab.this, "reload_texture_desc"),
-							"sprites/items/manifest.txt",
-							256,
-							false,
-							Messages.get(DebugTab.this, "reload"),
-							Messages.get(DebugTab.this, "cancel")
-					) {
-						@Override
-						public void onSelect(boolean positive, String text) {
-							if (positive && text != null && !text.isEmpty()) {
-								TextureCache.reloadFromDisk(text);
-								refreshTextures(text);
-								ShatteredPixelDungeon.seamlessResetScene();
-							}
-						}
-					});
-				}
-			};
-			add(btnReloadTexture);
-
-			btnReloadAllTextures = new RedButton(Messages.get(this, "reload_all_textures"), 6) {
-				@Override
-				protected void onClick() {
-					super.onClick();
-					TextureCache.clear();
-					refreshTextures(null);
-					ShatteredPixelDungeon.seamlessResetScene();
-				}
-			};
-			add(btnReloadAllTextures);
-
-			btnResetScene = new RedButton(Messages.get(this, "reset_scene"), 6) {
-				@Override
-				protected void onClick() {
-					super.onClick();
-					ShatteredPixelDungeon.seamlessResetScene();
-				}
-			};
-			add(btnResetScene);
-			}
-
-			private static void refreshTextures(String path) {
-			if (path == null || path.startsWith(ItemSpriteSheet.ATLAS.directory)) {
-				RuntimeAtlasRegistry.get(ItemSpriteSheet.ATLAS).invalidate();
-			}
-			if (path == null || path.startsWith(TalentIcon.ATLAS_SOURCE.directory)) {
-				RuntimeAtlasRegistry.get(TalentIcon.ATLAS_SOURCE).invalidate();
-			}
-			if (path == null || path.startsWith(BuffIcon.SMALL_ATLAS.directory)) {
-				RuntimeAtlasRegistry.get(BuffIcon.SMALL_ATLAS).invalidate();
-			}
-			if (path == null || path.startsWith(BuffIcon.LARGE_ATLAS.directory)) {
-				RuntimeAtlasRegistry.get(BuffIcon.LARGE_ATLAS).invalidate();
-			}
-			if (path == null || path.startsWith(HeroIcon.ATLAS_SOURCE.directory)) {
-				RuntimeAtlasRegistry.get(HeroIcon.ATLAS_SOURCE).invalidate();
-			}
-			if (path == null || path.startsWith(ItemSpriteSheet.Icons.ATLAS_SOURCE.directory)) {
-				RuntimeAtlasRegistry.get(ItemSpriteSheet.Icons.ATLAS_SOURCE).invalidate();
-			}
-			if (path == null || path.equals(Assets.Effects.TEXT_ICONS)) {
-				FloatingText.iconFilm = new TextureFilm(Assets.Effects.TEXT_ICONS, FloatingText.ICON_SIZE, FloatingText.ICON_SIZE);
-			}
-			}
-
-			@Override
-		protected void layout() {
-			title.setPos((width - title.width()) / 2, y + GAP);
-			sep1.size(width, 1);
-			sep1.y = title.bottom() + 3 * GAP;
-
-			float pos = sep1.y + 1 + GAP;
-
-			btnReloadTexture.setRect(0, pos, width, BTN_HEIGHT);
-			pos = btnReloadTexture.bottom() + GAP;
-
-			btnReloadAllTextures.setRect(0, pos, width, BTN_HEIGHT);
-			pos = btnReloadAllTextures.bottom() + GAP;
-
-			btnResetScene.setRect(0, pos, width, BTN_HEIGHT);
-			pos = btnResetScene.bottom();
-
-			height = pos;
-		}
-	}
 }

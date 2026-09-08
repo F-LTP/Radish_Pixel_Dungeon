@@ -3,7 +3,6 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -19,28 +18,23 @@ public class ReplacePoint extends MeleeWeapon {
 
     @Override
     public int damageRoll(Char owner) {
-        if (owner instanceof Hero) {
-            Hero hero = (Hero)owner;
-            int baseDamage = super.damageRoll(owner);
-            int totalDamage = 0;
-            PhysicalHitsTracker tracker = hero.buff(PhysicalHitsTracker.class);
-            if(tracker != null){
-                int physicalHits = tracker.getHits();
-                int bonusDamage = physicalHits * (3 + Math.round(0.3f * level()));
-                totalDamage = baseDamage + bonusDamage;
-                tracker.updateNextDamage(baseDamage, physicalHits, bonusDamage, totalDamage);
-            } else {
-                PhysicalHitsTracker trackers = Buff.affect(hero, PhysicalHitsTracker.class,1f);
-                int physicalHits = trackers.getHits();
-                int bonusDamage = physicalHits * (3 + Math.round(0.3f * level()));
-                totalDamage = baseDamage + bonusDamage;
-                trackers.updateNextDamage(baseDamage, physicalHits, bonusDamage, totalDamage);
-            }
-
-            return totalDamage;
+        int baseDamage = super.damageRoll(owner);
+        int totalDamage;
+        PhysicalHitsTracker tracker = owner.buff(PhysicalHitsTracker.class);
+        if(tracker != null){
+            int physicalHits = tracker.getHits();
+            int bonusDamage = physicalHits * (3 + Math.round(0.3f * level()));
+            totalDamage = baseDamage + bonusDamage;
+            tracker.updateNextDamage(baseDamage, physicalHits, bonusDamage, totalDamage);
+        } else {
+            PhysicalHitsTracker trackers = Buff.affect(owner, PhysicalHitsTracker.class,1f);
+            int physicalHits = trackers.getHits();
+            int bonusDamage = physicalHits * (3 + Math.round(0.3f * level()));
+            totalDamage = baseDamage + bonusDamage;
+            trackers.updateNextDamage(baseDamage, physicalHits, bonusDamage, totalDamage);
         }
 
-        return super.damageRoll(owner);
+        return totalDamage;
     }
 
     public static class PhysicalHitsTracker extends FlavourBuff {

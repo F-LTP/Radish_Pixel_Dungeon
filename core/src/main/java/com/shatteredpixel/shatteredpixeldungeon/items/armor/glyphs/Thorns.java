@@ -28,6 +28,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.watabou.utils.Random;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Thorns extends Armor.Glyph {
 
 	private static ItemSprite.Glowing RED = new ItemSprite.Glowing( 0x660022 );
@@ -35,7 +38,7 @@ public class Thorns extends Armor.Glyph {
 	@Override
 	public int proc(Armor armor, Char attacker, Char defender, int damage) {
 
-		int level = Math.max(0, armor.buffedLvl());
+		int level = Math.max(0, armor.procLvl());
 
 		// lvl 0 - 16.7%
 		// lvl 1 - 23.1%
@@ -45,7 +48,11 @@ public class Thorns extends Armor.Glyph {
 
 			float powerMulti = Math.max(1f, procChance);
 
-			Buff.affect( attacker, Bleeding.class).set( Math.round((4 + level)*powerMulti) );
+			// 来源链：[防御者（石像）, 荆棘刻印]，用于追踪反伤来源
+			List<Object> chain = new ArrayList<>();
+			if (defender != null) chain.add(defender);
+			chain.add(this);
+			Buff.affect( attacker, Bleeding.class).set( Math.round((4 + level)*powerMulti), Thorns.class, chain );
 
 		}
 

@@ -24,6 +24,9 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Elemental;
@@ -84,7 +87,7 @@ public class Wandmaker extends NPC {
 	}
 
 	@Override
-	public void damage( int dmg, Object src ) {
+	public void damage( DamageInfo info ) {
 		//do nothing
 	}
 
@@ -154,19 +157,14 @@ public class Wandmaker extends NPC {
 
 			String msg1 = "";
 			String msg2 = "";
-			switch(Dungeon.hero.heroClass){
-				case WARRIOR:
-					msg1 += Messages.get(this, "intro_warrior");
-					break;
-				case ROGUE:
-					msg1 += Messages.get(this, "intro_rogue");
-					break;
-				case MAGE:
-					msg1 += Messages.get(this, "intro_mage", Messages.titleCase(Dungeon.hero.name()));
-					break;
-				case HUNTRESS:
-					msg1 += Messages.get(this, "intro_huntress");
-					break;
+			if (Dungeon.hero.heroClass == HeroClasses.WARRIOR){
+				msg1 += Messages.get(this, "intro_warrior");
+			} else if (Dungeon.hero.heroClass == HeroClasses.ROGUE){
+				msg1 += Messages.get(this, "intro_rogue");
+			} else if (Dungeon.hero.heroClass == HeroClasses.MAGE){
+				msg1 += Messages.get(this, "intro_mage", Messages.titleCase(Dungeon.hero.name()));
+			} else if (Dungeon.hero.heroClass == HeroClasses.HUNTRESS){
+				msg1 += Messages.get(this, "intro_huntress");
 			}
 
 			msg1 += Messages.get(this, "intro_1");

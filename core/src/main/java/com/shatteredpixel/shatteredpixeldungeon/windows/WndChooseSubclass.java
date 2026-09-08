@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.items.TengusMask;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -35,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import com.watabou.noosa.Game;
 
 public class WndChooseSubclass extends Window {
 	
@@ -59,18 +61,37 @@ public class WndChooseSubclass extends Window {
 		float pos = message.bottom() + 3*GAP;
 
 		for (HeroSubClass subCls : hero.heroClass.subClasses()){
+			// Temporarily hide Jutte Champion from the Tengu's Mask choices.
+			if (subCls == HeroSubClasses.JUTTE_CHAMPION) continue;
 			RedButton btnCls = new RedButton( subCls.shortDesc(), 6 ) {
 				@Override
 				protected void onClick() {
+					final HeroSubClass previousSubClass = hero.subClass;
+					if (subCls == HeroSubClasses.DICE_MAGE) {
+						hero.subClass = subCls;
+						Game.platform.setTannFontMode(true);
+					}
 					GameScene.show(new WndOptions(new HeroIcon(subCls),
 							Messages.titleCase(subCls.title()),
 							Messages.get(WndChooseSubclass.this, "are_you_sure"),
 							Messages.get(WndChooseSubclass.this, "yes"),
 							Messages.get(WndChooseSubclass.this, "no")){
 						@Override
+						public void hide() {
+							super.hide();
+							if (subCls == HeroSubClasses.DICE_MAGE) {
+								hero.subClass = previousSubClass;
+								Game.platform.setTannFontMode(previousSubClass == HeroSubClasses.DICE_MAGE);
+							}
+						}
+
+						@Override
 						protected void onSelect(int index) {
-							hide();
 							if (index == 0 && WndChooseSubclass.this.parent != null){
+								if (subCls == HeroSubClasses.DICE_MAGE) {
+									hero.subClass = subCls;
+									Game.platform.setTannFontMode(true);
+								}
 								WndChooseSubclass.this.hide();
 								tome.choose( subCls );
 							}

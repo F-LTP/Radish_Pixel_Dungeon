@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -460,26 +461,23 @@ public enum Icons {
 	}
 
 	public static Image get( HeroClass cl ) {
-		switch (cl) {
-			case WARRIOR:
-				return new ItemSprite(ItemSpriteSheet.SEAL);
-			case MAGE:
-				//mage's staff normally has 2 pixels extra at the top for particle effects, we chop that off here
-				Image result = new ItemSprite(ItemSpriteSheet.MAGES_STAFF);
-				RectF frame = result.frame();
-				frame.top += frame.height()/8f;
-				result.frame(frame);
-				return result;
-			case ROGUE:
-				return new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK);
-			case HUNTRESS:
-				return new ItemSprite(ItemSpriteSheet.SPIRIT_BOW);
-			case RECTOR:
-				return new ItemSprite(ItemSpriteSheet.HOLYANKH);
-			case MOONLIGHT:
-				return new ItemSprite(ItemSpriteSheet.HOLYANKH); // TODO: 添加MOONLIGHT专属图标
-			default:
-				return new ItemSprite(ItemSpriteSheet.SEAL); // 默认返回战士图标避免崩溃
+		if (cl == HeroClasses.MAGE) {
+			//mage's staff normally has 2 pixels extra at the top for particle effects, we chop that off here
+			Image result = new ItemSprite(ItemSpriteSheet.MAGES_STAFF);
+			RectF frame = result.frame();
+			frame.top += frame.height()/8f;
+			result.frame(frame);
+			return result;
+		} else if (cl == HeroClasses.ROGUE) {
+			return new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK);
+		} else if (cl == HeroClasses.HUNTRESS) {
+			return new ItemSprite(ItemSpriteSheet.SPIRIT_BOW);
+		} else if (cl == HeroClasses.RECTOR) {
+			return new ItemSprite(ItemSpriteSheet.HOLYANKH);
+		} else if (cl == HeroClasses.MOONLIGHT) {
+			return new ItemSprite(ItemSpriteSheet.HOLYANKH); // TODO: 添加MOONLIGHT专属图标
+		} else {
+			return new ItemSprite(ItemSpriteSheet.SEAL); // 默认返回战士图标避免崩溃
 		}
 	}
 

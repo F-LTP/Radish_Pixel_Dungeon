@@ -20,6 +20,8 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -158,9 +160,10 @@ public class Eye extends Mob {
 	}
 
 	@Override
-	public void damage(int dmg, Object src) {
+	public void damage(DamageInfo info) {
+		int dmg = info.getDamage();
 		if (beamCharged) dmg /= 4;
-		super.damage(dmg, src);
+		super.damage(DamageInfo.of(dmg, info.getType(), info.getAttacker(), info.getSource()));
 	}
 	
 	//used so resistances can differentiate between melee and magical attacks
@@ -199,7 +202,7 @@ public class Eye extends Mob {
 					dmg = Math.round(dmg * 1.5f);
 				}
 
-				ch.damage( dmg, new DeathGaze() );
+				ch.damage( DamageInfo.of(dmg, DamageType.MAGICAL, this, new DeathGaze()) );
 
 				if (Dungeon.level.heroFOV[pos]) {
 					ch.sprite.flash();
@@ -273,9 +276,9 @@ public class Eye extends Mob {
 	}
 
 	{
-		resistances.add( WandOfDisintegration.class );
-		resistances.add( DeathGaze.class );
-		resistances.add( DisintegrationTrap.class );
+		typeResistances.put(DamageType.MAGICAL, 0.5f);
+		typeResistances.put(DamageType.MAGICAL, 0.5f);
+		typeResistances.put(DamageType.MAGICAL, 0.5f);
 	}
 
 	private class Hunting extends Mob.Hunting{

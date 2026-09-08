@@ -20,11 +20,13 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Stamina;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.VitaeBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
-import com.shatteredpixel.shatteredpixeldungeon.custom.utils.timing.VirtualActor;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
@@ -114,7 +116,7 @@ public class Belief extends Buff implements ActionIndicator.Action {
                 int altFixedDamage = 12 + Dungeon.depth;
                 int altFixedDamagePlus;
 
-                if(hero.subClass == HeroSubClass.BATTLEPREIST){
+                if(hero.subClass == HeroSubClasses.BATTLEPREIST){
                     ArrayList<Mob> visibleTargets = new ArrayList<>();
 
                     for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])){
@@ -132,43 +134,39 @@ public class Belief extends Buff implements ActionIndicator.Action {
                         if (mob.properties().contains(Char.Property.DEMONIC) || mob.properties().contains(Char.Property.UNDEAD)) {
                             altFixedDamage = (int) (altFixedDamage * 1.5f);
                         }
-                        int finalAltFixedDamage = altFixedDamage;
-                        VirtualActor.delay(0f, ()->{
-
-                            if (hero.pointsInTalent(Talent.ACT_GODPROGRESS) >= 1
-                                    && hero.buff(Talent.NoBeliefUsedCooldown.class) == null
-                                    && credibility<5) {
-                                float cooldown;
-                                switch (hero.pointsInTalent(Talent.ACT_GODPROGRESS)){
-                                    default:
-                                    case 1:
-                                        cooldown = 500f;
-                                        break;
-                                    case 2:
-                                        cooldown = 425f;
-                                        break;
-                                    case 3:
-                                        cooldown = 350f;
-                                        break;
-                                }
-                                Buff.affect(hero, Talent.NoBeliefUsedCooldown.class, cooldown);
-                                if(hero.pointsInTalent(Talent.IRON_SUN)>=2){
-                                    Buff.affect(hero, Barrier.class).setShield( hero.lvl );
-                                }
-                            } else {
-                                DownBelief(5);
+                        if (hero.pointsInTalent(Talent.ACT_GODPROGRESS) >= 1
+                                && hero.buff(Talent.NoBeliefUsedCooldown.class) == null
+                                && credibility<5) {
+                            float cooldown;
+                            switch (hero.pointsInTalent(Talent.ACT_GODPROGRESS)){
+                                default:
+                                case 1:
+                                    cooldown = 500f;
+                                    break;
+                                case 2:
+                                    cooldown = 425f;
+                                    break;
+                                case 3:
+                                    cooldown = 350f;
+                                    break;
                             }
+                            Buff.affect(hero, Talent.NoBeliefUsedCooldown.class, cooldown);
+                            if(hero.pointsInTalent(Talent.IRON_SUN)>=2){
+                                Buff.affect(hero, Barrier.class).setShield( hero.lvl );
+                            }
+                        } else {
+                            DownBelief(5);
+                        }
 
-                            float x = mob.sprite.center().x;
-                            float y = mob.sprite.center().y;
-                            mob.sprite.parent.add(new Lightning(mob.sprite.center(), new PointF( x, y-300f),null));
-                            mob.sprite.parent.add(new Lightning(new PointF(x-5f, y), new PointF( x-5f, y-300f),null));
-                            mob.sprite.parent.add(new Lightning(new PointF(x+5f, y), new PointF( x+5f, y-300f),null));
-                            Sample.INSTANCE.play( Assets.Sounds.LIGHTNING, 1.5f);
-                            mob.damage(finalAltFixedDamage + altFixedDamagePlus, this);
-                            mob.sprite.centerEmitter().burst( SparkParticle.FACTORY, 32 );
-                            mob.sprite.flash();
-                        });
+                        float x = mob.sprite.center().x;
+                        float y = mob.sprite.center().y;
+                        mob.sprite.parent.add(new Lightning(mob.sprite.center(), new PointF( x, y-300f),null));
+                        mob.sprite.parent.add(new Lightning(new PointF(x-5f, y), new PointF( x-5f, y-300f),null));
+                        mob.sprite.parent.add(new Lightning(new PointF(x+5f, y), new PointF( x+5f, y-300f),null));
+                        Sample.INSTANCE.play( Assets.Sounds.LIGHTNING, 1.5f);
+                        mob.damage(DamageInfo.of(altFixedDamage + altFixedDamagePlus, DamageType.LIGHTNING, null, this));
+                        mob.sprite.centerEmitter().burst( SparkParticle.FACTORY, 32 );
+                        mob.sprite.flash();
                     } else {
                         GLog.n(Messages.get(Belief.class,"no_target"));
                     }
@@ -185,7 +183,7 @@ public class Belief extends Buff implements ActionIndicator.Action {
                     int originVitaePlus = Dungeon.depth/5 * 12 + 8;
                     int adrenaline =  Dungeon.depth/5 * 4 - 1 ;
 
-                    if(hero.subClass == HeroSubClass.BATTLEPREIST){
+                    if(hero.subClass == HeroSubClasses.BATTLEPREIST){
                         Buff.affect(hero, VitaeBuff.class).setVitae((int) (originVitaePlus * 1.5f));
                         Buff.affect(target, Adrenaline.class,adrenaline);
                     } else {
@@ -194,7 +192,7 @@ public class Belief extends Buff implements ActionIndicator.Action {
 
                     Buff.affect(hero, Stamina.class,originStamina  * 1.5f);
                 } else {
-                    if(hero.subClass == HeroSubClass.BATTLEPREIST){
+                    if(hero.subClass == HeroSubClasses.BATTLEPREIST){
                         Buff.affect(hero, VitaeBuff.class).setVitae(Dungeon.depth/5 * 12);
                         Buff.affect(target, Adrenaline.class,Dungeon.depth/5 * 4-1);
                     } else {
@@ -259,7 +257,7 @@ public class Belief extends Buff implements ActionIndicator.Action {
                             GLog.p(Messages.get(Belief.class, "curse_remove_success"));
                             break;
                         case 3:
-                            hero.HP += Math.min(hero.HT / 3, hero.HT);
+                            hero.heal(hero.HT / 3);
                             if (hero.HP > hero.HT) {
                                 hero.HP = hero.HT;
                             }
@@ -292,7 +290,7 @@ public class Belief extends Buff implements ActionIndicator.Action {
                         GLog.p(Messages.get(Belief.class, "curse_remove_success"));
                     break;
                     case 3:
-                        hero.HP += Math.min(hero.HT / 3, hero.HT);
+                        hero.heal(hero.HT / 3);
                         if (hero.HP > hero.HT) {
                             hero.HP = hero.HT;
                         }
@@ -439,7 +437,8 @@ public class Belief extends Buff implements ActionIndicator.Action {
             credibility += exp;
         }
 
-        hero.sprite.showStatusWithIcon(Window.TITLE_COLOR, String.valueOf(roundedValue + exp), FloatingText.BELIEF);
+        hero.sprite.showStatusWithIcon(Window.TITLE_COLOR,
+                Integer.toString((int) Math.floor(roundedValue + exp)), FloatingText.BELIEF);
     }
 
 
@@ -450,7 +449,7 @@ public class Belief extends Buff implements ActionIndicator.Action {
     public void DownBelief(float value) {
         float actualValue = (float) (Math.floor(value * 100) / 100);
         credibility = Math.max(0, credibility - actualValue);
-        hero.sprite.showStatus(Window.RADISH, "-" + actualValue);
+        hero.sprite.showStatus(Window.RADISH, "-" + (int) Math.floor(actualValue));
 
         // Rector armor skill : taichi poise
         // DoggingDog 20260116
@@ -480,7 +479,11 @@ public class Belief extends Buff implements ActionIndicator.Action {
 
     @Override
     public String iconTextDisplay() {
-        return String.valueOf(Math.floor(credibility * 100) / 100);
+        return Integer.toString(displayedCredibility());
+    }
+
+    private int displayedCredibility() {
+        return (int) Math.floor(credibility);
     }
 
     public static String CREDIBILITY = "credibility";
@@ -515,9 +518,9 @@ public class Belief extends Buff implements ActionIndicator.Action {
                     buffCnt+=3;
                 }
             }
-            return Messages.get(this, "desc2",Math.floor(credibility * 100) / 100, buffCnt);
+            return Messages.get(this, "desc2", displayedCredibility(), buffCnt);
         }
-        return Messages.get(this, "desc",Math.floor(credibility * 100) / 100);
+        return Messages.get(this, "desc", displayedCredibility());
     }
 
     @Override

@@ -91,7 +91,7 @@ public class ElixirOfAquaticRejuvenation extends Elixir {
 				} else {
 					healAmt = (float)Math.floor(healAmt);
 				}
-				target.HP += healAmt;
+				target.heal((int)healAmt);
 				left -= healAmt;
 				if (target.buff(AfterGlow.Warmth.class)!=null){
 					target.buff(AfterGlow.Warmth.class).getWarmth();

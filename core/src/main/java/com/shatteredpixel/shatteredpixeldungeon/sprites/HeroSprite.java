@@ -24,12 +24,16 @@ package com.shatteredpixel.shatteredpixeldungeon.sprites;
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AnkhInvulnerability;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HeroDisguise;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.WheelchairRush;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.SkinDefinition;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.AshKing;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.FatedDraw;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.talents.moonlight.WeaponMasteryTalent;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -58,11 +62,14 @@ public class HeroSprite extends CharSprite {
 	private static final int FRAME_HEIGHT	= 15;
 	
 	private static final int RUN_FRAMERATE	= 20;
+
+	/** 标准英雄小人待机帧序（TextureFilm 索引）。 */
+	public static final int[] IDLE_FRAMES = { 0, 0, 0, 1, 0, 0, 1, 1 };
 	
 	private static TextureFilm tiers;
 	
-	private Animation fly;
-	private Animation read;
+	protected Animation fly;
+	protected Animation read;
 
 	public HeroSprite() {
 		super();
@@ -84,17 +91,23 @@ public class HeroSprite extends CharSprite {
 	}
 
 	public void updateArmor() {
+		// 皮肤使用特制贴图，动画由皮肤自己的精灵类（如 GamblerSprite）负责，
+		// 直接返回，不套用标准英雄的护甲行逻辑。
+		if (hero.heroClass.activeSkin() != null) return;
+
 		int t=0;
 		Armor armor = hero.belongings.armor();
 		
 		// 月华角色特殊贴图逻辑（优先级从高到低）
-		if (hero.heroClass == HeroClass.MOONLIGHT) {
+		if (hero.heroClass == HeroClasses.MOONLIGHT) {
 			WeaponMasteryTalent.MasteryTracker WeaponMasteryTracker = hero.buff(WeaponMasteryTalent.MasteryTracker.class);
 
-			// 第7行：薪王化身状态（HolyLanceForm/SoulStreamForm/FatalBladeForm）
+			// 第7行：各种强力buff状态（HolyLanceForm/SoulStreamForm/FatalBladeForm）
 			if (hero.buff(AshKing.HolyLanceForm.class) != null ||
 				hero.buff(AshKing.SoulStreamForm.class) != null ||
-				hero.buff(AshKing.FatalBladeForm.class) != null) {
+				hero.buff(AshKing.FatalBladeForm.class) != null ||
+				hero.buff(FatedDraw.FatedDrawTracker.class) != null ||
+					hero.buff(AnkhInvulnerability.class) != null){
 				t = 6;
 			}
 			// 第6行：轮椅加速状态
@@ -136,6 +149,7 @@ public class HeroSprite extends CharSprite {
 				else t = armor.tier;
 			}
 		}
+
 		TextureFilm film = new TextureFilm( tiers(), t, FRAME_WIDTH, FRAME_HEIGHT );
 
 		idle = new Animation( 1, true );
@@ -156,7 +170,7 @@ public class HeroSprite extends CharSprite {
 		operate.frames( film, 16, 17, 16, 17 );
 
 		fly = new Animation( 1, true );
-		fly.frames( film, 18 );
+		fly.frames( film, hero.heroClass == HeroClasses.MOONLIGHT ? 0 : 18 );
 
 		read = new Animation( 20, false );
 		read.frames( film, 19, 20, 20, 20, 20, 20, 20, 20, 20, 19 );
@@ -249,7 +263,21 @@ public class HeroSprite extends CharSprite {
 	}
 	
 	public static Image avatar( HeroClass cl, int armorTier ) {
+		return avatar( cl, armorTier, cl.GetSkin() );
+	}
+
+	public static Image avatar( HeroClass cl, int armorTier, int skinIndex ) {
 		
+		SkinDefinition skin = cl.skin( skinIndex );
+		// 自定义贴图皮肤：直接使用皮肤贴图的待机帧作为头像，不套用原版护甲行
+		if (skin != null && skin.customSprite()){
+			Image avatar = new Image( skin.asset() );
+			TextureFilm film = new TextureFilm( avatar.texture, skin.frameW(), skin.frameH() );
+			RectF frame = film.get( skin.idleFrames()[0] );
+			avatar.frame( frame );
+			return avatar;
+		}
+
 		RectF patch = tiers().get( armorTier );
 		Image avatar = new Image( cl.spritesheet() );
 		RectF frame = avatar.texture.uvRect( 1, 0, FRAME_WIDTH, FRAME_HEIGHT );
@@ -257,5 +285,26 @@ public class HeroSprite extends CharSprite {
 		avatar.frame( frame );
 		
 		return avatar;
+	}
+
+	/**
+	 * 返回英雄小人待机贴图（含皮肤支持）。与 {@link #avatar(HeroClass, int)} 类似，
+	 * 但保持原始帧尺寸（不裁剪到头像尺寸），用于存档列表等展示原始小人的位置。
+	 */
+	public static Image body( HeroClass cl, int armorTier ) {
+		return body( cl, armorTier, cl.GetSkin() );
+	}
+
+	public static Image body( HeroClass cl, int armorTier, int skinIndex ) {
+		SkinDefinition skin = cl.skin( skinIndex );
+		if (skin != null && skin.customSprite()){
+			Image body = new Image( skin.asset() );
+			TextureFilm film = new TextureFilm( body.texture, skin.frameW(), skin.frameH() );
+			RectF frame = film.get( skin.idleFrames()[0] );
+			body.frame( frame );
+			return body;
+		}
+
+		return new Image( cl.spritesheet(), 0, 15 * armorTier, FRAME_WIDTH, FRAME_HEIGHT );
 	}
 }

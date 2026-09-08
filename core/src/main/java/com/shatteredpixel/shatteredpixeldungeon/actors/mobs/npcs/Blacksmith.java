@@ -25,8 +25,11 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -91,12 +94,14 @@ public class Blacksmith extends NPC {
 				msg1 = Quest.alternative ? Messages.get(Blacksmith.this, "blood_1") : Messages.get(Blacksmith.this, "gold_1");
 			} else {
 
-				switch (Dungeon.hero.heroClass){
-					case WARRIOR:   msg1 += Messages.get(Blacksmith.this, "intro_quest_warrior"); break;
-					case MAGE:      msg1 += Messages.get(Blacksmith.this, "intro_quest_mage"); break;
-					case ROGUE:     msg1 += Messages.get(Blacksmith.this, "intro_quest_rogue"); break;
-					case HUNTRESS:  msg1 += Messages.get(Blacksmith.this, "intro_quest_huntress"); break;
-					//case CLERIC: msg1 += Messages.get(Blacksmith.this, "intro_quest_cleric"); break;
+				if (Dungeon.hero.heroClass == HeroClasses.WARRIOR) {
+					msg1 += Messages.get(Blacksmith.this, "intro_quest_warrior");
+				} else if (Dungeon.hero.heroClass == HeroClasses.MAGE) {
+					msg1 += Messages.get(Blacksmith.this, "intro_quest_mage");
+				} else if (Dungeon.hero.heroClass == HeroClasses.ROGUE) {
+					msg1 += Messages.get(Blacksmith.this, "intro_quest_rogue");
+				} else if (Dungeon.hero.heroClass == HeroClasses.HUNTRESS) {
+					msg1 += Messages.get(Blacksmith.this, "intro_quest_huntress");
 				}
 
 				msg1 += "\n\n" + Messages.get(Blacksmith.this, "intro_quest_start");
@@ -247,7 +252,7 @@ public class Blacksmith extends NPC {
 	}
 	
 	@Override
-	public void damage( int dmg, Object src ) {
+	public void damage( DamageInfo info ) {
 		//do nothing
 	}
 

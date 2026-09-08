@@ -1,3 +1,4 @@
+ash_king.png
 assassin.png
 battle_priest.png
 battlemage.png
@@ -44,4 +45,3 @@ warlock.png
 warp_beacon.png
 weapon_swap.png
 wild_magic.png
-

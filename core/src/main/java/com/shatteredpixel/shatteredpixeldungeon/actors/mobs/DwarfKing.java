@@ -29,6 +29,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Doom;
@@ -47,6 +49,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SparkParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KingsCrown;
+import com.shatteredpixel.shatteredpixeldungeon.items.FlashCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.LloydsBeacon;
@@ -447,7 +450,9 @@ public class DwarfKing extends Mob {
 	}
 
 	@Override
-	public void damage(int dmg, Object src) {
+	public void damage(DamageInfo info) {
+		int dmg = info.getDamage();
+		Object src = info.getSource();
 		//hero counts as unarmed if they aren't attacking with a weapon and aren't benefiting from force
 		if (src == Dungeon.hero || Dungeon.hero.buff(RingOfForce.Force.class) != null){
 			Statistics.qualifiedForBossChallengeBadge = false;
@@ -459,7 +464,7 @@ public class DwarfKing extends Mob {
 		}
 
 		if (isInvulnerable(src.getClass())){
-			super.damage(dmg, src);
+			super.damage(info);
 			return;
 		} else if (phase == 3 && !(src instanceof Viscosity.DeferedDamage)){
 			if (dmg >= 0) {
@@ -471,7 +476,7 @@ public class DwarfKing extends Mob {
 			return;
 		}
 		int preHP = HP;
-		super.damage(dmg, src);
+		super.damage(info);
 
 		LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
 		if (lock != null && !isImmune(src.getClass()) && !isInvulnerable(src.getClass())){
@@ -540,6 +545,18 @@ public class DwarfKing extends Mob {
 		return super.isAlive() || phase != 3;
 	}
 
+	/**
+	 * 骰子法师斩杀类法术（深渊/无限）的强制处决入口：
+	 * 无视阶段锁血直接进入最终阶段并死亡，保证 die() 中的
+	 * 掉落王冠、unseal 开门、清除随从等完整流程得以执行。
+	 */
+	public void forcedExecute(Object src) {
+		phase = 3;
+		HP = 0;
+		deathMarked = false;
+		die(src);
+	}
+
 	@Override
 	public void die(Object cause) {
 
@@ -601,12 +618,30 @@ public class DwarfKing extends Mob {
 			partnerID = -2; //no partners
 			return super.act();
 		}
+
+		@Override
+		public void die( Object cause ) {
+			if(Dungeon.LimitedDrops.FLASH_CRYSTAL_DWARF.count < 6 && Random.Float() < 0.21f){
+				Dungeon.LimitedDrops.FLASH_CRYSTAL_DWARF.count++;
+				Dungeon.level.drop(new FlashCrystal().quantity(Random.Int(1, 2)), pos).sprite.drop();
+			}
+			super.die( cause );
+		}
 	}
 
 	public static class DKMonk extends Monk {
 		{
 			properties.add(Property.BOSS_MINION);
 			state = HUNTING;
+		}
+
+		@Override
+		public void die( Object cause ) {
+			if(Dungeon.LimitedDrops.FLASH_CRYSTAL_DWARF.count < 6 && Random.Float() < 0.21f){
+				Dungeon.LimitedDrops.FLASH_CRYSTAL_DWARF.count++;
+				Dungeon.level.drop(new FlashCrystal().quantity(Random.Int(1, 2)), pos).sprite.drop();
+			}
+			super.die( cause );
 		}
 	}
 
@@ -623,12 +658,30 @@ public class DwarfKing extends Mob {
 			}
 			super.zap();
 		}
+
+		@Override
+		public void die( Object cause ) {
+			if(Dungeon.LimitedDrops.FLASH_CRYSTAL_DWARF.count < 6 && Random.Float() < 0.21f){
+				Dungeon.LimitedDrops.FLASH_CRYSTAL_DWARF.count++;
+				Dungeon.level.drop(new FlashCrystal().quantity(Random.Int(1, 2)), pos).sprite.drop();
+			}
+			super.die( cause );
+		}
 	}
 
 	public static class DKGolem extends Golem {
 		{
 			properties.add(Property.BOSS_MINION);
 			state = HUNTING;
+		}
+
+		@Override
+		public void die( Object cause ) {
+			if(Dungeon.LimitedDrops.FLASH_CRYSTAL_DWARF.count < 6 && Random.Float() < 0.21f){
+				Dungeon.LimitedDrops.FLASH_CRYSTAL_DWARF.count++;
+				Dungeon.level.drop(new FlashCrystal().quantity(Random.Int(1, 2)), pos).sprite.drop();
+			}
+			super.die( cause );
 		}
 	}
 
@@ -694,12 +747,12 @@ public class DwarfKing extends Mob {
 					}
 				} else {
 					Char ch = Actor.findChar(pos);
-					ch.damage(Char.combatRoll(20, 40), this);
+					ch.damage(DamageInfo.of(Char.combatRoll(20, 40), DamageType.PHYSICAL_NO_ARMOR, null, this));
 					if (((DwarfKing)target).phase == 2){
 						if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES)){
-							target.damage(target.HT/18, new KingDamager());
+							target.damage(DamageInfo.of(target.HT/18, DamageType.PHYSICAL_NO_ARMOR, target, new KingDamager()));
 						} else {
-							target.damage(target.HT/12, new KingDamager());
+							target.damage(DamageInfo.of(target.HT/12, DamageType.PHYSICAL_NO_ARMOR, target, new KingDamager()));
 						}
 					}
 					if (!ch.isAlive() && ch == Dungeon.hero) {
@@ -773,7 +826,7 @@ public class DwarfKing extends Mob {
 			for (Mob m : Dungeon.level.mobs){
 				if (m instanceof DwarfKing){
 					int damage = m.HT / (Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 18 : 12);
-					m.damage(damage, this);
+					m.damage(DamageInfo.of(damage, DamageType.PHYSICAL, null, this));
 				}
 			}
 		}
