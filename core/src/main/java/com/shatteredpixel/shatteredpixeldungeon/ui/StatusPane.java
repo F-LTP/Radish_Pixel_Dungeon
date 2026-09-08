@@ -21,15 +21,10 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.ui;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
-import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
-import com.shatteredpixel.shatteredpixeldungeon.Statistics;
+import com.shatteredpixel.shatteredpixeldungeon.*;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicPoint;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.VitaeBuff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CircleArc;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -40,11 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndHero;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndKeyBindings;
 import com.watabou.input.GameAction;
-import com.watabou.noosa.BitmapText;
-import com.watabou.noosa.Camera;
-import com.watabou.noosa.Game;
-import com.watabou.noosa.Image;
-import com.watabou.noosa.NinePatch;
+import com.watabou.noosa.*;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.noosa.ui.Component;
 import com.watabou.utils.ColorMath;
@@ -88,14 +79,32 @@ public class StatusPane extends Component {
 	// 骰子法师使用离散生命格代替普通血条
 	private DiceMageUI.HealthPips diceHp;
 
-	private static String asset =  !SPDSettings.NORMAL_SKIN() ? Assets.Interfaces.STATUS : Assets.Interfaces.NORMAL_STATUS;
-
 	private boolean large;
+
+	//破碎主题风格开启时始终使用原版状态栏；否则按玩家选择的萝卜主题状态栏风格
+	private static String statusAsset(){
+		if (SPDSettings.NORMAL_SKIN()) return Assets.Interfaces.NORMAL_STATUS;
+		switch (SPDSettings.statusStyle()){
+			case SPDSettings.OLD_RADISH:
+				return Assets.Interfaces.STATUS_OLD_RADISH;
+			case SPDSettings.STYLE_SHATTERED:
+				return Assets.Interfaces.STATUS_SHATTERED;
+			case SPDSettings.STYLE_WHITE_RADISH:
+				return Assets.Interfaces.STATUS_WHITE_RADISH;
+			case SPDSettings.STYLE_RADISH:
+				return Assets.Interfaces.STATUS_RADISH;
+			case SPDSettings.STYLE_RADISH_GARDEN:
+			default:
+				return Assets.Interfaces.STATUS_RADISH_GARDEN;
+		}
+	}
 
 	public StatusPane( boolean large ){
 		super();
 
 		this.large = large;
+
+		String asset = statusAsset();
 
 		if (large)  bg = new NinePatch( asset, 0, 64, 41, 39, 33, 0, 4, 0 );
 		else        bg = new NinePatch( asset, 0, 0, 128, 36, 85, 0, 45, 0 );

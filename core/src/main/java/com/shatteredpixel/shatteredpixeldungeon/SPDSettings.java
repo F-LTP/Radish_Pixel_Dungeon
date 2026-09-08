@@ -151,6 +151,16 @@ public class SPDSettings extends GameSettings {
 	public static void detourPrompt(boolean value){ put(KEY_DETOUR_PROMPT, value); }
 	public static boolean detourPrompt(){ return getBoolean(KEY_DETOUR_PROMPT, true); }
 
+	//状态栏面板风格（仅萝卜主题下生效）：0=破碎风格 1=萝卜园(默认) 2=白萝卜园 3=萝卜
+	public static final String KEY_STATUS_STYLE = "status_style";
+	public static final int STYLE_SHATTERED     = 0;
+	public static final int OLD_RADISH = 1;
+	public static final int STYLE_RADISH_GARDEN = 2;
+	public static final int STYLE_WHITE_RADISH  = 3;
+	public static final int STYLE_RADISH        = 4;
+	public static void statusStyle( int value ){ put( KEY_STATUS_STYLE, value ); }
+	public static int statusStyle(){ return getInt( KEY_STATUS_STYLE, STYLE_RADISH_GARDEN ); }
+
 	public static final String KEY_SEEDDEPTH	= "seeddepth";
 
 	//0 = mobile, 1 = mixed (large without inventory in main UI), 2 = large

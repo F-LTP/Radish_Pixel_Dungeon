@@ -101,7 +101,15 @@ public class Assets {
 
 		public static final String CHROME   	 = "interfaces/Rapd_UI/chrome.png";
 		public static final String ICONS    	 = "interfaces/Rapd_UI/icons.png";
-		public static final String STATUS   	 = "interfaces/Rapd_UI/status_pane.png";
+
+		//状态栏面板风格（萝卜主题下可选）：
+		//STATUS=老版萝卜, STATUS_RADISH_GARDEN=萝卜园(默认), STATUS_WHITE_RADISH=白萝卜园, STATUS_RADISH=萝卜
+		public static final String STATUS_OLD_RADISH   	 = "interfaces/Rapd_UI/status_pane.png";
+		public static final String STATUS_SHATTERED   	 = "interfaces/status_pane.png";
+		public static final String STATUS_RADISH_GARDEN = "interfaces/Rapd_UI/radish_status_pane.png";
+		public static final String STATUS_WHITE_RADISH  = "interfaces/Rapd_UI/white_radish_status_pane.png";
+		public static final String STATUS_RADISH        = "interfaces/Rapd_UI/plain_radish_status_pane.png";
+
 		public static final String MENU     	 = "interfaces/Rapd_UI/menu_pane.png";
 		public static final String MENU_BTN 	 = "interfaces/Rapd_UI/menu_button.png";
 		public static final String TOOLBAR  	 = "interfaces/Rapd_UI/toolbar.png";

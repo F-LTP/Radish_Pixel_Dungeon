@@ -420,7 +420,7 @@ public class WndSettings extends WndTabbed {
 		CheckBox chkFont;
 		CheckBox chkVibrate;
 		CheckBox origri_map;
-		CheckBox origri_normal;
+		RedButton btnStatusStyle;
 		CheckBox chkDetourPrompt;
 
 		@Override
@@ -666,15 +666,30 @@ public class WndSettings extends WndTabbed {
 			origri_map.checked(SPDSettings.origin_map());
 			add(origri_map);
 
-			origri_normal = new CheckBox(Messages.get(this, "origin_normal")){
+			btnStatusStyle = new RedButton( statusStyleLabel() ) {
 				@Override
 				protected void onClick() {
 					super.onClick();
-					SPDSettings.NORMAL_SKIN(checked());
+					ShatteredPixelDungeon.scene().addToFront(new WndOptions(
+							Messages.get(WndSettings.UITab.this, "status_style_title"),
+							Messages.get(WndSettings.UITab.this, "status_style_desc"),
+							Messages.get(WndSettings.UITab.this, "status_style_shattered"),
+							Messages.get(WndSettings.UITab.this, "status_style_old_radish"),
+							Messages.get(WndSettings.UITab.this, "status_style_garden"),
+							Messages.get(WndSettings.UITab.this, "status_style_white"),
+							Messages.get(WndSettings.UITab.this, "status_style_plain")) {
+						@Override
+						protected void onSelect(int index) {
+							SPDSettings.statusStyle(index);
+							//破碎风格=启用原版主题；其余萝卜主题风格=关闭原版主题
+							SPDSettings.NORMAL_SKIN(index == SPDSettings.STYLE_SHATTERED);
+							//切换贴图需重建场景才能刷新
+							ShatteredPixelDungeon.seamlessResetScene();
+						}
+					});
 				}
 			};
-			origri_normal.checked(SPDSettings.NORMAL_SKIN());
-			add(origri_normal);
+			add(btnStatusStyle);
 
 			chkDetourPrompt = new CheckBox(Messages.get(this, "detour_prompt")) {
 				@Override protected void onClick() {
@@ -684,6 +699,26 @@ public class WndSettings extends WndTabbed {
 			};
 			chkDetourPrompt.checked(SPDSettings.detourPrompt());
 			add(chkDetourPrompt);
+		}
+
+		private String statusStyleLabel(){
+			String style;
+			switch (SPDSettings.statusStyle()){
+				case SPDSettings.STYLE_SHATTERED:
+					style = Messages.get(this, "status_style_shattered");
+					break;
+				case SPDSettings.STYLE_WHITE_RADISH:
+					style = Messages.get(this, "status_style_white");
+					break;
+				case SPDSettings.STYLE_RADISH:
+					style = Messages.get(this, "status_style_plain");
+					break;
+				case SPDSettings.STYLE_RADISH_GARDEN:
+				default:
+					style = Messages.get(this, "status_style_garden");
+					break;
+			}
+			return Messages.get(this, "status_style") + ": " + style;
 		}
 
 		@Override
@@ -725,14 +760,14 @@ public class WndSettings extends WndTabbed {
 				chkFont.setRect(0, sep2.y + 1 + GAP, width/2-1, BTN_HEIGHT);
 				chkVibrate.setRect(chkFont.right()+2, chkFont.top(), width/2-1, BTN_HEIGHT);
 				origri_map.setRect(0, chkVibrate.bottom(), width/2-1, BTN_HEIGHT);
-				origri_normal.setRect(origri_map.right()+2, origri_map.top(), width/2-1, BTN_HEIGHT);
-				chkDetourPrompt.setRect(0, origri_normal.bottom() + GAP, width, BTN_HEIGHT);
+				btnStatusStyle.setRect(origri_map.right()+2, origri_map.top(), width/2-1, BTN_HEIGHT);
+				chkDetourPrompt.setRect(0, btnStatusStyle.bottom() + GAP, width/2-1, BTN_HEIGHT);
             } else {
 				chkFont.setRect(0, sep2.y + 1 + GAP, width, BTN_HEIGHT);
 				chkVibrate.setRect(0, chkFont.bottom() + GAP, width, BTN_HEIGHT);
 				origri_map.setRect(0, chkVibrate.bottom() + GAP, width, BTN_HEIGHT);
-				origri_normal.setRect(0, origri_map.bottom() + GAP, width, BTN_HEIGHT);
-				chkDetourPrompt.setRect(0, origri_normal.bottom() + GAP, width, BTN_HEIGHT);
+				btnStatusStyle.setRect(0, origri_map.bottom() + GAP, width, BTN_HEIGHT);
+				chkDetourPrompt.setRect(0, btnStatusStyle.bottom() + GAP, width, BTN_HEIGHT);
             }
             height = chkDetourPrompt.bottom();
         }
