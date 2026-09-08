@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -779,23 +780,138 @@ public class Generator {
 	private static HashMap<Category,Float> defaultCatProbs = new LinkedHashMap<>();
 	private static HashMap<Category,Float> categoryProbs = new LinkedHashMap<>();
 
-	public static void fullReset() {
-		usingFirstDeck = Random.Int(2) == 0;
-		generalReset();
-		for (Category cat : Category.values()) {
-			cat.using2ndProbs =  cat.defaultProbs2 != null && Random.Int(2) == 0;
-			reset(cat);
-			if (cat.defaultProbs != null) {
-				cat.seed = Random.Long();
-				cat.dropped = 0;
-			}
+	// ===== per-branch deck state =====
+	// The static fields above (usingFirstDeck, categoryProbs) and each Category's
+	// seed/dropped/probs/using2ndProbs always reflect the ACTIVE branch's deck state.
+	// Each branch keeps its own independent decks so that whether or when a branch is
+	// explored never perturbs another branch's generated items (route-independent seeds).
+	private static String activeBranch = Branches.MAIN;
+
+	private static class BranchDeck {
+		boolean usingFirstDeck;
+		HashMap<Category,Float> categoryProbs = new LinkedHashMap<>();
+		HashMap<Category, CategoryDeck> decks = new LinkedHashMap<>();
+	}
+
+	private static class CategoryDeck {
+		long seed;
+		int dropped;
+		float[] probs;
+		boolean using2ndProbs;
+	}
+
+	private static final HashMap<String, BranchDeck> branchDecks = new LinkedHashMap<>();
+
+	// deterministically derives a seed for a branch's decks from the run seed + branchId
+	// this is a pure function: it never reads the ambient RNG stream, so entering a branch
+	// at any time always yields the same initial decks for that branch.
+	private static long branchDeckSeed(String branchId){
+		long h = Dungeon.seed;
+		for (int i = 0; i < branchId.length(); i++){
+			h = h * 31 + branchId.charAt(i);
 		}
+		return h ^ 0x9E3779B97F4A7C15L;
+	}
+
+	private static void deriveBranchDeck(String branchId){
+		BranchDeck bd = new BranchDeck();
+		Random.pushGenerator( branchDeckSeed(branchId) );
+		try {
+			bd.usingFirstDeck = Random.Int(2) == 0;
+			for (Category cat : Category.values()) {
+				bd.categoryProbs.put( cat, bd.usingFirstDeck ? cat.firstProb : cat.secondProb );
+			}
+			for (Category cat : Category.values()) {
+				CategoryDeck cd = new CategoryDeck();
+				cd.dropped = 0;
+				if (cat.defaultProbs != null){
+					if (cat.defaultProbs2 != null){
+						// mirrors fullReset(): draw using2ndProbs, then reset() toggles it
+						cd.using2ndProbs = Random.Int(2) == 0;
+						cd.using2ndProbs = !cd.using2ndProbs;
+						cd.probs = cd.using2ndProbs ? cat.defaultProbs2.clone() : cat.defaultProbs.clone();
+					} else {
+						cd.using2ndProbs = false;
+						cd.probs = cat.defaultProbs.clone();
+					}
+					cd.seed = Random.Long();
+				} else {
+					cd.using2ndProbs = false;
+					cd.seed = 0;
+					cd.probs = cat.probs.clone();
+				}
+				bd.decks.put(cat, cd);
+			}
+		} finally {
+			Random.popGenerator();
+		}
+		branchDecks.put(branchId, bd);
+	}
+
+	private static void loadBranchDeck(String branchId){
+		BranchDeck bd = branchDecks.get(branchId);
+		if (bd == null) return;
+		usingFirstDeck = bd.usingFirstDeck;
+		categoryProbs.clear();
+		categoryProbs.putAll(bd.categoryProbs);
+		for (Category cat : Category.values()) {
+			CategoryDeck cd = bd.decks.get(cat);
+			if (cd == null) continue;
+			cat.seed = cd.seed;
+			cat.dropped = cd.dropped;
+			cat.probs = cd.probs;
+			cat.using2ndProbs = cd.using2ndProbs;
+		}
+		activeBranch = branchId;
+	}
+
+	private static void saveBranchDeck(String branchId){
+		BranchDeck bd = branchDecks.get(branchId);
+		if (bd == null) return;
+		bd.usingFirstDeck = usingFirstDeck;
+		bd.categoryProbs.clear();
+		bd.categoryProbs.putAll(categoryProbs);
+		for (Category cat : Category.values()) {
+			CategoryDeck cd = bd.decks.get(cat);
+			if (cd == null) continue;
+			cd.seed = cat.seed == null ? 0 : cat.seed;
+			cd.dropped = cat.dropped;
+			cd.probs = cat.probs;
+			cd.using2ndProbs = cat.using2ndProbs;
+		}
+	}
+
+	// Ensures the given branch's deck state is the active one, lazily initializing it
+	// (deterministically from the run seed) if that branch has not been entered yet.
+	public static void ensureBranchState(String branchId){
+		if (branchId == null) branchId = Branches.MAIN;
+		if (branchId.equals(activeBranch) && branchDecks.containsKey(activeBranch)){
+			return;
+		}
+		if (branchDecks.containsKey(activeBranch)){
+			saveBranchDeck(activeBranch);
+		}
+		if (!branchDecks.containsKey(branchId)){
+			deriveBranchDeck(branchId);
+		}
+		loadBranchDeck(branchId);
+	}
+
+	public static void fullReset() {
+		defaultCatProbs.clear();
+		for (Category cat : Category.values()) {
+			defaultCatProbs.put( cat, cat.firstProb + cat.secondProb );
+		}
+
+		branchDecks.clear();
+		activeBranch = Branches.MAIN;
+		deriveBranchDeck(activeBranch);
+		loadBranchDeck(activeBranch);
 	}
 
 	public static void generalReset(){
 		for (Category cat : Category.values()) {
 			categoryProbs.put( cat, usingFirstDeck ? cat.firstProb : cat.secondProb );
-			defaultCatProbs.put( cat, cat.firstProb + cat.secondProb );
 		}
 	}
 
@@ -1090,63 +1206,116 @@ public class Generator {
 	private static final String CATEGORY_SEED = "_seed";
 	private static final String CATEGORY_DROPPED = "_dropped";
 
-	public static void storeInBundle(Bundle bundle) {
-		bundle.put(FIRST_DECK, usingFirstDeck);
+	// key format: <cat>_branch_<branchId>_seed, branch_<branchId>_first_deck, etc.
+	private static String branchDeckKey(String branchId, String catName, String suffix){
+		return catName + "_branch_" + branchId + suffix;
+	}
 
-		Float[] genProbs = categoryProbs.values().toArray(new Float[0]);
+	private static String branchGlobalKey(String branchId, String suffix){
+		return "branch_" + branchId + "_" + suffix;
+	}
+
+	private static void storeBranchInBundle(Bundle bundle, String branchId){
+		BranchDeck bd = branchDecks.get(branchId);
+		if (bd == null) return;
+
+		bundle.put(branchGlobalKey(branchId, FIRST_DECK), bd.usingFirstDeck);
+
+		Float[] genProbs = bd.categoryProbs.values().toArray(new Float[0]);
 		float[] storeProbs = new float[genProbs.length];
 		for (int i = 0; i < storeProbs.length; i++){
 			storeProbs[i] = genProbs[i];
 		}
-		bundle.put( GENERAL_PROBS, storeProbs);
+		bundle.put( branchGlobalKey(branchId, GENERAL_PROBS), storeProbs);
 
 		for (Category cat : Category.values()){
 			if (cat.defaultProbs == null) continue;
+			CategoryDeck cd = bd.decks.get(cat);
+			if (cd == null) continue;
+			String catName = cat.name().toLowerCase();
 
-			bundle.put(cat.name().toLowerCase() + CATEGORY_PROBS, cat.probs);
+			bundle.put(branchDeckKey(branchId, catName, CATEGORY_PROBS), cd.probs);
 
 			if (cat.defaultProbs2 != null){
-				bundle.put(cat.name().toLowerCase() + CATEGORY_USING_PROBS2, cat.using2ndProbs);
+				bundle.put(branchDeckKey(branchId, catName, CATEGORY_USING_PROBS2), cd.using2ndProbs);
 			}
 
-			if (cat.seed != null) {
-				bundle.put(cat.name().toLowerCase() + CATEGORY_SEED, cat.seed);
-				bundle.put(cat.name().toLowerCase() + CATEGORY_DROPPED, cat.dropped);
+			bundle.put(branchDeckKey(branchId, catName, CATEGORY_SEED), cd.seed);
+			bundle.put(branchDeckKey(branchId, catName, CATEGORY_DROPPED), cd.dropped);
+		}
+	}
+
+	private static void restoreBranchFromBundle(Bundle bundle, String branchId){
+		BranchDeck bd = branchDecks.get(branchId);
+		if (bd == null) {
+			deriveBranchDeck(branchId);
+			bd = branchDecks.get(branchId);
+		}
+
+		bd.usingFirstDeck = bundle.getBoolean(branchGlobalKey(branchId, FIRST_DECK));
+
+		if (bundle.contains(branchGlobalKey(branchId, GENERAL_PROBS))){
+			float[] probs = bundle.getFloatArray(branchGlobalKey(branchId, GENERAL_PROBS));
+			if (probs.length == Category.values().length) {
+				bd.categoryProbs.clear();
+				for (int i = 0; i < probs.length; i++) {
+					bd.categoryProbs.put(Category.values()[i], probs[i]);
+				}
 			}
+		}
+
+		for (Category cat : Category.values()){
+			if (cat.defaultProbs == null) continue;
+			String catName = cat.name().toLowerCase();
+			if (!bundle.contains(branchDeckKey(branchId, catName, CATEGORY_PROBS))) continue;
+
+			CategoryDeck cd = bd.decks.get(cat);
+			if (cd == null) continue;
+
+			float[] probs = bundle.getFloatArray(branchDeckKey(branchId, catName, CATEGORY_PROBS));
+			if (probs.length == cat.defaultProbs.length){
+				cd.probs = probs;
+			}
+			if (bundle.contains(branchDeckKey(branchId, catName, CATEGORY_USING_PROBS2))){
+				cd.using2ndProbs = bundle.getBoolean(branchDeckKey(branchId, catName, CATEGORY_USING_PROBS2));
+			} else {
+				cd.using2ndProbs = false;
+			}
+			if (bundle.contains(branchDeckKey(branchId, catName, CATEGORY_SEED))){
+				cd.seed = bundle.getLong(branchDeckKey(branchId, catName, CATEGORY_SEED));
+				cd.dropped = bundle.getInt(branchDeckKey(branchId, catName, CATEGORY_DROPPED));
+			}
+		}
+	}
+
+	public static void storeInBundle(Bundle bundle) {
+		// ensure the currently-active branch's live deck state is reflected in branchDecks first
+		if (branchDecks.containsKey(activeBranch)){
+			saveBranchDeck(activeBranch);
+		}
+		for (String branchId : branchDecks.keySet()){
+			storeBranchInBundle(bundle, branchId);
 		}
 	}
 
 	public static void restoreFromBundle(Bundle bundle) {
 		fullReset();
 
-		usingFirstDeck = bundle.getBoolean(FIRST_DECK);
-
-		if (bundle.contains(GENERAL_PROBS)){
-			float[] probs = bundle.getFloatArray(GENERAL_PROBS);
-			if (probs.length == Category.values().length) {
-				for (int i = 0; i < probs.length; i++) {
-					categoryProbs.put(Category.values()[i], probs[i]);
-				}
+		// detect new format by presence of per-branch keys. Old saves (single global deck)
+		// are silently reset to the freshly derived state and may be played on.
+		boolean newFormat = false;
+		for (String branchId : Branches.getAllIds()){
+			if (bundle.contains(branchGlobalKey(branchId, FIRST_DECK))){
+				newFormat = true;
+				restoreBranchFromBundle(bundle, branchId);
 			}
 		}
-
-		for (Category cat : Category.values()){
-			if (bundle.contains(cat.name().toLowerCase() + CATEGORY_PROBS)){
-				float[] probs = bundle.getFloatArray(cat.name().toLowerCase() + CATEGORY_PROBS);
-				if (cat.defaultProbs != null && probs.length == cat.defaultProbs.length){
-					cat.probs = probs;
-				}
-				if (bundle.contains(cat.name().toLowerCase() + CATEGORY_USING_PROBS2)){
-					cat.using2ndProbs = bundle.getBoolean(cat.name().toLowerCase() + CATEGORY_USING_PROBS2);
-				} else {
-					cat.using2ndProbs = false;
-				}
-				if (bundle.contains(cat.name().toLowerCase() + CATEGORY_SEED)){
-					cat.seed = bundle.getLong(cat.name().toLowerCase() + CATEGORY_SEED);
-					cat.dropped = bundle.getInt(cat.name().toLowerCase() + CATEGORY_DROPPED);
-				}
-			}
+		if (!newFormat){
+			return;
 		}
-		
+
+		// always restore to the main branch's deck state on load; other branches are
+		// initialized deterministically when first entered (see ensureBranchState)
+		loadBranchDeck(Branches.MAIN);
 	}
 }

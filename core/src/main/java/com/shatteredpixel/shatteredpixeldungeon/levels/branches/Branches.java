@@ -87,6 +87,9 @@ public class Branches {
      * 获取所有分支 ID
      */
     public static Iterable<String> getAllIds() {
+        if (registry.isEmpty()) {
+            init();
+        }
         return registry.keySet();
     }
     

@@ -130,6 +130,8 @@ public class Dungeon {
 		GRUDGE_WEP,
 
 		CLUSTERED_SKELETON_WEP,
+		BONE_CLAW,
+		BONE_SPEAR,
 
 
 		// Date : 2024/07/26
@@ -343,7 +345,12 @@ public class Dungeon {
 		Actor.clear();
 		
 		Level level;
-		boolean randomMap = Random.Float()>=0.5f && !SPDSettings.origin_map();
+		boolean randomMap;
+		// rolls that shape level content but run before Level.create() must not consume
+		// the shared ambient stream, otherwise exploring branches would shift later floors.
+		Random.pushGenerator( Dungeon.seedCurDepth()+1 );
+			randomMap = Random.Float()>=0.5f && !SPDSettings.origin_map();
+		Random.popGenerator();
 		
 		// 使用 Branch 系统创建楼层
 		Branch branch = Branches.get(branchId);
@@ -364,7 +371,10 @@ public class Dungeon {
 		
 		// 第15层的 Boss 选择
 		if (branchId.equals(Branches.MAIN) && depth == 15) {
+			// deterministic per (branch, depth), independent of prior branch exploration
+			Random.pushGenerator( Dungeon.seedCurDepth()+1 );
 			level = GenerateCaveBossLevel();
+			Random.popGenerator();
 		}
 
 		//dead end levels get cleared, don't count as generated
@@ -940,6 +950,9 @@ public class Dungeon {
 		Dungeon.level = null;
 		Actor.clear();
 
+		// ensure the deck state of the branch being loaded is active (no-op on main)
+		Generator.ensureBranchState(branchId);
+
 		Bundle bundle = FileUtils.bundleFromFile( GamesInProgress.depthFile( save, depth, branchId ));
 
 		Level level = (Level)bundle.get( LEVEL );
@@ -962,6 +975,9 @@ public class Dungeon {
 
 		depth = targetDepth;
 		branchId = targetBranch;
+		// ensure the target branch's independent item-deck state is active
+		// before any of its floors are generated (route-independent decks)
+		Generator.ensureBranchState(targetBranch);
 		return levelHasBeenGenerated(targetDepth, targetBranch) ? loadLevel(save) : newLevel();
 	}
 	
