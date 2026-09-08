@@ -2,8 +2,10 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.TalentSet;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.skins.JumbleSkin;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -20,6 +22,8 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.JumbleSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.custom.utils.timing.VirtualTimer;
+import com.watabou.noosa.Game;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
 import com.watabou.utils.Random;
@@ -43,23 +47,39 @@ public class JumbleChangeBuff extends Buff {
 	private float turnsRemaining;
 
 	// 是否正在变身中（防止重入）
-	private boolean changing = false;
+	private volatile boolean changing = false;
+
+	// 当前外观组是变身结果的一部分，必须独立于精灵动画持久化。
+	private volatile int currentGroup = 0;
+	private transient volatile int visualChangeToken = 0;
+
+	/** Shared by transformation commit and Hero serialization. */
+	public static final Object STATE_LOCK = new Object();
 
 	private static final float MIN_INTERVAL = 180;
 	private static final float MAX_INTERVAL = 220;
+	// 两段各 10 帧、12 FPS，再留半秒余量；仅用于解锁，不参与游戏计时。
+	private static final float VISUAL_TIMEOUT = 20f / 12f + 0.5f;
 
 	private static final String TURNS = "turns";
+	private static final String GROUP = "group";
+
+	public int currentGroup() {
+		return currentGroup;
+	}
 
 	@Override
 	public boolean act() {
-		if (target == Dungeon.hero && isJumbleActive() && !changing) {
-			turnsRemaining -= 1;
-			if (turnsRemaining <= 0) {
-				changing = true;
-				Hero hero = (Hero) target;
-				hero.interrupt();
-				hero.spend(TICK);
-				startChange();
+		synchronized (STATE_LOCK) {
+			if (target == Dungeon.hero && isJumbleActive() && !changing) {
+				turnsRemaining -= 1;
+				if (turnsRemaining <= 0) {
+					changing = true;
+					Hero hero = (Hero) target;
+					hero.interrupt();
+					hero.spend(TICK);
+					startChange();
+				}
 			}
 		}
 		spend( TICK );
@@ -74,17 +94,21 @@ public class JumbleChangeBuff extends Buff {
 
 	/** 附加或重置变身倒计时（持久化 buff，恒存在）。 */
 	public static void resetCountdown() {
-		if (Dungeon.hero == null) return;
-		JumbleChangeBuff b = Buff.affect(Dungeon.hero, JumbleChangeBuff.class);
-		b.turnsRemaining = Random.NormalIntRange((int) MIN_INTERVAL, (int) MAX_INTERVAL);
+		synchronized (STATE_LOCK) {
+			if (Dungeon.hero == null) return;
+			JumbleChangeBuff b = Buff.affect(Dungeon.hero, JumbleChangeBuff.class);
+			b.turnsRemaining = Random.NormalIntRange((int) MIN_INTERVAL, (int) MAX_INTERVAL);
+		}
 	}
 
 	/** 若变身倒计时 buff 尚未存在，则创建并重置倒计时；已存在则不动。 */
 	public static void resetCountdownIfMissing() {
-		if (Dungeon.hero == null) return;
-		JumbleChangeBuff b = Dungeon.hero.buff(JumbleChangeBuff.class);
-		if (b == null) {
-			resetCountdown();
+		synchronized (STATE_LOCK) {
+			if (Dungeon.hero == null) return;
+			JumbleChangeBuff b = Dungeon.hero.buff(JumbleChangeBuff.class);
+			if (b == null) {
+				resetCountdown();
+			}
 		}
 	}
 
@@ -117,16 +141,23 @@ public class JumbleChangeBuff extends Buff {
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
-		super.storeInBundle(bundle);
-		bundle.put(TURNS, turnsRemaining);
+		synchronized (STATE_LOCK) {
+			super.storeInBundle(bundle);
+			bundle.put(TURNS, turnsRemaining);
+			bundle.put(GROUP, currentGroup);
+		}
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
-		super.restoreFromBundle(bundle);
-		turnsRemaining = bundle.getFloat(TURNS);
-		// Animation callbacks cannot survive saving; retry an expired transformation after loading.
-		changing = false;
+		synchronized (STATE_LOCK) {
+			super.restoreFromBundle(bundle);
+			turnsRemaining = bundle.getFloat(TURNS);
+			currentGroup = ((bundle.getInt(GROUP) % 6) + 6) % 6;
+			// 动画和回调不属于存档协议。读档后直接显示已提交的变身结果。
+			changing = false;
+			visualChangeToken++;
+		}
 	}
 
 	// ---- 变身流程 ----
@@ -135,60 +166,97 @@ public class JumbleChangeBuff extends Buff {
 		Hero hero = (Hero) target;
 		// 变身提示
 		GLog.w(Messages.get(JumbleChangeBuff.class, "transform"));
+
+		// 先提交全部逻辑结果。动画只展示这次已经确定的变身，不再决定变身是否成功。
+		final int token;
+		synchronized (STATE_LOCK) {
+			try {
+				doTalentMetamorph(hero);
+			} catch (Throwable t) {
+				logMetamorphError(t);
+			}
+			try {
+				doEquipmentTransmute(hero);
+			} catch (Throwable t) {
+				logMetamorphError(t);
+			}
+			currentGroup = Random.Int(6);
+			resetCountdown();
+			token = ++visualChangeToken;
+		}
+
 		if (hero.sprite instanceof JumbleSprite) {
 			JumbleSprite sprite = (JumbleSprite) hero.sprite;
 
-			// 一口气连续播放：消失 → (逻辑变换) → 出现 → 结束。全程阻塞，结束时才恢复。
-			// 用通用的"不消耗时间阻塞动画"机制：Hero.act() 期间被拦截，不移动/不攻击/不推进回合。
-			// 逻辑变换的异常必须被捕获，否则动画回调链中断，finishChange 永不执行（倒计时卡 0、英雄永久阻塞）。
-			hero.playAnimationNoTime(new Callback() {
-				@Override
-				public void call() {
-					sprite.playChange(new Callback() {
-						@Override
-						public void call() {
-							try {
-								doTalentMetamorph(hero);
-								doEquipmentTransmute(hero);
-							} catch (Throwable t) {
-								com.watabou.utils.DeviceCompat.log("JumbleChangeBuff", "startChange metamorph error: " + t);
-								t.printStackTrace();
-							}
-
-							int newGroup = Random.Int(6);
-							sprite.playAppear(newGroup, new Callback() {
+			// 阻塞仍保留为演出效果；超时只负责解锁，不改变已提交的结果。
+			try {
+				hero.playAnimationNoTime(new Callback() {
+					@Override
+					public void call() {
+						try {
+							sprite.playChange(new Callback() {
 								@Override
 								public void call() {
-									finishChange();
+									try {
+										sprite.playAppear(currentGroup, new Callback() {
+											@Override
+											public void call() {
+												finishVisualChange(token);
+											}
+										});
+									} catch (Throwable t) {
+										logMetamorphError(t);
+										finishVisualChange(token);
+									}
 								}
 							});
+						} catch (Throwable t) {
+							logMetamorphError(t);
+							finishVisualChange(token);
 						}
-					});
-				}
-			});
-		} else {
-			//没有杂散精灵时直接完成逻辑，不阻塞
-			try {
-				doTalentMetamorph(hero);
-				doEquipmentTransmute(hero);
+					}
+				});
+				Game.runOnRenderThread(() -> {
+					try {
+						VirtualTimer.countTime(VISUAL_TIMEOUT, () -> finishVisualChange(token));
+					} catch (Throwable t) {
+						logMetamorphError(t);
+						finishVisualChange(token);
+					}
+				});
 			} catch (Throwable t) {
-				com.watabou.utils.DeviceCompat.log("JumbleChangeBuff", "startChange metamorph error: " + t);
-				t.printStackTrace();
+				logMetamorphError(t);
+				finishVisualChange(token);
 			}
-			finishChange();
+		} else {
+			finishVisualChange(token);
 		}
 	}
 
-	private void finishChange() {
-		Hero hero = (Hero) target;
-		changing = false;
-		resetCountdown();
-		if (hero != null && hero.isAlive()) {
+	private void logMetamorphError(Throwable t) {
+		com.watabou.utils.DeviceCompat.log("JumbleChangeBuff", "metamorph error: " + t);
+		t.printStackTrace();
+	}
+
+	private void finishVisualChange(int token) {
+		Hero hero;
+		synchronized (STATE_LOCK) {
+			if (!changing || token != visualChangeToken) return;
+			changing = false;
+			hero = (Hero) target;
+		}
+		if (hero != null) {
 			if (hero.sprite instanceof JumbleSprite) {
-				hero.sprite.idle();
+				JumbleSprite sprite = (JumbleSprite) hero.sprite;
+				sprite.cancelAnimationCallback();
+				sprite.setGroup(currentGroup);
+				if (hero.isAlive()) {
+					sprite.idle();
+				}
 			}
-			// 恢复英雄行动（通用"不消耗时间阻塞动画"的收尾）
-			hero.finishAnimationNoTime();
+			if (hero.animationBusy) {
+				hero.finishAnimationNoTime();
+			}
 		}
 	}
 
@@ -201,20 +269,33 @@ public class JumbleChangeBuff extends Buff {
 			if (oldTier == null || oldTier.isEmpty()) continue;
 
 			LinkedHashMap<Talent, Integer> newTier = new LinkedHashMap<>();
+			List<Talent> upgradedTalents = new ArrayList<>();
 
 			for (Talent oldTalent : oldTier.keySet()) {
 				int points = oldTier.get(oldTalent);
-				//所有普通层天赋都参与蜕变；点数仅随天赋槽位保留，不影响替换流程。
-				Talent replacement = randomTalent(hero, oldTalent, tier);
-				newTier.put(replacement, points);
-
-				if (replacement != oldTalent) {
-					recordMetamorph(hero, oldTalent, replacement);
-					// 与原版蜕变一致：新天赋的被动/效果需在此触发才会生效
-					Talent.onTalentUpgraded(hero, replacement);
+				try {
+					//所有普通层天赋都参与蜕变；点数仅随天赋槽位保留，不影响替换流程。
+					Talent replacement = randomTalent(hero, oldTalent, tier);
+					if (replacement != oldTalent) {
+						recordMetamorph(hero, oldTalent, replacement);
+						upgradedTalents.add(replacement);
+					}
+					newTier.put(replacement, points);
+				} catch (Throwable t) {
+					// 单个槽位失败时保留原天赋；本次变身仍视为已消耗，绝不重试。
+					newTier.put(oldTalent, points);
+					logMetamorphError(t);
 				}
 			}
 			hero.talents.set(tier, newTier);
+			// 回调必须在新层写回后执行，否则 pointsInTalent(replacement) 会错误地返回 0。
+			for (Talent talent : upgradedTalents) {
+				try {
+					Talent.onTalentUpgraded(hero, talent);
+				} catch (Throwable t) {
+					logMetamorphError(t);
+				}
+			}
 		}
 	}
 
@@ -223,15 +304,14 @@ public class JumbleChangeBuff extends Buff {
 		List<Talent> pool = new ArrayList<>();
 		Set<Talent> alreadyUsed = new LinkedHashSet<>(hero.metamorphedTalents.values());
 		Set<Talent> currentTier = hero.talents.get(tierIndex).keySet();
-		HashMap<Talent, com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass> restricted = new HashMap<>();
+		HashMap<Talent, HeroClass> restricted = new HashMap<>();
 		restricted.put(Talent.RUNIC_TRANSFERENCE, HeroClasses.WARRIOR);
 		restricted.put(Talent.WAND_PRESERVATION, HeroClasses.MAGE);
 
-		for (com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass cls : HeroClasses.ALL) {
-			ArrayList<LinkedHashMap<Talent, Integer>> clsTalents = new ArrayList<>();
-			Talent.initClassTalents(cls, clsTalents);
-			if (tierIndex >= clsTalents.size()) continue;
-			for (Talent talent : clsTalents.get(tierIndex).keySet()) {
+		for (HeroClass cls : HeroClasses.ALL) {
+			Talent[] tierTalents = classTalentsAtTier(cls, tierIndex);
+			if (tierTalents == null) continue;
+			for (Talent talent : tierTalents) {
 				if (talent != oldTalent
 						&& !currentTier.contains(talent)
 						&& (!restricted.containsKey(talent) || restricted.get(talent) == hero.heroClass)) {
@@ -246,6 +326,18 @@ public class JumbleChangeBuff extends Buff {
 		if (pool.isEmpty()) return oldTalent;
 
 		return Random.element(pool);
+	}
+
+	/** 使用职业基础定义，避免其他职业当前选择的皮肤改变候选池层级。 */
+	private Talent[] classTalentsAtTier(HeroClass heroClass, int tierIndex) {
+		TalentSet talents = heroClass.talentSet();
+		if (talents == null) return null;
+		switch (tierIndex) {
+			case 0: return talents.getTier1();
+			case 1: return talents.getTier2();
+			case 2: return talents.getTier3();
+			default: return null;
+		}
 	}
 
 	private void recordMetamorph(Hero hero, Talent oldTalent, Talent newTalent) {
@@ -266,33 +358,49 @@ public class JumbleChangeBuff extends Buff {
 
 	private void doEquipmentTransmute(Hero hero) {
 		//神器：允许重复（直接从未使用过的全神器池随机，忽略唯一性）
-		transmuteArtifact(hero);
+		try {
+			transmuteArtifact(hero);
+		} catch (Throwable t) {
+			logMetamorphError(t);
+		}
 
 		Ring ring = hero.belongings.ring();
 		if (ring != null) {
-			boolean ringTypeKnown = ring.isKnown();
-			Item result = ScrollOfTransmutation.changeItem(ring);
-			if (result instanceof Ring) {
-				if (ringTypeKnown) {
-					// Ring type knowledge is stored separately from level/curse knowledge.
-					((Ring) result).setKnown();
+			try {
+				boolean ringTypeKnown = ring.isKnown();
+				Item result = ScrollOfTransmutation.changeItem(ring);
+				if (result instanceof Ring) {
+					if (ringTypeKnown) {
+						// Ring type knowledge is stored separately from level/curse knowledge.
+						((Ring) result).setKnown();
+					}
+					result.cursed = ring.cursed;
+					result.cursedKnown = ring.cursedKnown;
+					result.levelKnown = ring.levelKnown;
 				}
-				result.cursed = ring.cursed;
-				result.cursedKnown = ring.cursedKnown;
-				result.levelKnown = ring.levelKnown;
+				replaceEquipped(hero, ring, result);
+			} catch (Throwable t) {
+				logMetamorphError(t);
 			}
-			replaceEquipped(hero, ring, result);
 		}
 
 		KindOfWeapon weapon = hero.belongings.weapon();
 		if (weapon != null) {
-			Item result = ScrollOfTransmutation.changeItem(weapon);
-			replaceEquipped(hero, weapon, result);
+			try {
+				Item result = ScrollOfTransmutation.changeItem(weapon);
+				replaceEquipped(hero, weapon, result);
+			} catch (Throwable t) {
+				logMetamorphError(t);
+			}
 		}
 
 		Armor armor = hero.belongings.armor();
 		if (armor != null) {
-			transmuteArmor(hero, armor);
+			try {
+				transmuteArmor(hero, armor);
+			} catch (Throwable t) {
+				logMetamorphError(t);
+			}
 		}
 	}
 
@@ -330,7 +438,11 @@ public class JumbleChangeBuff extends Buff {
 			replacement.affixSeal(seal);
 		}
 
-		replaceEquipped(hero, old, replacement);
+		if (!replaceEquipped(hero, old, replacement) && seal != null) {
+			// 替换失败时，撤销前面的纹章转移并恢复到已经重新装备的旧护甲。
+			replacement.detachSeal(hero);
+			old.affixSeal(seal);
+		}
 	}
 
 	private void transmuteArtifact(Hero hero) {
@@ -360,33 +472,51 @@ public class JumbleChangeBuff extends Buff {
 
 		replacement.levelKnown = old.levelKnown;
 		replacement.transferUpgrade(old.visiblyUpgraded());
-		//生成器可能默认生成诅咒神器；蜕变后必须严格继承原神器状态。
+		// 生成器可能默认生成诅咒神器；蜕变后必须严格继承原神器状态。
 		replacement.cursed = old.cursed;
 		replacement.cursedKnown = old.cursedKnown;
 
 		replaceEquipped(hero, old, replacement);
 	}
 
-	private void replaceEquipped(Hero hero, Item oldItem, Item result) {
-		if (result == null || result == oldItem) return;
+	private boolean replaceEquipped(Hero hero, Item oldItem, Item result) {
+		if (result == null || result == oldItem) return false;
 
 		int slot = Dungeon.quickslot.getSlot(oldItem);
+		boolean oldCursed = oldItem.cursed;
 
-		//卸下旧物品（清除诅咒以允许卸下）
+		// 嬗变必须先摘下旧装备；临时清除诅咒以允许摘下，结果仍继承原诅咒状态。
 		oldItem.cursed = false;
 		if (oldItem.isEquipped(hero) && oldItem instanceof EquipableItem) {
-			((EquipableItem) oldItem).doUnequip(hero, false);
+			if (!((EquipableItem) oldItem).doUnequip(hero, false)) {
+				oldItem.cursed = oldCursed;
+				return false;
+			}
 		} else {
-			oldItem.detach(hero.belongings.backpack);
+			if (oldItem.detach(hero.belongings.backpack) == null) {
+				oldItem.cursed = oldCursed;
+				return false;
+			}
 		}
 
-		//收集新物品并装备
-		if (result instanceof EquipableItem) {
-			((EquipableItem) result).doEquip(hero);
-		} else {
-			if (!result.collect()) {
-				Dungeon.level.drop(result, hero.pos).sprite.drop();
+		boolean replaced = false;
+		try {
+			if (result instanceof EquipableItem) {
+				replaced = ((EquipableItem) result).doEquip(hero);
+			} else {
+				replaced = result.collect();
+				if (!replaced) {
+					Dungeon.level.drop(result, hero.pos).sprite.drop();
+					replaced = true;
+				}
 			}
+		} catch (Throwable t) {
+			logMetamorphError(t);
+		}
+
+		if (!replaced) {
+			rollbackEquipmentReplacement(hero, oldItem, oldCursed, result);
+			return false;
 		}
 		//装备 API 会正常扣除装备/卸下时间；蜕变是即时效果，抵消本次冷却。
 		hero.spend(-hero.cooldown());
@@ -397,6 +527,34 @@ public class JumbleChangeBuff extends Buff {
 				&& !Dungeon.quickslot.isNonePlaceholder(slot)
 				&& hero.belongings.contains(result)) {
 			Dungeon.quickslot.setSlot(slot, result);
+		}
+		return true;
+	}
+
+	private void rollbackEquipmentReplacement(Hero hero, Item oldItem, boolean oldCursed, Item result) {
+		try {
+			if (result instanceof EquipableItem && result.isEquipped(hero)) {
+				result.cursed = false;
+				((EquipableItem) result).doUnequip(hero, false);
+			} else {
+				result.detach(hero.belongings.backpack);
+			}
+		} catch (Throwable t) {
+			logMetamorphError(t);
+		}
+
+		oldItem.cursed = oldCursed;
+		try {
+			if (oldItem instanceof EquipableItem && ((EquipableItem) oldItem).doEquip(hero)) return;
+		} catch (Throwable t) {
+			logMetamorphError(t);
+		}
+
+		// 即使重新装备也异常，至少保住原物品，不能让它从存档中消失。
+		if (!oldItem.isEquipped(hero)
+				&& !hero.belongings.contains(oldItem)
+				&& !oldItem.collect(hero.belongings.backpack)) {
+			Dungeon.level.drop(oldItem, hero.pos).sprite.drop();
 		}
 	}
 }

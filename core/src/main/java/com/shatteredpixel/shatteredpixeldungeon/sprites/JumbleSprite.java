@@ -2,6 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.sprites;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.JumbleChangeBuff;
 import com.watabou.noosa.TextureFilm;
 import com.watabou.utils.Callback;
 
@@ -51,8 +52,19 @@ public class JumbleSprite extends HeroSprite {
 		return group;
 	}
 
+	/** 清除变身演出的回调，供读档/超时收尾跳过未完成动画。 */
+	public synchronized void cancelAnimationCallback() {
+		animCallback = null;
+	}
+
 	@Override
 	public void updateArmor() {
+		if (ch == Dungeon.hero) {
+			JumbleChangeBuff buff = Dungeon.hero.buff(JumbleChangeBuff.class);
+			if (buff != null) {
+				group = buff.currentGroup();
+			}
+		}
 		texture( Assets.Sprites.JUMBLE );
 
 		TextureFilm film = new TextureFilm( texture, FRAME_W, FRAME_H );
