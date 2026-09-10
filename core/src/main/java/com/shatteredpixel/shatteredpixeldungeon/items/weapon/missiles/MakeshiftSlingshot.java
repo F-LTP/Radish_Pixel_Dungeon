@@ -45,7 +45,7 @@ import java.util.ArrayList;
 /**
  * 简易投石索 (Makeshift Slingshot)
  * 哥布林10%概率掉落
- * 使用时消耗一颗石头，伤害提升4倍，投石索和石头一并摧毁
+ * 使用时消耗一颗石头，伤害提升4倍，石头以更快的速度发射，投石索和石头一并摧毁
  */
 public class MakeshiftSlingshot extends Item {
 
@@ -111,12 +111,8 @@ public class MakeshiftSlingshot extends Item {
 			
 			Sample.INSTANCE.play(Assets.Sounds.HIT);
 			MissileSprite missile = (MissileSprite) curUser.sprite.parent.recycle(MissileSprite.class);
-			missile.reset(curUser.sprite, cell, stone, new Callback() {
-				@Override
-				public void call() {
-					onThrowReached(cell);
-				}
-			}, 2f);
+			// The consumed stone supplies the projectile sprite.
+			missile.reset(curUser.sprite, cell, stone, () -> onThrowReached(cell), 2f);
 		}
 
 		@Override
@@ -140,9 +136,6 @@ public class MakeshiftSlingshot extends Item {
 		if (enemy != null && enemy != curUser) {
 			// 对敌人造成伤害
 			enemy.damage(DamageInfo.of(slingshotDamage, DamageType.PHYSICAL, curUser, curUser));
-			enemy.sprite.showStatus(CharSprite.NEGATIVE, 
-				Messages.get(MakeshiftSlingshot.class, "damage_bonus", 4));
-			
 			// 检查击杀
 			if (!enemy.isAlive()) {
 				if (enemy == Dungeon.hero) {
@@ -150,9 +143,6 @@ public class MakeshiftSlingshot extends Item {
 					GLog.n(Messages.get(MakeshiftSlingshot.class, "kill_desc"));
 				}
 			}
-		} else {
-			// 没有命中敌人，在地面上显示消息
-			GLog.i(Messages.get(MakeshiftSlingshot.class, "use"));
 		}
 	}
 
