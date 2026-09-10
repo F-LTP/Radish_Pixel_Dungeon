@@ -637,11 +637,18 @@ public abstract class Char extends Actor {
         //祝福之戒
 
         if (attacker.buff(Bless.class) != null) acuRoll *= 1.25f;
-        if (attacker.buff(Hex.class) != null) acuRoll *= 0.8f;
-        if (attacker.buff(Daze.class) != null) acuRoll *= 0.5f;
+        // 命中修正取"加法叠加"：各效果的增减百分比直接相加，而不是连乘，
+        // 避免多个减益叠乘后命中率掉得过狠。怨魂缠身等通过 FlavourBuff 的钩子参与。
+        float accMod = 1f;
+        if (attacker.buff(Hex.class) != null) accMod -= 0.2f;
+        if (attacker.buff(Daze.class) != null) accMod -= 0.5f;
         for (ChampionEnemy buff : attacker.buffs(ChampionEnemy.class)) {
-            acuRoll *= buff.evasionAndAccuracyFactor();
+            accMod -= 1f - buff.evasionAndAccuracyFactor();
         }
+        for (FlavourBuff buff : attacker.buffs(FlavourBuff.class)) {
+            accMod -= 1f - buff.evasionAndAccuracyFactor();
+        }
+        acuRoll *= Math.max(0f, accMod);
         acuRoll *= AscensionChallenge.statModifier(attacker);
 
         float defRoll;
@@ -654,15 +661,20 @@ public abstract class Char extends Actor {
             defRoll = Random.Float(defStat);
         }
         if (defender.buff(Bless.class) != null) defRoll *= 1.25f;
-        if (defender.buff(Hex.class) != null) defRoll *= 0.8f;
-        if (defender.buff(Daze.class) != null) defRoll *= 0.5f;
+        // 闪避修正同样取加法叠加，规则见上。
+        float defMod = 1f;
+        if (defender.buff(Hex.class) != null) defMod -= 0.2f;
+        if (defender.buff(Daze.class) != null) defMod -= 0.5f;
         for (ChampionEnemy buff : defender.buffs(ChampionEnemy.class)) {
-            defRoll *= buff.evasionAndAccuracyFactor();
+            defMod -= 1f - buff.evasionAndAccuracyFactor();
         }
-
         for (ChampionHero buff : defender.buffs(ChampionHero.class)) {
-            defRoll *= buff.evasionAndAccuracyFactor();
+            defMod -= 1f - buff.evasionAndAccuracyFactor();
         }
+        for (FlavourBuff buff : defender.buffs(FlavourBuff.class)) {
+            defMod -= 1f - buff.evasionAndAccuracyFactor();
+        }
+        defRoll *= Math.max(0f, defMod);
 
         defRoll *= AscensionChallenge.statModifier(defender);
         defRoll *= FerretTuft.evasionMultiplier();

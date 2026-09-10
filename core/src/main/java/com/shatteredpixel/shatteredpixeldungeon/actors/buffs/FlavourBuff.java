@@ -24,8 +24,8 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 
 //buff whose only internal logic is to wait and detach after a time.
-public class FlavourBuff extends Buff {
-	
+public abstract class FlavourBuff extends Buff {
+
 	@Override
 	public boolean act() {
 		detach();
@@ -46,4 +46,8 @@ public class FlavourBuff extends Buff {
 	public String iconTextDisplay() {
 		return Integer.toString((int)visualcooldown());
 	}
+
+    public float evasionAndAccuracyFactor() {
+        return 1.0f;
+    }
 }

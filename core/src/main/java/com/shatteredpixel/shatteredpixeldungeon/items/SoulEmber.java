@@ -21,8 +21,20 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Grudge;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.tiles.CustomTilemap;
+import com.watabou.utils.PathFinder;
+import com.watabou.utils.Point;
 
 /**
  * 灵魂余烬 (Soul Ember)
@@ -30,13 +42,52 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
  * 可分解为1点炼金能量。
  */
 public class SoulEmber extends Item {
-
 	{
 		image = ItemSpriteSheet.SOUL_EMBER;
 
 		stackable = true;
+		defaultAction = AC_THROW;
+		usesTargeting = true;
 
 		bones = true;
+	}
+
+	@Override
+	protected void onThrow(int cell) {
+		if (Dungeon.level.pit[cell]) {
+			super.onThrow(cell);
+		} else {
+			Splash.at(cell, 0x777777FF, 3);
+			if (canBurn(cell)) {
+				Level.set(cell, Terrain.EMBERS);
+				GameScene.updateMap(cell);
+			}
+			for (int i : PathFinder.NEIGHBOURS9) {
+				int p = cell + i;
+				if (p >= 0 && p < Dungeon.level.length()) {
+					Char ch = Actor.findChar(p);
+					if (ch != null && ch != curUser && ch.isAlive())
+						Buff.affect(ch, Grudge.Haunted.class, Grudge.Haunted.DURATION);
+				}
+			}
+		}
+	}
+
+	private boolean canBurn(int cell) {
+		Point p = Dungeon.level.cellToPoint(cell);
+		for (CustomTilemap cust : Dungeon.level.customTiles) {
+			Point custPoint = new Point(p);
+			custPoint.x -= cust.tileX;
+			custPoint.y -= cust.tileY;
+			if (custPoint.x >= 0 && custPoint.y >= 0
+					&& custPoint.x < cust.tileW && custPoint.y < cust.tileH) {
+				if (cust.image(custPoint.x, custPoint.y) != null) {
+					return false;
+				}
+			}
+		}
+		int t = Dungeon.level.map[cell];
+		return t == Terrain.EMPTY || t == Terrain.EMPTY_DECO || t == Terrain.WATER;
 	}
 
 	@Override
@@ -56,7 +107,7 @@ public class SoulEmber extends Item {
 
 	@Override
 	public int energyVal() {
-		return 1 * quantity;
+		return 2 * quantity;
 	}
 
 	@Override
@@ -66,6 +117,6 @@ public class SoulEmber extends Item {
 
 	@Override
 	public String desc() {
-		return Messages.get(this, "desc");
-	}
+        return super.desc();
+    }
 }
