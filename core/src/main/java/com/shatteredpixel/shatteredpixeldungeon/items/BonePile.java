@@ -73,26 +73,28 @@ public class BonePile extends Item {
 	private void use(Hero hero) {
 		detach(hero.belongings.backpack);
 		hero.spendAndNext(1f);
-		Sample.INSTANCE.play(Assets.Sounds.DEGRADE);
+		Sample.INSTANCE.play(Assets.Sounds.BONES);
 
 		float roll = Random.Float();
 
-		// 12% 骨爪
-		if (roll < 0.12f) {
+		// 骨爪与骨矛每局最多各掉落一次
+		if (roll < 0.12f && !Dungeon.LimitedDrops.BONE_CLAW.dropped()) {
+			Dungeon.LimitedDrops.BONE_CLAW.count++;
 			Item bone = new BoneClaw();
 			bone.upgrade(Random.Int(0, 2));
 			Dungeon.level.drop(bone, hero.pos).sprite.drop();
 			GLog.p(Messages.get(this, "get_claw"));
 		}
 		// 6% 骨矛
-		else if (roll < 0.18f) {
+		else if (roll < 0.18f && !Dungeon.LimitedDrops.BONE_SPEAR.dropped()) {
+			Dungeon.LimitedDrops.BONE_SPEAR.count++;
 			Item spear = new BoneSpear();
 			spear.upgrade(Random.Int(0, 1));
 			Dungeon.level.drop(spear, hero.pos).sprite.drop();
 			GLog.p(Messages.get(this, "get_spear"));
 		}
 		// 18% 金币
-		else if (roll < 0.36f) {
+		else if (roll < 0.46f) {
 			int gold = Random.Int(100, 200);
 			Dungeon.level.drop(new Gold(gold), hero.pos).sprite.drop();
 			GLog.p(Messages.get(this, "get_gold", gold));

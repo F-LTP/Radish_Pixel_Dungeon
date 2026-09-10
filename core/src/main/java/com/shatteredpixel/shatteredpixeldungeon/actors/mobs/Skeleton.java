@@ -69,8 +69,8 @@ public class Skeleton extends Mob {
 		
 		if (cause == Chasm.class) return;
 
-		// 残骨堆 33% 掉落1个
-		if(Dungeon.hero != null && Random.Float() < 0.33f){
+		// 残骨堆 20% 掉落1个
+		if(Dungeon.hero != null && Random.Float() < 0.20f){
 			Dungeon.level.drop(new BonePile(), pos).sprite.drop();
 		}
 		
