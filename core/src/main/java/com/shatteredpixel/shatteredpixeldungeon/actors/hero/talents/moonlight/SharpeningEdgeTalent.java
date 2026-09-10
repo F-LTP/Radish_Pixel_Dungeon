@@ -2,8 +2,6 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero.talents.moonlight;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -32,9 +30,6 @@ public class SharpeningEdgeTalent {
      * @return 是否可以使用
      */
     public static boolean canUse(Hero hero, Item sacrificeItem) {
-        // 只对月华英雄生效
-        if (hero.heroClass != HeroClasses.MOONLIGHT) return false;
-
         // 检查天赋点数
         int points = hero.pointsInTalent(Talent.SHARPENING_EDGE);
         if (points <= 0) return false;
