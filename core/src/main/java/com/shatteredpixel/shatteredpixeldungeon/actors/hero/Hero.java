@@ -560,29 +560,31 @@ public class Hero extends Char {
 
 	@Override
 	public void storeInBundle( Bundle bundle ) {
+		// Jumble 变身提交也使用此锁，避免存档抓到天赋/装备半提交状态。
+		synchronized (JumbleChangeBuff.STATE_LOCK) {
+			super.storeInBundle( bundle );
 
-		super.storeInBundle( bundle );
+			bundle.put( CLASS, heroClass.name() );
+			bundle.put( SUBCLASS, subClass.name() );
+			bundle.put( ABILITY, armorAbility );
+			bundle.put( SKIN, skin );
+			bundle.put( IMP_POWER, powerOfImp);
+			Talent.storeTalentsInBundle( bundle, this );
 
-		bundle.put( CLASS, heroClass.name() );
-		bundle.put( SUBCLASS, subClass.name() );
-		bundle.put( ABILITY, armorAbility );
-		bundle.put( SKIN, skin );
-		bundle.put( IMP_POWER, powerOfImp);
-		Talent.storeTalentsInBundle( bundle, this );
+			bundle.put( ATTACK, attackSkill );
+			bundle.put( DEFENSE, defenseSkill );
 
-		bundle.put( ATTACK, attackSkill );
-		bundle.put( DEFENSE, defenseSkill );
+			bundle.put( STRENGTH, STR );
 
-		bundle.put( STRENGTH, STR );
+			bundle.put( LEVEL, lvl );
+			bundle.put( EXPERIENCE, exp );
 
-		bundle.put( LEVEL, lvl );
-		bundle.put( EXPERIENCE, exp );
+			bundle.put( HTBOOST, HTBoost );
 
-		bundle.put( HTBOOST, HTBoost );
+			bundle.put(DEADKNGITH, rectorDeadKngithDeadMode );
 
-		bundle.put(DEADKNGITH, rectorDeadKngithDeadMode );
-
-		belongings.storeInBundle( bundle );
+			belongings.storeInBundle( bundle );
+		}
 	}
 
 	@Override

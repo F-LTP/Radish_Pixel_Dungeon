@@ -737,6 +737,10 @@ public class GameScene extends PixelScene {
 	@Override
 	public synchronized void onPause() {
 		try {
+			// 变身提交在 Actor 线程中执行；保存前等待当前动作完成，避免序列化到半变身状态。
+			if (!waitForActorThread( 4500, true )) {
+				throw new IOException("timeout waiting for actor thread before save");
+			}
 			Dungeon.saveAll();
 			Badges.saveGlobal();
 			Journal.saveGlobal();
