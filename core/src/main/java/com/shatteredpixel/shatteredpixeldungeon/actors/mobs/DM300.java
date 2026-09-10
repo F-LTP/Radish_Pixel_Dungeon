@@ -685,7 +685,6 @@ public class DM300 extends Mob {
 		resistances.add(Vertigo.class);
 		resistances.add(Cripple.class);
 		resistances.add(Chill.class);
-		resistances.add(Frost.class);
 		resistances.add(Roots.class);
 		resistances.add(Slow.class);
 	}

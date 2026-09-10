@@ -19,6 +19,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Corrosion;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.curses.ITempLevelCurse;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Muramasa;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfKing;
@@ -775,6 +776,11 @@ public class Armor extends EquipableItem {
 			}
 		}
 
+		//求生刻印：已损失生命值越多，闪避越高
+		if (hasGlyph(Survival.class, owner)){
+			evasion *= Survival.evasionMultiplier(owner, procLvl());
+		}
+
 		return evasion + augment.evasionFactor(buffedLvl());
 	}
 
@@ -806,6 +812,13 @@ public class Armor extends EquipableItem {
 			speed /= 3f * RingOfArcana.enchantPowerMultiplier(owner);
 		}
 
+		//沼泽诅咒：移动速度随奥术附魔强度降低（基础30%），湿润buff生效时减速失效
+		if (hasGlyph(Swamp.class, owner)
+				&& owner.buff(Swamp.Waterlogged.class) == null) {
+			float arcana = RingOfArcana.enchantPowerMultiplier(owner);
+			speed *= Math.max(0.1f, 1f - 0.3f * arcana);
+		}
+
 		return speed;
 
 	}
@@ -832,7 +845,7 @@ public class Armor extends EquipableItem {
 		if (hero != null && hero.belongings.armor == this) {
 			GoldRadish goldRadish = hero.belongings.getItem(GoldRadish.class);
 			if(goldRadish != null){
-				return goldRadish.fixedLevel(goldRadish.buffedLvl());
+				return goldRadish.fixedLevel(goldRadish.buffedLvl()) + curseTempLevel();
 			}
 
 			RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
@@ -869,15 +882,38 @@ public class Armor extends EquipableItem {
 			if(Dungeon.hero.buff( Degrade.class ) != null){
 						return super.buffedLvl();
 					} else {
-						return hero.belongings.armor.level() + RingOfKing.updateMultiplier(Dungeon.hero);
+						return super.buffedLvl() + RingOfKing.updateMultiplier(Dungeon.hero);
 					}
 		}
 
 		if (hero != null && (isEquipped(hero) || hero.belongings.contains(this))){
 			return super.buffedLvl();
 		} else {
-			return level();
+			return level() + curseTempLevel();
 		}
+	}
+
+	/** 沉重/超轻等诅咒提供的临时等级（护甲刻印或纹章刻印）。 */
+	public int curseTempLevel(){
+		ITempLevelCurse c = curseGlyph();
+		return c != null ? c.tempLevel() : 0;
+	}
+
+	/** 沉重/超轻等诅咒对力量需求的修正。 */
+	public int curseStrReqMod(){
+		ITempLevelCurse c = curseGlyph();
+		return c != null ? c.strReqMod() : 0;
+	}
+
+	private ITempLevelCurse curseGlyph(){
+		if (glyph instanceof ITempLevelCurse){
+			return (ITempLevelCurse) glyph;
+		}
+		BrokenSeal seal = checkSeal();
+		if (seal != null && seal.getGlyph() instanceof ITempLevelCurse){
+			return (ITempLevelCurse) seal.getGlyph();
+		}
+		return null;
 	}
 
 	@Override
@@ -1091,6 +1127,8 @@ public class Armor extends EquipableItem {
 		if (masteryPotionBonus){
 			req -= 2;
 		}
+		//沉重/超轻诅咒：力量需求修正
+		req += curseStrReqMod();
 		return req;
 	}
 
@@ -1191,7 +1229,7 @@ public class Armor extends EquipableItem {
 				Repulsion.class, Camouflage.class, Flow.class };
 
 		public static final Class<?>[] rare = new Class<?>[]{
-				Affection.class, AntiMagic.class, Thorns.class };
+				Affection.class, AntiMagic.class, Thorns.class, Survival.class, HolyLight.class };
 
 		private static final float[] typeChances = new float[]{
 				50, //12.5% each
@@ -1202,7 +1240,8 @@ public class Armor extends EquipableItem {
 
 		public static final Class<?>[] curses = new Class<?>[]{
 				AntiEntropy.class, Corrosion.class, Displacement.class, Metabolism.class,
-				Multiplicity.class, Stench.class, Overgrowth.class, Bulk.class
+				Multiplicity.class, Stench.class, Overgrowth.class, Bulk.class, Swamp.class,
+				Heavy.class, Ultralight.class
 		};
 
 		public abstract int proc( Armor armor, Char attacker, Char defender, int damage);

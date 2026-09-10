@@ -1237,7 +1237,7 @@ public abstract class Char extends Actor {
         int dealt = Math.max(0, hpBefore - Math.max(0, HP));
         if (dealt > 0) {
             Char attacker = src instanceof Char ? (Char) src : null;
-            EventManager.emit(new CharFinalDamageEvent(this, attacker, src, dealt, damageType));
+            EventManager.emit(new CharFinalDamageEvent(this, attacker, src, info.getSourceItem(), dealt, damageType));
         }
 
         if (HP < 0 && src instanceof Char && alignment == Alignment.ENEMY) {
@@ -1754,7 +1754,7 @@ public abstract class Char extends Actor {
     }
 
     public enum Property {
-        BOSS(new HashSet<Class>(Arrays.asList(Grim.class, GrimTrap.class, ScrollOfRetribution.class, ScrollOfPsionicBlast.class)),
+        BOSS(new HashSet<Class>(Arrays.asList(Grim.class, GrimTrap.class, ScrollOfRetribution.class, ScrollOfPsionicBlast.class, Chill.class)),
                 new HashSet<Class>(Arrays.asList(AllyBuff.class, Dread.class))),
         MINIBOSS(new HashSet<Class>(),
                 new HashSet<Class>(Arrays.asList(AllyBuff.class, Dread.class))),

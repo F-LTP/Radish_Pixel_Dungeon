@@ -154,6 +154,7 @@ public abstract class ChampionEnemy extends Buff {
 
 		{
 			immunities.add(Burning.class); typeImmunities.add(DamageType.BURNING_STATUS);
+			immunities.add(Frost.class);
 		}
 	}
 

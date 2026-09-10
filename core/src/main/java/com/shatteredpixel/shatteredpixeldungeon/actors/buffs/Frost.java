@@ -46,11 +46,33 @@ import java.util.ArrayList;
 
 public class Frost extends FlavourBuff {
 
-	public static final float DURATION	= 10f;
+	public static final float DURATION	= 5f;
+
+	//bosses are only frozen for a shorter time
+	public static final float BOSS_DURATION	= 3f;
 
 	{
 		type = buffType.NEGATIVE;
 		announced = true;
+	}
+
+	@Override
+	protected void spend(float time) {
+		super.spend(time);
+		clampBossDuration();
+	}
+
+	@Override
+	protected void postpone(float time) {
+		super.postpone(time);
+		clampBossDuration();
+	}
+
+	private void clampBossDuration(){
+		if (target != null && Char.hasProp(target, Char.Property.BOSS)
+				&& cooldown() > BOSS_DURATION){
+			time = now() + BOSS_DURATION;
+		}
 	}
 
 	@Override
@@ -122,6 +144,8 @@ public class Frost extends FlavourBuff {
 		super.detach();
 		if (target.paralysed > 0)
 			target.paralysed--;
+		//thawing removes all remaining chill, but water chills the target again
+		Buff.detach(target, Chill.class);
 		if (Dungeon.level.water[target.pos])
 			Buff.prolong(target, Chill.class, Chill.DURATION/2f);
 	}

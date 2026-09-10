@@ -32,7 +32,9 @@ import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ElmoParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Swamp;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.ChargrilledMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.FrozenCarpaccio;
@@ -212,6 +214,20 @@ public class Burning extends Buff implements Hero.Doom {
 				}
 			}
 		}
+
+		//沼泽诅咒：被引燃的持续时间随护甲等级减少（基础减半，每级多减10%），+5时完全免疫点燃
+		if (ch instanceof Hero) {
+			Armor worn = ((Hero) ch).belongings.armor();
+			if (worn != null && worn.hasGlyph(Swamp.class, ch)) {
+				int swampLvl = Math.max(0, worn.procLvl());
+				if (swampLvl >= 5) {
+					detach();
+					return;
+				}
+				duration *= (1f - (0.5f + 0.1f * swampLvl));
+			}
+		}
+
 		left = duration;
 	}
 
