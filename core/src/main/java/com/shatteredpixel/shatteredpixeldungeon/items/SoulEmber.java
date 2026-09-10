@@ -39,7 +39,7 @@ import com.watabou.utils.Point;
 /**
  * 灵魂余烬 (Soul Ember)
  * 怨灵/缠怨灵 35%/70% 概率掉落 1～3 个；诅咒玫瑰和尸尘生成的怨灵不掉落。
- * 可分解为1点炼金能量。
+ * 可分解为2点炼金能量。
  */
 public class SoulEmber extends Item {
 	{
