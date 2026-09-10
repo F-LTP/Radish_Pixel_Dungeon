@@ -63,10 +63,14 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Annoying;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Dazzling;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Displacing;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.DoubleEdged;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Explosive;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Friendly;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Heavy;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Polarized;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Sacrificial;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Temporal;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Ultralight;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Wayward;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blocking;
@@ -75,10 +79,12 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Chilli
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Corrupting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Elastic;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Jealousy;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Survival;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Unstable;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Vampiric;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
@@ -118,7 +124,9 @@ public class ElementalStrike extends ArmorAbility {
 		effectTypes.put(Unstable.class,     MagicMissile.RAINBOW_CONE);
 		effectTypes.put(Corrupting.class,   MagicMissile.SHADOW_CONE);
 		effectTypes.put(Grim.class,         MagicMissile.SHADOW_CONE);
+		effectTypes.put(Jealousy.class,     MagicMissile.PURPLE_CONE);
 		effectTypes.put(Vampiric.class,     MagicMissile.BLOOD_CONE);
+		effectTypes.put(Survival.class,     MagicMissile.WARD_CONE);
 
 		effectTypes.put(Annoying.class,     MagicMissile.SHADOW_CONE);
 		effectTypes.put(Displacing.class,   MagicMissile.SHADOW_CONE);
@@ -128,6 +136,10 @@ public class ElementalStrike extends ArmorAbility {
 		effectTypes.put(Wayward.class,      MagicMissile.SHADOW_CONE);
 		effectTypes.put(Polarized.class,    MagicMissile.SHADOW_CONE);
 		effectTypes.put(Friendly.class,     MagicMissile.SHADOW_CONE);
+		effectTypes.put(Temporal.class,     MagicMissile.SHADOW_CONE);
+		effectTypes.put(DoubleEdged.class,  MagicMissile.SHADOW_CONE);
+		effectTypes.put(Heavy.class,        MagicMissile.SHADOW_CONE);
+		effectTypes.put(Ultralight.class,   MagicMissile.SHADOW_CONE);
 
 		effectTypes.put(null,               MagicMissile.MAGIC_MISS_CONE);
 	}

@@ -43,17 +43,22 @@ import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfKing;
+import com.shatteredpixel.shatteredpixeldungeon.items.curses.ITempLevelCurse;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ParchmentScrap;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Annoying;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Dazzling;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Displacing;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.DoubleEdged;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Explosive;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Friendly;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Heavy;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Polarized;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Sacrificial;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Stubbornness;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Temporal;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Ultralight;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Wayward;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blocking;
@@ -64,6 +69,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Corrup
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Elastic;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Euphoria;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Jealousy;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lamprey;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
@@ -72,6 +78,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Resona
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Seeking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Striking;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Survival;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Unstable;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Vampiric;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.WetEnchantment;
@@ -265,12 +272,28 @@ abstract public class Weapon extends KindOfWeapon {
 			ACC /= 5;
 		}
 
+		//求生附魔：已损失生命值越多，命中越高
+		if (hasEnchant(Survival.class, owner)){
+			ACC *= Survival.accuracyMultiplier(owner, Math.max(0, buffedLvl()));
+		}
+
 		return encumbrance > 0 ? (float)(ACC / Math.pow( 1.5, encumbrance )) : ACC;
 	}
 	
 	@Override
 	public float delayFactor( Char owner ) {
-		return baseDelay(owner) * (1f/speedMultiplier(owner));
+		float delay = baseDelay(owner) * (1f/speedMultiplier(owner));
+
+		//时速诅咒：等级提高加快效果的触发概率（每级+2.5%，最高75%），
+		//时间倍率n受奥术戒指附魔强度影响，时间变为1/n（加快）或n（减慢）
+		if (hasEnchant(Temporal.class, owner)){
+			int level = Math.max(0, buffedLvl());
+			float fastChance = Math.min(0.75f, 0.5f + 0.025f * level);
+			float n = 2f * RingOfArcana.enchantPowerMultiplier(owner);
+			delay *= (Random.Float() < fastChance ? 1f/n : n);
+		}
+
+		return delay;
 	}
 
 	protected float baseDelay( Char owner ){
@@ -337,6 +360,8 @@ abstract public class Weapon extends KindOfWeapon {
 		if (masteryPotionBonus){
 			req -= 2;
 		}
+		//沉重/超轻诅咒：力量需求修正
+		req += curseStrReqMod();
 		return req;
 	}
 
@@ -357,12 +382,30 @@ abstract public class Weapon extends KindOfWeapon {
 	}
 
 	public int buffedLvl(){
+		int lvl;
 		if (Dungeon.hero != null && Dungeon.hero.buff( Degrade.class ) != null
 				&& (isEquipped( Dungeon.hero ) || Dungeon.hero.belongings.contains( this ))) {
-			return Degrade.reduceLevel(level());
+			lvl = Degrade.reduceLevel(level());
 		} else {
-			return level();
+			lvl = level();
 		}
+		return lvl + curseTempLevel();
+	}
+
+	/** 沉重/超轻等诅咒提供的临时等级。 */
+	public int curseTempLevel(){
+		if (enchantment instanceof ITempLevelCurse){
+			return ((ITempLevelCurse) enchantment).tempLevel();
+		}
+		return 0;
+	}
+
+	/** 沉重/超轻等诅咒对力量需求的修正。 */
+	public int curseStrReqMod(){
+		if (enchantment instanceof ITempLevelCurse){
+			return ((ITempLevelCurse) enchantment).strReqMod();
+		}
+		return 0;
 	}
 	
 	@Override
@@ -504,7 +547,7 @@ abstract public class Weapon extends KindOfWeapon {
 				Lucky.class, Projecting.class, Unstable.class, Combos.class, Seeking.class};
 
 		public static final Class<?>[] rare = new Class<?>[]{
-				Corrupting.class, Grim.class, Vampiric.class, Striking.class, Euphoria.class};
+				Corrupting.class, Grim.class, Vampiric.class, Striking.class, Euphoria.class, Survival.class, Jealousy.class};
 
 		public static final float[] typeChances = new float[]{
 				50, //12.5% each
@@ -514,7 +557,8 @@ abstract public class Weapon extends KindOfWeapon {
 		
 		public static final Class<?>[] curses = new Class<?>[]{
 				Annoying.class, Displacing.class, Dazzling.class, Explosive.class,
-				Sacrificial.class, Wayward.class, Polarized.class, Friendly.class, Stubbornness.class
+				Sacrificial.class, Wayward.class, Polarized.class, Friendly.class, Stubbornness.class,
+				Temporal.class, DoubleEdged.class, Heavy.class, Ultralight.class
 		};
 		
 			

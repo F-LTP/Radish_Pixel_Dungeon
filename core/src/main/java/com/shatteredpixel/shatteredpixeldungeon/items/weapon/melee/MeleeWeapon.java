@@ -239,7 +239,7 @@ public class MeleeWeapon extends Weapon {
 		if (hero != null && hero.belongings.weapon == this) {
 			GoldRadish goldRadish = hero.belongings.getItem(GoldRadish.class);
 			if(goldRadish != null){
-				return goldRadish.fixedLevel(goldRadish.buffedLvl());
+				return goldRadish.fixedLevel(goldRadish.buffedLvl()) + curseTempLevel();
 			}
 
 			RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
@@ -274,7 +274,7 @@ public class MeleeWeapon extends Weapon {
 			if(Dungeon.hero.buff( Degrade.class ) != null){
 						return super.buffedLvl();
 					} else {
-						return hero.belongings.weapon.level() + RingOfKing.updateMultiplier(Dungeon.hero);
+						return super.buffedLvl() + RingOfKing.updateMultiplier(Dungeon.hero);
 					}
 		}
 
@@ -282,7 +282,7 @@ public class MeleeWeapon extends Weapon {
 		if (hero != null && (isEquipped(hero) || hero.belongings.contains(this))){
 			return super.buffedLvl();
 		} else {
-			return level();
+			return level() + curseTempLevel();
 		}
 	}
 

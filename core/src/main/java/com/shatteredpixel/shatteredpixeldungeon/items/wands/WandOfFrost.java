@@ -102,9 +102,9 @@ public class WandOfFrost extends DamageWand {
 
 			if (ch.isAlive()){
 				if (Dungeon.level.water[ch.pos])
-					Buff.affect(ch, Chill.class, 4+buffedLvl());
+					Chill.chillOrFreeze(ch, 4+buffedLvl());
 				else
-					Buff.affect(ch, Chill.class, 2+buffedLvl());
+					Chill.chillOrFreeze(ch, 2+buffedLvl());
 			}
 		} else {
 			Dungeon.level.pressCell(bolt.collisionPos);
@@ -127,13 +127,11 @@ public class WandOfFrost extends DamageWand {
 
 		if (chill != null) {
 
-			//1/9 at 2 turns of chill, scaling to 9/9 at 10 turns
+			//1/9 at 2 turns of chill, scaling with the chill applied
 			float procChance = ((int)Math.floor(chill.cooldown()) - 1)/9f;
 			procChance *= procChanceMultiplier(attacker);
 
 			if (Random.Float() < procChance) {
-
-				float powerMulti = Math.max(1f, procChance);
 
 				//need to delay this through an actor so that the freezing isn't broken by taking damage from the staff hit.
 				new FlavourBuff() {
@@ -142,7 +140,7 @@ public class WandOfFrost extends DamageWand {
 					}
 
 					public boolean act() {
-						Buff.affect(target, Frost.class, Math.round(Frost.DURATION * powerMulti));
+						Buff.affect(target, Frost.class, Frost.DURATION);
 						return super.act();
 					}
 				}.attachTo(defender);
