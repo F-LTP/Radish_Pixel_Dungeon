@@ -23,23 +23,19 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Guard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Jailer;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Prisoner;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.RoyalGuard;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Torturer;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 
 import java.util.ArrayList;
@@ -47,7 +43,8 @@ import java.util.ArrayList;
 /**
  * 律法残页 (Law Fragment)
  * 监狱守卫/拷问者/囚犯 15%/20%/30% 掉落。
- * 阅读之后，使视野内的所有狱警（监狱守卫、拷问者、新boss）和犯人（囚犯、天狗、副本boss）麻痹4回合。
+ * 阅读之后，使视野内的所有狱警（监狱守卫、拷问者、新boss）和犯人（囚犯、天狗、副本boss）麻痹4回合，
+ * 并将其沿远离自身的方向击退5格。
  * 可分解为6点炼金能量。
  */
 public class LawFragment extends Item {
@@ -56,6 +53,7 @@ public class LawFragment extends Item {
 
 	private static final float TIME_TO_READ = 1f;
 	private static final float PARALYZE_DURATION = 4f;
+	private static final int KNOCKBACK_DIST = 5;
 
 	{
 		defaultAction = AC_READ;
@@ -93,38 +91,41 @@ public class LawFragment extends Item {
 
 		Sample.INSTANCE.play(Assets.Sounds.READ);
 		curUser.sprite.emitter().start(Speck.factory(Speck.NOTE), 0.1f, 10);
+		Buff.affect(curUser, Light.class, 10f);
+		if (curUser.sprite != null) new Flare(6, 32).color(0xFFFFFF, true).show(curUser.sprite, 2f);
 
-		// 使视野内的所有狱警与犯人麻痹
+		// 使视野内的所有狱警与犯人麻痹并将其击退5格
 		int paralyzed = 0;
 		for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
 			if (mob.isAlive()
 					&& Dungeon.level.heroFOV[mob.pos]
 					&& isGuardOrPrisoner(mob)) {
 				Buff.affect(mob, Paralysis.class, PARALYZE_DURATION);
-				if (mob.sprite != null) {
-					mob.sprite.showStatus(CharSprite.NEUTRAL, Messages.get(this, "paralyzed"));
-				}
 				paralyzed++;
-			}
-		}
 
-		if (paralyzed > 0) {
-			GLog.i(Messages.get(this, "effect", paralyzed));
-		} else {
-			GLog.i(Messages.get(this, "no_target"));
+				knockBackAway(mob);
+			}
 		}
 	}
 
-	/**
-	 * 是否为律法残页影响范围内的狱警或犯人。
-	 */
+	protected void knockBackAway(Mob mob) {
+		if (mob.rooted || mob.properties().contains(Char.Property.IMMOVABLE)) {
+			return;
+		}
+		// 从英雄指向敌人的方向
+		Ballistica heroToMob = new Ballistica(curUser.pos, mob.pos, Ballistica.PROJECTILE);
+		int mobIndex = heroToMob.path.indexOf(mob.pos);
+		// 敌人须位于轨迹上，且轨迹尽头在该方向还有延伸空间
+		if (mobIndex < 0 || mobIndex >= heroToMob.path.size() - 1) {
+			return;
+		}
+		int targetPos = heroToMob.path.get(heroToMob.path.size() - 1);
+		Ballistica knockbackPath = new Ballistica(mob.pos, targetPos, Ballistica.MAGIC_BOLT);
+		WandOfBlastWave.throwChar(mob, knockbackPath, KNOCKBACK_DIST, true, true, this);
+	}
+
 	protected boolean isGuardOrPrisoner(Mob mob) {
-		return mob instanceof Guard
-				|| mob instanceof Jailer
-				|| mob instanceof RoyalGuard
-				|| mob instanceof Torturer
-				|| mob instanceof Prisoner
-				|| mob instanceof Tengu;
+		return mob.properties().contains(Char.Property.JAIL_INHABITANT);
 	}
 
 	@Override

@@ -1776,7 +1776,8 @@ public abstract class Char extends Actor {
 
         HEADLESS,
         EYES,
-        GNOLL;
+        GNOLL,
+        JAIL_INHABITANT;
 
         private HashSet<Class> resistances;
         private HashSet<Class> immunities;

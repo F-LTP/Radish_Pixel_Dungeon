@@ -82,7 +82,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SentryRoom;
 import com.shatteredpixel.shatteredpixeldungeon.effects.*;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.DogLeg;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
@@ -1387,6 +1389,29 @@ public abstract class Mob extends Char {
 		target = cell;
 	}
 
+	/**
+	 * 返回距此怪物最近、且在吸引范围(DogLeg.LURE_RANGE)内的一根活跃狗腿诱饵的位置；
+	 * 没有则返回 -1。只有敌对怪物会被狗腿吸引。
+	 */
+	public int nearestLure() {
+		if (alignment != Alignment.ENEMY) return -1;
+
+		int nearest = -1;
+		int bestDist = Integer.MAX_VALUE;
+		for (Heap heap : Dungeon.level.heaps.valueList()) {
+			for (Item item : heap.items) {
+				if (item instanceof DogLeg && ((DogLeg) item).lure != null) {
+					int d = Dungeon.level.distance(pos, heap.pos);
+					if (d <= DogLeg.LURE_RANGE && d < bestDist) {
+						bestDist = d;
+						nearest = heap.pos;
+					}
+				}
+			}
+		}
+		return nearest;
+	}
+
 	public String description() {
 		return Messages.get(this, "desc");
 	}
@@ -1570,7 +1595,11 @@ public abstract class Mob extends Char {
 
 			} else {
 
-				if (enemyInFOV) {
+				//附近的狗腿诱饵优先于追捕玩家：有诱饵时走向最近的诱饵
+				int lure = nearestLure();
+				if (lure != -1) {
+					target = lure;
+				} else if (enemyInFOV) {
 					target = enemy.pos;
 				} else if (enemy == null) {
 					sprite.showLost();

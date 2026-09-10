@@ -59,6 +59,7 @@ public class Guard extends Mob {
 		lootChance = 0.2f; //by default, see lootChance()
 
 		properties.add(Property.UNDEAD);
+		properties.add(Property.JAIL_INHABITANT);
 		
 		HUNTING = new Hunting();
 	}
