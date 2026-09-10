@@ -59,6 +59,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.quest.MetalShard;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
@@ -172,6 +173,7 @@ public abstract class Recipe {
 	};
 	
 	private static Recipe[] oneIngredientRecipes = new Recipe[]{
+		new MetalToLiquidMetal(),
 		new Scroll.ScrollToStone(),
 		new ExoticPotion.PotionToExotic(),
 		new ExoticScroll.ScrollToExotic(),
@@ -195,6 +197,10 @@ public abstract class Recipe {
 		new TrinketCatalyst.Recipe(),
 		new Trinket.UpgradeTrinket()
 	};
+
+	private static class MetalToLiquidMetal extends SimpleRecipe {
+		{ inputs = new Class[]{MetalShard.class}; inQuantity = new int[]{1}; cost = 2; output = LiquidMetal.class; outQuantity = 80; }
+	}
 	
 	private static Recipe[] twoIngredientRecipes = new Recipe[]{
 		new Blandfruit.CookFruit(),
@@ -267,5 +273,4 @@ public abstract class Recipe {
 		}
 	}
 }
-
 
