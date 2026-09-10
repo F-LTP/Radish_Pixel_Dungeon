@@ -248,7 +248,7 @@ public class Hero extends Char {
 	}
 
 	/** 设置圆球朝向角度（0-360，自动归一化）。 */
-	private void sphereAngle( float v ){
+	public void sphereAngle( float v ){
 		if (!isSphereSkin()) return;
 		SphereOrientation o = buff( SphereOrientation.class );
 		if (o == null){

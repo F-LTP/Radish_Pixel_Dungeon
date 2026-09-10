@@ -31,6 +31,9 @@ public class SphereSprite extends HeroSprite {
 	// 是否处于"滚动冻结"状态：移动结束后停留在当前滚动帧，而非回退到待机闪烁
 	private boolean holdRun = false;
 
+	// 最近一次旋转/滚动的一次性动画（冻结逻辑据此判断；run 循环动画旧路径仍保留）
+	private Animation rollAnim = null;
+
 	public SphereSprite() {
 		super();
 	}
@@ -81,6 +84,16 @@ public class SphereSprite extends HeroSprite {
 		// 以便滚动动画有更充足的时间播放。
 		if (motion != null) {
 			motion.interval *= 1.5f;
+
+			// 移动只沿一个方向（顺时针）滚动：1 格恰好推进 4 个滚动帧 = 144°。
+			// 逻辑角度直接锁定为目标角，不依赖运行时帧时序，保证每次移动角度确定。
+			if (ch instanceof Hero && ((Hero) ch).isSphereSkin()){
+				Hero hero = (Hero) ch;
+				float fromAngle = hero.sphereAngle();
+				float toAngle = (fromAngle + 144f) % 360f;
+				hero.sphereAngle( toAngle );
+				spin( fromAngle, toAngle, motion.interval );
+			}
 		}
 	}
 
@@ -94,6 +107,20 @@ public class SphereSprite extends HeroSprite {
 	 * @param toAngle   目标角度（0-360；0 为正确角度）
 	 */
 	public void spin( float fromAngle, float toAngle ){
+		spin( fromAngle, toAngle, 0f );
+	}
+
+	/**
+	 * 原地旋转/滚动动画：从 {@code fromAngle} 沿最短弧旋转到 {@code toAngle}。
+	 * <p>根据要旋转的角度差，从移动动画（滚动 run）的帧中取出对应的一段，动态拼成一个
+	 * 一次性播放的动画。{@code duration <= 0} 时沿用 run 的帧率；否则让动画总时长贴合
+	 * {@code duration}（用于移动中滚动与位移同步）。第 0 帧即正确角度（0°）。</p>
+	 *
+	 * @param fromAngle 起始角度（0-360）
+	 * @param toAngle   目标角度（0-360；0 为正确角度）
+	 * @param duration  动画总时长（秒），&gt; 0 时用于贴合位移时长
+	 */
+	public void spin( float fromAngle, float toAngle, float duration ){
 
 		int fromIdx = angleToFrame( fromAngle );
 		int toIdx   = angleToFrame( toAngle );
@@ -113,16 +140,20 @@ public class SphereSprite extends HeroSprite {
 			return;
 		}
 
-		// 按最短弧方向取出 run 帧的一段（含起点与终点），拼成一次性动画，沿用移动动画 fps
+		// 按最短弧方向取出 run 帧的一段（含起点与终点），拼成一次性动画
 		RectF[] cells = new RectF[steps + 1];
 		int idx = fromIdx;
 		for (int i = 0; i <= steps; i++){
 			cells[i] = run.frames[idx];
 			idx = (idx + dir + 10) % 10;
 		}
-		Animation rotate = new Animation( Math.round( 1f / run.delay ), false ).frames( cells );
+		int fps = duration > 0f
+				? Math.max( 1, Math.round( (steps + 1) / duration ) )
+				: Math.round( 1f / run.delay );
+		Animation rotate = new Animation( fps, false ).frames( cells );
 
 		flipHorizontal = dir < 0;
+		rollAnim = rotate;
 		play( rotate, true );
 	}
 
@@ -156,11 +187,11 @@ public class SphereSprite extends HeroSprite {
 	@Override
 	public void idle() {
 		// 移动结束后不切换到待机闪烁，而是冻结在当前的滚动帧。
-		if (curAnim == run) {
+		if (curAnim == run || (rollAnim != null && curAnim == rollAnim)) {
 			holdRun = true;
-			// 滚动停止时，让逻辑角度跟随视觉定格帧（角度 = 帧 × 36°）。
-			// 这样角度为 0 时一定显示第 0 帧，不会停在最后一帧，且无需打断自然的滚动定格。
-			if (ch instanceof Hero && ((Hero) ch).isSphereSkin()){
+			// run 旧路径：滚动停止时让逻辑角度跟随视觉定格帧（角度 = 帧 × 36°），
+			// 保证角度为 0 时一定显示第 0 帧。旋转/滚动一次性动画的角度已在发起时锁定，无需改写。
+			if (curAnim == run && ch instanceof Hero && ((Hero) ch).isSphereSkin()){
 				((Hero) ch).sphereAngleFromFrame( curFrame );
 			}
 			return;
@@ -192,7 +223,7 @@ public class SphereSprite extends HeroSprite {
 	public void update() {
 		// 持续冻结滚动帧：即使 paralysis 等状态清除了 paused 标志，
 		// 只要仍处于 holdRun，就保持动画停在当前帧。
-		if (holdRun && curAnim == run) {
+		if (holdRun && (curAnim == run || (rollAnim != null && curAnim == rollAnim))) {
 			paused = true;
 		}
 		super.update();
