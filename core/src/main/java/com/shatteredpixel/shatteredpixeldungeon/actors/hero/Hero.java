@@ -2093,7 +2093,7 @@ public class Hero extends Char {
 			if(wep != null){
 				int dmgRoll = Integer.MAX_VALUE;
 				for (int i = 0; i < riverGlass.judgeTimes(); i++){
-					int roll = (i == 0) ? wep.damageRoll(this) : Char.combatRoll(wep.min(), wep.max());
+					int roll = wep.damageRoll(this);
 					dmgRoll = Math.min(dmgRoll, roll);
 				}
 				int dmg = dmgRoll;

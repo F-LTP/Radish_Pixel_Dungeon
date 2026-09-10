@@ -38,6 +38,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
+import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -529,6 +530,16 @@ public class SpiritBow extends Weapon {
 		public int damageRoll(Char owner) {
 			return SpiritBow.this.damageRoll(owner);
 		}
+
+		@Override
+		public int min(){
+			return SpiritBow.this.min();
+		}
+
+		@Override
+		public int max(){
+			return SpiritBow.this.max();
+		}
 		
 		@Override
 		public boolean hasEnchant(Class<? extends Enchantment> type, Char owner) {
@@ -628,7 +639,9 @@ public class SpiritBow extends Weapon {
 
 
 										//射技决斗 T3
-										int bonusTurns = Dungeon.hero.hasTalent(Talent.SHARED_UPGRADES) ? hero.belongings.weapon().buffedLvl() : 0;
+										KindOfWeapon equippedWeapon = hero.belongings.attackingWeapon();
+										int bonusTurns = Dungeon.hero.hasTalent(Talent.SHARED_UPGRADES)
+												&& equippedWeapon != null ? equippedWeapon.buffedLvl() : 0;
 										if (enemy instanceof Mob && ((Mob) enemy).surprisedBy(hero)
 										&& hero.pointsInTalent(Talent.BOW_DULES)>=3) {
 											if(hero.buff(SnipersMark.class) == null){
