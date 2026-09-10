@@ -1126,7 +1126,9 @@ public class Hero extends Char {
 
 		if (wep != null){
 			// mod by DoggingDog on 2024-11-13, 4 Seeking enchantment
-			if(enemy.buff(Seeking.SeekingBuff.class) != null){
+			// 追寻附魔：只有当前武器就是施加标记的那把武器时，才能无视距离追击
+			Seeking.SeekingBuff seeking = enemy.buff(Seeking.SeekingBuff.class);
+			if(seeking != null && seeking.isBoundWeapon(wep)){
 				return true;
 			}
 			//
