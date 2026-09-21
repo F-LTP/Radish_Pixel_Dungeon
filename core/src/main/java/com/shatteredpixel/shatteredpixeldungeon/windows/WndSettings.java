@@ -450,6 +450,7 @@ public class WndSettings extends WndTabbed {
 		CheckBox chkVibrate;
 		CheckBox origri_map;
 		CheckBox origri_normal;
+		CheckBox chkGraphicStats;
 
 		@Override
 		protected void createChildren() {
@@ -703,6 +704,16 @@ public class WndSettings extends WndTabbed {
 			};
 			origri_normal.checked(SPDSettings.NORMAL_SKIN());
 			add(origri_normal);
+
+			chkGraphicStats = new CheckBox(Messages.get(this, "graphic_stats")){
+				@Override
+				protected void onClick() {
+					super.onClick();
+					SPDSettings.graphicStats(checked());
+				}
+			};
+			chkGraphicStats.checked(SPDSettings.graphicStats());
+			add(chkGraphicStats);
 		}
 
 		@Override
@@ -745,13 +756,15 @@ public class WndSettings extends WndTabbed {
 				chkVibrate.setRect(chkFont.right()+2, chkFont.top(), width/2-1, BTN_HEIGHT);
 				origri_map.setRect(0, chkVibrate.bottom(), width/2-1, BTN_HEIGHT);
 				origri_normal.setRect(origri_map.right()+2, origri_map.top(), width/2-1, BTN_HEIGHT);
+				chkGraphicStats.setRect(0, origri_normal.bottom(), width/2-1, BTN_HEIGHT);
             } else {
 				chkFont.setRect(0, sep2.y + 1 + GAP, width, BTN_HEIGHT);
 				chkVibrate.setRect(0, chkFont.bottom() + GAP, width, BTN_HEIGHT);
 				origri_map.setRect(0, chkVibrate.bottom() + GAP, width, BTN_HEIGHT);
 				origri_normal.setRect(0, origri_map.bottom() + GAP, width, BTN_HEIGHT);
+				chkGraphicStats.setRect(0, origri_normal.bottom() + GAP, width, BTN_HEIGHT);
             }
-            height = origri_normal.bottom();
+            height = chkGraphicStats.bottom();
         }
 
 	}

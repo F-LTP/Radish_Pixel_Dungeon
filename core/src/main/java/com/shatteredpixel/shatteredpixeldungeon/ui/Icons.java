@@ -64,6 +64,19 @@ public enum Icons {
 	CALENDAR,
 	CHEVRON,
 
+	//图形化属性图标, 12x12, 位于 icons.png 第 128 行
+	ABILITY_STR,
+	ABILITY_HP,
+	ABILITY_EXP,
+	ABILITY_GOLD,
+	ABILITY_DEPTH,
+	ABILITY_SEED,
+	ABILITY_HUNGER,
+	ABILITY_TURNS,
+	ABILITY_TIMES,
+	ABILITY_CRIT,
+	ABILITY_CRITDMG,
+
 	//misc larger icons, mainly used for buttons, tabs, and journal, spacing for 16x16
 	TARGET,
 	INFO,
@@ -233,6 +246,41 @@ public enum Icons {
 				break;
 			case CHEVRON:
 				icon.frame( icon.texture.uvRectBySize( 240, 16, 13, 10 ) );
+				break;
+
+			//图形化属性图标, 12x12, y = 128
+			case ABILITY_STR:
+				icon.frame( icon.texture.uvRectBySize( 0, 128, 12, 12 ) );
+				break;
+			case ABILITY_HP:
+				icon.frame( icon.texture.uvRectBySize( 12, 128, 12, 12 ) );
+				break;
+			case ABILITY_EXP:
+				icon.frame( icon.texture.uvRectBySize( 24, 128, 12, 12 ) );
+				break;
+			case ABILITY_GOLD:
+				icon.frame( icon.texture.uvRectBySize( 36, 128, 12, 12 ) );
+				break;
+			case ABILITY_DEPTH:
+				icon.frame( icon.texture.uvRectBySize( 48, 128, 12, 12 ) );
+				break;
+			case ABILITY_SEED:
+				icon.frame( icon.texture.uvRectBySize( 60, 128, 12, 12 ) );
+				break;
+			case ABILITY_HUNGER:
+				icon.frame( icon.texture.uvRectBySize( 72, 128, 12, 12 ) );
+				break;
+			case ABILITY_TURNS:
+				icon.frame( icon.texture.uvRectBySize( 84, 128, 12, 12 ) );
+				break;
+			case ABILITY_TIMES:
+				icon.frame( icon.texture.uvRectBySize( 96, 128, 12, 12 ) );
+				break;
+			case ABILITY_CRIT:
+				icon.frame( icon.texture.uvRectBySize( 108, 128, 12, 12 ) );
+				break;
+			case ABILITY_CRITDMG:
+				icon.frame( icon.texture.uvRectBySize( 120, 128, 12, 12 ) );
 				break;
 
 			case TARGET:
