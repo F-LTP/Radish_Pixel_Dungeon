@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Identification;
+import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
@@ -36,120 +37,105 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.IconTitle;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.audio.Sample;
-import com.watabou.utils.Random;
-import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
+//Reading this scroll lets the reader choose a type of item in their backpack
+//(equipment, scrolls, potions or rings) and identifies up to 4 such items.
 public class ScrollOfDivination extends ExoticScroll {
-	
+
 	{
 		icon = ItemSpriteSheet.Icons.SCROLL_DIVINATE;
 	}
-	
+
 	@Override
 	public void doRead() {
 
 		detach(curUser.belongings.backpack);
 		curUser.sprite.parent.add( new Identification( curUser.sprite.center().offset( 0, -16 ) ) );
-		
+
 		Sample.INSTANCE.play( Assets.Sounds.READ );
-		
-		HashSet<Class<? extends Potion>> potions = Potion.getUnknown();
-		HashSet<Class<? extends Scroll>> scrolls = Scroll.getUnknown();
-		HashSet<Class<? extends Ring>> rings = Ring.getUnknown();
-		
-		int total = potions.size() + scrolls.size() + rings.size();
-		
-		ArrayList<Item> IDed = new ArrayList<>();
-		int left = 4;
-		
-		float[] baseProbs = new float[]{3, 3, 3};
-		float[] probs = baseProbs.clone();
-		
-		while (left > 0 && total > 0) {
-			switch (Random.chances(probs)) {
-				default:
-					probs = baseProbs.clone();
-					continue;
-				case 0:
-					if (potions.isEmpty()) {
-						probs[0] = 0;
-						continue;
-					}
-					probs[0]--;
-					Potion p = Reflection.newInstance(Random.element(potions));
-					p.identify();
-					IDed.add(p);
-					potions.remove(p.getClass());
-					break;
-				case 1:
-					if (scrolls.isEmpty()) {
-						probs[1] = 0;
-						continue;
-					}
-					probs[1]--;
-					Scroll s = Reflection.newInstance(Random.element(scrolls));
-					s.identify();
-					IDed.add(s);
-					scrolls.remove(s.getClass());
-					break;
-				case 2:
-					if (rings.isEmpty()) {
-						probs[2] = 0;
-						continue;
-					}
-					probs[2]--;
-					Ring r = Reflection.newInstance(Random.element(rings));
-					r.setKnown();
-					IDed.add(r);
-					rings.remove(r.getClass());
-					break;
-			}
-			left --;
-			total --;
-		}
 
-		if (left == 4){
-			GLog.n( Messages.get(this, "nothing_left") );
-		} else {
-			GameScene.show(new WndDivination(IDed));
-		}
-
-		readAnimation(true);
 		identify();
+		readAnimation(true);
+
+		GameScene.show( new WndOptions(new ItemSprite(this),
+				Messages.titleCase(name()),
+				Messages.get(this, "prompt"),
+				Messages.get(this, "equipment"),
+				Messages.get(this, "scroll"),
+				Messages.get(this, "potion"),
+				Messages.get(this, "ring") ) {
+			@Override
+			protected void onSelect( int index ) {
+
+				ArrayList<Item> ided;
+				switch (index) {
+					case 0: ided = identifyItems(EquipableItem.class, true); break;
+					case 1: ided = identifyItems(Scroll.class, false); break;
+					case 2: ided = identifyItems(Potion.class, false); break;
+					default: ided = identifyItems(Ring.class, false); break;
+				}
+
+				if (ided.isEmpty()) {
+					GLog.n( Messages.get(ScrollOfDivination.class, "nothing_left") );
+				} else {
+					GLog.p( Messages.get(ScrollOfDivination.class, "identified", ided.size()) );
+					GameScene.show( new WndDivination(ided) );
+				}
+			}
+		});
 	}
-	
+
+	//identifies up to 4 unidentified items of the given type in the backpack
+	private ArrayList<Item> identifyItems(Class<?> type, boolean excludeRings) {
+		ArrayList<Item> ided = new ArrayList<>();
+		for (Item item : curUser.belongings.backpack.items) {
+			if (ided.size() >= 4) {
+				break;
+			}
+			if (item == null || item.isIdentified() || !type.isInstance(item)) {
+				continue;
+			}
+			if (excludeRings && item instanceof Ring) {
+				continue;
+			}
+			item.identify();
+			ided.add(item);
+		}
+		return ided;
+	}
+
 	private class WndDivination extends Window {
-		
+
 		private static final int WIDTH = 120;
-		
+
 		WndDivination(ArrayList<Item> IDed ){
 			IconTitle cur = new IconTitle(new ItemSprite(ScrollOfDivination.this),
 					Messages.titleCase(Messages.get(ScrollOfDivination.class, "name")));
 			cur.setRect(0, 0, WIDTH, 0);
 			add(cur);
-			
+
 			RenderedTextBlock msg = PixelScene.renderTextBlock(Messages.get(this, "desc"), 6);
 			msg.maxWidth(120);
 			msg.setPos(0, cur.bottom() + 2);
 			add(msg);
-			
+
 			float pos = msg.bottom() + 10;
-			
+
 			for (Item i : IDed){
-				
+
 				cur = new IconTitle(i);
 				cur.setRect(0, pos, WIDTH, 0);
 				add(cur);
 				pos = cur.bottom() + 2;
-				
+
 			}
-			
+
 			resize(WIDTH, (int)pos);
 		}
-		
+
 	}
 }
