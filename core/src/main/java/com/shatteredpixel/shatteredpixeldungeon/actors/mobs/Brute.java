@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SwordSlashEffect;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -69,6 +70,14 @@ public class Brute extends Mob {
 	@Override
 	public int drRoll() {
 		return super.drRoll() + Char.combatRoll(0, 8);
+	}
+
+	@Override
+	public int attackProc(Char enemy, int damage) {
+		damage = super.attackProc(enemy, damage);
+		// CC0 斩击特效：豺狼蛮兵攻击时顺着攻击方向在目标身上播放
+		SwordSlashEffect.showOn(this, enemy);
+		return damage;
 	}
 
 	@Override
