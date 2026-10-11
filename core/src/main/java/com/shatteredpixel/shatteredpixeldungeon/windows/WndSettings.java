@@ -421,6 +421,7 @@ public class WndSettings extends WndTabbed {
 		CheckBox origri_map;
 		RedButton btnStatusStyle;
 		CheckBox chkDetourPrompt;
+		CheckBox chkGraphicStats;
 
 		@Override
 		protected void createChildren() {
@@ -698,6 +699,16 @@ public class WndSettings extends WndTabbed {
 			};
 			chkDetourPrompt.checked(SPDSettings.detourPrompt());
 			add(chkDetourPrompt);
+
+			chkGraphicStats = new CheckBox(Messages.get(this, "graphic_stats")){
+				@Override
+				protected void onClick() {
+					super.onClick();
+					SPDSettings.graphicStats(checked());
+				}
+			};
+			chkGraphicStats.checked(SPDSettings.graphicStats());
+			add(chkGraphicStats);
 		}
 
 		private String statusStyleLabel(){
@@ -761,14 +772,16 @@ public class WndSettings extends WndTabbed {
 				origri_map.setRect(0, chkVibrate.bottom(), width/2-1, BTN_HEIGHT);
 				btnStatusStyle.setRect(origri_map.right()+2, origri_map.top(), width/2-1, BTN_HEIGHT);
 				chkDetourPrompt.setRect(0, btnStatusStyle.bottom() + GAP, width/2-1, BTN_HEIGHT);
+				chkGraphicStats.setRect(0, chkDetourPrompt.bottom() + GAP, width/2-1, BTN_HEIGHT);
             } else {
 				chkFont.setRect(0, sep2.y + 1 + GAP, width, BTN_HEIGHT);
 				chkVibrate.setRect(0, chkFont.bottom() + GAP, width, BTN_HEIGHT);
 				origri_map.setRect(0, chkVibrate.bottom() + GAP, width, BTN_HEIGHT);
 				btnStatusStyle.setRect(0, origri_map.bottom() + GAP, width, BTN_HEIGHT);
 				chkDetourPrompt.setRect(0, btnStatusStyle.bottom() + GAP, width, BTN_HEIGHT);
+				chkGraphicStats.setRect(0, chkDetourPrompt.bottom() + GAP, width, BTN_HEIGHT);
             }
-            height = chkDetourPrompt.bottom();
+            height = chkGraphicStats.bottom();
         }
 
 	}

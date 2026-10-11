@@ -509,6 +509,18 @@ public class SPDSettings extends GameSettings {
 	}
 
 
+	//图形化属性栏 (WndHero 属性页的图标版布局), 默认开启
+	public static final String KEY_STATS_UI = "graphic_stats";
+
+	public static void graphicStats( boolean value ){
+		put( KEY_STATS_UI, value );
+	}
+
+	public static boolean graphicStats(){
+		return getBoolean( KEY_STATS_UI, true );
+	}
+
+
 	public static final String KEY_UNLOCKITEM = "forever_unlock_item";
 
 	public static final String KEY_CURRENTHEROSKIN = "current_hero_skin";
