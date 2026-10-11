@@ -64,7 +64,7 @@ import java.util.ArrayList;
 public class SpiritBow extends Weapon {
 	
 	public static final String AC_SHOOT		= "SHOOT";
-	
+
 	{
 		image = ItemSpriteSheet.SPIRIT_BOW;
 		
@@ -106,6 +106,16 @@ public class SpiritBow extends Weapon {
 
 	@Override
 	public int proc(Char attacker, Char defender, int damage) {
+
+		// 自然连结 +3：灵能弓命中时有 16% 概率触发随机负面植物
+		if (Dungeon.hero != null
+				&& Dungeon.hero.subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.DRUID
+				&& Dungeon.hero.pointsInTalent(Talent.NATURE_BOND) >= 3
+				&& defender.isAlive() && Random.Float() < 0.16f) {
+			Plant plant = (Plant) Reflection.newInstance(Random.element(harmfulPlants));
+			plant.pos = defender.pos;
+			plant.activate( defender.isAlive() ? defender : null );
+		}
 
 		if(hero.pointsInTalent(Talent.LAND_HEART) >= 4){
 			if((Dungeon.level.map[defender.pos] == Terrain.EMBERS) || (Dungeon.level.map[defender.pos] == Terrain.GRASS)){
@@ -232,6 +242,15 @@ public class SpiritBow extends Weapon {
 			int exStr = ((Hero)owner).STR() - STRReq();
 			if (exStr > 0) {
 				damage += Char.combatRoll( 0, exStr );
+			}
+			// 自然连结 +3：灵能弓攻击上升 25%
+			if (((Hero)owner).subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.DRUID
+					&& ((Hero)owner).pointsInTalent(Talent.NATURE_BOND) >= 3) {
+				damage = Math.round( damage * 1.25f );
+			}
+			// 附魔箭：伤害翻倍并法术化
+			if (((Hero)owner).buff( com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Druid.EnchantArrow.class ) != null) {
+				damage = Math.round( damage * 2f );
 			}
 		}
 

@@ -2828,6 +2828,8 @@ public class Hero extends Char {
 		//xp granted by ascension challenge is only for on-exp gain effects
 		if (source != AscensionChallenge.class) {
 			this.exp += exp;
+			// 德鲁伊：击杀敌人收集自然能量
+			com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Druid.onKill(this);
 		}
 
 		EventManager.emit(new HeroGainExperienceEvent(this, exp, source));
