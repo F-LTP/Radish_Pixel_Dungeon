@@ -39,6 +39,8 @@ public class Assets {
 	public static class Environment {
 		public static final String TERRAIN_FEATURES = "environment/terrain_features.png";
 
+		public static final String DUNGEON_STAIRS = "environment/dungeon_stairs.png";
+
 		public static final String VISUAL_GRID  = "environment/visual_grid.png";
 		public static final String WALL_BLOCKING= "environment/wall_blocking.png";
 
@@ -344,6 +346,7 @@ public class Assets {
 		public static final String GNOLL    = "sprites/gnoll.png";
 		public static final String CRAB     = "sprites/crab.png";
 		public static final String HEADCRAB = "sprites/headcrab.png";
+		public static final String FELON    = "sprites/felon.png";
 		public static final String GOO      = "sprites/goo.png";
 		public static final String SWARM    = "sprites/swarm.png";
 		public static final String SKELETON = "sprites/skeleton.png";
