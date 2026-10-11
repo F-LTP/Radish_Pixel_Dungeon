@@ -31,7 +31,7 @@ public class Rogue extends HeroDefinition {
 	@Override public String avatarSkin() { return Assets.Sprites.AVATARS_ROGUE; }
 
 	@Override public HeroSubClass[] subClasses() {
-		return new HeroSubClass[]{ HeroSubClasses.ASSASSIN, HeroSubClasses.FREERUNNER };
+		return new HeroSubClass[]{ HeroSubClasses.ASSASSIN, HeroSubClasses.FREERUNNER, HeroSubClasses.SHADOW_DANCER };
 	}
 
 	@Override public ArmorAbility[] armorAbilities() {

@@ -374,6 +374,13 @@ public abstract class Char extends Actor {
 
         if (enemy == null) return false;
 
+        // 影舞者：破隐攻击替换为突袭（选目标点冲刺）
+        if (this instanceof Hero && ((Hero) this).subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.SHADOW_DANCER
+                && com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.ShadowDancer.hasVeil((Hero) this)) {
+            com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.ShadowDancer.openSelector((Hero) this);
+            return true;
+        }
+
         // 充能（特殊学派）：英雄攻击伤害提升30%
         if (this == hero && buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChargeBoost.class) != null) {
             dmgMulti *= 1.3f;
@@ -495,6 +502,9 @@ public abstract class Char extends Actor {
             return true;
 
         } else {
+			if (enemy instanceof Hero) {
+				com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.ShadowDancer.onDodged((Hero) enemy);
+			}
 			if (this instanceof Hero && ((Hero) this).belongings.attackingWeapon() instanceof Yamato) {
 				((Yamato) ((Hero) this).belongings.attackingWeapon()).onMiss();
 			}
@@ -679,6 +689,7 @@ public abstract class Char extends Actor {
 
         defRoll *= AscensionChallenge.statModifier(defender);
         defRoll *= FerretTuft.evasionMultiplier();
+        defRoll *= com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.ShadowDancer.stealthEvasionMultiplier(defender);
 
         return (acuRoll * accMulti) >= defRoll;
     }
