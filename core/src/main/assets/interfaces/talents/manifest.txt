@@ -4,6 +4,7 @@ adrenal_combat.png
 adventurers_intuition.png
 aggressive_barrier.png
 ally_warp.png
+animal_companion.png
 arcane_vision.png
 armsmasters_intuition.png
 assassins_reach.png
@@ -27,6 +28,7 @@ brief_harvest.png
 brisk_pace.png
 cached_rations.png
 catapult_start.png
+circuit_chain.png
 cloned_armor.png
 close_the_gap.png
 combined_energy.png
@@ -48,12 +50,14 @@ devotional.png
 directed_power.png
 double_jump.png
 double_mark.png
+double_strike.png
 duel_dance.png
 durable_projectiles.png
 durable_tips.png
 eagle_eye.png
 efficient_healing.png
 egg_basket.png
+elemental_mastery.png
 elemental_power.png
 elemental_reach.png
 elimination_match.png
@@ -140,6 +144,7 @@ lingering_magic.png
 liquid_agility.png
 longrange_warp.png
 loot_ground.png
+magic_ingenuity.png
 magic_refining.png
 magic_stick.png
 magic_tactics.png
@@ -153,6 +158,7 @@ more_darts.png
 moving_defense.png
 mystical_charge.png
 mystical_meal.png
+nature_bond.png
 natures_bounty.png
 natures_wrath.png
 necromancers_minions.png
@@ -163,6 +169,7 @@ patient_strike.png
 perfect_copy.png
 pharcis_bless.png
 phase_filling.png
+potion_distillation.png
 power_recycle.png
 prayer_before_meals.png
 precise_assault.png
@@ -176,6 +183,7 @@ ratforcements.png
 ratlomacy.png
 ratsistance.png
 reactive_barrier.png
+ready_modification.png
 rejuvenating_steps.png
 remote_beacon.png
 revenge_roar.png
@@ -185,7 +193,9 @@ sacrifice.png
 scholars_intuition.png
 seer_shot.png
 shadow_blade.png
+shadow_rush.png
 shadow_step.png
+shadows_gift.png
 shared_enchantment.png
 shared_upgrades.png
 sharpening_edge.png
@@ -201,10 +211,12 @@ soul_nowifi.png
 soul_possession.png
 soul_siphon.png
 soul_stream.png
+spectral_ward.png
 speedy_stealth.png
 spell_empower.png
 spell_queue.png
 spirit_blades.png
+storm_assault.png
 storm_attack.png
 storm_rush.png
 strengthening_meal.png

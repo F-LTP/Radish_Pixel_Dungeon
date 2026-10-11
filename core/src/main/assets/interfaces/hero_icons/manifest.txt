@@ -1,3 +1,4 @@
+artificer.png
 ash_king.png
 assassin.png
 battle_priest.png
@@ -11,6 +12,8 @@ combo.png
 dead_knight.png
 death_mark.png
 dice_mage.png
+druid.png
+druid_skill.png
 elemental_blast.png
 elemental_strike.png
 end_bless.png
@@ -22,6 +25,7 @@ gladiator.png
 heroic_leap.png
 jutte_champion.png
 little_knight.png
+magic_warrior.png
 momentum.png
 monk.png
 monk_abilities.png
@@ -33,6 +37,7 @@ ratmogrify.png
 red_cardinal.png
 shadow.png
 shadow_clone.png
+shadow_dancer.png
 shockwave.png
 smoke_bomb.png
 sniper.png
