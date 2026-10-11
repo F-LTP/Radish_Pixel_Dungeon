@@ -54,6 +54,7 @@ import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Reflection;
+import com.watabou.utils.Random;
 
 public class ScrollOfTransmutation extends InventoryScroll {
 	
@@ -222,6 +223,13 @@ public class ScrollOfTransmutation extends InventoryScroll {
 		do {
 			n = (Weapon)Generator.randomUsingDefaults(c);
 		} while (Challenges.isItemBlocked(n) || n.getClass() == w.getClass());
+
+		// 矮人重炮仅可通过击杀矮人炮手掉落或嬗变获得：4 阶近战武器嬗变时有机会变成它
+		if (w instanceof MeleeWeapon && !(w instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeavyCannon)
+				&& ((MeleeWeapon) w).tier == 4
+				&& Random.Int( 15 ) == 0) {
+			n = new com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeavyCannon();
+		}
 
 		n.level(0);
 		n.quantity(1);
