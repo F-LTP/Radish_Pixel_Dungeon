@@ -16,6 +16,7 @@ import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.BackpackCleaner;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.CustomPlayer;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.CustomWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.EffectTester;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.FloorTester;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.AnimationTweaker;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.EnemyAttributeModifier;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.ImmortalShieldAffecter;
@@ -293,6 +294,8 @@ public abstract class HeroDefinition {
 		new TestPotion().collect( testbag3 );
 
 		new TestTalentOFTerminalBook().collect( testbag3 );
+
+		new FloorTester().collect( testbag3 );
 
 		new ScrollHolder().collect();
 		Dungeon.LimitedDrops.SCROLL_HOLDER.drop();

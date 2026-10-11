@@ -123,8 +123,26 @@ public abstract class RegularLevel extends Level {
 			return false;
 		}
 		
-		return painter().paint(this, rooms);
+		if (!painter().paint(this, rooms)) {
+			return false;
+		}
+		addBranchStairsVisuals();
+		return true;
 		
+	}
+
+	// 为所有副本（分支）上下楼梯加上带黄边的贴图覆盖
+	private void addBranchStairsVisuals() {
+		for (LevelTransition t : transitions) {
+			if (t.type == LevelTransition.Type.BRANCH_ENTRANCE
+					|| t.type == LevelTransition.Type.BRANCH_EXIT) {
+				BranchStairsVisual vis = new BranchStairsVisual(
+						t.type == LevelTransition.Type.BRANCH_ENTRANCE);
+				int cell = t.cell();
+				vis.pos( cell % width(), cell / width() );
+				customTiles.add( vis );
+			}
+		}
 	}
 
 	protected ArrayList<Room> initRooms() {

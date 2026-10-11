@@ -132,6 +132,7 @@ dark_shadow_sword.png
 darksword.png
 dart.png
 darts.png
+daughter_wine.png
 dbl_bomb.png
 deadmode.png
 deviloon_item.png

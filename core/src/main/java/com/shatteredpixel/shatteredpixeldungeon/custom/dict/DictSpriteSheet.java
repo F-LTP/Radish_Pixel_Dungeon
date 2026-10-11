@@ -63,6 +63,8 @@ public class DictSpriteSheet {
                 return new Image(Assets.Sprites.CRAB, 0, 16, 16, 16);
             case HEADCRAB:
                 return new Image(Assets.Sprites.HEADCRAB, 0, 0, 16, 16);
+            case FELON:
+                return new Image(Assets.Sprites.FELON, 0, 0, 26, 25);
 
             case THIEF:
                 return new Image(Assets.Sprites.THIEF, 0, 0, 12, 13);
@@ -240,6 +242,7 @@ public class DictSpriteSheet {
     public static final int GNOLL_DARTER    = 209 + 10000;
     public static final int GREAT_CRAB      = 210 + 10000;
     public static final int HEADCRAB        = 215 + 10000;
+    public static final int FELON           = 216 + 10000;
 
     //Radish new Enemy
     // Zone 1

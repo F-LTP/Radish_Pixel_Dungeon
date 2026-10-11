@@ -509,6 +509,7 @@ public class ItemSpriteSheet {
 	public static final String ELIXIR_HONEY = "elixir_honey";
 	public static final String ELIXIR_AQUA = "elixir_aqua";
 	public static final String ELIXIR_MIGHT = "elixir_might";
+	public static final String DAUGHTER_WINE = "daughter_wine";
 	public static final String ELIXIR_DRAGON = "elixir_dragon";
 	public static final String ELIXIR_TOXIC = "elixir_toxic";
 	public static final String ELIXIR_ICY = "elixir_icy";

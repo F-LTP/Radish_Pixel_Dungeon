@@ -232,6 +232,7 @@ public class SpawnMisc extends TestItem {
             brewList.add(ElixirOfIcyTouch.class);
             brewList.add(ElixirOfMight.class);
             brewList.add(ElixirOfToxicEssence.class);
+            brewList.add(com.shatteredpixel.shatteredpixeldungeon.items.potions.DaughterWine.class);
         }
 
         //Spell

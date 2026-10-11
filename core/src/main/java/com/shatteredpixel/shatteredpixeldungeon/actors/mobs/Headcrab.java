@@ -50,7 +50,23 @@ public class Headcrab extends Crab {
 	{
 		spriteClass = HeadcrabSprite.class;
 
-		// 其余属性（HP/defenseSkill/baseSpeed/EXP/maxLvl/loot）全部继承自 Crab
+		// 必定掉落 2 块生肉
+		loot = new com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat().quantity(2);
+		lootChance = 1f;
+	}
+
+	@Override
+	public void die( Object cause ) {
+		// 必定额外掉落一件英雄遗骸（随机职业）
+		com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass cls =
+				com.watabou.utils.Random.oneOf(
+						com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses.WARRIOR,
+						com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses.MAGE,
+						com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses.ROGUE,
+						com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses.HUNTRESS );
+		Dungeon.level.drop(
+				com.shatteredpixel.shatteredpixeldungeon.items.remains.RemainsItem.get( cls ), pos ).sprite.drop();
+		super.die( cause );
 	}
 
 	@Override

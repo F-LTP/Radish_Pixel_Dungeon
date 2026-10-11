@@ -9,6 +9,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.CavesBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.CavesLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.CityBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.CityLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.ConvictLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.DeadEndLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.HallsBossLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.HallsLevel;
@@ -39,6 +40,7 @@ public class Branches {
     public static final String MAIN = "main";
     public static final String MOSS = "moss";
     public static final String MINING = "mining";
+    public static final String CONVICT = "convict";
     
     /**
      * 初始化所有分支（在游戏启动时调用）
@@ -54,6 +56,9 @@ public class Branches {
         
         // 采矿分支
         register(createMiningBranch());
+        
+        // 传奇重犯副本分支
+        register(createConvictBranch());
     }
     
     /**
@@ -152,5 +157,15 @@ public class Branches {
         levels[1] = MiningLevel.class;
         
         return new Branch(MINING, 1, "branch_mining", levels);
+    }
+
+    private static Branch createConvictBranch() {
+        // 传奇重犯副本：1 层
+        @SuppressWarnings("unchecked")
+        Class<? extends Level>[] levels = new Class[2];  // 索引 0-1
+        levels[0] = DeadEndLevel.class;  // 占位，不使用
+        levels[1] = ConvictLevel.class;
+
+        return new Branch(CONVICT, 1, "branch_convict", levels);
     }
 }
