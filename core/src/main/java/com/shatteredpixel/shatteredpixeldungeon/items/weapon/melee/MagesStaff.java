@@ -144,7 +144,6 @@ public class MagesStaff extends MeleeWeapon {
 		if (Dungeon.hero.subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.ARTIFICER) {
 			actions.add( AC_CRAFT_CHAIN );
 			actions.add( AC_CRAFT_PACK );
-			actions.add( AC_READY_MOD );
 			if (hero.buff( com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer.ChainReady.class ) != null) {
 				actions.add( AC_CHAIN );
 			}
@@ -228,9 +227,34 @@ public class MagesStaff extends MeleeWeapon {
 			GameScene.selectCell( packListener );
 		} else if (action.equals(AC_READY_MOD)) {
 			curUser = hero;
-			GameScene.selectCell( readyModListener );
+			GameScene.selectItem( readyModItemSelector );
 		}
 	}
+
+	// 即用改装：先选一件武器/护甲，再选友方单位
+	private com.shatteredpixel.shatteredpixeldungeon.items.Item pendingReadyGear = null;
+
+	private final WndBag.ItemSelector readyModItemSelector = new WndBag.ItemSelector() {
+		@Override
+		public String textPrompt() {
+			return Messages.get( MagesStaff.class, "prompt_ready_mod" );
+		}
+
+		@Override
+		public boolean itemSelectable( com.shatteredpixel.shatteredpixeldungeon.items.Item item ) {
+			return item instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon
+					|| item instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+		}
+
+		@Override
+		public void onSelect( com.shatteredpixel.shatteredpixeldungeon.items.Item item ) {
+			if (item != null) {
+				pendingReadyGear = item;
+				curUser = Dungeon.hero;
+				GameScene.selectCell( readyModListener );
+			}
+		}
+	};
 
 	private com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector.Listener readyModListener =
 			new com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector.Listener() {
@@ -242,12 +266,13 @@ public class MagesStaff extends MeleeWeapon {
 			com.shatteredpixel.shatteredpixeldungeon.actors.Char ally =
 					com.shatteredpixel.shatteredpixeldungeon.actors.Actor.findChar( target );
 			if (com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer
-					.readyModify( Dungeon.hero, ally )) {
+					.readyModify( Dungeon.hero, pendingReadyGear, ally )) {
 				Dungeon.hero.spendAndNext( 1f );
 				Dungeon.hero.sprite.operate( Dungeon.hero.pos );
 			} else {
 				com.shatteredpixel.shatteredpixeldungeon.utils.GLog.w( Messages.get( MagesStaff.class, "no_ally" ) );
 			}
+			pendingReadyGear = null;
 		}
 
 		@Override

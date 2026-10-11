@@ -76,10 +76,20 @@ public abstract class EquipableItem extends Item {
 
 
 
+	public static final String AC_READY_THROW = "READY_THROW";
+
 	@Override
 	public ArrayList<String> actions(Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
 		actions.add( isEquipped( hero ) ? AC_UNEQUIP : AC_EQUIP );
+		// 奇械师·即用改装：把背包里的武器/护甲扔给友方单位
+		if (hero.subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.ARTIFICER
+				&& hero.pointsInTalent( com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent.READY_MODIFICATION ) > 0
+				&& !isEquipped( hero )
+				&& (this instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon
+					|| this instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor)) {
+			actions.add( AC_READY_THROW );
+		}
 		return actions;
 	}
 
@@ -122,8 +132,37 @@ public abstract class EquipableItem extends Item {
 			}
 		} else if (action.equals( AC_UNEQUIP )) {
 			doUnequip( hero, true );
+		} else if (action.equals( AC_READY_THROW )) {
+			curUser = hero;
+			curItem = this;
+			com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene.selectCell( readyThrowListener );
 		}
 	}
+
+	// 即用改装：把本件装备扔给友方单位
+	private final com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector.Listener readyThrowListener =
+			new com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector.Listener() {
+		@Override
+		public void onSelect( Integer target ) {
+			if (target == null) {
+				return;
+			}
+			com.shatteredpixel.shatteredpixeldungeon.actors.Char ally =
+					com.shatteredpixel.shatteredpixeldungeon.actors.Actor.findChar( target );
+			if (com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer
+					.readyModify( Dungeon.hero, EquipableItem.this, ally )) {
+				Dungeon.hero.spendAndNext( 1f );
+				Dungeon.hero.sprite.operate( Dungeon.hero.pos );
+			} else {
+				GLog.w( Messages.get( EquipableItem.class, "ready_mod_fail" ) );
+			}
+		}
+
+		@Override
+		public String prompt() {
+			return Messages.get( EquipableItem.class, "ready_mod_prompt" );
+		}
+	};
 
 	@Override
 	public void doDrop( Hero hero ) {

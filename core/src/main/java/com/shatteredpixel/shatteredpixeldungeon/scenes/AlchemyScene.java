@@ -770,7 +770,14 @@ public class AlchemyScene extends PixelScene {
 						opts ) {
 					@Override
 					protected void onSelect( int index ) {
-						potions.get( index ).apply( Dungeon.hero );
+						if (index < 0 || index >= potions.size()) {
+							return;
+						}
+						try {
+							potions.get( index ).apply( Dungeon.hero );
+						} catch (Throwable t) {
+							com.shatteredpixel.shatteredpixeldungeon.utils.GLog.n( "potion distill error: " + t );
+						}
 						com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer
 								.startDistillCooldown( Dungeon.hero );
 					}

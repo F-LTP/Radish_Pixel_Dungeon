@@ -1323,7 +1323,10 @@ public abstract class Mob extends Char {
 		//soul eater talent
 		if (buff(SoulMark.class) != null &&
 				Random.Int(10) < Dungeon.hero.pointsInTalent(Talent.SOUL_EATER)){
-			Talent.onFoodEaten(Dungeon.hero, 0, null);
+			// 击杀进食：恢复饥饿并触发进食相关天赋
+			float soulFood = Hunger.STARVING / 6f;
+			Buff.affect(Dungeon.hero, Hunger.class).satisfy(soulFood);
+			Talent.onFoodEaten(Dungeon.hero, soulFood, null);
 		}
 
 		//搜刮地皮天赋：注定一抽消耗次数产生掉落

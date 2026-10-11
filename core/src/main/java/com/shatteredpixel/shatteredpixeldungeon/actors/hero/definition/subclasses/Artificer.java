@@ -241,8 +241,8 @@ public class Artificer extends HeroSubClass {
 
 	// ===== 即用改装：把武器/护甲改装给友方单位 =====
 
-	public static boolean readyModify( Hero hero, Char ally ) {
-		if (hero == null || ally == null || ally == hero
+	public static boolean readyModify( Hero hero, com.shatteredpixel.shatteredpixeldungeon.items.Item gear, Char ally ) {
+		if (hero == null || ally == null || ally == hero || gear == null
 				|| hero.subClass != com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.ARTIFICER) {
 			return false;
 		}
@@ -253,38 +253,29 @@ public class Artificer extends HeroSubClass {
 		if (pts <= 0) {
 			return false;
 		}
-
-		int tier = 0, level = 0;
-		com.shatteredpixel.shatteredpixeldungeon.items.Item gear = null;
-		for (com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon wg
-				: new ArrayList<>( hero.belongings.getAllItems( com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon.class ) )) {
-			if (wg != hero.belongings.attackingWeapon()) {
-				gear = wg;
-				tier = Math.min(5, Math.max(1, wg.level() + 1));
-				level = wg.level();
-				break;
-			}
-		}
-		if (gear == null) {
-			for (com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor ag
-					: new ArrayList<>( hero.belongings.getAllItems( com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor.class ) )) {
-				if (ag != hero.belongings.armor) {
-					gear = ag;
-					tier = ag.tier;
-					level = ag.level();
-					break;
-				}
-			}
-		}
-		if (gear == null) {
+		// 同一目标只能改装一次，避免重复叠加生命上限
+		if (ally.buff( ReadyMod.class ) != null) {
 			return false;
 		}
+
+		boolean isWeapon = gear instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+		boolean isArmor = gear instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+		if (!isWeapon && !isArmor) {
+			return false;
+		}
+		int tier = isWeapon
+				? Math.min(5, Math.max(1, gear.level() + 1))
+				: ((com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor) gear).tier;
+		int level = gear.level();
 
 		int hp = (tier + level) * (pts >= 3 ? 8 : pts >= 2 ? 6 : 4);
 		int def = (tier + level) * 2;
 
+		// 只消耗玩家选中的那一件装备
+		ReadyMod rm = Buff.affect( ally, ReadyMod.class );
+		rm.gearClass = gear.getClass().getName();
+		rm.apply( hp, def );
 		gear.detach( hero.belongings.backpack );
-		Buff.affect( ally, ReadyMod.class ).apply( hp, def );
 		return true;
 	}
 
@@ -297,6 +288,7 @@ public class Artificer extends HeroSubClass {
 
 		public int bonusHp = 0;
 		public int bonusDef = 0;
+		public String gearClass = "";
 
 		public void apply( int hp, int def ) {
 			unapply();
@@ -324,6 +316,16 @@ public class Artificer extends HeroSubClass {
 		@Override
 		public void detach() {
 			unapply();
+			// 友方死亡后，这件装备有 50% 概率掉回地上
+			if (target != null && !gearClass.isEmpty() && com.watabou.utils.Random.Float() < 0.5f) {
+				try {
+					com.shatteredpixel.shatteredpixeldungeon.items.Item gear =
+							(com.shatteredpixel.shatteredpixeldungeon.items.Item) Class
+									.forName( gearClass ).newInstance();
+					com.shatteredpixel.shatteredpixeldungeon.Dungeon.level.drop( gear, target.pos );
+				} catch (Throwable ignored) {
+				}
+			}
 			super.detach();
 		}
 
@@ -334,12 +336,14 @@ public class Artificer extends HeroSubClass {
 
 		private static final String HP = "bonus_hp";
 		private static final String DEF = "bonus_def";
+		private static final String GEAR = "gear_class";
 
 		@Override
 		public void storeInBundle( Bundle bundle ) {
 			super.storeInBundle( bundle );
 			bundle.put( HP, bonusHp );
 			bundle.put( DEF, bonusDef );
+			bundle.put( GEAR, gearClass );
 		}
 
 		@Override
@@ -347,6 +351,7 @@ public class Artificer extends HeroSubClass {
 			super.restoreFromBundle( bundle );
 			bonusHp = bundle.getInt( HP );
 			bonusDef = bundle.getInt( DEF );
+			gearClass = bundle.getString( GEAR );
 		}
 	}
 
