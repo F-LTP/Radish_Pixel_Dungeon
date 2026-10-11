@@ -855,6 +855,7 @@ public abstract class Char extends Actor {
 
     /** 防御方护甲（Hero 用装备护甲，其余用其 armor() 访问器），无则为 null。 */
     public static Item defendingArmor(Char defender) {
+        if (defender == null) return null;
         if (defender instanceof Hero) {
             return ((Hero) defender).belongings.armor();
         }

@@ -182,11 +182,13 @@ public class HighGrass {
 			}
 
 			//Camouflage
-			Armor wornArmor = Char.defendingArmor(ch) instanceof Armor
-					? (Armor) Char.defendingArmor(ch)
-					: null;
-			if (wornArmor != null && wornArmor.hasGlyph(Camouflage.class, ch)) {
-				Camouflage.activate(ch, wornArmor.buffedLvl());
+			if (ch != null) {
+				Armor wornArmor = Char.defendingArmor(ch) instanceof Armor
+						? (Armor) Char.defendingArmor(ch)
+						: null;
+				if (wornArmor != null && wornArmor.hasGlyph(Camouflage.class, ch)) {
+					Camouflage.activate(ch, wornArmor.buffedLvl());
+				}
 			}
 			if (ch instanceof Hero && ((Hero) ch).hasTalent(Talent.VINE_TRAP)){
 				//GLog.p("create trap!");
