@@ -94,7 +94,11 @@ public class CloakOfShadows extends Artifact {
 				else if (cursed)       GLog.i( Messages.get(this, "cursed") );
 				else if (charge <= 0)  GLog.i( Messages.get(this, "no_charge") );
 				else {
-					hero.spend( 1f );
+					//阴影之赐 +1：使用斗篷不消耗回合
+					if (!(hero.subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.SHADOW_DANCER
+							&& hero.pointsInTalent(Talent.SHADOWS_GIFT) >= 1)) {
+						hero.spend( 1f );
+					}
 					hero.busy();
 					Sample.INSTANCE.play(Assets.Sounds.MELD);
 					activeBuff = activeBuff();

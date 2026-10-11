@@ -53,6 +53,12 @@ public class HeroIcon extends Image {
 	public static final String BATTLE_PRIEST = "battle_priest";
 	public static final String RED_CARDINAL = "red_cardinal";
 	public static final String DEAD_KNIGHT = "dead_knight";
+	//新增第三转职
+	public static final String MAGIC_WARRIOR = "magic_warrior";
+	public static final String ARTIFICER = "artificer";
+	public static final String SHADOW_DANCER = "shadow_dancer";
+	public static final String DRUID = "druid";
+	public static final String DRUID_SKILL = "druid_skill";
 
 	//abilities
 	public static final String ASH_KING = "ash_king";

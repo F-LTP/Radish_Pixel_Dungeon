@@ -140,7 +140,7 @@ public class BrokenSeal extends ItemArmorAttachable {
 		@Override
 		public synchronized boolean act() {
 			if (Regeneration.regenOn() && shielding() < maxShield()) {
-				partialShield += 1/30f;
+				partialShield += 1/30f * com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior.spectralWardMultiplier((Hero)target);
 			}
 			
 			while (partialShield >= 1){
@@ -168,7 +168,8 @@ public class BrokenSeal extends ItemArmorAttachable {
 
 		public synchronized int maxShield() {
 			if (armor != null && armor.isEquipped((Hero)target) && armor.checkSeal() != null) {
-				return armor.checkSeal().maxShield(armor.tier, armor.level());
+				int base = armor.checkSeal().maxShield(armor.tier, armor.level());
+				return Math.round(base * com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior.spectralWardMultiplier((Hero)target));
 			} else {
 				return 0;
 			}

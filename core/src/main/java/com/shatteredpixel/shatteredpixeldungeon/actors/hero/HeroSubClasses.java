@@ -1,16 +1,20 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Assassin;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Battlemage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Battlepreist;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Berserker;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.DeadKnight;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.DiceMage;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Druid;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Freerunner;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Gladiator;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.JutteChampion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.LittleKnight;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.RedCardinal;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.ShadowDancer;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Sniper;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Warden;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Warlock;
@@ -36,12 +40,16 @@ public final class HeroSubClasses {
 
 	public static final HeroSubClass BERSERKER     = new Berserker();
 	public static final HeroSubClass GLADIATOR     = new Gladiator();
+	public static final HeroSubClass MAGIC_WARRIOR = new MagicWarrior();
 	public static final HeroSubClass BATTLEMAGE    = new Battlemage();
 	public static final HeroSubClass WARLOCK       = new Warlock();
 	public static final HeroSubClass ASSASSIN      = new Assassin();
 	public static final HeroSubClass FREERUNNER    = new Freerunner();
 	public static final HeroSubClass SNIPER        = new Sniper();
 	public static final HeroSubClass WARDEN        = new Warden();
+	public static final HeroSubClass SHADOW_DANCER = new ShadowDancer();
+	public static final HeroSubClass ARTIFICER     = new Artificer();
+	public static final HeroSubClass DRUID         = new Druid();
 	public static final HeroSubClass BATTLEPREIST  = new Battlepreist();
 	public static final HeroSubClass REDCARDINAL   = new RedCardinal();
 	public static final HeroSubClass DEAD_KNIGHT   = new DeadKnight();
@@ -60,10 +68,10 @@ public final class HeroSubClasses {
 	//所有子职业集合
 	public static final Collection<HeroSubClass> ALL = Arrays.asList(
 			NONE,
-			BERSERKER, GLADIATOR,
-			BATTLEMAGE, WARLOCK,
-			ASSASSIN, FREERUNNER,
-			SNIPER, WARDEN,
+			BERSERKER, GLADIATOR, MAGIC_WARRIOR,
+			BATTLEMAGE, WARLOCK, ARTIFICER,
+			ASSASSIN, FREERUNNER, SHADOW_DANCER,
+			SNIPER, WARDEN, DRUID,
 			BATTLEPREIST, REDCARDINAL, DEAD_KNIGHT,
 			LITTLE_KNIGHT, DICE_MAGE, JUTTE_CHAMPION,
 			CHAMPION, MONK

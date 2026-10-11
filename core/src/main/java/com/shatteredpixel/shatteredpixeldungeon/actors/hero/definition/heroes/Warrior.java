@@ -31,7 +31,7 @@ public class Warrior extends HeroDefinition {
 	@Override public String avatarSkin() { return Assets.Sprites.AVATARS_WARRIOR; }
 
 	@Override public HeroSubClass[] subClasses() {
-		return new HeroSubClass[]{ HeroSubClasses.BERSERKER, HeroSubClasses.GLADIATOR };
+		return new HeroSubClass[]{ HeroSubClasses.BERSERKER, HeroSubClasses.GLADIATOR, HeroSubClasses.MAGIC_WARRIOR };
 	}
 
 	@Override public ArmorAbility[] armorAbilities() {

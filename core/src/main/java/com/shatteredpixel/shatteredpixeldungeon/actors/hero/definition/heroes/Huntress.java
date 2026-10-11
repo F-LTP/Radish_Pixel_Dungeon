@@ -29,7 +29,7 @@ public class Huntress extends HeroDefinition {
 	@Override public String avatarSkin() { return Assets.Sprites.AVATARS_HUNTRESS; }
 
 	@Override public HeroSubClass[] subClasses() {
-		return new HeroSubClass[]{ HeroSubClasses.SNIPER, HeroSubClasses.WARDEN };
+		return new HeroSubClass[]{ HeroSubClasses.SNIPER, HeroSubClasses.WARDEN, HeroSubClasses.DRUID };
 	}
 
 	@Override public ArmorAbility[] armorAbilities() {

@@ -350,7 +350,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 	}
 
 	public boolean canReach( Char owner, int target){
-		int reach = reachFactor(owner);
+		int reach = reachFactor(owner) + com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer.attackReachBonus(owner);
 		if (Dungeon.level.distance( owner.pos, target ) > reach){
 			return false;
 		} else {

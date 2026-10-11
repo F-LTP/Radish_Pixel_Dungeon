@@ -10,7 +10,8 @@ buildscript {
         //接入FB后 直接打包安卓DEBUG会出错 若要调试请gradlew desktop:debug
         // PowerShell: ./gradlew desktop:debug
         // 打包直接选择release 签名食用MT默认的
-        classpath 'com.android.tools:r8:8.7.18'
+        // 本地调试临时注释掉固定的 r8（与 AGP 8.13.2 的 D8 API 不兼容），改用 AGP 自带 R8
+        // classpath 'com.android.tools:r8:8.7.18'
         //noinspection AndroidGradlePluginVersion,AndroidGradlePluginVersion
         classpath 'com.android.tools.build:gradle:8.13.2'
         classpath 'com.google.gms:google-services:4.4.2'

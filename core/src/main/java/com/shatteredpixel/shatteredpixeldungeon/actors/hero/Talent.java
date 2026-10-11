@@ -131,6 +131,26 @@ public class Talent {
 
 	public static final Talent FANATICISM_MAGIC = new Talent("FANATICISM_MAGIC", 3);
 
+	// 魔武士 T3 天赋
+	public static final Talent SPECTRAL_WARD = new Talent("SPECTRAL_WARD", 3);
+	public static final Talent MAGIC_INGENUITY = new Talent("MAGIC_INGENUITY", 3);
+	public static final Talent STORM_ASSAULT = new Talent("STORM_ASSAULT", 3);
+
+	// 影舞者 T3 天赋
+	public static final Talent DOUBLE_STRIKE = new Talent("DOUBLE_STRIKE", 3);
+	public static final Talent SHADOWS_GIFT = new Talent("SHADOWS_GIFT", 3);
+	public static final Talent SHADOW_RUSH = new Talent("SHADOW_RUSH", 3);
+
+	// 奇械师 T3 天赋
+	public static final Talent POTION_DISTILLATION = new Talent("POTION_DISTILLATION", 3);
+	public static final Talent CIRCUIT_CHAIN = new Talent("CIRCUIT_CHAIN", 3);
+	public static final Talent READY_MODIFICATION = new Talent("READY_MODIFICATION", 3);
+
+	// 德鲁伊 T3 天赋
+	public static final Talent ANIMAL_COMPANION = new Talent("ANIMAL_COMPANION", 3);
+	public static final Talent NATURE_BOND = new Talent("NATURE_BOND", 3);
+	public static final Talent ELEMENTAL_MASTERY = new Talent("ELEMENTAL_MASTERY", 3);
+
 	public static final Talent REVENGE_ROAR = new Talent("REVENGE_ROAR", 4);
 
 	public static final Talent THIRSTY_BLADE = new Talent("THIRSTY_BLADE", 4);
@@ -1090,6 +1110,9 @@ public class Talent {
 
 	public static void onScrollUsed( Hero hero, int pos, float factor ){
 
+		if (hero.subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.MAGIC_WARRIOR){
+			com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior.magicIngenuityDamage(hero);
+		}
 	}
 
 	public static void onUpgradeScrollUsed( Hero hero ){
