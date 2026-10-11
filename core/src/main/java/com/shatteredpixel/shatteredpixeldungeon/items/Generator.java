@@ -554,10 +554,9 @@ public class Generator {
 					HeadCleaver.class,
 					Seekingspear.class,
 					Grimtooth.class,
-					ReplacePoint.class,
-					HeavyCannon.class
+					ReplacePoint.class
 			};
-			WEP_T4_NEW.probs = new float[]{ 5, 5, 5, 5, 5, 5, 5, 1 };
+			WEP_T4_NEW.probs = new float[]{ 5, 5, 5, 5, 5, 5, 5 };
 
 			WEP_T5.classes = new Class<?>[]{
 					Taijutsu.class,
