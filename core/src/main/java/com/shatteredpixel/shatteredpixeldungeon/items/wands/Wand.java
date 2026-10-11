@@ -550,6 +550,10 @@ public abstract class Wand extends Item {
 		} else {
 			curCharges -= cursed ? 1 : chargesPerCast();
 		}
+		// 魔武士：使用法杖后为下次攻击叠加附魔强化
+		com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior.gainCharge(Dungeon.hero);
+		// 奇械师：记录上一次使用的法杖
+		com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer.recordWand(Dungeon.hero, this);
 		if (hero.hasTalent(Talent.SPELL_QUEUE)) {
 			SpellQueue mySq = hero.belongings.getItem(SpellQueue.class);
 			if (mySq != null) mySq.updateImage();

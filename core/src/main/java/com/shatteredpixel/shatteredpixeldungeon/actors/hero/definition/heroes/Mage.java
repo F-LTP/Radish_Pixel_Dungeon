@@ -29,7 +29,7 @@ public class Mage extends HeroDefinition {
 	@Override public String avatarSkin() { return Assets.Sprites.AVATARS_MAGE; }
 
 	@Override public HeroSubClass[] subClasses() {
-		return new HeroSubClass[]{ HeroSubClasses.BATTLEMAGE, HeroSubClasses.WARLOCK };
+		return new HeroSubClass[]{ HeroSubClasses.BATTLEMAGE, HeroSubClasses.WARLOCK, HeroSubClasses.ARTIFICER };
 	}
 
 	@Override public ArmorAbility[] armorAbilities() {
