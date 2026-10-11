@@ -15,6 +15,7 @@ import com.shatteredpixel.shatteredpixeldungeon.custom.dict.DictBook;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.BackpackCleaner;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.CustomPlayer;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.CustomWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.EffectTester;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.AnimationTweaker;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.EnemyAttributeModifier;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.ImmortalShieldAffecter;
@@ -34,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.SpawnW
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestArmor;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestArtifact;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestMissile;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestPotion;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestRing;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestTalentOFTerminalBook;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -263,6 +265,8 @@ public abstract class HeroDefinition {
 		testBag.collect();
 		TestBag testbag2 = new TestBag();
 		testbag2.collect();
+		TestBag testbag3 = new TestBag();
+		testbag3.collect();
 
 		new TrapPlacer().collect();
 
@@ -274,19 +278,21 @@ public abstract class HeroDefinition {
 
 		new AnimationTweaker().collect( testbag2 );
 
+		new EffectTester().collect( testbag2 );
+
 		new LevelTeleporter().collect();
 
-		new LazyTest().collect();
+		new LazyTest().collect( testbag3 );
 
-		new TestArmor().collect();
-		new TestArtifact().collect();
-		new SpawnWeapon().collect();
-		new TestMissile().collect();
-		new TestRing().collect();
-		new SnDFunctions().collect();
-		//new TestPotion().collect();
+		new TestArmor().collect( testbag3 );
+		new TestArtifact().collect( testbag3 );
+		new SpawnWeapon().collect( testbag3 );
+		new TestMissile().collect( testbag3 );
+		new TestRing().collect( testbag3 );
+		new SnDFunctions().collect( testbag3 );
+		new TestPotion().collect( testbag3 );
 
-		new TestTalentOFTerminalBook().collect();
+		new TestTalentOFTerminalBook().collect( testbag3 );
 
 		new ScrollHolder().collect();
 		Dungeon.LimitedDrops.SCROLL_HOLDER.drop();
