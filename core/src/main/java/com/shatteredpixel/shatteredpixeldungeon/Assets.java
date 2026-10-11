@@ -29,6 +29,11 @@ public class Assets {
 		public static final String SPECKS       = "effects/specks.png";
 		public static final String SPELL_ICONS  = "effects/spell_icons.png";
 		public static final String TEXT_ICONS   = "effects/text_icons.png";
+
+		// CC0 effect assets (see effects/cc0/CREDITS.txt)
+		public static final String SWORD_SLASH    = "effects/cc0/sword_slash.png";
+		public static final String PIXEL_EXPLOSION= "effects/cc0/pixel_explosion.png";
+		public static final String SIMPLE_FX      = "effects/cc0/simplefx.png";
 	}
 
 	public static class Environment {
@@ -338,6 +343,7 @@ public class Assets {
 		public static final String EYE      = "sprites/eye.png";
 		public static final String GNOLL    = "sprites/gnoll.png";
 		public static final String CRAB     = "sprites/crab.png";
+		public static final String HEADCRAB = "sprites/headcrab.png";
 		public static final String GOO      = "sprites/goo.png";
 		public static final String SWARM    = "sprites/swarm.png";
 		public static final String SKELETON = "sprites/skeleton.png";

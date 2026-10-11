@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SwordSlashEffect;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
@@ -35,6 +36,13 @@ public class Greatsword extends MeleeWeapon {
 		hitSoundPitch = 1f;
 
 		tier = 5;
+	}
+
+	@Override
+	public int proc(Char attacker, Char defender, int damage) {
+		// CC0 斩击特效：命中时顺着攻击方向在目标身上播放
+		SwordSlashEffect.showOn(attacker, defender);
+		return super.proc(attacker, defender, damage);
 	}
 
 	@Override

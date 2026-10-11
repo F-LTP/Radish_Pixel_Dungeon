@@ -5,6 +5,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.KillBoatSwordWaitBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroAction;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SwordSlashEffect;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
 public class KillBoatSword extends MeleeWeapon {
@@ -16,6 +17,13 @@ public class KillBoatSword extends MeleeWeapon {
         tier = 5;
     }
     public boolean delayAttack = false;
+
+    @Override
+    public int proc(Char attacker, Char defender, int damage) {
+        // CC0 斩击特效：命中时顺着攻击方向在目标身上播放
+        SwordSlashEffect.showOn(attacker, defender);
+        return super.proc(attacker, defender, damage);
+    }
 
     @Override
     public int min(int lvl) {

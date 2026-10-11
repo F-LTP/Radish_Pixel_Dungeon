@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.PixelExplosionEffect;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BlastParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -62,6 +63,9 @@ public class PotionOfDragonsBreath extends ExoticPotion {
 		if (Dungeon.level.heroFOV[cell]) {
 			CellEmitter.center(cell).burst(BlastParticle.FACTORY, 30);
 		}
+
+		// CC0 像素爆炸特效
+		PixelExplosionEffect.showAtCell(cell);
 
 		for (int offset : PathFinder.NEIGHBOURS9){
 			int c = cell + offset;
