@@ -88,6 +88,9 @@ public abstract class Spell extends Item {
 			}
 			
 			onCast( hero );
+
+			// 魔武士：使用法力结晶叠加附魔强化并触发魔术巧思
+			com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior.onMagicCrystalUsed( hero );
 			
 		}
 	}

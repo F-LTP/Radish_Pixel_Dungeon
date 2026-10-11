@@ -109,6 +109,8 @@ public abstract class EquipableItem extends Item {
 			int slot = Dungeon.quickslot.getSlot( this );
 			slotOfUnequipped = -1;
 			doEquip(hero);
+			// 魔武士：装备被诅咒的物品时把诅咒转化为随机附魔
+			com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior.purgeCurseOnEquip( hero, this );
 			if (slot != -1) {
 				Dungeon.quickslot.setSlot( slot, this );
 				updateQuickslot();
@@ -165,6 +167,7 @@ public abstract class EquipableItem extends Item {
 
 
 		if (cursed
+				&& !com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior.canHandleCursed( hero )
 				&& hero.buff(MagicImmune.class) == null
 				&& (!hero.belongings.lostInventory() || keptThroughLostInventory())) {
 			GLog.w(Messages.get(EquipableItem.class, "unequip_cursed"));
