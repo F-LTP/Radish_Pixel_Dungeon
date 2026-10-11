@@ -430,7 +430,7 @@ public class WndBag extends WndTabbed {
 		@Override
 		public GameAction keyAction() {
 			switch (index){
-				case 1: default:
+				case 1:
 					return SPDAction.BAG_1;
 				case 2:
 					return SPDAction.BAG_2;
@@ -446,6 +446,9 @@ public class WndBag extends WndTabbed {
 					return SPDAction.BAG_7;
 				case 8:
 					return SPDAction.BAG_8;
+				default:
+					// 超过 8 个的背包没有独立快捷键
+					return null;
 			}
 		}
 

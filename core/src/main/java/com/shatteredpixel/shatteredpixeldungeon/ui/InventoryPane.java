@@ -195,10 +195,10 @@ public class InventoryPane extends Component {
 		}
 
 		bags = new ArrayList<>();
-		// 创建 8 个背包按钮，支持挑战模式下的多个背包
-		// 主背包 + ChallengeBag + TestBag + ScrollHolder + PotionBandolier + VelvetPouch + MagicalHolster + 预留 = 8 个
+		// 创建 12 个背包按钮，支持挑战模式/测试模式下的多个背包
+		// 主背包 + ChallengeBag + TestBag×N + ScrollHolder + PotionBandolier + VelvetPouch + MagicalHolster = 最多 12 个
 		// 如果背包数量过多，按钮宽度会自动缩小以适应
-		for (int i = 0; i < 8; i++){
+		for (int i = 0; i < 12; i++){
 			BagButton btn = new BagButton(null, i+1);
 			bags.add(btn);
 			add(btn);
@@ -262,8 +262,8 @@ public class InventoryPane extends Component {
 		float bagRowStart = left;
 		float availableWidth = width - (bagRowStart - x);
 		
-		// 计算实际有背包的按钮数量（最多 8 个）
-		// 请注意，只在调试模式会出现这么多的背包
+		// 计算实际有背包的按钮数量（最多 12 个）
+		// 请注意，只在挑战模式/调试模式会出现这么多的背包
 		int bagsWithItems = 0;
 		for (BagButton b : bags) {
 			if (b.bag != null) bagsWithItems++;
@@ -740,7 +740,7 @@ public class InventoryPane extends Component {
 		@Override
 		public GameAction keyAction() {
 			switch (index){
-				case 1: default:
+				case 1:
 					return SPDAction.BAG_1;
 				case 2:
 					return SPDAction.BAG_2;
@@ -756,6 +756,9 @@ public class InventoryPane extends Component {
 					return SPDAction.BAG_7;
 				case 8:
 					return SPDAction.BAG_8;
+				default:
+					// 超过 8 个的背包没有独立快捷键
+					return null;
 			}
 		}
 
