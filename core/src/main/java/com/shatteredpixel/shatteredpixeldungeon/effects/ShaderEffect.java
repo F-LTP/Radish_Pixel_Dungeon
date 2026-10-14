@@ -60,6 +60,7 @@ public class ShaderEffect extends Gizmo {
             case ALPHA: return Shaders.alpha;
             case SINGULARITY: return Shaders.singularity;
             case NOISE: return Shaders.noise;
+            case LIGHTDISSOLVE: return Shaders.lightDissolve;
             default: return Shaders.alpha;
         }
     }
@@ -124,6 +125,15 @@ public class ShaderEffect extends Gizmo {
                     n.setProgress(progress);
                 }
                 break;
+            case LIGHTDISSOLVE:
+                if (shader instanceof LightDissolveShader) {
+                    LightDissolveShader l = (LightDissolveShader) shader;
+                    l.setProgress(progress);
+                    l.setRandom(random);
+                    l.setMoveAmount(0.15f);
+                    l.setMoveDir(0.94f, -0.34f);
+                }
+                break;
         }
     }
 
@@ -173,6 +183,16 @@ public class ShaderEffect extends Gizmo {
         shader.use();
         shader.setCamera(combinedMatrix);
         shader.setFrame(frame.left, frame.top, frame.width(), frame.height());
+
+        // 光解消散：像素格对齐贴图源像素（帧内每个源像素对应的局部 uv 尺寸）
+        if (shaderType == ShaderType.LIGHTDISSOLVE && shader instanceof LightDissolveShader) {
+            LightDissolveShader l = (LightDissolveShader) shader;
+            float pxW = frame.width() * texture.width;
+            float pxH = frame.height() * texture.height;
+            l.setPixelSize(pxW > 0f ? 1f / pxW : 1f / 16f,
+                           pxH > 0f ? 1f / pxH : 1f / 16f);
+        }
+
         uploadShaderParams();
         shader.bindTextures();
         texture.bind();
@@ -254,6 +274,6 @@ public class ShaderEffect extends Gizmo {
     }
 
     public enum ShaderType {
-        CUT, BURN, ELLIPSE, ACID, WIPE, ALPHA, SINGULARITY, NOISE
+        CUT, BURN, ELLIPSE, ACID, WIPE, ALPHA, SINGULARITY, NOISE, LIGHTDISSOLVE
     }
 }

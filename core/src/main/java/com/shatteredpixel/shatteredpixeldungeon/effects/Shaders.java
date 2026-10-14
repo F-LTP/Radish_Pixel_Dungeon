@@ -31,6 +31,10 @@ public class Shaders {
     public static final AlphaShader alpha = load(AlphaShader.class);
     public static final NoiseShader noise = load(NoiseShader.class);
     
+    // ============== 光解消散效果 ==============
+    
+    public static final LightDissolveShader lightDissolve = load(LightDissolveShader.class);
+    
     // ============== 加载方法 ==============
     
     private static <T extends com.watabou.glwrap.GlslShaderScript> T load(Class<T> shaderClass) {
@@ -50,6 +54,7 @@ public class Shaders {
         wipe.getClass();
         alpha.getClass();
         noise.getClass();
+        lightDissolve.getClass();
     }
     
     /**
