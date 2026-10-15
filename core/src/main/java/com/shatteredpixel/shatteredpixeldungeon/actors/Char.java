@@ -372,6 +372,11 @@ public abstract class Char extends Actor {
         return attack(enemy, 1f, 0f, 1f);
     }
 
+	// 击杀英雄时的死亡信息，子类可覆盖自定义
+	protected String heroKilledMessage() {
+		return Messages.capitalize(Messages.get(Char.class, "kill", name()));
+	}
+
     public boolean attack(Char enemy, float dmgMulti, float dmgBonus, float accMulti) {
 
         if (enemy == null) return false;
@@ -494,7 +499,7 @@ public abstract class Char extends Actor {
                         Badges.validateDeathFromFriendlyMagic();
                     }
                     Dungeon.fail(getClass());
-                    GLog.n(Messages.capitalize(Messages.get(Char.class, "kill", name())));
+                    GLog.n(heroKilledMessage());
 
                 } else if (this == hero) {
                     GLog.i(Messages.capitalize(Messages.get(Char.class, "defeat", enemy.name())));
@@ -518,6 +523,10 @@ public abstract class Char extends Actor {
                 }
             }
             enemy.sprite.showStatus(CharSprite.NEUTRAL, enemy.defenseVerb());
+
+            if (defender.belongings.weapon instanceof FogSword) {
+              Buff.affect(defender, Invisibility.class, 1f);
+            }
 
             if (visibleFight) {
                 //TODO enemy.defenseSound? currently miss plays for monks/crab even when they parry

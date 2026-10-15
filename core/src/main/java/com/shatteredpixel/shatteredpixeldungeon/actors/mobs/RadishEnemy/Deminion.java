@@ -68,6 +68,11 @@ public class Deminion extends Mob {
     }
 
     @Override
+    protected String heroKilledMessage() {
+        return Messages.capitalize(Messages.get(Deminion.class, "kill"));
+    }
+
+    @Override
     public void die( Object cause ) {
         super.die( cause );
     }
@@ -125,9 +130,6 @@ public class Deminion extends Mob {
                 return true;
             }
             
-            if(criticalRoll.critical){
-                enemy.sprite.showStatus(CharSprite.NEGATIVE,Messages.get(this,"crit"));
-            }
 
             if(enemy.buff(Sigil.class) != null){
                 Buff.prolong(enemy, Sigil.class, Sigil.DURATION);
@@ -161,9 +163,6 @@ public class Deminion extends Mob {
                 return true;
             }
             
-            if(criticalRoll.critical){
-                enemy.sprite.showStatus(CharSprite.NEGATIVE,Messages.get(this,"crit"));
-            }
             // Use DeminionCritClass if target has Sigil to show armor-piercing crit icon
             if(enemy.buff(Sigil.class) != null){
                 DamageInfo sigilDamage = new DamageInfo(effectiveDamage, DamageType.PHYSICAL, this, null, new DeminionCritClass());
@@ -194,7 +193,7 @@ public class Deminion extends Mob {
                 if (enemy == Dungeon.hero) {
 
                     Dungeon.fail( getClass() );
-                    GLog.n( Messages.capitalize(Messages.get(Deminion.class, "kill")) );
+                    GLog.n( heroKilledMessage() );
 
                 }
             }
