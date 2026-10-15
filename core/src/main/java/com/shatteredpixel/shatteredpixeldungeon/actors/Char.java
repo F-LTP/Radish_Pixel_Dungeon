@@ -381,17 +381,15 @@ public abstract class Char extends Actor {
 
         if (enemy == null) return false;
 
-        // 影舞者：破隐攻击替换为突袭（选目标点冲刺）
-        if (this instanceof Hero && ((Hero) this).subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.SHADOW_DANCER
-                && com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.ShadowDancer.hasVeil((Hero) this)) {
-            com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.ShadowDancer.openSelector((Hero) this);
+        // 攻击前事件：可在本次攻击发生前替换/取消它（影舞者破隐），或调整伤害乘区（充能）
+        PreAttackEvent preAttack = new PreAttackEvent(this, enemy, dmgMulti, dmgBonus, accMulti);
+        EventManager.emit(preAttack);
+        if (preAttack.isCancelled()) {
             return true;
         }
-
-        // 充能（特殊学派）：英雄攻击伤害提升30%
-        if (this == hero && buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChargeBoost.class) != null) {
-            dmgMulti *= 1.3f;
-        }
+        dmgMulti = preAttack.getDmgMulti();
+        dmgBonus = preAttack.getDmgBonus();
+        accMulti = preAttack.getAccMulti();
 
         // Attack animations can finish after a level transition or scene reload.
         // Do not resolve a stale attack while the level's map/FOV is unavailable.
@@ -415,10 +413,6 @@ public abstract class Char extends Actor {
             return false;
 
         } else if (hit(this, enemy, accMulti, false)) {
-            if (enemy.buff(AfterImage.Blur.class) != null) {
-                enemy.buff(AfterImage.Blur.class).gainDodge();
-            }
-
 			OrdinaryAttackDamage.DamageRoll damageRoll = OrdinaryAttackDamage.rollBaseDamage(this);
 			OrdinaryAttackDamage.CriticalRoll criticalRoll = OrdinaryAttackDamage.rollCritical(this, enemy, damageRoll.damage);
 			Preparation prep = damageRoll.preparation;
@@ -456,33 +450,9 @@ public abstract class Char extends Actor {
 
             enemy.damage(attackDamage);
 
-            if (buff(FireImbue.class) != null) buff(FireImbue.class).proc(enemy);
-            if (buff(FrostImbue.class) != null) buff(FrostImbue.class).proc(enemy);
-
-            // 圆球皮肤：近战命中时有 16% 概率使目标麻痹 2 回合
-            if (this == hero && hero.isSphereSkin()
-                    && !(((Hero) this).belongings.attackingWeapon() instanceof MissileWeapon)
-                    && enemy.isAlive()
-                    && Random.Float() < 0.16f) {
-                Buff.affect(enemy, Paralysis.class, 2f);
-            }
-
-            if (this == hero && enemy.isAlive() && ArrowBuff.tryExecute(enemy)) {
-                enemy.HP = 0;
-                enemy.die(this);
-            }
-
-            if (enemy.isAlive() && enemy.alignment != alignment && prep != null && prep.canKO(enemy)) {
-                enemy.HP = 0;
-                if (!enemy.isAlive()) {
-                    enemy.die(this);
-                } else {
-                    //helps with triggering any on-damage effects that need to activate
-                    enemy.damage(DamageInfo.of(-1, DamageType.TRUE, this, this));
-                    DeathMark.processFearTheReaper(enemy);
-                }
-                enemy.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Preparation.class, "assassinated"));
-            }
+            // 命中后事件：附带 debuff（火/冰赋能）、控制（圆球皮肤）、斩杀（箭矢）、暗杀（潜行）等
+            EventManager.emit(new AttackHitEvent(this, enemy, effectiveDamage, attackDamage,
+                    attackingWeapon(), defendingArmor(enemy), prep));
 
             enemy.sprite.bloodBurstA(sprite.center(), effectiveDamage);
             enemy.sprite.flash();
@@ -509,24 +479,12 @@ public abstract class Char extends Actor {
             return true;
 
         } else {
-			if (enemy instanceof Hero) {
-				com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.ShadowDancer.onDodged((Hero) enemy);
-			}
-			if (this instanceof Hero && ((Hero) this).belongings.attackingWeapon() instanceof Yamato) {
-				((Yamato) ((Hero) this).belongings.attackingWeapon()).onMiss();
-			}
-            if (enemy.buff(CloakofGreyFeather.hexDodge.class) != null) {
-                for (Char ch : Actor.chars()) {
-                    if (ch.alignment != enemy.alignment && enemy.fieldOfView[ch.pos] && ch.alignment != Alignment.NEUTRAL) {
-                        Buff.affect(ch, Hex.class, 2f + 0.75f * enemy.buff(CloakofGreyFeather.hexDodge.class).buffedLvl());
-                    }
-                }
-            }
-            enemy.sprite.showStatus(CharSprite.NEUTRAL, enemy.defenseVerb());
+            // 未命中事件：职业闪避（影舞者）、武器未命中效果（Yamato）、护甲反制（灰羽斗篷）、
+            // 防御者持雾剑时获得隐身等
+            EventManager.emit(new AttackMissEvent(this, enemy,
+                    attackingWeapon(), defendingWeapon(enemy), defendingArmor(enemy)));
 
-            if (defender.belongings.weapon instanceof FogSword) {
-              Buff.affect(defender, Invisibility.class, 1f);
-            }
+            enemy.sprite.showStatus(CharSprite.NEUTRAL, enemy.defenseVerb());
 
             if (visibleFight) {
                 //TODO enemy.defenseSound? currently miss plays for monks/crab even when they parry
@@ -566,49 +524,24 @@ public abstract class Char extends Actor {
 			defStat *= RingOfEvasion.evasionMultiplier(defender);
 		}
 
-		Item attackWeapon = attacker instanceof Hero
-				? ((Hero) attacker).belongings.attackingWeapon()
-				: attacker.attackingWeapon();
-		AfterImage.absoluteEvasion attackEvasion = attacker.buff(AfterImage.absoluteEvasion.class);
-		if (!magic && attackEvasion != null
-				&& attacker.buff(AfterImage.AnotabsoluteEvasion.class) == null
-				&& attackWeapon instanceof CircleSword) {
-			attackEvasion.detach();
-			return true;
-		}
+		Item attackWeapon = attacker.attackingWeapon();
+		Item defendWeapon = defendingWeapon(defender);
 
         if (defender instanceof Hero && ((Hero) defender).damageInterrupt) {
             ((Hero) defender).interrupt();
         }
 
-        if (defender.buff(AfterImage.absoluteEvasion.class) != null && defender instanceof Wraith) {
-
-            Buff.detach(defender, AfterImage.absoluteEvasion.class);
-            return false;
-        }
-
-		boolean defenderWieldsCircleSword = defender.wieldsCircleSword();
-		if (defender.buff(AfterImage.absoluteEvasion.class) != null
-				&& !defenderWieldsCircleSword) {
-            Buff.detach(defender, AfterImage.absoluteEvasion.class);
-            return false;
-        }
-
-        if (defender.buff(AfterImage.AnotabsoluteEvasion.class) != null) {
-            Buff.detach(defender, AfterImage.AnotabsoluteEvasion.class);
-            return false;
-        }
-
-        if (defender.HP < defender.HT) {
-            if (attackWeapon instanceof Axe_D) {
-                return true;
-            }
-        }
-
-        if (attackWeapon instanceof PneumFistGloves) {
-            if (((PneumFistGloves) attackWeapon).active && Dungeon.energy > 0) {
-                return true;
-            }
+        // 命中判定事件：物品/装备可覆写本次命中结果（强制必中 / 必闪）或调整命中、闪避数值。
+        // 覆写为「先写者获胜」，优先级高者先执行。
+        HitCheckEvent hitCheck = new HitCheckEvent(attacker, defender, magic,
+                attackWeapon, defendWeapon, acuStat, defStat);
+        EventManager.emit(hitCheck);
+        acuStat = hitCheck.getAccuracy();
+        defStat = hitCheck.getEvasion();
+        switch (hitCheck.getResult()) {
+            case FORCE_HIT:  return true;
+            case FORCE_MISS: return false;
+            default: break;
         }
 
 

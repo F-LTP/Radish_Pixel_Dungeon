@@ -5,7 +5,10 @@ import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.events.AttackMissEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -73,6 +76,14 @@ public class FogSword extends MeleeWeapon {
         @Override
         public float iconFadePercent() {
             return Math.max(0, (DURATION - visualcooldown()) / DURATION);
+        }
+    }
+
+    /** 未命中时，若防御者手持雾剑则使其获得短暂隐身（由攻击未命中事件驱动）。 */
+    @SubscribeEvent(event = AttackMissEvent.class, priority = 0)
+    public static void onAttackMiss(AttackMissEvent event) {
+        if (event.getDefenderWeapon() instanceof FogSword) {
+            Buff.affect(event.getDefender(), Invisibility.class, 1f);
         }
     }
 

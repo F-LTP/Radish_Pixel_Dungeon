@@ -81,7 +81,7 @@ public class Rlyeh extends MeleeWeapon {
      * 拉莱耶反弹：玩家方（英雄本体或其雕像）持有 Rlyeh 时，近战攻击可能被反弹给攻击者。
      * 订阅 {@link AttackEvent}，命中后、伤害结算前触发。触发成功则取消本次攻击，并对攻击者施加反弹伤害。
      */
-    @SubscribeEvent(event = AttackEvent.class, priority = 0)
+    @SubscribeEvent(event = AttackEvent.class, priority = 100)
     public static void onAttack(AttackEvent event) {
         Hero player = Dungeon.hero;
         if (player == null) return;

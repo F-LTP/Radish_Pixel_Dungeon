@@ -25,6 +25,8 @@ import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SnowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.events.AttackHitEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
@@ -78,6 +80,17 @@ public class FrostImbue extends FlavourBuff {
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	/** 命中后由攻击命中事件驱动：攻击者带冰霜赋能时，为目标附加冰寒。 */
+	@SubscribeEvent(event = AttackHitEvent.class, priority = -110)
+	public static void onAttackHit(AttackHitEvent event) {
+		Char attacker = event.getAttacker();
+		if (attacker == null) return;
+		FrostImbue imbue = attacker.buff(FrostImbue.class);
+		if (imbue != null) {
+			imbue.proc(event.getDefender());
 		}
 	}
 }

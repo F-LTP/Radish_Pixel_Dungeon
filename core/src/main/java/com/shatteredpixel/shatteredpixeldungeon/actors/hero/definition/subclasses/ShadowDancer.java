@@ -7,6 +7,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
+import com.shatteredpixel.shatteredpixeldungeon.events.AttackMissEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.PreAttackEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
@@ -27,6 +31,30 @@ public class ShadowDancer extends HeroSubClass {
 
 	public ShadowDancer() {
 		super("SHADOW_DANCER", HeroIcon.SHADOW_DANCER);
+	}
+
+	/**
+	 * 破隐攻击替换为突袭：处于隐身时，本次普通攻击被取消，改为弹出突袭目标点选择。
+	 * 由攻击前事件驱动；取消后 {@code attack()} 视为该次行动已被消耗。
+	 */
+	@SubscribeEvent(event = PreAttackEvent.class, priority = 1000)
+	public static void onPreAttack(PreAttackEvent event) {
+		Char attacker = event.getAttacker();
+		if (!(attacker instanceof Hero)) return;
+		Hero hero = (Hero) attacker;
+		if (hero.subClass != HeroSubClasses.SHADOW_DANCER) return;
+		if (!hasVeil(hero)) return;
+		openSelector(hero);
+		event.cancel();
+	}
+
+	/** 闪避敌人攻击时累计连击（由攻击未命中事件驱动）。 */
+	@SubscribeEvent(event = AttackMissEvent.class, priority = 100)
+	public static void onAttackMiss(AttackMissEvent event) {
+		Char defender = event.getDefender();
+		if (defender instanceof Hero) {
+			onDodged((Hero) defender);
+		}
 	}
 
 	@Override

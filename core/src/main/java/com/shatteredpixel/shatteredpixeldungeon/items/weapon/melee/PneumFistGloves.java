@@ -6,6 +6,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
+import com.shatteredpixel.shatteredpixeldungeon.events.HitCheckEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -111,6 +113,17 @@ public class PneumFistGloves extends MeleeWeapon {
     public void storeInBundle(Bundle bundle) {
         super.storeInBundle(bundle);
         bundle.put("active_boolean", active);
+    }
+
+    /** 激活且仍有能量时必定命中（由命中判定事件驱动，装备者可能是玩家或怪物）。 */
+    @SubscribeEvent(event = HitCheckEvent.class, priority = 500)
+    public static void onActiveForceHit(HitCheckEvent event) {
+        if (event.getResult() != HitCheckEvent.Result.NONE) return;
+        if (event.getAttackerWeapon() instanceof PneumFistGloves
+                && ((PneumFistGloves) event.getAttackerWeapon()).active
+                && Dungeon.energy > 0) {
+            event.forceHit();
+        }
     }
 }
 
