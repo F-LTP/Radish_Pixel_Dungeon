@@ -1058,58 +1058,6 @@ public abstract class Mob extends Char {
 	@Override
 	public void die( Object cause ) {
 
-		// DiceMage 死亡着色器效果：根据伤害类型应用 shader
-		if (alignment == Alignment.ENEMY
-				&& Dungeon.hero != null
-				&& Dungeon.hero.subClass == HeroSubClasses.DICE_MAGE
-				&& sprite != null
-				&& sprite.parent != null) {
-			com.shatteredpixel.shatteredpixeldungeon.damage.DamageType dmgType = this.lastDamageType;
-
-			// 根据伤害类型选择 shader（含火/毒等持续伤害状态：烧死、毒死等）
-			com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType shaderType = null;
-			if (dmgType != null) {
-				switch (dmgType) {
-					case FIRE:
-					case BURNING_STATUS:
-						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.BURN;
-						break;
-					case FROST:
-					case CHILL:
-						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.ALPHA;
-						break;
-					case LIGHTNING:
-						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.SINGULARITY;
-						break;
-					case TOXIC:
-					case CORROSIVE:
-					case POISON:
-					case OOZE:
-						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.ACID;
-						break;
-					case MAGICAL:
-					case CORRUPTION:
-						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.NOISE;
-						break;
-					case PHYSICAL:
-					case PHYSICAL_NO_ARMOR:
-					case BLEEDING:
-					case FALL:
-					case CHASM:
-					case PICK:
-						shaderType = com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.ShaderType.CUT;
-						break;
-					default:
-						shaderType = null;
-				}
-			}
-			
-			// 应用 shader 效果
-			if (shaderType != null) {
-				com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect.apply(this, shaderType, 0.5f);
-			}
-		}
-
 		if (alignment == Alignment.ENEMY
 				&& hero.subClass == HeroSubClasses.DICE_MAGE
 				&& (cause == hero || cause instanceof Weapon || cause instanceof Wand || cause instanceof DiceMageSpell)){

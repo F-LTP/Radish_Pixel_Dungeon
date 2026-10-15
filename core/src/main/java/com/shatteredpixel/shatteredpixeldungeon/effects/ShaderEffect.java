@@ -12,7 +12,6 @@
 package com.shatteredpixel.shatteredpixeldungeon.effects;
 
 import com.badlogic.gdx.Gdx;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.shaders.*;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.watabou.glwrap.GlslShaderScript;
@@ -48,6 +47,13 @@ public class ShaderEffect extends Gizmo {
         this.duration = duration;
 
         shader = getShader(type);
+    }
+
+    /** 进度走完后的回调（如清理尸体），替代旧的死亡标记轮询。 */
+    private Runnable onComplete;
+
+    public void onComplete( Runnable onComplete ) {
+        this.onComplete = onComplete;
     }
 
     private GlslShaderScript getShader(ShaderType type) {
@@ -145,12 +151,10 @@ public class ShaderEffect extends Gizmo {
         progress = Math.min(elapsed / duration, 1.0f);
 
         if (progress >= 1.0f) {
-            if (target != null && target.isPendingDeathAfterShader()) {
-                target.clearPendingDeath();
-                target.setShaderEffect(null);
-                target.killAndErase();
-            }
             killAndErase();
+            if (onComplete != null) {
+                onComplete.run();
+            }
         }
     }
 
@@ -234,43 +238,32 @@ public class ShaderEffect extends Gizmo {
 
     // ========== 静态入口 ==========
 
-    public static void apply(Char target, ShaderType type, float duration) {
-//        GLog.w("ShaderEffect.apply 被调用! target=" + target + " type=" + type);
-        
-        if (target == null || target.sprite == null) {
-//            GLog.w("ShaderEffect.apply: target 或 sprite 为 null!");
-            return;
-        }
+    /**
+     * 死亡着色器动画：准备状态清理 → 渲染线程挂载 shader → 进度走完后清理尸体并回调。
+     */
+    public static DeathAnimation deathAnimation( ShaderType type, float duration ) {
+        return (sprite, onFinished) -> {
+            sprite.prepareDeathVisual();
 
-        CharSprite sprite = target.sprite;
+            Game.runOnRenderThread( () -> {
+                if (sprite.parent == null) {
+                    if (onFinished != null) {
+                        onFinished.run();
+                    }
+                    return;
+                }
 
-        sprite.dieAfterShader();
+                ShaderEffect old = sprite.getShaderEffect();
+                if (old != null) {
+                    old.killAndErase();
+                }
 
-        final CharSprite finalSprite = sprite;
-        final ShaderType finalType = type;
-        final float finalDuration = duration;
-        
-        Game.runOnRenderThread(() -> {
-//            GLog.w("ShaderEffect: 渲染线程回调执行中...");
-            
-            if (finalSprite.parent == null) {
-//                GLog.w("ShaderEffect: sprite.parent 为 null，已移除?");
-                return;
-            }
-            
-            ShaderEffect old = finalSprite.getShaderEffect();
-            if (old != null) {
-                old.killAndErase();
-            }
-
-            ShaderEffect effect = new ShaderEffect(finalSprite, finalType, finalDuration);
-            finalSprite.setShaderEffect(effect);
-//            GLog.w("ShaderEffect: setShaderEffect 已调用, shaderEffect=" + finalSprite.getShaderEffect());
-
-            if (finalSprite.parent != null) {
-                finalSprite.parent.add(effect);
-            }
-        });
+                ShaderEffect effect = new ShaderEffect(sprite, type, duration);
+                effect.onComplete( onFinished );
+                sprite.setShaderEffect(effect);
+                sprite.parent.add(effect);
+            } );
+        };
     }
 
     public enum ShaderType {

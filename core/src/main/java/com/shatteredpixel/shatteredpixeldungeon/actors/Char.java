@@ -40,6 +40,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.custom.buffs.SpellVulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.ImmortalShieldAffecter;
 import com.shatteredpixel.shatteredpixeldungeon.damage.*;
+import com.shatteredpixel.shatteredpixeldungeon.effects.DeathAnimation;
+import com.shatteredpixel.shatteredpixeldungeon.effects.DeathAnimations;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SnDSFX;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
@@ -1401,15 +1403,12 @@ public abstract class Char extends Actor {
     public void die(Object src) {
         destroy();
         if (src != Chasm.class && sprite != null) {
-            // 如果 sprite 有待处理的死亡标记（shader 即将创建），跳过死亡动画。
-            // dieAfterShader() 已经在 ShaderEffect.apply() 中同步调用过（shaderEffect
-            // 是在渲染线程延迟设置的，因此这里不能依赖 getShaderEffect() 判空）。
-            if (sprite.isPendingDeathAfterShader()) {
-                // shader 会接管，不需要播放死亡动画
-            } else if (sprite.getShaderEffect() == null) {
-                sprite.die();
+            //通过死因选择死亡动画（含默认动画在内的全部死法都由 DeathAnimations 管理）
+            DeathAnimation anim = DeathAnimations.select(this, src);
+            if (anim != null) {
+                anim.play(sprite, sprite::killAndErase);
             } else {
-                sprite.dieAfterShader();
+                sprite.die();
             }
         }
         if (SnDSFX.active()) {
