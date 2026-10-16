@@ -6,33 +6,25 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionHero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FireImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FrostImbue;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Fury;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.damage.OrdinaryAttackDamage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfMindVision;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -49,6 +41,7 @@ public class Deminion extends Mob {
         HP = HT = 60;
         defenseSkill = 24;
 
+        flying = true;
 
         EXP = 12;
         maxLvl = 26;
@@ -98,86 +91,19 @@ public class Deminion extends Mob {
             if (enemy.buff(AfterImage.Blur.class)!=null){
                 enemy.buff(AfterImage.Blur.class).gainDodge();
             }
-            int dr = Math.round(enemy.drRoll() * AscensionChallenge.statModifier(enemy));
 
-            Barkskin bark = enemy.buff(Barkskin.class);
-            if (bark != null)   dr += Random.NormalIntRange( 0 , bark.level() );
+            OrdinaryAttackDamage.DamageRoll damageRoll = OrdinaryAttackDamage.rollBaseDamage(this);
+            OrdinaryAttackDamage.CriticalRoll criticalRoll = OrdinaryAttackDamage.rollCritical(this, enemy, damageRoll.damage);
+            Preparation prep = damageRoll.preparation;
+            DamageInfo attackDamage = OrdinaryAttackDamage.build(this, enemy, Math.round(criticalRoll.damage), criticalRoll.critical,
+                    criticalRoll.multiplier, dmgMulti, dmgBonus);
 
-            //we use a float here briefly so that we don't have to constantly round while
-            // potentially applying various multiplier effects
-            float dmg;
-            Preparation prep = buff(Preparation.class);
-            if (prep != null){
-                dmg = prep.damageRoll(this);
-            } else {
-                dmg = damageRoll();
-            }
-            boolean crit=false;
-            boolean surprise =enemy instanceof Mob && ((Mob) enemy).surprisedBy(this);
-            float current_crit=critSkill(),current_critdamage=critDamage();
-
-            current_critdamage=Math.min(current_critdamage,critDamageCap);
-            if (this.buff(Scythe.scytheSac.class)!=null){
-                current_crit+=10f;
-                current_critdamage+=0.1f;
-            }
-
-            if (this.buff(RingOfTenacity.Tenacity.class)!=null) {current_crit=0;}
-            if (Random.Float()*100<current_crit || crit) {
-                dmg*=current_critdamage;
-                crit = true;
-            }
-
-            dmg = Math.round(dmg*dmgMulti);
-
-            Berserk berserk = buff(Berserk.class);
-            if (berserk != null) dmg = berserk.damageFactor(dmg);
-
-            if (buff( Fury.class ) != null) {
-                dmg *= 1.5f;
-            }
-            if (buff(RingOfTenacity.Tenacity.class)!=null){
-                dmg*=RingOfTenacity.attackMultiplier(this);
-            }
-            for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
-                dmg *= buff.meleeDamageFactor();
-            }
-            for (ChampionHero buff : buffs(ChampionHero.class)){
-                dmg *= buff.meleeDamageFactor();
-            }
-            dmg *= AscensionChallenge.statModifier(this);
-
-            //flat damage bonus is applied after positive multipliers, but before negative ones
-            dmg += dmgBonus;
-
-            //friendly endure
-            Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
-            if (endure != null) dmg = endure.damageFactor(dmg);
-
-            //enemy endure
-            endure = enemy.buff(Endure.EndureTracker.class);
-            if (endure != null){
-                dmg = endure.adjustDamageTaken(dmg);
-            }
-
-            if (enemy.buff(ScrollOfChallenge.ChallengeArena.class) != null){
-                dmg *= 0.67f;
-            }
-
-            if ( buff(Weakness.class) != null ){
-                dmg *= 0.67f;
-            }
-
-            int effectiveDamage = enemy.defenseProc( this, Math.round(dmg) );
+            int effectiveDamage = enemy.defenseProc( this, attackDamage.getDamage() );
 
             // created by DoggingDog on 20240718
             // for Torturer using
-            effectiveDamage = Math.max( effectiveDamage - dr, 0 );
-
-            if (enemy.buff(Viscosity.ViscosityTracker.class) != null){
-                effectiveDamage = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(effectiveDamage);
-                enemy.buff(Viscosity.ViscosityTracker.class).detach();
-            }
+            // 护甲 DR 已移入 DamagePipeline「应用护甲」阶段，此处不再扣除
+            // 黏稠刻印延迟伤害同样改在 DamagePipeline「应用护甲」之后结算，此处不再处理
 
             //vulnerable specifically applies after armor reductions
             if ( enemy.buff( Vulnerable.class ) != null){
@@ -186,22 +112,65 @@ public class Deminion extends Mob {
 
             effectiveDamage = attackProc( enemy, effectiveDamage );
 
+            DamageInfo firstAttackDamage = attackDamage.copy();
+            firstAttackDamage.addFinalAddModifier(effectiveDamage - firstAttackDamage.getDamage(), "attack post-processing");
+
             if (visibleFight) {
                 if (effectiveDamage > 0 || !enemy.blockSound(Random.Float(0.96f, 1.05f))) {
                     hitSound(Random.Float(0.87f, 1.15f));
                 }
             }
 
+            if (!enemy.isAlive()){
+                return true;
+            }
+            
+            if(criticalRoll.critical){
+                enemy.sprite.showStatus(CharSprite.NEGATIVE,Messages.get(this,"crit"));
+            }
+
+            if(enemy.buff(Sigil.class) != null){
+                Buff.prolong(enemy, Sigil.class, Sigil.DURATION);
+
+                enemy.damage(firstAttackDamage.copy());
+
+                enemy.damage(DamageInfo.of(8, DamageType.TRUE, this, new DeminionCritClass()));
+            } else {
+                enemy.damage(firstAttackDamage);
+            }
+
+            if(enemy.buff(Sigil.class) != null){
+                Buff.prolong(enemy, Sigil.class, Sigil.DURATION);
+                effectiveDamage += 8;
+            }
+
+            effectiveDamage = attackProc( enemy, effectiveDamage );
+
+            DamageInfo secondAttackDamage = attackDamage.copy();
+            secondAttackDamage.addFinalAddModifier(effectiveDamage - secondAttackDamage.getDamage(), "attack post-processing");
+
+            if (visibleFight) {
+                if (effectiveDamage > 0 || !enemy.blockSound(Random.Float(0.96f, 1.05f))) {
+                    hitSound(Random.Float(0.87f, 1.15f));
+                }
+            }
+            
             // If the enemy is already dead, interrupt the attack.
             // This matters as defence procs can sometimes inflict self-damage, such as armor glyphs.
             if (!enemy.isAlive()){
                 return true;
             }
-
-            if(crit){
+            
+            if(criticalRoll.critical){
                 enemy.sprite.showStatus(CharSprite.NEGATIVE,Messages.get(this,"crit"));
             }
-            enemy.damage( effectiveDamage, this );
+            // Use DeminionCritClass if target has Sigil to show armor-piercing crit icon
+            if(enemy.buff(Sigil.class) != null){
+                DamageInfo sigilDamage = new DamageInfo(effectiveDamage, DamageType.PHYSICAL, this, null, new DeminionCritClass());
+                enemy.damage(sigilDamage);
+            } else {
+                enemy.damage(secondAttackDamage);
+            }
 
             if (buff(FireImbue.class) != null)  buff(FireImbue.class).proc(enemy);
             if (buff(FrostImbue.class) != null) buff(FrostImbue.class).proc(enemy);
@@ -212,7 +181,7 @@ public class Deminion extends Mob {
                     enemy.die(this);
                 } else {
                     //helps with triggering any on-damage effects that need to activate
-                    enemy.damage(-1, this);
+                    enemy.damage(DamageInfo.of(-1, DamageType.TRUE, this, this));
                     DeathMark.processFearTheReaper(enemy);
                 }
                 enemy.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Preparation.class, "assassinated"));
@@ -260,16 +229,22 @@ public class Deminion extends Mob {
     }
     private void zap() {
         spend( 1f );
-
+        
         Invisibility.dispel(this);
         if (hit( this, enemy, true )) {
-
+            
             int dmg = Random.NormalIntRange( 1, 1 );
             dmg = Math.round(dmg * AscensionChallenge.statModifier(this));
-            enemy.damage( dmg, new MagicMissile() );
-            Buff.prolong(enemy,Sigil.class,Sigil.DURATION);
 
-
+            if(enemy.buff(Sigil.class) != null){
+                Buff.prolong(enemy, Sigil.class, Sigil.DURATION);
+                enemy.damage(DamageInfo.of(dmg, DamageType.MAGICAL, this, new MagicMissile()));
+                enemy.damage(DamageInfo.of(8, DamageType.TRUE, this, new DeminionCritClass()));
+            } else {
+                enemy.damage(DamageInfo.of(dmg, DamageType.MAGICAL, this, new MagicMissile()));
+                Buff.prolong(enemy,Sigil.class,Sigil.DURATION);
+            }
+            
             if (!enemy.isAlive() && enemy == Dungeon.hero) {
                 Badges.validateDeathFromEnemyMagic();
                 Dungeon.fail( getClass() );
@@ -315,7 +290,7 @@ public class Deminion extends Mob {
             announced = true;
         }
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.VULNERABLE;
         }
         @Override
@@ -331,4 +306,7 @@ public class Deminion extends Mob {
             GLog.n( Messages.get(this, "ondeath") );
         }
     }
+
+    // 这是为了表明Deminion攻击带有印记的敌人的时候造成了固定的真实伤害
+    public static class DeminionCritClass{}
 }

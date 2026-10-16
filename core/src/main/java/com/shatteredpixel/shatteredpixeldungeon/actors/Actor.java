@@ -34,10 +34,14 @@ import com.watabou.utils.SparseArray;
 import java.util.HashSet;
 
 public abstract class Actor implements Bundlable {
-	
+
+	public static synchronized  Class<? extends Actor> getCurrentActorClass(){
+		return  current == null ? null: current.getClass();
+	}
+
 	public static final float TICK	= 1f;
 
-	private float time;
+	public float time;
 
 	private int id = 0;
 

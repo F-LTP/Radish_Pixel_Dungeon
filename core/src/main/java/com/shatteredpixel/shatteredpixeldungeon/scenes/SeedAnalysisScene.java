@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.scenes;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.SeedFinder;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Archs;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ExitButton;
@@ -77,7 +78,8 @@ public class SeedAnalysisScene extends PixelScene {
                 text = DungeonSeed.formatText(text);
                 long seed = DungeonSeed.convertFromText(text);
                 if (positive && seed > -1){
-                    CreditsBlock txt = new CreditsBlock(true, Window.TITLE_COLOR, new SeedFinder().logSeedItems(text,27));
+                    CreditsBlock txt = new CreditsBlock(true, Window.TITLE_COLOR,
+                            new SeedFinder().logSeedItems(text, Branches.get(Branches.MAIN).maxDepth));
                     txt.setRect((Camera.main.width - colWidth)/2f, 12, colWidth, 0);
                     content.add(txt);
                     content.setSize( fullWidth, txt.bottom()+10 );

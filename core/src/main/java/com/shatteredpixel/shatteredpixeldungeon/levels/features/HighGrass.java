@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.features;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -28,15 +30,18 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.ArmoredStatue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Blacksmith;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
+import com.shatteredpixel.shatteredpixeldungeon.events.HeroTrampleGrassEvent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Dewdrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Camouflage;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.SandalsOfNature;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Berry;
 import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.MagicRoot;
@@ -44,6 +49,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.PetrifiedSeed;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.MiningLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
+import com.shatteredpixel.shatteredpixeldungeon.plants.VineTrap;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.watabou.utils.Random;
 
@@ -59,6 +65,11 @@ public class HighGrass {
 		
 		Char ch = Actor.findChar(pos);
 
+		// 发布踩踏高草事件（仅对英雄）
+		if (ch instanceof Hero) {
+			EventManager.emit(new HeroTrampleGrassEvent((Hero) ch, level, pos));
+		}
+
 		if (ch instanceof Hero && ((Hero) ch).hasTalent(Talent.UNDERESTIMATED)){
 			int berriesAvailable = 2 + 4*((Hero) ch).pointsInTalent(Talent.UNDERESTIMATED);
 
@@ -72,8 +83,21 @@ public class HighGrass {
 			}
 		}
 
+		if (ch instanceof Hero && ((Hero) ch).hasTalent(Talent.LAND_HEART)){
+			Buff.affect(Dungeon.hero, Talent.HIGHGRSS_SPEED.class, 1f);
+
+			if(hero.pointsInTalent(Talent.LAND_HEART) >= 2 && Random.Int(10) == 0){
+				Waterskin waterskin = hero.belongings.getItem(Waterskin.class);
+				Dewdrop dewdrop = new Dewdrop();
+				if(waterskin != null){
+					waterskin.collectDew(dewdrop);
+				}
+			}
+
+		}
+
 		if (level.map[pos] == Terrain.FURROWED_GRASS){
-			if (ch instanceof Hero && ((Hero) ch).heroClass == HeroClass.HUNTRESS){
+			if (ch instanceof Hero && ((Hero) ch).heroClass == HeroClasses.HUNTRESS){
 				//Do nothing
 				freezeTrample = true;
 			} else {
@@ -81,7 +105,7 @@ public class HighGrass {
 			}
 			
 		} else {
-			if (ch instanceof Hero && ((Hero) ch).heroClass == HeroClass.HUNTRESS){
+			if (ch instanceof Hero && ((Hero) ch).heroClass == HeroClasses.HUNTRESS){
 				Level.set(pos, Terrain.FURROWED_GRASS);
 				freezeTrample = true;
 			} else {
@@ -158,21 +182,16 @@ public class HighGrass {
 			}
 
 			//Camouflage
-			if (ch instanceof Hero) {
-				Hero hero = (Hero) ch;
-				if (hero.belongings.armor() != null && hero.belongings.armor().hasGlyph(Camouflage.class, hero)) {
-					Camouflage.activate(hero, hero.belongings.armor.buffedLvl());
-				}
-			} else if (ch instanceof DriedRose.GhostHero){
-				DriedRose.GhostHero ghost = (DriedRose.GhostHero) ch;
-				if (ghost.armor() != null && ghost.armor().hasGlyph(Camouflage.class, ghost)){
-					Camouflage.activate(ghost, ghost.armor().buffedLvl());
-				}
-			} else if (ch instanceof ArmoredStatue){
-				ArmoredStatue statue = (ArmoredStatue) ch;
-				if (statue.armor() != null && statue.armor().hasGlyph(Camouflage.class, statue)){
-					Camouflage.activate(statue, statue.armor().buffedLvl());
-				}
+			Armor wornArmor = Char.defendingArmor(ch) instanceof Armor
+					? (Armor) Char.defendingArmor(ch)
+					: null;
+			if (wornArmor != null && wornArmor.hasGlyph(Camouflage.class, ch)) {
+				Camouflage.activate(ch, wornArmor.buffedLvl());
+			}
+			if (ch instanceof Hero && ((Hero) ch).hasTalent(Talent.VINE_TRAP)){
+				//GLog.p("create trap!");
+				Buff.affect(ch, VineTrap.PlantBuff.class,ch.cooldown()).set(pos);
+				//Dungeon.plantVineTrap(pos);
 			}
 			
 		}

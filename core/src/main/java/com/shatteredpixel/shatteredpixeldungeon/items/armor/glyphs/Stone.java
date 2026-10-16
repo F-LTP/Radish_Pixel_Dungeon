@@ -21,10 +21,10 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs;
 
-import static com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon.Enchantment.genericProcChanceMultiplier;
-
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.FerretTuft;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.watabou.utils.GameMath;
 
@@ -40,7 +40,8 @@ public class Stone extends Armor.Glyph {
 		float accuracy = attacker.attackSkill(defender);
 		testing = false;
 
-		evasion *= genericProcChanceMultiplier(defender);
+		evasion *= RingOfArcana.enchantPowerMultiplier(defender)*defender.talentProc();
+		evasion *= FerretTuft.evasionMultiplier();
 		
 		float hitChance;
 		if (evasion >= accuracy){
@@ -48,7 +49,7 @@ public class Stone extends Armor.Glyph {
 		} else {
 			hitChance = 1f - (evasion/accuracy)/2f;
 		}
-		
+
 		//75% of dodge chance is applied as damage reduction
 		// we clamp in case accuracy or evasion were negative
 		hitChance = GameMath.gate(0.25f, (1f + 3f*hitChance)/4f, 1f);

@@ -38,7 +38,7 @@ public class SnipersMark extends FlavourBuff implements ActionIndicator.Action {
 
 	public int object = 0;
 	public int level = 0;
-
+	public int secondObject = 0;
 	private static final String OBJECT    = "object";
 	private static final String LEVEL    = "level";
 
@@ -52,19 +52,24 @@ public class SnipersMark extends FlavourBuff implements ActionIndicator.Action {
 		this.object = object;
 		this.level = level;
 	}
-	
+
+	public void setSec(int object, int level){
+		this.secondObject = object;
+		this.level = level;
+	}
+
 	@Override
 	public boolean attachTo(Char target) {
 		ActionIndicator.setAction(this);
 		return super.attachTo(target);
 	}
-	
+
 	@Override
 	public void detach() {
 		super.detach();
 		ActionIndicator.clearAction(this);
 	}
-	
+
 	@Override
 	public void storeInBundle( Bundle bundle ) {
 		super.storeInBundle( bundle );
@@ -80,7 +85,7 @@ public class SnipersMark extends FlavourBuff implements ActionIndicator.Action {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.MARK;
 	}
 
@@ -93,7 +98,7 @@ public class SnipersMark extends FlavourBuff implements ActionIndicator.Action {
 	public String desc() {
 		return Messages.get(this, "desc");
 	}
-	
+
 	@Override
 	public String actionName() {
 		SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
@@ -111,7 +116,7 @@ public class SnipersMark extends FlavourBuff implements ActionIndicator.Action {
 	}
 
 	@Override
-	public int actionIcon() {
+	public String actionIcon() {
 		return HeroIcon.SNIPERS_MARK;
 	}
 
@@ -122,27 +127,44 @@ public class SnipersMark extends FlavourBuff implements ActionIndicator.Action {
 
 	@Override
 	public void doAction() {
-		
+
 		Hero hero = Dungeon.hero;
 		if (hero == null) return;
-		
+
 		SpiritBow bow = hero.belongings.getItem(SpiritBow.class);
 		if (bow == null) return;
-		
+
 		SpiritBow.SpiritArrow arrow = bow.knockArrow();
 		if (arrow == null) return;
-		
+
 		Char ch = (Char) Actor.findById(object);
-		if (ch == null) return;
-		
+
+
+
+		if (ch == null)
+			return;
+
+
 		int cell = QuickSlotButton.autoAim(ch, arrow);
+
 		if (cell == -1) return;
-		
+
 		bow.sniperSpecial = true;
 		bow.sniperSpecialBonusDamage = level*Dungeon.hero.pointsInTalent(Talent.SHARED_UPGRADES)/10f;
-		
+//		if (hero.hasTalent(Talent.BOW_DULES)) {
+//			for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
+//				if (mob.alignment != Char.Alignment.ALLY && Dungeon.level.heroFOV[mob.pos]) {
+//					cell = mob.pos;
+//					arrow.cast(hero, cell);
+//				}
+//			}
+//		} else {
+//			arrow.cast(hero, cell);
+//		}
+
 		arrow.cast(hero, cell);
+
 		detach();
-		
+
 	}
 }

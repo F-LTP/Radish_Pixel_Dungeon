@@ -3,12 +3,10 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
-import com.watabou.utils.Bundle;
 
 public class Morello extends MeleeWeapon {
 
@@ -51,9 +49,9 @@ public class Morello extends MeleeWeapon {
 
        public void updateMaxCharge(Hero hero){
            if(hero.belongings.weapon instanceof Morello){
-               KindOfWeapon morello = hero.belongings.weapon;
-               this.buffCharge = 1 + (int)Math.ceil(morello.level() * 0.5f);
-           }
+           			KindOfWeapon morello = hero.belongings.weapon;
+           			this.buffCharge = 2 + (int)Math.ceil(morello.buffedLvl() * 0.5f);
+           		}
        }
 
         @Override
@@ -67,7 +65,7 @@ public class Morello extends MeleeWeapon {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.UPGRADE;
         }
 

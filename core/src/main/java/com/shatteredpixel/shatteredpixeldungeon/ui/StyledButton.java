@@ -25,13 +25,12 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.watabou.noosa.Image;
-import com.watabou.noosa.NinePatch;
 import com.watabou.noosa.audio.Sample;
 
 //simple button which support a background chrome, text, and an icon.
 public class StyledButton extends Button {
 	
-	protected NinePatch bg;
+	protected ButtonSkin skin;
 	protected RenderedTextBlock text;
 	protected Image icon;
 	public boolean leftJustify = false;
@@ -45,8 +44,9 @@ public class StyledButton extends Button {
 	public StyledButton(Chrome.Type type, String label, int size ){
 		super();
 		
-		bg = Chrome.get( type );
-		addToBack( bg );
+		skin = new ButtonSkin(type);
+		addToBack(skin.chrome());
+		add(skin.themedFrame());
 		
 		text = PixelScene.renderTextBlock( size );
 		text.text( label );
@@ -54,20 +54,23 @@ public class StyledButton extends Button {
 	}
 	
 	@Override
+	protected void createChildren() {
+		super.createChildren();
+	}
+	
+	@Override
 	protected void layout() {
 		
 		super.layout();
 		
-		bg.x = x;
-		bg.y = y;
-		bg.size( width, height );
+		skin.layout(x, y, width, height);
 		
 		float componentWidth = 0;
 		
 		if (icon != null) componentWidth += icon.width() + 2;
 		
 		if (text != null && !text.text().equals("")){
-			if (multiline) text.maxWidth( (int)(width - componentWidth - bg.marginHor() - 2));
+			if (multiline) text.maxWidth( (int)(width - componentWidth - skin.marginHor() - 2));
 			componentWidth += text.width() + 2;
 
 			text.setPos(
@@ -87,12 +90,12 @@ public class StyledButton extends Button {
 
 		if (leftJustify){
 			if (icon != null){
-				icon.x = x + bg.marginLeft() + 1;
+				icon.x = x + skin.marginLeft() + 1;
 				PixelScene.align(icon);
 				text.setPos( icon.x + icon.width() + 1, text.top());
 				PixelScene.align(text);
 			} else if (text != null) {
-				text.setPos( x + bg.marginLeft() + 1, text.top());
+				text.setPos( x + skin.marginLeft() + 1, text.top());
 				PixelScene.align(text);
 			}
 		}
@@ -101,13 +104,13 @@ public class StyledButton extends Button {
 	
 	@Override
 	protected void onPointerDown() {
-		bg.brightness( 1.2f );
+		skin.onPointerDown();
 		Sample.INSTANCE.play( Assets.Sounds.CLICK );
 	}
 	
 	@Override
 	protected void onPointerUp() {
-		bg.resetColor();
+		skin.onPointerUp();
 	}
 	
 	public void enable( boolean value ) {
@@ -128,6 +131,10 @@ public class StyledButton extends Button {
 	public void textColor( int value ) {
 		text.hardlight( value );
 	}
+
+	public void lineColor( int value ) {
+		skin.lineColor( value );
+	}
 	
 	public void icon( Image icon ) {
 		if (this.icon != null) {
@@ -146,13 +153,13 @@ public class StyledButton extends Button {
 
 	public void alpha(float value){
 		if (icon != null) icon.alpha(value);
-		if (bg != null)   bg.alpha(value);
 		if (text != null) text.alpha(value);
+		if (skin != null) skin.alpha(value);
 	}
 
 	public float alpha(){
 		if (icon != null)   return icon.alpha();
-		else                return bg.alpha();
+		else                return skin.alpha();
 	}
 	
 	public float reqWidth() {

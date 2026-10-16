@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -85,10 +86,17 @@ public class PrismaticGuard extends Buff {
 		} else {
 			spend(TICK);
 		}
-		
+
 		LockedFloor lock = target.buff(LockedFloor.class);
-		if (HP < maxHP() && Regeneration.regenOn()){
-			HP += 0.1f;
+		if (HP < maxHP() && (lock == null || lock.regenOn())){
+			float to_heal = 0.1f;
+			if (target == Dungeon.hero){
+				Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+				if (ben!=null){
+					to_heal*=RingOfBenediction.periodMultiplier(target);
+				}
+			}
+			HP +=to_heal;
 		}
 		
 		return true;
@@ -107,7 +115,7 @@ public class PrismaticGuard extends Buff {
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.ARMOR;
 	}
 	

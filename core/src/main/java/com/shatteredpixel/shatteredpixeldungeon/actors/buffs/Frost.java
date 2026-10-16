@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
@@ -24,8 +24,14 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Thief;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Wheelchair;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.FrozenCarpaccio;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
@@ -40,25 +46,57 @@ import java.util.ArrayList;
 
 public class Frost extends FlavourBuff {
 
-	public static final float DURATION	= 10f;
+	public static final float DURATION	= 5f;
+
+	//bosses are only frozen for a shorter time
+	public static final float BOSS_DURATION	= 3f;
 
 	{
 		type = buffType.NEGATIVE;
 		announced = true;
 	}
-	
+
+	@Override
+	protected void spend(float time) {
+		super.spend(time);
+		clampBossDuration();
+	}
+
+	@Override
+	protected void postpone(float time) {
+		super.postpone(time);
+		clampBossDuration();
+	}
+
+	private void clampBossDuration(){
+		if (target != null && Char.hasProp(target, Char.Property.BOSS)
+				&& cooldown() > BOSS_DURATION){
+			time = now() + BOSS_DURATION;
+		}
+	}
+
 	@Override
 	public boolean attachTo( Char target ) {
 		Buff.detach( target, Burning.class );
 
 		if (super.attachTo( target )) {
-			
+
 			target.paralysed++;
 			Buff.detach( target, Chill.class );
 
 			if (target instanceof Hero) {
 
 				Hero hero = (Hero)target;
+
+				// 弹射起步天赋触发：受到冻伤时获得免费轮椅使用机会
+				if (hero.heroClass == HeroClasses.MOONLIGHT
+						&& hero.pointsInTalent(Talent.CATAPULT_START) >= 1
+						&& hero.buff(CatapultStartCooldown.class) == null) {
+					Buff.affect(hero, CatapultStartBuff.class, 1f);
+					Buff.affect(hero, CatapultStartCooldown.class, CatapultStartCooldown.DURATION);
+					GLog.p(Messages.get(Wheelchair.class, "catapult_triggered"));
+				}
+
 				ArrayList<Item> freezable = new ArrayList<>();
 				//does not reach inside of containers
 				if (!hero.belongings.lostInventory()) {
@@ -68,7 +106,7 @@ public class Frost extends FlavourBuff {
 						}
 					}
 				}
-				
+
 				if (!freezable.isEmpty()){
 					Item toFreeze = Random.element(freezable).detach( hero.belongings.backpack );
 					GLog.w( Messages.capitalize(Messages.get(this, "freezes", toFreeze.title())) );
@@ -81,7 +119,7 @@ public class Frost extends FlavourBuff {
 						}
 					}
 				}
-				
+
 			} else if (target instanceof Thief) {
 
 				Item item = ((Thief) target).item;
@@ -100,18 +138,20 @@ public class Frost extends FlavourBuff {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public void detach() {
 		super.detach();
 		if (target.paralysed > 0)
 			target.paralysed--;
+		//thawing removes all remaining chill, but water chills the target again
+		Buff.detach(target, Chill.class);
 		if (Dungeon.level.water[target.pos])
 			Buff.prolong(target, Chill.class, Chill.DURATION/2f);
 	}
-	
+
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.FROST;
 	}
 
@@ -138,7 +178,7 @@ public class Frost extends FlavourBuff {
 
 	{
 		//can't chill what's frozen!
-		immunities.add( Chill.class );
+		immunities.add(Chill.class); typeImmunities.add(DamageType.CHILL);
 	}
 
 }

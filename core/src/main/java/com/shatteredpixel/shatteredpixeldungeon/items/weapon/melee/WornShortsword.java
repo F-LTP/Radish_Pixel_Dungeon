@@ -49,6 +49,15 @@ public class WornShortsword extends MeleeWeapon {
 	}
 
 	@Override
+	public int min(int lvl) {
+		return  2 + lvl;
+	}
+	@Override
+	public int max(int lvl) {
+		return  10 + lvl * 2;
+	}
+
+	@Override
 	public String targetingPrompt() {
 		return Messages.get(this, "prompt");
 	}

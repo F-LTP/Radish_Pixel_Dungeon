@@ -28,6 +28,8 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentsPane;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -42,11 +44,19 @@ public class WndInfoSubclass extends WndTitledMessage {
 		Talent.initSubclassTalents(subCls, talentList);
 		Talent.initT4Talents(cls,subCls,talentList);
 
-		TalentsPane.TalentTierPane talentPane = new TalentsPane.TalentTierPane(talentList.get(2), 3, TalentButton.Mode.INFO);
-		talentPane.title.text( Messages.titleCase(Messages.get(WndHeroInfo.class, "talents")));
-		talentPane.setRect(0, height + 5, width, talentPane.height());
-		add(talentPane);
-		resize(width, (int) talentPane.bottom());
+		if (talentList.get(2).isEmpty()) {
+			RenderedTextBlock explanation = PixelScene.renderTextBlock(Messages.get(this, "dice_mage_talents"), 6);
+			explanation.maxWidth(width);
+			explanation.setPos(0, height + 5);
+			add(explanation);
+			resize(width, (int) explanation.bottom());
+		} else {
+			TalentsPane.TalentTierPane talentPane = new TalentsPane.TalentTierPane(talentList.get(2), 3, TalentButton.Mode.INFO);
+			talentPane.title.text( Messages.titleCase(Messages.get(WndHeroInfo.class, "talents")));
+			talentPane.setRect(0, height + 5, width, talentPane.height());
+			add(talentPane);
+			resize(width, (int) talentPane.bottom());
+		}
 
 	}
 

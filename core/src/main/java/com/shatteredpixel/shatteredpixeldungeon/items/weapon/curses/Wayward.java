@@ -68,7 +68,7 @@ public class Wayward extends Weapon.Enchantment {
 		public static final float DURATION	= 10f;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.WEAKNESS;
 		}
 

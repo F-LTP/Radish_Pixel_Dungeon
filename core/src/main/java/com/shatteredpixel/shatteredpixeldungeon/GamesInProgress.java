@@ -22,7 +22,9 @@
 package com.shatteredpixel.shatteredpixeldungeon;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.FileUtils;
@@ -35,7 +37,7 @@ import java.util.HashMap;
 
 public class GamesInProgress {
 	
-	public static final int MAX_SLOTS = HeroClass.values().length;
+	public static final int MAX_SLOTS = HeroClasses.ALL.size();
 	
 	//null means we have loaded info and it is empty, no entry means unknown.
 	private static HashMap<Integer, Info> slotStates = new HashMap<>();
@@ -46,29 +48,33 @@ public class GamesInProgress {
 	private static final String GAME_FOLDER = "game%d";
 	private static final String GAME_FILE	= "game.dat";
 	private static final String DEPTH_FILE	= "depth%d.dat";
-	private static final String DEPTH_BRANCH_FILE	= "depth%d-branch%d.dat";
+	private static final String DEPTH_BRANCH_ID_FILE = "depth%d-branch_%s.dat";
+
+	/**
+	 * 获取存档文件路径（使用 String branchId）
+	 */
+	public static String depthFile( int slot, int depth, String branchId ) {
+		if (branchId == null || branchId.equals(Branches.MAIN)) {
+			return gameFolder(slot) + "/" + Messages.format(DEPTH_FILE, depth);
+		} else {
+			return gameFolder(slot) + "/" + Messages.format(DEPTH_BRANCH_ID_FILE, depth, branchId);
+		}
+	}
 	
+
 	public static boolean gameExists( int slot ){
 		return FileUtils.dirExists(gameFolder(slot))
 				&& FileUtils.fileLength(gameFile(slot)) > 1;
 	}
-	
+
 	public static String gameFolder( int slot ){
 		return Messages.format(GAME_FOLDER, slot);
 	}
-	
+
 	public static String gameFile( int slot ){
 		return gameFolder(slot) + "/" + GAME_FILE;
 	}
-	
-	public static String depthFile( int slot, int depth, int branch ) {
-		if (branch == 0) {
-			return gameFolder(slot) + "/" + Messages.format(DEPTH_FILE, depth);
-		} else {
-			return gameFolder(slot) + "/" + Messages.format(DEPTH_BRANCH_FILE, depth, branch);
-		}
-	}
-	
+
 	public static int firstEmpty(){
 		for (int i = 1; i <= MAX_SLOTS; i++){
 			if (check(i) == null) return i;
@@ -136,7 +142,7 @@ public class GamesInProgress {
 		info.customSeed = Dungeon.customSeedText;
 		info.daily = Dungeon.daily;
 		info.dailyReplay = Dungeon.dailyReplay;
-		
+
 		info.level = Dungeon.hero.lvl;
 		info.str = Dungeon.hero.STR;
 		info.strBonus = Dungeon.hero.STR() - Dungeon.hero.STR;
@@ -146,7 +152,8 @@ public class GamesInProgress {
 		info.shld = Dungeon.hero.shielding();
 		info.heroClass = Dungeon.hero.heroClass;
 		info.subClass = Dungeon.hero.subClass;
-		info.armorTier = Dungeon.hero.tier();
+		info.armorTier = Dungeon.hero.tier_for_image();
+		info.skin = Dungeon.hero.skin;
 		
 		info.goldCollected = Statistics.goldCollected;
 		info.maxDepth = Statistics.deepestFloor;
@@ -184,6 +191,7 @@ public class GamesInProgress {
 		public HeroClass heroClass;
 		public HeroSubClass subClass;
 		public int armorTier;
+		public int skin;
 		
 		public int goldCollected;
 		public int maxDepth;

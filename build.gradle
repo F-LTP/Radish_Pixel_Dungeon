@@ -2,14 +2,20 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = uri("https://storage.googleapis.com/r8-releases/raw")
+        }
     }
     dependencies {
         //接入FB后 直接打包安卓DEBUG会出错 若要调试请gradlew desktop:debug
         // PowerShell: ./gradlew desktop:debug
         // 打包直接选择release 签名食用MT默认的
-        classpath 'com.android.tools.build:gradle:7.3.1'
-        classpath 'com.google.gms:google-services:4.3.15'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
+        // 本地调试临时注释掉固定的 r8（与 AGP 8.13.2 的 D8 API 不兼容），改用 AGP 自带 R8
+        // classpath 'com.android.tools:r8:8.7.18'
+        //noinspection AndroidGradlePluginVersion,AndroidGradlePluginVersion
+        classpath 'com.android.tools.build:gradle:8.13.2'
+        classpath 'com.google.gms:google-services:4.4.2'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.3'
     }
 }
 
@@ -19,18 +25,17 @@ allprojects {
         appName = 'Radish Pixel Dungeon'
         appPackageName = 'com.shatteredpixel.radishpixeldungeon'
 
-        appVersionCode = 240918
-        appVersionName = '0.3.8-base2.4.2'
+        appVersionCode = 2608060
+        appVersionName = '0.8.4-base2.4.2'
 
         appJavaCompatibility = JavaVersion.VERSION_1_8
 
-        appAndroidCompileSDK = 33
+        appAndroidCompileSDK = 34
         appAndroidMinSDK = 19
         appAndroidTargetSDK = 33
 
         gdxVersion = '1.11.0'
-        gdxControllersVersion = '2.2.4-SNAPSHOT'
-        //robovmVersion = '2.3.16'
+        gdxControllersVersion = '2.2.4'
     }
     version = appVersionName
 
@@ -38,6 +43,11 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
     }
 
 }
+
+apply from: 'gradle/runtime-atlas.gradle'

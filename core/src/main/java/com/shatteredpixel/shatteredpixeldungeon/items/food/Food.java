@@ -42,7 +42,6 @@ import com.watabou.noosa.audio.Sample;
 import java.util.ArrayList;
 
 public class Food extends Item {
-
 	public static final float TIME_TO_EAT	= 3f;
 	
 	public static final String AC_EAT	= "EAT";
@@ -71,6 +70,26 @@ public class Food extends Item {
 		super.execute( hero, action );
 
 		if (action.equals( AC_EAT )) {
+			if (hero.hasTalent(Talent.MEAL_UTILIZATION) && !(this instanceof HalfFood)) {
+				Food eaten = (Food) detach( hero.belongings.backpack );
+				if (eaten == null) return;
+				eaten.satisfyPortion(hero, eaten.energy / 2f);
+				GLog.i( Messages.get(this, "eat_msg") );
+				hero.sprite.operate( hero.pos );
+				hero.busy();
+				SpellSprite.show( hero, SpellSprite.FOOD );
+				eatSFX();
+				hero.spend( 1f );
+				Talent.onFoodEaten(hero, eaten.energy / 2f, eaten);
+				Statistics.foodEaten++;
+				Badges.validateFoodEaten();
+
+				HalfFood half = new HalfFood(eaten);
+				if (!half.collect(hero.belongings.backpack)) {
+					Dungeon.level.drop(half, hero.pos).sprite.drop();
+				}
+				return;
+			}
 			
 			detach( hero.belongings.backpack );
 			
@@ -101,7 +120,8 @@ public class Food extends Item {
 			|| Dungeon.hero.hasTalent(Talent.ENERGIZING_MEAL)
 			|| Dungeon.hero.hasTalent(Talent.MYSTICAL_MEAL)
 			|| Dungeon.hero.hasTalent(Talent.INVIGORATING_MEAL)
-			|| Dungeon.hero.hasTalent(Talent.FOCUSED_MEAL)){
+			|| Dungeon.hero.hasTalent(Talent.FOCUSED_MEAL)
+			|| Dungeon.hero.hasTalent(Talent.BLESS_FOOD)){
 			return TIME_TO_EAT - 2;
 		} else {
 			return TIME_TO_EAT;
@@ -109,7 +129,22 @@ public class Food extends Item {
 	}
 	
 	protected void satisfy( Hero hero ){
-		float foodVal = energy;
+		satisfyBase(hero, energy);
+	}
+
+	/** Applies this food's complete effect while restoring only the requested energy. */
+	protected void satisfyPortion( Hero hero, float portionEnergy ) {
+		float originalEnergy = energy;
+		try {
+			energy = portionEnergy;
+			satisfy(hero);
+		} finally {
+			energy = originalEnergy;
+		}
+	}
+
+	protected void satisfyBase( Hero hero, float foodValue ){
+		float foodVal = foodValue;
 		if (Dungeon.isChallenged(Challenges.NO_FOOD)){
 			foodVal /= 3f;
 		}

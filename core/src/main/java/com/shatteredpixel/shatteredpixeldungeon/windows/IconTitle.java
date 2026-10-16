@@ -53,20 +53,21 @@ public class IconTitle extends Component {
 		icon( icon );
 		label( Messages.titleCase( item.title() ) );
 		icon.view( item );
+		layout();
 	}
-	
+
 	public IconTitle( Heap heap ){
 		ItemSprite icon = new ItemSprite();
 		icon( icon );
 		label( Messages.titleCase( heap.title() ) );
 		icon.view( heap );
+		layout();
 	}
 
 	public IconTitle( Image icon, String label ) {
-		super();
-
 		icon( icon );
 		label( label );
+		layout();
 	}
 
 	@Override
@@ -97,7 +98,7 @@ public class IconTitle extends Component {
 
 		tfLabel.maxWidth((int)(width - (imWidth + GAP)));
 		tfLabel.setPos(x + imWidth + GAP,
-						imHeight > tfLabel.height() ? y +(imHeight - tfLabel.height()) / 2 : y);
+				imHeight > tfLabel.height() ? y +(imHeight - tfLabel.height()) / 2 : y);
 		PixelScene.align(tfLabel);
 
 		if (health.visible) {
@@ -106,6 +107,10 @@ public class IconTitle extends Component {
 		} else {
 			height = Math.max( imHeight, tfLabel.height() );
 		}
+	}
+
+	public float reqWidth(){
+		return imIcon.width() + tfLabel.width() + GAP;
 	}
 
 	public void icon( Image icon ) {
@@ -126,6 +131,15 @@ public class IconTitle extends Component {
 
 	public void color( int color ) {
 		tfLabel.hardlight( color );
+	}
+
+	public float alpha(){
+		return imIcon.alpha();
+	}
+
+	public void alpha( float value ){
+		tfLabel.alpha(value);
+		imIcon.alpha(value);
 	}
 
 	public void health( float value ) {

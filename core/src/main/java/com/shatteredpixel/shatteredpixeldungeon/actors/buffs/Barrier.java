@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blocking;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -29,6 +30,7 @@ import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
 
 public class Barrier extends ShieldBuff {
+	private boolean applyingIronPendant;
 	
 	{
 		type = buffType.POSITIVE;
@@ -38,20 +40,33 @@ public class Barrier extends ShieldBuff {
 
 	@Override
 	public void incShield(int amt) {
+		if (!applyingIronPendant && target == Dungeon.hero && amt > 0) {
+			applyingIronPendant = true;
+			amt = com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToyEffects.shieldGainMultiplier(amt);
+		}
 		super.incShield(amt);
+		applyingIronPendant = false;
 		partialLostShield = 0;
 	}
 
 	@Override
 	public void setShield(int shield) {
+		if (!applyingIronPendant && target == Dungeon.hero && shield > shielding()) {
+			applyingIronPendant = true;
+			int gain = shield - shielding();
+			shield = shielding() + com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToyEffects.shieldGainMultiplier(gain);
+		}
 		super.setShield(shield);
+		applyingIronPendant = false;
 		if (shielding() == shield) partialLostShield = 0;
 	}
 
 	@Override
 	public boolean act() {
 
-		partialLostShield += Math.min(1f, shielding()/20f);
+		if (!MercuryBuff.preventsNaturalDecay()) {
+			partialLostShield += Math.min(1f, shielding()/20f);
+		}
 
 		if (partialLostShield >= 1f) {
 			absorbDamage(1);
@@ -77,7 +92,7 @@ public class Barrier extends ShieldBuff {
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.ARMOR;
 	}
 	

@@ -7,8 +7,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.watabou.utils.Random;
 
-public class Cutterhead  extends MeleeWeapon{
+public class Cutterhead extends MeleeWeapon {
     //private static ItemSprite.Glowing RED = new ItemSprite.Glowing( 0x660022 );
     {
         image = ItemSpriteSheet.CUTTERHEAD;
@@ -17,18 +18,25 @@ public class Cutterhead  extends MeleeWeapon{
 
         tier = 5;
     }
+
+    //Basically this weapon only does half damage
+    @Override
+    public int min(int lvl){
+        return Math.round(super.min(lvl) * 0.5f);
+    }
+
     @Override
     public int max(int lvl) {
-        return  4*(tier+1) +    //24 base, down from 30
-                lvl*(tier);   //scaling down
+        return Math.round(4 * (tier + 1) +    //24 base, down from 30
+                lvl * (tier) * 0.5f);         //scaling down
     }
+
     @Override
     public int proc(Char attacker, Char defender, int damage) {
-        int dmgbonus = 0;
         if (!(defender.properties().contains(Char.Property.INORGANIC))) {
-            dmgbonus += damage / 4;
-            Buff.affect(defender, Bleeding.class).set(3 + 0.5f * buffedLvl(), this.getClass());
+            Bleeding.finishAllBleedingDamage(defender);
+            Buff.affect(defender, Bleeding.class).set(damage, this.getClass());
         }
-        return super.proc(attacker, defender, damage + dmgbonus);
+        return super.proc(attacker, defender, damage);
     }
 }

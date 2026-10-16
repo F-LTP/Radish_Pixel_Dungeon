@@ -25,11 +25,16 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlameParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite.Glowing;
 import com.watabou.utils.Random;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Blazing extends Weapon.Enchantment {
 
@@ -48,7 +53,12 @@ public class Blazing extends Weapon.Enchantment {
 			float powerMulti = Math.max(1f, procChance);
 
 			if (defender.buff(Burning.class) == null){
-				Buff.affect(defender, Burning.class).reignite(defender, 8f);
+				// 来源链：[攻击者, 武器, 烈焰附魔]
+				List<Object> chain = new ArrayList<>();
+				if (attacker != null) chain.add(attacker);
+				if (weapon != null) chain.add(weapon);
+				chain.add(this);
+				Buff.affect(defender, Burning.class).reignite(defender, 8f, chain);
 				powerMulti -= 1;
 			}
 
@@ -56,7 +66,11 @@ public class Blazing extends Weapon.Enchantment {
 				int burnDamage = Char.combatRoll( 1, 3 + Dungeon.scalingDepth()/4 );
 				burnDamage = Math.round(burnDamage * 0.67f * powerMulti);
 				if (burnDamage > 0) {
-					defender.damage(burnDamage, this);
+					DamageInfo dmg = new DamageInfo(burnDamage, DamageType.BURNING_STATUS, attacker, weapon, this);
+					if (attacker != null) dmg.addCause(attacker);
+					if (weapon != null) dmg.addCause(weapon);
+					dmg.addCause(this);
+					defender.damage(dmg);
 				}
 			}
 			

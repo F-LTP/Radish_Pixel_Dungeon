@@ -14,14 +14,17 @@
 
 	<!-- We perform a runtime check to ensure controllers are disabled on API 14 & 15 -->
 	<uses-sdk tools:overrideLibrary="com.badlogicgames.gdx.controllers" />
-
+	<!--Fixed OBSERVE_GRANT_REVOKE_PERMISSIONS-->
+	<uses-permission
+		android:name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"
+		tools:ignore="ProtectedPermissions" />
 	<!-- Note that the game doesn't truly support small screen resolutions,
-		it instead forces downscaling to work on these displays.-->
+        it instead forces downscaling to work on these displays.-->
 	<supports-screens
-		android:smallScreens="true"
-		android:normalScreens="true"
 		android:largeScreens="true"
-		android:xlargeScreens="true"/>
+		android:normalScreens="true"
+		android:smallScreens="true"
+		android:xlargeScreens="true" />
 
 	<application
 		android:icon="@mipmap/ic_launcher"
@@ -31,6 +34,13 @@
 		android:allowBackup="true"
 		android:fullBackupOnly="true"
 		android:backupAgent=".AndroidBackupHandler">
+		<activity
+			android:name=".ErrorActivity"
+			android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize"
+			android:exported="false"
+			android:screenOrientation="nosensor"
+			android:theme="@style/DungeonTheme"
+			tools:ignore="DiscouragedApi" />
 		<activity
 			android:name=".AndroidLauncher"
 			android:screenOrientation="nosensor"

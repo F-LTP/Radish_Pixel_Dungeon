@@ -57,7 +57,7 @@ public class ElixirOfFeatherFall extends Elixir {
 		public static final float DURATION	= 50f;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.LEVITATION;
 		}
 

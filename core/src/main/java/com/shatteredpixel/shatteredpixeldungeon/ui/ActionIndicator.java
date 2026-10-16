@@ -206,7 +206,7 @@ public class ActionIndicator extends Tag {
 
 		String actionName();
 
-		default int actionIcon(){
+		default String actionIcon(){
 			return HeroIcon.NONE;
 		}
 

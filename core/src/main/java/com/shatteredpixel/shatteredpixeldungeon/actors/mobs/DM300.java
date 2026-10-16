@@ -20,6 +20,8 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
@@ -60,6 +62,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.DM300Sprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Game;
@@ -223,7 +226,11 @@ public class DM300 extends Mob {
 							lastAbility = ROCKS;
 							turnsSinceLastAbility = 0;
 							if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
-								((DM300Sprite)sprite).slam(enemy.pos);
+								if (sprite instanceof DM300Sprite) {
+									((DM300Sprite)sprite).slam(enemy.pos);
+								} else if (sprite instanceof SnakeSprite) {
+									((SnakeSprite)sprite).slam(enemy.pos);
+								}
 								return false;
 							} else {
 								dropRocks(enemy);
@@ -267,7 +274,11 @@ public class DM300 extends Mob {
 							}
 						} else {
 							if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
-								((DM300Sprite)sprite).slam(enemy.pos);
+								if (sprite instanceof DM300Sprite) {
+									((DM300Sprite)sprite).slam(enemy.pos);
+								} else if (sprite instanceof SnakeSprite) {
+									((SnakeSprite)sprite).slam(enemy.pos);
+								}
 								return false;
 							} else {
 								dropRocks(enemy);
@@ -462,13 +473,14 @@ public class DM300 extends Mob {
 	private boolean invulnWarned = false;
 
 	@Override
-	public void damage(int dmg, Object src) {
+	public void damage(DamageInfo info) {
+		Object src = info.getSource();
 		if (!BossHealthBar.isAssigned()){
 			notice();
 		}
 
 		int preHP = HP;
-		super.damage(dmg, src);
+		super.damage(info);
 		if (isInvulnerable(src.getClass())){
 			return;
 		}
@@ -517,8 +529,13 @@ public class DM300 extends Mob {
 		spend(Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 2f : 3f);
 		yell(Messages.get(this, "charging"));
 		sprite.showStatus(CharSprite.POSITIVE, Messages.get(this, "invulnerable"));
-		((DM300Sprite)sprite).updateChargeState(true);
-		((DM300Sprite)sprite).charge();
+		if (sprite instanceof DM300Sprite) {
+			((DM300Sprite)sprite).updateChargeState(true);
+			((DM300Sprite)sprite).charge();
+		} else if (sprite instanceof SnakeSprite) {
+			((SnakeSprite)sprite).updateChargeState(true);
+			((SnakeSprite)sprite).charge();
+		}
 		chargeAnnounced = false;
 
 	}
@@ -529,7 +546,11 @@ public class DM300 extends Mob {
 
 	public void loseSupercharge(){
 		supercharged = false;
-		((DM300Sprite)sprite).updateChargeState(false);
+		if (sprite instanceof DM300Sprite) {
+			((DM300Sprite)sprite).updateChargeState(false);
+		} else if (sprite instanceof SnakeSprite) {
+			((SnakeSprite)sprite).updateChargeState(false);
+		}
 
 		if (pylonsActivated < totalPylonsToActivate()){
 			yell(Messages.get(this, "charge_lost"));
@@ -559,6 +580,8 @@ public class DM300 extends Mob {
 	public void die( Object cause ) {
 
 		super.die( cause );
+
+		Badges.validateRectorUnlock();
 
 		GameScene.bossSlain();
 		Dungeon.level.unseal();
@@ -662,7 +685,6 @@ public class DM300 extends Mob {
 		resistances.add(Vertigo.class);
 		resistances.add(Cripple.class);
 		resistances.add(Chill.class);
-		resistances.add(Frost.class);
 		resistances.add(Roots.class);
 		resistances.add(Slow.class);
 	}

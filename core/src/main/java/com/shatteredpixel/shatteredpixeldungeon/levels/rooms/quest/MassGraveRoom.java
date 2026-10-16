@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Skeleton;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
@@ -134,6 +135,8 @@ public class MassGraveRoom extends SpecialRoom {
 
 		@Override
 		public Tilemap create() {
+			texture = Assets.Environment.TILES_BLOOD_PRISON.equals(Dungeon.level.tilesTex())
+					? Assets.Environment.BLOOD_PRISON_QUEST : Assets.Environment.PRISON_QUEST;
 			Tilemap v = super.create();
 			int[] data = new int[tileW*tileH];
 			for (int i = 0; i < data.length; i++){

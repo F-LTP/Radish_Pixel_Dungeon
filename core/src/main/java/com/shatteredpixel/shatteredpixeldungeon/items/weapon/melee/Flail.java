@@ -143,7 +143,7 @@ public class Flail extends MeleeWeapon {
 		public int spins = 0;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.DUEL_SPIN;
 		}
 

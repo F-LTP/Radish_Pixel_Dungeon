@@ -28,15 +28,44 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.journal.Guidebook;
+import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Muramasa;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Bundle;
 
 import java.util.ArrayList;
 
 public abstract class EquipableItem extends Item {
+
+	public String customName = "";
+	public int customNoteID = -1;
+
+	public String name() {
+		return this.customName.equals("") ? super.name() : this.customName;
+	}
+
+	private static final String CUSTOM_NOTE_ID = "custom_note_id";
+
+	@Override
+	public void restoreFromBundle(Bundle bundle) {
+		super.restoreFromBundle(bundle);
+		if (bundle.contains(CUSTOM_NOTE_ID))    customNoteID = bundle.getInt(CUSTOM_NOTE_ID);
+		if (bundle.contains("customName")) {
+			this.customName = bundle.getString("customName");
+		}
+	}
+
+	@Override
+	public void storeInBundle(Bundle bundle) {
+		super.storeInBundle(bundle);
+		if (customNoteID != -1)     bundle.put(CUSTOM_NOTE_ID, customNoteID);
+		if (!this.customName.equals("")) {
+			bundle.put("customName", this.customName);
+		}
+	}
 
 	public static final String AC_EQUIP		= "EQUIP";
 	public static final String AC_UNEQUIP	= "UNEQUIP";
@@ -45,10 +74,22 @@ public abstract class EquipableItem extends Item {
 		bones = true;
 	}
 
+
+
+	public static final String AC_READY_THROW = "READY_THROW";
+
 	@Override
 	public ArrayList<String> actions(Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
 		actions.add( isEquipped( hero ) ? AC_UNEQUIP : AC_EQUIP );
+		// 奇械师·即用改装：把背包里的武器/护甲扔给友方单位
+		if (hero.subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.ARTIFICER
+				&& hero.pointsInTalent( com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent.READY_MODIFICATION ) > 0
+				&& !isEquipped( hero )
+				&& (this instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon
+					|| this instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor)) {
+			actions.add( AC_READY_THROW );
+		}
 		return actions;
 	}
 
@@ -78,6 +119,8 @@ public abstract class EquipableItem extends Item {
 			int slot = Dungeon.quickslot.getSlot( this );
 			slotOfUnequipped = -1;
 			doEquip(hero);
+			// 魔武士：装备被诅咒的物品时把诅咒转化为随机附魔
+			com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior.purgeCurseOnEquip( hero, this );
 			if (slot != -1) {
 				Dungeon.quickslot.setSlot( slot, this );
 				updateQuickslot();
@@ -89,8 +132,37 @@ public abstract class EquipableItem extends Item {
 			}
 		} else if (action.equals( AC_UNEQUIP )) {
 			doUnequip( hero, true );
+		} else if (action.equals( AC_READY_THROW )) {
+			curUser = hero;
+			curItem = this;
+			com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene.selectCell( readyThrowListener );
 		}
 	}
+
+	// 即用改装：把本件装备扔给友方单位
+	private final com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector.Listener readyThrowListener =
+			new com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector.Listener() {
+		@Override
+		public void onSelect( Integer target ) {
+			if (target == null) {
+				return;
+			}
+			com.shatteredpixel.shatteredpixeldungeon.actors.Char ally =
+					com.shatteredpixel.shatteredpixeldungeon.actors.Actor.findChar( target );
+			if (com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer
+					.readyModify( Dungeon.hero, EquipableItem.this, ally )) {
+				Dungeon.hero.spendAndNext( 1f );
+				Dungeon.hero.sprite.operate( Dungeon.hero.pos );
+			} else {
+				GLog.w( Messages.get( EquipableItem.class, "ready_mod_fail" ) );
+			}
+		}
+
+		@Override
+		public String prompt() {
+			return Messages.get( EquipableItem.class, "ready_mod_prompt" );
+		}
+	};
 
 	@Override
 	public void doDrop( Hero hero ) {
@@ -124,7 +196,17 @@ public abstract class EquipableItem extends Item {
 
 	public boolean doUnequip( Hero hero, boolean collect, boolean single ) {
 
+		// func 4 Muramasa mania
+		// DoggingDog on 20250419
+		if(Dungeon.hero.buff(Muramasa.MuramasaMania.class)!=null && Dungeon.hero!=null){
+			GLog.n(Messages.get(Muramasa.MuramasaMania.class,"mania"));
+			return false;
+		}
+		//
+
+
 		if (cursed
+				&& !com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior.canHandleCursed( hero )
 				&& hero.buff(MagicImmune.class) == null
 				&& (!hero.belongings.lostInventory() || keptThroughLostInventory())) {
 			GLog.w(Messages.get(EquipableItem.class, "unequip_cursed"));

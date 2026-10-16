@@ -35,7 +35,7 @@ public class Drowsy extends Buff {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.DROWSY;
 	}
 

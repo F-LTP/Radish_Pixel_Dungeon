@@ -17,25 +17,23 @@ public class DeviloonSprite extends MobSprite {
     public DeviloonSprite() {
         super();
 
-        texture(Assets.Sprites.DEVILOON);
+        texture(Assets.Sprites.DEMINION);
 
-        TextureFilm frames = new TextureFilm( texture, 24, 17 );
-        idle = new Animation( 9, true );
-        idle.frames( frames, 0,1,2,3);
+        TextureFilm frames = new TextureFilm( texture, 16, 16 );
+        idle = new Animation( 1, true );
+        idle.frames( frames, 0,1);
 
         run = new Animation( 9, true );
-        run.frames( frames,  3,4, 5, 6);
+        run.frames( frames,  2,3,4, 5);
 
-        attack = new Animation( 9, false );
-        attack.frames( frames, 7,8,9);
+        attack = new Animation( 11, false );
+        attack.frames( frames, 6,7,8);
 
         zap = new Animation(11,false);
-        zap.frames(frames,10,11,12,13);
-
-        charging = zap.clone();
+        zap.frames(frames,9,10,11,12,13);
 
         die = new Animation( 11, false );
-        die.frames( frames, 14,15,16,17,18,19);
+        die.frames( frames, 14,15,16,17,18);
 
         play(idle);
     }

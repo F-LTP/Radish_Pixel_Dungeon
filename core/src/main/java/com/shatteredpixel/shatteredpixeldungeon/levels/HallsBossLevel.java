@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SnDBGM;
 import com.shatteredpixel.shatteredpixeldungeon.Bones;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
@@ -78,6 +79,7 @@ public class HallsBossLevel extends Level {
 
 	@Override
 	public void playLevelMusic() {
+        if (SnDBGM.playLevelMusic()) return;
 		if (locked && BossHealthBar.isAssigned()){
 			if (BossHealthBar.isBleeding()){
 				Music.INSTANCE.play(Assets.Music.HALLS_BOSS_FINALE, true);
@@ -94,12 +96,12 @@ public class HallsBossLevel extends Level {
 
 	@Override
 	public String tilesTex() {
-		return Assets.Environment.TILES_HALLS;
+		return Assets.Environment.TILES_FIRE_HALLS;
 	}
 
 	@Override
 	public String waterTex() {
-		return Assets.Environment.WATER_HALLS;
+		return Assets.Environment.WATER_E;
 	}
 
 	@Override
@@ -306,7 +308,9 @@ public class HallsBossLevel extends Level {
 				Music.INSTANCE.fadeOut(5f, new Callback() {
 					@Override
 					public void call() {
-						Music.INSTANCE.play(Assets.Music.THEME_FINALE, true);
+						if (!SnDBGM.playLevelMusic()) {
+							Music.INSTANCE.play(Assets.Music.THEME_FINALE, true);
+						}
 					}
 				});
 			}

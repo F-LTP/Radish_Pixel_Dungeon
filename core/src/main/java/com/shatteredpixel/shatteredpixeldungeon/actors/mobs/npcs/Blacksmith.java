@@ -23,9 +23,13 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -90,13 +94,14 @@ public class Blacksmith extends NPC {
 				msg1 = Quest.alternative ? Messages.get(Blacksmith.this, "blood_1") : Messages.get(Blacksmith.this, "gold_1");
 			} else {
 
-				switch (Dungeon.hero.heroClass){
-					case WARRIOR:   msg1 += Messages.get(Blacksmith.this, "intro_quest_warrior"); break;
-					case MAGE:      msg1 += Messages.get(Blacksmith.this, "intro_quest_mage"); break;
-					case ROGUE:     msg1 += Messages.get(Blacksmith.this, "intro_quest_rogue"); break;
-					case HUNTRESS:  msg1 += Messages.get(Blacksmith.this, "intro_quest_huntress"); break;
-					case DUELIST:   msg1 += Messages.get(Blacksmith.this, "intro_quest_duelist"); break;
-					//case CLERIC: msg1 += Messages.get(Blacksmith.this, "intro_quest_cleric"); break;
+				if (Dungeon.hero.heroClass == HeroClasses.WARRIOR) {
+					msg1 += Messages.get(Blacksmith.this, "intro_quest_warrior");
+				} else if (Dungeon.hero.heroClass == HeroClasses.MAGE) {
+					msg1 += Messages.get(Blacksmith.this, "intro_quest_mage");
+				} else if (Dungeon.hero.heroClass == HeroClasses.ROGUE) {
+					msg1 += Messages.get(Blacksmith.this, "intro_quest_rogue");
+				} else if (Dungeon.hero.heroClass == HeroClasses.HUNTRESS) {
+					msg1 += Messages.get(Blacksmith.this, "intro_quest_huntress");
 				}
 
 				msg1 += "\n\n" + Messages.get(Blacksmith.this, "intro_quest_start");
@@ -247,7 +252,7 @@ public class Blacksmith extends NPC {
 	}
 	
 	@Override
-	public void damage( int dmg, Object src ) {
+	public void damage( DamageInfo info ) {
 		//do nothing
 	}
 
@@ -277,6 +282,7 @@ public class Blacksmith extends NPC {
 		private static boolean started;
 		private static boolean bossBeaten;
 		private static boolean completed;
+		private static int entranceDepth;
 
 		//reward tracking. Stores remaining favor, the pickaxe, and how many of each reward has been chosen
 		public static int favor;
@@ -300,6 +306,7 @@ public class Blacksmith extends NPC {
 			started     = false;
 			bossBeaten  = false;
 			completed	= false;
+			entranceDepth = -1;
 
 			favor       = 0;
 			pickaxe     = new Pickaxe().identify();
@@ -323,6 +330,7 @@ public class Blacksmith extends NPC {
 		private static final String STARTED		= "started";
 		private static final String BOSS_BEATEN	= "boss_beaten";
 		private static final String COMPLETED	= "completed";
+		private static final String ENTRANCE_DEPTH = "entrance_depth";
 
 		private static final String FAVOR	    = "favor";
 		private static final String PICKAXE	    = "pickaxe";
@@ -348,6 +356,7 @@ public class Blacksmith extends NPC {
 				node.put( STARTED, started );
 				node.put( BOSS_BEATEN, bossBeaten );
 				node.put( COMPLETED, completed );
+				node.put( ENTRANCE_DEPTH, entranceDepth );
 
 				node.put( FAVOR, favor );
 				if (pickaxe != null) node.put( PICKAXE, pickaxe );
@@ -379,7 +388,8 @@ public class Blacksmith extends NPC {
 				given = node.getBoolean( GIVEN );
 				started = node.getBoolean( STARTED );
 				bossBeaten = node.getBoolean( BOSS_BEATEN );
-				completed = node.getBoolean( COMPLETED );
+					completed = node.getBoolean( COMPLETED );
+					entranceDepth = node.getInt( ENTRANCE_DEPTH );
 
 				favor = node.getInt( FAVOR );
 				if (node.contains(PICKAXE)) {
@@ -413,8 +423,9 @@ public class Blacksmith extends NPC {
 		public static ArrayList<Room> spawn( ArrayList<Room> rooms ) {
 			if (!spawned && Dungeon.depth > 11 && Random.Int( 15 - Dungeon.depth ) == 0) {
 				
-				rooms.add(new BlacksmithRoom());
-				spawned = true;
+					rooms.add(new BlacksmithRoom());
+					spawned = true;
+					entranceDepth = Dungeon.depth;
 
 				//Currently cannot roll the fungi quest, as it is not fully implemented
 				type = Random.IntRange(1, 2);
@@ -425,6 +436,10 @@ public class Blacksmith extends NPC {
 				
 			}
 			return rooms;
+		}
+
+		public static int entranceDepth() {
+			return entranceDepth;
 		}
 
 		public static void generateRewards( boolean useDecks ){
@@ -535,7 +550,7 @@ public class Blacksmith extends NPC {
 
 		//if the blacksmith is generated pre-v2.2.0, and the player never spawned a mining test floor
 		public static boolean oldQuestMineBlocked(){
-			return type == OLD && !Dungeon.levelHasBeenGenerated(Dungeon.depth, 1);
+			return type == OLD && !Dungeon.levelHasBeenGenerated(Dungeon.depth, Branches.MINING);
 		}
 
 		public static boolean oldBloodQuest(){

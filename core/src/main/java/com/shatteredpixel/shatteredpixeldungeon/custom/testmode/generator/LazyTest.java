@@ -10,6 +10,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.PlateArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Pasty;
+import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.AntiqueKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.AlchemicalCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfFrost;
@@ -72,7 +73,6 @@ public class LazyTest extends TestGenerator {
     @Override
     public void execute(Hero hero, String action){
         if(action.equals(AC_GIVE)){
-            new PotionOfExperience().quantity(100).identify().collect();
             new PotionOfFrost().quantity(100).identify().collect();
             new PotionOfHaste().quantity(100).identify().collect();
             new PotionOfHealing().quantity(100).identify().collect();
@@ -139,6 +139,8 @@ public class LazyTest extends TestGenerator {
 
             new StoneOfAugmentation().quantity(100).collect();
 
+            new AntiqueKatana().identify().collect();
+
             new Blindweed.Seed().quantity(100).identify().collect();
             new Mageroyal.Seed().quantity(100).identify().collect();
             new Earthroot.Seed().quantity(100).identify().collect();
@@ -154,6 +156,10 @@ public class LazyTest extends TestGenerator {
 
             for (int i = 0; i < 6; i++) {
                 new PotionOfStrength().apply(hero);
+            }
+
+            for (int i = 0; i < 31; i++) {
+                new PotionOfExperience().apply(hero);
             }
 
             RingOfConcentration roa = new RingOfConcentration();

@@ -12,7 +12,7 @@ public class ZeroAttack extends FlavourBuff {
     }
 
     @Override
-    public int icon() {
+    public String icon() {
         return BuffIndicator.WEAKNESS;
     }
 

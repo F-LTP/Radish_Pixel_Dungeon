@@ -1,31 +1,13 @@
 package com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator;
 
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.AntiEntropy;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Bulk;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Corrosion;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Displacement;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Metabolism;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Multiplicity;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Overgrowth;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Stench;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Affection;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Camouflage;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Entanglement;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Flow;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Obfuscation;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Potential;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Repulsion;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Stone;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Swiftness;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Thorns;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor.Glyph;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -43,12 +25,15 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class TestArmor extends TestGenerator {
     {
         image = ItemSpriteSheet.ARMOR_HOLDER;
     }
+
+    private static final Class<?>[][] GLYPH_LISTS = {null, Glyph.common, Glyph.uncommon, Glyph.rare, Glyph.curses};
 
     private int tier = 1;
     private boolean cursed = false;
@@ -116,65 +101,14 @@ public class TestArmor extends TestGenerator {
     }
 
     private Class<? extends Armor.Glyph> generateEnchant(int category, int id) {
-        if (category == 1) switch (id) {
-            case 0:
-                return Obfuscation.class;
-            case 1:
-                return Swiftness.class;
-            case 2:
-                return Viscosity.class;
-            case 3:
-                return Potential.class;
-            default:
-                return null;
+        Class<?>[] glyphs = GLYPH_LISTS[category];
+        if (glyphs == null ) {
+            return null;
         }
-        else if (category == 2) switch (id) {
-            case 0:
-                return Stone.class;
-            case 1:
-                return Brimstone.class;
-            case 2:
-                return Entanglement.class;
-            case 3:
-                return Repulsion.class;
-            case 4:
-                return Camouflage.class;
-            case 5:
-                return Flow.class;
-            default:
-                return null;
+        if (id >= glyphs.length){
+            return (Class<? extends Armor.Glyph>) glyphs[glyphs.length-1];
         }
-        else if (category == 3) switch (id) {
-            case 0:
-                return AntiMagic.class;
-            case 1:
-                return Thorns.class;
-            case 2:
-                return Affection.class;
-            default:
-                return null;
-        }
-        else if (category == 4) switch (id) {
-            case 0:
-                return AntiEntropy.class;
-            case 1:
-                return Bulk.class;
-            case 2:
-                return Corrosion.class;
-            case 3:
-                return Displacement.class;
-            case 4:
-                return Metabolism.class;
-            case 5:
-                return Multiplicity.class;
-            case 6:
-                return Overgrowth.class;
-            case 7:
-                return Stench.class;
-            default:
-                return null;
-        }
-        return null;
+        return (Class<? extends Armor.Glyph>) glyphs[id];
     }
 
     private Class<? extends Armor>[] armorList(int t) {
@@ -331,8 +265,7 @@ public class TestArmor extends TestGenerator {
                         super.onClick();
                     }
                 };
-                Image im = new Image(Assets.Sprites.ITEMS);
-                im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(all[i])).image));
+                Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(all[i])).image);
                 im.scale.set(1f);
                 btn.icon(im);
                 left = (WIDTH - BTN_SIZE * ((i/r_limit+1<t_row)?r_limit:length-(t_row-1)*r_limit) )/2f;
@@ -368,12 +301,21 @@ public class TestArmor extends TestGenerator {
         }
 
         private String enchantDesc() {
-            //String desc = Messages.get(BossRushMelee.class, "enchant_id_pre", enchant_rarity);
-            String desc = "";
-            String key = "enchant_id_e" + String.valueOf(enchant_rarity);
-            Class<? extends Armor.Glyph> ench = generateEnchant(enchant_rarity, enchant_id);
-            desc += Messages.get(TestArmor.class, key, (ench == null ? Messages.get(TestArmor.class, "null_enchant") : currentEnchName(ench)));
-            return desc;
+            StringBuilder desc = new StringBuilder();
+            if (enchant_rarity < 1 || enchant_rarity >= GLYPH_LISTS.length) {
+                desc.append(Messages.get(TestArmor.class, "null_enchant"));
+            } else {
+                Class<?>[] glyphs = GLYPH_LISTS[enchant_rarity];
+                for (int i = 0; i < glyphs.length; i++) {
+                    desc.append(i).append(":").append(currentEnchName((Class<? extends Glyph>) glyphs[i])).append(" ");
+                    if ((i + 1) % 4 == 0) {
+                        desc.append("\n");
+                    }
+                }
+                Class<? extends Glyph> ench = generateEnchant(enchant_rarity, enchant_id);
+                desc.append("当前选取:").append(currentEnchName(ench));
+            }
+            return desc.toString();
         }
     }
 }

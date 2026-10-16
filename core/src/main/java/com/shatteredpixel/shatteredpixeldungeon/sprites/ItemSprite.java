@@ -28,40 +28,48 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.food.HalfFood;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.CrackedSpyglass;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
+import com.watabou.gltextures.AtlasFrame;
+import com.watabou.gltextures.RuntimeAtlas;
+import com.watabou.gltextures.RuntimeAtlasRegistry;
 import com.watabou.gltextures.SmartTexture;
-import com.watabou.gltextures.TextureCache;
 import com.watabou.glwrap.Matrix;
 import com.watabou.glwrap.Vertexbuffer;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Game;
+import com.watabou.noosa.Image;
 import com.watabou.noosa.MovieClip;
 import com.watabou.noosa.NoosaScript;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
+import com.shatteredpixel.shatteredpixeldungeon.ui.UITheme;
 
 import java.nio.Buffer;
 
 public class ItemSprite extends MovieClip {
 
-	public static final int SIZE	= 16;
-	
+	private static final int MIN_VISIBLE_ALPHA = 16;
+
 	private static final float DROP_INTERVAL = 0.4f;
-	
+
 	public Heap heap;
-	
+	private static final RuntimeAtlas ATLAS = RuntimeAtlasRegistry.get( ItemSpriteSheet.ATLAS );
+
 	private Glowing glowing;
+	private boolean invertDarkSprite;
 	//FIXME: a lot of this emitter functionality isn't very well implemented.
 	//right now I want to ship 0.3.0, but should refactor in the future.
 	protected Emitter emitter;
 	private float phase;
 	private boolean glowUp;
-	
+
 	private float dropInterval;
 
 	//the amount the sprite is raised from flat when viewed in a raised perspective
@@ -73,35 +81,34 @@ public class ItemSprite extends MovieClip {
 	protected float shadowWidth     = 1f;
 	protected float shadowHeight    = 0.25f;
 	protected float shadowOffset    = 0.5f;
-	
+
 	public ItemSprite() {
 		this( ItemSpriteSheet.SOMETHING, null );
 	}
-	
+
 	public ItemSprite( Heap heap ){
-		super(Assets.Sprites.ITEMS);
+		this();
 		view( heap );
 	}
-	
+
 	public ItemSprite( Item item ) {
-		super(Assets.Sprites.ITEMS);
+		this();
 		view( item );
 	}
-	
-	public ItemSprite( int image ){
+
+	public ItemSprite( String image ){
 		this( image, null );
 	}
-	
-	public ItemSprite( int image, Glowing glowing ) {
-		super( Assets.Sprites.ITEMS );
-		
+
+	public ItemSprite( String image, Glowing glowing ) {
+		super();
 		view(image, glowing);
 	}
-	
+
 	public void link() {
 		link(heap);
 	}
-	
+
 	public void link( Heap heap ) {
 		this.heap = heap;
 		view(heap);
@@ -109,20 +116,34 @@ public class ItemSprite extends MovieClip {
 		visible = heap.seen;
 		place(heap.pos);
 	}
-	
+
 	@Override
 	public void revive() {
 		super.revive();
-		
+
 		speed.set( 0 );
 		acc.set( 0 );
 		dropInterval = 0;
-		
+
 		heap = null;
 		if (emitter != null) {
 			emitter.killAndErase();
 			emitter = null;
 		}
+	}
+
+	@Override
+	public void copy(Image other) {
+		super.copy(other);
+
+		if (other instanceof ItemSprite && ((ItemSprite) other).glowing != null){
+			glow(((ItemSprite) other).glowing);
+		}
+		if (other instanceof ItemSprite) {
+			invertDarkSprite = ((ItemSprite) other).invertDarkSprite;
+			applyDarkSpriteColor();
+		}
+
 	}
 
 	public void visible(boolean value){
@@ -132,23 +153,23 @@ public class ItemSprite extends MovieClip {
 			emitter = null;
 		}
 	}
-	
+
 	public PointF worldToCamera( int cell ) {
 		final int csize = DungeonTilemap.SIZE;
-		
+
 		return new PointF(
 				PixelScene.align(Camera.main, ((cell % Dungeon.level.width()) + 0.5f) * csize - width() * 0.5f),
 				PixelScene.align(Camera.main, ((cell / Dungeon.level.width()) + 1.0f) * csize - height() - csize * perspectiveRaise)
 		);
 	}
-	
+
 	public void place( int p ) {
 		if (Dungeon.level != null) {
 			point(worldToCamera(p));
 			shadowOffset = 0.5f;
 		}
 	}
-	
+
 	public void drop() {
 
 		if (heap.isEmpty()) {
@@ -159,50 +180,78 @@ public class ItemSprite extends MovieClip {
 			// where as long as the player continually taps, the heap sails up into the air.
 			place(heap.pos);
 		}
-			
+
 		dropInterval = DROP_INTERVAL;
-		
+
 		speed.set( 0, -100 );
 		acc.set(0, -speed.y / DROP_INTERVAL * 2);
-		
+
 		if (heap != null && heap.seen && heap.peek() instanceof Gold) {
 			CellEmitter.center( heap.pos ).burst( Speck.factory( Speck.COIN ), 5 );
 			Sample.INSTANCE.play( Assets.Sounds.GOLD, 1, 1, Random.Float( 0.9f, 1.1f ) );
 		}
 	}
-	
+
 	public void drop( int from ) {
 
 		if (heap.pos == from) {
 			drop();
 		} else {
-			
+
 			float px = x;
 			float py = y;
 			drop();
-			
+
 			place(from);
-	
+
 			speed.offset((px - x) / DROP_INTERVAL, (py - y) / DROP_INTERVAL);
 		}
 	}
 
 	public ItemSprite view( Item item ){
+		if (item.sndImageName != null) {
+			com.watabou.gltextures.SmartTexture tex = com.shatteredpixel.shatteredpixeldungeon.ui.SNDItems.texture();
+			com.watabou.utils.RectF sndFrame = com.shatteredpixel.shatteredpixeldungeon.ui.SNDItems.frame(item.sndImageName);
+			if (tex != null && sndFrame != null) {
+				if (this.emitter != null) this.emitter.killAndErase();
+				emitter = null;
+				this.texture = tex;
+				frame(sndFrame);
+				glow(item.glowing());
+				applyDarkSpriteColor();
+				com.watabou.noosa.particles.Emitter emitter = item.emitter();
+				if (emitter != null && parent != null) {
+					emitter.pos(this);
+					parent.add(emitter);
+					this.emitter = emitter;
+				}
+				return this;
+			}
+		}
 		view(item.image(), item.glowing());
+		if (item instanceof HalfFood) {
+			AtlasFrame atlasFrame = ATLAS.trimmedFrame(item.image(), MIN_VISIBLE_ALPHA);
+			float middle = (atlasFrame.uv.top + atlasFrame.uv.bottom) / 2f;
+			texture = atlasFrame.texture;
+			frame(new com.watabou.utils.RectF(
+					atlasFrame.uv.left, middle, atlasFrame.uv.right, atlasFrame.uv.bottom));
+		}
 		Emitter emitter = item.emitter();
 		if (emitter != null && parent != null) {
 			emitter.pos( this );
 			parent.add( emitter );
 			this.emitter = emitter;
 		}
+		applyDarkSpriteColor();
 		return this;
 	}
-	
+
 	public ItemSprite view( Heap heap ){
+		alpha( heap.hidden ? CrackedSpyglass.hiddenAlpha() : 1f);
 		if (heap.size() <= 0 || heap.items == null){
-			return view( 0, null );
+			return view( ItemSpriteSheet.SOMETHING, null );
 		}
-		
+
 		switch (heap.type) {
 			case HEAP: case FOR_SALE:
 				return view( heap.peek() );
@@ -219,28 +268,65 @@ public class ItemSprite extends MovieClip {
 			case REMAINS:
 				return view( ItemSpriteSheet.REMAINS, null );
 			default:
-				return view( 0, null );
+				return view( ItemSpriteSheet.SOMETHING, null );
 		}
 	}
-	
-	public ItemSprite view( int image, Glowing glowing ) {
+
+	public ItemSprite view( String image, Glowing glowing ) {
 		if (this.emitter != null) this.emitter.killAndErase();
 		emitter = null;
 		frame( image );
 		glow( glowing );
+		applyDarkSpriteColor();
 		return this;
 	}
 
-	public void frame( int image ){
-		frame( ItemSpriteSheet.film.get( image ));
+	/** Makes nearly-black, opaque item art visible on the Dice Mage dark panels. */
+	private void applyDarkSpriteColor() {
+		invertDarkSprite = false;
+		if (UITheme.isDiceMage() && texture instanceof SmartTexture) {
+			SmartTexture tex = (SmartTexture) texture;
+			int left = Math.max(0, (int) (frame.left * tex.width));
+			int right = Math.min(tex.width, (int) Math.ceil(frame.right * tex.width));
+			int top = Math.max(0, (int) (frame.top * tex.height));
+			int bottom = Math.min(tex.height, (int) Math.ceil(frame.bottom * tex.height));
+			boolean hasOpaque = false;
+			boolean dark = true;
+			for (int py = top; py < bottom && dark; py++) {
+				for (int px = left; px < right; px++) {
+					int color = tex.getPixel(px, py);
+					int alpha = (color >>> 24) & 0xFF;
+					if (alpha < MIN_VISIBLE_ALPHA) continue;
+					hasOpaque = true;
+					int red = (color >>> 16) & 0xFF;
+					int green = (color >>> 8) & 0xFF;
+					int blue = color & 0xFF;
+					if (red > 24 || green > 24 || blue > 24) {
+						dark = false;
+						break;
+					}
+				}
+			}
+			invertDarkSprite = hasOpaque && dark;
+		}
+		if (invertDarkSprite && glowing == null) {
+			rm = gm = bm = -1f;
+			ra = ga = ba = 1f;
+		}
+	}
 
-		float height = ItemSpriteSheet.film.height( image );
+	public void frame( String image ){
+		AtlasFrame atlasFrame = ATLAS.trimmedFrame( image, MIN_VISIBLE_ALPHA );
+		texture = atlasFrame.texture;
+		frame( atlasFrame.uv );
+
+		float height = atlasFrame.height;
 		//adds extra raise to very short items, so they are visible
 		if (height < 8f){
 			perspectiveRaise =  (5 + 8 - height) / 16f;
 		}
 	}
-	
+
 	public synchronized void glow( Glowing glowing ){
 		this.glowing = glowing;
 		if (glowing == null) resetColor();
@@ -349,46 +435,54 @@ public class ItemSprite extends MovieClip {
 
 		if (visible && glowing != null) {
 			if (glowUp && (phase += Game.elapsed) > glowing.period) {
-				
+
 				glowUp = false;
 				phase = glowing.period;
-				
+
 			} else if (!glowUp && (phase -= Game.elapsed) < 0) {
-				
+
 				glowUp = true;
 				phase = 0;
-				
+
 			}
-			
+
 			float value = phase / glowing.period * 0.6f;
-			
-			rm = gm = bm = 1 - value;
-			ra = glowing.red * value;
-			ga = glowing.green * value;
-			ba = glowing.blue * value;
+
+			float base = 1 - value;
+			if (invertDarkSprite) {
+				rm = gm = bm = -base;
+				ra = base + glowing.red * value;
+				ga = base + glowing.green * value;
+				ba = base + glowing.blue * value;
+			} else {
+				rm = gm = bm = base;
+				ra = glowing.red * value;
+				ga = glowing.green * value;
+				ba = glowing.blue * value;
+			}
 		}
 	}
 
-	public static int pick( int index, int x, int y ) {
-		SmartTexture tx = TextureCache.get( Assets.Sprites.ITEMS );
-		int rows = tx.width / SIZE;
-		int row = index / rows;
-		int col = index % rows;
-		return tx.getPixel( col * SIZE + x, row * SIZE + y );
+	public static int pick( String name, int x, int y ) {
+		return ATLAS.pixel( name, x, y );
 	}
-	
+
+	public static AtlasFrame atlasFrame( String name ) {
+		return ATLAS.trimmedFrame( name, MIN_VISIBLE_ALPHA );
+	}
+
 	public static class Glowing {
-		
+
 		public int color;
 		public float red;
 		public float green;
 		public float blue;
 		public float period;
-		
+
 		public Glowing( int color ) {
 			this( color, 1f );
 		}
-		
+
 		public Glowing( int color, float period ) {
 
 			this.color = color;
@@ -396,7 +490,7 @@ public class ItemSprite extends MovieClip {
 			red = (color >> 16) / 255f;
 			green = ((color >> 8) & 0xFF) / 255f;
 			blue = (color & 0xFF) / 255f;
-			
+
 			this.period = period;
 		}
 	}

@@ -712,7 +712,7 @@ public class Toolbar extends Component {
 		}
 
 		public void icon( int x, int y, int width, int height){
-			if (icon == null) icon = new Image( Assets.Interfaces.TOOLBAR );
+			if (icon == null) icon = new Image( !SPDSettings.NORMAL_SKIN() ? Assets.Interfaces.TOOLBAR : Assets.Interfaces.NORMAL_TOOLBAR );
 			add(icon);
 
 			icon.frame( x, y, width, height);
@@ -722,7 +722,7 @@ public class Toolbar extends Component {
 		protected void createChildren() {
 			super.createChildren();
 			
-			base = new Image( Assets.Interfaces.TOOLBAR );
+			base = new Image( !SPDSettings.NORMAL_SKIN() ? Assets.Interfaces.TOOLBAR : Assets.Interfaces.NORMAL_TOOLBAR );
 			add( base );
 		}
 		

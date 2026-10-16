@@ -89,7 +89,7 @@ public class Spanner extends MeleeWeapon {
                         reach = 2;
                     }
 
-                    if(target == t.pos &&Dungeon.level.distance( t.pos, curUser.pos ) <= reach){
+                    if(target == t.pos && Dungeon.level.distance( t.pos, curUser.pos ) <= reach){
                         boolean isRepair = !t.active && t.onlyRepair;
                         if(isRepair){
                             t.active = true;

@@ -24,8 +24,10 @@ package com.shatteredpixel.shatteredpixeldungeon.levels.traps;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -56,9 +58,9 @@ public class CursingTrap extends Trap {
 		}
 
 		Heap heap = Dungeon.level.heaps.get( pos );
-		if (heap != null){
-			for (Item item : heap.items){
-				if (item.isUpgradable() && !(item instanceof MissileWeapon))
+		if (heap != null) {
+			for (Item item : heap.items) {
+				if ((item.isUpgradable() && !(item instanceof MissileWeapon)) || (item instanceof BrokenSeal && Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)))
 					curse(item);
 			}
 		}

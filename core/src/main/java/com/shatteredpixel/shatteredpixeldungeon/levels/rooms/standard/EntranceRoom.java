@@ -31,19 +31,37 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.CaveEntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.CavesFissureEntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.ChasmBridgeEntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.ChasmEntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.CircleBasinEntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.HallwayEntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.PillarsEntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.RitualEntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.StatuesEntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.WaterBridgeEntranceRoom;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
+import com.watabou.utils.Reflection;
+
+import java.util.ArrayList;
 
 public class EntranceRoom extends StandardRoom {
-	
+
 	@Override
 	public int minWidth() {
 		return Math.max(super.minWidth(), 5);
 	}
-	
+
 	@Override
 	public int minHeight() {
 		return Math.max(super.minHeight(), 5);
+	}
+
+	@Override
+	public boolean isEntrance() {
+		return true;
 	}
 
 	@Override
@@ -61,10 +79,10 @@ public class EntranceRoom extends StandardRoom {
 	}
 
 	public void paint(Level level ) {
-		
+
 		Painter.fill( level, this, Terrain.WALL );
 		Painter.fill( level, this, 1, Terrain.EMPTY );
-		
+
 		for (Room.Door door : connected.values()) {
 			door.set( Room.Door.Type.REGULAR );
 		}
@@ -75,7 +93,7 @@ public class EntranceRoom extends StandardRoom {
 		} while (level.findMob(entrance) != null);
 		Painter.set( level, entrance, Terrain.ENTRANCE );
 
-		if (Dungeon.depth == 0){
+		if (Dungeon.depth == 1){
 			level.transitions.add(new LevelTransition(level, entrance, LevelTransition.Type.SURFACE));
 		} else {
 			level.transitions.add(new LevelTransition(level, entrance, LevelTransition.Type.REGULAR_ENTRANCE));
@@ -94,6 +112,7 @@ public class EntranceRoom extends StandardRoom {
 						Random.IntRange( top + 1, bottom - 2 )));
 			} while (pos == level.entrance() || level.findMob(level.entrance()) != null);
 			level.drop( new Guidebook(), pos );
+			Document.ADVENTURERS_GUIDE.deletePage(Document.GUIDE_INTRO);
 		}
 
 		//places the third guidebook page on floor 2
@@ -113,11 +132,49 @@ public class EntranceRoom extends StandardRoom {
 
 	}
 
-	@Override
-	public boolean connect(Room room) {
-		//cannot connect to exit, otherwise works normally
-		if (room instanceof ExitRoom)   return false;
-		else                            return super.connect(room);
+	private static ArrayList<Class<?extends StandardRoom>> rooms = new ArrayList<>();
+	static {
+		rooms.add(EntranceRoom.class);
+
+		rooms.add(WaterBridgeEntranceRoom.class);
+		rooms.add(CircleBasinEntranceRoom.class);
+
+		rooms.add(ChasmBridgeEntranceRoom.class);
+		rooms.add(PillarsEntranceRoom.class);
+
+		rooms.add(CaveEntranceRoom.class);
+		rooms.add(CavesFissureEntranceRoom.class);
+
+		rooms.add(HallwayEntranceRoom.class);
+		rooms.add(StatuesEntranceRoom.class);
+
+		rooms.add(ChasmEntranceRoom.class);
+		rooms.add(RitualEntranceRoom.class);
 	}
-	
+
+	private static float[][] chances = new float[31][];
+	static {
+		chances[1] =  new float[]{1,  0,0, 0,0, 0,0, 0,0, 0,0};
+		chances[2] =  chances[1];
+		chances[3] =  new float[]{3,  6,1, 0,0, 0,0, 0,0, 0,0};
+		chances[5] =  chances[4] = chances[3];
+
+		chances[6] =  new float[]{2,  0,0, 4,4, 0,0, 0,0, 0,0};
+		chances[10] = chances[9] = chances[8] = chances[7] = chances[6];
+
+		chances[11] = new float[]{2,  0,0, 0,0, 4,4, 0,0, 0,0};
+		chances[15] = chances[14] = chances[13] = chances[12] = chances[11];
+
+		chances[16] = new float[]{2,  0,0, 0,0, 0,0, 4,4, 0,0};
+		chances[20] = chances[19] = chances[18] = chances[17] = chances[16];
+
+		chances[21] = new float[]{3,  0,0, 0,0, 0,0, 0,0, 6,1};
+		chances[30] = chances[29] = chances[28] = chances[27] = chances[26] =
+				chances[25] = chances[24] = chances[23] = chances[22] = chances[21];
+	}
+
+	public static StandardRoom createEntrance(){
+		return Reflection.newInstance(rooms.get(Random.chances(chances[Dungeon.depth])));
+	}
+
 }

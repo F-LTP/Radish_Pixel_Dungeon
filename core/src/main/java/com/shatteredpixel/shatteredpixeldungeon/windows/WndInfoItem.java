@@ -24,13 +24,18 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.ui.DiceMageUI;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ItemSlot;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RoundedFrame;
+import com.shatteredpixel.shatteredpixeldungeon.ui.UITheme;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 
 public class WndInfoItem extends Window {
 	
 	private static final float GAP	= 2;
+	private static final float DICE_PAD = 3;
+	private static final int DICE_ICON = 28;
 
 	private static final int WIDTH_MIN = 120;
 	private static final int WIDTH_MAX = 220;
@@ -76,6 +81,10 @@ public class WndInfoItem extends Window {
 	}
 
 	private void fillFields(Heap heap ) {
+		if (UITheme.isDiceMage()) {
+			layoutDiceHeap(heap);
+			return;
+		}
 		
 		IconTitle titlebar = new IconTitle( heap );
 		titlebar.color( TITLE_COLOR );
@@ -86,6 +95,10 @@ public class WndInfoItem extends Window {
 	}
 	
 	private void fillFields( Item item ) {
+		if (UITheme.isDiceMage()) {
+			layoutDiceItem(item);
+			return;
+		}
 		
 		int color = TITLE_COLOR;
 		if (item.levelKnown && item.level() > 0) {
@@ -97,7 +110,7 @@ public class WndInfoItem extends Window {
 		IconTitle titlebar = new IconTitle( item );
 		titlebar.color( color );
 		
-		RenderedTextBlock txtInfo = PixelScene.renderTextBlock( item.info(), 6 );
+		RenderedTextBlock txtInfo = PixelScene.renderTextBlock( item.displayInfo(), 6 );
 		
 		layoutFields(titlebar, txtInfo);
 	}
@@ -122,5 +135,88 @@ public class WndInfoItem extends Window {
 		add( info );
 
 		resize( width, (int)(info.bottom() + 2) );
+	}
+
+	private void layoutDiceHeap(Heap heap) {
+		int width = PixelScene.landscape() ? 150 : 132;
+		chrome.hardlight(DiceMageUI.DARK);
+
+		IconTitle titlebar = new IconTitle(heap);
+		titlebar.color(DiceMageUI.GOLD);
+		layoutDiceFields(titlebar, "[LOOT]", heap.info(), width, DiceMageUI.GREY_LINE);
+	}
+
+	private void layoutDiceItem(Item item) {
+		int width = PixelScene.landscape() ? 150 : 132;
+		chrome.hardlight(DiceMageUI.DARK);
+
+		int lineColor = DiceMageUI.itemLineColor(item, item.isEquipped(com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero));
+		ItemSlot icon = new ItemSlot(item);
+		icon.setRect(DICE_PAD, DICE_PAD, DICE_ICON, DICE_ICON);
+		RoundedFrame iconFrame = UITheme.roundedFrame(DiceMageUI.BLACK, lineColor);
+		iconFrame.setRect(0, 0, DICE_ICON + DICE_PAD * 2, DICE_ICON + DICE_PAD * 2);
+		add(iconFrame);
+		add(icon);
+
+		RenderedTextBlock title = PixelScene.renderTextBlock("[ITEM] " + item.name(), 8);
+		title.hardlight(lineColor);
+		title.maxWidth(width - DICE_ICON - (int)DICE_PAD * 4);
+		title.setPos(DICE_ICON + DICE_PAD * 3, DICE_PAD);
+		add(title);
+
+		RenderedTextBlock tags = PixelScene.renderTextBlock(itemTags(item), 6);
+		tags.hardlight(DiceMageUI.CREAM);
+		tags.maxWidth(width - DICE_ICON - (int)DICE_PAD * 4);
+		tags.setPos(title.left(), title.bottom() + 1);
+		add(tags);
+
+		float topHeight = Math.max(iconFrame.bottom(), tags.bottom()) + DICE_PAD;
+		layoutDiceInfoBody(item.displayInfo(), width, topHeight, lineColor);
+	}
+
+	private void layoutDiceFields(IconTitle titlebar, String label, String body, int width, int lineColor) {
+		RoundedFrame top = UITheme.roundedFrame(DiceMageUI.BLACK, lineColor);
+		top.setRect(0, 0, width, 34);
+		add(top);
+
+		RenderedTextBlock labelText = PixelScene.renderTextBlock(label, 8);
+		labelText.hardlight(DiceMageUI.GOLD);
+		labelText.setPos(DICE_PAD, DICE_PAD);
+		add(labelText);
+
+		titlebar.setRect(DICE_PAD, labelText.bottom() + 1, width - DICE_PAD * 2, 0);
+		add(titlebar);
+
+		layoutDiceInfoBody(body, width, Math.max(34, titlebar.bottom() + DICE_PAD), lineColor);
+	}
+
+	private void layoutDiceInfoBody(String body, int width, float top, int lineColor) {
+		RenderedTextBlock info = PixelScene.renderTextBlock(body, 6);
+		info.hardlight(DiceMageUI.CREAM);
+		info.maxWidth((int)(width - DICE_PAD * 4));
+		info.setPos(DICE_PAD * 2, top + DICE_PAD * 2);
+
+		RoundedFrame bodyFrame = UITheme.roundedFrame(DiceMageUI.PANEL, lineColor);
+		bodyFrame.setRect(0, top + DICE_PAD, width, info.height() + DICE_PAD * 4);
+		add(bodyFrame);
+		add(info);
+
+		resize(width, (int)(bodyFrame.bottom() + DICE_PAD));
+	}
+
+	private String itemTags(Item item) {
+		String tags = "[card]";
+		if (item.levelKnown && item.level() > 0) {
+			tags += " +" + item.level();
+		} else if (item.levelKnown && item.level() < 0) {
+			tags += " " + item.level();
+		}
+		if (item.cursedKnown) {
+			tags += item.cursed ? " cursed" : " clean";
+		}
+		if (!item.isIdentified()) {
+			tags += " unknown";
+		}
+		return tags;
 	}
 }

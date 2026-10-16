@@ -68,7 +68,7 @@ public class Degrade extends FlavourBuff {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.DEGRADE;
 	}
 

@@ -29,11 +29,14 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.EmoIcon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.IceBlock;
+import com.shatteredpixel.shatteredpixeldungeon.effects.ShaderEffect;
 import com.shatteredpixel.shatteredpixeldungeon.effects.ShieldHalo;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TorchHalo;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ElmoParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlameParticle;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.HalomethaneFlameParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SnowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -41,6 +44,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CharHealthIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.glwrap.Matrix;
 import com.watabou.glwrap.Vertexbuffer;
 import com.watabou.noosa.Camera;
@@ -82,7 +86,8 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	protected float shadowOffset    = 0.25f;
 
 	public enum State {
-		BURNING, LEVITATING, INVISIBLE, PARALYSED, FROZEN, ILLUMINATED, CHILLED, DARKENED, MARKED, HEALING, SHIELDED, HEARTS
+		BURNING, LEVITATING, INVISIBLE, PARALYSED, FROZEN, ILLUMINATED, CHILLED, DARKENED, MARKED, HEALING, SHIELDED, HEARTS,
+		HALOMETHANEBURNING,ELMOBURNING
 	}
 	private int stunStates = 0;
 	
@@ -98,11 +103,15 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	protected PosTweener motion;
 	
 	protected Emitter burning;
+
+	protected Emitter ealoburning;
+
 	protected Emitter chilled;
 	protected Emitter marked;
 	protected Emitter levitation;
 	protected Emitter healing;
 	protected Emitter hearts;
+	protected Emitter haloburning;
 	
 	protected IceBlock iceBlock;
 	protected DarkBlock darkBlock;
@@ -110,6 +119,40 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	protected ShieldHalo shield;
 	protected AlphaTweener invisible;
 	protected Flare aura;
+	protected ShaderEffect shaderEffect;
+	protected boolean pendingDeathAfterShader = false;
+
+	public void setShaderEffect(ShaderEffect effect) {
+		if (shaderEffect == effect) return;
+		ShaderEffect previous = shaderEffect;
+		shaderEffect = effect;
+		if (previous != null) {
+			previous.killAndErase();
+		}
+	}
+
+	public ShaderEffect getShaderEffect() {
+		return shaderEffect;
+	}
+
+	public boolean isPendingDeathAfterShader() {
+		return pendingDeathAfterShader;
+	}
+
+	public void clearPendingDeath() {
+		pendingDeathAfterShader = false;
+	}
+
+	public void dieAfterShader() {
+		sleeping = false;
+		remove(State.PARALYSED);
+		hideEmo();
+		if (health != null) {
+			health.killAndErase();
+		}
+		pendingDeathAfterShader = true;
+	}
+
 	
 	protected EmoIcon emo;
 	protected CharHealthIndicator health;
@@ -203,6 +246,22 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 				FloatingText.show( x, y, ch.pos, text, color, icon, true );
 			} else {
 				FloatingText.show( x, y, -1, text, color, icon, true );
+			}
+		}
+	}
+
+	/** 显示跳字并左侧叠加多个图标（用于混合伤害，图标顺序即展示顺序）。 */
+	public void showStatusWithIcons( int color, String text, int[] icons, Object... args ) {
+		if (visible) {
+			if (args.length > 0) {
+				text = Messages.format( text, args );
+			}
+			float x = destinationCenter().x;
+			float y = destinationCenter().y - height()/2f;
+			if (ch != null) {
+				FloatingText.show( x, y, ch.pos, text, color, icons, true );
+			} else {
+				FloatingText.show( x, y, -1, text, color, icons, true );
 			}
 		}
 	}
@@ -314,6 +373,16 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 			health.killAndErase();
 		}
 	}
+
+	public void skipDieAnimation() {
+		sleeping = false;
+		remove( State.PARALYSED );
+		hideEmo();
+
+		if (health != null){
+			health.killAndErase();
+		}
+	}
 	
 	public Emitter emitter() {
 		Emitter emitter = GameScene.emitter();
@@ -365,6 +434,10 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 					Sample.INSTANCE.play( Assets.Sounds.BURNING );
 				}
 				break;
+			case ELMOBURNING:
+				ealoburning = emitter();
+				ealoburning.pour(ElmoParticle.FACTORY,0.05f);
+				break;
 			case LEVITATING:
 				levitation = emitter();
 				levitation.pour( Speck.factory( Speck.JET ), 0.02f );
@@ -413,15 +486,34 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 				hearts = emitter();
 				hearts.pour(Speck.factory(Speck.HEART), 0.5f);
 				break;
+			case HALOMETHANEBURNING:
+				haloburning = emitter();
+				haloburning.pour(HalomethaneFlameParticle.FACTORY, 0.06f);
+				if (visible) {
+					Sample.INSTANCE.play(Assets.Sounds.BURNING);
+				}
+				break;
 		}
 	}
 	
 	public void remove( State state ) {
 		switch (state) {
+			case HALOMETHANEBURNING:
+				if (haloburning != null) {
+					haloburning.on = false;
+					haloburning = null;
+				}
+				break;
 			case BURNING:
 				if (burning != null) {
 					burning.on = false;
 					burning = null;
+				}
+				break;
+			case ELMOBURNING:
+				if(ealoburning != null){
+					ealoburning.on = false;
+					ealoburning = null;
 				}
 				break;
 			case LEVITATING:
@@ -703,11 +795,27 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 					0, 0, 0, aa * .6f);
 
 			script.drawQuad(buffer);
-		}
+					}
 
-		super.draw();
+					// 如果有着色器效果，使用着色器渲染
+					if (shaderEffect != null && !shaderEffect.isFinished()) {
+//						GLog.w("CharSprite.draw: 检测到着色器效果");
+						if (dirty) {
+							((Buffer)verticesBuffer).position(0);
+							verticesBuffer.put(vertices);
+							if (buffer == null)
+								buffer = new Vertexbuffer(verticesBuffer);
+							else
+								buffer.updateVertices(verticesBuffer);
+							dirty = false;
+						}
+						updateMatrix();
+						shaderEffect.drawWithShader(texture, frame(), width, height, matrix, verticesBuffer, buffer);
+					} else {
+						super.draw();
+					}
 
-	}
+				}
 
 	@Override
 	public void onComplete( Tweener tweener ) {

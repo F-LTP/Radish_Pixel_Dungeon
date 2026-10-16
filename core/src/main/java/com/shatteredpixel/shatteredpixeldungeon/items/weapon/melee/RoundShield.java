@@ -43,6 +43,15 @@ public class RoundShield extends MeleeWeapon {
 		tier = 3;
 	}
 
+	public int DRMax(){
+		return DRMax(buffedLvl());
+	}
+
+	//4 extra defence, plus 1 per level
+	public int DRMax(int lvl){
+		return 4 + lvl;
+	}
+
 	@Override
 	public int max(int lvl) {
 		return  Math.round(3f*(tier+1)) +   //12 base, down from 20
@@ -94,7 +103,7 @@ public class RoundShield extends MeleeWeapon {
 		public boolean hasBlocked = false;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.DUEL_GUARD;
 		}
 

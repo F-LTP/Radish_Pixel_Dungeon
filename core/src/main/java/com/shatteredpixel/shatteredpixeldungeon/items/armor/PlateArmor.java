@@ -21,16 +21,35 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.watabou.noosa.audio.Sample;
 
 public class PlateArmor extends Armor {
 
 	{
 		image = ItemSpriteSheet.ARMOR_PLATE;
 	}
-	
+
 	public PlateArmor() {
 		super( 5 );
+	}
+
+	/**
+	 * 板甲特效：免疫减免前低于 4+0.5*等级的伤害（向下取整）
+	 * @param damage 原始伤害
+	 * @return 如果伤害低于阈值返回 0（完全免疫），否则返回原始伤害
+	 */
+	public float damageReduce(Char wearer, float damage) {
+		if (wearer != null && Char.defendingArmor(wearer) == this) {
+			int threshold = 4 + (int)(buffedLvl() * 0.5f);
+			if (damage < threshold) {
+				Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY);
+				return 0;
+			}
+		}
+		return damage;
 	}
 
 }

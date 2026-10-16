@@ -1,10 +1,5 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
-import com.shatteredpixel.shatteredpixeldungeon.Challenges;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Bundle;
@@ -24,18 +19,10 @@ public class AfterGlow extends Armor{
     @Override
 
     public int DRMax(int lvl){
-        if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
-            return Math.max(8 + lvl + augment.defenseFactor(lvl),lvl);
-        }
-
         return 15 + 3 * lvl + augment.defenseFactor(lvl);
     }
     @Override
     public int DRMin(int lvl){
-        if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
-            return lvl;
-        }
-
         return 2 * lvl;
     }
     public class Warmth extends ArmorBuff {

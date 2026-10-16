@@ -15,7 +15,7 @@ public class SilverScaleArmor extends Armor {
 
     @Override
     public int value() {
-        if (seal != null) return 0;
+        if (checkSeal() != null) return 0;
 
         int price = 5;
         /*if (hasGoodGlyph()) {

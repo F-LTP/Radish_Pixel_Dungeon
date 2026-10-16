@@ -23,11 +23,14 @@ package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.Runestone;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -44,7 +47,7 @@ import com.watabou.utils.Random;
 import java.util.ArrayList;
 
 public class Alchemize extends Spell {
-	
+
 	{
 		image = ItemSpriteSheet.ALCHEMIZE;
 
@@ -52,12 +55,12 @@ public class Alchemize extends Spell {
 	}
 
 	private static WndBag parentWnd;
-	
+
 	@Override
 	protected void onCast(Hero hero) {
 		parentWnd = GameScene.selectItem( itemSelector );
 	}
-	
+
 	@Override
 	public int value() {
 		//lower value, as it's very cheap to make (and also sold at shops)
@@ -143,14 +146,21 @@ public class Alchemize extends Spell {
 			this.owner = owner;
 
 			float pos = height;
-
+			Shopkeeper shop = null;
+			for (Char ch : Actor.chars()){
+				if (ch instanceof Shopkeeper){
+					shop = (Shopkeeper) ch;
+					break;
+				}
+			}
+			final Shopkeeper finalShop = shop;
 			if (Shopkeeper.canSell(item)) {
 				if (item.quantity() == 1) {
 
 					RedButton btnSell = new RedButton(Messages.get(this, "sell", item.value())) {
 						@Override
 						protected void onClick() {
-							WndTradeItem.sell(item);
+							WndTradeItem.sell(item,finalShop);
 							hide();
 							consumeAlchemize();
 						}
@@ -175,10 +185,11 @@ public class Alchemize extends Spell {
 					btnSell1.setRect(0, pos + GAP, width, BTN_HEIGHT);
 					btnSell1.icon(new ItemSprite(ItemSpriteSheet.GOLD));
 					add(btnSell1);
+
 					RedButton btnSellAll = new RedButton(Messages.get(this, "sell_all", priceAll)) {
 						@Override
 						protected void onClick() {
-							WndTradeItem.sell(item);
+							WndTradeItem.sell(item,finalShop);
 							hide();
 							consumeAlchemize();
 						}
@@ -198,7 +209,7 @@ public class Alchemize extends Spell {
 					RedButton btnEnergize = new RedButton(Messages.get(this, "energize", item.energyVal())) {
 						@Override
 						protected void onClick() {
-							WndEnergizeItem.energize(item);
+							WndEnergizeItem.energizeAll(item);
 							hide();
 							consumeAlchemize();
 						}
@@ -226,7 +237,7 @@ public class Alchemize extends Spell {
 					RedButton btnEnergizeAll = new RedButton(Messages.get(this, "energize_all", energyAll)) {
 						@Override
 						protected void onClick() {
-							WndEnergizeItem.energize(item);
+							WndEnergizeItem.energizeAll(item);
 							hide();
 							consumeAlchemize();
 						}
@@ -258,6 +269,7 @@ public class Alchemize extends Spell {
 				}
 				GameScene.selectItem(itemSelector);
 			}
+			Catalog.countUse(getClass());
 			if (curItem instanceof Alchemize && Random.Float() < ((Alchemize)curItem).talentChance){
 				Talent.onScrollUsed(curUser, curUser.pos, ((Alchemize) curItem).talentFactor);
 			}

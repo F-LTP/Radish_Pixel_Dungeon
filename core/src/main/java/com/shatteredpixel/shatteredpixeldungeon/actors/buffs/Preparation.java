@@ -52,7 +52,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Preparation extends Buff implements ActionIndicator.Action {
-	
+	public boolean stay = true;
 	{
 		//always acts after other buffs, so invisibility effects can process first
 		actPriority = BUFF_PRIO - 1;
@@ -82,6 +82,18 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 				{.20f, .27f, .33f, .40f},
 				{.50f, .67f, .83f, 1.0f}
 		};
+
+		// Talent: BraceYourSelf
+		// transfer by DoggingDog on 2024-09-21
+		private static final float[][] braceYourselfExtraDmgs=new float[][]{
+				{0,.15f,.20f,.25f,.30f},
+				{0,.30f,.40f,.50f,.60f},
+				{0,.45f,.60f,.75f,.90f},
+				{0,.60f,.80f,1.0f,1.2f}
+		};
+		public float  braceYourselfExtraDmg(){
+			return braceYourselfExtraDmgs[ordinal()][Dungeon.hero.pointsInTalent(Talent.BRACE_YOURSELF)];
+		}
 
 		public float KOThreshold(){
 			return KOThresholds[ordinal()][Dungeon.hero.pointsInTalent(Talent.ENHANCED_LETHALITY)];
@@ -114,7 +126,12 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 				int newDmg = attacker.damageRoll();
 				if (newDmg > dmg) dmg = newDmg;
 			}
-			return Math.round(dmg * (1f + baseDmgBonus));
+			// Talent : brace_yourself
+			// by DoggingDog on 2024-09-21
+			if(Dungeon.hero.buff(BraceYourself.class) != null)
+                return Math.round(dmg * (1f + baseDmgBonus + braceYourselfExtraDmg()));
+            else
+				return Math.round(dmg * (1f + baseDmgBonus));
 		}
 		
 		public static AttackLevel getLvl(int turnsInvis){
@@ -164,7 +181,7 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.PREPARATION;
 	}
 	
@@ -192,8 +209,13 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 		
 		AttackLevel lvl = AttackLevel.getLvl(turnsInvis);
 
+		//Talent : brace_yourself
+		float bdb=lvl.baseDmgBonus;
+		if(Dungeon.hero.buff(BraceYourself.class)!=null)
+			bdb=lvl.baseDmgBonus+ lvl.braceYourselfExtraDmg();
+
 		desc += "\n\n" + Messages.get(this, "desc_dmg",
-				(int)(lvl.baseDmgBonus*100),
+				(int)(bdb*100),
 				(int)(lvl.KOThreshold()*100),
 				(int)(lvl.KOThreshold()*20));
 		
@@ -214,20 +236,22 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 		
 		return desc;
 	}
-	
+
 	private static final String TURNS = "turnsInvis";
-	
+
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		turnsInvis = bundle.getInt(TURNS);
+		stay=bundle.getBoolean("do_you_stay");
 		ActionIndicator.setAction(this);
 	}
-	
+
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(TURNS, turnsInvis);
+		bundle.put("do_you_stay",stay);
 	}
 
 	@Override
@@ -236,7 +260,7 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	}
 	
 	@Override
-	public int actionIcon() {
+	public String actionIcon() {
 		return HeroIcon.PREPARATION;
 	}
 

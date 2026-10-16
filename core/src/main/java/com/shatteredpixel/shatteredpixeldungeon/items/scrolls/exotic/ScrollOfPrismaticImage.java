@@ -58,7 +58,7 @@ public class ScrollOfPrismaticImage extends ExoticScroll {
 		identify();
 		
 		Sample.INSTANCE.play( Assets.Sounds.READ );
-	
-		readAnimation();
+
+		readAnimation(true);
 	}
 }

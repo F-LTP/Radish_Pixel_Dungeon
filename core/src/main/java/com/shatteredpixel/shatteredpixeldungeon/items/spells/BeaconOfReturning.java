@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfPassage;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.InterlevelScene;
@@ -56,7 +57,7 @@ public class BeaconOfReturning extends Spell {
 	}
 	
 	public int returnDepth	= -1;
-	public int returnBranch	= 0;
+	public String returnBranchId	= Branches.MAIN;
 	public int returnPos;
 	
 	@Override
@@ -100,7 +101,7 @@ public class BeaconOfReturning extends Spell {
 	
 	private void setBeacon(Hero hero ){
 		returnDepth = Dungeon.depth;
-		returnBranch = Dungeon.branch;
+		returnBranchId = Dungeon.branchId;
 		returnPos = hero.pos;
 		
 		hero.spend( 1f );
@@ -115,7 +116,7 @@ public class BeaconOfReturning extends Spell {
 	
 	private void returnBeacon( Hero hero ){
 		
-		if (returnDepth == Dungeon.depth && returnBranch == Dungeon.branch) {
+		if (returnDepth == Dungeon.depth && returnBranchId.equals(Dungeon.branchId)) {
 
 			Char existing = Actor.findChar(returnPos);
 			if (existing != null && existing != hero){
@@ -159,7 +160,7 @@ public class BeaconOfReturning extends Spell {
 			}
 
 			//cannot return to mining level
-			if (returnDepth >= 11 && returnDepth <= 14 && returnBranch == 1){
+			if (returnDepth >= 11 && returnDepth <= 14 && returnBranchId.equals(Branches.MINING)){
 				GLog.w( Messages.get(ScrollOfTeleportation.class, "no_tele") );
 				return;
 			}
@@ -168,7 +169,7 @@ public class BeaconOfReturning extends Spell {
 			Invisibility.dispel();
 			InterlevelScene.mode = InterlevelScene.Mode.RETURN;
 			InterlevelScene.returnDepth = returnDepth;
-			InterlevelScene.returnBranch = returnBranch;
+			InterlevelScene.returnBranchId = returnBranchId;
 			InterlevelScene.returnPos = returnPos;
 			Game.switchScene( InterlevelScene.class );
 		}
@@ -195,14 +196,14 @@ public class BeaconOfReturning extends Spell {
 	}
 	
 	private static final String DEPTH	= "depth";
-	private static final String BRANCH	= "branch";
+	private static final String BRANCH_ID	= "branch_id";
 	private static final String POS		= "pos";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
 		super.storeInBundle( bundle );
 		bundle.put( DEPTH, returnDepth );
-		bundle.put( BRANCH, returnBranch );
+		bundle.put( BRANCH_ID, returnBranchId );
 		if (returnDepth != -1) {
 			bundle.put( POS, returnPos );
 		}
@@ -212,8 +213,8 @@ public class BeaconOfReturning extends Spell {
 	public void restoreFromBundle( Bundle bundle ) {
 		super.restoreFromBundle(bundle);
 		returnDepth	= bundle.getInt( DEPTH );
-		returnBranch = bundle.getInt( BRANCH );
 		returnPos	= bundle.getInt( POS );
+		returnBranchId = bundle.getString(BRANCH_ID);
 	}
 	
 	@Override

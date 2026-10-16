@@ -77,7 +77,7 @@ public class Kinetic extends Weapon.Enchantment {
 		}
 		
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.WEAPON;
 		}
 		

@@ -1,8 +1,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
-import com.shatteredpixel.shatteredpixeldungeon.Challenges;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CircleSword;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
@@ -24,18 +24,10 @@ public class AfterImage extends Armor{
     @Override
 
     public int DRMax(int lvl){
-        if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
-            return Math.max(3 + 2 * lvl + augment.defenseFactor(lvl),2);
-        }
-
         return 8 + 5 * lvl + augment.defenseFactor(lvl);
     }
     @Override
     public int DRMin(int lvl){
-        if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
-            return 2;
-        }
-
         return 4;
     }
     private static final String DODGES       = "dodges";
@@ -71,15 +63,25 @@ public class AfterImage extends Armor{
     public static class absoluteEvasion extends Buff{
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.A_EVA;
         }
+
+		@Override
+		public String desc() {
+			if (!(this instanceof AnotabsoluteEvasion)
+					&& target != null
+					&& target.attackingWeapon() instanceof CircleSword) {
+				return Messages.get(this, "circle_desc");
+			}
+			return super.desc();
+		}
     }
 
     public static class AnotabsoluteEvasion extends absoluteEvasion {
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.A_EVA;
         }
 

@@ -291,7 +291,7 @@ public class TacticalThrowTalen4Battlemage {
         }
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.ARMOR;
         }
 

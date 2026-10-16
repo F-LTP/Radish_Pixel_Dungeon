@@ -24,13 +24,18 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ImpSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIcon;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
@@ -50,6 +55,7 @@ public class WndHeroInfo extends WndTabbed {
 	private TalentInfoTab talentInfo;
 	private SubclassInfoTab subclassInfo;
 	private ArmorAbilityInfoTab abilityInfo;
+	private ImpSuperTalentInfoTab impSuperTalentInfo;
 
 	private static int WIDTH = 120;
 	private static int MIN_HEIGHT = 125;
@@ -58,22 +64,18 @@ public class WndHeroInfo extends WndTabbed {
 	public WndHeroInfo( HeroClass cl ){
 
 		Image tabIcon;
-		switch (cl){
-			case WARRIOR: default:
-				tabIcon = new ItemSprite(ItemSpriteSheet.SEAL, null);
-				break;
-			case MAGE:
-				tabIcon = new ItemSprite(ItemSpriteSheet.MAGES_STAFF, null);
-				break;
-			case ROGUE:
-				tabIcon = new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK, null);
-				break;
-			case HUNTRESS:
-				tabIcon = new ItemSprite(ItemSpriteSheet.SPIRIT_BOW, null);
-				break;
-			case DUELIST:
-				tabIcon = new ItemSprite(ItemSpriteSheet.RAPIER, null);
-				break;
+		if (cl == HeroClasses.MAGE) {
+			tabIcon = new ItemSprite(ItemSpriteSheet.MAGES_STAFF, null);
+		} else if (cl == HeroClasses.ROGUE) {
+			tabIcon = new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK, null);
+		} else if (cl == HeroClasses.HUNTRESS) {
+			tabIcon = new ItemSprite(ItemSpriteSheet.SPIRIT_BOW, null);
+		} else if (cl == HeroClasses.RECTOR) {
+			tabIcon = new ItemSprite(ItemSpriteSheet.HOLYANKH, null);
+		} else if (cl == HeroClasses.MOONLIGHT) {
+			tabIcon = new ItemSprite(ItemSpriteSheet.SNAKE_BITED_YENDOR, null);
+		} else {
+			tabIcon = new ItemSprite(ItemSpriteSheet.SEAL, null);
 		}
 
 		int finalHeight = MIN_HEIGHT;
@@ -132,6 +134,21 @@ public class WndHeroInfo extends WndTabbed {
 					abilityInfo.visible = abilityInfo.active = value;
 				}
 			});
+
+			//IMP SUPER TALENT
+			impSuperTalentInfo = new ImpSuperTalentInfoTab(cl);
+			add(impSuperTalentInfo);
+			impSuperTalentInfo.setSize(WIDTH, MIN_HEIGHT);
+			finalHeight = (int)Math.max(finalHeight, impSuperTalentInfo.height());
+
+			add(new IconTab(new ImpSprite()) {
+				@Override
+				protected void select(boolean value) {
+					super.select(value);
+					impSuperTalentInfo.visible = impSuperTalentInfo.active = value;
+				}
+			});
+
 		}
 
 		resize(WIDTH, finalHeight);
@@ -170,35 +187,34 @@ public class WndHeroInfo extends WndTabbed {
 				add(info[i]);
 			}
 
-			switch (cls){
-				case WARRIOR: default:
-					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.SEAL),
-							new ItemSprite(ItemSpriteSheet.WORN_SHORTSWORD),
-							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
-					break;
-				case MAGE:
-					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.MAGES_STAFF),
-							new ItemSprite(ItemSpriteSheet.WAND_MAGIC_MISSILE),
-							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
-					break;
-				case ROGUE:
-					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK),
-							Icons.get(Icons.STAIRS),
-							new ItemSprite(ItemSpriteSheet.DAGGER),
-							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
-					break;
-				case HUNTRESS:
-					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.SPIRIT_BOW),
-							new Image(Assets.Environment.TILES_SEWERS, 32, 64, 16, 16),
-							new ItemSprite(ItemSpriteSheet.GLOVES),
-							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
-					break;
-				case DUELIST:
-					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.RAPIER),
-							new ItemSprite(ItemSpriteSheet.WAR_HAMMER),
-							new ItemSprite(ItemSpriteSheet.THROWING_SPIKE),
-							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
-					break;
+			if (cls == HeroClasses.MAGE) {
+				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.MAGES_STAFF),
+						new ItemSprite(ItemSpriteSheet.WAND_MAGIC_MISSILE),
+						new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
+			} else if (cls == HeroClasses.ROGUE) {
+				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK),
+						Icons.get(Icons.STAIRS),
+						new ItemSprite(ItemSpriteSheet.DAGGER),
+						new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
+			} else if (cls == HeroClasses.HUNTRESS) {
+				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.SPIRIT_BOW),
+						new Image(Assets.Environment.TILES_SEWERS, 32, 64, 16, 16),
+						new ItemSprite(ItemSpriteSheet.GLOVES),
+						new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
+			} else if (cls == HeroClasses.RECTOR) {
+				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.HOLYANKH),
+						new ItemSprite(ItemSpriteSheet.RING_SKYLUE),
+						new BuffIcon(BuffIndicator.CORRUPT, true),
+						new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
+			} else if (cls == HeroClasses.MOONLIGHT) {
+				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.THROWING_KNIFE),
+				new ItemSprite(ItemSpriteSheet.ARTIFACT_WHEELCHAIR),
+				new BuffIcon(BuffIndicator.CORRUPT, true),
+				new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
+			} else {
+				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.SEAL),
+						new ItemSprite(ItemSpriteSheet.WORN_SHORTSWORD),
+						new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 			}
 			for (Image im : icons) {
 				add(im);
@@ -218,8 +234,12 @@ public class WndHeroInfo extends WndTabbed {
 				info[i].maxWidth((int)width - 20);
 				info[i].setPos(20, pos);
 
-				icons[i].x = (20-icons[i].width())/2;
-				icons[i].y = info[i].top() + (info[i].height() - icons[i].height())/2;
+				// Some skins add description sections without adding another icon.
+				// Keep the text visible instead of indexing past the icon list.
+				if (i < icons.length) {
+					icons[i].x = (20-icons[i].width())/2;
+					icons[i].y = info[i].top() + (info[i].height() - icons[i].height())/2;
+				}
 
 				pos = info[i].bottom() + 4*MARGIN;
 			}
@@ -379,6 +399,65 @@ public class WndHeroInfo extends WndTabbed {
 				abilityInfos[i].setRect(width-20, abilityDescs[i].top() + (abilityDescs[i].height()-20)/2, 20, 20);
 
 				pos = abilityDescs[i].bottom() + 4*MARGIN;
+			}
+
+			height = Math.max(height, pos - 4*MARGIN);
+
+		}
+	}
+
+	private static class ImpSuperTalentInfoTab extends Component {
+		private RenderedTextBlock title;
+		private RenderedTextBlock message;
+		private RenderedTextBlock[] subClsDescs;
+		private IconButton[] subClsInfos;
+
+		public ImpSuperTalentInfoTab( HeroClass cls ){
+			super();
+			title = PixelScene.renderTextBlock(Messages.titleCase(Messages.get(WndHeroInfo.class, "supertalent")), 9);
+			title.hardlight(TITLE_COLOR);
+			add(title);
+
+			message = PixelScene.renderTextBlock(Messages.get(WndHeroInfo.class, "supertalent_msg"), 6);
+			add(message);
+
+			HeroSubClass[] subClasses = cls.subClasses();
+
+			subClsDescs = new RenderedTextBlock[subClasses.length];
+			subClsInfos = new IconButton[subClasses.length];
+
+			for (int i = 0; i < subClasses.length; i++){
+				subClsDescs[i] = PixelScene.renderTextBlock(subClasses[i].shortDesc(), 6);
+				int finalI = i;
+				subClsInfos[i] = new IconButton( Icons.get(Icons.INFO) ){
+					@Override
+					protected void onClick() {
+						Game.scene().addToFront(new WndInfoImpSuperTalent(cls, subClasses[finalI]));
+					}
+				};
+				add(subClsDescs[i]);
+				add(subClsInfos[i]);
+			}
+
+		}
+
+		@Override
+		protected void layout() {
+			super.layout();
+
+			title.setPos((width-title.width())/2, MARGIN);
+			message.maxWidth((int)width);
+			message.setPos(0, title.bottom()+4*MARGIN);
+
+			float pos = message.bottom()+4*MARGIN;
+
+			for (int i = 0; i < subClsDescs.length; i++){
+				subClsDescs[i].maxWidth((int)width - 20);
+				subClsDescs[i].setPos(0, pos);
+
+				subClsInfos[i].setRect(width-20, subClsDescs[i].top() + (subClsDescs[i].height()-20)/2, 20, 20);
+
+				pos = subClsDescs[i].bottom() + 4*MARGIN;
 			}
 
 			height = Math.max(height, pos - 4*MARGIN);

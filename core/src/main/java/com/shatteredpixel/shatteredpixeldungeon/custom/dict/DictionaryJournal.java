@@ -17,11 +17,11 @@ public enum DictionaryJournal {
     DOCUMENTS,
     UNCLASSIFIED;
 
-    private LinkedHashMap<String, Integer> d = new LinkedHashMap<>();
+    private LinkedHashMap<String, Object> d = new LinkedHashMap<>();
 
     public Collection<String> keyList(){return d.keySet();}
 
-    public Collection<Integer> imageList() {return d.values();}
+    public Collection<Object> imageList() {return d.values();}
 
     static {
         //armors
@@ -118,6 +118,7 @@ public enum DictionaryJournal {
         MOBS.d.put("mob_gnoll",             DictSpriteSheet.GNOLL);
         MOBS.d.put("mob_frat",              DictSpriteSheet.F_RAT);
         MOBS.d.put("mob_crab",              DictSpriteSheet.CRAB);
+        MOBS.d.put("mob_headcrab",          DictSpriteSheet.HEADCRAB);
         MOBS.d.put("mob_gnoll_darter",      DictSpriteSheet.GNOLL_DARTER);
         MOBS.d.put("mob_swarm",             DictSpriteSheet.SWARM);
         MOBS.d.put("mob_slime",             DictSpriteSheet.SLIME);

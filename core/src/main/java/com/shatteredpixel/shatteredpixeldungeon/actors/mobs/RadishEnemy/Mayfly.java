@@ -114,10 +114,8 @@ public class Mayfly extends Mob {
             if(Dungeon.hero != null){
                 if(isInRange(Dungeon.hero.pos) && fieldOfView[Dungeon.hero.pos]){
                     int healthHalo = HealRoll();
-                    Dungeon.hero.HP += healthHalo;
-                    Dungeon.hero.HP = Math.min(Dungeon.hero.HP, Dungeon.hero.HT);
+                    Dungeon.hero.heal(healthHalo);
                     Dungeon.hero.sprite.emitter().burst(Speck.factory(Speck.HEALING), healthHalo);
-                    Dungeon.hero.sprite.showStatus(CharSprite.POSITIVE, "+%dHP", healthHalo);
                     if (sprite != null && (sprite.visible)) {
                         sprite.zap(Dungeon.hero.pos);
                     }

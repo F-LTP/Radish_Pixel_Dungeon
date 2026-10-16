@@ -25,12 +25,15 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurse;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.SpectralNecromancerSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
@@ -53,6 +56,8 @@ public class SpectralNecromancer extends Necromancer {
 			summoning = false;
 			if (sprite instanceof SpectralNecromancerSprite) {
 				((SpectralNecromancerSprite) sprite).cancelSummoning();
+			} else if (sprite instanceof SnakeSprite) {
+				((SnakeSprite) sprite).cancelSummoning();
 			}
 		}
 		return super.act();
@@ -107,9 +112,14 @@ public class SpectralNecromancer extends Necromancer {
 		if (Actor.findChar(summoningPos) != null) {
 
 			//cancel if character cannot be moved
-			if (Char.hasProp(Actor.findChar(summoningPos), Property.IMMOVABLE)){
+			if (Char.hasProp(Actor.findChar(summoningPos), Property.IMMOVABLE)
+					|| com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SpaceFragment.blocksPassiveDisplacement(Actor.findChar(summoningPos))){
 				summoning = false;
-				((SpectralNecromancerSprite)sprite).finishSummoning();
+				if (sprite instanceof SpectralNecromancerSprite) {
+					((SpectralNecromancerSprite)sprite).finishSummoning();
+				} else if (sprite instanceof SnakeSprite) {
+					((SnakeSprite)sprite).finishSummoning();
+				}
 				spend(TICK);
 				return;
 			}
@@ -136,7 +146,7 @@ public class SpectralNecromancer extends Necromancer {
 
 				Char blocker = Actor.findChar(summoningPos);
 				if (blocker.alignment != alignment){
-					blocker.damage( Char.combatRoll(2, 10), new SummoningBlockDamage() );
+					blocker.damage( DamageInfo.of(Char.combatRoll(2, 10), DamageType.PHYSICAL_NO_ARMOR, this, new SummoningBlockDamage()) );
 					if (blocker == Dungeon.hero && !blocker.isAlive()){
 						Badges.validateDeathFromEnemyMagic();
 						Dungeon.fail(this);
@@ -154,7 +164,11 @@ public class SpectralNecromancer extends Necromancer {
 		Wraith wraith = Wraith.spawnAt(summoningPos, Wraith.class);
 		wraith.adjustStats(0);
 		Dungeon.level.occupyCell( wraith );
-		((SpectralNecromancerSprite)sprite).finishSummoning();
+		if (sprite instanceof SpectralNecromancerSprite) {
+			((SpectralNecromancerSprite)sprite).finishSummoning();
+		} else if (sprite instanceof SnakeSprite) {
+			((SnakeSprite)sprite).finishSummoning();
+		}
 
 		for (Buff b : buffs(AllyBuff.class)){
 			Buff.affect( wraith, b.getClass());

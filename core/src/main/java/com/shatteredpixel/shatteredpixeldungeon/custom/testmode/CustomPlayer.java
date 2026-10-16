@@ -230,7 +230,7 @@ public class CustomPlayer extends TestItem{
             baseArmorButton.setRect(0, baseDamageButton.bottom() + GAP, WIDTH, 16);
             add(baseArmorButton);
 
-            attackDelayButton = new RedButton(Messages.get(CustomPlayer.class, "accuracy_button", hero.attackDelay()), 7) {
+            attackDelayButton = new RedButton(Messages.get(CustomPlayer.class, "attackdelay_button", hero.attackDelay()), 7) {
                 @Override
                 protected void onClick() {
                     Game.runOnRenderThread(() ->GameScene.show(new WndTextNumberInput(

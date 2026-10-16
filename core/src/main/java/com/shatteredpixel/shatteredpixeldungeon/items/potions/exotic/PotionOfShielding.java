@@ -23,30 +23,35 @@ package com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic;
 
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.utils.Random;
 
+//Permanently increases the drinker's maximum health by 4~7 points.
 public class PotionOfShielding extends ExoticPotion {
-	
+
 	{
 		icon = ItemSpriteSheet.Icons.POTION_SHIELDING;
 	}
-	
+
 	@Override
 	public void apply(Hero hero) {
 		identify();
 
-		if (Dungeon.isChallenged(Challenges.NO_HEALING)){
-			PotionOfHealing.pharmacophobiaProc(hero);
+		if (Dungeon.isChallenged(Challenges.DAMAGE_NO)){
+			Buff.affect(hero, Poison.class).set(4 + hero.lvl/2f);
+			GLog.n( Messages.get(this, "poison") );
 		} else {
-			//~75% of a potion of healing
-			Buff.affect(hero, Barrier.class).setShield((int) (0.6f * hero.HT + 10));
-			hero.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString((int) (0.6f * hero.HT + 10)), FloatingText.SHIELDING );
+			int amount = Random.NormalIntRange(4, 7);
+			hero.HTBoost += amount;
+			hero.updateHT(true);
+			hero.sprite.showStatus(CharSprite.POSITIVE, "+" + amount);
+			GLog.p( Messages.get(this, "msg", amount) );
 		}
 	}
 }

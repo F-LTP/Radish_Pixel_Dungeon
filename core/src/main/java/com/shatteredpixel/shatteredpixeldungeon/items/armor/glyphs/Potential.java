@@ -37,12 +37,12 @@ public class Potential extends Glyph {
 	@Override
 	public int proc( Armor armor, Char attacker, Char defender, int damage) {
 
-		int level = Math.max( 0, armor.buffedLvl() );
+		int level = Math.max( 0, armor.procLvl() );
 		
 		// lvl 0 - 16.7%
 		// lvl 1 - 28.6%
 		// lvl 2 - 37.5%
-		float procChance = (level+1f)/(level+6f) * procChanceMultiplier(defender);
+		float procChance = (level+1f)/(level+6f) * procChanceMultiplier(defender)*defender.talentProc();
 		if (Random.Float() < procChance && defender instanceof Hero) {
 
 			float powerMulti = Math.max(1f, procChance);

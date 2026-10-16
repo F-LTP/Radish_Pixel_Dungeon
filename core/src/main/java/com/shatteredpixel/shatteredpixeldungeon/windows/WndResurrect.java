@@ -135,6 +135,8 @@ public class WndResurrect extends Window {
 			btnItem2.item().keptThoughLostInvent = true;
 		}
 
+		Statistics.gnoll_boss = 0;
+
 		InterlevelScene.mode = InterlevelScene.Mode.RESURRECT;
 		Game.switchScene( InterlevelScene.class );
 	}

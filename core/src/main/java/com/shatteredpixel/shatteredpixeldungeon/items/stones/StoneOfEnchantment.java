@@ -21,13 +21,18 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.stones;
 
+import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RuneSlade;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -49,28 +54,40 @@ public class StoneOfEnchantment extends InventoryStone {
 	@Override
 	protected void onItemSelected(Item item) {
 		curItem.detach( curUser.belongings.backpack );
-		
 		if (item instanceof Weapon) {
-			
+
+			if(item instanceof RuneSlade){
+				item.level++;
+				ScrollOfUpgrade.upgrade(curUser);
+				Badges.validateItemLevelAquired( item );
+				Statistics.upgradesUsed++;
+				Badges.validateMageUnlock();
+				GLog.i(Messages.get(RuneSlade.class,"en_update"));
+			}
 			((Weapon)item).enchant();
-			
-		} else {
-			
+
+		} else if (item instanceof Armor){
+
 			((Armor)item).inscribe();
-			
+
 		}
-		
+		else if (item instanceof BrokenSeal){
+			((BrokenSeal)item).inscribe();
+		}
+
 		curUser.sprite.emitter().start( Speck.factory( Speck.LIGHT ), 0.1f, 5 );
 		Enchanting.show( curUser, item );
-		
+
 		if (item instanceof Weapon) {
 			GLog.p(Messages.get(this, "weapon"));
-		} else {
+		} else if (item instanceof Armor){
 			GLog.p(Messages.get(this, "armor"));
+		}else if (item instanceof BrokenSeal){
+			GLog.p(Messages.get(this, "seal"));
 		}
-		
+
 		useAnimation();
-		
+
 	}
 	
 	@Override

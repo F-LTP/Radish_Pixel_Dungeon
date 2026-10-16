@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
@@ -75,15 +76,10 @@ public class DeadEndLevel extends Level {
 		int entrance = SIZE * width() + SIZE / 2 + 1;
 
 		//different exit behaviour depending on main branch or side one
-		if (Dungeon.branch == 0) {
+		if (Dungeon.branchId.equals(Branches.MAIN)) {
 			transitions.add(new LevelTransition(this, entrance, LevelTransition.Type.REGULAR_ENTRANCE));
 		} else {
-			transitions.add(new LevelTransition(this,
-					entrance,
-					LevelTransition.Type.BRANCH_ENTRANCE,
-					Dungeon.depth,
-					0,
-					LevelTransition.Type.BRANCH_EXIT));
+			throw new IllegalStateException("Side branches cannot create a dead-end fallback floor");
 		}
 		map[entrance] = Terrain.ENTRANCE;
 		

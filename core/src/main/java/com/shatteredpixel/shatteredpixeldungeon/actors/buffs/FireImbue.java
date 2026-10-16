@@ -20,10 +20,12 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlameParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -59,6 +61,12 @@ public class FireImbue extends Buff {
 	}
 
 	public void set( float duration ) {
+		if (target == Dungeon.hero){
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				duration*=RingOfBenediction.periodMultiplier(target);
+			}
+		}
 		this.left = duration;
 	}
 
@@ -86,7 +94,7 @@ public class FireImbue extends Buff {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.IMBUE;
 	}
 
@@ -111,7 +119,7 @@ public class FireImbue extends Buff {
 	}
 
 	{
-		immunities.add( Burning.class );
+		immunities.add(Burning.class); typeImmunities.add(DamageType.BURNING_STATUS);
 	}
 
 	@Override

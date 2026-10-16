@@ -131,10 +131,8 @@ public abstract class TextField extends RedButton {
     protected void layout() {
 
         if(large) {
-            bg.x = x;
-            bg.y = y;
             height = Math.max(height, MIN_HEIGHT_LARGE);
-            bg.size(width, height);
+            skin.layout(x, y, width, height);
 
             hotArea.x = x;
             hotArea.y = y;
@@ -142,13 +140,13 @@ public abstract class TextField extends RedButton {
             hotArea.height = height;
 
             if (icon != null) {
-                text.setPos((width - text.width() - text.height() - 2) / 2, bg.y + 2);
+                text.setPos((width - text.width() - text.height() - 2) / 2, y + 2);
                 PixelScene.align(text);
                 icon.scale.set((text.height() + 2) / icon.height);
                 icon.x = text.right() + 2;
                 icon.y = text.top() - 2;
             } else {
-                text.setPos((width - text.width()) / 2, bg.y + 2);
+                text.setPos((width - text.width()) / 2, y + 2);
                 PixelScene.align(text);
             }
 
@@ -162,10 +160,8 @@ public abstract class TextField extends RedButton {
 
         }else{
 
-            bg.x = x;
-            bg.y = y;
             height = Math.max(height, MIN_HEIGHT_PACKED);
-            bg.size(width, height);
+            skin.layout(x, y, width, height);
 
             hotArea.x = x;
             hotArea.y = y;
@@ -174,17 +170,17 @@ public abstract class TextField extends RedButton {
 
             if (icon != null) {
                 icon.x = 1;
-                icon.y = (bg.height - icon.height)/2 + bg.y;
-                text.setPos(icon.x + icon.width() + 1, (bg.height - text.height())/2 + bg.y);
+                icon.y = (height - icon.height)/2 + y;
+                text.setPos(icon.x + icon.width() + 1, (height - text.height())/2 + y);
                 PixelScene.align(text);
             } else {
-                text.setPos( 2, (bg.height - text.height())/2 + bg.y);
+                text.setPos( 2, (height - text.height())/2 + y);
                 PixelScene.align(text);
             }
 
             inputWnd.x = text.right() + 2;
-            inputWnd.y = bg.y + 2;
-            inputWnd.size(bg.x + bg.width - text.right() - 4, bg.height - 4);
+            inputWnd.y = y + 2;
+            inputWnd.size(x + width - text.right() - 4, height - 4);
 
             inputText.maxWidth((int) inputWnd.width);
             inputText.setPos((inputWnd.width() - inputText.width()) / 2 + inputWnd.x, inputWnd.y + (inputWnd.height - inputText.height()) / 2);

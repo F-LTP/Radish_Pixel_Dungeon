@@ -58,6 +58,7 @@ public abstract class Trap implements Bundlable {
 
 	public boolean visible;
 	public boolean active = true;
+	public boolean mcOnlyUpgrade = false;
 	public boolean disarmedByActivation = true;
 	
 	public boolean canBeHidden = true;
@@ -128,6 +129,8 @@ public abstract class Trap implements Bundlable {
 
 	private static final String ONLYREPAIR = "onlyRepair";
 
+	private static final String MC_ONLY = "mc";
+
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		pos = bundle.getInt( POS );
@@ -138,6 +141,9 @@ public abstract class Trap implements Bundlable {
 		if(bundle.contains(ONLYREPAIR)){
 			onlyRepair = bundle.getBoolean(ONLYREPAIR);
 		}
+		if (bundle.contains(MC_ONLY)) {
+			mcOnlyUpgrade = bundle.getBoolean(MC_ONLY);
+		}
 	}
 
 	@Override
@@ -146,5 +152,6 @@ public abstract class Trap implements Bundlable {
 		bundle.put( VISIBLE, visible );
 		bundle.put( ACTIVE, active );
 		bundle.put( ONLYREPAIR,onlyRepair);
+		bundle.put( MC_ONLY, mcOnlyUpgrade );
 	}
 }

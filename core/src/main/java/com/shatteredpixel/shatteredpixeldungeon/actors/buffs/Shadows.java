@@ -112,7 +112,7 @@ public class Shadows extends Invisibility {
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.SHADOWS;
 	}
 

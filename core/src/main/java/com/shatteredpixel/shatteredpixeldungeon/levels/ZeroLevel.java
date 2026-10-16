@@ -21,9 +21,9 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.levels;
 
-import static com.shatteredpixel.shatteredpixeldungeon.items.Generator.randomArtifact;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Statistics;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Boat;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MoonLight;
@@ -32,23 +32,44 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Owo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PW;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.SeaShore;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.ThunderStorm;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.SurfaceScene;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
+import com.watabou.noosa.Game;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ZeroLevel extends Level {
-    static final Class<?>[] zero_npc={
-            Boat.class,
-            Owo.class,
-            ThunderStorm.class,
-            SeaShore.class,
-            PW.class,
-            MoonLight.class
-    };
+    static final Class<?>[] zero_npc;
+
+    static {
+        // 创建一个初始的 Class 数组，不包含 MoonLight.class
+        List<Class<?>> npcList = new ArrayList<>(Arrays.asList(
+                Boat.class,
+                Owo.class,
+                ThunderStorm.class,
+                SeaShore.class,
+                PW.class
+        ));
+
+        // 根据 UpdateReady() 的结果来决定是否加入 MoonLight.class
+
+            npcList.add(MoonLight.class);
+
+
+        // 将最终列表转化为数组
+        zero_npc = npcList.toArray(new Class<?>[0]);
+    }
+
+
+
     private static final int[] true_map = {
             0,0,0,0,0,0,0,0,0,0,0,
             0,0,0,4,4,4,4,4,0,0,0,
@@ -84,47 +105,21 @@ public class ZeroLevel extends Level {
         this.viewDistance = 12;
     }
 
-    /*private int mapToTerrain(int var1) {
-        if (var1 == 1 || var1 == 2 || var1 == 3) {
-            return 29;
+    @Override
+    public boolean activateTransition(Hero hero, LevelTransition transition) {
+        if (transition.type == LevelTransition.Type.SURFACE){
+            if (hero.belongings.getItem( Amulet.class ) == null) {
+                Game.runOnRenderThread(() -> GameScene.show( new WndMessage( Messages.get(hero, "leave") ) ));
+                return false;
+            } else {
+                Statistics.ascended = true;
+                Game.switchScene( SurfaceScene.class );
+                return true;
+            }
+        } else {
+            return super.activateTransition(hero, transition);
         }
-        if (var1 != 4) {
-            if (var1 == 16) {
-                return 7;
-            }
-            if (var1 == 17) {
-                return 8;
-            }
-            switch (var1) {
-                case -047483644:
-                    break;
-                case -2147483584:
-                case 64:
-                case 190:
-                    return 4;
-                case 85:
-                    return 11;
-                case -2147483524:
-                case 124:
-                case 140:
-                    return 27;
-                case 69:
-                case 25:
-                    return 12;
-                case 80:
-                    return 5;
-                case 96:
-                    return 23;
-                case 120:
-                    return 20;
-                case 123:
-                    return 29;
-                default:
-                    return 1;
-            }
-        }
-        return 14;
-    }*/
+    }
 
     protected boolean build() {
         setSize(11, 24);
@@ -176,6 +171,8 @@ public class ZeroLevel extends Level {
             NPC npcToAdd  = (NPC)Reflection.newInstance(this_npc[c]);
             npcToAdd.pos=poses[i];
             mobs.add(npcToAdd);
+
+
         }
 
     }

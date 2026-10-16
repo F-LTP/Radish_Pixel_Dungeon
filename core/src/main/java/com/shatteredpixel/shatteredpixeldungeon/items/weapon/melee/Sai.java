@@ -136,7 +136,7 @@ public class Sai extends MeleeWeapon {
 		public int hits = 0;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			if (Dungeon.hero.belongings.weapon() instanceof Gloves
 					|| Dungeon.hero.belongings.weapon() instanceof Sai
 					|| Dungeon.hero.belongings.weapon() instanceof Gauntlet
@@ -163,7 +163,7 @@ public class Sai extends MeleeWeapon {
 			hits++;
 			comboTime = 5f;
 
-			if (hits >= 2 && icon() != BuffIndicator.NONE){
+			if (hits >= 2 && !BuffIndicator.NONE.equals(icon())){
 				GLog.p( Messages.get(Combo.class, "combo", hits) );
 			}
 		}

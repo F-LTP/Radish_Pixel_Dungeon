@@ -16,10 +16,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.features;
+
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.level;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
@@ -30,10 +33,15 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.SkyWalker;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfFeatherFall;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.WeakFloorRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -52,7 +60,7 @@ public class Chasm implements Hero.Doom {
 
 	public static boolean jumpConfirmed = false;
 	private static int heroPos;
-	
+
 	public static void heroJump( final Hero hero ) {
 		heroPos = hero.pos;
 		Game.runOnRenderThread(new Callback() {
@@ -94,25 +102,36 @@ public class Chasm implements Hero.Doom {
 			}
 		});
 	}
-	
+
 	public static void heroFall( int pos ) {
-		
+
 		jumpConfirmed = false;
-				
+
 		Sample.INSTANCE.play( Assets.Sounds.FALLING );
 
 		Level.beforeTransition();
 
 		if (Dungeon.hero.isAlive()) {
-			Dungeon.hero.interrupt();
-			InterlevelScene.mode = InterlevelScene.Mode.FALL;
-			if (Dungeon.level instanceof RegularLevel) {
-				Room room = ((RegularLevel)Dungeon.level).room( pos );
-				InterlevelScene.fallIntoPit = room != null && room instanceof WeakFloorRoom;
+			// 检查当前分支是否有下一层可掉落
+			boolean canFallToNextLevel = Branches.get(Dungeon.branchId).hasMoreDepth(Dungeon.depth + 1);
+			
+			if (Dungeon.branchId.equals(Branches.MAIN) || canFallToNextLevel) {
+				// 主线或有下一层的支线：正常掉落流程
+				Dungeon.hero.interrupt();
+				InterlevelScene.mode = InterlevelScene.Mode.FALL;
+				if (Dungeon.level instanceof RegularLevel) {
+					Room room = ((RegularLevel)Dungeon.level).room( pos );
+					InterlevelScene.fallIntoPit = room != null && room instanceof WeakFloorRoom;
+				} else {
+					InterlevelScene.fallIntoPit = false;
+				}
+				Game.switchScene( InterlevelScene.class );
 			} else {
-				InterlevelScene.fallIntoPit = false;
+				// 支线终点：传送到入口
+				ScrollOfTeleportation.appear(hero, level.entrance());
+				Dungeon.hero.interrupt();
+				Dungeon.observe();
 			}
-			Game.switchScene( InterlevelScene.class );
 		} else {
 			Dungeon.hero.sprite.visible = false;
 		}
@@ -127,40 +146,52 @@ public class Chasm implements Hero.Doom {
 	}
 
 	public static void heroLand() {
-		
+
 		Hero hero = Dungeon.hero;
-		
+
 		ElixirOfFeatherFall.FeatherBuff b = hero.buff(ElixirOfFeatherFall.FeatherBuff.class);
-		
+
 		if (b != null){
 			hero.sprite.emitter().burst( Speck.factory( Speck.JET ), 20);
 			b.detach();
 			return;
 		}
-		
+
 		PixelScene.shake( 4, 1f );
 
 		Dungeon.level.occupyCell(hero );
+
+		// DoggingDog, 20241216
+		if(hero.belongings.armor() != null){
+			if(hero.belongings.armor().hasGlyph(SkyWalker.class,hero)){
+				Buff.affect( hero, Bleeding.class).set( Math.round(hero.HT/ 4f / (6f + (6f*(hero.HP/(float)hero.HT)))), Chasm.class);
+				int damage = Math.max( hero.HP / 8, Char.combatRoll( hero.HP / 8, hero.HT / 16 ));
+				hero.damage(new DamageInfo(damage, DamageType.CHASM, null, null, new Chasm()));
+				return;
+			}
+		}
+
 		Buff.prolong( hero, Cripple.class, Cripple.DURATION );
 
 		//The lower the hero's HP, the more bleed and the less upfront damage.
 		//Hero has a 50% chance to bleed out at 66% HP, and begins to risk instant-death at 25%
 		Buff.affect( hero, Bleeding.class).set( Math.round(hero.HT / (6f + (6f*(hero.HP/(float)hero.HT)))), Chasm.class);
-		hero.damage( Math.max( hero.HP / 2, Char.combatRoll( hero.HP / 2, hero.HT / 4 )), new Chasm() );
+		int damage = Math.max( hero.HP / 2, Char.combatRoll( hero.HP / 2, hero.HT / 4 ));
+		hero.damage(new DamageInfo(damage, DamageType.CHASM, null, null, new Chasm()));
 	}
 
 	public static void mobFall( Mob mob ) {
 		if (mob.isAlive()) mob.die( Chasm.class );
-		
+
 		if (mob.sprite != null) ((MobSprite)mob.sprite).fall();
 	}
-	
+
 	public static class Falling extends Buff {
-		
+
 		{
 			actPriority = VFX_PRIO;
 		}
-		
+
 		@Override
 		public boolean act() {
 			heroLand();

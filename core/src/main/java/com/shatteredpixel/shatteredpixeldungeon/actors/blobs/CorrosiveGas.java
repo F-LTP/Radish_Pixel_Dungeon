@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.blobs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -54,7 +55,7 @@ public class CorrosiveGas extends Blob {
 				for (int j = area.top; j < area.bottom; j++){
 					cell = i + j*Dungeon.level.width();
 					if (cur[cell] > 0 && (ch = Actor.findChar( cell )) != null) {
-						if (!ch.isImmune(this.getClass()))
+						if (!ch.isImmuneTo(DamageType.CORROSIVE))
 							Buff.affect(ch, Corrosion.class).set(2f, strength, source);
 					}
 				}

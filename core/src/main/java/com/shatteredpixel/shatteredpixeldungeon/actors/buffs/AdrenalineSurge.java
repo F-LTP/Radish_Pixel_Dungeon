@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
@@ -36,11 +38,17 @@ public class AdrenalineSurge extends Buff {
 	
 	private int boost;
 	private float interval;
-	
+
 	public void reset(int boost, float interval){
 		this.boost = boost;
 		this.interval = interval;
-		spend(interval - cooldown());
+		if (target == Dungeon.hero){
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				this.interval=(int)(interval*RingOfBenediction.periodMultiplier(target));
+			}
+		}
+		spend(this.interval - cooldown());
 	}
 	
 	public int boost(){
@@ -59,7 +67,7 @@ public class AdrenalineSurge extends Buff {
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.UPGRADE;
 	}
 

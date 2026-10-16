@@ -20,10 +20,13 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.items.artifacts;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.CorrosiveGas;
@@ -31,8 +34,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MoveCount;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
@@ -387,9 +391,9 @@ public class DriedRose extends Artifact {
 
 		@Override
 		public boolean act() {
-			
+
 			spend( TICK );
-			
+
 			if (ghost == null && ghostID != 0){
 				Actor a = Actor.findById(ghostID);
 				if (a != null){
@@ -402,33 +406,41 @@ public class DriedRose extends Artifact {
 			if (ghost != null && !ghost.isAlive()){
 				ghost = null;
 			}
-			
+
 			//rose does not charge while ghost hero is alive
 			if (ghost != null && !cursed && target.buff(MagicImmune.class) == null){
-				
+				defaultAction = AC_DIRECT;
+
 				//heals to full over 500 turns
-				if (ghost.HP < ghost.HT && Regeneration.regenOn()) {
-					partialCharge += (ghost.HT / 500f) * RingOfEnergy.artifactChargeMultiplier(target);
+				LockedFloor lock = target.buff(LockedFloor.class);
+				if (ghost.HP < ghost.HT && (lock == null || lock.regenOn())) {
+					float toGain=(ghost.HT / 500f) * RingOfEnergy.artifactChargeMultiplier(target);
+					if (target.buff(MoveCount.class)!=null)
+						toGain*=target.buff(MoveCount.class).chargeMultiplier(Dungeon.hero);
+					partialCharge += toGain;
 					updateQuickslot();
-					
-					while (partialCharge > 1) {
+
+					if (partialCharge > 1) {
 						ghost.HP++;
 						partialCharge--;
 					}
 				} else {
 					partialCharge = 0;
 				}
-				
+
 				return true;
+			} else {
+				defaultAction = AC_SUMMON;
 			}
-			
+
+			LockedFloor lock = target.buff(LockedFloor.class);
 			if (charge < chargeCap
 					&& !cursed
 					&& target.buff(MagicImmune.class) == null
-					&& Regeneration.regenOn()) {
+					&& (lock == null || lock.regenOn())) {
 				//500 turns to a full charge
 				partialCharge += (1/5f * RingOfEnergy.artifactChargeMultiplier(target));
-				while (partialCharge > 1){
+				if (partialCharge > 1){
 					charge++;
 					partialCharge--;
 					if (charge == chargeCap){
@@ -448,7 +460,8 @@ public class DriedRose extends Artifact {
 				}
 
 				if (spawnPoints.size() > 0) {
-					Wraith.spawnAt(Random.element(spawnPoints), Wraith.class);
+					Wraith w = Wraith.spawnAt(Random.element(spawnPoints));
+					if (w != null) w.noSoulDrop = true;
 					Sample.INSTANCE.play(Assets.Sounds.CURSED);
 				}
 
@@ -587,7 +600,7 @@ public class DriedRose extends Artifact {
 			if (rose == null
 					|| !rose.isEquipped(Dungeon.hero)
 					|| Dungeon.hero.buff(MagicImmune.class) != null){
-				damage(1, new NoRoseDamage());
+				damage(DamageInfo.of(1, DamageType.PHYSICAL_NO_ARMOR, null, new NoRoseDamage()));
 			}
 			
 			if (!isAlive()) {
@@ -659,15 +672,16 @@ public class DriedRose extends Artifact {
 		}
 		
 		@Override
-		public void damage(int dmg, Object src) {
+		public void damage(DamageInfo info) {
 			//TODO improve this when I have proper damage source logic
+			int dmg = info.getDamage();
 			if (rose != null && rose.armor != null && rose.armor.hasGlyph(AntiMagic.class, this)
-					&& AntiMagic.RESISTS.contains(src.getClass())){
+					&& AntiMagic.RESISTS.contains(info.getSource().getClass())){
 				dmg -= AntiMagic.drRoll(this, rose.armor.buffedLvl());
 				dmg = Math.max(dmg, 0);
 			}
 			
-			super.damage( dmg, src );
+			super.damage( DamageInfo.of(dmg, info.getType(), info.getAttacker(), info.getSource()) );
 			
 			//for the rose status indicator
 			Item.updateQuickslot();
@@ -820,7 +834,12 @@ public class DriedRose extends Artifact {
 			
 			switch(depth){
 				case 0:
-					yell( Messages.get( this, "seen_goo_" + Random.IntRange(1, 3) ));
+					if(Statistics.bigsnake_zikk){
+						yell( Messages.get( this, "seen_snake_" + Random.IntRange(1, 3) ));
+					} else {
+						yell( Messages.get( this, "seen_goo_" + Random.IntRange(1, 3) ));
+					}
+
 					break;
 				case 1:
 					yell( Messages.get( this, "seen_tengu_" + Random.IntRange(1, 3) ));
@@ -859,10 +878,10 @@ public class DriedRose extends Artifact {
 		}
 		
 		{
-			immunities.add( CorrosiveGas.class );
-			immunities.add( Burning.class );
-			immunities.add( ScrollOfRetribution.class );
-			immunities.add( ScrollOfPsionicBlast.class );
+			immunities.add(CorrosiveGas.class); typeImmunities.add(DamageType.CORROSIVE);
+			immunities.add(Burning.class); typeImmunities.add(DamageType.BURNING_STATUS);
+			typeImmunities.add(DamageType.MAGICAL);
+			typeImmunities.add(DamageType.MAGICAL);
 			immunities.add( AllyBuff.class );
 		}
 

@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.bombs;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -28,8 +30,11 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BlastParticle;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.RainbowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -185,6 +190,9 @@ public class Bomb extends Item {
 
 				int dmg = Char.combatRoll(5 + Dungeon.scalingDepth(), 10 + Dungeon.scalingDepth()*2);
 
+				//伤害上升50%
+				dmg *= 1.5f;
+
 				//those not at the center of the blast take less damage
 				if (ch.pos != cell){
 					dmg = Math.round(dmg*0.67f);
@@ -193,7 +201,7 @@ public class Bomb extends Item {
 				dmg -= ch.drRoll();
 
 				if (dmg > 0) {
-					ch.damage(dmg, this);
+					ch.damage(new DamageInfo(dmg, DamageType.PHYSICAL_NO_ARMOR, null, null, this));
 				}
 				
 				if (ch == Dungeon.hero && !ch.isAlive()) {
@@ -205,6 +213,65 @@ public class Bomb extends Item {
 				}
 			}
 			
+			if (terrainAffected) {
+				Dungeon.observe();
+			}
+		}
+	}
+
+	public void explodeMobs(int cell,int damage) {
+		//We're blowing up, so no need for a fuse anymore.
+		this.fuse = null;
+
+		if (explodesDestructively()) {
+
+			ArrayList<Char> affected = new ArrayList<>();
+
+			if (Dungeon.level.heroFOV[cell]) {
+				CellEmitter.center(cell).burst(RainbowParticle.BURST, 30);
+			}
+
+			boolean terrainAffected = false;
+			for (int n : PathFinder.NEIGHBOURS8) {
+				int c = cell + n;
+				if (c >= 0 && c < Dungeon.level.length()) {
+					if (Dungeon.level.heroFOV[c]) {
+						CellEmitter.get(c).burst(RainbowParticle.BURST, 4);
+					}
+
+					Char ch = Actor.findChar(c);
+					if (ch != null) {
+						affected.add(ch);
+					}
+				}
+			}
+
+			for (Char ch : affected) {
+
+				//if they have already been killed by another bomb
+				if (!ch.isAlive()) {
+					continue;
+				}
+
+				int dmg = damage;
+
+				//those not at the center of the blast take less damage
+				if (ch.pos != cell) {
+					dmg = Math.round(dmg * 0.67f);
+				}
+
+				dmg -= ch.drRoll();
+
+				if (dmg > 0) {
+					if (ch != hero) {
+						ch.damage(new DamageInfo(dmg, DamageType.PHYSICAL_NO_ARMOR, null, null, this));
+					}
+
+				}
+
+
+			}
+
 			if (terrainAffected) {
 				Dungeon.observe();
 			}

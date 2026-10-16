@@ -26,18 +26,20 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Prisoner;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Chains;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.items.LawFragment;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.GuardSprite;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
+import com.watabou.utils.Random;
 
 public class Guard extends Mob {
 
@@ -57,6 +59,7 @@ public class Guard extends Mob {
 		lootChance = 0.2f; //by default, see lootChance()
 
 		properties.add(Property.UNDEAD);
+		properties.add(Property.JAIL_INHABITANT);
 		
 		HUNTING = new Hunting();
 	}
@@ -68,6 +71,10 @@ public class Guard extends Mob {
 
 	private boolean chain(int target){
 		if (chainsUsed || enemy.properties().contains(Property.IMMOVABLE))
+			return false;
+
+		// 空间碎片：免疫来自外部的位移，直接放弃拉拽（不生成动画）
+		if (com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SpaceFragment.blocksPassiveDisplacement(enemy))
 			return false;
 
 		Ballistica chain = new Ballistica(pos, target, Ballistica.PROJECTILE);
@@ -118,6 +125,10 @@ public class Guard extends Mob {
 	}
 
 	private void pullEnemy( Char enemy, int pullPos ){
+		// 空间碎片：免疫来自外部的位移
+		if (com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SpaceFragment.blocksPassiveDisplacement(enemy)) {
+			return;
+		}
 		enemy.pos = pullPos;
 		enemy.sprite.place(pullPos);
 		Dungeon.level.occupyCell(enemy);
@@ -150,6 +161,15 @@ public class Guard extends Mob {
 	public Item createLoot() {
 		Dungeon.LimitedDrops.GUARD_ARM.count++;
 		return super.createLoot();
+	}
+
+	@Override
+	public void die( Object cause ) {
+		// 律法残页 15% 掉落
+		if(Random.Float() < 0.15f){
+			Dungeon.level.drop(new LawFragment(), pos).sprite.drop();
+		}
+		super.die( cause );
 	}
 
 	private final String CHAINSUSED = "chainsused";
@@ -185,5 +205,21 @@ public class Guard extends Mob {
 			}
 			
 		}
+	}
+
+
+	@Override
+	protected Char chooseEnemy() {
+		for (Mob mob : Dungeon.level.mobs) {
+			if (!(mob == this)
+					&& mob.alignment != Alignment.NEUTRAL
+					&& !mob.isInvulnerable(getClass())
+					&& !(alignment == Alignment.ALLY && mob.alignment == Alignment.ALLY)
+					&& mob instanceof Prisoner
+					&& fieldOfView[mob.pos]) {
+				return mob;
+			}
+		}
+		return super.chooseEnemy();
 	}
 }

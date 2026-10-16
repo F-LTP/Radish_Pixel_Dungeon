@@ -23,6 +23,7 @@ package com.watabou.utils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -60,6 +61,9 @@ public abstract class PlatformSupport {
 
 	//TODO should consider spinning this into its own class, rather than platform support getting ever bigger
 	protected static HashMap<FreeTypeFontGenerator, HashMap<Integer, BitmapFont>> fonts;
+	protected static HashMap<Integer, BitmapFont> tannFonts;
+	private static FreeTypeFontGenerator tannFontGenerator;
+	private static boolean tannFontMode;
 
 	protected int pageSize;
 	protected PixmapPacker packer;
@@ -71,11 +75,38 @@ public abstract class PlatformSupport {
 
 	public abstract String[] splitforTextBlock( String text, boolean multiline );
 
+	public void setTannFontMode(boolean value){
+		if (tannFontMode != value) {
+			tannFontMode = value;
+			disposeTannFonts();
+			reloadGenerators();
+		}
+	}
+
+	public boolean tannFontMode(){
+		return tannFontMode;
+	}
+
+	private void disposeTannFonts(){
+		if (tannFonts != null) {
+			for (BitmapFont f : tannFonts.values()) {
+				f.dispose();
+			}
+			tannFonts.clear();
+			tannFonts = null;
+		}
+		if (tannFontGenerator != null) {
+			tannFontGenerator.dispose();
+			tannFontGenerator = null;
+		}
+	}
+
 	public void resetGenerators(){
 		resetGenerators( true );
 	}
 
 	public void resetGenerators( boolean setupAfter ){
+		disposeTannFonts();
 		if (fonts != null) {
 			for (FreeTypeFontGenerator generator : fonts.keySet()) {
 				for (BitmapFont f : fonts.get(generator).values()) {
@@ -97,6 +128,7 @@ public abstract class PlatformSupport {
 	}
 
 	public void reloadGenerators(){
+		disposeTannFonts();
 		if (packer != null) {
 			for (FreeTypeFontGenerator generator : fonts.keySet()) {
 				for (BitmapFont f : fonts.get(generator).values()) {
@@ -117,6 +149,10 @@ public abstract class PlatformSupport {
 	//flipped is needed because Shattered's graphics are y-down, while GDX graphics are y-up.
 	//this is very confusing, I know.
 	public BitmapFont getFont(int size, String text, boolean flipped, boolean border) {
+		if (tannFontMode) {
+			return getTannFont(size, flipped, border);
+		}
+
 		FreeTypeFontGenerator generator = getGeneratorForString(text);
 
 		if (generator == null){
@@ -155,6 +191,33 @@ public abstract class PlatformSupport {
 		}
 
 		return fonts.get(generator).get(key);
+	}
+
+	private BitmapFont getTannFont(int size, boolean flipped, boolean border) {
+		if (tannFonts == null) {
+			tannFonts = new HashMap<>();
+			tannFontGenerator = new FreeTypeFontGenerator(
+					Gdx.files.internal("fonts/fusion_pixel_10px_zh_hans.ttf"));
+		}
+
+		int key = size * 4 + (flipped ? 1 : 0) + (border ? 2 : 0);
+		if (!tannFonts.containsKey(key)) {
+			FreeTypeFontGenerator.FreeTypeFontParameter parameters =
+					new FreeTypeFontGenerator.FreeTypeFontParameter();
+			parameters.size = 10;
+			parameters.flip = flipped;
+			parameters.incremental = true;
+			parameters.hinting = FreeTypeFontGenerator.Hinting.None;
+			parameters.minFilter = Texture.TextureFilter.Nearest;
+			parameters.magFilter = Texture.TextureFilter.Nearest;
+			BitmapFont font = tannFontGenerator.generateFont(parameters);
+			font.getData().setScale(size / 10f);
+			font.setUseIntegerPositions(false);
+			font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+			tannFonts.put(key, font);
+		}
+
+		return tannFonts.get(key);
 	}
 
 

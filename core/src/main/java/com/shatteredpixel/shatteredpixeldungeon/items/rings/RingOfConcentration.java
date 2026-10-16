@@ -75,6 +75,11 @@ public class RingOfConcentration extends Ring {
 			return Messages.get(this, "typical_stats", new DecimalFormat("#.##").format(20f),new DecimalFormat("#.##").format(5f),new DecimalFormat("#.##").format(0.1f));
 		}
 	}
+
+	public String upgradeStat1(int level){
+		if (cursed) level = Math.min(-1, level-3);
+		return Messages.decimalFormat("#.##", 100f * (Math.pow(1.2f, level+1)-1f)) + "%";
+	}
 	
 	@Override
 	protected RingBuff buff( ) {

@@ -3,14 +3,16 @@ package com.shatteredpixel.shatteredpixeldungeon.custom.dict;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIcon;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 
 public class DictSpriteSheet {
-    public static Image createImage(int sheet){
-        if(sheet<10000) {
-            return new ItemSprite(sheet);
+    public static Image createImage(Object sheet){
+        if (sheet instanceof String) {
+            return new ItemSprite((String) sheet);
         }
-        return miscImages(sheet);
+        return miscImages((Integer) sheet);
     }
     
     public static Image miscImages(int sheet){
@@ -59,6 +61,10 @@ public class DictSpriteSheet {
                 return new Image(Assets.Sprites.SLIME, 14, 12, 14, 12);
             case GREAT_CRAB:
                 return new Image(Assets.Sprites.CRAB, 0, 16, 16, 16);
+            case HEADCRAB:
+                return new Image(Assets.Sprites.HEADCRAB, 0, 0, 16, 16);
+            case FELON:
+                return new Image(Assets.Sprites.FELON, 0, 0, 26, 25);
 
             case THIEF:
                 return new Image(Assets.Sprites.THIEF, 0, 0, 12, 13);
@@ -193,15 +199,15 @@ public class DictSpriteSheet {
             case CHASM:
                 return new Image(Assets.Environment.TILES_CAVES, 48, 48, 16, 16);
             case BUFF_POSITIVE:
-                return new Image(Assets.Interfaces.BUFFS_LARGE, 48 ,16, 16, 16);
+                return new BuffIcon(BuffIndicator.HERB_HEALING, true);
             case BUFF_NEUTRAL:
-                return new Image(Assets.Interfaces.BUFFS_LARGE, 112 ,32, 16, 16);
+                return new BuffIcon(BuffIndicator.SACRIFICE, true);
             case BUFF_NEGATIVE:
-                return new Image(Assets.Interfaces.BUFFS_LARGE, 224 ,0, 16, 16);
+                return new BuffIcon(BuffIndicator.WEAKNESS, true);
             case BUFF_AMULET_CURSE:
-                return new Image(Assets.Interfaces.BUFFS_LARGE, 176, 48, 16, 16);
+                return new BuffIcon(BuffIndicator.AMULET, true);
             case BUFF_SAC_FIRE:
-                return new Image(Assets.Interfaces.BUFFS_LARGE, 112, 32, 16, 16);
+                return new BuffIcon(BuffIndicator.SACRIFICE, true);
 
         }
         return new ItemSprite(ItemSpriteSheet.SOMETHING);
@@ -235,6 +241,8 @@ public class DictSpriteSheet {
     public static final int F_RAT           = 208 + 10000;
     public static final int GNOLL_DARTER    = 209 + 10000;
     public static final int GREAT_CRAB      = 210 + 10000;
+    public static final int HEADCRAB        = 215 + 10000;
+    public static final int FELON           = 216 + 10000;
 
     //Radish new Enemy
     // Zone 1

@@ -42,8 +42,8 @@ public class ScrollOfForesight extends ExoticScroll {
 		Buff.affect(curUser, Foresight.class, Foresight.DURATION);
 
 		identify();
-		
-		readAnimation();
+
+		readAnimation(true);
 	}
 	
 }

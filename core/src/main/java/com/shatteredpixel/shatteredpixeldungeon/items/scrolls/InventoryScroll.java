@@ -111,13 +111,14 @@ public abstract class InventoryScroll extends Scroll {
 			
 			if (item != null) {
 
-				if (!identifiedByUse) {
+				if (!identifiedByUse && !(curItem instanceof ScrollOfUpgrade)) {
 					curItem = detach(curUser.belongings.backpack);
 				}
 				((InventoryScroll)curItem).onItemSelected( item );
-				((InventoryScroll)curItem).readAnimation();
-				
-				Sample.INSTANCE.play( Assets.Sounds.READ );
+				if (!(curItem instanceof ScrollOfUpgrade)) {
+					((InventoryScroll) curItem).readAnimation();
+					Sample.INSTANCE.play(Assets.Sounds.READ);
+				}
 				
 			} else if (identifiedByUse && !((Scroll)curItem).anonymous) {
 				

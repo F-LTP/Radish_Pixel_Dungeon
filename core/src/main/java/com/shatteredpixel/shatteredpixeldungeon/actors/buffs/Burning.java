@@ -28,15 +28,18 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Thief;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ElmoParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Swamp;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.ChargrilledMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.FrozenCarpaccio;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -47,6 +50,7 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Burning extends Buff implements Hero.Doom {
 	
@@ -56,7 +60,10 @@ public class Burning extends Buff implements Hero.Doom {
 	
 	//for tracking burning of hero items
 	private int burnIncrement = 0;
-	
+
+	// 火焰伤害来源链：记录点燃者、点燃来源（附魔/法杖/环境）等，随火传导/伤害逐层传递
+	private List<Object> causeChain = new ArrayList<>();
+
 	private static final String LEFT	= "left";
 	private static final String BURN	= "burnIncrement";
 
@@ -94,11 +101,16 @@ public class Burning extends Buff implements Hero.Doom {
 			int damage = Char.combatRoll( 1, 3 + Dungeon.scalingDepth()/4 );
 			Buff.detach( target, Chill.class);
 
-			if (target instanceof Hero && target.buff(TimekeepersHourglass.timeStasis.class) == null) {
-				
+			DamageInfo dmgInfo = DamageInfo.burningStatus(damage, this);
+			dmgInfo.setCauseChain(causeChain);
+
+			if (target instanceof Hero
+					&& target.buff(TimekeepersHourglass.timeStasis.class) == null
+					&& target.buff(TimeStasis.class) == null) {
+
 				Hero hero = (Hero)target;
 
-				hero.damage( damage, this );
+				hero.damage( dmgInfo );
 				burnIncrement++;
 
 				//at 4+ turns, there is a (turns-3)/3 chance an item burns
@@ -127,9 +139,9 @@ public class Burning extends Buff implements Hero.Doom {
 						Heap.burnFX( hero.pos );
 					}
 				}
-				
+
 			} else {
-				target.damage( damage, this );
+				target.damage( dmgInfo );
 			}
 
 			if (target instanceof Thief && ((Thief) target).item != null) {
@@ -170,8 +182,19 @@ public class Burning extends Buff implements Hero.Doom {
 	public void reignite( Char ch ) {
 		reignite( ch, DURATION );
 	}
-	
+
 	public void reignite( Char ch, float duration ) {
+		reignite( ch, duration, null );
+	}
+
+	/** reignite 并携带一条伤害来源链（点燃者、点燃来源等）。 */
+	public void reignite( Char ch, float duration, List<?> chain ) {
+		if (chain != null) {
+			causeChain.clear();
+			for (Object c : chain) {
+				if (c != null) causeChain.add(c);
+			}
+		}
 		if (ch.isImmune(Burning.class)){
 			//TODO this only works for the hero, not others who can have brimstone+arcana effect
 			// e.g. prismatic image, shadow clone
@@ -179,7 +202,7 @@ public class Burning extends Buff implements Hero.Doom {
 					&& ((Hero) ch).belongings.armor() != null
 					&& ((Hero) ch).belongings.armor().hasGlyph(Brimstone.class, ch)){
 				//generate avg of 1 shield per turn per 50% boost, to a max of 4x boost
-				float shieldChance = 2*(Armor.Glyph.genericProcChanceMultiplier(ch) - 1f);
+				float shieldChance = 2*(RingOfArcana.enchantPowerMultiplier(ch)*ch.talentProc() - 1f);
 				int shieldCap = Math.round(shieldChance*4f);
 				int shieldGain = (int)shieldChance;
 				if (Random.Float() < shieldChance%1) shieldGain++;
@@ -191,12 +214,41 @@ public class Burning extends Buff implements Hero.Doom {
 				}
 			}
 		}
+
+		//沼泽诅咒：被引燃的持续时间随护甲等级减少（基础减半，每级多减10%），+5时完全免疫点燃
+		if (ch instanceof Hero) {
+			Armor worn = ((Hero) ch).belongings.armor();
+			if (worn != null && worn.hasGlyph(Swamp.class, ch)) {
+				int swampLvl = Math.max(0, worn.procLvl());
+				if (swampLvl >= 5) {
+					detach();
+					return;
+				}
+				duration *= (1f - (0.5f + 0.1f * swampLvl));
+			}
+		}
+
 		left = duration;
+	}
+
+	/** 剩余引燃将持续造成的总火焰伤害（供"烧焦"等法术立即结算）。 */
+	public int remainingDamage() {
+		int turns = Math.max(1, (int) Math.ceil(left));
+		int total = 0;
+		for (int i = 0; i < turns; i++) {
+			total += Char.combatRoll( 1, 3 + Dungeon.scalingDepth()/4 );
+		}
+		return total;
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.FIRE;
+	}
+
+	/** 火焰伤害来源链（供 DamageInfo 注入与传导）。 */
+	public List<Object> getCauseChain() {
+		return new ArrayList<>(causeChain);
 	}
 
 	@Override
