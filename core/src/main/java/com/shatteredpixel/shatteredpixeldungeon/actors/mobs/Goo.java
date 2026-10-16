@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
@@ -284,13 +285,13 @@ public class Goo extends Mob {
 	}
 
 	@Override
-	public void damage(int dmg, Object src) {
+	public void damage(DamageInfo info) {
 		if (!BossHealthBar.isAssigned()){
 			BossHealthBar.assignBoss( this );
 			Dungeon.level.seal();
 		}
 		boolean bleeding = (HP*2 <= HT);
-		super.damage(dmg, src);
+		super.damage(info);
 		if ((HP*2 <= HT) && !bleeding){
 			BossHealthBar.bleed(true);
 			sprite.showStatus(CharSprite.WARNING, Messages.get(this, "enraged"));
@@ -302,7 +303,9 @@ public class Goo extends Mob {
 			yell(Messages.get(this, "gluuurp"));
 		}
 		LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
-		if (lock != null && !isImmune(src.getClass()) && !isInvulnerable(src.getClass())){
+		Object src = info.getSource();
+		int dmg = info.getDamage();
+		if (lock != null && src != null && !isImmune(src.getClass()) && !isInvulnerable(src.getClass())){
 			if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES))   lock.addTime(dmg);
 			else                                                    lock.addTime(dmg*1.5f);
 		}

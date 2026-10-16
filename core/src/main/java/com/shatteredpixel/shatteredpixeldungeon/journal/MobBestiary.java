@@ -35,6 +35,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Bee;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Brute;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CausticSlime;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Crab;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Headcrab;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.LegendaryFelon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CrystalGuardian;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CrystalMimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CrystalSpire;
@@ -255,8 +257,9 @@ public enum MobBestiary {
                 Bandit.class, SpectralNecromancer.class,
                 ArmoredBrute.class, DM201.class,
                 Elemental.ChaosElemental.class, Senior.class,
-                Acidic.class,
-                TormentedSpirit.class, PhantomPiranha.class, CrystalMimic.class, ArmoredStatue.class);
+                Acidic.class, Headcrab.class,
+                TormentedSpirit.class, PhantomPiranha.class, CrystalMimic.class, ArmoredStatue.class,
+                LegendaryFelon.class);
 
         QUEST.addEntities(FetidRat.class, GnollTrickster.class, GreatCrab.class,
                 Elemental.NewbornFireElemental.class, RotLasher.class, RotHeart.class,
@@ -308,12 +311,8 @@ public enum MobBestiary {
     }
 
     public static boolean isSeen(Class<?> cls){
-        for (MobBestiary cat : values()) {
-            if (cat.seen.containsKey(cls)) {
-                return cat.seen.get(cls);
-            }
-        }
-        return false;
+        //TheCatist: 生物图鉴默认全部解锁，不随 debug 模式变化
+        return true;
     }
 
     public static void setSeen(Class<?> cls){

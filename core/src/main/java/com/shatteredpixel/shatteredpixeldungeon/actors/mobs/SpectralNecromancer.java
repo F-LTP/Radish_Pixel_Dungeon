@@ -25,6 +25,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
@@ -110,7 +112,8 @@ public class SpectralNecromancer extends Necromancer {
 		if (Actor.findChar(summoningPos) != null) {
 
 			//cancel if character cannot be moved
-			if (Char.hasProp(Actor.findChar(summoningPos), Property.IMMOVABLE)){
+			if (Char.hasProp(Actor.findChar(summoningPos), Property.IMMOVABLE)
+					|| com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SpaceFragment.blocksPassiveDisplacement(Actor.findChar(summoningPos))){
 				summoning = false;
 				if (sprite instanceof SpectralNecromancerSprite) {
 					((SpectralNecromancerSprite)sprite).finishSummoning();
@@ -143,7 +146,7 @@ public class SpectralNecromancer extends Necromancer {
 
 				Char blocker = Actor.findChar(summoningPos);
 				if (blocker.alignment != alignment){
-					blocker.damage( Char.combatRoll(2, 10), new SummoningBlockDamage() );
+					blocker.damage( DamageInfo.of(Char.combatRoll(2, 10), DamageType.PHYSICAL_NO_ARMOR, this, new SummoningBlockDamage()) );
 					if (blocker == Dungeon.hero && !blocker.isAlive()){
 						Badges.validateDeathFromEnemyMagic();
 						Dungeon.fail(this);

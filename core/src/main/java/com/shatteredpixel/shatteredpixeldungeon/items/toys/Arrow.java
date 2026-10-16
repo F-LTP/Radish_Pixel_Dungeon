@@ -21,8 +21,8 @@ public class Arrow extends ItemArmorAttachable {
 	/**
 	 * 在 Hero.attack() 造成伤害后调用，尝试斩杀
 	 */
-	public static boolean tryExecute(Char enemy) {
-		return ArrowBuff.tryExecute(enemy);
+	public static boolean tryExecute(Char attacker, Char enemy) {
+		return ArrowBuff.tryExecute(attacker, enemy);
 	}
 
 	@Override

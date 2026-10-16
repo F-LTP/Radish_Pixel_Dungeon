@@ -75,6 +75,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Swarm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Thief;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Warlock;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -166,6 +168,10 @@ public class AscensionChallenge extends Buff {
 		}
 
 		return 1;
+	}
+
+	public static void modifyOutgoingAttackDamage(Char attacker, DamageInfo info) {
+		info.addDirectMultModifier(statModifier(attacker), "ascension", AscensionChallenge.class);
 	}
 
 	//distant mobs get constantly beckoned to the hero at 2+ stacks
@@ -352,7 +358,7 @@ public class AscensionChallenge extends Buff {
 		if (stacks >= 8 && !Dungeon.bossLevel()){
 			damageInc += (stacks-4)/4f;
 			if (damageInc >= 1){
-				target.damage((int)damageInc, this);
+				target.damage(new DamageInfo((int)damageInc, DamageType.AMULET, null, null, this));
 				damageInc -= (int)damageInc;
 
 				if (target == Dungeon.hero && !target.isAlive()){

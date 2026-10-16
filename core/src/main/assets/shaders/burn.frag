@@ -31,10 +31,10 @@ void main() {
   
   vec2 ratioPos = (vUV - uFrame.xy) / uFrame.zw;
   
-  float noiseVal = fbm(ratioPos * 8.0 + uRandom * 10.0);
+  float noiseVal = clamp(fbm(ratioPos * 8.0 + uRandom * 10.0), 0.0, 1.0);
   float noiseStrength = 0.35;
   
-  float burnAmt = (1.0 - ratioPos.y) - uBurnProgress * 1.8 + noiseVal * noiseStrength;
+  float burnAmt = (1.0 - ratioPos.y) - uBurnProgress * 1.5 + noiseVal * noiseStrength;
   
   if (burnAmt < 0.0) {
     col.a = 0.0;

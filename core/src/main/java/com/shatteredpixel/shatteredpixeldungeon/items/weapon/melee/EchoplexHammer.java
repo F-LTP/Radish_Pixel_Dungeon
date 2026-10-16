@@ -6,6 +6,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -85,7 +87,7 @@ public class EchoplexHammer extends MeleeWeapon {
         Mob[] mobs = Dungeon.level.mobs.toArray(new Mob[0]);
         for (Mob mob : mobs) {
             if (mob.alignment == Char.Alignment.ENEMY && Dungeon.level.heroFOV[mob.pos]) {
-            			mob.damage(10 + 2 * weapon.buffedLvl() , weapon );
+            			mob.damage(DamageInfo.of(10 + 2 * weapon.buffedLvl(), DamageType.MAGICAL, null, weapon));
                 if (!mob.isAlive()) {
                     killedMob = mob;
                     mob.die(attacker);

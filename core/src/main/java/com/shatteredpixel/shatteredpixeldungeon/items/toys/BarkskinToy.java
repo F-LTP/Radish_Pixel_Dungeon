@@ -5,10 +5,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BarkskinToyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.ItemArmorAttachable;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
 /**
- * 树肤 — 降低最大生命值 10 点，获得常驻树肤效果
+ * 树肤 — 最大生命值 +40，但无法获得护盾。卸下时损失 40 点最大/当前生命值。
  */
 public class BarkskinToy extends ItemArmorAttachable {
 
@@ -30,7 +29,12 @@ public class BarkskinToy extends ItemArmorAttachable {
 	}
 
 	@Override
+	public int detachHPLoss(Hero hero) {
+		return BarkskinToyBuff.MAX_HP_BONUS;
+	}
+
+	@Override
 	public String desc() {
-		return Messages.get(this, "desc", BarkskinToyBuff.MAX_HP_PENALTY, BarkskinToyBuff.BARKSKIN_LEVEL);
+		return Messages.get(this, "desc", BarkskinToyBuff.MAX_HP_BONUS);
 	}
 }

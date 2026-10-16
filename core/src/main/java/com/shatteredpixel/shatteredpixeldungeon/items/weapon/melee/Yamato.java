@@ -9,6 +9,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.events.AttackMissEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -234,6 +236,14 @@ public class Yamato extends MeleeWeapon {
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		comboHits = bundle.getInt(COMBO_HITS);
+	}
+
+	/** 未命中时清空连击层数（由攻击未命中事件驱动，装备者可能是玩家或怪物）。 */
+	@SubscribeEvent(event = AttackMissEvent.class, priority = 0)
+	public static void onAttackMiss(AttackMissEvent event) {
+		if (event.getAttackerWeapon() instanceof Yamato) {
+			((Yamato) event.getAttackerWeapon()).onMiss();
+		}
 	}
 
 	public static class YamatoCooldown extends FlavourBuff {

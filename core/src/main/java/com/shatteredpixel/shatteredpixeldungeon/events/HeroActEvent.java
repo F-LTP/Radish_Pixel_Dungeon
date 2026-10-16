@@ -1,17 +1,16 @@
 package com.shatteredpixel.shatteredpixeldungeon.events;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import org.jetbrains.annotations.NotNull;
 
-/**
- * 英雄回合事件
- * 当英雄执行 act() 方法时触发，每个游戏回合触发一次
- */
+/** Hero.act() 开头，每回合一次；此时行动未决定、时间未消耗，不可取消 */
 public class HeroActEvent extends GameEvent {
-    private final Hero hero;
 
-    public HeroActEvent(Hero hero) {
-        this.hero = hero;
-    }
+	private final Hero hero;
 
-    public Hero getHero() { return hero; }
+	public HeroActEvent(@NotNull Hero hero) {
+		this.hero = hero;
+	}
+
+	public @NotNull Hero getHero() { return hero; }
 }

@@ -70,6 +70,12 @@ public class MissileSprite extends ItemSprite implements Tweener.Listener {
 				item, listener );
 	}
 
+	public void reset( Visual from, int to, Item item, Callback listener, float speedMultiplier ) {
+		reset(from.center(),
+				Dungeon.level.solid[to] ? DungeonTilemap.raisedTileCenterToWorld(to) : DungeonTilemap.raisedTileCenterToWorld(to),
+				item, listener, speedMultiplier);
+	}
+
 	// 新增方法：从怪物头上掉下来且瞬发执行的特效
 	public void resetFromAbove(Char ch, int targetPos, Item item, Callback listener) {
 		revive();
@@ -108,6 +114,10 @@ public class MissileSprite extends ItemSprite implements Tweener.Listener {
 	}
 
 	public void reset( PointF from, PointF to, Item item, Callback listener) {
+		reset(from, to, item, listener, 1f);
+	}
+
+	private void reset( PointF from, PointF to, Item item, Callback listener, float speedMultiplier) {
 		revive();
 
 		if (item == null)   view(ItemSpriteSheet.SOMETHING, null);
@@ -116,7 +126,7 @@ public class MissileSprite extends ItemSprite implements Tweener.Listener {
 		setup( from,
 				to,
 				item,
-				listener );
+				listener, speedMultiplier );
 	}
 	
 	private static final int DEFAULT_ANGULAR_SPEED = 720;
@@ -153,7 +163,7 @@ public class MissileSprite extends ItemSprite implements Tweener.Listener {
 	}
 
 	//TODO it might be nice to have a source and destination angle, to improve thrown weapon visuals
-	private void setup( PointF from, PointF to, Item item, Callback listener ){
+	private void setup( PointF from, PointF to, Item item, Callback listener, float speedMultiplier ){
 
 		originToCenter();
 
@@ -168,7 +178,7 @@ public class MissileSprite extends ItemSprite implements Tweener.Listener {
 		point( from );
 
 		PointF d = PointF.diff( to, from );
-		speed.set(d).normalize().scale(SPEED);
+		speed.set(d).normalize().scale(SPEED * speedMultiplier);
 		
 		angularSpeed = DEFAULT_ANGULAR_SPEED;
 		for (Class<?extends Item> cls : ANGULAR_SPEEDS.keySet()){

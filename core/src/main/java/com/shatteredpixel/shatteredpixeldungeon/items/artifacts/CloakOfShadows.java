@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MoveCount;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
@@ -93,7 +94,11 @@ public class CloakOfShadows extends Artifact {
 				else if (cursed)       GLog.i( Messages.get(this, "cursed") );
 				else if (charge <= 0)  GLog.i( Messages.get(this, "no_charge") );
 				else {
-					hero.spend( 1f );
+					//阴影之赐 +1：使用斗篷不消耗回合
+					if (!(hero.subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.SHADOW_DANCER
+							&& hero.pointsInTalent(Talent.SHADOWS_GIFT) >= 1)) {
+						hero.spend( 1f );
+					}
 					hero.busy();
 					Sample.INSTANCE.play(Assets.Sounds.MELD);
 					activeBuff = activeBuff();
@@ -307,7 +312,7 @@ public class CloakOfShadows extends Artifact {
 		public boolean attachTo( Char target ) {
 			if (super.attachTo( target )) {
 				target.invisible++;
-				if (target instanceof Hero && ((Hero) target).subClass == HeroSubClass.ASSASSIN){
+				if (target instanceof Hero && ((Hero) target).subClass == HeroSubClasses.ASSASSIN){
 					Buff.affect(target, Preparation.class);
 				}
 				if (target instanceof Hero && ((Hero) target).hasTalent(Talent.PROTECTIVE_SHADOWS)){

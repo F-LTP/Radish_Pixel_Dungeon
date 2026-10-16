@@ -25,16 +25,17 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
-import com.watabou.utils.Callback;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ import java.util.ArrayList;
 /**
  * 简易投石索 (Makeshift Slingshot)
  * 哥布林10%概率掉落
- * 使用时消耗一颗石头，伤害提升4倍，投石索和石头一并摧毁
+ * 使用时消耗一颗石头，伤害提升4倍，石头以更快的速度发射，投石索和石头一并摧毁
  */
 public class MakeshiftSlingshot extends Item {
 
@@ -52,9 +53,10 @@ public class MakeshiftSlingshot extends Item {
 		defaultAction = AC_USE;
 		usesTargeting = true;
 
-		// 暂时使用石子贴图，后续需要添加专用贴图
-		image = ItemSpriteSheet.THROWING_STONE;
-		stackable = false;
+		image = ItemSpriteSheet.MAKESHIFT_SLINGSHOT;
+		stackable = true;
+		levelKnown = true;
+		cursedKnown = true;
 
 		bones = true;
 	}
@@ -99,23 +101,16 @@ public class MakeshiftSlingshot extends Item {
 				return;
 			}
 
-			// 消耗石头和投石索
+			// 消耗一颗石头和一个投石索
 			stone.detach(curUser.belongings.backpack);
 			curItem.detach(curUser.belongings.backpack);
 
 			curUser.spendAndNext(1f);
 			
-			// 播放投掷音效
 			Sample.INSTANCE.play(Assets.Sounds.HIT);
-			
-			// 执行投掷动画
-			curUser.sprite.zap(cell, new Callback() {
-				@Override
-				public void call() {
-					// 投掷到达目标
-					onThrowReached(cell);
-				}
-			});
+			MissileSprite missile = (MissileSprite) curUser.sprite.parent.recycle(MissileSprite.class);
+			// The consumed stone supplies the projectile sprite.
+			missile.reset(curUser.sprite, cell, stone, () -> onThrowReached(cell), 2f);
 		}
 
 		@Override
@@ -138,10 +133,7 @@ public class MakeshiftSlingshot extends Item {
 
 		if (enemy != null && enemy != curUser) {
 			// 对敌人造成伤害
-			enemy.damage(slingshotDamage, curUser);
-			enemy.sprite.showStatus(CharSprite.NEGATIVE, 
-				Messages.get(MakeshiftSlingshot.class, "damage_bonus", 4));
-			
+			enemy.damage(DamageInfo.of(slingshotDamage, DamageType.PHYSICAL, curUser, curUser));
 			// 检查击杀
 			if (!enemy.isAlive()) {
 				if (enemy == Dungeon.hero) {
@@ -149,9 +141,6 @@ public class MakeshiftSlingshot extends Item {
 					GLog.n(Messages.get(MakeshiftSlingshot.class, "kill_desc"));
 				}
 			}
-		} else {
-			// 没有命中敌人，在地面上显示消息
-			GLog.i(Messages.get(MakeshiftSlingshot.class, "use"));
 		}
 	}
 

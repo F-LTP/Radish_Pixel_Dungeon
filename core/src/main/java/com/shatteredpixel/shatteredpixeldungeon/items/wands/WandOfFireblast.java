@@ -32,6 +32,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.WildMagic;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
@@ -132,7 +134,7 @@ public class WandOfFireblast extends DamageWand {
 
 		for ( Char ch : affectedChars ){
 			wandProc(ch, chargesPerCast());
-			ch.damage(damageRoll(), this);
+			ch.damage(new DamageInfo(damageRoll(), DamageType.FIRE, curUser, this, this));
 			if (ch.isAlive()) {
 				Buff.affect(ch, Burning.class).reignite(ch);
 				switch (chargesPerCast()) {

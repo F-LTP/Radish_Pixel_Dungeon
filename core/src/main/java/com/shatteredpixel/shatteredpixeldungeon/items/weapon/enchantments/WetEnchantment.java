@@ -4,6 +4,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon.Enchantment;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -24,7 +26,7 @@ public class WetEnchantment extends Enchantment {
         if (lvl > 0 && attacker.buff(MagicImmune.class) == null) {
             // 魔法伤害：0-等级，使用 WetMagicDamage 来源以单独显示
             int magicDmg = Random.IntRange(0, lvl);
-            defender.damage(magicDmg, new WetMagicDamage());
+            defender.damage(new DamageInfo(magicDmg, DamageType.MAGICAL, attacker, weapon, new WetMagicDamage()));
 
             // 25%概率虚弱
             if (Random.Float() < 0.25f) {

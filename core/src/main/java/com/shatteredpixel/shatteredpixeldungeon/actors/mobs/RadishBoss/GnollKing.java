@@ -14,11 +14,13 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.GnollGuard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
+import com.shatteredpixel.shatteredpixeldungeon.items.FlashCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
-import com.shatteredpixel.shatteredpixeldungeon.items.keys.SkeletonKey;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
@@ -186,6 +188,11 @@ public class GnollKing extends Mob {
 
         public boolean reachAttack = false;
 
+        @Override
+        protected boolean isDamageable() {
+            return true;
+        }
+
         {
             spriteClass = GnollGuardSprite.GnollGuardShadowSprite.class;
             maxLvl = -1;
@@ -194,7 +201,7 @@ public class GnollKing extends Mob {
         @Override
         protected boolean act() {
             if(Statistics.gnoll_boss >= 2){
-                damage(1000,new DM100.LightningBolt());
+                damage(DamageInfo.of(1000, DamageType.LIGHTNING, this, new DM100.LightningBolt()));
             }
             return super.act();
         }
@@ -222,11 +229,11 @@ public class GnollKing extends Mob {
         }
 
         @Override
-        public void damage(int dmg, Object src) {
-            super.damage(dmg, src);
+        public void damage(DamageInfo info) {
+            super.damage(info);
             LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
-            if (lock != null && !isImmune(src.getClass()) && !isInvulnerable(src.getClass())){
-                lock.addTime(dmg*1.25f);
+            if (lock != null && !isImmune(info.getSource().getClass()) && !isInvulnerable(info.getSource().getClass())){
+                lock.addTime(info.getDamage()*1.25f);
             }
         }
 
@@ -322,7 +329,7 @@ public class GnollKing extends Mob {
 
     @Override
     public boolean canAttack(Char target) {
-        return Dungeon.level.trueDistance(pos, target.pos) <= 2 || super.canAttack(enemy);
+        return Dungeon.level.trueDistance(pos, target.pos) <= 2 || super.canAttack(target);
     }
 
     @Override
@@ -383,7 +390,7 @@ public class GnollKing extends Mob {
                         for (Char victim : leapTargets) {
                             if(!(victim instanceof GnollShamanKing)){
                                 int damage = 25;
-                                victim.damage(damage, this);
+                                victim.damage(DamageInfo.of(damage, DamageType.PHYSICAL, GnollKing.this, GnollKing.this));
                                 victim.sprite.flash();
                                 Sample.INSTANCE.play(Assets.Sounds.HIT);
 
@@ -525,14 +532,14 @@ public class GnollKing extends Mob {
 
 
     @Override
-    public void damage(int dmg, Object src) {
-        int finalDmg = calculateToughnessDamage(dmg, src);
-        super.damage(finalDmg, src);
+    public void damage(DamageInfo info) {
+        int finalDmg = calculateToughnessDamage(info.getDamage(), info.getSource());
+        super.damage(DamageInfo.of(finalDmg, info.getType(), info.getAttacker(), info.getSource()));
         checkFirstHalfHealthTrigger();
 
         LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
-        if (lock != null && !isImmune(src.getClass()) && !isInvulnerable(src.getClass())){
-            lock.addTime(dmg*1.5f);
+        if (lock != null && !isImmune(info.getSource().getClass()) && !isInvulnerable(info.getSource().getClass())){
+            lock.addTime(info.getDamage()*1.5f);
         }
     }
 
@@ -598,13 +605,18 @@ public class GnollKing extends Mob {
     public void die( Object cause ) {
         super.die( cause );
 
+        // 双王各 100% 掉落2个闪晶
+        if(Dungeon.LimitedDrops.FLASH_CRYSTAL_KING.count < 6){
+            Dungeon.LimitedDrops.FLASH_CRYSTAL_KING.count++;
+            Dungeon.level.drop(new FlashCrystal().quantity(2), pos).sprite.drop();
+        }
+
         Statistics.gnoll_boss++;
 
         if(Statistics.gnoll_boss >= 2){
             Badges.validateRectorUnlock();
             GameScene.bossSlain();
             Dungeon.level.unseal();
-            Dungeon.level.drop( new SkeletonKey( Dungeon.depth ), pos ).sprite.drop();
             Dungeon.level.drop( new Gold( 1500 ), pos ).sprite.drop();
             Dungeon.level.drop( new ScrollOfUpgrade(), pos ).sprite.drop();
             Statistics.bossScores[2] += 3000;

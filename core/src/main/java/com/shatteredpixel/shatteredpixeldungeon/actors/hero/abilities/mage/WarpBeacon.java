@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -121,12 +122,12 @@ public class WarpBeacon extends ArmorAbility {
 								if (hero.hasTalent(Talent.TELEFRAG)){
 									int heroHP = hero.HP + hero.shielding();
 									int heroDmg = 5 * hero.pointsInTalent(Talent.TELEFRAG);
-									hero.damage(Math.min(heroDmg, heroHP-1), WarpBeacon.this);
+									hero.damage(DamageInfo.magical(Math.min(heroDmg, heroHP-1), WarpBeacon.this));
 
 									int damage = Char.combatRoll(10*hero.pointsInTalent(Talent.TELEFRAG), 15*hero.pointsInTalent(Talent.TELEFRAG));
 									existing.sprite.flash();
 									existing.sprite.bloodBurstA(existing.sprite.center(), damage);
-									existing.damage(damage, WarpBeacon.this);
+									existing.damage(DamageInfo.magical(damage, WarpBeacon.this));
 
 									Sample.INSTANCE.play(Assets.Sounds.HIT_CRUSH);
 									Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);

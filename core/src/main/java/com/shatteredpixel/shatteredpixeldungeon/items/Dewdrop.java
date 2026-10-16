@@ -82,9 +82,8 @@ public class Dewdrop extends Item {
 			shield = Math.min(shield, maxShield-curShield);
 		}*/
 		if (effect > 0) {
-			hero.HP += effect;
+			hero.heal(effect);
             hero.sprite.emitter().burst( Speck.factory( Speck.HEALING ), 1 );
-            hero.sprite.showStatus(CharSprite.POSITIVE, Messages.get(Dewdrop.class, "heal", effect));
 
         } else if (!force) {
 			GLog.i( Messages.get(Dewdrop.class, "already_full") );

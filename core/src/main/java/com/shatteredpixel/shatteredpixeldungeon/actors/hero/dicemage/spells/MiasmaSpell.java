@@ -1,10 +1,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.dicemage.spells;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.MiasmaGas;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.dicemage.DiceMageSpell;
@@ -12,9 +10,24 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PoisonParticle;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.watabou.noosa.audio.Sample;
 
+/**
+ * 瘴气（自然学派 L3）：在目标格喷出浓烈瘴气（体积80，相当于+3腐蚀法杖），
+ * 瘴气每回合造成毒气瓶毒素伤害并为敌人叠加2层中毒。
+ */
 public class MiasmaSpell extends DiceMageSpell {
+
+    @Override
+    public Talent school() {
+        return Talent.SCHOOL_NATURE;
+    }
+
+    @Override
+    public int level() {
+        return 3;
+    }
 
     @Override
     public int mpCost() {
@@ -22,9 +35,8 @@ public class MiasmaSpell extends DiceMageSpell {
     }
 
     @Override
-    public boolean canCast() {
-        Hero hero = Dungeon.hero;
-        return hero != null && hero.pointsInTalent(Talent.LEARN_MIASMA) > 0 && super.canCast();
+    public String sndImageName() {
+        return "miasma";
     }
 
     @Override
@@ -33,36 +45,12 @@ public class MiasmaSpell extends DiceMageSpell {
             @Override
             public void onSelect(Integer cell) {
                 if (cell == null) return;
-
-                int points = hero.pointsInTalent(Talent.LEARN_MIASMA);
-                int radius = points == 1 ? 1 : (points == 2 ? 2 : 3);
-                int baseDamage = 3;
-                int width = Dungeon.level.width();
-                int centerX = cell % width;
-                int centerY = cell / width;
-                int hitCount = 0;
-
                 if (!spendMagic(hero)) return;
 
-                for (int x = centerX - radius; x <= centerX + radius; x++) {
-                    for (int y = centerY - radius; y <= centerY + radius; y++) {
-                        if (x < 0 || x >= width) continue;
-                        int pos = y * width + x;
-                        if (pos < 0 || pos >= Dungeon.level.length()) continue;
-
-                        Char ch = Actor.findChar(pos);
-                        if (ch != null) {
-                            ch.damage(baseDamage, MiasmaSpell.this);
-                            if (ch.isAlive()) {
-                                CellEmitter.center(ch.pos).burst(PoisonParticle.SPLASH, 8);
-                                Buff.affect(ch, Poison.class).set(baseDamage * 4f);
-                            }
-                            hitCount++;
-                        }
-                    }
-                }
-
-                GLog.p(Messages.get(MiasmaSpell.this, "cast", hitCount));
+                Blob gas = Blob.seed(cell, 80, MiasmaGas.class);
+                GameScene.add(gas);
+                CellEmitter.get(cell).burst(PoisonParticle.SPLASH, 10);
+                Sample.INSTANCE.play(Assets.Sounds.GAS);
                 hero.spendAndNext(1f);
             }
 

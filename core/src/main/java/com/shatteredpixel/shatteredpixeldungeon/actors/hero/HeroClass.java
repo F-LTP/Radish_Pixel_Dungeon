@@ -21,523 +21,156 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Badges;
-import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.QuickSlot;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.Belief;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.NaturesPower;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpectralBlades;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpiritHawk;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.ElementalBlast;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.WarpBeacon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.WildMagic;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.AshKing;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.FatedDraw;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.ToyBackpack;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rector.GodsPossesion;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rector.LastPrayer;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rector.ShadowHymn;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.ShadowClone;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.SmokeBomb;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.HeroicLeap;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Shockwave;
-import com.shatteredpixel.shatteredpixeldungeon.custom.ch.ChallengeBag;
-import com.shatteredpixel.shatteredpixeldungeon.custom.dict.DictBook;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.BackpackCleaner;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.CustomPlayer;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.CustomWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.EnemyAttributeModifier;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.ImmortalShieldAffecter;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.LevelTeleporter;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.MobAttributeViewer;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.MobPlacer;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.SnakeBiteToggle;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.SnDItemBox;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TalentSetter;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TerrainPlacer;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TestBag;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TimeReverser;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TrapPlacer;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.LazyTest;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.SpawnMisc;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.SpawnWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestArmor;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestArtifact;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestMissile;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestRing;
-import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator.TestTalentOFTerminalBook;
-import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
-import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
-import com.shatteredpixel.shatteredpixeldungeon.items.alive.SeedOfCard;
-import com.shatteredpixel.shatteredpixeldungeon.items.alive.StoneOfCard;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.MagneticCrown;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Wheelchair;
-import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
-import com.shatteredpixel.shatteredpixeldungeon.items.bags.PotionBandolier;
-import com.shatteredpixel.shatteredpixeldungeon.items.bags.ScrollHolder;
-import com.shatteredpixel.shatteredpixeldungeon.items.bags.VelvetPouch;
-import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
-import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Aberforth;
-import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Chibayari;
-import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.DualDuelDaggers;
-import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.InversionBeta;
-import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.LunarCorona;
-import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Showdarker;
-import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Starlight;
-import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Sunless;
-import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Turtleir;
-import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Wastelandew;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.*;
-import com.shatteredpixel.shatteredpixeldungeon.items.quest.SmallWoodenCross;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfIdentify;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfLullaby;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRage;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurse;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfMagicMissile;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CelestialSphere;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dagger;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EchoplexHammer;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EnemyFlag;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gloves;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MetalCross;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.PneumFistGloves;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortsword;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingKnife;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingStone;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.HeroDefinition;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.HeroRegistry;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.SkinDefinition;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.TalentSet;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndKeyBindings;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
 import com.watabou.noosa.Image;
-import com.watabou.utils.DeviceCompat;
-import com.watabou.utils.Random;
-import com.watabou.utils.Reflection;
 
-import java.util.HashSet;
 
-public enum HeroClass {
 
-	WARRIOR( HeroSubClass.BERSERKER, HeroSubClass.GLADIATOR ),
-	MAGE( HeroSubClass.BATTLEMAGE, HeroSubClass.WARLOCK ),
-	ROGUE( HeroSubClass.ASSASSIN, HeroSubClass.FREERUNNER ),
-	HUNTRESS( HeroSubClass.SNIPER, HeroSubClass.WARDEN ),
+/**
+ * 职业类 - 通过注册中心获取具体定义。
+ */
+public class HeroClass {
 
-	//New Hero-Radish Pixel Dungeon
-	RECTOR( HeroSubClass.BATTLEPREIST, HeroSubClass.REDCARDINAL, HeroSubClass.DEAD_KNIGHT),
-	MOONLIGHT( HeroSubClass.LITTLE_KNIGHT, HeroSubClass.DICE_MAGE, HeroSubClass.JUTTE_CHAMPION);
+	//职业实例与全量集合见 {@link HeroClasses}（Manager）
 
-//	DUELIST( HeroSubClass.CHAMPION, HeroSubClass.MONK );
+	private final String name;
+	private HeroDefinition definition;
 
-	private HeroSubClass[] subClasses;
-
-	HeroClass( HeroSubClass...subClasses ) {
-		this.subClasses = subClasses;
+	HeroClass(String name) {
+		this.name = name;
 	}
 
+	public void bindDefinition(HeroDefinition def) { this.definition = def; }
 
-	private static void doChallengeSpawn() {
-		new ChallengeBag().collect();
-
-		//TODO
-		new MagneticCrown().identify().collect();
-
-		new DictBook().collect();
-		new EchoplexHammer().collect();
-		new EnemyFlag().collect();
-		new ShadowBooks().collect();
-		new CelestialSphere().collect();
-
-		new Aberforth().identify().collect();
-		new DualDuelDaggers().identify().collect();
-		new Chibayari().identify().collect();
-		new Wastelandew().identify().collect();
-		new Turtleir().identify().collect();
-		new Showdarker().identify().collect();
-		new Sunless().identify().collect();
-		new Starlight().identify().collect();
-		new LunarCorona().identify().collect();
-
-		new InversionBeta().identify().collect();
-
-		new SpawnMisc().collect();
-		new MobPlacer().collect();
-
-		new PneumFistGloves().collect();
-
-		CustomWeapon customWeapon = new CustomWeapon();
-		customWeapon.adjustStatus();
-		customWeapon.identify().collect();
-
-		new CustomPlayer().collect();
-		
-		new SnakeBiteToggle().collect();
-
-		new TalentSetter().collect();
-
-		new TestBag().collect();
-
-		new TrapPlacer().collect();
-
-		new TimeReverser().collect();
-
-		new ImmortalShieldAffecter().collect();
-
-		new BackpackCleaner().collect();
-
-		new LevelTeleporter().collect();
-
-		new LazyTest().collect();
-
-		new TestArmor().collect();
-		new TestArtifact().collect();
-		new SpawnWeapon().collect();
-		new TestMissile().collect();
-		new TestRing().collect();
-		new SnDItemBox().collect();
-		//new TestPotion().collect();
-
-		new TestTalentOFTerminalBook().collect();
-
-		new ScrollHolder().collect();
-		Dungeon.LimitedDrops.SCROLL_HOLDER.drop();
-
-		new PotionBandolier().collect();
-		Dungeon.LimitedDrops.POTION_BANDOLIER.drop();
-
-		if (!Dungeon.LimitedDrops.VELVET_POUCH.dropped()) {
-			new VelvetPouch().collect();
-			Dungeon.LimitedDrops.VELVET_POUCH.drop();
+	public HeroDefinition definition() {
+		if (definition == null){
+			definition = HeroRegistry.get(this);
 		}
-
-		new MagicalHolster().collect();
-		Dungeon.LimitedDrops.MAGICAL_HOLSTER.drop();
-
-		//	new WandOfReflectDisintegration().identify().collect();
-
-		new EnemyAttributeModifier().collect();
-
-		new MobAttributeViewer().collect();
-
-		new TerrainPlacer().collect();
-
+		return definition;
 	}
+
+	public String name() { return name; }
+
+	public int ordinal() {
+		int i = 0;
+		for (HeroClass cls : HeroClasses.ALL){
+			if (cls == this) return i;
+			i++;
+		}
+		return 0;
+	}
+
+	//代理方法
+	public String spritesheet() { return definition().spritesheet(); }
+	public String splashArt() { return definition().splashArt(); }
+	public String GetSkinAssest() { return definition().avatarSkin(); }
+
+	public boolean isUnlocked() {
+		return definition().isUnlocked();
+	}
+
+	public HeroSubClass[] subClasses() { return definition().subClasses(); }
+
+	public ArmorAbility[] armorAbilities() { return definition().armorAbilities(); }
 
 	public void initHero( Hero hero ) {
-
-		//[TEST MODE]
-		if (Dungeon.isChallenged(Challenges.TEST_MODE))
-			doChallengeSpawn();
-
-		hero.rectorDeadKngithDeadMode = false;
-
-		new StoneOfCard().collect();
-		new SeedOfCard().collect();
-
-		hero.heroClass = this;
-		Talent.initClassTalents(hero);
-
-		// Snake Bite challenge: start with 11 strength
-		if (Dungeon.isChallenged(Challenges.SNAKE_BITE)) {
-			hero.STR = Hero.STARTING_STR + 1;
-		}
-
-		Item i = new ClothArmor().identify();
-		if (!Challenges.isItemBlocked(i)) hero.belongings.armor = (ClothArmor)i;
-
-		i = new Food();
-		if (!Challenges.isItemBlocked(i)) i.collect();
-
-		// 牧师不初始携带绒布包，商人会售卖
-		// TODO 这里应该重构成每个职业在init里面添加对应的背包
-		if (this != RECTOR && this != MOONLIGHT) {
-			new VelvetPouch().collect();
-			Dungeon.LimitedDrops.VELVET_POUCH.drop();
-		}
-
-		Waterskin waterskin = new Waterskin();
-		waterskin.collect();
-
-		new ScrollOfIdentify().identify();
-
-		switch (this) {
-			case WARRIOR:
-				initWarrior( hero );
-				break;
-
-			case MAGE:
-				initMage( hero );
-				break;
-
-			case ROGUE:
-				initRogue( hero );
-				break;
-
-			case HUNTRESS:
-				initHuntress( hero );
-				break;
-
-			case RECTOR:
-				initRector( hero );
-				break;
-
-			case MOONLIGHT:
-				initMoonlight( hero );
-				break;
-		}
-
-		if (SPDSettings.quickslotWaterskin()) {
-			for (int s = 0; s < QuickSlot.SIZE; s++) {
-				if (Dungeon.quickslot.getItem(s) == null) {
-					Dungeon.quickslot.setSlot(s, waterskin);
-					break;
-				}
-			}
-		}
+		// A newly-created Hero defaults to rogue/skin 0, so activeDefinition()
+		// would ignore the skin selected for a new rogue before initialization.
+		SkinDefinition selectedSkin = skin(getGlobalSkin());
+		(selectedSkin != null ? selectedSkin : definition()).initHero(hero);
 	}
 
-	private static void initWarrior( Hero hero ) {
-		(hero.belongings.weapon = new WornShortsword()).identify();
-		ThrowingStone stones = new ThrowingStone();
-		stones.quantity(3).collect();
-		Dungeon.quickslot.setSlot(0, stones);
+	public TalentSet talentSet() { return definition == null ? null : definition.talents(); }
 
-		if (hero.belongings.armor != null){
-			hero.belongings.armor.affixSeal(new BrokenSeal());
+	/** 当前有效定义：若选中了皮肤变体则返回该皮肤，否则为基础职业。 */
+	public HeroDefinition activeDefinition() {
+		SkinDefinition skin = skin(GetSkin());
+		return skin != null ? skin : definition();
+	}
+
+	/** 当前选中的皮肤变体（无皮肤时返回 null）。 */
+	public SkinDefinition activeSkin() {
+		return skin(GetSkin());
+	}
+
+	/**
+	 * 根据皮肤索引返回对应的皮肤变体定义。
+	 * @return 皮肤变体；若该索引不属于任何皮肤（如基础职业或纯外观头像皮肤），返回 null。
+	 */
+	public SkinDefinition skin(int index) {
+		if (index <= 0) return null;
+		for (SkinDefinition s : definition().skins()){
+			if (s.skinIndex() == index) return s;
 		}
-
-		new PotionOfHealing().identify();
-		new ScrollOfRage().identify();
-	}
-
-	private static void initMage( Hero hero ) {
-		MagesStaff staff;
-
-		staff = new MagesStaff(new WandOfMagicMissile());
-
-		(hero.belongings.weapon = staff).identify();
-		hero.belongings.weapon.activate(hero);
-
-		Dungeon.quickslot.setSlot(0, staff);
-
-		new ScrollOfUpgrade().identify();
-		new PotionOfLiquidFlame().identify();
-	}
-
-	private static void initRogue( Hero hero ) {
-		(hero.belongings.weapon = new Dagger()).identify();
-
-		CloakOfShadows cloak = new CloakOfShadows();
-		(hero.belongings.artifact = cloak).identify();
-		hero.belongings.artifact.activate( hero );
-
-		ThrowingKnife knives = new ThrowingKnife();
-		knives.quantity(3).collect();
-
-		Dungeon.quickslot.setSlot(0, cloak);
-		Dungeon.quickslot.setSlot(1, knives);
-
-		new ScrollOfMagicMapping().identify();
-		new PotionOfInvisibility().identify();
-	}
-
-	private static void initHuntress( Hero hero ) {
-
-		(hero.belongings.weapon = new Gloves()).identify();
-		SpiritBow bow = new SpiritBow();
-		bow.identify().collect();
-
-		Dungeon.quickslot.setSlot(0, bow);
-
-		new PotionOfMindVision().identify();
-		new ScrollOfLullaby().identify();
-	}
-
-	private static void initRector( Hero hero ) {
-
-		(hero.belongings.weapon = new MetalCross()).identify();
-
-		new SmallWoodenCross().identify().collect();
-		new ScrollHolder().identify().collect();
-		new Food().identify().collect();
-
-		Buff.affect(hero, Belief.class);
-
-		new ScrollOfIdentify().identify();
-		new PotionOfExperience().identify();
-		new ScrollOfRemoveCurse().identify();
-	}
-
-	private static void initMoonlight( Hero hero ) {
-		Wheelchair wheelchair = new Wheelchair();
-		(hero.belongings.artifact = wheelchair).identify();
-		hero.belongings.artifact.activate( hero );
-		// 初始武器：所有角色的初始武器
-		(hero.belongings.weapon = new WornShortsword()).identify();
-		new Dagger().identify().collect();
-		new Gloves().identify().collect();
-		new MagicalHolster().collect();
-		new MagesStaff().identify().collect();
-		Dart knives = new Dart();
-		knives.quantity(3).collect();
-
-		Dungeon.quickslot.setSlot(0, wheelchair);
-		Dungeon.quickslot.setSlot(1, knives);
-		// 初始物品：力量药剂、升级卷轴、鉴定卷轴已鉴定
-		// 以及四种随机卷轴与药水
-		new PotionOfStrength().identify();
-		new ScrollOfUpgrade().identify();
-		new ScrollOfIdentify().identify();
-
-		int scrollCount = Random.Int(5); // 0-4
-		int potionCount = 4 - scrollCount;
-
-		HashSet<Class<? extends Scroll>> unknownScrolls = Scroll.getUnknown();
-		for (int i = 0; i < scrollCount && !unknownScrolls.isEmpty(); i++) {
-			Class<? extends Scroll> scrollClass = Random.element(unknownScrolls);
-			Reflection.newInstance(scrollClass).identify();
-			unknownScrolls.remove(scrollClass);
-		}
-
-		HashSet<Class<? extends Potion>> unknownPotions = Potion.getUnknown();
-		for (int i = 0; i < potionCount && !unknownPotions.isEmpty(); i++) {
-			Class<? extends Potion> potionClass = Random.element(unknownPotions);
-			Reflection.newInstance(potionClass).identify();
-			unknownPotions.remove(potionClass);
-		}
-
-		// 月华生命值调整：-2 最大生命值，-1 成长
-		hero.HT = hero.HT - 2;
-		hero.HP = hero.HT;
+		return null;
 	}
 
 	public String title() {
-		return Messages.get(HeroClass.class, name());
+		return activeDefinition().heroName();
 	}
 
 	public String desc(){
-		return Messages.get(HeroClass.class, name()+"_desc");
+		return activeDefinition().heroDesc();
 	}
 
 	public String shortDesc(){
-		return Messages.get(HeroClass.class, name()+"_desc_short");
+		return activeDefinition().heroShortDesc();
 	}
 
-	public HeroSubClass[] subClasses() {
-		return subClasses;
-	}
-
-	public ArmorAbility[] armorAbilities(){
-		switch (this) {
-			case WARRIOR: default:
-				return new ArmorAbility[]{new HeroicLeap(), new Shockwave(), new Endure()};
-			case MAGE:
-				return new ArmorAbility[]{new ElementalBlast(), new WildMagic(), new WarpBeacon()};
-			case ROGUE:
-				return new ArmorAbility[]{new SmokeBomb(), new DeathMark(), new ShadowClone()};
-			case HUNTRESS:
-				return new ArmorAbility[]{new SpectralBlades(), new NaturesPower(), new SpiritHawk()};
-			case RECTOR:
-				return new ArmorAbility[]{new LastPrayer(),new ShadowHymn(),new GodsPossesion()};
-			case MOONLIGHT:
-				return new ArmorAbility[]{new FatedDraw(), new ToyBackpack(), new AshKing()};
-		}
-	}
-
-	public String spritesheet() {
-		switch (this) {
-			case WARRIOR: default:
-				return Assets.Sprites.WARRIOR;
-			case MAGE:
-				return Assets.Sprites.MAGE;
-			case ROGUE:
-				return Assets.Sprites.ROGUE;
-			case HUNTRESS:
-				return Assets.Sprites.HUNTRESS;
-			case RECTOR:
-				return Assets.Sprites.RECTOR;
-			case MOONLIGHT:
-				return Assets.Sprites.MOONLIGHT;
-		}
-	}
-
-	public String splashArt(){
-		switch (this) {
-			case WARRIOR: default:
-				return Assets.Splashes.WARRIOR;
-			case MAGE:
-				return Assets.Splashes.MAGE;
-			case ROGUE:
-				return Assets.Splashes.ROGUE;
-			case HUNTRESS:
-				return Assets.Splashes.HUNTRESS;
-			case RECTOR:
-				return Assets.Splashes.RECTOR;
-			case MOONLIGHT:
-				return Assets.Splashes.MOONLIGHT;
-		}
-	}
-	
-	public boolean isUnlocked(){
-		//always unlock on debug builds
-		if (DeviceCompat.isDebug()) return true;
-
-		switch (this){
-			case MAGE:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_MAGE);
-			case ROGUE:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_ROGUE);
-			case HUNTRESS:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_HUNTRESS);
-			case RECTOR:
-				return true;
-			case MOONLIGHT:
-				return true; // TODO: 添加解锁条件
-			case WARRIOR: default:
-				return true;
-		}
-	}
-	
 	public String unlockMsg() {
-		return shortDesc() + "\n\n" + Messages.get(HeroClass.class, name()+"_unlock");
+		return activeDefinition().heroUnlockMsg();
 	}
 
-	public String GetSkinAssest(){
-		switch (this) {
-			case WARRIOR: default:
-				return Assets.Sprites.AVATARS_WARRIOR;
-			case MAGE:
-				return Assets.Sprites.AVATARS_MAGE;
-			case ROGUE:
-				return Assets.Sprites.AVATARS_ROGUE;
-			case HUNTRESS:
-				return Assets.Sprites.AVATARS_HUNTRESS;
-			case RECTOR:
-				return Assets.Sprites.AVATARS_RECTOR;
-			case MOONLIGHT:
-				return Assets.Sprites.AVATARS_MOONLIGHT;
-		}
+	/** 按指定皮肤索引取显示名称（无皮肤时为基础职业名），用于存档列表等无英雄上下文的界面。 */
+	public String title(int skinIndex) {
+		SkinDefinition s = skin(skinIndex);
+		return s != null ? s.heroName() : definition().heroName();
+	}
+
+	/** 按指定皮肤索引取长描述。 */
+	public String desc(int skinIndex) {
+		SkinDefinition s = skin(skinIndex);
+		return s != null ? s.heroDesc() : definition().heroDesc();
+	}
+
+	/** 按指定皮肤索引取短描述。 */
+	public String shortDesc(int skinIndex) {
+		SkinDefinition s = skin(skinIndex);
+		return s != null ? s.heroShortDesc() : definition().heroShortDesc();
+	}
+
+	/** 按指定皮肤索引取解锁提示。 */
+	public String unlockMsg(int skinIndex) {
+		SkinDefinition s = skin(skinIndex);
+		return s != null ? s.heroUnlockMsg() : definition().heroUnlockMsg();
 	}
 
 	private static boolean onlyMode = false;
 
+	/** 创建当前皮肤/职业的精灵实例（游戏内使用，需已存在 {@link Dungeon#hero}）。 */
+	public HeroSprite createSkinSprite() {
+		try {
+			return activeDefinition().spriteClass().getDeclaredConstructor().newInstance();
+		} catch (Exception e) {
+			return new HeroSprite();
+		}
+	}
 
+	/** 当前是否启用独立贴图皮肤（如盗贼的赌徒）。 */
+	public boolean isGamblerSkin() {
+		return activeDefinition().customSprite();
+	}
 
 	/**
 	 *
@@ -552,33 +185,31 @@ public enum HeroClass {
 			isSkinUnlock = true;
 		}else {
 			while ( skinIndex < skinCount ) {
-				switch (this) {
-					case WARRIOR:
-					default:
-						isSkinUnlock = SPDSettings.isItemUnlock("avatars_warrior_" + skinIndex);
-						break;
-					case MAGE:
-						isSkinUnlock = SPDSettings.isItemUnlock("avatars_mage_" + skinIndex);
-						break;
-					case ROGUE:
-						isSkinUnlock = SPDSettings.isItemUnlock("avatars_rogue_" + skinIndex);
-						break;
-					case HUNTRESS:
-						isSkinUnlock = SPDSettings.isItemUnlock("avatars_huntress_" + skinIndex);
-						break;
-					case RECTOR:
-						isSkinUnlock = SPDSettings.isItemUnlock("avatars_rector_" + skinIndex);
-						break;
-					case MOONLIGHT:
-						isSkinUnlock = SPDSettings.isItemUnlock("avatars_moonlight_" + skinIndex);
-						break;
-				}
+				isSkinUnlock = SPDSettings.isItemUnlock("avatars_" + name().toLowerCase() + "_" + skinIndex);
 				if(!isSkinUnlock){
 					skinIndex++;
 				}else {
 					break;
 				}
 			}
+
+			// 普通头像皮肤遍历完毕后，继续寻找更高索引的独立贴图皮肤变体（如杂散/赌徒/流浪者/圆球）
+			if (skinIndex >= skinCount) {
+				isSkinUnlock = false;
+				for (SkinDefinition s : definition().skins()){
+					if (s.customSprite() && s.skinIndex() >= skinIndex){
+						skinIndex = s.skinIndex();
+						isSkinUnlock = true;
+						break;
+					}
+				}
+			}
+		}
+
+		// 独立贴图皮肤变体（如盗贼的赌徒）恒解锁
+		SkinDefinition skin = skin(skinIndex);
+		if (skin != null && skin.customSprite()) {
+			isSkinUnlock = true;
 		}
 
 		if(!isSkinUnlock){
@@ -589,12 +220,27 @@ public enum HeroClass {
 			}
 		}
 
-
+		// 游戏内修改时写入当前英雄（随存档持久化）；未开局（角色选择界面）时写入全局暂存
+		if (Dungeon.hero != null && Dungeon.hero.heroClass == this){
+			Dungeon.hero.skin = skinIndex;
+		}
 		SPDSettings.setHeroSkin(this.ordinal(),skinIndex);
 	}
 
+	/** 获取当前有效皮肤索引。游戏内返回本局英雄的皮肤，否则返回全局暂存值。 */
 	public int GetSkin(){
+		if (Dungeon.hero != null && Dungeon.hero.heroClass == this){
+			return Dungeon.hero.skin;
+		}
 		return SPDSettings.getHeroSkin(this.ordinal());
 	}
+
+	/** 直接读取全局暂存的皮肤索引（不涉及当前英雄），用于新建角色时回填。 */
+	public int getGlobalSkin() {
+		return SPDSettings.getHeroSkin(this.ordinal());
+	}
+
+	//存档序列化（实例名）
+	public String saveName(){ return name; }
 
 }

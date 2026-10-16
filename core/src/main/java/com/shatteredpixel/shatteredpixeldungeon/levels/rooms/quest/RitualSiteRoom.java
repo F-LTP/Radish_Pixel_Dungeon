@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.CeremonialCandle;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
@@ -80,10 +81,9 @@ public class RitualSiteRoom extends StandardRoom {
 	}
 
 	public static class RitualMarker extends CustomTilemap {
-		
+
 		{
 			texture = Assets.Environment.PRISON_QUEST;
-			
 			tileW = tileH = 3;
 		}
 		
@@ -91,6 +91,8 @@ public class RitualSiteRoom extends StandardRoom {
 
 		@Override
 		public Tilemap create() {
+			texture = Assets.Environment.TILES_BLOOD_PRISON.equals(Dungeon.level.tilesTex())
+					? Assets.Environment.BLOOD_PRISON_QUEST : Assets.Environment.PRISON_QUEST;
 			Tilemap v = super.create();
 			v.map(mapSimpleImage(0, 0, TEX_WIDTH), 3);
 			return v;

@@ -38,6 +38,9 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Bleeding extends Buff {
 
         {
@@ -49,6 +52,9 @@ public class Bleeding extends Buff {
 
         //used in specific cases where the source of the bleed is important for death logic
         private Class source;
+
+        // 流血伤害来源链：记录是谁/什么造成的流血（如「装甲石像的荆棘刻印」），随流血伤害传递
+        private List<Object> causeChain = new ArrayList<>();
 
         public float level(){
                 return level;
@@ -70,7 +76,7 @@ public class Bleeding extends Buff {
                 }
 
                 if (totalBleedDmg > 0) {
-                        target.damage(new DamageInfo(totalBleedDmg, DamageType.BLEEDING, null, null, bleeding));
+                        target.damage(new DamageInfo(totalBleedDmg, DamageType.BLEEDING, null, null, bleeding).setCauseChain(bleeding.getCauseChain()));
                 }
                 bleeding.detach();
 
@@ -98,10 +104,26 @@ public class Bleeding extends Buff {
         }
 
         public void set( float level, Class source ){
+                set( level, source, null );
+        }
+
+        /** set 并携带一条伤害来源链（如「装甲石像的荆棘刻印」）。 */
+        public void set( float level, Class source, List<?> chain ){
                 if (this.level < level) {
                         this.level = Math.max(this.level, level);
                         this.source = source;
+                        if (chain != null) {
+                                this.causeChain.clear();
+                                for (Object c : chain) {
+                                        if (c != null) this.causeChain.add(c);
+                                }
+                        }
                 }
+        }
+
+        /** 流血伤害来源链（供 DamageInfo 注入与死亡追踪）。 */
+        public List<Object> getCauseChain() {
+                return new ArrayList<>(causeChain);
         }
 
         @Override
@@ -123,7 +145,7 @@ public class Bleeding extends Buff {
 
                         if (dmg > 0) {
 
-                                target.damage(new DamageInfo(dmg, DamageType.BLEEDING, null, null, this));
+                                target.damage(new DamageInfo(dmg, DamageType.BLEEDING, null, null, this).setCauseChain(causeChain));
                                 if (target.sprite.visible) {
                                         Splash.at( target.sprite.center(), -PointF.PI / 2, PointF.PI / 6,
                                                         target.sprite.blood(), Math.min( 10 * dmg / target.HT, 10 ) );

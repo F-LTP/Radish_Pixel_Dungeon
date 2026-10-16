@@ -93,58 +93,16 @@ public class Javelin extends MissileWeapon {
 	@Override
 	public String info() {
 		updateCrossbow();
-		String info = desc();
-		
-		int min = Math.round(augment.damageFactor(min()));
-		int max = Math.round(augment.damageFactor(max()));
-		
-		info += "\n\n" + Messages.get( MissileWeapon.class, "stats",
-				tier,
-				min,
-				max,
-				STRReq());
-		
-		if (Dungeon.hero != null) {
-			if (STRReq() > Dungeon.hero.STR()) {
-				info += " " + Messages.get(Weapon.class, "too_heavy");
-			} else if (Dungeon.hero.STR() > STRReq()) {
-				info += " " + Messages.get(Weapon.class, "excess_str", Dungeon.hero.STR() - STRReq());
-			}
-		}
-		
-		// 显示蝎子弩加成提示
+		return super.info();
+	}
+
+	@Override
+	public String statsInfo(){
+		String info = super.statsInfo();
 		if (bow != null) {
-			int bowMin = min();
-			int bowMax = max();
-			info += "\n\n" + Messages.get(this, "crossbow_bonus", bow.name(), bowMin, bowMax);
+			if (!info.isEmpty()) info += "\n\n";
+			info += Messages.get(this, "crossbow_bonus", bow.name(), min(), max());
 		}
-
-		if (enchantment != null && (cursedKnown || !enchantment.curse())){
-			info += "\n\n" + Messages.get(Weapon.class, "enchanted", enchantment.name());
-			info += " " + Messages.get(enchantment, "desc");
-		}
-
-		if (cursed && isEquipped( Dungeon.hero )) {
-			info += "\n\n" + Messages.get(Weapon.class, "cursed_worn");
-		} else if (cursedKnown && cursed) {
-			info += "\n\n" + Messages.get(Weapon.class, "cursed");
-		} else if (!isIdentified() && cursedKnown){
-			info += "\n\n" + Messages.get(Weapon.class, "not_cursed");
-		}
-
-		info += "\n\n" + Messages.get(MissileWeapon.class, "distance");
-		
-		info += "\n\n" + Messages.get(this, "durability");
-		
-		if (durabilityPerUse() > 0){
-			info += " " + Messages.get(this, "uses_left",
-					(int)Math.ceil(durability/durabilityPerUse()),
-					(int)Math.ceil(MAX_DURABILITY/durabilityPerUse()));
-		} else {
-			info += " " + Messages.get(this, "unlimited_uses");
-		}
-		
-		
 		return info;
 	}
 }

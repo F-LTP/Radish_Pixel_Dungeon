@@ -5,7 +5,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Random;
@@ -33,11 +32,9 @@ public class Grimtooth extends MeleeWeapon{
 
     @Override
     public int proc(Char attacker, Char defender, int damage){
-        if(attacker instanceof Hero){
-            if (defender instanceof Mob){
-                if (((Mob) defender).surprisedBy(attacker)){
-                    Buff.affect(defender,DB_first.class);
-                }
+        if (defender instanceof Mob){
+            if (((Mob) defender).surprisedBy(attacker)){
+                Buff.affect(defender,DB_first.class);
             }
         }
         if (Random.Float()<0.15f+0.02f*buffedLvl()) Buff.affect(defender, Cripple.class,3);

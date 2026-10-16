@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
@@ -63,24 +64,18 @@ public class WndHeroInfo extends WndTabbed {
 	public WndHeroInfo( HeroClass cl ){
 
 		Image tabIcon;
-		switch (cl){
-			case WARRIOR: default:
-				tabIcon = new ItemSprite(ItemSpriteSheet.SEAL, null);
-				break;
-			case MAGE:
-				tabIcon = new ItemSprite(ItemSpriteSheet.MAGES_STAFF, null);
-				break;
-			case ROGUE:
-				tabIcon = new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK, null);
-				break;
-			case HUNTRESS:
-				tabIcon = new ItemSprite(ItemSpriteSheet.SPIRIT_BOW, null);
-				break;
-			case RECTOR:
-				tabIcon = new ItemSprite(ItemSpriteSheet.HOLYANKH, null);
-				break;
-			case MOONLIGHT:
-				tabIcon = new ItemSprite(ItemSpriteSheet.SNAKE_BITED_YENDOR, null);
+		if (cl == HeroClasses.MAGE) {
+			tabIcon = new ItemSprite(ItemSpriteSheet.MAGES_STAFF, null);
+		} else if (cl == HeroClasses.ROGUE) {
+			tabIcon = new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK, null);
+		} else if (cl == HeroClasses.HUNTRESS) {
+			tabIcon = new ItemSprite(ItemSpriteSheet.SPIRIT_BOW, null);
+		} else if (cl == HeroClasses.RECTOR) {
+			tabIcon = new ItemSprite(ItemSpriteSheet.HOLYANKH, null);
+		} else if (cl == HeroClasses.MOONLIGHT) {
+			tabIcon = new ItemSprite(ItemSpriteSheet.SNAKE_BITED_YENDOR, null);
+		} else {
+			tabIcon = new ItemSprite(ItemSpriteSheet.SEAL, null);
 		}
 
 		int finalHeight = MIN_HEIGHT;
@@ -192,40 +187,34 @@ public class WndHeroInfo extends WndTabbed {
 				add(info[i]);
 			}
 
-			switch (cls){
-				case WARRIOR: default:
-					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.SEAL),
-							new ItemSprite(ItemSpriteSheet.WORN_SHORTSWORD),
-							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
-					break;
-				case MAGE:
-					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.MAGES_STAFF),
-							new ItemSprite(ItemSpriteSheet.WAND_MAGIC_MISSILE),
-							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
-					break;
-				case ROGUE:
-					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK),
-							Icons.get(Icons.STAIRS),
-							new ItemSprite(ItemSpriteSheet.DAGGER),
-							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
-					break;
-				case HUNTRESS:
-					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.SPIRIT_BOW),
-							new Image(Assets.Environment.TILES_SEWERS, 32, 64, 16, 16),
-							new ItemSprite(ItemSpriteSheet.GLOVES),
-							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
-					break;
-				case RECTOR:
-					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.HOLYANKH),
-							new ItemSprite(ItemSpriteSheet.RING_SKYLUE),
-							new BuffIcon(BuffIndicator.CORRUPT, true),
-							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
-					break;
-				case MOONLIGHT:
-					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.THROWING_KNIFE),
-					new ItemSprite(ItemSpriteSheet.ARTIFACT_WHEELCHAIR),
-					new BuffIcon(BuffIndicator.CORRUPT, true),
-					new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
+			if (cls == HeroClasses.MAGE) {
+				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.MAGES_STAFF),
+						new ItemSprite(ItemSpriteSheet.WAND_MAGIC_MISSILE),
+						new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
+			} else if (cls == HeroClasses.ROGUE) {
+				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK),
+						Icons.get(Icons.STAIRS),
+						new ItemSprite(ItemSpriteSheet.DAGGER),
+						new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
+			} else if (cls == HeroClasses.HUNTRESS) {
+				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.SPIRIT_BOW),
+						new Image(Assets.Environment.TILES_SEWERS, 32, 64, 16, 16),
+						new ItemSprite(ItemSpriteSheet.GLOVES),
+						new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
+			} else if (cls == HeroClasses.RECTOR) {
+				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.HOLYANKH),
+						new ItemSprite(ItemSpriteSheet.RING_SKYLUE),
+						new BuffIcon(BuffIndicator.CORRUPT, true),
+						new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
+			} else if (cls == HeroClasses.MOONLIGHT) {
+				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.THROWING_KNIFE),
+				new ItemSprite(ItemSpriteSheet.ARTIFACT_WHEELCHAIR),
+				new BuffIcon(BuffIndicator.CORRUPT, true),
+				new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
+			} else {
+				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.SEAL),
+						new ItemSprite(ItemSpriteSheet.WORN_SHORTSWORD),
+						new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 			}
 			for (Image im : icons) {
 				add(im);
@@ -245,8 +234,12 @@ public class WndHeroInfo extends WndTabbed {
 				info[i].maxWidth((int)width - 20);
 				info[i].setPos(20, pos);
 
-				icons[i].x = (20-icons[i].width())/2;
-				icons[i].y = info[i].top() + (info[i].height() - icons[i].height())/2;
+				// Some skins add description sections without adding another icon.
+				// Keep the text visible instead of indexing past the icon list.
+				if (i < icons.length) {
+					icons[i].x = (20-icons[i].width())/2;
+					icons[i].y = info[i].top() + (info[i].height() - icons[i].height())/2;
+				}
 
 				pos = info[i].bottom() + 4*MARGIN;
 			}

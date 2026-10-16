@@ -120,7 +120,6 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	protected AlphaTweener invisible;
 	protected Flare aura;
 	protected ShaderEffect shaderEffect;
-	protected boolean pendingDeathAfterShader = false;
 
 	public void setShaderEffect(ShaderEffect effect) {
 		if (shaderEffect == effect) return;
@@ -135,22 +134,14 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		return shaderEffect;
 	}
 
-	public boolean isPendingDeathAfterShader() {
-		return pendingDeathAfterShader;
-	}
-
-	public void clearPendingDeath() {
-		pendingDeathAfterShader = false;
-	}
-
-	public void dieAfterShader() {
+	/** 自定义死亡动画开始前的公共准备：清理休眠/麻痹状态，隐藏情绪图标与血条。 */
+	public void prepareDeathVisual() {
 		sleeping = false;
 		remove(State.PARALYSED);
 		hideEmo();
 		if (health != null) {
 			health.killAndErase();
 		}
-		pendingDeathAfterShader = true;
 	}
 
 	
@@ -246,6 +237,22 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 				FloatingText.show( x, y, ch.pos, text, color, icon, true );
 			} else {
 				FloatingText.show( x, y, -1, text, color, icon, true );
+			}
+		}
+	}
+
+	/** 显示跳字并左侧叠加多个图标（用于混合伤害，图标顺序即展示顺序）。 */
+	public void showStatusWithIcons( int color, String text, int[] icons, Object... args ) {
+		if (visible) {
+			if (args.length > 0) {
+				text = Messages.format( text, args );
+			}
+			float x = destinationCenter().x;
+			float y = destinationCenter().y - height()/2f;
+			if (ch != null) {
+				FloatingText.show( x, y, ch.pos, text, color, icons, true );
+			} else {
+				FloatingText.show( x, y, -1, text, color, icons, true );
 			}
 		}
 	}

@@ -28,10 +28,15 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.dicemage.DiceMageSchools;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.dicemage.DiceMageSpell;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CrystalSpire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Pylon;
+import com.shatteredpixel.shatteredpixeldungeon.custom.utils.BuffScanner;
 import com.shatteredpixel.shatteredpixeldungeon.items.EnergyCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -59,17 +64,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.TerrainFeaturesTilemap;
-import com.shatteredpixel.shatteredpixeldungeon.ui.BadgesGrid;
-import com.shatteredpixel.shatteredpixeldungeon.ui.BadgesList;
-import com.shatteredpixel.shatteredpixeldungeon.ui.CustomNoteButton;
-import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
-import com.shatteredpixel.shatteredpixeldungeon.ui.QuickRecipe;
-import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
-import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
-import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollPane;
-import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollingGridPane;
-import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollingListPane;
-import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import com.shatteredpixel.shatteredpixeldungeon.ui.*;
 import com.watabou.input.KeyBindings;
 import com.watabou.input.KeyEvent;
 import com.watabou.noosa.BitmapText;
@@ -80,6 +75,7 @@ import com.watabou.noosa.ui.Component;
 import com.watabou.utils.RectF;
 import com.watabou.utils.Reflection;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -558,7 +554,7 @@ public class WndJournal extends WndTabbed {
 	public static class CatalogTab extends Component{
 
 		private RedButton[] itemButtons;
-		private static final int NUM_BUTTONS = 4;
+		private static final int NUM_BUTTONS = 6;
 
 		public static int currentItemIdx   = 0;
 		private static float[] scrollPositions = new float[NUM_BUTTONS];
@@ -568,8 +564,16 @@ public class WndJournal extends WndTabbed {
 		private static final int CONSUM_IDX = 1;
 		private static final int BESTIARY_IDX = 2;
 		private static final int LORE_IDX = 3;
+		private static final int SPELLS_IDX = 4;
+		private static final int BUFFS_IDX = 5;
 
 		private ScrollingGridPane grid;
+
+		public static ArrayList<Class<?>> positiveBuffs = new ArrayList<>();
+		public static ArrayList<Class<?>> negativeBuffs = new ArrayList<>();
+		public static ArrayList<Class<?>> neutralBuffs = new ArrayList<>();
+
+		public static ArrayList<Class<? extends Buff>> buffClasses = BuffScanner.getAllBuffClasses();
 
 		@Override
 		protected void createChildren() {
@@ -589,6 +593,8 @@ public class WndJournal extends WndTabbed {
 			itemButtons[CONSUM_IDX].icon(new ItemSprite(ItemSpriteSheet.POTION_HOLDER));
 			itemButtons[BESTIARY_IDX].icon(new ItemSprite(ItemSpriteSheet.MOB_HOLDER));
 			itemButtons[LORE_IDX].icon(new ItemSprite(ItemSpriteSheet.DOCUMENT_HOLDER));
+			itemButtons[SPELLS_IDX].icon(new ItemSprite(ItemSpriteSheet.SPELL_HOLDER));
+			itemButtons[BUFFS_IDX].icon(new ItemSprite(ItemSpriteSheet.SCROLL_HOLDER));
 
 			grid = new ScrollingGridPane(){
 				@Override
@@ -676,7 +682,7 @@ public class WndJournal extends WndTabbed {
 					addGridEntities(grid, bestiary.entities());
 				}
 
-			} else {
+			} else if (currentItemIdx == LORE_IDX) {
 				int totalItems = 0;
 				int totalSeen = 0;
 				for (Document doc : Document.values()){
@@ -722,6 +728,90 @@ public class WndJournal extends WndTabbed {
 					}
 					addGridDocuments(grid, doc);
 				}
+
+			} else if (currentItemIdx == SPELLS_IDX){
+				grid.addHeader("_" + Messages.get(this, "title_spells") + "_", 9, true);
+				addGridSpells(grid);
+			} else if (currentItemIdx == BUFFS_IDX){
+
+				positiveBuffs.clear();
+				negativeBuffs.clear();
+				neutralBuffs.clear();
+
+				/**
+				  @param由于Buff自身处理就有很多在局内或者特定条件处理,evan对这些非空未进行考虑处理。
+				 @param但Buff很多，一个一个修改工作量过于超标，为了减轻百科的工作量，使用TC拦截一切可能的崩溃
+				 @param 此方法并非最佳-但也算是一种较为轻松的做法
+				 */
+				for (Class<?> buffClass : buffClasses) {
+					Buff buff;
+					/** @param Buff自身就是坏的例如抽象基类Buff-不可见 */
+					try {
+						buff = (Buff) buffClass.getDeclaredConstructor().newInstance();
+					} catch (Exception e) {
+						continue;
+					}
+
+					/** @param Buff图标/描述/名字-其中有一个触发崩溃情况下-不可见 */
+					String iconID;
+					String title, desc;
+					try {
+						iconID = buff.icon();
+						title = Messages.titleCase(buff.name());
+						desc = buff.desc();
+					} catch (Exception e) {
+						continue;
+					}
+
+					//Buff是NONE属性 不可见
+					if (iconID.equals(BuffIndicator.NONE)) {
+						continue;
+					}
+
+					//Buff 没有名字或描述时 不可见
+					if (title.contains(Messages.NO_TEXT_FOUND) || desc.contains(Messages.NO_TEXT_FOUND)) {
+						continue;
+					}
+
+					if (buff.type == Buff.buffType.POSITIVE) {
+						positiveBuffs.add(buffClass);
+					} else if (buff.type == Buff.buffType.NEGATIVE) {
+						negativeBuffs.add(buffClass);
+					} else if (buff.type == Buff.buffType.NEUTRAL) {
+						neutralBuffs.add(buffClass);
+					} else {
+						neutralBuffs.add(buffClass);
+					}
+				}
+
+				//总数量
+				grid.addHeader(
+						Messages.get(this, "title_buffs")
+								+ Messages.get(this, "use_buffs",
+								positiveBuffs.size() + negativeBuffs.size() + neutralBuffs.size())
+								+ Messages.get(this, "t_buff", buffClasses.size()),
+						9, true);
+				
+				if (!positiveBuffs.isEmpty()) {
+					grid.addHeader("_" + Messages.get(CatalogTab.class, "title_positive_buffs") + "_ (" + positiveBuffs.size() + ")", 7, false);
+					for (Class<?> buffClass : positiveBuffs) {
+						addGridBuff(grid, buffClass);
+					}
+				}
+
+				if (!negativeBuffs.isEmpty()) {
+					grid.addHeader("_" + Messages.get(CatalogTab.class, "title_negative_buffs") + "_ (" + negativeBuffs.size() + ")", 7, false);
+					for (Class<?> buffClass : negativeBuffs) {
+						addGridBuff(grid, buffClass);
+					}
+				}
+
+				if (!neutralBuffs.isEmpty()) {
+					grid.addHeader("_" + Messages.get(CatalogTab.class, "title_neutral_buffs") + "_ (" + neutralBuffs.size() + ")", 7, false);
+					for (Class<?> buffClass : neutralBuffs) {
+						addGridBuff(grid, buffClass);
+					}
+				}
 			}
 
 			grid.setRect(x, itemButtons[NUM_BUTTONS-1].bottom() + 1, width,
@@ -765,9 +855,9 @@ public class WndJournal extends WndTabbed {
 					title = Messages.titleCase(item.trueName());
 					//some items don't include direct stats, generally when they're not applicable
 					if (item instanceof ClassArmor || item instanceof SpiritBow){
-						desc += item.desc();
+						desc += item.displayDesc();
 					} else {
-						desc += item.info();
+						desc += item.displayInfo();
 					}
 
 					if (Catalog.useCount(itemClass) > 1) {
@@ -985,6 +1075,73 @@ public class WndJournal extends WndTabbed {
 		}
 	};
 
+	/** 骰子法师法术图鉴：列出所有法术，含图标、名称、描述与所属学派。 */
+	private static void addGridSpells( ScrollingGridPane grid ){
+		java.util.List<Class<? extends DiceMageSpell>> spells = DiceMageSchools.allSpells();
+
+		for (Class<? extends DiceMageSpell> spellCls : spells){
+			DiceMageSpell spell = null;
+			try {
+				spell = spellCls.newInstance();
+			} catch (Exception e){
+				continue;
+			}
+
+			Image icon = null;
+			String sndName = spell.sndImageName();
+			if (sndName != null){
+				icon = SNDItems.get(sndName);
+				if (icon != null){
+					// 放大 SND 小贴图到与物品图标相近的显示尺寸
+					float s = 16f / icon.width();
+					icon.scale.set(s);
+				}
+			}
+			if (icon == null){
+				// 回退：使用学派天赋图标
+				Talent schoolTalent = spell.school();
+				if (schoolTalent != null){
+					icon = new TalentIcon(schoolTalent);
+				}
+			}
+			if (icon == null){
+				icon = new ItemSprite(ItemSpriteSheet.SPELL_HOLDER);
+			}
+
+			String title = Messages.titleCase(spell.name());
+			String desc = spell.desc();
+
+			// 所属学派标签
+			Talent schoolTalent = spell.school();
+			if (schoolTalent != null){
+				desc = Messages.get(WndJournal.CatalogTab.class, "school_of") + Messages.titleCase(schoolTalent.title()) + "\n\n" + desc;
+			} else {
+				desc = Messages.get(WndJournal.CatalogTab.class, "school_none") + "\n\n" + desc;
+			}
+
+			String finalTitle = title;
+			String finalDesc = desc;
+			final Image spellIcon = icon;
+			ScrollingGridPane.GridItem gridItem = new ScrollingGridPane.GridItem(icon) {
+				@Override
+				public boolean onClick(float x, float y) {
+					if (inside(x, y)) {
+						Image sprite = new Image(spellIcon);
+						if (ShatteredPixelDungeon.scene() instanceof GameScene){
+							GameScene.show(new WndJournalItem(sprite, finalTitle, finalDesc));
+						} else {
+							ShatteredPixelDungeon.scene().addToFront(new WndJournalItem(sprite, finalTitle, finalDesc));
+						}
+						return true;
+					} else {
+						return false;
+					}
+				}
+			};
+			grid.addItem(gridItem);
+		}
+	}
+
 	private static void addGridDocuments( ScrollingGridPane grid, Document doc ){
 		for (String page : doc.pageNames()){
 
@@ -1131,6 +1288,54 @@ public class WndJournal extends WndTabbed {
 			}
 		}
 
+	}
+
+	private static void addGridBuff(ScrollingGridPane grid, Class<?> buffClass) {
+		Buff buff;
+		try {
+			buff = (Buff) buffClass.getDeclaredConstructor().newInstance();
+		} catch (Exception e) {
+			return;
+		}
+		String iconID;
+		String title, desc;
+		try {
+			iconID = buff.icon();
+			title = Messages.titleCase(buff.name());
+			desc = buff.desc();
+		} catch (Exception e) {
+			return;
+		}
+
+		Image icons = new BuffIcon(iconID, true);
+		try {
+			Method tintMethod = buffClass.getMethod("tintIcon", Image.class);
+			tintMethod.invoke(buff, icons);
+		} catch (Exception ignored) {
+		}
+
+		ScrollingGridPane.GridItem gridItem = getGridItem(title, desc, icons);
+		grid.addItem(gridItem);
+	}
+
+	private static ScrollingGridPane.GridItem getGridItem(String title, String desc, Image icon) {
+		return new ScrollingGridPane.GridItem(icon) {
+			@Override
+			public boolean onClick(float x, float y) {
+				if (inside(x, y) && icon != null) {
+					Image sprite = new Image();
+					sprite.copy(icon);
+					if (ShatteredPixelDungeon.scene() instanceof GameScene){
+						GameScene.show(new WndJournalItem(sprite, title, desc));
+					} else {
+						ShatteredPixelDungeon.scene().addToFront(new WndJournalItem(sprite, title, desc));
+					}
+					return true;
+				} else {
+					return false;
+				}
+			}
+		};
 	}
 
 }

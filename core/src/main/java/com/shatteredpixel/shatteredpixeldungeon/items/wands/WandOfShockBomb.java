@@ -7,6 +7,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
@@ -58,13 +60,7 @@ public class WandOfShockBomb extends DamageWand {
         int targetPos = attack.collisionPos;
 
         // 先移除现有的爆炸区域
-        ShockBombTracker existing = Dungeon.hero.buff(ShockBombTracker.class);
-        if (existing != null) {
-            existing.detach();
-        }
-
-        // 创建新的爆炸区域
-        ShockBombTracker tracker = Buff.affect(Dungeon.hero, ShockBombTracker.class);
+        ShockBombTracker tracker = Buff.append(Dungeon.hero, ShockBombTracker.class);
         tracker.damage = damageRoll();
         tracker.setPos(targetPos, buffedLvl());
     }
@@ -76,13 +72,7 @@ public class WandOfShockBomb extends DamageWand {
 
         if (Random.Int(100) < triggerChance) {
             // 先移除现有的爆炸区域
-            ShockBombTracker existing = Dungeon.hero.buff(ShockBombTracker.class);
-            if (existing != null) {
-                existing.detach();
-            }
-
-            // 创建新的爆炸区域
-            ShockBombTracker tracker = Buff.affect(Dungeon.hero, ShockBombTracker.class);
+            ShockBombTracker tracker = Buff.append(Dungeon.hero, ShockBombTracker.class);
             tracker.damage = damageRoll();
             tracker.setPos(defender.pos, buffedLvl());
         }
@@ -188,7 +178,7 @@ public class WandOfShockBomb extends DamageWand {
                 Char ch = Actor.findChar(cell);
                 if (ch != null) {
                     if (ch.alignment == Char.Alignment.ENEMY || (ch instanceof Mimic && ch.alignment == Char.Alignment.NEUTRAL)) {
-                        ch.damage(damage, new DM100.LightningBolt());
+                        ch.damage(new DamageInfo(damage, DamageType.LIGHTNING, null, null, new DM100.LightningBolt()));
                     }
                     if (ch.alignment == Char.Alignment.ALLY) {
                         int pushTarget = cell;

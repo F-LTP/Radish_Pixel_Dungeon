@@ -304,6 +304,8 @@ public class Bestiary {
 					cl = Senior.class;
 				} else if (cl == Scorpio.class) {
 					cl = Acidic.class;
+				} else if (cl == Crab.class) {
+					cl = Headcrab.class;
 				}
 				rotation.set(i, cl);
 			}

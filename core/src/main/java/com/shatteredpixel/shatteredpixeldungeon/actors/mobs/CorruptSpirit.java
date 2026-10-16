@@ -165,6 +165,11 @@ public class CorruptSpirit extends Mob {
 			return BuffIndicator.CORRUPT_SPIRIT;
 		}
 
+		@Override
+		public String desc() {
+			return Messages.get(this, "desc", amount);
+		}
+
 		// 降低闪避和精准
 		public int evasionDebuff() {
 			return amount;

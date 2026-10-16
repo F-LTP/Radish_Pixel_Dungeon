@@ -6,6 +6,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Roots;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.WheelchairRush;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CatapultStartBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.WheelchairCrashBuff;
@@ -14,9 +15,12 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Speed;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Stamina;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.NaturesPower;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SparkParticle;
 import com.shatteredpixel.shatteredpixeldungeon.events.BeforeHeroMoveEvent;
@@ -69,11 +73,11 @@ public class Wheelchair extends Artifact {
         if (hero.buff(MagicImmune.class) != null) {
             return actions;
         }
-        if (isEquipped(hero) && charge > 0 && !cursed) {
+        if (isEquipped(hero) && (charge > 0 || canRideWithoutCharge(hero)) && !cursed) {
             actions.add(AC_RIDE);
         }
         // 轮椅翻车：月华英雄在加速状态下可使用
-        if (isEquipped(hero) && !cursed && hero.heroClass == HeroClass.MOONLIGHT) {
+        if (isEquipped(hero) && !cursed && hero.heroClass == HeroClasses.MOONLIGHT) {
             int points = hero.pointsInTalent(Talent.WHEELCHAIR_CRASH);
             if (points > 0 && hasAnySpeedBuff(hero)) {
                 actions.add(AC_CRASH);
@@ -102,7 +106,10 @@ public class Wheelchair extends Artifact {
             if (!isEquipped(hero)) {
                 GLog.i(Messages.get(Artifact.class, "need_to_equip"));
                 usesTargeting = false;
-            } else if (charge < 1) {
+            } else if (hero.buff(Roots.class) != null) {
+                GLog.w(Messages.get(this, "rooted"));
+                usesTargeting = false;
+            } else if (charge < 1 && !canRideWithoutCharge(hero)) {
                 GLog.i(Messages.get(this, "no_charge"));
                 usesTargeting = false;
             } else if (cursed) {
@@ -117,6 +124,10 @@ public class Wheelchair extends Artifact {
             usesTargeting = false;
             performCrash(hero);
         }
+    }
+
+    private boolean canRideWithoutCharge(Hero hero) {
+        return hero.buff(CatapultStartBuff.class) != null;
     }
 
     // 执行轮椅翻车
@@ -161,7 +172,7 @@ public class Wheelchair extends Artifact {
         for (Mob mob : new ArrayList<>(Dungeon.level.mobs)) {
             if (Dungeon.level.distance(hero.pos, mob.pos) <= 2) {
                 // 2格距离是5x5范围
-                mob.damage(damage, this);
+                mob.damage(new DamageInfo(damage, DamageType.PHYSICAL, hero, this, this));
                 CellEmitter.get(mob.pos).burst(SparkParticle.FACTORY, 6);
             }
         }
@@ -188,7 +199,7 @@ public class Wheelchair extends Artifact {
         int range = 2 + (int)(level() * 0.2f);
         // 检查弹射起步天赋+2
         if (curUser != null) {
-            if (curUser.heroClass == HeroClass.MOONLIGHT && curUser.pointsInTalent(Talent.CATAPULT_START) >= 2) {
+            if (curUser.heroClass == HeroClasses.MOONLIGHT && curUser.pointsInTalent(Talent.CATAPULT_START) >= 2) {
                 range += 1;
             }
         }
@@ -212,6 +223,10 @@ public class Wheelchair extends Artifact {
                 // 检查是否处于坠毁状态
                 if (curUser.buff(WheelchairCrashBuff.class) != null) {
                     GLog.w(Messages.get(Wheelchair.class, "cannot_jump_crashed"));
+                    return;
+                }
+                if (curUser.buff(Roots.class) != null) {
+                    GLog.w(Messages.get(Wheelchair.class, "rooted"));
                     return;
                 }
 
@@ -301,10 +316,8 @@ public class Wheelchair extends Artifact {
         // 检查弹射起步效果Buff
         CatapultStartBuff catapultBuff = hero.buff(CatapultStartBuff.class);
         if (catapultBuff != null) {
-            // 有弹射起步效果，不消耗充能
             Buff.detach(hero, CatapultStartBuff.class);
         } else {
-            // 消耗充能
             charge--;
         }
 
@@ -362,7 +375,7 @@ public class Wheelchair extends Artifact {
     @SubscribeEvent(event = BeforeHeroMoveEvent.class)
     public static void onBeforeHeroMove(BeforeHeroMoveEvent event) {
         Hero hero = event.getHero();
-        if (hero.heroClass == HeroClass.MOONLIGHT && hero.pointsInTalent(Talent.STRONG_BODY) == 0) {
+        if (hero.heroClass == HeroClasses.MOONLIGHT && hero.pointsInTalent(Talent.STRONG_BODY) == 0) {
             if (!(hero.belongings.artifact instanceof Wheelchair)) {
                 GLog.w(Messages.get(hero, "wheelchair_needed"));
                 event.cancel();

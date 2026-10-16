@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor.Glyph;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
@@ -48,7 +49,8 @@ public class Viscosity extends Glyph {
 	public int proc( Armor armor, Char attacker, Char defender, int damage ) {
 
 		//we use a tracker so that this glyph can apply after armor
-		Buff.affect(defender, ViscosityTracker.class).level = armor.buffedLvl();
+		ViscosityTracker tracker = Buff.affect(defender, ViscosityTracker.class);
+		if (tracker != null) tracker.level = armor.procLvl();
 
 		return damage;
 
@@ -59,18 +61,21 @@ public class Viscosity extends Glyph {
 		return PURPLE;
 	}
 
-	public static class ViscosityTracker extends Buff {
+	public static class ViscosityTracker extends Buff implements IDamageModifier {
 
 		{
 			actPriority = Actor.VFX_PRIO;
 		}
 
 		private int level = 0;
+		private int deferred = 0;
 
-		public int deferDamage(int dmg){
+		@Override
+		public float rawAddFlat(int dmg, DamageInfo info){
+			deferred = 0;
 			//account for icon stomach (just skip the glyph)
 			if (target.buff(Talent.WarriorFoodImmunity.class) != null){
-				return dmg;
+				return 0f;
 			}
 
 			int level = Math.max( 0, this.level );
@@ -78,22 +83,23 @@ public class Viscosity extends Glyph {
 			float percent = (level+1)/(float)(level+6);
 			percent *= RingOfArcana.enchantPowerMultiplier(target)*target.talentProc();
 
-			int amount;
 			if (percent > 1f){
-				dmg = Math.round(dmg / percent);
-				amount = dmg;
+				deferred = Math.round(dmg / percent);
+				return -dmg;
 			} else {
-				amount = (int)Math.ceil(dmg * percent);
+				deferred = (int)Math.ceil(dmg * percent);
+				return -deferred;
 			}
+		}
 
-			if (amount > 0){
-				DeferedDamage deferred = Buff.affect( target, DeferedDamage.class );
-				deferred.prolong( amount );
-
-				target.sprite.showStatus( CharSprite.WARNING, Messages.get(Viscosity.class, "deferred", amount) );
+		@Override
+		public void onDamageTaken(int dealt, DamageInfo info){
+			if (deferred > 0){
+				Buff.affect( target, DeferedDamage.class ).prolong( deferred );
+				target.sprite.showStatus( CharSprite.WARNING, Messages.get(Viscosity.class, "deferred", deferred) );
+				deferred = 0;
 			}
-
-			return dmg - amount;
+			detach();
 		}
 
 		@Override

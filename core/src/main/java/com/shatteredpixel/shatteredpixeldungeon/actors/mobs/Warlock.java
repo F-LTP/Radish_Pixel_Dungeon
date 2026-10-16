@@ -25,6 +25,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
@@ -117,7 +119,7 @@ public class Warlock extends Mob implements Callback {
 			
 			int dmg = Char.combatRoll( 12, 18 );
 			dmg = Math.round(dmg * AscensionChallenge.statModifier(this));
-			enemy.damage( dmg, new DarkBolt() );
+			enemy.damage( DamageInfo.of(dmg, DamageType.MAGICAL, this, new DarkBolt()) );
 			
 			if (enemy == Dungeon.hero && !enemy.isAlive()) {
 				Badges.validateDeathFromEnemyMagic();

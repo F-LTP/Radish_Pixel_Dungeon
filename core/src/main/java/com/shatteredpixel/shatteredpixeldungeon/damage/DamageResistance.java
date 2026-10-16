@@ -109,9 +109,10 @@ public class DamageResistance {
 	 * 计算伤害减免百分比
 	 */
 	public float getReductionPercent(DamageInfo info) {
-		if (info.isTrueDamage() || isImmune(info.getType())) {
+		if (info.isTrueDamage()) {
 			return 0f;
 		}
+		if (isImmune(info.getType())) return 100f;
 		return getResistance(info.getType()) * 100f;
 	}
 	

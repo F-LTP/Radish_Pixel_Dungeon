@@ -31,11 +31,20 @@ public class RottenLance extends MeleeWeapon{// idea is from relic pd
     @Override
     public int max(int lvl) {
         return  14 +
-                lvl*2+
-                (isRoot(Dungeon.hero)?11+2*lvl:0);
+                lvl*2;
     }
     public boolean isRoot(Hero hero){
         return Dungeon.hero != null && hero.buff(Root.class) != null;
+    }
+
+    @Override
+    public int damageRoll(Char owner) {
+        int damage = super.damageRoll(owner);
+        // 蓄根加成：按实际持有者是否处于 Root 状态结算（英雄/怪物统一）
+        if (owner != null && owner.buff(Root.class) != null) {
+            damage += augment.damageFactor(11 + 2 * buffedLvl());
+        }
+        return damage;
     }
     @Override public ArrayList<String> actions(Hero hero ) {
         ArrayList<String> actions = super.actions(hero);

@@ -33,6 +33,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -146,7 +148,7 @@ public class DeathMark extends ArmorAbility {
 		return new Talent[]{Talent.FEAR_THE_REAPER, Talent.DEATHLY_DURABILITY, Talent.DOUBLE_MARK, Talent.HEROIC_ENERGY};
 	}
 
-	public static class DeathMarkTracker extends FlavourBuff {
+	public static class DeathMarkTracker extends FlavourBuff implements IDamageModifier {
 
 		public static float DURATION = 5f;
 
@@ -155,6 +157,11 @@ public class DeathMark extends ArmorAbility {
 		{
 			type = buffType.NEGATIVE;
 			announced = true;
+		}
+
+		@Override
+		public float finalMultiply(int dmg, DamageInfo info) {
+			return target.alignment != Char.Alignment.ALLY ? 1.25f : 1f;
 		}
 
 		@Override

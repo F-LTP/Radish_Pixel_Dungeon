@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -216,7 +217,7 @@ public class MagicalFireRoom extends SpecialRoom {
 
 						//ignite adjacent chars
 						Char ch = Actor.findChar(cell);
-						if (ch != null && !ch.isImmune(getClass())) {
+						if (ch != null && !ch.isImmuneTo(DamageType.FIRE)) {
 							Buff.affect(ch, Burning.class).reignite(ch, 4f);
 						}
 

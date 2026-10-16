@@ -30,6 +30,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -97,11 +99,11 @@ public class WandOfPrismaticLight extends DamageWand {
 			ch.sprite.emitter().start( ShadowParticle.UP, 0.05f, 10+buffedLvl() );
 			Sample.INSTANCE.play(Assets.Sounds.BURNING);
 
-			ch.damage(Math.round(dmg*1.333f), this);
+			ch.damage(new DamageInfo(Math.round(dmg*1.333f), DamageType.MAGICAL, curUser, this, this));
 		} else {
 			ch.sprite.centerEmitter().burst( RainbowParticle.BURST, 10+buffedLvl() );
 
-			ch.damage(dmg, this);
+			ch.damage(new DamageInfo(dmg, DamageType.MAGICAL, curUser, this, this));
 		}
 
 	}

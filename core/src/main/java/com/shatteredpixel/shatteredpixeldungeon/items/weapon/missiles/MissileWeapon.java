@@ -34,7 +34,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.StormAttackArrow;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.TacticalThrowTalen4Battlemage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
@@ -86,12 +88,15 @@ abstract public class MissileWeapon extends Weapon {
 
 	//used to reduce durability from the source weapon stack, rather than the one being thrown.
 	protected MissileWeapon parent;
+	private transient Char damageOwner;
 
 	public int tier;
 
 	@Override
 	public int min() {
-		if(hero != null){
+		if(damageOwner != null){
+			return Math.max(0, min( buffedLvl() + RingOfSharpshooting.levelDamageBonus(damageOwner) ));
+		} else if(hero != null){
 			return Math.max(0, min( buffedLvl() + RingOfSharpshooting.levelDamageBonus(Dungeon.hero) ));
 		} else {
 			return Math.max(0, min( buffedLvl()  ));
@@ -109,7 +114,9 @@ abstract public class MissileWeapon extends Weapon {
 
 	@Override
 	public int max() {
-		if(hero != null){
+		if(damageOwner != null){
+			return Math.max(0, max( buffedLvl() + RingOfSharpshooting.levelDamageBonus(damageOwner) ));
+		} else if(hero != null){
 			return Math.max(0, max( buffedLvl() + RingOfSharpshooting.levelDamageBonus(Dungeon.hero) ));
 		}
 		return Math.max(0, max( buffedLvl() ));
@@ -131,7 +138,7 @@ abstract public class MissileWeapon extends Weapon {
 		if (Dungeon.hero != null && (hero.belongings.contains(this) || parent != null)) {
 			RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
 			if(riverGlass != null){
-				return super.buffedLvl() + riverGlass.level() + 1;
+				return super.buffedLvl() + riverGlass.virtualLevel();
 			}
 		}
 
@@ -264,7 +271,7 @@ abstract public class MissileWeapon extends Weapon {
 
 			//metamorphed seer shot logic
 			if (curUser.hasTalent(Talent.SEER_SHOT)
-					&& curUser.heroClass != HeroClass.HUNTRESS
+					&& curUser.heroClass != HeroClasses.HUNTRESS
 					&& curUser.buff(Talent.SeerShotCooldown.class) == null){
 				if (Actor.findChar(cell) == null) {
 					RevealedArea a = Buff.affect(curUser, RevealedArea.class, 5 * curUser.pointsInTalent(Talent.SEER_SHOT));
@@ -381,7 +388,7 @@ abstract public class MissileWeapon extends Weapon {
 	@Override
 	public int proc(Char attacker, Char defender, int damage) {
 		// 小骑士：投掷武器命中附加2+区域层中毒
-		if (attacker == Dungeon.hero && Dungeon.hero.subClass == HeroSubClass.LITTLE_KNIGHT) {
+		if (attacker == Dungeon.hero && Dungeon.hero.subClass == HeroSubClasses.LITTLE_KNIGHT) {
 			int poisonDuration = 2 + Dungeon.depth;
 			Buff.affect(defender, Poison.class).set(poisonDuration);
 		}
@@ -547,6 +554,7 @@ abstract public class MissileWeapon extends Weapon {
 	
 	@Override
 	public int damageRoll(Char owner) {
+		damageOwner = owner;
 		int damage = augment.damageFactor(super.damageRoll( owner ));
 		
 		if (owner instanceof Hero) {
@@ -614,7 +622,8 @@ abstract public class MissileWeapon extends Weapon {
 	public String info() {
 
 		String info = desc();
-		
+
+		// 数值
 		info += "\n\n" + Messages.get( MissileWeapon.class, "stats",
 				tier,
 				Math.round(augment.damageFactor(min())),
@@ -629,11 +638,34 @@ abstract public class MissileWeapon extends Weapon {
 			}
 		}
 
+		// 效果
+		String statsInfo = statsInfo();
+		if (!statsInfo.equals("")) info += "\n\n" + statsInfo;
+
+		// 武器特性
+		String traits = traitsInfo();
+		if (!traits.equals("")) info += "\n\n" + traits;
+
+		// 攻击距离
+		info += "\n\n" + Messages.get(MissileWeapon.class, "distance");
+
+		// 耐久
+		info += "\n\n" + Messages.get(this, "durability");
+		if (durabilityPerUse() > 0){
+			info += " " + Messages.get(this, "uses_left",
+					(int)Math.ceil(durability/durabilityPerUse()),
+					(int)Math.ceil(MAX_DURABILITY/durabilityPerUse()));
+		} else {
+			info += " " + Messages.get(this, "unlimited_uses");
+		}
+
+		// 附魔
 		if (enchantment != null && (cursedKnown || !enchantment.curse())){
 			info += "\n\n" + Messages.get(Weapon.class, "enchanted", enchantment.name());
 			info += " " + Messages.get(enchantment, "desc");
 		}
 
+		// 诅咒
 		if (cursed && isEquipped( Dungeon.hero )) {
 			info += "\n\n" + Messages.get(Weapon.class, "cursed_worn");
 		} else if (cursedKnown && cursed) {
@@ -642,20 +674,31 @@ abstract public class MissileWeapon extends Weapon {
 			info += "\n\n" + Messages.get(Weapon.class, "not_cursed");
 		}
 
-		info += "\n\n" + Messages.get(MissileWeapon.class, "distance");
-		
-		info += "\n\n" + Messages.get(this, "durability");
-		
-		if (durabilityPerUse() > 0){
-			info += " " + Messages.get(this, "uses_left",
-					(int)Math.ceil(durability/durabilityPerUse()),
-					(int)Math.ceil(MAX_DURABILITY/durabilityPerUse()));
-		} else {
-			info += " " + Messages.get(this, "unlimited_uses");
-		}
-		
-		
 		return info;
+	}
+
+	/** 效果（默认读取 stats_desc）。 */
+	public String statsInfo(){
+		return Messages.get(this, "stats_desc");
+	}
+
+	/** 投掷武器特性：根据攻击速度、精准与力量需求自动生成。 */
+	public String traitsInfo(){
+		ArrayList<String> traits = new ArrayList<>();
+		if (DLY < 1f) {
+			traits.add(Messages.get(Weapon.class, "trait_fast"));
+		} else if (DLY > 1f) {
+			traits.add(Messages.get(Weapon.class, "trait_slow"));
+		}
+		if (ACC < 1f) {
+			traits.add(Messages.get(Weapon.class, "trait_inaccurate"));
+		} else if (ACC > 1f) {
+			traits.add(Messages.get(Weapon.class, "trait_accurate"));
+		}
+		if (STRReq(0) > 2 * tier + 8) {
+			traits.add(Messages.get(Weapon.class, "trait_heavy"));
+		}
+		return String.join(" ", traits);
 	}
 	
 	@Override

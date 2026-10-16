@@ -2,10 +2,13 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -67,7 +70,9 @@ public class WhiteKingGodSword extends MeleeWeapon {
                         ((MissileSprite)target.sprite.parent.recycle( MissileSprite.class )).resetFromAbove(mob,mob.pos, new WKNOR(), new Callback() {
                             @Override
                             public void call() {
-                                mob.damage(damage, this);
+                                int enchantedDamage = weapon.proc(Dungeon.hero, mob, damage);
+                                mob.damage(DamageInfo.of(enchantedDamage, DamageType.PHYSICAL, Dungeon.hero, this)
+										.setFloatingTextIcon(FloatingText.PHYS_DMG_NO_BLOCK));
                                 Buff.detach( mob, Paralysis.class);
                             }
                         });

@@ -23,17 +23,16 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.StatueSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
-import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 public class ArmoredStatue extends Statue {
@@ -42,69 +41,41 @@ public class ArmoredStatue extends Statue {
 		spriteClass = StatueSprite.class;
 	}
 
-	public Armor armor;
-
 	public ArmoredStatue(){
 		super();
 
+		Armor a;
 		do {
-			armor = Generator.randomArmor();
-		} while (armor.cursed);
-		armor.inscribe(Armor.Glyph.random());
+			a = Generator.randomArmor();
+		} while (a.cursed);
+		a.inscribe(Armor.Glyph.random());
+		mobEquipment.armor = a;
 
 		//double HP
 		HP = HT = 30 + Dungeon.depth * 10;
 	}
 
-	private static final String ARMOR	= "armor";
-
-	@Override
-	public void storeInBundle( Bundle bundle ) {
-		super.storeInBundle( bundle );
-		bundle.put( ARMOR, armor );
-	}
-
-	@Override
-	public void restoreFromBundle( Bundle bundle ) {
-		super.restoreFromBundle( bundle );
-		armor = (Armor)bundle.get( ARMOR );
-	}
-
 	@Override
 	public int drRoll() {
-		return super.drRoll() + Char.combatRoll( armor.DRMin(), armor.DRMax());
-	}
-
-	//used in some glyph calculations
-	public Armor armor(){
-		return armor;
+		// 轮刃放弃所有防御：护甲 DR 也随之失效
+		if (wieldsCircleSword()) return 0;
+		// Statue.drRoll 不委托 super，这里在武器 DR 之外补上护甲 DR（与改动前一致）
+		return super.drRoll() + Char.combatRoll( armor().DRMin(), armor().DRMax());
 	}
 
 	@Override
 	public boolean isImmune(Class effect) {
 		if (effect == Burning.class
-				&& armor != null
-				&& armor.hasGlyph(Brimstone.class, this)){
+				&& armor() != null
+				&& armor().hasGlyph(Brimstone.class, this)){
 			return true;
 		}
 		return super.isImmune(effect);
 	}
 
 	@Override
-	public int defenseProc(Char enemy, int damage) {
-		damage = armor.proc(enemy, this, damage);
-		return super.defenseProc(enemy, damage);
-	}
-
-	@Override
-	public void damage(int dmg, Object src) {
-		//TODO improve this when I have proper damage source logic
-		if (armor != null && armor.hasGlyph(AntiMagic.class, this)
-				&& AntiMagic.RESISTS.contains(src.getClass())){
-			dmg -= AntiMagic.drRoll(this, armor.procLvl());
-		}
-
-		super.damage( dmg, src );
+	public void damage(DamageInfo info) {
+		super.damage(info);
 
 		//for the rose status indicator
 		Item.updateQuickslot();
@@ -114,38 +85,32 @@ public class ArmoredStatue extends Statue {
 	public CharSprite sprite() {
 		CharSprite sprite = super.sprite();
 		if (sprite instanceof StatueSprite) {
-			((StatueSprite)sprite).setArmor(armor.tier);
+			((StatueSprite)sprite).setArmor(armor().tier);
 		} else if (sprite instanceof SnakeSprite) {
-			((SnakeSprite)sprite).setArmor(armor.tier);
+			((SnakeSprite)sprite).setArmor(armor().tier);
 		}
 		return sprite;
 	}
 
 	@Override
-	public float speed() {
-		return armor.speedFactor(this, super.speed());
-	}
-
-	@Override
 	public float stealth() {
-		return armor.stealthFactor(this, super.stealth());
+		return armor().stealthFactor(this, super.stealth());
 	}
 
 	@Override
 	public int defenseSkill(Char enemy) {
-		return Math.round(armor.evasionFactor(this, super.defenseSkill(enemy)));
+		return Math.round(armor().evasionFactor(this, super.defenseSkill(enemy)));
 	}
 
 	@Override
 	public void die( Object cause ) {
-		armor.identify(false);
-		Dungeon.level.drop( armor, pos ).sprite.drop();
+		if (armor() != null) armor().identify(false);
 		super.die( cause );
 	}
 
 	@Override
 	public String description() {
-		return Messages.get(this, "desc", weapon.name(), armor.name());
+		return Messages.get(this, "desc", weapon().name(), armor().name());
 	}
 
 }

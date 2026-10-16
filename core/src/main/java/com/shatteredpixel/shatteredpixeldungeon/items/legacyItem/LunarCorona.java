@@ -1,5 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.legacyItem;
 
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.utils.LegacyItemRing;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -14,7 +16,7 @@ public class LunarCorona extends LegacyItemRing {
         return new Phase();
     }
 
-    public class Phase extends RingBuff {
+    public class Phase extends RingBuff implements IDamageModifier {
         {
             type = buffType.NEUTRAL;
             announced = true;
@@ -37,6 +39,11 @@ public class LunarCorona extends LegacyItemRing {
                 Waxing = !Waxing;
             }
             return super.act();
+        }
+
+        @Override
+        public float rawMultiply(int dmg, DamageInfo info) {
+            return Waxing ? 2f : 0.5f;
         }
 
         @Override

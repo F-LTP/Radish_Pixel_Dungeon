@@ -30,6 +30,12 @@ public class Chill extends FlavourBuff {
 
 	public static final float DURATION = 10f;
 
+	//the maximum speed reduction chill can inflict (66%)
+	public static final float MAX_SLOW = 0.66f;
+
+	//turns of chill needed to reach the maximum slow
+	public static final float MAX_TURNS = MAX_SLOW * 10f;
+
 	{
 		type = buffType.NEGATIVE;
 		announced = true;
@@ -42,9 +48,37 @@ public class Chill extends FlavourBuff {
 		return super.attachTo(target);
 	}
 
-	//reduces speed by 10% for every turn remaining, capping at 50%
+	//reduces speed by 10% for every turn remaining, capping at 66%
 	public float speedFactor(){
-		return Math.max(0.5f, 1 - cooldown()*0.1f);
+		return Math.max(1 - MAX_SLOW, 1 - cooldown()*0.1f);
+	}
+
+	//applies chill up to the slow cap, freezing the target if the chill would go beyond it.
+	//used by frost effects that can freeze (chilling enchantment, wand of frost)
+	public static void chillOrFreeze(Char target, float duration){
+		if (target.buff(Frost.class) != null) return;
+		if (target.isImmune(Chill.class)) return;
+
+		float resist = target.resist(Chill.class);
+		Chill existing = target.buff(Chill.class);
+		float current = existing == null ? 0f : existing.cooldown();
+
+		float room = MAX_TURNS - current;
+		if (room <= 0f){
+			freeze(target);
+		} else if (duration * resist >= room){
+			//fill the remaining chill, then freeze
+			Buff.affect(target, Chill.class, room / resist);
+			freeze(target);
+		} else {
+			Buff.affect(target, Chill.class, duration);
+		}
+	}
+
+	private static void freeze(Char target){
+		if (!target.isImmune(Frost.class)){
+			Buff.affect(target, Frost.class, Frost.DURATION);
+		}
 	}
 
 	@Override

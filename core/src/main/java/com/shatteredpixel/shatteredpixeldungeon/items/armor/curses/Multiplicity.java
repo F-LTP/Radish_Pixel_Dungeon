@@ -71,10 +71,10 @@ public class Multiplicity extends Armor.Glyph {
 					((MirrorImage)m).duplicate( (Hero)defender );
 
 				} else {
-					Char toDuplicate = attacker;
+					Char toDuplicate = defender instanceof Mob ? defender : attacker;
 
 					if (toDuplicate instanceof Ratmogrify.TransmogRat){
-						toDuplicate = ((Ratmogrify.TransmogRat)attacker).getOriginal();
+						toDuplicate = ((Ratmogrify.TransmogRat) toDuplicate).getOriginal();
 					}
 
 					//FIXME should probably have a mob property for this
@@ -90,7 +90,7 @@ public class Multiplicity extends Armor.Glyph {
 						if (m != null) {
 							
 							Bundle store = new Bundle();
-							attacker.storeInBundle(store);
+							toDuplicate.storeInBundle(store);
 							m.restoreFromBundle(store);
 							m.pos = 0;
 							m.HP = m.HT;

@@ -2,6 +2,8 @@ package com.shatteredpixel.shatteredpixeldungeon.items.legacyItem;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
@@ -36,7 +38,7 @@ public class Masamune extends MeleeWeapon {
             if (defender.properties().contains(Char.Property.DEMONIC) || defender.properties().contains(Char.Property.UNDEAD)) {
                 defender.sprite.emitter().start(ShadowParticle.UP, 0.05f, 10 + buffedLvl());
                 Sample.INSTANCE.play(Assets.Sounds.BURNING);
-                defender.damage(Math.round(damage * 0.35f), this);
+                defender.damage(DamageInfo.of(Math.round(damage * 0.35f), DamageType.PHYSICAL, attacker, this));
                 return (int) (damage * 1.35f);
             }
             return damage;

@@ -368,7 +368,7 @@ public class Ring extends KindofMisc {
 			}
 			RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
 			if(riverGlass != null){
-				return super.buffedLvl() + riverGlass.level() + 1;
+				return super.buffedLvl() + riverGlass.virtualLevel();
 			}
 			if(hero.belongings.misc == this || hero.belongings.ring == this){
 				GoldRadish goldRadish = hero.belongings.getItem(GoldRadish.class);

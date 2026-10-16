@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicPoint;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SparkParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -447,7 +448,7 @@ public class AlchemyScene extends PixelScene {
 
 			@Override
 			protected void onClick() {
-				if (Dungeon.hero.subClass == HeroSubClass.DICE_MAGE && Dungeon.energy > 0){
+				if (Dungeon.hero.subClass == HeroSubClasses.DICE_MAGE && Dungeon.energy > 0){
 					AlchemyScene.this.addToFront(new WndOptions(Messages.get(AlchemyScene.class, "dice_mage_title"),
 							Messages.get(AlchemyScene.class, "dice_mage_message"),
 							Messages.get(AlchemyScene.class, "dice_mage_convert"),
@@ -644,7 +645,7 @@ public class AlchemyScene extends PixelScene {
 
 			Recipe recipe = recipes.get(i);
 
-			int cost = recipe.cost(ingredients);
+			int cost = com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer.alchemyDiscount( Dungeon.hero, recipe.cost(ingredients) );
 
 			outputs[i].visible = true;
 			outputs[i].setRect(outputs[0].left(), top, BTN_SIZE, BTN_SIZE);
@@ -688,7 +689,7 @@ public class AlchemyScene extends PixelScene {
 		Item result = null;
 
 		if (recipe != null){
-			int cost = recipe.cost(ingredients);
+			int cost = com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer.alchemyDiscount( Dungeon.hero, recipe.cost(ingredients) );
 			if (toolkit != null){
 				cost = toolkit.consumeEnergy(cost);
 			}
@@ -718,6 +719,7 @@ public class AlchemyScene extends PixelScene {
 		if (result != null){
 
 			craftItem(ingredients, result);
+			maybeDistill( ingredients );
 
 		}
 
@@ -742,6 +744,37 @@ public class AlchemyScene extends PixelScene {
 				}
 			}
 		}
+	}
+
+	private void maybeDistill( ArrayList<Item> ingredients ) {
+		if (!com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer.canDistill( Dungeon.hero )) {
+			return;
+		}
+		final java.util.ArrayList<com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion> potions = new java.util.ArrayList<>();
+		for (Item it : ingredients) {
+			if (it instanceof com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion) {
+				potions.add( (com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion) it );
+			}
+		}
+		if (potions.isEmpty()) {
+			return;
+		}
+		String[] opts = new String[potions.size()];
+		for (int i = 0; i < potions.size(); i++) {
+			opts[i] = potions.get( i ).name();
+		}
+		com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene.show(
+				new com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions(
+						Messages.get( AlchemyScene.class, "distill_title" ),
+						Messages.get( AlchemyScene.class, "distill_body" ),
+						opts ) {
+					@Override
+					protected void onSelect( int index ) {
+						potions.get( index ).apply( Dungeon.hero );
+						com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer
+								.startDistillCooldown( Dungeon.hero );
+					}
+				} );
 	}
 
 	public void craftItem( ArrayList<Item> ingredients, Item result ){

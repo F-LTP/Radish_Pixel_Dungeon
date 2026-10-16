@@ -34,6 +34,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Lightning;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
@@ -183,7 +185,7 @@ public abstract class Elemental extends Mob {
 	@Override
 	public boolean add( Buff buff ) {
 		if (harmfulBuffs.contains( buff.getClass() )) {
-			damage( Random.NormalIntRange( HT/2, HT * 3/5 ), buff );
+			damage( DamageInfo.of( Random.NormalIntRange( HT/2, HT * 3/5 ), DamageType.UNKNOWN, this, buff ) );
 			return false;
 		} else {
 			return super.add( buff );
@@ -514,7 +516,7 @@ public abstract class Elemental extends Mob {
 			}
 
 			for (Char ch : affected) {
-				ch.damage( Math.round( damage * 0.4f ), new Shocking() );
+				ch.damage( DamageInfo.of( Math.round( damage * 0.4f ), DamageType.LIGHTNING, this, new Shocking() ) );
 				if (ch == Dungeon.hero && !ch.isAlive()){
 					Dungeon.fail(this);
 					GLog.n( Messages.capitalize(Messages.get(Char.class, "kill", name())) );

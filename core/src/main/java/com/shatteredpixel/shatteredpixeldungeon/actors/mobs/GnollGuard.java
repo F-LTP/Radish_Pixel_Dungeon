@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Spear;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -75,9 +76,10 @@ public class GnollGuard extends Mob {
 	}
 
 	@Override
-	public void damage(int dmg, Object src) {
+	public void damage(DamageInfo info) {
+		int dmg = info.getDamage();
 		if (hasSapper()) dmg /= 4;
-		super.damage(dmg, src);
+		super.damage(DamageInfo.of(dmg, info.getType(), info.getAttacker(), info.getSource()));
 	}
 
 	@Override

@@ -27,7 +27,7 @@ float fbm(vec2 p) {
 void main() {
   vec4 col = texture2D(uTex, vUV);
   vec2 localUV = (vUV - uFrame.xy) / uFrame.zw;
-  float noiseVal = fbm(localUV * 8.0 + uRandom * 10.0);
+  float noiseVal = clamp(fbm(localUV * 8.0 + uRandom * 10.0), 0.0, 1.0);
   
   if (noiseVal < uAlpha) {
     col.a = 0.0;

@@ -25,6 +25,9 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.dicemage.DiceMageSchools;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfMetamorphosis;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -49,10 +52,11 @@ public class TalentButton extends Button {
 	int pointsInTalent;
 	Mode mode;
 
-	TalentIcon icon;
+	Image icon;
 	Image bg;
 
 	ColorBlock fill;
+	RoundedFrame roundedFrame;
 
 	public enum Mode {
 		INFO,
@@ -72,8 +76,23 @@ public class TalentButton extends Button {
 
 		bg.frame(20*(talent.maxPoints()-1), 0, WIDTH, HEIGHT);
 
-		icon = new TalentIcon( talent );
+		// 骰子法师学派天赋：显示"即将解锁"法术的 SND 贴图，而非通用天赋图标
+		Image schoolIcon = schoolIcon();
+		icon = schoolIcon != null ? schoolIcon : new TalentIcon( talent );
 		add(icon);
+	}
+
+	/** 学派天赋返回其"即将解锁"法术的 SND 图标；非学派或找不到时返回 null。 */
+	private Image schoolIcon() {
+		if (!Talent.isDiceMageSpellTalent(talent)) return null;
+		String sndName = DiceMageSchools.nextSpellSndName(talent, pointsInTalent);
+		if (sndName == null) return null;
+		Image img = SNDItems.get(sndName);
+		if (img == null) return null;
+		// 将 SND 贴图放大到与天赋图标(16px)相同的显示尺寸
+		float s = 16f / img.width();
+		img.scale.set(s);
+		return img;
 	}
 
 	@Override
@@ -85,6 +104,10 @@ public class TalentButton extends Button {
 
 		bg = new Image(Assets.Interfaces.TALENT_BUTTON);
 		add(bg);
+
+		roundedFrame = UITheme.roundedFrame(DiceMageUI.BLACK, DiceMageUI.ORANGE);
+		roundedFrame.visible = false;
+		addToBack(roundedFrame);
 	}
 
 	@Override
@@ -100,6 +123,12 @@ public class TalentButton extends Button {
 
 		bg.x = x;
 		bg.y = y;
+		bg.visible = !UITheme.isDiceMage();
+		roundedFrame.setRect(x, y, width, height);
+		roundedFrame.visible = UITheme.isDiceMage();
+		if (roundedFrame.visible) {
+			roundedFrame.setLineColor(DiceMageUI.ORANGE);
+		}
 
 		icon.x = x + 2;
 		icon.y = y + 2;
@@ -114,6 +143,8 @@ public class TalentButton extends Button {
 		if (mode == Mode.UPGRADE
 				&& Dungeon.hero != null
 				&& Dungeon.hero.isAlive()
+				&& !(tier == 3 && Dungeon.hero.subClass == HeroSubClasses.DICE_MAGE
+						&& Talent.isDiceMageSpellTalent(talent))
 				&& Dungeon.hero.talentPointsAvailable(tier) > 0
 				&& Dungeon.hero.pointsInTalent(talent) < talent.maxPoints()){
 			toAdd = new WndInfoTalent(talent, pointsInTalent, new WndInfoTalent.TalentButtonCallback() {

@@ -23,8 +23,10 @@ package com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ChallengeParticle;
@@ -77,6 +79,11 @@ public class ScrollOfChallenge extends ExoticScroll {
 
 		{
 			type = buffType.POSITIVE;
+		}
+
+		@Override
+		public void modifyIncomingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+			info.addFinalMultModifier(0.67f, "challenge arena", this);
 		}
 
 		@Override

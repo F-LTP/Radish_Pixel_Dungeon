@@ -5,6 +5,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.custom.utils.BallisticaReal;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PurpleParticle;
@@ -196,9 +198,9 @@ public class WandOfReflectDisintegration extends WandOfDisintegration {
             wandProc(ch, chargesPerCast());
             int damage = Math.round(damageRoll(lvl)*reflectionDamageFactor(reflection));
             if(!ch.equals(curUser)) {
-                ch.damage(damage, this);
+                ch.damage(DamageInfo.of(damage, DamageType.MAGICAL, curUser, this));
             }else{
-                ch.damage(damage/6, this);
+                ch.damage(DamageInfo.of(damage/6, DamageType.MAGICAL, curUser, this));
             }
             ch.sprite.centerEmitter().burst( PurpleParticle.BURST, Random.IntRange( 1, 2 ) );
             ch.sprite.flash();

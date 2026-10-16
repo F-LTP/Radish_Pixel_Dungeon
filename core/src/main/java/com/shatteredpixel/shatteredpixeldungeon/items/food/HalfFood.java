@@ -56,7 +56,7 @@ public class HalfFood extends Food {
 			float oldEnergy = source.energy;
 			try {
 				source.energy = energy;
-				source.satisfy(hero);
+				source.satisfyPortion(hero, energy);
 				if (source instanceof Blandfruit) {
 					Blandfruit fruit = (Blandfruit) source;
 					if (fruit.potionAttrib != null) fruit.potionAttrib.apply(hero);
@@ -77,6 +77,11 @@ public class HalfFood extends Food {
 		Talent.onFoodEaten(hero, energy, this);
 		Statistics.foodEaten++;
 		Badges.validateFoodEaten();
+	}
+
+	@Override
+	protected float eatingTime() {
+		return 1f;
 	}
 
 	@Override

@@ -4,6 +4,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -35,7 +37,7 @@ public class Holyankh extends MeleeWeapon{
             Char ch = Actor.findChar(defender.pos + i);
             if (ch!=null){
                 if (ch.alignment != attacker.alignment) {
-                    ch.damage(damageRoll(attacker), this);
+                    ch.damage(new DamageInfo(damageRoll(attacker), DamageType.MAGICAL, attacker, this, this));
                     ch.sprite.emitter().burst(Speck.factory(Speck.LIGHT), 6 );
                     active=true;
                 }

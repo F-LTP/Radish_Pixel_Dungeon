@@ -29,6 +29,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
@@ -36,6 +38,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfCompression;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Elastic;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SpaceFragment;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.TenguDartTrap;
@@ -93,7 +96,7 @@ public class WandOfBlastWave extends DamageWand {
 
 			if (ch != null){
 				wandProc(ch, chargesPerCast());
-				if (ch.alignment != Char.Alignment.ALLY) ch.damage(damageRoll(), this);
+				if (ch.alignment != Char.Alignment.ALLY) ch.damage(new DamageInfo(damageRoll(), DamageType.MAGICAL, curUser, this, this));
 
 				if (ch.pos == bolt.collisionPos + i) {
 					Ballistica trajectory = new Ballistica(ch.pos, ch.pos + i, Ballistica.MAGIC_BOLT);
@@ -108,7 +111,7 @@ public class WandOfBlastWave extends DamageWand {
 		Char ch = Actor.findChar(bolt.collisionPos);
 		if (ch != null){
 			wandProc(ch, chargesPerCast());
-			ch.damage(damageRoll(), this);
+			ch.damage(new DamageInfo(damageRoll(), DamageType.MAGICAL, curUser, this, this));
 
 			if (bolt.path.size() > bolt.dist+1 && ch.pos == bolt.collisionPos) {
 				Ballistica trajectory = new Ballistica(ch.pos, bolt.path.get(bolt.dist + 1), Ballistica.MAGIC_BOLT);
@@ -121,6 +124,10 @@ public class WandOfBlastWave extends DamageWand {
 
 	public static void throwChar(final Char ch, final Ballistica trajectory, int power,
 								 boolean closeDoors, boolean collideDmg, Object cause){
+		// 空间碎片：免疫来自外部的位移
+		if (SpaceFragment.blocksPassiveDisplacement(ch)) {
+			return;
+		}
 		if (ch.properties().contains(Char.Property.BOSS)) {
 			power = (power+1)/2;
 		}
@@ -187,7 +194,7 @@ public class WandOfBlastWave extends DamageWand {
 				if (finalCollided && ch.isActive()) {
 					int baseDamage = Random.NormalIntRange(finalDist, 2*finalDist);
 					int boostedDamage = Math.round(baseDamage * damageMultiplier);
-					ch.damage(boostedDamage, new Knockback());
+					ch.damage(new DamageInfo(boostedDamage, DamageType.PHYSICAL_NO_ARMOR, null, null, new Knockback()));
 					if (ch.isActive()) {
 						Paralysis.prolong(ch, Paralysis.class, 1 + finalDist/2f);
 					} else if (ch == Dungeon.hero){

@@ -9,8 +9,12 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.WhitePlasticChairSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.utils.Bundle;
 
 public class WhitePlasticChair extends Mob {
+
+	private static final String KICKED = "kicked";
+	private boolean kicked;
 
 	{
 		spriteClass = WhitePlasticChairSprite.class;
@@ -20,10 +24,12 @@ public class WhitePlasticChair extends Mob {
 		alignment = Alignment.ENEMY;
 		state = PASSIVE;
 		properties.add(Property.IMMOVABLE);
+		properties.add(Property.NPC);
 	}
 
 	@Override
 	protected boolean act() {
+		throwItems();
 		spend(TICK);
 		return true;
 	}
@@ -43,6 +49,9 @@ public class WhitePlasticChair extends Mob {
 	}
 
 	public void kick(Hero hero) {
+		if (kicked) {
+			return;
+		}
 		if (!Dungeon.level.adjacent(hero.pos, pos)) {
 			GLog.w(Messages.get(this, "too_far"));
 			return;
@@ -51,12 +60,23 @@ public class WhitePlasticChair extends Mob {
 		int dropPos = pos;
 		PixelScene.shake(3, 0.5f);
 		alignment = Alignment.NEUTRAL;
-		destroy();
-		if (sprite != null) sprite.die();
+		kicked = true;
 
 		Yamato yamato = (Yamato) new Yamato().random();
 		yamato.level(yamato.level() + 1);
 		Dungeon.level.drop(yamato, dropPos).sprite.drop();
 		GLog.p(Messages.get(this, "kicked"));
+	}
+
+	@Override
+	public void storeInBundle(Bundle bundle) {
+		super.storeInBundle(bundle);
+		bundle.put(KICKED, kicked);
+	}
+
+	@Override
+	public void restoreFromBundle(Bundle bundle) {
+		super.restoreFromBundle(bundle);
+		kicked = bundle.getBoolean(KICKED);
 	}
 }

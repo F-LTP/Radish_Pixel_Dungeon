@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -48,14 +49,14 @@ public class Paralysis extends FlavourBuff {
 		}
 	}
 	
-	public void processDamage( int damage ){
-		if (target == null) return;
+	@Override
+	public void onPreShieldDamage(int dmg, int hpBefore, DamageInfo info) {
 		ParalysisResist resist = target.buff(ParalysisResist.class);
 		if (resist == null){
 			resist = Buff.affect(target, ParalysisResist.class);
 		}
-		resist.damage += damage;
-		if (Random.NormalIntRange(0, resist.damage) >= Random.NormalIntRange(0, target.HP)){
+		resist.damage += dmg;
+		if (Random.NormalIntRange(0, resist.damage) >= Random.NormalIntRange(0, hpBefore)){
 			if (Dungeon.level.heroFOV[target.pos]) {
 				target.sprite.showStatus(CharSprite.NEUTRAL, Messages.get(this, "out"));
 			}

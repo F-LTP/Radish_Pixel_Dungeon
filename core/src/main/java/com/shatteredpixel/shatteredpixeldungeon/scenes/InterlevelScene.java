@@ -544,7 +544,8 @@ public class InterlevelScene extends PixelScene {
 
 				if (error != null) {
 					String errorMsg;
-					if (error instanceof FileNotFoundException)     errorMsg = Messages.get(this, "file_not_found");
+					if (error instanceof Dungeon.IncompatibleSaveException) errorMsg = Messages.get(this, "incompatible_save");
+					else if (error instanceof FileNotFoundException) errorMsg = Messages.get(this, "file_not_found");
 					else if (error instanceof IOException)          errorMsg = Messages.get(this, "io_error");
 					else if (error.getMessage() != null &&
 							error.getMessage().equals("old save")) errorMsg = Messages.get(this, "io_error");

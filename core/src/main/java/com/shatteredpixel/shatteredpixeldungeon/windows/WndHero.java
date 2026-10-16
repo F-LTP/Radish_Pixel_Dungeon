@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
@@ -127,6 +128,8 @@ public class WndHero extends WndTabbed {
 	private class StatsTab extends Group {
 
 		private static final int GAP = 6;
+		//图形化布局行距, 比文本布局紧凑, 以便在同样高度内容纳更多条目
+		private static final int ICON_GAP = 3;
 
 		private float pos;
 
@@ -175,6 +178,19 @@ public class WndHero extends WndTabbed {
 
 			pos = title.bottom() + 2*GAP;
 
+			if (SPDSettings.graphicStats()) {
+				// 图形化属性栏（图标 + 数值布局）
+				initializeIconLayout();
+			} else {
+				// 原始纯文本属性栏
+				initializeOriginalLayout();
+			}
+		}
+
+		/** 原始布局：文本标签 + 数值，两列对齐 */
+		private void initializeOriginalLayout(){
+			Hero hero = Dungeon.hero;
+
 			int strBonus = hero.STR() - hero.STR;
 			if (strBonus > 0)           statSlot( Messages.get(this, "str"), hero.STR + " + " + strBonus );
 			else if (strBonus < 0)      statSlot( Messages.get(this, "str"), hero.STR + " - " + -strBonus );
@@ -206,7 +222,7 @@ public class WndHero extends WndTabbed {
 			Hunger hunger = Dungeon.hero.buff(Hunger.class);
 			String hunger_str = "null";
 			if(hunger != null){
-				hunger_str = hunger.hunger() + "/" + Hunger.STARVING;
+				hunger_str = hunger.hunger() + "/" + (int) hunger.getMaxHunger();
 			}
 			statSlot( M.L(HeroStat.class, "hunger"), hunger_str);
 			if (Dungeon.isChallenged(Challenges.TEST_MODE)) {
@@ -237,6 +253,104 @@ public class WndHero extends WndTabbed {
 
 		private void statSlot( String label, int value ) {
 			statSlot( label, Integer.toString( value ) );
+		}
+
+		/** 图形化布局：属性图标 + 数值，两列排布，鼠标悬停图标可看到属性名 */
+		private void initializeIconLayout(){
+			Hero hero = Dungeon.hero;
+			pos -= 3;
+
+			// —— 力量（独占一行） ——
+			int strBonus = hero.STR() - hero.STR;
+			String strValue = hero.STR + (strBonus != 0 ? " " + (strBonus > 0 ? "+" : "-") + Math.abs(strBonus) : "");
+			statSlot(Icons.ABILITY_STR, Messages.get(this, "str"), strValue, 0, true);
+
+			// —— 生命（独占一行） ——
+			String healthValue = hero.HP + (hero.shielding() > 0 ? "+" + hero.shielding() : "") + "/" + hero.HT;
+			statSlot(Icons.ABILITY_HP, Messages.get(this, "health"), healthValue, 0, true);
+
+			// —— 饥饿度 | 经验 ——
+			Hunger hunger = Dungeon.hero.buff(Hunger.class);
+			String hungerValue = M.L(HeroStat.class, "hunger_none");
+			if (hunger != null){
+				hungerValue = hunger.hunger() + "/" + (int)Hunger.STARVING;
+			}
+			statSlot(Icons.ABILITY_HUNGER, M.L(HeroStat.class, "hunger"), hungerValue, 0, false);
+			statSlot(Icons.ABILITY_EXP, Messages.get(this, "exp"), hero.exp + "/" + hero.maxExp(), WIDTH/2f, true);
+
+			pos += 3;
+
+			// —— 暴击率 | 暴击倍率 ——
+			statSlot(Icons.ABILITY_CRIT, Messages.get(this, "crit"), hero.critSkill() + "%", 0, false);
+			statSlot(Icons.ABILITY_CRITDMG, Messages.get(this, "critdamage"), hero.critDamage_shown() + "%", WIDTH/2f, true);
+
+			// —— 金币收集数 | 最高层数 ——
+			statSlot(Icons.ABILITY_GOLD, Messages.get(this, "gold"), Statistics.goldCollected, 0, false);
+			statSlot(Icons.ABILITY_DEPTH, Messages.get(this, "depth"), Statistics.deepestFloor, WIDTH/2f, true);
+
+			// —— 地牢种子（独占一行） ——
+			// 种子文本可能很长（自定义种子/种子码），独占一行
+			if (Dungeon.daily){
+				if (!Dungeon.dailyReplay) {
+					statSlot(Icons.ABILITY_SEED, Messages.get(this, "daily_for"), "_" + Dungeon.customSeedText + "_", 0, true);
+				} else {
+					statSlot(Icons.ABILITY_SEED, Messages.get(this, "replay_for"), "_" + Dungeon.customSeedText + "_", 0, true);
+				}
+			} else if (!Dungeon.customSeedText.isEmpty()){
+				statSlot(Icons.ABILITY_SEED, Messages.get(this, "custom_seed"), "_" + Dungeon.customSeedText + "_", 0, true);
+			} else {
+				statSlot(Icons.ABILITY_SEED, Messages.get(this, "dungeon_seed"), DungeonSeed.convertToCode(Dungeon.seed), 0, true);
+			}
+
+			pos += 3;
+
+			// —— 游戏时间 | 回合数 ——
+			// 仅在测试模式显示，与文本布局保持一致
+			if (Dungeon.isChallenged(Challenges.TEST_MODE)) {
+				int t_all_sec = Math.round(Statistics.real_seconds);
+				int t_hour = t_all_sec / 3600;
+				int t_minute = (t_all_sec - t_hour * 3600) / 60;
+				int t_second = t_all_sec - t_hour * 3600 - t_minute * 60;
+				statSlot(Icons.ABILITY_TIMES, M.L(HeroStat.class, "playtime"),
+						String.format(Locale.ENGLISH, "%dd %dm %ds", t_hour, t_minute, t_second), 0, false);
+				statSlot(Icons.ABILITY_TURNS, M.L(HeroStat.class, "turns"),
+						String.format(Locale.ENGLISH, "%.2f", Statistics.turnsPassed), WIDTH/2f, true);
+			}
+		}
+
+		/**
+		 * 图形化布局的单个条目：左侧属性图标（悬停显示属性名），右侧数值。
+		 *
+		 * @param type   属性图标
+		 * @param tooltip 悬停提示文本（属性名）
+		 * @param value   数值文本
+		 * @param xStart  该列起始偏移，0 = 左列，WIDTH/2f = 右列
+		 * @param enter   是否结束本行；true 时把 pos 推进到下一行
+		 */
+		private void statSlot( Icons type, String tooltip, String value, float xStart, boolean enter ){
+
+			IconButton iconBtn = new IconButton( Icons.get( type ) ){
+				@Override
+				protected String hoverText() {
+					return tooltip;
+				}
+			};
+			iconBtn.setSize( 12, 12 );
+			iconBtn.setPos( 3 + xStart, pos + (PixelScene.renderTextBlock( value, 8 ).height() - 12) / 2 );
+			add( iconBtn );
+
+			RenderedTextBlock txt = PixelScene.renderTextBlock( value, 8 );
+			txt.setPos( WIDTH * 0.145f + xStart, pos + (6 - txt.height()) );
+			PixelScene.align( txt );
+			add( txt );
+
+			if (enter) {
+				pos += Math.max( iconBtn.height(), txt.height() ) + ICON_GAP;
+			}
+		}
+
+		private void statSlot( Icons type, String tooltip, int value, float xStart, boolean enter ) {
+			statSlot( type, tooltip, Integer.toString( value ), xStart, enter );
 		}
 
 		public float height() {

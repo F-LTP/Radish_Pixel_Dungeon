@@ -24,6 +24,11 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
+import com.shatteredpixel.shatteredpixeldungeon.events.BuffAppliedEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -31,8 +36,13 @@ import com.watabou.noosa.Image;
 import com.watabou.utils.Reflection;
 
 import java.util.HashSet;
+import java.util.HashMap;
 
 public class Buff extends Actor {
+	private static int restoreDepth;
+
+	public static void beginRestore() { restoreDepth++; }
+	public static void endRestore() { restoreDepth = Math.max(0, restoreDepth - 1); }
 	
 	public Char target;
 
@@ -61,6 +71,43 @@ public class Buff extends Actor {
 	public HashSet<Class> immunities() {
 		return new HashSet<>(immunities);
 	}
+
+	// 按 DamageType 的伤害抗性层（用于伤害管线）。默认空，子类可覆盖。
+	protected HashMap<DamageType, Float> typeResistances = new HashMap<>();
+
+	public HashMap<DamageType, Float> typeResistances() {
+		return new HashMap<>(typeResistances);
+	}
+
+	protected HashSet<DamageType> typeImmunities = new HashSet<>();
+
+	public HashSet<DamageType> typeImmunities() {
+		return new HashSet<>(typeImmunities);
+	}
+
+	public void modifyOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+	}
+
+	public void modifyPreFinalOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+	}
+
+	public void modifyFinalOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+	}
+
+	public void modifyIncomingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+	}
+
+	/**
+	 * 目标受到伤害后的回调（减免管线全部完成后调用，无论实际扣血是否 > 0）。
+	 */
+	public void onDamageTaken(int dealt, DamageInfo info) {
+	}
+
+	/**
+	 * 护盾吸收前的受击反应回调（最终伤害修正之后、护盾与 HP 扣减之前）。
+	 */
+	public void onPreShieldDamage(int dmg, int hpBefore, DamageInfo info) {
+	}
 	
 	public boolean attachTo( Char target ) {
 
@@ -71,6 +118,18 @@ public class Buff extends Actor {
 		this.target = target;
 
 		if (target.add( this )){
+			// BuffAppliedEvent 可取消：取消则附加失败（移除 buff，目标头顶显示"抵抗"字样）
+			if (restoreDepth == 0) {
+				BuffAppliedEvent event = new BuffAppliedEvent(target, this, BuffAppliedEvent.Source.GAMEPLAY);
+				EventManager.emit(event);
+				if (event.isCancelled()) {
+					detach();
+					if (target.sprite != null) {
+						target.sprite.showStatus(CharSprite.NEUTRAL, Messages.get(Buff.class, "resisted"));
+					}
+					return false;
+				}
+			}
 			if (target.sprite != null) fx( true );
 			return true;
 		} else {

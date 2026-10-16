@@ -47,6 +47,7 @@ public class QuickSlotButton extends Button {
 	private int slotNum;
 
 	private ItemSlot slot;
+	private RoundedFrame themedBg;
 	
 	private Image crossB;
 	private Image crossM;
@@ -78,6 +79,10 @@ public class QuickSlotButton extends Button {
 	@Override
 	protected void createChildren() {
 		super.createChildren();
+
+		themedBg = UITheme.roundedFrame(DiceMageUI.BLACK, DiceMageUI.ORANGE);
+		themedBg.visible = false;
+		add(themedBg);
 		
 		slot = new ItemSlot() {
 			@Override
@@ -162,6 +167,8 @@ public class QuickSlotButton extends Button {
 		super.layout();
 		
 		slot.fill( this );
+		themedBg.visible = UITheme.isDiceMage();
+		themedBg.setRect(x, y, width, height);
 		
 		crossB.x = x + (width - crossB.width) / 2;
 		crossB.y = y + (height - crossB.height) / 2;
@@ -170,6 +177,7 @@ public class QuickSlotButton extends Button {
 
 	public void alpha( float value ){
 		slot.alpha(value);
+		themedBg.alpha(value);
 	}
 
 	@Override

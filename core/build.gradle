@@ -9,6 +9,7 @@ dependencies {
 
     //事件系统模块引入
     implementation project(':event-annotations')
+    implementation 'org.jetbrains:annotations:15.0'
     annotationProcessor project(':event-processor')
 
     //Add JackSon

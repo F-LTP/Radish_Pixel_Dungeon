@@ -320,6 +320,10 @@ public class Notes {
 			return key.getClass();
 		}
 
+		public String branchId(){
+			return key.branchId;
+		}
+
 		@Override
 		protected int order() {
 			return 1000 + Generator.Category.order(key);

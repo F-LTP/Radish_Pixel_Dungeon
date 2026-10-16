@@ -70,7 +70,7 @@ public class LethalDefense extends Buff{
 
     @Override
     public String desc() {
-        return Messages.get(this, "desc" , duration);
+        return Messages.get(this, "desc", dispTurns(duration));
     }
 
 }

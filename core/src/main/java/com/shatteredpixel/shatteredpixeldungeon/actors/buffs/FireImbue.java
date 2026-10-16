@@ -20,10 +20,13 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlameParticle;
+import com.shatteredpixel.shatteredpixeldungeon.events.AttackHitEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -118,7 +121,7 @@ public class FireImbue extends Buff {
 	}
 
 	{
-		immunities.add( Burning.class );
+		immunities.add(Burning.class); typeImmunities.add(DamageType.BURNING_STATUS);
 	}
 
 	@Override
@@ -128,6 +131,17 @@ public class FireImbue extends Buff {
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	/** 命中后由攻击命中事件驱动：攻击者带火焰赋能时，为目标附加燃烧。 */
+	@SubscribeEvent(event = AttackHitEvent.class, priority = -100)
+	public static void onAttackHit(AttackHitEvent event) {
+		Char attacker = event.getAttacker();
+		if (attacker == null) return;
+		FireImbue imbue = attacker.buff(FireImbue.class);
+		if (imbue != null) {
+			imbue.proc(event.getDefender());
 		}
 	}
 }

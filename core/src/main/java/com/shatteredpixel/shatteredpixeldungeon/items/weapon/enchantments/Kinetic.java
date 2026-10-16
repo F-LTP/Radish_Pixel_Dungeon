@@ -24,6 +24,12 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.events.CharFinalDamageEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -37,17 +43,45 @@ public class Kinetic extends Weapon.Enchantment {
 	
 	@Override
 	public int proc(Weapon weapon, Char attacker, Char defender, int damage) {
-		
+
 		int conservedDamage = 0;
-		if (attacker.buff(ConservedDamage.class) != null) {
-			conservedDamage = attacker.buff(ConservedDamage.class).damageBonus();
-			attacker.buff(ConservedDamage.class).detach();
+		ConservedDamage stored = attacker.buff(ConservedDamage.class);
+		if (stored != null) {
+			conservedDamage = stored.consume();
 		}
 
-		//use a tracker so that we can know the true final damage
+		// 本次命中用到的恒动武器：留下追踪器，让击杀时能读到真正的最终伤害；
+		// conservedDamage 记录本次已经释放掉的量，蓄能结算时扣除（实际加算见 ConservedDamage）
 		Buff.affect(attacker, KineticTracker.class).conservedDamage = conservedDamage;
-		
-		return damage + conservedDamage;
+
+		return damage;
+	}
+
+	@Override
+	public boolean releasesConservedDamage() {
+		return true;
+	}
+
+	/** 击杀时的蓄能：把溢出伤害按魔纹/祝福倍率折算后存给攻击者。 */
+	@SubscribeEvent(event = CharFinalDamageEvent.class, priority = 0)
+	public static void onTargetKilled(CharFinalDamageEvent event) {
+		Char attacker = event.getAttacker();
+		if (attacker == null || event.getTarget().alignment != Char.Alignment.ENEMY || event.getHpAfter() >= 0) {
+			return;
+		}
+
+		KineticTracker tracker = attacker.buff(KineticTracker.class);
+		if (tracker == null) {
+			return;
+		}
+
+		int dmgToAdd = -event.getHpAfter();
+		dmgToAdd -= tracker.conservedDamage;
+		dmgToAdd = Math.round(dmgToAdd * RingOfArcana.enchantPowerMultiplier(attacker) * RingOfBenediction.periodMultiplier(attacker));
+		if (dmgToAdd > 0) {
+			Buff.affect(attacker, ConservedDamage.class).setBonus(dmgToAdd);
+		}
+		tracker.detach();
 	}
 	
 	@Override
@@ -75,6 +109,37 @@ public class Kinetic extends Weapon.Enchantment {
 		{
 			type = buffType.POSITIVE;
 		}
+
+		/**
+		 * 释放：储存的恒动伤害以下一次普通攻击的固定加算结算（进基础值桶，会吃暴击与各类乘区）。
+		 * 这里只负责加算并标记「已释放」，由释放武器的 proc 在命中时取走并消耗（见 consume）。
+		 */
+		@Override
+		public void modifyOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+			Item weapon = attacker.attackingWeapon();
+			if (!(weapon instanceof Weapon) || !((Weapon) weapon).releasesConservedDamage(attacker)) {
+				return;
+			}
+
+			info.addFlatModifier(damageBonus(), "kinetic");
+			released = true;
+		}
+
+		/**
+		 * 供释放武器的 proc 调用：返回本次命中已经加算掉的量并消耗本 buff。
+		 * 没有真正走普通攻击的 proc（能力直接调用的 weapon.proc）不会取走，储存量留到下一次普通攻击。
+		 */
+		public int consume() {
+			if (!released) {
+				return 0;
+			}
+			int bonus = damageBonus();
+			detach();
+			return bonus;
+		}
+
+		/** 本次普通攻击是否已经把储存量加算进 DamageInfo，等待 proc 取走。 */
+		private boolean released;
 		
 		@Override
 		public String icon() {

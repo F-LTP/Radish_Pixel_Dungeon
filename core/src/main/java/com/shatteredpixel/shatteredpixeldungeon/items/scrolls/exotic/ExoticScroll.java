@@ -122,7 +122,11 @@ public abstract class ExoticScroll extends Scroll {
 	public void reset() {
 		super.reset();
 		if (handler != null && handler.contains(exoToReg.get(this.getClass()))) {
-			image = handler.image(exoToReg.get(this.getClass())) + 16;
+			String regularImage = handler.image(exoToReg.get(this.getClass()));
+			// The old sprite sheet used a numeric row offset. RuntimeAtlas uses names.
+			image = regularImage.startsWith("scroll_")
+					? "exotic_" + regularImage.substring("scroll_".length())
+					: regularImage;
 			rune = handler.label(exoToReg.get(this.getClass()));
 		}
 	}

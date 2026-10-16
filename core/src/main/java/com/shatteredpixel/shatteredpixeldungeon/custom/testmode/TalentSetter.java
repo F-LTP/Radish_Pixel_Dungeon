@@ -2,6 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.custom.testmode;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -55,7 +56,7 @@ public class TalentSetter extends TestItem {
                     }
                     // 第3层需要先转职
                     if (index == 2) {
-                        return hero.subClass != HeroSubClass.NONE 
+                        return hero.subClass != HeroSubClasses.NONE 
                                 && hero.talents.size() > index && !hero.talents.get(index).isEmpty();
                     }
                     // 第4层需要护甲技能或恶魔天赋

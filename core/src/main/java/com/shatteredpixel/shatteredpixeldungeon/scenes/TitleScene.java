@@ -190,7 +190,7 @@ public class TitleScene extends PixelScene {
 		btnSeedAnalysis.icon(Icons.get(Icons.MAGNIFY));
 		add(btnSeedAnalysis);
 
-		StyledButton seed = new JoinButton(landscape() ? Chrome.Type.GREY_BUTTON_TR : Chrome.Type.BLANK, Messages.get(this, "seed"));
+		StyledButton seed = new JoinButton(Chrome.Type.GREY_BUTTON_TR, Messages.get(this, "seed"));
 		seed.icon(Icons.get(Icons.ENERGY));
 		add(seed);
 

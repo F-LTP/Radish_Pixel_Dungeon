@@ -51,7 +51,7 @@ public class StormCloud extends Blob {
 					//fiery enemies take damage as if they are in toxic gas
 					Char ch = Actor.findChar(cell);
 					if (ch != null
-							&& !ch.isImmune(getClass())
+							&& !ch.isImmuneTo(DamageType.LIGHTNING)
 							&& Char.hasProp(ch, Char.Property.FIERY)){
 						int damage = 1 + Dungeon.scalingDepth()/5;
 						ch.damage(new DamageInfo(damage, DamageType.WATER, null, null, this));

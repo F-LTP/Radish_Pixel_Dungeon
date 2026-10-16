@@ -31,7 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Ooze;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.events.DrinkPotionEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.DrinkPotionFinishEvent;
 import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
 import com.shatteredpixel.shatteredpixeldungeon.events.ThrowPotionEvent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
@@ -45,6 +45,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfHo
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCorrosiveGas;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfDragonsBreath;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfShroudingFog;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfSnapFreeze;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfStormClouds;
@@ -119,6 +120,7 @@ public class Potion extends Item {
 		mustThrowPots.add(PotionOfSnapFreeze.class);
 		mustThrowPots.add(PotionOfShroudingFog.class);
 		mustThrowPots.add(PotionOfStormClouds.class);
+		mustThrowPots.add(PotionOfDragonsBreath.class);
 
 		//also all brews except unstable, hardcoded
 	}
@@ -351,7 +353,7 @@ public class Potion extends Item {
 	}
 
 	protected void emitDrinkEvent(Hero hero) {
-		EventManager.emit(new DrinkPotionEvent(hero, this));
+		EventManager.emit(new DrinkPotionFinishEvent(hero, this));
 	}
 
 	public void apply( Hero hero ) {

@@ -73,6 +73,11 @@ public class ShatteredPixelDungeon extends Game {
 				com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.exit.ExitRoom.class,
 				"com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.ExitRoom" );
 
+		// SnDItemBox renamed to SnDFunctions (test tool)
+		com.watabou.utils.Bundle.addAlias(
+				com.shatteredpixel.shatteredpixeldungeon.custom.testmode.SnDFunctions.class,
+				"com.shatteredpixel.shatteredpixeldungeon.custom.testmode.SnDItemBox" );
+
 		//pre-v2.3.0
 		com.watabou.utils.Bundle.addAlias(
 				com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb.ConjuredBomb.class,

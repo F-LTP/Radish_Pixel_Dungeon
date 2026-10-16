@@ -94,10 +94,12 @@ public class EventSubscriberProcessor extends AbstractProcessor {
 
         TypeElement enclosingClass = (TypeElement) method.getEnclosingElement();
         String className = enclosingClass.getQualifiedName().toString();
+        String packageName = processingEnv.getElementUtils().getPackageOf(enclosingClass).getQualifiedName().toString();
+        String simpleClassName = enclosingClass.getSimpleName().toString();
         String methodName = method.getSimpleName().toString();
         String eventTypeName = eventType.toString();
 
-        SubscriberInfo info = new SubscriberInfo(className, methodName, eventTypeName, priority);
+        SubscriberInfo info = new SubscriberInfo(className, packageName, simpleClassName, methodName, eventTypeName, priority);
         subscribersByEvent.computeIfAbsent(eventTypeName, k -> new ArrayList<>()).add(info);
     }
 

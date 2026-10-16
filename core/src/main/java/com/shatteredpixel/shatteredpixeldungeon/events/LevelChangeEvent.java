@@ -1,39 +1,34 @@
 package com.shatteredpixel.shatteredpixeldungeon.events;
 
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-/**
- * 关卡变更事件
- * 当英雄进入新关卡时触发
- */
+/** 预留事件：当前无发布点——EmergencyTalent 已在订阅但永不触发，接入前先确认该天赋预期 */
 public class LevelChangeEvent extends GameEvent {
-    private final Level previousLevel;
-    private final Level newLevel;
-    private final TransitionType transitionType;
 
-    public LevelChangeEvent(Level previousLevel, Level newLevel, TransitionType transitionType) {
-        this.previousLevel = previousLevel;
-        this.newLevel = newLevel;
-        this.transitionType = transitionType;
-    }
+	public enum TransitionType {
+		DESCEND,
+		ASCEND,
+		TELEPORT,
+		FALL,
+		PORTAL
+	}
 
-    public Level getPreviousLevel() {
-        return previousLevel;
-    }
+	private final Level previousLevel;
+	private final Level newLevel;
+	private final TransitionType transitionType;
 
-    public Level getNewLevel() {
-        return newLevel;
-    }
+	public LevelChangeEvent(@Nullable Level previousLevel, @NotNull Level newLevel,
+	                        @NotNull TransitionType transitionType) {
+		this.previousLevel = previousLevel;
+		this.newLevel = newLevel;
+		this.transitionType = transitionType;
+	}
 
-    public TransitionType getTransitionType() {
-        return transitionType;
-    }
+	public @Nullable Level getPreviousLevel() { return previousLevel; }
 
-    public enum TransitionType {
-        DESCEND,        // 下楼
-        ASCEND,         // 上楼
-        TELEPORT,       // 传送
-        FALL,           // 掉落
-        PORTAL          // 传送门
-    }
+	public @NotNull Level getNewLevel() { return newLevel; }
+
+	public @NotNull TransitionType getTransitionType() { return transitionType; }
 }

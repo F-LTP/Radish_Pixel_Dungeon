@@ -94,11 +94,6 @@ public class RingOfDestruction extends Ring {
 
 		@Override
 		public boolean act() {
-			if (target != Dungeon.hero) {
-				spend(TICK);
-				return true;
-			}
-
 			int level = getRingLevel();
 			if (level <= 0) {
 				spend(TICK);
@@ -106,9 +101,14 @@ public class RingOfDestruction extends Ring {
 			}
 
 			ArrayList<Mob> visibleEnemies = new ArrayList<>();
+			if (target.fieldOfView == null) {
+				spend(TICK);
+				return true;
+			}
 			for (Mob mob : Dungeon.level.mobs) {
-				if (mob.alignment == Char.Alignment.ENEMY 
-						&& Dungeon.level.heroFOV[mob.pos]
+				if (mob != target && mob.alignment != target.alignment
+						&& target.fieldOfView != null && mob.pos >= 0 && mob.pos < target.fieldOfView.length
+						&& target.fieldOfView[mob.pos]
 						&& mob.isAlive()
 						&& !mob.isInvulnerable(getClass())) {
 					visibleEnemies.add(mob);
@@ -131,12 +131,12 @@ public class RingOfDestruction extends Ring {
 				}
 
 				float selfDmgPercent = selfDamagePercent(level);
-				accumulatedSelfDamage += Dungeon.hero.HT * selfDmgPercent / 100f;
+				accumulatedSelfDamage += target.HT * selfDmgPercent / 100f;
 				int selfDamage = (int) accumulatedSelfDamage;
 				accumulatedSelfDamage -= selfDamage;
 				if (selfDamage > 0) {
 					Dungeon.hero.damage(DamageInfo.magical(
-							Math.min(selfDamage, Math.max(0, Dungeon.hero.HP - 1)), this));
+							Math.min(selfDamage, Math.max(0, target.HP - 1)), this));
 				}
 			}
 
@@ -149,7 +149,7 @@ public class RingOfDestruction extends Ring {
 		 */
 		private int getRingLevel() {
 			// 从 Ring.getBuffedBonus 获取等级
-			return RingOfDestruction.this.combinedBuffedBonus(Dungeon.hero);
+			return Ring.getBuffedBonus(target, Destruction.class);
 		}
 	}
 }

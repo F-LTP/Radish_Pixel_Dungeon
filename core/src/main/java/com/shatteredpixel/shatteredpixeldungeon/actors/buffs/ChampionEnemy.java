@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -28,6 +29,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EliteBadge;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -38,7 +41,7 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
-public abstract class ChampionEnemy extends Buff {
+public abstract class ChampionEnemy extends Buff implements IDamageModifier {
 
 	{
 		type = buffType.POSITIVE;
@@ -74,8 +77,18 @@ public abstract class ChampionEnemy extends Buff {
 		return 1f;
 	}
 
+	@Override
+	public void modifyOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+		info.addDirectMultModifier(meleeDamageFactor(), "champion enemy", this);
+	}
+
 	public float damageTakenFactor(){
 		return 1f;
+	}
+
+	@Override
+	public float finalMultiply(int dmg, DamageInfo info) {
+		return damageTakenFactor();
 	}
 
 	public float evasionAndAccuracyFactor(){
@@ -146,7 +159,8 @@ public abstract class ChampionEnemy extends Buff {
 		}
 
 		{
-			immunities.add(Burning.class);
+			immunities.add(Burning.class); typeImmunities.add(DamageType.BURNING_STATUS);
+			immunities.add(Frost.class);
 		}
 	}
 

@@ -2,25 +2,20 @@ package com.shatteredpixel.shatteredpixeldungeon.events;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import org.jetbrains.annotations.NotNull;
 
-/**
- * 物品拾取事件
- * 当英雄拾取物品时触发
- */
+/** 预留事件：当前无发布点，订阅收不到回调（接入时同步更新 AGENTS.md 的无发布点清单） */
 public class ItemPickupEvent extends GameEvent {
-    private final Hero hero;
-    private final Item item;
 
-    public ItemPickupEvent(Hero hero, Item item) {
-        this.hero = hero;
-        this.item = item;
-    }
+	private final Hero hero;
+	private final Item item;
 
-    public Hero getHero() {
-        return hero;
-    }
+	public ItemPickupEvent(@NotNull Hero hero, @NotNull Item item) {
+		this.hero = hero;
+		this.item = item;
+	}
 
-    public Item getItem() {
-        return item;
-    }
+	public @NotNull Hero getHero() { return hero; }
+
+	public @NotNull Item getItem() { return item; }
 }

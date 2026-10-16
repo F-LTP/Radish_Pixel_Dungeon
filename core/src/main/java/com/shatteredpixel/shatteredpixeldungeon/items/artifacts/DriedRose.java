@@ -20,6 +20,8 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.items.artifacts;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -47,7 +49,6 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
@@ -458,7 +459,8 @@ public class DriedRose extends Artifact {
 				}
 
 				if (spawnPoints.size() > 0) {
-					Wraith.spawnAt(Random.element(spawnPoints));
+					Wraith w = Wraith.spawnAt(Random.element(spawnPoints));
+					if (w != null) w.noSoulDrop = true;
 					Sample.INSTANCE.play(Assets.Sounds.CURSED);
 				}
 
@@ -597,7 +599,7 @@ public class DriedRose extends Artifact {
 			if (rose == null
 					|| !rose.isEquipped(Dungeon.hero)
 					|| Dungeon.hero.buff(MagicImmune.class) != null){
-				damage(1, new NoRoseDamage());
+				damage(DamageInfo.of(1, DamageType.PHYSICAL_NO_ARMOR, null, new NoRoseDamage()));
 			}
 			
 			if (!isAlive()) {
@@ -669,16 +671,9 @@ public class DriedRose extends Artifact {
 		}
 		
 		@Override
-		public void damage(int dmg, Object src) {
-			//TODO improve this when I have proper damage source logic
-			if (rose != null && rose.armor != null && rose.armor.hasGlyph(AntiMagic.class, this)
-					&& AntiMagic.RESISTS.contains(src.getClass())){
-				dmg -= AntiMagic.drRoll(this, rose.armor.buffedLvl());
-				dmg = Math.max(dmg, 0);
-			}
-			
-			super.damage( dmg, src );
-			
+		public void damage(DamageInfo info) {
+			super.damage(info);
+
 			//for the rose status indicator
 			Item.updateQuickslot();
 		}
@@ -874,10 +869,10 @@ public class DriedRose extends Artifact {
 		}
 		
 		{
-			immunities.add( CorrosiveGas.class );
-			immunities.add( Burning.class );
-			immunities.add( ScrollOfRetribution.class );
-			immunities.add( ScrollOfPsionicBlast.class );
+			immunities.add(CorrosiveGas.class); typeImmunities.add(DamageType.CORROSIVE);
+			immunities.add(Burning.class); typeImmunities.add(DamageType.BURNING_STATUS);
+			typeImmunities.add(DamageType.MAGICAL);
+			typeImmunities.add(DamageType.MAGICAL);
 			immunities.add( AllyBuff.class );
 		}
 

@@ -18,11 +18,13 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM300;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Shaman;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
+import com.shatteredpixel.shatteredpixeldungeon.items.FlashCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
-import com.shatteredpixel.shatteredpixeldungeon.items.keys.SkeletonKey;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
@@ -182,13 +184,13 @@ public class GnollShamanKing extends Mob implements Callback {
     }
 
     @Override
-    public void damage(int dmg, Object src) {
-        int finalDmg = calculateToughnessDamage(dmg, src);
-        super.damage(finalDmg, src);
+    public void damage(DamageInfo info) {
+        int finalDmg = calculateToughnessDamage(info.getDamage(), info.getSource());
+        super.damage(DamageInfo.of(finalDmg, info.getType(), info.getAttacker(), info.getSource()));
         checkFirstHalfHealthTrigger();
         LockedFloor lock = Dungeon.hero.buff(LockedFloor.class);
-        if (lock != null && !isImmune(src.getClass()) && !isInvulnerable(src.getClass())){
-            lock.addTime(dmg*1f);
+        if (lock != null && !isImmune(info.getSource().getClass()) && !isInvulnerable(info.getSource().getClass())){
+            lock.addTime(info.getDamage()*1f);
         }
 
     }
@@ -237,13 +239,18 @@ public class GnollShamanKing extends Mob implements Callback {
     public void die( Object cause ) {
         super.die( cause );
 
+        // 双王各 100% 掉落2个闪晶
+        if(Dungeon.LimitedDrops.FLASH_CRYSTAL_KING.count < 6){
+            Dungeon.LimitedDrops.FLASH_CRYSTAL_KING.count++;
+            Dungeon.level.drop(new FlashCrystal().quantity(2), pos).sprite.drop();
+        }
+
         Statistics.gnoll_boss++;
 
         if(Statistics.gnoll_boss >= 2){
             Badges.validateRectorUnlock();
             GameScene.bossSlain();
             Dungeon.level.unseal();
-            Dungeon.level.drop( new SkeletonKey( Dungeon.depth ), pos ).sprite.drop();
             Dungeon.level.drop( new Gold( 1500 ), pos ).sprite.drop();
             Dungeon.level.drop( new ScrollOfUpgrade(), pos ).sprite.drop();
             Statistics.bossScores[2] += 3000;
@@ -344,7 +351,7 @@ public class GnollShamanKing extends Mob implements Callback {
 
             int dmg = Char.combatRoll( 5, 20 );
             dmg = Math.round(dmg * AscensionChallenge.statModifier(this));
-            enemy.damage( dmg, new Shaman.EarthenBolt() );
+            enemy.damage(DamageInfo.of(dmg, DamageType.MAGICAL, this, new Shaman.EarthenBolt()));
 
             if (!enemy.isAlive() && enemy == Dungeon.hero) {
                 Badges.validateDeathFromEnemyMagic();

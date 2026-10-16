@@ -7,6 +7,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
@@ -152,7 +154,7 @@ public class StormAttackArrow extends MissileWeapon {
     private void applyExtraArrowDamage(int cell, int damage) {
         Char target = Actor.findChar(cell);
         if (target != null) {
-            target.damage(damage,this);
+            target.damage(DamageInfo.of(damage, DamageType.LIGHTNING, null, this));
         }
     }
 

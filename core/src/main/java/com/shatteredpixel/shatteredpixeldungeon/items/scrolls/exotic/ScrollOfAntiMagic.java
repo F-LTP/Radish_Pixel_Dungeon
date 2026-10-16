@@ -21,23 +21,67 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic;
 
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurse;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.audio.Sample;
 
+import java.util.ArrayList;
+
+//Reading this scroll removes the curses from all of the reader's equipped
+//items, then strikes every enemy in view. The more curses were removed, the
+//more damage is dealt.
 public class ScrollOfAntiMagic extends ExoticScroll {
-	
+
 	{
 		icon = ItemSpriteSheet.Icons.SCROLL_ANTIMAGIC;
 	}
-	
+
 	@Override
 	public void doRead() {
 
 		detach(curUser.belongings.backpack);
-		Buff.affect( curUser, MagicImmune.class, MagicImmune.DURATION );
 		new Flare( 5, 32 ).color( 0x00FF00, true ).show( curUser.sprite, 2f );
+		Sample.INSTANCE.play( Assets.Sounds.READ );
+
+		int removed = 0;
+		for (Item item : curUser.belongings) {
+			if (item != null
+					&& item.isEquipped(curUser)
+					&& ScrollOfRemoveCurse.uncursable(item)) {
+				if (ScrollOfRemoveCurse.uncurse(curUser, item)) {
+					removed++;
+				}
+			}
+		}
+
+		int dmg = 10 + 15 * removed;
+
+		ArrayList<Mob> targets = new ArrayList<>();
+		for (Mob mob : Dungeon.level.mobs.toArray( new Mob[0] )) {
+			if (mob.alignment != Char.Alignment.ALLY && Dungeon.level.heroFOV[mob.pos]) {
+				targets.add(mob);
+			}
+		}
+
+		for (Mob mob : targets) {
+			mob.damage(new DamageInfo(dmg, DamageType.MAGICAL, curUser, this, this));
+		}
+
+		if (removed > 0) {
+			GLog.p( Messages.get(this, "cleansed", removed, dmg) );
+		} else {
+			GLog.i( Messages.get(this, "none_cleansed", dmg) );
+		}
 
 		identify();
 

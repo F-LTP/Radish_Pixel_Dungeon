@@ -2,6 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.effects;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.watabou.noosa.audio.Music;
 
 /**
@@ -118,7 +119,7 @@ public class SnDBGM {
     }
 
     public static boolean active() {
-        return Dungeon.hero != null && Dungeon.hero.subClass == HeroSubClass.DICE_MAGE;
+        return Dungeon.hero != null && Dungeon.hero.subClass == HeroSubClasses.DICE_MAGE;
     }
 
     /**
@@ -130,6 +131,7 @@ public class SnDBGM {
 
     /**
      * 根据当前层数播放对应区域的背景音乐。
+     *
      * @return true 如果 Dice Mage 激活并播放了音乐，否则false并且什么都不做
      */
     public static boolean playLevelMusic() {
@@ -164,6 +166,7 @@ public class SnDBGM {
         }
 
         Music.INSTANCE.playTracks(tracks, chances, true);
+        Music.INSTANCE.volume(1.5f);
         return true;
     }
 }

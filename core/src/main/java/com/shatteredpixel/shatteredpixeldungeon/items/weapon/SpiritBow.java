@@ -38,6 +38,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
+import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -63,7 +64,7 @@ import java.util.ArrayList;
 public class SpiritBow extends Weapon {
 	
 	public static final String AC_SHOOT		= "SHOOT";
-	
+
 	{
 		image = ItemSpriteSheet.SPIRIT_BOW;
 		
@@ -105,6 +106,16 @@ public class SpiritBow extends Weapon {
 
 	@Override
 	public int proc(Char attacker, Char defender, int damage) {
+
+		// 自然连结 +3：灵能弓命中时有 16% 概率触发随机负面植物
+		if (Dungeon.hero != null
+				&& Dungeon.hero.subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.DRUID
+				&& Dungeon.hero.pointsInTalent(Talent.NATURE_BOND) >= 3
+				&& defender.isAlive() && Random.Float() < 0.16f) {
+			Plant plant = (Plant) Reflection.newInstance(Random.element(harmfulPlants));
+			plant.pos = defender.pos;
+			plant.activate( defender.isAlive() ? defender : null );
+		}
 
 		if(hero.pointsInTalent(Talent.LAND_HEART) >= 4){
 			if((Dungeon.level.map[defender.pos] == Terrain.EMBERS) || (Dungeon.level.map[defender.pos] == Terrain.GRASS)){
@@ -159,9 +170,9 @@ public class SpiritBow extends Weapon {
 				STRReq());
 		
 		if (STRReq() > Dungeon.hero.STR()) {
-			info += " " + Messages.get(Weapon.class, "too_heavy");
+			info += "\n\n" + Messages.get(Weapon.class, "too_heavy");
 		} else if (Dungeon.hero.STR() > STRReq()){
-			info += " " + Messages.get(Weapon.class, "excess_str", Dungeon.hero.STR() - STRReq());
+			info += "\n\n" + Messages.get(Weapon.class, "excess_str", Dungeon.hero.STR() - STRReq());
 		}
 		
 		switch (augment) {
@@ -231,6 +242,15 @@ public class SpiritBow extends Weapon {
 			int exStr = ((Hero)owner).STR() - STRReq();
 			if (exStr > 0) {
 				damage += Char.combatRoll( 0, exStr );
+			}
+			// 自然连结 +3：灵能弓攻击上升 25%
+			if (((Hero)owner).subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.DRUID
+					&& ((Hero)owner).pointsInTalent(Talent.NATURE_BOND) >= 3) {
+				damage = Math.round( damage * 1.25f );
+			}
+			// 附魔箭：伤害翻倍并法术化
+			if (((Hero)owner).buff( com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Druid.EnchantArrow.class ) != null) {
+				damage = Math.round( damage * 2f );
 			}
 		}
 
@@ -529,6 +549,16 @@ public class SpiritBow extends Weapon {
 		public int damageRoll(Char owner) {
 			return SpiritBow.this.damageRoll(owner);
 		}
+
+		@Override
+		public int min(){
+			return SpiritBow.this.min();
+		}
+
+		@Override
+		public int max(){
+			return SpiritBow.this.max();
+		}
 		
 		@Override
 		public boolean hasEnchant(Class<? extends Enchantment> type, Char owner) {
@@ -628,7 +658,9 @@ public class SpiritBow extends Weapon {
 
 
 										//射技决斗 T3
-										int bonusTurns = Dungeon.hero.hasTalent(Talent.SHARED_UPGRADES) ? hero.belongings.weapon().buffedLvl() : 0;
+										KindOfWeapon equippedWeapon = hero.belongings.attackingWeapon();
+										int bonusTurns = Dungeon.hero.hasTalent(Talent.SHARED_UPGRADES)
+												&& equippedWeapon != null ? equippedWeapon.buffedLvl() : 0;
 										if (enemy instanceof Mob && ((Mob) enemy).surprisedBy(hero)
 										&& hero.pointsInTalent(Talent.BOW_DULES)>=3) {
 											if(hero.buff(SnipersMark.class) == null){

@@ -25,6 +25,8 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.DiceMageUI;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RoundedFrame;
+import com.shatteredpixel.shatteredpixeldungeon.ui.UITheme;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 
 public class WndMessage extends Window {
@@ -38,7 +40,7 @@ public class WndMessage extends Window {
 		
 		super();
 
-		if (DiceMageUI.active()) {
+		if (UITheme.isDiceMage()) {
 			layoutDiceNotice(text);
 			return;
 		}
@@ -67,7 +69,7 @@ public class WndMessage extends Window {
 		info.maxWidth(width - MARGIN * 4);
 		info.setPos(MARGIN * 2, label.bottom() + MARGIN * 2);
 
-		DiceMageUI.Frame messageFrame = new DiceMageUI.Frame(DiceMageUI.PANEL, DiceMageUI.GREY_LINE);
+		RoundedFrame messageFrame = UITheme.roundedFrame(DiceMageUI.PANEL, DiceMageUI.GREY_LINE);
 		messageFrame.setRect(0, label.bottom() + MARGIN, width, info.height() + MARGIN * 4);
 		add(messageFrame);
 		add(info);

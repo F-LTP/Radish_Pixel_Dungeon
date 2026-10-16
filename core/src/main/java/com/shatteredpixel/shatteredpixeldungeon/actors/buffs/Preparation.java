@@ -22,6 +22,11 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.events.AttackHitEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -178,6 +183,30 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 
 	public boolean canKO( Char defender ){
 		return !defender.isInvulnerable(target.getClass()) && AttackLevel.getLvl(turnsInvis).canKO(defender);
+	}
+
+	/**
+	 * 暗杀：本次伤害来自潜行增益时，若目标血量低于处决阈值则直接击杀。
+	 * 由攻击命中事件驱动；持有潜行者可能是玩家，也可能是持有该增益的怪物。
+	 */
+	@SubscribeEvent(event = AttackHitEvent.class, priority = -400)
+	public static void onAttackHit(AttackHitEvent event) {
+		Char attacker = event.getAttacker();
+		Char defender = event.getDefender();
+		Preparation prep = event.getPreparation();
+		if (attacker == null || defender == null || prep == null) return;
+		if (!defender.isAlive() || defender.alignment == attacker.alignment) return;
+		if (!prep.canKO(defender)) return;
+
+		defender.HP = 0;
+		if (!defender.isAlive()) {
+			defender.die(attacker);
+		} else {
+			//helps with triggering any on-damage effects that need to activate
+			defender.damage(DamageInfo.of(-1, DamageType.TRUE, attacker, attacker));
+			DeathMark.processFearTheReaper(defender);
+		}
+		defender.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Preparation.class, "assassinated"));
 	}
 	
 	@Override

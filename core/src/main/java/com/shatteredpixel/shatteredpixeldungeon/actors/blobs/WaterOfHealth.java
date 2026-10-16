@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HolySpringUsedBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
@@ -50,6 +51,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.noosa.Game;
 
 public class WaterOfHealth extends WellWater {
 
@@ -59,7 +61,7 @@ public class WaterOfHealth extends WellWater {
 		if (!hero.isAlive()) return false;
 
 		// 神圣泉水天赋：月华英雄可以选择转化
-		if (hero.heroClass == HeroClass.MOONLIGHT) {
+		if (hero.heroClass == HeroClasses.MOONLIGHT) {
 			int points = hero.pointsInTalent(Talent.HOLY_SPRING);
 			if (points > 0) {
 				HolySpringUsedBuff usedBuff = hero.buff(HolySpringUsedBuff.class);
@@ -69,7 +71,7 @@ public class WaterOfHealth extends WellWater {
 
 				if (usedBuff.canTransformHealth()) {
 					int wellPos = hero.pos;
-					GameScene.show(new WndOptions(
+					Game.runOnRenderThread(() -> GameScene.show(new WndOptions(
 							Messages.get(WaterOfHealth.class, "holy_spring_title"),
 							Messages.get(WaterOfHealth.class, "holy_spring_desc"),
 							Messages.get(WaterOfHealth.class, "holy_spring_normal"),
@@ -85,7 +87,7 @@ public class WaterOfHealth extends WellWater {
 								transformEffect(hero, points);
 							}
 						}
-					});
+					}));
 					return false; // 暂时不消耗泉水，等待玩家选择
 				}
 			}
@@ -103,13 +105,11 @@ public class WaterOfHealth extends WellWater {
 		hero.buff( Hunger.class ).satisfy( Hunger.STARVING );
 
 		if (Dungeon.isChallenged(Challenges.DAMAGE_NO)){
-			hero.HP += Math.min( 1 , hero.HT );
+			hero.heal(Math.min( 1 , hero.HT ));
 			hero.sprite.emitter().start( Speck.factory( Speck.HEALING ), 0.4f, 4 );
-			hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(1), FloatingText.HEALING);
 		} else {
-			hero.HP = hero.HT;
+			hero.heal(hero.HT);
 			hero.sprite.emitter().start( Speck.factory( Speck.HEALING ), 0.4f, 4 );
-			hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(hero.HT), FloatingText.HEALING);
 		}
 
 		CellEmitter.get( hero.pos ).start( ShaftParticle.FACTORY, 0.2f, 3 );

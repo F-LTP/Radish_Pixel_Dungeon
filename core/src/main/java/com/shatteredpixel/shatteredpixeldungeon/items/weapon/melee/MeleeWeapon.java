@@ -37,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroAction;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -59,6 +60,8 @@ import com.watabou.noosa.Image;
 import com.watabou.noosa.Visual;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
+
+import java.util.ArrayList;
 
 public class MeleeWeapon extends Weapon {
 
@@ -238,17 +241,17 @@ public class MeleeWeapon extends Weapon {
 		if (hero != null && hero.belongings.weapon == this) {
 			GoldRadish goldRadish = hero.belongings.getItem(GoldRadish.class);
 			if(goldRadish != null){
-				return goldRadish.fixedLevel(goldRadish.buffedLvl());
+				return goldRadish.fixedLevel(goldRadish.buffedLvl()) + curseTempLevel();
 			}
 
 			RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
 			// 塑形玻璃的虚拟等级需要与国王之戒的虚拟等级叠加
 			if(riverGlass != null && hero.buff(BlessAWP.WeaponGetReady.class)!=null && hero.belongings.weapon() == this) {
-				return super.buffedLvl() + 1 + riverGlass.level() + 1 + RingOfKing.updateMultiplier(Dungeon.hero);
+				return super.buffedLvl() + 1 + riverGlass.virtualLevel() + RingOfKing.updateMultiplier(Dungeon.hero);
 			} else if(hero.buff(BlessAWP.WeaponGetReady.class)!=null && hero.belongings.weapon() == this){
 				return super.buffedLvl() + 1 + RingOfKing.updateMultiplier(Dungeon.hero);
 			} else if(riverGlass != null){
-				return super.buffedLvl() + riverGlass.level() + 1 + RingOfKing.updateMultiplier(Dungeon.hero);
+				return super.buffedLvl() + riverGlass.virtualLevel() + RingOfKing.updateMultiplier(Dungeon.hero);
 			}
 
 			if (hero.pointsInTalent(Talent.GIFT) > 0) {
@@ -273,7 +276,7 @@ public class MeleeWeapon extends Weapon {
 			if(Dungeon.hero.buff( Degrade.class ) != null){
 						return super.buffedLvl();
 					} else {
-						return hero.belongings.weapon.level() + RingOfKing.updateMultiplier(Dungeon.hero);
+						return super.buffedLvl() + RingOfKing.updateMultiplier(Dungeon.hero);
 					}
 		}
 
@@ -281,7 +284,7 @@ public class MeleeWeapon extends Weapon {
 		if (hero != null && (isEquipped(hero) || hero.belongings.contains(this))){
 			return super.buffedLvl();
 		} else {
-			return level();
+			return level() + curseTempLevel();
 		}
 	}
 
@@ -323,6 +326,7 @@ public class MeleeWeapon extends Weapon {
 
 		String info = super.info();
 
+		// 数值
 		if (levelKnown) {
 			info += "\n\n" + Messages.get(MeleeWeapon.class, "stats_known", tier, augment.damageFactor(min()), augment.damageFactor(max()), STRReq());
 			if (Dungeon.hero != null) {
@@ -339,8 +343,13 @@ public class MeleeWeapon extends Weapon {
 			}
 		}
 
+		// 效果
 		String statsInfo = statsInfo();
 		if (!statsInfo.equals("")) info += "\n\n" + statsInfo;
+
+		// 武器特性
+		String traits = traitsInfo();
+		if (!traits.equals("")) info += "\n\n" + traits;
 
 		switch (augment) {
 			case SPEED:
@@ -364,7 +373,7 @@ public class MeleeWeapon extends Weapon {
 			info += "\n\n" + Messages.get(Weapon.class, "cursed_worn");
 		} else if (cursedKnown && cursed) {
 			info += "\n\n" + Messages.get(Weapon.class, "cursed");
-		} else if (!isIdentified() && cursedKnown){
+		} else if (!isIdentified() && cursedKnown && !cursed){
 			if (enchantment != null && enchantment.curse()) {
 				info += "\n\n" + Messages.get(Weapon.class, "weak_cursed");
 			} else {
@@ -377,6 +386,28 @@ public class MeleeWeapon extends Weapon {
 	
 	public String statsInfo(){
 		return Messages.get(this, "stats_desc");
+	}
+
+	/** 武器特性：根据攻击速度、攻击距离、精准与力量需求自动生成。 */
+	public String traitsInfo() {
+		ArrayList<String> traits = new ArrayList<>();
+		if (DLY < 1f) {
+			traits.add(Messages.get(Weapon.class, "trait_fast"));
+		} else if (DLY > 1f) {
+			traits.add(Messages.get(Weapon.class, "trait_slow"));
+		}
+		if (RCH > 1) {
+			traits.add(Messages.get(Weapon.class, "trait_reach"));
+		}
+		if (ACC < 1f) {
+			traits.add(Messages.get(Weapon.class, "trait_inaccurate"));
+		} else if (ACC > 1f) {
+			traits.add(Messages.get(Weapon.class, "trait_accurate"));
+		}
+		if (STRReq(0) > 2 * tier + 8) {
+			traits.add(Messages.get(Weapon.class, "trait_heavy"));
+		}
+		return String.join(" ", traits);
 	}
 
 	public String abilityInfo() {
@@ -425,7 +456,7 @@ public class MeleeWeapon extends Weapon {
 					float chargeToGain = 1/(60f-1.5f*(chargeCap()-charges));
 
 					//40 to 30 turns per charge for champion
-					if (Dungeon.hero.subClass == HeroSubClass.CHAMPION){
+					if (Dungeon.hero.subClass == HeroSubClasses.CHAMPION){
 						chargeToGain *= 1.5f;
 					}
 
@@ -447,7 +478,7 @@ public class MeleeWeapon extends Weapon {
 				partialCharge = 0;
 			}
 
-			if (ActionIndicator.action != this && Dungeon.hero.subClass == HeroSubClass.CHAMPION) {
+			if (ActionIndicator.action != this && Dungeon.hero.subClass == HeroSubClasses.CHAMPION) {
 				ActionIndicator.setAction(this);
 			}
 
@@ -457,7 +488,7 @@ public class MeleeWeapon extends Weapon {
 
 		@Override
 		public void fx(boolean on) {
-			if (on && Dungeon.hero.subClass == HeroSubClass.CHAMPION) {
+			if (on && Dungeon.hero.subClass == HeroSubClasses.CHAMPION) {
 				ActionIndicator.setAction(this);
 			}
 		}
@@ -470,7 +501,7 @@ public class MeleeWeapon extends Weapon {
 
 		public int chargeCap(){
 			//caps at level 19 with 8 or 10 charges
-			if (Dungeon.hero.subClass == HeroSubClass.CHAMPION){
+			if (Dungeon.hero.subClass == HeroSubClasses.CHAMPION){
 				return Math.min(10, 4 + (Dungeon.hero.lvl - 1) / 3);
 			} else {
 				return Math.min(8, 2 + (Dungeon.hero.lvl - 1) / 3);
@@ -551,7 +582,7 @@ public class MeleeWeapon extends Weapon {
 
 		@Override
 		public void doAction() {
-			if (Dungeon.hero.subClass != HeroSubClass.CHAMPION){
+			if (Dungeon.hero.subClass != HeroSubClasses.CHAMPION){
 				return;
 			}
 

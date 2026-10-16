@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -32,9 +33,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PrismaticGuard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
@@ -46,6 +48,11 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 
 public class PrismaticImage extends NPC {
+
+	@Override
+	protected boolean isDamageable() {
+		return true;
+	}
 	
 	{
 		spriteClass = PrismaticSprite.class;
@@ -204,18 +211,12 @@ public class PrismaticImage extends NPC {
 	}
 	
 	@Override
-	public void damage(int dmg, Object src) {
-		
-		//TODO improve this when I have proper damage source logic
-		if (hero != null && hero.belongings.armor() != null && hero.belongings.armor().hasGlyph(AntiMagic.class, this)
-				&& AntiMagic.RESISTS.contains(src.getClass())){
-			dmg -= AntiMagic.drRoll(hero, hero.belongings.armor().buffedLvl());
-			dmg = Math.max(dmg, 0);
-		}
-		
-		super.damage(dmg, src);
+	protected void collectDamageModifiers(java.util.List<IDamageModifier> out) {
+		super.collectDamageModifiers(out);
+		Hero owner = hero != null ? hero : Dungeon.hero;
+		if (owner != null) collectArmorGlyphs(out, owner.belongings.armor(), owner);
 	}
-	
+
 	@Override
 	public float speed() {
 		if (hero != null && hero.belongings.armor() != null){
@@ -266,9 +267,9 @@ public class PrismaticImage extends NPC {
 	}
 	
 	{
-		immunities.add( ToxicGas.class );
-		immunities.add( CorrosiveGas.class );
-		immunities.add( Burning.class );
+		typeImmunities.add(DamageType.TOXIC);
+		immunities.add(CorrosiveGas.class); typeImmunities.add(DamageType.CORROSIVE);
+		immunities.add(Burning.class); typeImmunities.add(DamageType.BURNING_STATUS);
 		immunities.add( AllyBuff.class );
 	}
 	

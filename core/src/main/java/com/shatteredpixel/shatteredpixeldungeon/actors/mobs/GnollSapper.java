@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.effects.TargetedCell;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -106,9 +107,9 @@ public class GnollSapper extends Mob {
 	}
 
 	@Override
-	public void damage(int dmg, Object src) {
-		super.damage(dmg, src);
-		abilityCooldown -= dmg/10f;
+	public void damage(DamageInfo info) {
+		super.damage(info);
+		abilityCooldown -= info.getDamage()/10f;
 	}
 
 	@Override

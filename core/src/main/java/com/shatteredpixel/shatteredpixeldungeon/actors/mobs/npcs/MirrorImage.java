@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -42,6 +43,11 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
 
 public class MirrorImage extends NPC {
+
+	@Override
+	protected boolean isDamageable() {
+		return true;
+	}
 	
 	{
 		spriteClass = MirrorSprite.class;
@@ -193,9 +199,9 @@ public class MirrorImage extends NPC {
 	}
 	
 	{
-		immunities.add( ToxicGas.class );
-		immunities.add( CorrosiveGas.class );
-		immunities.add( Burning.class );
+		typeImmunities.add(DamageType.TOXIC);
+		immunities.add(CorrosiveGas.class); typeImmunities.add(DamageType.CORROSIVE);
+		immunities.add(Burning.class); typeImmunities.add(DamageType.BURNING_STATUS);
 		immunities.add( AllyBuff.class );
 	}
 	

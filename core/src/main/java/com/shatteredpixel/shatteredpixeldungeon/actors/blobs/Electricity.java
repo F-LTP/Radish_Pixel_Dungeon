@@ -71,7 +71,7 @@ public class Electricity extends Blob {
 				cell = i + j*Dungeon.level.width();
 				if (cur[cell] > 0) {
 					Char ch = Actor.findChar( cell );
-					if (ch != null && !ch.isImmune(this.getClass())) {
+					if (ch != null && !ch.isImmuneTo(DamageType.LIGHTNING)) {
 						if (ch.buff(Paralysis.class) == null){
 							Buff.prolong( ch, Paralysis.class, cur[cell]);
 						}

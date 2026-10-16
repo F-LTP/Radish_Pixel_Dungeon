@@ -4,6 +4,9 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.utils.LegacyItemArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -42,7 +45,7 @@ public class Turtleir extends LegacyItemArmor {
     @Override
     public int proc(Char attacker, Char defender, int damage ) {
         int dmg = Math.max(0,damage-Dungeon.hero.drRoll());
-        dmg = ((Mass_Energy)buff).absorbDamage(dmg);
+        dmg = Math.max(0, (int) (dmg * ((Mass_Energy) buff).rawMultiply(dmg, null)));
         if(dmg != 0 && buff instanceof Mass_Energy){
             ((Mass_Energy) buff).add(Mass_Energy.DURATION);
         }else if (dmg == 0 && ((Mass_Energy)buff).getLvl() != 0 && buff instanceof Mass_Energy){
@@ -54,7 +57,7 @@ public class Turtleir extends LegacyItemArmor {
             for (int i  : PathFinder.NEIGNBOURS24){
                 Char ch = Actor.findChar(pos + i);
                 if (ch != null && ch != Dungeon.hero){
-                    ch.damage(((Mass_Energy) buff).blastDamage(),this);
+                    ch.damage(DamageInfo.of(((Mass_Energy) buff).blastDamage(), DamageType.MAGICAL, attacker, this));
                 }
             }
             ((Mass_Energy) buff).clr();
@@ -71,7 +74,7 @@ public class Turtleir extends LegacyItemArmor {
     }
 
 
-    public class Mass_Energy extends ArmorBuff {
+    public class Mass_Energy extends ArmorBuff implements IDamageModifier {
         {
             type = buffType.POSITIVE;
             announced = true;
@@ -105,8 +108,9 @@ public class Turtleir extends LegacyItemArmor {
             return lvl;
         }
 
-        public int absorbDamage(int dmg){
-            return Math.max(0,(int) (dmg * (1f - lvl * 0.15f)));
+        @Override
+        public float rawMultiply(int dmg, DamageInfo info){
+            return 1f - lvl * 0.15f;
         }
 
         public void add(int Lv){

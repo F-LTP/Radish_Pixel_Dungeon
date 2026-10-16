@@ -10,11 +10,16 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TestItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Ankh;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArcaneResin;
+import com.shatteredpixel.shatteredpixeldungeon.items.BonePile;
+import com.shatteredpixel.shatteredpixeldungeon.items.FlashCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Honeypot;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KingsCrown;
+import com.shatteredpixel.shatteredpixeldungeon.items.LawFragment;
 import com.shatteredpixel.shatteredpixeldungeon.items.LiquidMetal;
+import com.shatteredpixel.shatteredpixeldungeon.items.MechanicalFragment;
+import com.shatteredpixel.shatteredpixeldungeon.items.SoulEmber;
 import com.shatteredpixel.shatteredpixeldungeon.items.Stylus;
 import com.shatteredpixel.shatteredpixeldungeon.items.TengusMask;
 import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
@@ -75,9 +80,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.spells.WildEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.Runestone;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFear;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ChaoticCenser;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.CrackedSpyglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.DimensionalSundial;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ExoticCrystals;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.EyeOfNewt;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.FerretTuft;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.GoldRadish;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.LightKing;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.MimicTooth;
@@ -96,6 +103,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.WondrousResin;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
+import com.shatteredpixel.shatteredpixeldungeon.items.DogLeg;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MakeshiftSlingshot;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -223,6 +232,7 @@ public class SpawnMisc extends TestItem {
             brewList.add(ElixirOfIcyTouch.class);
             brewList.add(ElixirOfMight.class);
             brewList.add(ElixirOfToxicEssence.class);
+            brewList.add(com.shatteredpixel.shatteredpixeldungeon.items.potions.DaughterWine.class);
         }
 
         //Spell
@@ -280,10 +290,19 @@ public class SpawnMisc extends TestItem {
             trList.add(GoldRadish.class);
             trList.add(LightKing.class);
             trList.add(RiverCrystal.class);
+            trList.add(FerretTuft.class);
+            trList.add(CrackedSpyglass.class);
         }
 
         //Misc
         if(miscList.isEmpty()) {
+            miscList.add(BonePile.class);
+            miscList.add(DogLeg.class);
+            miscList.add(FlashCrystal.class);
+            miscList.add(LawFragment.class);
+            miscList.add(MakeshiftSlingshot.class);
+            miscList.add(MechanicalFragment.class);
+            miscList.add(SoulEmber.class);
             miscList.add(TrinketCatalyst.class);
             miscList.add(Torch.class);
             miscList.add(GooBlob.class);

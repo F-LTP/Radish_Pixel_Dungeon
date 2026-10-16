@@ -163,6 +163,11 @@ public class SmokeBomb extends ArmorAbility {
 
 	public static class NinjaLog extends NPC {
 
+		@Override
+		protected boolean isDamageable() {
+			return true;
+		}
+
 		{
 			spriteClass = NinjaLogSprite.class;
 			defenseSkill = 0;

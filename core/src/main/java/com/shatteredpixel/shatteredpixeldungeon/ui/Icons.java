@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -63,6 +64,19 @@ public enum Icons {
 	RIGHTARROW,
 	CALENDAR,
 	CHEVRON,
+
+	//图形化属性图标, 12x12, 位于 icons.png 第 128 行
+	ABILITY_STR,
+	ABILITY_HP,
+	ABILITY_EXP,
+	ABILITY_GOLD,
+	ABILITY_DEPTH,
+	ABILITY_SEED,
+	ABILITY_HUNGER,
+	ABILITY_TURNS,
+	ABILITY_TIMES,
+	ABILITY_CRIT,
+	ABILITY_CRITDMG,
 
 	//misc larger icons, mainly used for buttons, tabs, and journal, spacing for 16x16
 	TARGET,
@@ -233,6 +247,41 @@ public enum Icons {
 				break;
 			case CHEVRON:
 				icon.frame( icon.texture.uvRectBySize( 240, 16, 13, 10 ) );
+				break;
+
+			//图形化属性图标, 12x12, y = 128
+			case ABILITY_STR:
+				icon.frame( icon.texture.uvRectBySize( 0, 128, 12, 12 ) );
+				break;
+			case ABILITY_HP:
+				icon.frame( icon.texture.uvRectBySize( 12, 128, 12, 12 ) );
+				break;
+			case ABILITY_EXP:
+				icon.frame( icon.texture.uvRectBySize( 24, 128, 12, 12 ) );
+				break;
+			case ABILITY_GOLD:
+				icon.frame( icon.texture.uvRectBySize( 36, 128, 12, 12 ) );
+				break;
+			case ABILITY_DEPTH:
+				icon.frame( icon.texture.uvRectBySize( 48, 128, 12, 12 ) );
+				break;
+			case ABILITY_SEED:
+				icon.frame( icon.texture.uvRectBySize( 60, 128, 12, 12 ) );
+				break;
+			case ABILITY_HUNGER:
+				icon.frame( icon.texture.uvRectBySize( 72, 128, 12, 12 ) );
+				break;
+			case ABILITY_TURNS:
+				icon.frame( icon.texture.uvRectBySize( 84, 128, 12, 12 ) );
+				break;
+			case ABILITY_TIMES:
+				icon.frame( icon.texture.uvRectBySize( 96, 128, 12, 12 ) );
+				break;
+			case ABILITY_CRIT:
+				icon.frame( icon.texture.uvRectBySize( 108, 128, 12, 12 ) );
+				break;
+			case ABILITY_CRITDMG:
+				icon.frame( icon.texture.uvRectBySize( 120, 128, 12, 12 ) );
 				break;
 
 			case TARGET:
@@ -460,26 +509,23 @@ public enum Icons {
 	}
 
 	public static Image get( HeroClass cl ) {
-		switch (cl) {
-			case WARRIOR:
-				return new ItemSprite(ItemSpriteSheet.SEAL);
-			case MAGE:
-				//mage's staff normally has 2 pixels extra at the top for particle effects, we chop that off here
-				Image result = new ItemSprite(ItemSpriteSheet.MAGES_STAFF);
-				RectF frame = result.frame();
-				frame.top += frame.height()/8f;
-				result.frame(frame);
-				return result;
-			case ROGUE:
-				return new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK);
-			case HUNTRESS:
-				return new ItemSprite(ItemSpriteSheet.SPIRIT_BOW);
-			case RECTOR:
-				return new ItemSprite(ItemSpriteSheet.HOLYANKH);
-			case MOONLIGHT:
-				return new ItemSprite(ItemSpriteSheet.HOLYANKH); // TODO: 添加MOONLIGHT专属图标
-			default:
-				return new ItemSprite(ItemSpriteSheet.SEAL); // 默认返回战士图标避免崩溃
+		if (cl == HeroClasses.MAGE) {
+			//mage's staff normally has 2 pixels extra at the top for particle effects, we chop that off here
+			Image result = new ItemSprite(ItemSpriteSheet.MAGES_STAFF);
+			RectF frame = result.frame();
+			frame.top += frame.height()/8f;
+			result.frame(frame);
+			return result;
+		} else if (cl == HeroClasses.ROGUE) {
+			return new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK);
+		} else if (cl == HeroClasses.HUNTRESS) {
+			return new ItemSprite(ItemSpriteSheet.SPIRIT_BOW);
+		} else if (cl == HeroClasses.RECTOR) {
+			return new ItemSprite(ItemSpriteSheet.HOLYANKH);
+		} else if (cl == HeroClasses.MOONLIGHT) {
+			return new ItemSprite(ItemSpriteSheet.HOLYANKH); // TODO: 添加MOONLIGHT专属图标
+		} else {
+			return new ItemSprite(ItemSpriteSheet.SEAL); // 默认返回战士图标避免崩溃
 		}
 	}
 

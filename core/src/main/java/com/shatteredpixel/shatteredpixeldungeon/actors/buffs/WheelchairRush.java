@@ -32,31 +32,33 @@ import com.watabou.noosa.Image;
  */
 public class WheelchairRush extends FlavourBuff {
 
-	{
-		type = buffType.POSITIVE;
-		announced = true;
-	}
+    public static final float DURATION = 10f;
 
-	public static final float DURATION = 10f;
+    {
+        type = buffType.POSITIVE;
+        announced = true;
+    }
 
-	@Override
-	public String icon() {
-		return BuffIndicator.HASTE;
-	}
+    @Override
+    public String icon() {
+        return BuffIndicator.HASTE;
+    }
 
-	@Override
-	public void tintIcon(Image icon) {
-		icon.hardlight(0.8f, 0.5f, 1f); // 紫色调
-	}
+    @Override
+    public void tintIcon(Image icon) {
+        icon.hardlight(0.8f, 0.5f, 1f); // 紫色调
+    }
 
-	@Override
-	public float iconFadePercent() {
-		return Math.max(0, (DURATION - visualcooldown()) / DURATION);
-	}
+    @Override
+    public float iconFadePercent() {
+        return Math.max(0, (DURATION - visualcooldown()) / DURATION);
+    }
 
-	@Override
-		public void detach() {
-			super.detach();
-			((HeroSprite) Dungeon.hero.sprite).updateArmor();
-		}
-	}
+    @Override
+    public void detach() {
+        super.detach();
+        if (Dungeon.hero != null && Dungeon.hero.sprite != null) {
+            ((HeroSprite) Dungeon.hero.sprite).updateArmor();
+        }
+    }
+}

@@ -127,13 +127,48 @@ public abstract class ItemArmorAttachable extends Item {
 	}
 
 	/**
+	 * 卸下该玩具时损失的最大/当前生命值。默认 0，子类可覆写。
+	 */
+	public int detachHPLoss(Hero hero) {
+		return 0;
+	}
+
+	/**
+	 * 当前是否允许卸下该玩具。若卸下会导致死亡则返回 false。
+	 */
+	public boolean canDetach(Hero hero) {
+		if (hero == null || detachHPLoss(hero) <= 0) return true;
+		return hero.HP > detachHPLoss(hero);
+	}
+
+	/**
+	 * 尝试卸下该玩具。若卸下会导致死亡则拒绝并返回 false；否则先扣除 detachHPLoss 点当前生命值，再返回 true。
+	 */
+	public boolean tryDetach(Hero hero) {
+		if (!canDetach(hero)) {
+			GLog.w(Messages.get(this, "cannot_detach", name(), detachHPLoss(hero)));
+			return false;
+		}
+		if (hero != null && detachHPLoss(hero) > 0) {
+			hero.HP -= detachHPLoss(hero);
+		}
+		return true;
+	}
+
+	/**
 	 * 从护甲取下玩具。放回背包。
 	 */
 	public void detachFromArmor(Hero hero) {
 		if (attachedTo != null) {
+			if (!tryDetach(hero)) return;
 			Armor armor = attachedTo;
-			int index = armor.getToys().indexOf(this);
-			armor.detachToy(index);
+			if (this instanceof BrokenSeal) {
+				// 破损纹章卸下时需要返还升级并（如果有天赋）携带附魔
+				armor.detachSeal(hero);
+			} else {
+				int index = armor.getToys().indexOf(this);
+				armor.detachToy(index);
+			}
 			armor.dropExcessToysAfterCapacityChange(hero);
 			if (hero != null && !hero.belongings.backpack.contains(this)) {
 				collect(hero.belongings.backpack);

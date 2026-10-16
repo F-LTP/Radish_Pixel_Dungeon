@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.ui.changelist;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BadgeBanner;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.SandalsOfNature;
@@ -89,7 +90,7 @@ public class v1_X_Changes {
 				"Rather than just using the effect of earthroot, the footwear of nature now use the effect of the seed most recently fed to them! These effects can be triggered on nearby enemies instead of just on you, opening up a bunch of tactical potential for this artifact.\n\n" +
 				"For balance, the amount of extra seeds/dew the footwear gives has been reduced, and 1 additional seed is needed for each upgrade level."));
 
-		changes.addButton(new ChangeButton(new Image(Assets.Sprites.WARRIOR, 0, 90, 12, 15), HeroSubClass.BERSERKER.title(),
+		changes.addButton(new ChangeButton(new Image(Assets.Sprites.WARRIOR, 0, 90, 12, 15), HeroSubClasses.BERSERKER.title(),
 				"_The Berserker's berserk ability is now manually activated, but has a much lower cooldown._\n\n" +
 				"I'm doing this to try and make the subclass a bit more engaging, players can now trigger berserk at any point when they have 100% or more rage. Berserking still gives a big bonus shield, letting the Berserker survive normally fatal encounters. The lower the Berserker's health, the more shielding he gets.\n\n" +
 				"The Berserker's talents have been adjusted as well:\n" +
@@ -793,7 +794,7 @@ public class v1_X_Changes {
 				"I'm giving a mild buff to the _Dried Rose_ to fix an odd inconsistency where it was better to kill the ghost off than let them heal:\n" +
 				"_-_ Ghost HP regen doubled, to match the roses recharge speed (500 turns to full HP)"));
 
-		changes.addButton( new ChangeButton( new Image(Assets.Sprites.WARRIOR, 0, 90, 12, 15), HeroSubClass.BERSERKER.title(),
+		changes.addButton( new ChangeButton( new Image(Assets.Sprites.WARRIOR, 0, 90, 12, 15), HeroSubClasses.BERSERKER.title(),
 				"The berserker is getting a small QOL buff to make it easier to hold onto rage in combat:\n\n" +
 				"_-_ Rage now starts expiring after not taking damage for 2 turns, instead of immediately."));
 
@@ -813,7 +814,7 @@ public class v1_X_Changes {
 				"The reduction to the Mage's starting melee damage in v1.0.0 had a good effect on his early game winrate, but it's still notably higher than other heroes. So, I'm nudging his early melee power down one more time:\n\n" +
 				"_- Mage's Staff_ base damage reduced to 1-6 from 1-7."));
 
-		changes.addButton( new ChangeButton( new Image(Assets.Sprites.ROGUE, 0, 90, 12, 15), HeroSubClass.ASSASSIN.title(),
+		changes.addButton( new ChangeButton( new Image(Assets.Sprites.ROGUE, 0, 90, 12, 15), HeroSubClasses.ASSASSIN.title(),
 				"The Assassin is doing very well right now, especially after the power boost he can receive from smoke bomb or death mark. I'm scaling back his core power a little to try and reign him in a bit:\n\n" +
 				"_-_ Preparation bonus damage at power level 1/2/3/4 reduced to 10/20/35/50%, from 15/30/45/60%"));
 

@@ -37,7 +37,7 @@ public class CureHerb extends Item {
             hero.spend( Actor.TICK );
             detach(hero.belongings.backpack);
             hero.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
-            hero.HP+=Math.min(15,hero.HT-hero.HP);
+            hero.heal(Math.min(15, hero.HT-hero.HP));
             if (hero.buff(AfterGlow.Warmth.class)!=null){
                 hero.buff(AfterGlow.Warmth.class).getWarmth();
             }

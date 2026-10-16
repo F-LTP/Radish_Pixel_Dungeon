@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Imp;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -204,7 +205,7 @@ public class WndImp extends Window{
 	}
 
 	private void gainTalent(Imp imp, DwarfToken tokens, Hero hero) {
-		if (hero.subClass== HeroSubClass.NONE){
+		if (hero.subClass== HeroSubClasses.NONE){
 			GLog.n( Messages.get(this, "deny"));
 		} else {
 			hero.powerOfImp=true;

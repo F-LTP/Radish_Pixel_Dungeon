@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Jealousy;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -126,6 +127,9 @@ public class ScrollOfUpgrade extends InventoryScroll {
 
 		Catalog.countUse(item.getClass());
 		Catalog.countUse(ScrollOfUpgrade.class);
+
+		//嫉妒附魔：根据升级卷轴的使用对象调整嫉妒值
+		Jealousy.onUpgradeScrollUsed(item);
 
 		return item;
 	}

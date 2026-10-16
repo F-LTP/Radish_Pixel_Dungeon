@@ -4,6 +4,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -155,8 +157,8 @@ public class Tonfa extends MeleeWeapon{
         Char ch = Actor.findChar( bolt.collisionPos );
         if (ch != null) {
             int dmg = Random.Int(2+buffedLvl(), 8+buffedLvl() * 2);
-            ch.damage(dmg, new TonfaBolt());
-            ch.damage(dmg, new TonfaBolt());
+            ch.damage(DamageInfo.of(dmg, DamageType.MAGICAL, null, new TonfaBolt()));
+            ch.damage(DamageInfo.of(dmg, DamageType.MAGICAL, null, new TonfaBolt()));
             Sample.INSTANCE.play( Assets.Sounds.HIT_MAGIC, 1, Random.Float(0.87f, 1.15f) );
             ch.sprite.burst(0xFFFFFFFF, buffedLvl() / 2 + 2);
 

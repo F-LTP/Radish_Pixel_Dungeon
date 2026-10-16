@@ -54,11 +54,9 @@ public class Vampiric extends Weapon.Enchantment {
 			
 			if (healAmt > 0 && attacker.isAlive()) {
 				if (Dungeon.isChallenged(Challenges.DAMAGE_NO)) {
-					attacker.HP += 1;
-					attacker.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(1), FloatingText.HEALING);
+					attacker.heal(1);
 				}  else {
-					attacker.HP += healAmt;
-					attacker.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(healAmt), FloatingText.HEALING);
+					attacker.heal(healAmt);
 				}
 				
 			}

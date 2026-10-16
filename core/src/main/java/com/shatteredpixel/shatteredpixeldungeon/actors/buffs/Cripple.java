@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Wheelchair;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -45,7 +46,7 @@ public class Cripple extends FlavourBuff {
 			// 弹射起步天赋触发：受到残废时获得免费轮椅使用机会
 			if (target instanceof Hero) {
 				Hero hero = (Hero) target;
-				if (hero.heroClass == HeroClass.MOONLIGHT
+				if (hero.heroClass == HeroClasses.MOONLIGHT
 						&& hero.pointsInTalent(Talent.CATAPULT_START) >= 1
 						&& hero.buff(CatapultStartCooldown.class) == null) {
 					Buff.affect(hero, CatapultStartBuff.class, 1f);

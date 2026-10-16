@@ -1,6 +1,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.watabou.utils.Random;
@@ -15,10 +17,10 @@ public class Combos extends Weapon.Enchantment {
         procChance = Math.min(1f,procChance);
 
         if (Random.Float() < procChance){
-            defender.damage(attacker.damageRoll()/2-defender.drRoll(),weapon);
+            defender.damage(DamageInfo.of(attacker.damageRoll()/2-defender.drRoll(), DamageType.PHYSICAL, attacker, weapon));
             procChance /=2 ;
             while(Random.Float() < procChance){
-                defender.damage(attacker.damageRoll()/2-defender.drRoll(),weapon);
+                defender.damage(DamageInfo.of(attacker.damageRoll()/2-defender.drRoll(), DamageType.PHYSICAL, attacker, weapon));
                 procChance /= 2;
             }
         }

@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.DiceMageUI;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ItemSlot;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RoundedFrame;
+import com.shatteredpixel.shatteredpixeldungeon.ui.UITheme;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 
 public class WndInfoItem extends Window {
@@ -79,7 +81,7 @@ public class WndInfoItem extends Window {
 	}
 
 	private void fillFields(Heap heap ) {
-		if (DiceMageUI.active()) {
+		if (UITheme.isDiceMage()) {
 			layoutDiceHeap(heap);
 			return;
 		}
@@ -93,7 +95,7 @@ public class WndInfoItem extends Window {
 	}
 	
 	private void fillFields( Item item ) {
-		if (DiceMageUI.active()) {
+		if (UITheme.isDiceMage()) {
 			layoutDiceItem(item);
 			return;
 		}
@@ -108,7 +110,7 @@ public class WndInfoItem extends Window {
 		IconTitle titlebar = new IconTitle( item );
 		titlebar.color( color );
 		
-		RenderedTextBlock txtInfo = PixelScene.renderTextBlock( item.info(), 6 );
+		RenderedTextBlock txtInfo = PixelScene.renderTextBlock( item.displayInfo(), 6 );
 		
 		layoutFields(titlebar, txtInfo);
 	}
@@ -151,7 +153,7 @@ public class WndInfoItem extends Window {
 		int lineColor = DiceMageUI.itemLineColor(item, item.isEquipped(com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero));
 		ItemSlot icon = new ItemSlot(item);
 		icon.setRect(DICE_PAD, DICE_PAD, DICE_ICON, DICE_ICON);
-		DiceMageUI.Frame iconFrame = new DiceMageUI.Frame(DiceMageUI.BLACK, lineColor);
+		RoundedFrame iconFrame = UITheme.roundedFrame(DiceMageUI.BLACK, lineColor);
 		iconFrame.setRect(0, 0, DICE_ICON + DICE_PAD * 2, DICE_ICON + DICE_PAD * 2);
 		add(iconFrame);
 		add(icon);
@@ -169,11 +171,11 @@ public class WndInfoItem extends Window {
 		add(tags);
 
 		float topHeight = Math.max(iconFrame.bottom(), tags.bottom()) + DICE_PAD;
-		layoutDiceInfoBody(item.info(), width, topHeight, lineColor);
+		layoutDiceInfoBody(item.displayInfo(), width, topHeight, lineColor);
 	}
 
 	private void layoutDiceFields(IconTitle titlebar, String label, String body, int width, int lineColor) {
-		DiceMageUI.Frame top = new DiceMageUI.Frame(DiceMageUI.BLACK, lineColor);
+		RoundedFrame top = UITheme.roundedFrame(DiceMageUI.BLACK, lineColor);
 		top.setRect(0, 0, width, 34);
 		add(top);
 
@@ -194,7 +196,7 @@ public class WndInfoItem extends Window {
 		info.maxWidth((int)(width - DICE_PAD * 4));
 		info.setPos(DICE_PAD * 2, top + DICE_PAD * 2);
 
-		DiceMageUI.Frame bodyFrame = new DiceMageUI.Frame(DiceMageUI.PANEL, lineColor);
+		RoundedFrame bodyFrame = UITheme.roundedFrame(DiceMageUI.PANEL, lineColor);
 		bodyFrame.setRect(0, top + DICE_PAD, width, info.height() + DICE_PAD * 4);
 		add(bodyFrame);
 		add(info);

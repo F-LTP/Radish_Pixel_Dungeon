@@ -45,7 +45,7 @@ public class Hunger extends Buff implements Hero.Doom {
         // 战士4-2 高端饮食：饱食度上限加成
         public static final int[] HIGH_DIET_MAX = {550, 600, 650, 700};
         public static final float HIGH_DIET_THRESHOLD = 450f;
-        public static final float[] HIGH_DIET_REGEN_BOOST = {0.15f, 0.24f, 0.33f, 0.45f};
+        public static final float[] HIGH_DIET_REGEN_BOOST = {0.5f, 1f, 1.5f, 2f};
 
         private float level;
         private float partialDamage;
@@ -218,7 +218,7 @@ public class Hunger extends Buff implements Hero.Doom {
          * 检查是否处于高饱食度状态（战士4-2 高端饮食）
          */
         public boolean isHighSatiety() {
-                return level < HIGH_DIET_THRESHOLD;
+                return getMaxHunger() - level > HIGH_DIET_THRESHOLD;
         }
 
         /**
@@ -227,7 +227,7 @@ public class Hunger extends Buff implements Hero.Doom {
         public static float getHighDietRegenMultiplier(Hero hero) {
                 if (hero.hasTalent(com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent.HIGH_DIET)) {
                         Hunger hunger = hero.buff(Hunger.class);
-                        if (hunger != null && hunger.level < HIGH_DIET_THRESHOLD) {
+                        if (hunger != null && hunger.isHighSatiety()) {
                                 int points = hero.pointsInTalent(com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent.HIGH_DIET);
                                 if (points > 0 && points <= 4) {
                                         return 1f + HIGH_DIET_REGEN_BOOST[points - 1];
@@ -245,7 +245,7 @@ public class Hunger extends Buff implements Hero.Doom {
         public String icon() {
                 if (level < HUNGRY) {
                         return BuffIndicator.NONE;
-                } else if (level < STARVING) {
+                } else if (level < getMaxHunger()) {
                         return BuffIndicator.HUNGER;
                 } else {
                         return BuffIndicator.STARVATION;
@@ -254,7 +254,7 @@ public class Hunger extends Buff implements Hero.Doom {
 
         @Override
         public String name() {
-                if (level < STARVING) {
+                if (level < getMaxHunger()) {
                         return Messages.get(this, "hungry");
                 } else {
                         return Messages.get(this, "starving");
@@ -264,7 +264,7 @@ public class Hunger extends Buff implements Hero.Doom {
         @Override
         public String desc() {
                 String result;
-                if (level < STARVING) {
+                if (level < getMaxHunger()) {
                         result = Messages.get(this, "desc_intro_hungry");
                 } else {
                         result = Messages.get(this, "desc_intro_starving");
