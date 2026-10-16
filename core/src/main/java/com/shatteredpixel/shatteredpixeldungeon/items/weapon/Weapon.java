@@ -502,6 +502,11 @@ abstract public class Weapon extends KindOfWeapon {
 	public boolean hasEnchant(Class<?extends Enchantment> type, Char owner) {
 		return enchantment != null && enchantment.getClass() == type && owner.buff(MagicImmune.class) == null;
 	}
+
+	/** 本武器是否会把已储存的恒动伤害释放到持有者的下一次普通攻击上。 */
+	public boolean releasesConservedDamage(Char owner) {
+		return enchantment != null && enchantment.releasesConservedDamage() && owner.buff(MagicImmune.class) == null;
+	}
 	
 	//these are not used to process specific enchant effects, so magic immune doesn't affect them
 	public boolean hasGoodEnchant(){
@@ -563,6 +568,11 @@ abstract public class Weapon extends KindOfWeapon {
 		
 			
 		public abstract int proc( Weapon weapon, Char attacker, Char defender, int damage );
+
+		/** 是否会在命中时释放持有者身上储存的恒动伤害（Kinetic / Unstable），由 Kinetic.ConservedDamage 读取。 */
+		public boolean releasesConservedDamage(){
+			return false;
+		}
 
 		protected float procChanceMultiplier( Char attacker ){
 			return genericProcChanceMultiplier( attacker );

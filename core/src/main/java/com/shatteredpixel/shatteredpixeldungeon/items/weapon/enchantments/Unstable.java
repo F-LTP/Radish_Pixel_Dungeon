@@ -48,16 +48,14 @@ public class Unstable extends Weapon.Enchantment {
 
 	@Override
 	public int proc( Weapon weapon, Char attacker, Char defender, int damage ) {
-		
-		int conservedDamage = 0;
-		if (attacker.buff(Kinetic.ConservedDamage.class) != null) {
-			conservedDamage = attacker.buff(Kinetic.ConservedDamage.class).damageBonus();
-			attacker.buff(Kinetic.ConservedDamage.class).detach();
-		}
-		
-		damage = Reflection.newInstance(Random.oneOf(randomEnchants)).proc( weapon, attacker, defender, damage );
-		
-		return damage + conservedDamage;
+
+		// 储存的恒动伤害由 Kinetic.ConservedDamage 在构建期自行释放，这里不再重复结算
+		return Reflection.newInstance(Random.oneOf(randomEnchants)).proc( weapon, attacker, defender, damage );
+	}
+
+	@Override
+	public boolean releasesConservedDamage() {
+		return true;
 	}
 
 	@Override

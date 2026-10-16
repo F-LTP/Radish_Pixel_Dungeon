@@ -2,6 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.watabou.utils.Bundle;
 
 public class VitaeBuff extends Buff{
@@ -27,7 +28,12 @@ public class VitaeBuff extends Buff{
         //
     }
 
-    public int absorbDamage( int dmg ){
+    /**
+     * 维塔吸收：护盾之后的第二层生命池。
+     * VITAE_BOOST 4 点的固定减伤在这里结算（饥愤伤害除外）；vitae 清空时本 buff 已 detach，
+     * 与旧实现在 Char 里"buff 存在才减伤"的判断一致。
+     */
+    public int absorbDamage( int dmg, DamageInfo info ){
         if (vitae >= dmg){
             vitae -= dmg;
             dmg = 0;
@@ -36,6 +42,11 @@ public class VitaeBuff extends Buff{
         }
         if (vitae == 0){
             detach();
+            return dmg;
+        }
+        if (Dungeon.hero.pointsInTalent(Talent.VITAE_BOOST) >= 4
+                && !(info != null && info.getSource() instanceof Hunger)) {
+            dmg = Math.max(0, dmg - 2);
         }
         return dmg;
     }

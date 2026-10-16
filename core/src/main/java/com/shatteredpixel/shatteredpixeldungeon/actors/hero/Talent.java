@@ -49,6 +49,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.events.CharFinalDamageEvent;
 import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
 import com.shatteredpixel.shatteredpixeldungeon.events.HeroEatFoodEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.ShieldBreakEvent;
 import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -1016,6 +1017,17 @@ public class Talent {
 		Hero hero = (Hero) event.getTarget();
 		if (!hero.hasTalent( BLOODY_VITAE )) return;
 		Buff.affect( hero, VitaeBuff.class ).setVitae( 2 + hero.pointsInTalent( BLOODY_VITAE ) );
+	}
+
+	/** 受衅怒火：护盾从正值被打到 0 时授予（护盾全额吸收、没能扣到血也算）。 */
+	@SubscribeEvent(event = ShieldBreakEvent.class)
+	public static void onShieldBroken( ShieldBreakEvent event ) {
+		if (!(event.getTarget() instanceof Hero)) return;
+		Hero hero = (Hero) event.getTarget();
+		if (hero.HP <= 0
+				|| !hero.hasTalent(PROVOKED_ANGER)
+				|| hero.buff(ProvokedAngerTracker.class) != null) return;
+		Buff.affect(hero, ProvokedAngerTracker.class, 5f);
 	}
 
 	public static void onFoodEaten( Hero hero, float foodVal, Item foodSource ){

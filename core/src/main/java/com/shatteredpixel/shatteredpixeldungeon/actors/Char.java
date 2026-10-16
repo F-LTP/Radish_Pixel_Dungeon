@@ -65,7 +65,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.YetWand.HolyLand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
@@ -988,22 +987,6 @@ public abstract class Char extends Actor {
             }
         }
 
-        if (buff(Sickle.HarvestBleedTracker.class) != null) {
-            buff(Sickle.HarvestBleedTracker.class).detach();
-
-            if (!isImmune(Bleeding.class)) {
-                Bleeding b = buff(Bleeding.class);
-                if (b == null) {
-                    b = new Bleeding();
-                }
-                b.announced = false;
-                b.set(dmg, Sickle.HarvestBleedTracker.class);
-                b.attachTo(this);
-                sprite.showStatus(CharSprite.WARNING, Messages.titleCase(b.name()) + " " + (int) b.level());
-                return new DamageResult(info.getBaseDamage(), Math.max(0, dmg), 0, 0, 0, 0, false);
-            }
-        }
-
         // 伤害类型抗性：按 DamageType 的新层 + 现有基于来源类的旧层（乘算）
         int resistanceBlocked = 0;
         boolean immuneHit = false;
@@ -1059,27 +1042,17 @@ public abstract class Char extends Actor {
                 if (dmg == 0) break;
             }
 
-            //受衅怒火 2024-9-17
-            // 受衅怒火 TheCatist 2026-8-8 仅有护盾从正值降低到 0 的时候才能触发
-            if (HP > 0 && shielded > 0 && shieldingBeforeHit > 0 && shielding() == 0
-                    && this instanceof Hero && ((Hero) this).hasTalent(Talent.PROVOKED_ANGER)
-                    && buff(Talent.ProvokedAngerTracker.class) == null) {
-                Buff.affect(this, Talent.ProvokedAngerTracker.class, 5f);
+            // 护盾由正值被打到 0：发布护盾破裂事件（受衅怒火等在此响应）
+            if (shieldingBeforeHit > 0 && shielding() == 0 && shielded > 0) {
+                EventManager.emit(new ShieldBreakEvent(this, src instanceof Char ? (Char) src : null, shielded - dmg));
             }
         }
         shielded -= dmg;
 
 
-        // DoggingDog on 20250511
+        // DoggingDog on 20250511：维塔吸收（护盾之后、扣血之前）；VITAE_BOOST 的固定减伤在 VitaeBuff 内结算
         for (VitaeBuff s : buffs(VitaeBuff.class)) {
-            dmg = s.absorbDamage(dmg);
-        }
-
-        // DoggingDog on 20250818
-        if (hero.pointsInTalent(Talent.VITAE_BOOST) >= 4 && hero != null && !(src instanceof Hunger)) {
-            if (hero.buff(VitaeBuff.class) != null) {
-                dmg = Math.max(0, dmg - 2);
-            }
+            dmg = s.absorbDamage(dmg, info);
         }
 
         int hpBefore = HP;
@@ -1115,19 +1088,6 @@ public abstract class Char extends Actor {
         for (Buff b : buffs().toArray(new Buff[0])) {
             b.onDamageTaken(dealt, info);
         }
-
-        if (HP < 0 && src instanceof Char && alignment == Alignment.ENEMY) {
-            if (((Char) src).buff(Kinetic.KineticTracker.class) != null) {
-                int dmgToAdd = -HP;
-                dmgToAdd -= ((Char) src).buff(Kinetic.KineticTracker.class).conservedDamage;
-                dmgToAdd = Math.round(dmgToAdd * RingOfArcana.enchantPowerMultiplier((Char) src) * RingOfBenediction.periodMultiplier((Char) src));
-                if (dmgToAdd > 0) {
-                    Buff.affect((Char) src, Kinetic.ConservedDamage.class).setBonus(dmgToAdd);
-                }
-                ((Char) src).buff(Kinetic.KineticTracker.class).detach();
-            }
-        }
-
 
         if (sprite != null && !immuneHit) {
             // 免疫伤害（元素/来源免疫被完全抵挡）时不弹出 "0" 伤害数字
