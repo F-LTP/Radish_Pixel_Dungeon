@@ -910,7 +910,11 @@ public abstract class Char extends Actor {
      * 旧调用兼容入口已被移除：所有伤害必须显式构造 DamageInfo 并经 damage(DamageInfo) 进入管线。
      */
 
-    /** 唯一权威的伤害应用实现，由 DamagePipeline 调用。 */
+    /**
+     * 唯一权威的伤害应用实现，由 DamagePipeline 调用。
+     * 阶段顺序即语义：进管线原始伤害事件 → 护甲 DR（折入原始桶）→ 原始修正 → 分摊 → 伤害类型抗性 → 最终修正 →
+     * 护盾前反应 → 吸收层 1（护盾）→ 吸收层 2（维塔临时生命）→ 扣血 → 最终伤害事件 → 受击反应。
+     */
     public DamageResult applyDamage(DamageInfo info) {
         Object src = info.getSource();
         DamageType damageType = info.getType();
@@ -956,24 +960,9 @@ public abstract class Char extends Actor {
             return new DamageResult(info.getBaseDamage(), Math.max(0, dmg), 0, 0, 0, 0, true);
         }
 
+        // 伤害分摊：LifeLink 之间按链接数均摊（份额计算与伙伴承伤封装在 LifeLink 内）
         if (!(src instanceof LifeLink) && buff(LifeLink.class) != null) {
-            HashSet<LifeLink> links = buffs(LifeLink.class);
-            for (LifeLink link : links.toArray(new LifeLink[0])) {
-                if (Actor.findById(link.object) == null) {
-                    links.remove(link);
-                    link.detach();
-                }
-            }
-            dmg = (int) Math.ceil(dmg / (float) (links.size() + 1));
-            for (LifeLink link : links) {
-                Char ch = (Char) Actor.findById(link.object);
-                if (ch != null) {
-                    ch.damage(DamageInfo.of(dmg, damageType, this, link));
-                    if (!ch.isAlive()) {
-                        link.detach();
-                    }
-                }
-            }
+            dmg = LifeLink.shareDamage(this, dmg, damageType);
         }
 
         // 伤害类型抗性：按 DamageType 的新层 + 现有基于来源类的旧层（乘算）。
@@ -1022,6 +1011,7 @@ public abstract class Char extends Actor {
             b.onPreShieldDamage(dmg, HP, info);
         }
 
+        // —— 吸收层 1：护盾（ShieldBuff）——
         int shielded = dmg;
         int shieldingBeforeHit = shielding();
 
@@ -1038,8 +1028,9 @@ public abstract class Char extends Actor {
         }
         shielded -= dmg;
 
-
-        // DoggingDog on 20250511：维塔吸收（护盾之后、扣血之前）；VITAE_BOOST 的固定减伤在 VitaeBuff 内结算
+        // —— 吸收层 2：维塔临时生命 ——
+        // 独立的一层，固定排在护盾之后、扣血之前（本作不会再有更多吸收层，故不做成可插拔集合）；
+        // 吸收与 VITAE_BOOST 的固定减伤都在 VitaeBuff 内结算。
         for (VitaeBuff s : buffs(VitaeBuff.class)) {
             dmg = s.absorbDamage(dmg, info);
         }

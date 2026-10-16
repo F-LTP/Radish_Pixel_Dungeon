@@ -23,9 +23,13 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
+
+import java.util.HashSet;
 
 public class LifeLink extends FlavourBuff {
 
@@ -36,6 +40,33 @@ public class LifeLink extends FlavourBuff {
 	{
 		type = buffType.POSITIVE;
 		announced = true;
+	}
+
+	/**
+	 * 伤害分摊：把 victim 本次受到的伤害按链接数均摊，自身留下向上取整的那一份，其余各个链接目标
+	 * 按同一基数走各自的承伤管线（因此各自抗性/护盾独立结算）。
+	 * 返回 victim 应继续结算的伤害；已失效的链接会顺带清理。
+	 */
+	public static int shareDamage(Char victim, int dmg, DamageType type) {
+		HashSet<LifeLink> links = victim.buffs(LifeLink.class);
+		for (LifeLink link : links.toArray(new LifeLink[0])) {
+			if (Actor.findById(link.object) == null) {
+				links.remove(link);
+				link.detach();
+			}
+		}
+
+		int shared = (int) Math.ceil(dmg / (float) (links.size() + 1));
+		for (LifeLink link : links) {
+			Char ch = (Char) Actor.findById(link.object);
+			if (ch != null) {
+				ch.damage(DamageInfo.of(shared, type, victim, link));
+				if (!ch.isAlive()) {
+					link.detach();
+				}
+			}
+		}
+		return shared;
 	}
 
 	@Override
