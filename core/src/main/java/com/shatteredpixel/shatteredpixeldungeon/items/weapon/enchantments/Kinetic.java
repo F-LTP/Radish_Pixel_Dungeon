@@ -44,8 +44,15 @@ public class Kinetic extends Weapon.Enchantment {
 	@Override
 	public int proc(Weapon weapon, Char attacker, Char defender, int damage) {
 
-		// 本次命中用到的恒动武器：留下追踪器，让击杀时能读到真正的最终伤害（实际加算见 ConservedDamage）
-		Buff.affect(attacker, KineticTracker.class);
+		int conservedDamage = 0;
+		ConservedDamage stored = attacker.buff(ConservedDamage.class);
+		if (stored != null) {
+			conservedDamage = stored.consume();
+		}
+
+		// 本次命中用到的恒动武器：留下追踪器，让击杀时能读到真正的最终伤害；
+		// conservedDamage 记录本次已经释放掉的量，蓄能结算时扣除（实际加算见 ConservedDamage）
+		Buff.affect(attacker, KineticTracker.class).conservedDamage = conservedDamage;
 
 		return damage;
 	}
@@ -105,7 +112,7 @@ public class Kinetic extends Weapon.Enchantment {
 
 		/**
 		 * 释放：储存的恒动伤害以下一次普通攻击的固定加算结算（进基础值桶，会吃暴击与各类乘区）。
-		 * 释放与本 buff 的消耗绑在一起，保证只有真正吃到加成的那次攻击才会消耗掉储存量。
+		 * 这里只负责加算并标记「已释放」，由释放武器的 proc 在命中时取走并消耗（见 consume）。
 		 */
 		@Override
 		public void modifyOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
@@ -114,11 +121,25 @@ public class Kinetic extends Weapon.Enchantment {
 				return;
 			}
 
-			int bonus = damageBonus();
-			info.addFlatModifier(bonus, "kinetic");
-			Buff.affect(attacker, KineticTracker.class).conservedDamage = bonus;
-			detach();
+			info.addFlatModifier(damageBonus(), "kinetic");
+			released = true;
 		}
+
+		/**
+		 * 供释放武器的 proc 调用：返回本次命中已经加算掉的量并消耗本 buff。
+		 * 没有真正走普通攻击的 proc（能力直接调用的 weapon.proc）不会取走，储存量留到下一次普通攻击。
+		 */
+		public int consume() {
+			if (!released) {
+				return 0;
+			}
+			int bonus = damageBonus();
+			detach();
+			return bonus;
+		}
+
+		/** 本次普通攻击是否已经把储存量加算进 DamageInfo，等待 proc 取走。 */
+		private boolean released;
 		
 		@Override
 		public String icon() {

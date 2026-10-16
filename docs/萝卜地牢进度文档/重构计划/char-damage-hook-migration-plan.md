@@ -62,17 +62,17 @@
 
 - **VITAE_BOOST 平坦 -2**：由 `Char.applyDamage` 的两段判断（`VitaeBuff` 存在 + 天赋 4 点 + 非饥愤）移入 `VitaeBuff.absorbDamage(dmg, info)`；vitae 清空即 detach 的分支直接返回，与旧实现"buff 还在才减伤"一致。行为等价。
 - **Kinetic 蓄能**：结算改为订阅 `CharFinalDamageEvent`，条件（`HP < 0`、目标为敌方阵营、来源为 `Char`）与旧实现一致。
-- **Kinetic 释放**：储存伤害的加算由 `Kinetic.ConservedDamage.modifyOutgoingAttackDamage` 在构建期以固定加算注入（原为 `OrdinaryAttackDamage.foldPostProcessing` 的最终加算），释放与消耗绑定在同一次攻击上；`Unstable` 不再重复结算已储存的恒动伤害。
+- **Kinetic 释放**：储存伤害的加算由 `Kinetic.ConservedDamage.modifyOutgoingAttackDamage` 在构建期以固定加算注入（原为 `OrdinaryAttackDamage.foldPostProcessing` 的最终加算）；取走与消耗仍在释放武器的 `proc` 里（`ConservedDamage.consume()`），因此与旧实现在同一时点消耗。
 - **PROVOKED_ANGER**：新增 `ShieldBreakEvent`（护盾由正值归零时在护盾相位内发布），`Talent` 改为静态订阅；保留"护盾全额吸收（dealt = 0）也触发"的语义。行为等价。
 - **Sickle**：删除 `Char.applyDamage` 中不可达的 `HarvestBleedTracker` 分支（唯一入口 `MeleeWeapon.execute` 里的 `duelistAbility` 调用已被注释）。
 
 #### C1 已确认的行为差异
 
 1. 储存伤害的加算相位由「最终加算」变为「基础值加算」，会吃暴击 / 直接乘区 / 最终乘区，**释放出来的伤害变高**（平衡改动）。
-2. 释放时机提前到命中判定（构建 `DamageInfo`）时：被 `AttackEvent` 取消的攻击会消耗掉储存量（旧实现不消耗）。仅影响反弹类（如 Rlyeh）等极少数路径。
-3. 只有「会把恒动伤害释放出去的武器」（附魔声明 `releasesConservedDamage()`，即 Kinetic / Unstable）才会释放，因此矮人王「30 点恒动」在非恒动武器下仍只作为挂着的 buff（与旧实现一致）。
-4. `Unstable` 命中时不再自行消耗储存量（改由 `ConservedDamage` 自行消耗），因此现在的行为是：附魔为 `Unstable` 时「首次蓄能」依旧不会发生（与旧实现一致），储存量一旦存在则会被下一次普通攻击释放。
-5. 蓄能结算由「`onDamageTaken` 之后」提前到 `CharFinalDamageEvent` 发布时（同一次结算内），事件订阅者与受击钩子之间不再有 Kinetic 结算介入，实际无影响。
+2. 只有「会把恒动伤害释放出去的武器」（附魔声明 `releasesConservedDamage()`，即 Kinetic / Unstable）才会释放，因此矮人王「30 点恒动」在非恒动武器下仍只作为挂着的 buff（与旧实现一致）。
+3. 不走普通攻击管线、直接调用 `weapon.proc` 的路径（白王剑的眼击、骰法师的 Cut / Hack）不再立刻释放储存量：既不额外加算，也不再把它消耗掉，储存量留到下一次普通攻击（旧实现会在这些路径上立即释放并消耗）。
+4. 蓄能结算由「`onDamageTaken` 之后」提前到 `CharFinalDamageEvent` 发布时（同一次结算内），事件订阅者与受击钩子之间不再有 Kinetic 结算介入，实际无影响。
+5. 被 `AttackEvent` 取消的攻击：不加算、不消耗（与旧实现一致），只是构建期已注入的固定加算随该 `DamageInfo` 一起丢弃。
 
 ### C2（抗性乘区 / 天球仪来源 / 伤害图标）
 
