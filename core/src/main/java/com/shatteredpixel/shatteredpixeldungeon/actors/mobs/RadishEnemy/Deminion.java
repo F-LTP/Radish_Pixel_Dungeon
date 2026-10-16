@@ -20,6 +20,7 @@ import com.shatteredpixel.shatteredpixeldungeon.damage.OrdinaryAttackDamage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
@@ -136,7 +137,8 @@ public class Deminion extends Mob {
 
                 enemy.damage(firstAttackDamage.copy());
 
-                enemy.damage(DamageInfo.of(8, DamageType.TRUE, this, new DeminionCritClass()));
+                enemy.damage(DamageInfo.of(8, DamageType.TRUE, this, new DeminionCritClass())
+                        .setFloatingTextIcon(FloatingText.CRIT_NO_BLOCK));
             } else {
                 enemy.damage(firstAttackDamage);
             }
@@ -165,7 +167,8 @@ public class Deminion extends Mob {
             
             // Use DeminionCritClass if target has Sigil to show armor-piercing crit icon
             if(enemy.buff(Sigil.class) != null){
-                DamageInfo sigilDamage = new DamageInfo(effectiveDamage, DamageType.PHYSICAL, this, null, new DeminionCritClass());
+                DamageInfo sigilDamage = new DamageInfo(effectiveDamage, DamageType.PHYSICAL, this, null, new DeminionCritClass())
+                        .setFloatingTextIcon(FloatingText.CRIT_NO_BLOCK);
                 enemy.damage(sigilDamage);
             } else {
                 enemy.damage(secondAttackDamage);
@@ -238,7 +241,8 @@ public class Deminion extends Mob {
             if(enemy.buff(Sigil.class) != null){
                 Buff.prolong(enemy, Sigil.class, Sigil.DURATION);
                 enemy.damage(DamageInfo.of(dmg, DamageType.MAGICAL, this, new MagicMissile()));
-                enemy.damage(DamageInfo.of(8, DamageType.TRUE, this, new DeminionCritClass()));
+                enemy.damage(DamageInfo.of(8, DamageType.TRUE, this, new DeminionCritClass())
+                        .setFloatingTextIcon(FloatingText.CRIT_NO_BLOCK));
             } else {
                 enemy.damage(DamageInfo.of(dmg, DamageType.MAGICAL, this, new MagicMissile()));
                 Buff.prolong(enemy,Sigil.class,Sigil.DURATION);

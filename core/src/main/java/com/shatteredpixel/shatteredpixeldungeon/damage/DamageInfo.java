@@ -27,6 +27,7 @@ package com.shatteredpixel.shatteredpixeldungeon.damage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -93,6 +94,9 @@ public class DamageInfo {
 	
 	/** 来源对象（Buff、Blob、Trap等，可能为空） */
 	private Object source;
+
+	/** 浮动文字图标覆盖；-1 表示按伤害类型/暴击推断（见 getFloatingTextIcon）。 */
+	private int floatingTextIcon = -1;
 
 	/** 伤害来源链：有序的因果对象列表，按「引发→中间传导→最终」顺序排列。
 	 *  例如 [玩家, 玩家武器, 烈焰附魔, 怪物身上的火, 草, 门]。
@@ -509,8 +513,15 @@ public class DamageInfo {
 	
 	/**
 	 * 获取浮动文字图标（考虑暴击）。仅用于单一伤害类型。
+	 * 优先级：显式覆盖 > 抗魔法来源（显示为魔法） > 暴击/伤害类型。
 	 */
 	public int getFloatingTextIcon() {
+		if (floatingTextIcon != -1) {
+			return floatingTextIcon;
+		}
+		if (source != null && AntiMagic.isMagicSource(source)) {
+			return FloatingText.MAGIC_DMG;
+		}
 		if (critical) {
 			if (ignoresArmor()) {
 				return FloatingText.CRIT_NO_BLOCK;
@@ -519,6 +530,14 @@ public class DamageInfo {
 			}
 		}
 		return type.getFloatingTextIcon();
+	}
+
+	/**
+	 * 覆盖浮动文字图标（如无视护甲的一击、必暴击的一击）。不传则由类型/暴击推断。
+	 */
+	public DamageInfo setFloatingTextIcon(int icon) {
+		this.floatingTextIcon = icon;
+		return this;
 	}
 
 	/**
@@ -761,6 +780,7 @@ public class DamageInfo {
 		DamageInfo copy = new DamageInfo(baseDamage, type, attacker, sourceItem, source);
 		copy.critical = this.critical;
 		copy.criticalMultiplier = this.criticalMultiplier;
+		copy.floatingTextIcon = this.floatingTextIcon;
 		copy.setCauseChain(this.causeChain);
 		if (this.mixed != null) {
 			MixedDamage mc = new MixedDamage();

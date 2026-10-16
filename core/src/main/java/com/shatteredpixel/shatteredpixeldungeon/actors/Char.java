@@ -33,7 +33,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Ch
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.FatedDraw;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.*;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Deminion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.ImmortalShieldAffecter;
@@ -49,7 +48,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.*;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Masamune;
@@ -66,7 +64,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.YetWand.HolyLand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.*;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
@@ -927,14 +924,6 @@ public abstract class Char extends Actor {
             return new DamageResult(info.getBaseDamage(), dmg, 0, 0, 0, 0, true);
         }
 
-        // 天球仪造成魔法伤害的代码移动到这里来，以便防止额外造成1次物理伤害
-        boolean srcIsAHeroWieldingCS = src instanceof Hero && ((Hero) src).belongings.attackingWeapon() instanceof CelestialSphere;
-        boolean srcIsCS = src instanceof CelestialSphere;
-        boolean srcIsAStatueWieldingCS = src instanceof Statue && ((Statue) src).weapon() instanceof CelestialSphere;
-        if (srcIsCS || srcIsAHeroWieldingCS || srcIsAStatueWieldingCS) {
-            src = new DM100.LightningBolt();
-        }
-
         if (!isAlive() || dmg < 0) {
             return new DamageResult(info.getBaseDamage(), Math.max(0, dmg), 0, 0, 0, 0, false);
         }
@@ -987,14 +976,15 @@ public abstract class Char extends Actor {
             }
         }
 
-        // 伤害类型抗性：按 DamageType 的新层 + 现有基于来源类的旧层（乘算）
+        // 伤害类型抗性：按 DamageType 的新层 + 现有基于来源类的旧层（乘算）。
+        // 免疫是控制流（伤害归零 + 抑制跳字），单独前置判定；抗性本身作为最终乘区的乘算项参与聚合。
         int resistanceBlocked = 0;
         boolean immuneHit = false;
+        float resistanceMultiplier = 1f;
         if (damageType == DamageType.MIXED && info.isMixed() && info.getMixed() != null) {
             // 混合伤害：按各成分分别判定免疫/抗性后加权
-            int before = dmg;
-            float remaining = 0f;
             MixedDamage md = info.getMixed();
+            float remaining = 0f;
             boolean allImmune = true;
             for (int i = 0; i < md.size(); i++) {
                 DamageType compType = md.typeAt(i);
@@ -1010,8 +1000,8 @@ public abstract class Char extends Actor {
                 dmg = 0;
                 immuneHit = true;
             } else {
-                dmg = Math.round(dmg * remaining);
-                resistanceBlocked = Math.max(0, before - dmg);
+                resistanceMultiplier = remaining;
+                resistanceBlocked = Math.max(0, dmg - Math.round(dmg * remaining));
             }
         } else if (damageType != DamageType.TRUE) {
             if (isImmuneTo(damageType) || isImmune(src.getClass())) {
@@ -1019,14 +1009,13 @@ public abstract class Char extends Actor {
                 dmg = 0;
                 immuneHit = true;
             } else {
-                int before = dmg;
-                dmg = Math.round(dmg * resistanceTo(damageType) * resist(src.getClass()));
-                resistanceBlocked = Math.max(0, before - dmg);
+                resistanceMultiplier = resistanceTo(damageType) * resist(src.getClass());
+                resistanceBlocked = Math.max(0, dmg - Math.round(dmg * resistanceMultiplier));
             }
         }
 
-        // 最终伤害修正（抗性之后）
-        dmg = applyFinalDamageModifiers(dmg, info, damageModifiers);
+        // 最终伤害修正（抗性作为乘算项并入同一乘区）
+        dmg = applyFinalDamageModifiers(dmg, info, damageModifiers, resistanceMultiplier);
 
         // 护盾前反应相位：携带护盾前伤害与受击前 HP（只读，供 Paralysis 等）
         for (Buff b : buffs().toArray(new Buff[0])) {
@@ -1091,27 +1080,11 @@ public abstract class Char extends Actor {
 
         if (sprite != null && !immuneHit) {
             // 免疫伤害（元素/来源免疫被完全抵挡）时不弹出 "0" 伤害数字
-            // 图标以 DamageType 为准（含暴击）；以下仅保留 DamageType 无法表达的特例
             if (info.isMixed() && info.getMixed() != null) {
                 // 混合伤害：按成分占比排序，左侧显示多个图标
                 sprite.showStatusWithIcons(CharSprite.NEGATIVE, Integer.toString(dmg + shielded), info.getFloatingTextIcons());
             } else {
-                int icon = info.getFloatingTextIcon();
-                if (damageType == DamageType.PHYSICAL) {
-                    // 狙击手远程攻击无视护甲
-                    if (src == hero
-                            && hero.subClass == HeroSubClasses.SNIPER
-                            && !Dungeon.level.adjacent(hero.pos, pos)
-                            && hero.belongings.attackingWeapon() instanceof MissileWeapon) {
-                        icon = FloatingText.PHYS_DMG_NO_BLOCK;
-                    }
-                    if (src instanceof WhiteKingGodSword.OnlyOneEyeAttack) icon = FloatingText.PHYS_DMG_NO_BLOCK;
-                }
-                // 抗魔法刻印抵抗的来源类（与 DamageType 不完全一一对应，保留）
-                if (AntiMagic.RESISTS.contains(src.getClass())) icon = FloatingText.MAGIC_DMG;
-                if (src instanceof Deminion.DeminionCritClass) icon = FloatingText.CRIT_NO_BLOCK;
-
-                sprite.showStatusWithIcon(CharSprite.NEGATIVE, Integer.toString(dmg + shielded), icon);
+                sprite.showStatusWithIcon(CharSprite.NEGATIVE, Integer.toString(dmg + shielded), info.getFloatingTextIcon());
             }
         }
 
@@ -1162,15 +1135,16 @@ public abstract class Char extends Actor {
         return Math.max(0, (int) ((dmg + flat) * (1f + percent) * mult));
     }
 
-    /** 最终伤害修正：抗性之后、护盾之前。聚合顺序同上；取整沿用原实现的四舍五入。 */
-    private int applyFinalDamageModifiers(int dmg, DamageInfo info, java.util.List<IDamageModifier> mods) {
+    /** 最终伤害修正：抗性之后、护盾之前。聚合顺序同上；取整沿用原实现的四舍五入。
+     *  伤害类型抗性作为纯粹的乘算项并入本乘区（与其它最终乘算同桶累乘）。 */
+    private int applyFinalDamageModifiers(int dmg, DamageInfo info, java.util.List<IDamageModifier> mods, float resistanceMultiplier) {
         float flat = 0f, percent = 0f, mult = 1f;
         for (IDamageModifier m : mods) {
             flat += m.finalAddFlat(dmg, info);
             percent += m.finalAddPercent(dmg, info);
             mult *= m.finalMultiply(dmg, info);
         }
-        return Math.max(0, Math.round((dmg + flat) * (1f + percent) * mult));
+        return Math.max(0, Math.round((dmg + flat) * (1f + percent) * mult * resistanceMultiplier));
     }
 
     /**

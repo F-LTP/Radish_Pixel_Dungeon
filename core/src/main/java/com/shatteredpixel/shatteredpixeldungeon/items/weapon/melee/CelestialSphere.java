@@ -1,6 +1,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Random;
 
@@ -37,5 +39,19 @@ public class CelestialSphere extends MeleeWeapon {
             damage += Random.NormalIntRange(wandTotalLevel, wandTotalLevel * 2);
         }
         return damage;
+    }
+
+    /**
+     * 天球仪打的是魔法来源的伤害：来源归一化为闪电判定（与减伤、图标共用同一份名单），
+     * 这样既不会额外造成一次物理伤害，也不需要在承伤管线里对武器类型做特判。
+     */
+    @Override
+    public void modifyDamageInfo(Char attacker, Char defender, DamageInfo info) {
+        info.setSource(new DM100.LightningBolt());
+    }
+
+    @Override
+    public boolean ignoresDefenseRoll() {
+        return true;
     }
 }

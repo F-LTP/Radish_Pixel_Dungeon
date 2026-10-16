@@ -37,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.ElementalStrike;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.CustomWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
@@ -501,6 +502,18 @@ abstract public class Weapon extends KindOfWeapon {
 
 	public boolean hasEnchant(Class<?extends Enchantment> type, Char owner) {
 		return enchantment != null && enchantment.getClass() == type && owner.buff(MagicImmune.class) == null;
+	}
+
+	/**
+	 * 普通攻击的 DamageInfo 构建完成后调用，允许武器改写本次伤害的来源与类型。
+	 * 例：天球仪把来源改写成魔法来源（{@link com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100.LightningBolt}）。
+	 */
+	public void modifyDamageInfo(Char attacker, Char defender, DamageInfo info) {
+	}
+
+	/** 该武器的普通攻击是否无视防御掷骰（护甲 DR）——如天球仪。 */
+	public boolean ignoresDefenseRoll() {
+		return false;
 	}
 
 	/** 本武器是否会把已储存的恒动伤害释放到持有者的下一次普通攻击上。 */

@@ -135,7 +135,12 @@ public class AntiMagic extends Armor.Glyph implements IDamageModifier {
 		Armor a = this.armor;
 		if (src == null || a == null || a.wearer == null) return 0f;
 		if (a.wearer.buff(MagicImmune.class) != null) return 0f;
-		return RESISTS.contains(src.getClass()) ? -drRoll(a.wearer, a.procLvl()) : 0f;
+		return isMagicSource(src) ? -drRoll(a.wearer, a.procLvl()) : 0f;
+	}
+
+	/** 该来源造成的伤害是否按“魔法来源”处理（减伤与跳字图标共用同一份名单）。 */
+	public static boolean isMagicSource(Object src) {
+		return src != null && RESISTS.contains(src.getClass());
 	}
 
 	public static int drRoll( Char ch, int level ){

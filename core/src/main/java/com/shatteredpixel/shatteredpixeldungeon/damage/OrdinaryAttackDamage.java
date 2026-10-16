@@ -15,6 +15,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.PlateArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Radish;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.*;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.watabou.utils.Point;
@@ -44,6 +45,11 @@ public class OrdinaryAttackDamage {
 		if (attacker instanceof Hero && ((Hero) attacker).isSphereSkin()
 				&& !(sourceItem(attacker) instanceof MissileWeapon)) {
 			info.addFinalMultModifier(1.2f, "sphere melee");
+		}
+
+		// 武器侧改写（来源/类型归一化），放在最后：让构建期各种修正看到原始来源
+		if (sourceItem(attacker) instanceof Weapon) {
+			((Weapon) sourceItem(attacker)).modifyDamageInfo(attacker, defender, info);
 		}
 
 		return info;
@@ -253,8 +259,8 @@ public class OrdinaryAttackDamage {
 
 	public static boolean ignoresDefenseRoll(Char attacker) {
 		Item weapon = attacker.attackingWeapon();
-		boolean srcIsWieldingCS = weapon instanceof CelestialSphere;
-		return attacker instanceof Torturer || srcIsWieldingCS;
+		boolean weaponIgnores = weapon instanceof Weapon && ((Weapon) weapon).ignoresDefenseRoll();
+		return attacker instanceof Torturer || weaponIgnores;
 	}
 
 	private static Item sourceItem(Char attacker) {
