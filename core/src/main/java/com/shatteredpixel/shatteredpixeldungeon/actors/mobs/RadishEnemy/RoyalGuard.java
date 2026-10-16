@@ -6,7 +6,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.RoyalGuardSprite;
@@ -30,43 +29,36 @@ public class RoyalGuard extends Mob {
         loot = Generator.Category.WEP_T4;
         lootChance = 0.2f;
     }
-    public Weapon equipment;
-    private static final String ROYAL_GUARD_WEAPON	= "royal_guard_weapon";
-
-    @Override
-    public void storeInBundle( Bundle bundle ) {
-        super.storeInBundle( bundle );
-        if(equipment != null)
-            bundle.put( ROYAL_GUARD_WEAPON, equipment );
+    public Weapon equipment() {
+        return (Weapon) mobEquipment.weapon;
     }
 
     @Override
     public void restoreFromBundle( Bundle bundle ) {
         super.restoreFromBundle( bundle );
-        equipment = (Weapon)bundle.get( ROYAL_GUARD_WEAPON );
-        if(equipment == null)
-            equipment = (Weapon) Generator.randomUsingDefaults(Random.oneOf(Generator.Category.WEP_T4, Generator.Category.WEP_T5));
+        if (mobEquipment.weapon == null) {
+            mobEquipment.weapon = (Weapon) Generator.randomUsingDefaults(Random.oneOf(Generator.Category.WEP_T4, Generator.Category.WEP_T5));
+        }
     }
 
     public RoyalGuard(){
         super();
-        equipment = (Weapon) Generator.randomUsingDefaults(Random.oneOf(Generator.Category.WEP_T4, Generator.Category.WEP_T5));
-//        equipment = new FogSword();
+        mobEquipment.weapon = (Weapon) Generator.randomUsingDefaults(Random.oneOf(Generator.Category.WEP_T4, Generator.Category.WEP_T5));
     }
 
     @Override
     public String description() {
         String desc = super.description();
         desc += "\n\n";
-        desc += Messages.get(this, "equipment", equipment.name() );
+        desc += Messages.get(this, "equipment", equipment().name() );
         return desc;
     }
     @Override
     public Item createLoot() {
         Dungeon.LimitedDrops.ROYALGUARD_WEP.count++;
         int Ug = Random.Int(0,100)<50?0:(Random.Int(0,50)<40?1:2);
-        if(equipment != null && equipment instanceof MeleeWeapon)
-            loot = equipment.upgrade(Ug);
+        if(equipment() instanceof MeleeWeapon)
+            loot = equipment().upgrade(Ug);
         return super.createLoot();
     }
     @Override
@@ -75,49 +67,28 @@ public class RoyalGuard extends Mob {
     }
 
     @Override
-    public int damageRoll() {
-        if(equipment != null)
-            return equipment.damageRoll(this);
-        else
-            return Random.Int(8,8);
-    }
-
-    @Override
     public int attackSkill( Char target ) {
         int accuracy = 30;
-        if(equipment != null && equipment instanceof MeleeWeapon){
-            accuracy *= equipment.accuracyFactor( this, target );
+        if(equipment() instanceof MeleeWeapon){
+            accuracy *= equipment().accuracyFactor( this, target );
         }
         return accuracy;
     }
 
     @Override
-    public float attackDelay() {
-        return super.attackDelay() * equipment.delayFactor(this);
-    }
-
-    @Override
-    protected boolean canAttack( Char enemy ) {
-        if(equipment != null && equipment instanceof MeleeWeapon)
-            return super.canAttack(enemy) || equipment.canReach(this, enemy.pos);
-        else
-            return super.canAttack(enemy);
-    }
-    @Override
     public int drRoll() {
         if (wieldsCircleSword()) return 0;
-        return Random.NormalIntRange(1, 8) + equipment.defenseFactor(this);
+        return Random.NormalIntRange(1, 8) + equipment().defenseFactor(this);
     }
 
     @Override
     protected String heroKilledMessage() {
-        return Messages.capitalize(Messages.get(RoyalGuard.class, "kill", equipment.name()));
+        return Messages.capitalize(Messages.get(RoyalGuard.class, "kill", equipment().name()));
     }
 
     @Override
     public int attackProc( Char enemy, int damage ) {
         damage = super.attackProc( enemy, damage );
-        damage = equipment.proc( this, enemy, damage );
         if (!enemy.isAlive() && enemy == Dungeon.hero){
             Dungeon.fail(getClass());
             GLog.n( Messages.capitalize(Messages.get(Char.class, "kill", name())) );

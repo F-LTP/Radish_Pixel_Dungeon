@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CircleSword;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -87,11 +88,16 @@ public class RingOfTenacity extends Ring {
 		return (float)Math.pow(1.05,gbb);
 	}
 
-	public class Tenacity extends RingBuff {
+	public class Tenacity extends RingBuff implements IDamageModifier {
 
 		@Override
 		public void modifyOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
 			info.addDirectMultModifier(attackMultiplier(attacker), "tenacity", this);
+		}
+
+		@Override
+		public float finalMultiply(int dmg, DamageInfo info) {
+			return RingOfTenacity.damageMultiplier(target);
 		}
 	}
 }

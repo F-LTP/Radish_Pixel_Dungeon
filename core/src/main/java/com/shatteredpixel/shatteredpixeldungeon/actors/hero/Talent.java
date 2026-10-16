@@ -35,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicPoint;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PhysicalEmpower;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Recharging;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.VitaeBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.WandEmpower;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.Belief;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
@@ -45,8 +46,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.TalentSet
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
+import com.shatteredpixel.shatteredpixeldungeon.events.CharFinalDamageEvent;
 import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
 import com.shatteredpixel.shatteredpixeldungeon.events.HeroEatFoodEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
@@ -1006,6 +1009,14 @@ public class Talent {
 
 	public static class CachedRationsDropped extends CounterBuff{{revivePersists = true;}};
 	public static class NatureBerriesDropped extends CounterBuff{{revivePersists = true;}};
+
+	@SubscribeEvent(event = CharFinalDamageEvent.class)
+	public static void onBloodyVitae( CharFinalDamageEvent event ) {
+		if (!(event.getTarget() instanceof Hero) || !(event.getSource() instanceof Mob)) return;
+		Hero hero = (Hero) event.getTarget();
+		if (!hero.hasTalent( BLOODY_VITAE )) return;
+		Buff.affect( hero, VitaeBuff.class ).setVitae( 2 + hero.pointsInTalent( BLOODY_VITAE ) );
+	}
 
 	public static void onFoodEaten( Hero hero, float foodVal, Item foodSource ){
 		EventManager.emit(new HeroEatFoodEvent(hero, foodVal, foodSource));

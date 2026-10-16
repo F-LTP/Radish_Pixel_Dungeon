@@ -43,10 +43,16 @@ public class Belladonna extends MeleeWeapon {
         return 4f + 1.5f * lvl;
     }
 
+    /** 施加法术易伤时的承伤倍率，每等级 ×1.05。 */
+    public static float procFactor(int lvl) {
+        return SpellVulnerable.DAMAGE_FACTOR * (float) Math.pow(1.05f, lvl);
+    }
+
     @Override
     public int proc(Char attacker, Char defender, int damage) {
         if (Random.Float() < procChance(buffedLvl())) {
-            Buff.affect(defender, SpellVulnerable.class, procDuration(buffedLvl()));
+            SpellVulnerable sv = Buff.affect(defender, SpellVulnerable.class, procDuration(buffedLvl()));
+            sv.setFactor(procFactor(buffedLvl()));
         }
         return super.proc(attacker, defender, damage);
     }
@@ -55,8 +61,10 @@ public class Belladonna extends MeleeWeapon {
     public String statsInfo() {
         if (Dungeon.hero != null) {
             return Messages.get(this, "stats_desc",
-                    Math.round(procChance(buffedLvl()) * 100f), procDuration(buffedLvl()));
+                    Math.round(procChance(buffedLvl()) * 100f),
+                    Math.round((procFactor(buffedLvl()) - 1f) * 100f),
+                    procDuration(buffedLvl()));
         }
-        return Messages.get(this, "stats_desc", 50, 4f);
+        return Messages.get(this, "stats_desc", 50, 33, 4f);
     }
 }

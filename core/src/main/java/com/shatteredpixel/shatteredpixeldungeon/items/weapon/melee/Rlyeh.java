@@ -121,8 +121,8 @@ public class Rlyeh extends MeleeWeapon {
         }
         if (Dungeon.level.mobs != null) {
             for (Mob mob : Dungeon.level.mobs) {
-                if (mob instanceof Statue && ((Statue) mob).weapon instanceof Rlyeh) {
-                    return (Rlyeh) ((Statue) mob).weapon;
+                if (mob instanceof Statue && ((Statue) mob).weapon() instanceof Rlyeh) {
+                    return (Rlyeh) ((Statue) mob).weapon();
                 }
             }
         }

@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EliteBadge;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Wayward;
@@ -40,7 +41,7 @@ import com.watabou.utils.Random;
 
 import java.util.HashSet;
 
-public abstract class ChampionHero extends Buff {
+public abstract class ChampionHero extends Buff implements IDamageModifier {
 
     {
         type = buffType.POSITIVE;
@@ -115,6 +116,11 @@ public abstract class ChampionHero extends Buff {
 
     public float damageTakenFactor(){
         return 1f;
+    }
+
+    @Override
+    public float finalMultiply(int dmg, DamageInfo info) {
+        return damageTakenFactor();
     }
 
     public float evasionAndAccuracyFactor(){

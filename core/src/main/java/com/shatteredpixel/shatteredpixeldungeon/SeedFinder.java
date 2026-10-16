@@ -227,7 +227,7 @@ public class SeedFinder {
             if (m instanceof Statue) {
                 Heap h = new Heap();
                 h.items = new LinkedList<>();
-                h.items.add(((Statue) m).weapon.identify());
+                h.items.add(((Statue) m).weapon().identify());
                 h.type = Type.STATUE;
                 heaps.add(h);
             }

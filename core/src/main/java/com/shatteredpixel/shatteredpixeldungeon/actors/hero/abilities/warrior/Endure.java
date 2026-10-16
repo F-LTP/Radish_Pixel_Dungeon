@@ -33,8 +33,11 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
+import com.shatteredpixel.shatteredpixeldungeon.events.CharUnprocedDamageEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -69,7 +72,16 @@ public class Endure extends ArmorAbility {
 		hero.spendAndNext(3f);
 	}
 
-	public static class EndureTracker extends FlavourBuff {
+	// 蓄力基准 = 进管线原始伤害（全来源），与旧 Char 路径的 build 期出伤值语义一致
+	// 订阅方法须放在顶层类：event-processor 不支持以嵌套类作为订阅者
+	@SubscribeEvent(event = CharUnprocedDamageEvent.class, priority = 0)
+	public static void onUnprocedDamage(CharUnprocedDamageEvent event) {
+		EndureTracker t = event.getTarget().buff(EndureTracker.class);
+		if (t == null || !t.enduring) return;
+		t.damageBonus += event.getDamage() / 2f;
+	}
+
+	public static class EndureTracker extends FlavourBuff implements IDamageModifier {
 
 		{
 			type = buffType.POSITIVE;
@@ -100,27 +112,18 @@ public class Endure extends ArmorAbility {
 			return Messages.get(this, "desc", damageBonus, hitsLeft);
 		}
 
-		public float adjustDamageTaken(float damage){
-			if (enduring) {
-				damageBonus += damage/2;
-
-				float damageMulti = 0.5f;
-				if (Dungeon.hero.hasTalent(Talent.SHRUG_IT_OFF)){
-					//total damage reduction is 60%/68%/74%/80%, based on points in talent
-					damageMulti *= Math.pow(0.8f, Dungeon.hero.pointsInTalent(Talent.SHRUG_IT_OFF));
-				}
-
-				return damage*damageMulti;
-			}
-			return damage;
+		@Override
+		public float finalMultiply(int dmg, DamageInfo info) {
+			return enduring ? damageMulti() : 1f;
 		}
 
-		@Override
-		public void modifyIncomingAttackDamage(Char attacker, Char defender, DamageInfo info) {
-			int before = info.getDamage();
-			if (before > 0) {
-				info.addFinalMultModifier(adjustDamageTaken(before) / before, "defender endure", this);
+		private float damageMulti() {
+			float damageMulti = 0.5f;
+			if (Dungeon.hero.hasTalent(Talent.SHRUG_IT_OFF)){
+				//total damage reduction is 60%/68%/74%/80%, based on points in talent
+				damageMulti *= Math.pow(0.8f, Dungeon.hero.pointsInTalent(Talent.SHRUG_IT_OFF));
 			}
+			return damageMulti;
 		}
 
 		public void endEnduring(){

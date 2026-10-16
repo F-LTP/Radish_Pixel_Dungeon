@@ -34,10 +34,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.*;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Deminion;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.RoyalGuard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
-import com.shatteredpixel.shatteredpixeldungeon.custom.buffs.SpellVulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.ImmortalShieldAffecter;
 import com.shatteredpixel.shatteredpixeldungeon.damage.*;
 import com.shatteredpixel.shatteredpixeldungeon.effects.DeathAnimation;
@@ -47,17 +45,14 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.SnDSFX;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.events.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
-import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.LunarCorona;
 import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Masamune;
-import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Sunless;
-import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Turtleir;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRetribution;
@@ -770,16 +765,10 @@ public abstract class Char extends Actor {
 
     // ========== 攻击事件辅助 ==========
 
-    /** 该角色本次使用的攻击武器（Hero 用装备武器，Statue 用其 weapon 字段，RoyalGuard 用其 equipment 字段），无则为 null。 */
+    /** 该角色本次使用的攻击武器（Hero 用装备武器；Mob 覆写为 mobEquipment.weapon），无则为 null。 */
     public Item attackingWeapon() {
         if (this instanceof Hero) {
             return ((Hero) this).belongings.attackingWeapon();
-        }
-        if (this instanceof Statue) {
-            return ((Statue) this).weapon;
-        }
-        if (this instanceof RoyalGuard) {
-            return ((RoyalGuard) this).equipment;
         }
         return null;
     }
@@ -789,24 +778,15 @@ public abstract class Char extends Actor {
         return defendingWeapon(this) instanceof CircleSword;
     }
 
-    /** 防御方持有的武器（Hero 用装备武器，Statue 用其 weapon 字段，RoyalGuard 用其 equipment 字段），无则为 null。 */
+    /** 防御方持有的武器（Hero 用装备武器，其余角色用 attackingWeapon()），无则为 null。 */
     public static Item defendingWeapon(Char defender) {
         if (defender instanceof Hero) {
             return ((Hero) defender).belongings.weapon();
         }
-        if (defender instanceof Statue) {
-            return ((Statue) defender).weapon;
-        }
-        if (defender instanceof RoyalGuard) {
-            return ((RoyalGuard) defender).equipment;
-        }
-		if (defender instanceof Mob) {
-			return defender.attackingWeapon();
-		}
-        return null;
+        return defender.attackingWeapon();
     }
 
-    /** 该角色当前穿着的护甲（Hero 在 belongings，ArmoredStatue/未来挑战怪覆写），无则为 null。 */
+    /** 该角色当前穿着的护甲（Hero 在 belongings，Mob 覆写为 mobEquipment.armor），无则为 null。 */
     public Armor armor() {
         return null;
     }
@@ -913,10 +893,8 @@ public abstract class Char extends Actor {
     }
 
     /**
-     * 新的伤害方法：使用DamageInfo包装伤害信息
-     * <p>
-     * 暴击是DamageInfo的属性，而不是特殊的伤害类型。
-     * 此方法将DamageInfo转换为旧格式调用现有逻辑，保持向后兼容。
+     * 伤害入口：将 DamageInfo 交给 DamagePipeline 处理。
+     * 暴击是 DamageInfo 的属性，而不是特殊的伤害类型。
      *
      * @param info 伤害信息对象
      */
@@ -953,7 +931,7 @@ public abstract class Char extends Actor {
         // 天球仪造成魔法伤害的代码移动到这里来，以便防止额外造成1次物理伤害
         boolean srcIsAHeroWieldingCS = src instanceof Hero && ((Hero) src).belongings.attackingWeapon() instanceof CelestialSphere;
         boolean srcIsCS = src instanceof CelestialSphere;
-        boolean srcIsAStatueWieldingCS = src instanceof Statue && ((Statue) src).weapon instanceof CelestialSphere;
+        boolean srcIsAStatueWieldingCS = src instanceof Statue && ((Statue) src).weapon() instanceof CelestialSphere;
         if (srcIsCS || srcIsAHeroWieldingCS || srcIsAStatueWieldingCS) {
             src = new DM100.LightningBolt();
         }
@@ -968,56 +946,22 @@ public abstract class Char extends Actor {
             EventManager.emit(new CharUnprocedDamageEvent(this, attacker, src, dmg, damageType));
         }
 
-        // —— 应用护甲：直接加算（在承伤倍率乘算之前做平坦扣减）——
+        // —— 应用护甲：DR 折入原始伤害桶的固定项，与其它固定加算同桶相消 ——
         int armorBlocked = 0;
+        int armorReduction = 0;
         Char attackerChar = info.getAttacker() != null ? info.getAttacker() : (src instanceof Char ? (Char) src : null);
         if (attackerChar != null && damageType == DamageType.PHYSICAL && !OrdinaryAttackDamage.ignoresDefenseRoll(attackerChar)) {
             int dr = OrdinaryAttackDamage.rollDefenseReduction(attackerChar, this, true);
             if (dr > 0) {
-                int before = dmg;
-                dmg = Math.max(dmg - dr, 0);
-                armorBlocked = before - dmg;
+                armorReduction = dr;
+                armorBlocked = Math.min(dmg, dr);
             }
         }
 
-		Armor wornArmor = armor();
-		if (!(this instanceof Hero) && src != null && wornArmor != null
-				&& wornArmor.hasGlyph(AntiMagic.class, this)
-				&& AntiMagic.RESISTS.contains(src.getClass())) {
-			dmg = Math.max(0, dmg - AntiMagic.drRoll(this, wornArmor.procLvl()));
-		}
-
-        // —— 黏稠刻印：在护甲之后结算延迟伤害（优先级在护甲之后，护甲先阻挡再延迟剩余部分）——
-        if (buff(Viscosity.ViscosityTracker.class) != null) {
-            dmg = buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
-            buff(Viscosity.ViscosityTracker.class).detach();
-        }
-
-        // DoggingDog on 20250710
-        if (hero.buff(LunarCorona.Phase.class) != null) {
-            LunarCorona.Phase buff = hero.buff(LunarCorona.Phase.class);
-            if (buff.isWaxing()) {
-                dmg *= 2;
-            } else {
-                dmg /= 2;
-            }
-        }
-
-        // DoggingDog on 20250518
-        if (hero.belongings.armor instanceof Turtleir && this instanceof Hero) {
-            Turtleir.Mass_Energy buff = hero.buff(Turtleir.Mass_Energy.class);
-            if (buff != null) {
-                dmg = buff.absorbDamage(dmg);
-            }
-        }
-
-        // DoggingDog on 20250523
-        if (hero.belongings.armor instanceof Sunless && this instanceof Hero) {
-            Sunless.Sirris buff = hero.buff(Sunless.Sirris.class);
-            if (buff != null) {
-                dmg = buff.absorbDamage(dmg);
-            }
-        }
+        // 原始伤害修正（抗性之前；含吸收、延迟、月相等）。修正来源只收集一次，原始/最终两段复用。
+        java.util.List<IDamageModifier> damageModifiers = new java.util.ArrayList<>();
+        collectDamageModifiers(damageModifiers);
+        dmg = applyRawDamageModifiers(dmg, info, armorReduction, damageModifiers);
 
         if (isInvulnerable(src.getClass())) {
             sprite.showStatus(CharSprite.POSITIVE, Messages.get(this, "invulnerable"));
@@ -1044,32 +988,6 @@ public abstract class Char extends Actor {
             }
         }
 
-        Terror t = buff(Terror.class);
-        if (t != null) {
-            t.recover();
-        }
-        Dread d = buff(Dread.class);
-        if (d != null) {
-            d.recover();
-        }
-        Charm c = buff(Charm.class);
-        if (c != null) {
-            c.recover(src);
-        }
-        if (this.buff(Frost.class) != null) {
-            Buff.detach(this, Frost.class);
-        }
-        if (this.buff(MagicalSleep.class) != null) {
-            Buff.detach(this, MagicalSleep.class);
-        }
-        if (this.buff(Doom.class) != null && !isImmune(Doom.class)) {
-            dmg *= 1.67f;
-        }
-
-        if (alignment != Alignment.ALLY && this.buff(DeathMark.DeathMarkTracker.class) != null) {
-            dmg *= 1.25f;
-        }
-
         if (buff(Sickle.HarvestBleedTracker.class) != null) {
             buff(Sickle.HarvestBleedTracker.class).detach();
 
@@ -1084,14 +1002,6 @@ public abstract class Char extends Actor {
                 sprite.showStatus(CharSprite.WARNING, Messages.titleCase(b.name()) + " " + (int) b.level());
                 return new DamageResult(info.getBaseDamage(), Math.max(0, dmg), 0, 0, 0, 0, false);
             }
-        }
-
-        for (ChampionEnemy buff : buffs(ChampionEnemy.class)) {
-            dmg = (int) Math.ceil(dmg * buff.damageTakenFactor());
-        }
-
-        for (ChampionHero buff : buffs(ChampionHero.class)) {
-            dmg = (int) Math.ceil(dmg * buff.damageTakenFactor());
         }
 
         // 伤害类型抗性：按 DamageType 的新层 + 现有基于来源类的旧层（乘算）
@@ -1132,19 +1042,12 @@ public abstract class Char extends Actor {
             }
         }
 
-        // 法术易伤：受到魔法/元素伤害时提高
-        if (damageType.isMagical() && buff(SpellVulnerable.class) != null) {
-            dmg = Math.round(dmg * SpellVulnerable.DAMAGE_FACTOR);
-        }
+        // 最终伤害修正（抗性之后）
+        dmg = applyFinalDamageModifiers(dmg, info, damageModifiers);
 
-        //TODO improve this when I have proper damage source logic
-        if (damageType.isMagical() && buff(ArcaneArmor.class) != null) {
-            dmg -= combatRoll(0, buff(ArcaneArmor.class).level());
-            if (dmg < 0) dmg = 0;
-        }
-
-        if (buff(Paralysis.class) != null) {
-            buff(Paralysis.class).processDamage(dmg);
+        // 护盾前反应相位：携带护盾前伤害与受击前 HP（只读，供 Paralysis 等）
+        for (Buff b : buffs().toArray(new Buff[0])) {
+            b.onPreShieldDamage(dmg, HP, info);
         }
 
         int shielded = dmg;
@@ -1182,14 +1085,6 @@ public abstract class Char extends Actor {
         int hpBefore = HP;
         if (this.buff(ImmortalShieldAffecter.ImmortalShield.class) == null) {
             HP -= Math.max(dmg, 0);
-
-            // DoggingDog on 20250818
-            if (dmg >= 1 && hero.hasTalent(Talent.BLOODY_VITAE) && this instanceof Hero && hero != null) {
-                if (src instanceof Mob)
-                    Buff.affect(hero, VitaeBuff.class).setVitae(2 + hero.pointsInTalent(Talent.BLOODY_VITAE));
-            }
-            //
-
         }
 
         if (HP > 0 && buff(Grim.GrimTracker.class) != null) {
@@ -1213,7 +1108,12 @@ public abstract class Char extends Actor {
         int dealt = Math.max(0, hpBefore - Math.max(0, HP));
         if (dealt > 0) {
             Char attacker = src instanceof Char ? (Char) src : null;
-            EventManager.emit(new CharFinalDamageEvent(this, attacker, src, info.getSourceItem(), dealt, damageType));
+            EventManager.emit(new CharFinalDamageEvent(this, attacker, src, info.getSourceItem(), dealt, damageType, hpBefore, HP));
+        }
+
+        // 受击反应钩子：快照迭代（钩子内可能 detach，如 Frost 解冻）
+        for (Buff b : buffs().toArray(new Buff[0])) {
+            b.onDamageTaken(dealt, info);
         }
 
         if (HP < 0 && src instanceof Char && alignment == Alignment.ENEMY) {
@@ -1270,9 +1170,51 @@ public abstract class Char extends Actor {
         return new DamageResult(info.getBaseDamage(), info.getDamage(), armorBlocked, resistanceBlocked, shielded, hpDamage, immuneHit);
     }
 
+    /** 收集本角色所有承伤修正来源：自身 Buff + 已装备物品。子类覆写补充装备。 */
+    protected void collectDamageModifiers(java.util.List<IDamageModifier> out) {
+        for (Buff b : buffs()) {
+            addDamageModifier(out, b);
+        }
+        collectArmorGlyphs(out, armor(), this);
+    }
+
+    protected static void addDamageModifier(java.util.List<IDamageModifier> out, Object candidate) {
+        if (candidate instanceof IDamageModifier) out.add((IDamageModifier) candidate);
+    }
+
+    /** 收集护甲的生效刻印（本体 + 封印）作为修正来源，并绑定持甲者上下文。 */
+    protected static void collectArmorGlyphs(java.util.List<IDamageModifier> out, Armor a, Char wearer) {
+        if (a == null || wearer == null) return;
+        a.bindWearer(wearer);
+        addDamageModifier(out, a.glyph);
+        BrokenSeal s = a.checkSeal();
+        if (s != null && s.getGlyph() != a.glyph) addDamageModifier(out, s.getGlyph());
+    }
+
+    /** 原始伤害修正：抗性之前，护甲 DR 以固定减算并入同桶。聚合顺序为固定加算 → 百分比加算 → 乘算；取整沿用原实现的截断。 */
+    private int applyRawDamageModifiers(int dmg, DamageInfo info, int armorReduction, java.util.List<IDamageModifier> mods) {
+        float flat = -armorReduction, percent = 0f, mult = 1f;
+        for (IDamageModifier m : mods) {
+            flat += m.rawAddFlat(dmg, info);
+            percent += m.rawAddPercent(dmg, info);
+            mult *= m.rawMultiply(dmg, info);
+        }
+        return Math.max(0, (int) ((dmg + flat) * (1f + percent) * mult));
+    }
+
+    /** 最终伤害修正：抗性之后、护盾之前。聚合顺序同上；取整沿用原实现的四舍五入。 */
+    private int applyFinalDamageModifiers(int dmg, DamageInfo info, java.util.List<IDamageModifier> mods) {
+        float flat = 0f, percent = 0f, mult = 1f;
+        for (IDamageModifier m : mods) {
+            flat += m.finalAddFlat(dmg, info);
+            percent += m.finalAddPercent(dmg, info);
+            mult *= m.finalMultiply(dmg, info);
+        }
+        return Math.max(0, Math.round((dmg + flat) * (1f + percent) * mult));
+    }
+
     /**
      * 恢复生命值的统一入口。
-     * <p>
      * 所有治疗来源（自然恢复、持续治疗、食物、药水、露水等）都应调用此方法，
      * 而不是直接修改 {@link #HP}。此方法在英雄恢复生命时发布 {@link HeroHealEvent}。
      *
@@ -1285,7 +1227,6 @@ public abstract class Char extends Actor {
 
     /**
      * 恢复生命值的统一入口。
-     * <p>
      * 所有治疗来源（自然恢复、持续治疗、食物、药水、露水等）都应调用此方法，
      * 而不是直接修改 {@link #HP}。此方法在英雄恢复生命时发布 {@link HeroHealEvent}。
      *

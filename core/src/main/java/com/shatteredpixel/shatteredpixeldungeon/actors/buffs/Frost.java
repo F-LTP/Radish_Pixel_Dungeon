@@ -46,6 +46,11 @@ import java.util.ArrayList;
 
 public class Frost extends FlavourBuff {
 
+	@Override
+	public void onDamageTaken(int dealt, DamageInfo info) {
+		detach();
+	}
+
 	public static final float DURATION	= 5f;
 
 	//bosses are only frozen for a shorter time

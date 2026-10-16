@@ -22,15 +22,18 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
 
-//A magical version of barkskin, essentially
-public class ArcaneArmor extends Buff {
+// 本质上是魔法版的树皮术
+public class ArcaneArmor extends Buff implements IDamageModifier {
 
 	{
 		type = buffType.POSITIVE;
@@ -74,6 +77,11 @@ public class ArcaneArmor extends Buff {
 			}
 			spend(interval - cooldown() - 1);
 		}
+	}
+
+	@Override
+	public float finalAddFlat(int dmg, DamageInfo info) {
+		return info.getType().isMagical() ? -Char.combatRoll(0, level) : 0f;
 	}
 
 	@Override

@@ -33,10 +33,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PrismaticGuard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
-import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
@@ -211,19 +211,12 @@ public class PrismaticImage extends NPC {
 	}
 	
 	@Override
-	public void damage(DamageInfo info) {
-		
-		int dmg = info.getDamage();
-		//TODO improve this when I have proper damage source logic
-		if (hero != null && hero.belongings.armor() != null && hero.belongings.armor().hasGlyph(AntiMagic.class, this)
-				&& info.getSource() != null && AntiMagic.RESISTS.contains(info.getSource().getClass())){
-			dmg -= AntiMagic.drRoll(hero, hero.belongings.armor().buffedLvl());
-			dmg = Math.max(dmg, 0);
-		}
-		
-		super.damage(DamageInfo.of(dmg, info.getType(), info.getAttacker(), info.getSource()));
+	protected void collectDamageModifiers(java.util.List<IDamageModifier> out) {
+		super.collectDamageModifiers(out);
+		Hero owner = hero != null ? hero : Dungeon.hero;
+		if (owner != null) collectArmorGlyphs(out, owner.belongings.armor(), owner);
 	}
-	
+
 	@Override
 	public float speed() {
 		if (hero != null && hero.belongings.armor() != null){

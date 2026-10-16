@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
@@ -930,6 +931,16 @@ public abstract class Mob extends Char {
 	@Override
 	public Armor armor() {
 		return mobEquipment.armor != null ? mobEquipment.armor : super.armor();
+	}
+
+	@Override
+	protected void collectDamageModifiers(java.util.List<IDamageModifier> out) {
+		super.collectDamageModifiers(out);
+		// 经攻击武器访问器收集：Statue / RoyalGuard 等持有独立武器字段的怪无需再覆写
+		addDamageModifier(out, attackingWeapon());
+		addDamageModifier(out, mobEquipment.artifact);
+		addDamageModifier(out, mobEquipment.misc);
+		addDamageModifier(out, mobEquipment.ring);
 	}
 
 	@Override

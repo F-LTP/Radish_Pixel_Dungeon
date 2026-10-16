@@ -49,7 +49,6 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
@@ -673,16 +672,8 @@ public class DriedRose extends Artifact {
 		
 		@Override
 		public void damage(DamageInfo info) {
-			//TODO improve this when I have proper damage source logic
-			int dmg = info.getDamage();
-			if (rose != null && rose.armor != null && rose.armor.hasGlyph(AntiMagic.class, this)
-					&& AntiMagic.RESISTS.contains(info.getSource().getClass())){
-				dmg -= AntiMagic.drRoll(this, rose.armor.buffedLvl());
-				dmg = Math.max(dmg, 0);
-			}
-			
-			super.damage( DamageInfo.of(dmg, info.getType(), info.getAttacker(), info.getSource()) );
-			
+			super.damage(info);
+
 			//for the rose status indicator
 			Item.updateQuickslot();
 		}

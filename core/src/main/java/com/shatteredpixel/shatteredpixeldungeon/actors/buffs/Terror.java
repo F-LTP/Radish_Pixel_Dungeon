@@ -21,10 +21,16 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
 
 public class Terror extends FlavourBuff {
+
+	@Override
+	public void onDamageTaken(int dealt, DamageInfo info) {
+		recover();
+	}
 
 	public int object = 0;
 

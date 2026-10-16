@@ -96,6 +96,18 @@ public class Buff extends Actor {
 
 	public void modifyIncomingAttackDamage(Char attacker, Char defender, DamageInfo info) {
 	}
+
+	/**
+	 * 目标受到伤害后的回调（减免管线全部完成后调用，无论实际扣血是否 > 0）。
+	 */
+	public void onDamageTaken(int dealt, DamageInfo info) {
+	}
+
+	/**
+	 * 护盾吸收前的受击反应回调（最终伤害修正之后、护盾与 HP 扣减之前）。
+	 */
+	public void onPreShieldDamage(int dmg, int hpBefore, DamageInfo info) {
+	}
 	
 	public boolean attachTo( Char target ) {
 

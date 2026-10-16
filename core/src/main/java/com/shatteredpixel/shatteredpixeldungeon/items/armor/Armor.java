@@ -108,6 +108,9 @@ public class Armor extends EquipableItem {
 	public Augment augment = Augment.NONE;
 
 	public Glyph glyph;
+
+	/** 持甲者上下文，供刻印在承伤结算时读取。 */
+	public Char wearer;
 	//public boolean curseInfusionBonus = false;
 
 	public boolean glyphHardened = false;
@@ -302,6 +305,7 @@ public class Armor extends EquipableItem {
 
 	@Override
 	public void activate(Char ch) {
+		bindWearer(ch);
 		// BrokenSeal 的 WarriorShield 通过 applyEffect() 自动应用
 		if (buff != null){
 			buff.detach();
@@ -315,6 +319,14 @@ public class Armor extends EquipableItem {
 				toy.applyEffect((Hero)ch);
 			}
 		}
+	}
+
+	/** 绑定持甲者：承伤枚举与装备激活时调用，供刻印读取上下文。 */
+	public void bindWearer(Char ch) {
+		wearer = ch;
+		if (glyph != null) glyph.armor = this;
+		BrokenSeal s = checkSeal();
+		if (s != null && s.getGlyph() != null) s.getGlyph().armor = this;
 	}
 
 	public void affixSeal(BrokenSeal seal){
@@ -687,6 +699,7 @@ public class Armor extends EquipableItem {
 	public boolean doUnequip( Hero hero, boolean collect, boolean single ) {
 		if (super.doUnequip( hero, collect, single )) {
 			hero.belongings.armor = null;
+			wearer = null;
 			for (ItemArmorAttachable toy : attachedToys) {
 				ChallengeToyEffects.removePermanentEffect(hero, toy);
 			}
@@ -1238,6 +1251,9 @@ public class Armor extends EquipableItem {
 				10  //3.33% each
 		};
 		public boolean onSeal=false;
+
+		/** 所属护甲，由 Armor 在绑定时注入，供刻印读取持甲者与等级。 */
+		protected Armor armor;
 
 		public static final Class<?>[] curses = new Class<?>[]{
 				AntiEntropy.class, Corrosion.class, Displacement.class, Metabolism.class,

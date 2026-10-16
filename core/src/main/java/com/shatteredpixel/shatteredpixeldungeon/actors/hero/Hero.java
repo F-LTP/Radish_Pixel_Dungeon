@@ -36,6 +36,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.*;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.Belief;
@@ -96,7 +98,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.EnergyArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.AlchemistsToolkit;
@@ -210,6 +211,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class Hero extends Char {
 
@@ -2238,6 +2240,20 @@ public class Hero extends Char {
 		return total;
 	}
 
+	@Override
+	protected void collectDamageModifiers(List<IDamageModifier> out) {
+		super.collectDamageModifiers(out);
+		collectArmorGlyphs(out, belongings.armor(), this);
+		addDamageModifier(out, belongings.weapon());
+		addDamageModifier(out, belongings.artifact());
+		addDamageModifier(out, belongings.misc());
+		addDamageModifier(out, belongings.ring());
+		addDamageModifier(out, belongings.secondWep());
+		for (Item it : belongings) {
+			if (it instanceof Trinket) addDamageModifier(out, it);
+		}
+	}
+
 	boolean isOnly = false;
 	@Override
 	public void damage( DamageInfo info ) {
@@ -2282,12 +2298,7 @@ public class Hero extends Char {
 			GLog.w( Messages.get(this, "pain_resist") );
 		}
 
-		Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
 		if (!(src instanceof Char)){
-			//reduce damage here if it isn't coming from a character (if it is we already reduced it)
-			if (endure != null){
-				dmg = Math.round(endure.adjustDamageTaken(dmg));
-			}
 			//the same also applies to challenge scroll damage reduction
 			if (buff(ScrollOfChallenge.ChallengeArena.class) != null){
 				dmg *= 0.67f;
@@ -2297,13 +2308,6 @@ public class Hero extends Char {
 		CapeOfThorns.Thorns thorns = buff( CapeOfThorns.Thorns.class );
 		if (thorns != null) {
 			dmg = thorns.proc(dmg, (src instanceof Char ? (Char)src : null),  this);
-		}
-
-		dmg = (int)Math.ceil(dmg * RingOfTenacity.damageMultiplier( this ));
-		//TODO improve this when I have proper damage source logic
-		if (belongings.armor() != null && belongings.armor().hasGlyph(AntiMagic.class, this)
-				&& AntiMagic.RESISTS.contains(src.getClass())){
-			dmg -= AntiMagic.drRoll(this, belongings.armor().procLvl());
 		}
 
 		if (buff(Talent.WarriorFoodImmunity.class) != null){
