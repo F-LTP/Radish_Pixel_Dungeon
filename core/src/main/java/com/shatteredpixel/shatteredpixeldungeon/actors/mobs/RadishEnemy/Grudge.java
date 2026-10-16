@@ -53,7 +53,6 @@ public class Grudge extends Mob {
         super.die( cause );
     }
     @Override
-    @Override
     protected String heroKilledMessage() {
         return Messages.capitalize(Messages.get(Grudge.class, "kill"));
     }

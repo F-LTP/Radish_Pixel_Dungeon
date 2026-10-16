@@ -31,7 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Ooze;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.events.DrinkPotionEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.DrinkPotionFinishEvent;
 import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
 import com.shatteredpixel.shatteredpixeldungeon.events.ThrowPotionEvent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
@@ -353,7 +353,7 @@ public class Potion extends Item {
 	}
 
 	protected void emitDrinkEvent(Hero hero) {
-		EventManager.emit(new DrinkPotionEvent(hero, this));
+		EventManager.emit(new DrinkPotionFinishEvent(hero, this));
 	}
 
 	public void apply( Hero hero ) {

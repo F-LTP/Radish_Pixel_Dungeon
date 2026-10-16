@@ -160,7 +160,6 @@ public class Goblin extends Mob {
         return desc;
     }
     @Override
-    @Override
     protected String heroKilledMessage() {
         return Messages.capitalize(Messages.get(Goblin.class, "rankings_desc"));
     }

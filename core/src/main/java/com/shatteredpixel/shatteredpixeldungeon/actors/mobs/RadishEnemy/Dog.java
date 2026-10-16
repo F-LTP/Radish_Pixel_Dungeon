@@ -69,7 +69,6 @@ public class Dog extends Mob {
         super.die( cause );
     }
     @Override
-    @Override
     protected String heroKilledMessage() {
         return Messages.capitalize(Messages.get(Dog.class, "rankings_desc"));
     }

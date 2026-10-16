@@ -1,72 +1,64 @@
 package com.shatteredpixel.shatteredpixeldungeon.events;
 
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
- * 英雄死亡事件
- * 当英雄死亡时触发
+ * 真正死亡路径（super.die 后、reallyDie 前）发布；Ankh 复活不发布——收到即本局结束。
+ * killer 为伤害来源 Char（投射物回退 lastAttacker，非战斗为 null）；cause 由 lastDamageType 推导。
  */
 public class HeroDeathEvent extends GameEvent {
-    private final Hero hero;
-    private final Char killer;
-    private final DeathCause cause;
 
-    public HeroDeathEvent(Hero hero, Char killer, DeathCause cause) {
-        this.hero = hero;
-        this.killer = killer;
-        this.cause = cause;
-    }
+	public enum DeathCause {
+		COMBAT,
+		POISON,
+		FIRE,
+		ELECTRICITY,
+		FALLING,
+		STARVATION,
+		OTHER;
 
-    public Hero getHero() {
-        return hero;
-    }
+		/** 无法归类的类型（普通物理/魔法伤害等）返回 null，由调用方按凶手定 COMBAT/OTHER */
+		public static DeathCause fromDamageType(DamageType type) {
+			if (type == null) return null;
+			switch (type) {
+				case POISON:
+				case OOZE:
+					return POISON;
+				case FIRE:
+				case BURNING_STATUS:
+				case TOXIC:
+				case CORROSIVE:
+					return FIRE;
+				case LIGHTNING:
+					return ELECTRICITY;
+				case FALL:
+				case CHASM:
+					return FALLING;
+				case HUNGER:
+					return STARVATION;
+				default:
+					return null;
+			}
+		}
+	}
 
-    public Char getKiller() {
-        return killer;
-    }
+	private final Hero hero;
+	private final Char killer;
+	private final DeathCause cause;
 
-    public DeathCause getCause() {
-        return cause;
-    }
+	public HeroDeathEvent(@NotNull Hero hero, @Nullable Char killer, @NotNull DeathCause cause) {
+		this.hero = hero;
+		this.killer = killer;
+		this.cause = cause;
+	}
 
-    public enum DeathCause {
-        COMBAT,         // 战斗死亡
-        POISON,         // 中毒
-        FIRE,           // 火焰
-        ELECTRICITY,    // 电击
-        FALLING,        // 掉落
-        STARVATION,     // 饥饿
-        OTHER           // 其他原因
-        ;
+	public @NotNull Hero getHero() { return hero; }
 
-        /**
-         * 根据伤害类型推导死亡原因。
-         * 无法归类的类型（普通物理/魔法战斗伤害等）返回 null，
-         * 由调用方结合凶手是否为 Char 决定 COMBAT 或 OTHER。
-         */
-        public static DeathCause fromDamageType(DamageType type) {
-            if (type == null) return null;
-            switch (type) {
-                case POISON:
-                case OOZE:
-                    return POISON;
-                case FIRE:
-                case BURNING_STATUS:
-                case TOXIC:
-                case CORROSIVE:
-                    return FIRE;
-                case LIGHTNING:
-                    return ELECTRICITY;
-                case FALL:
-                case CHASM:
-                    return FALLING;
-                case HUNGER:
-                    return STARVATION;
-                default:
-                    return null;
-            }
-        }
-    }
+	public @Nullable Char getKiller() { return killer; }
+
+	public @NotNull DeathCause getCause() { return cause; }
 }

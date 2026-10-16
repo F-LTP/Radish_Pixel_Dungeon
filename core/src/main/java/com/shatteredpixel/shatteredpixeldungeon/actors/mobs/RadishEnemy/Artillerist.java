@@ -79,7 +79,6 @@ public class Artillerist extends Mob {
     }
 
     @Override
-    @Override
     protected String heroKilledMessage() {
         return Messages.capitalize(Messages.get(Artillerist.class, "kill"));
     }

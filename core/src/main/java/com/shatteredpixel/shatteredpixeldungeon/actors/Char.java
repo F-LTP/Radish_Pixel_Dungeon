@@ -377,6 +377,20 @@ public abstract class Char extends Actor {
 		return Messages.capitalize(Messages.get(Char.class, "kill", name()));
 	}
 
+    /**
+     * 一次近战攻击的完整结算流程：
+     * 1. PreAttackEvent：可替换/取消攻击，dmgMulti/dmgBonus/accMulti 写回；
+     * 2. 场景有效性检查（层切换后的残留动画不结算）与目标无敌检查；
+     * 3. hit() 命中判定（内部发布 HitCheckEvent，可强制定结果）；
+     *    未命中 → AttackMissEvent（职业/武器/护甲效果）后返回 false；
+     * 4. 造成伤害：rollBaseDamage 掷基础伤害（潜行走 Preparation 公式）→ rollCritical 暴击 →
+     *    build 构建 DamageInfo（出伤三段 modifier、attack bonus、守方 incoming、圆球皮肤）→ 板甲的免疫伤害；
+     * 5. AttackEvent：反弹类效果可取消（Rlyeh），取消则播命中音效并返回 true；
+     * 6. foldPostProcessing：defenseProc → 弱点 → attackProc → 诗；
+     * 7. enemy.damage() 走统一减免管线（护甲 DR/抗性/护盾，发布 CharUnproced/FinalDamageEvent）；
+     * 8. AttackHitEvent：debuff(-100) → 控制(-200) → 斩杀(-300) → 处决/暗杀(-400)，随后血花、闪白与击杀播报。
+     * 返回 true 表示行动已消耗（命中或被取消），false 表示未命中或未发生。
+     */
     public boolean attack(Char enemy, float dmgMulti, float dmgBonus, float accMulti) {
 
         if (enemy == null) return false;

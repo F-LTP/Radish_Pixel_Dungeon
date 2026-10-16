@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.events.BuffAppliedEvent;
 import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
@@ -105,10 +106,19 @@ public class Buff extends Actor {
 		this.target = target;
 
 		if (target.add( this )){
-			if (target.sprite != null) fx( true );
+			// BuffAppliedEvent 可取消：取消则附加失败（移除 buff，目标头顶显示"抵抗"字样）
 			if (restoreDepth == 0) {
-				EventManager.emit(new BuffAppliedEvent(target, this, BuffAppliedEvent.Source.GAMEPLAY));
+				BuffAppliedEvent event = new BuffAppliedEvent(target, this, BuffAppliedEvent.Source.GAMEPLAY);
+				EventManager.emit(event);
+				if (event.isCancelled()) {
+					detach();
+					if (target.sprite != null) {
+						target.sprite.showStatus(CharSprite.NEUTRAL, Messages.get(Buff.class, "resisted"));
+					}
+					return false;
+				}
 			}
+			if (target.sprite != null) fx( true );
 			return true;
 		} else {
 			this.target = null;

@@ -105,7 +105,6 @@ public class GnollZealot extends Mob {
         super.die( cause );
     }
     @Override
-    @Override
     protected String heroKilledMessage() {
         return Messages.capitalize(Messages.get(GnollZealot.class, "kill"));
     }

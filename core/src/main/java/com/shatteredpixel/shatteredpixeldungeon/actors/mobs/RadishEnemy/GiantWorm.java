@@ -73,7 +73,6 @@ public class GiantWorm extends Mob{
 
 
     @Override
-    @Override
     protected String heroKilledMessage() {
         return Messages.capitalize(Messages.get(GiantWorm.class, "rankings_desc"));
     }
