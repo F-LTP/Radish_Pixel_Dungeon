@@ -34,6 +34,7 @@ public class Shaders {
     // ============== 光解消散效果 ==============
     
     public static final LightDissolveShader lightDissolve = load(LightDissolveShader.class);
+    public static final LightEvaporateShader lightEvaporate = load(LightEvaporateShader.class);
     
     // ============== 加载方法 ==============
     
@@ -55,6 +56,7 @@ public class Shaders {
         alpha.getClass();
         noise.getClass();
         lightDissolve.getClass();
+        lightEvaporate.getClass();
     }
     
     /**

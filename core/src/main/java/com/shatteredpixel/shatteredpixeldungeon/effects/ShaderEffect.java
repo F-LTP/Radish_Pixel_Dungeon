@@ -40,6 +40,10 @@ public class ShaderEffect extends Gizmo {
     private final GlslShaderScript shader;
     private float[] combinedMatrix = new float[16];
 
+    /** LIGHTEVAPORATE 的整体漂移速度（像素/秒），由死亡动画按方向设置。 */
+    private float driftX = 0f;
+    private float driftY = 0f;
+
     public ShaderEffect(CharSprite target, ShaderType type, float duration) {
         super();
         this.target = target;
@@ -56,6 +60,14 @@ public class ShaderEffect extends Gizmo {
         this.onComplete = onComplete;
     }
 
+    /**
+     * 设置整体漂移速度（像素/秒）。仅 LIGHTEVAPORATE 使用。
+     */
+    public void setDrift(float x, float y) {
+        this.driftX = x;
+        this.driftY = y;
+    }
+
     private GlslShaderScript getShader(ShaderType type) {
         switch (type) {
             case CUT: return Shaders.cut;
@@ -67,6 +79,7 @@ public class ShaderEffect extends Gizmo {
             case SINGULARITY: return Shaders.singularity;
             case NOISE: return Shaders.noise;
             case LIGHTDISSOLVE: return Shaders.lightDissolve;
+            case LIGHTEVAPORATE: return Shaders.lightEvaporate;
             default: return Shaders.alpha;
         }
     }
@@ -136,8 +149,17 @@ public class ShaderEffect extends Gizmo {
                     LightDissolveShader l = (LightDissolveShader) shader;
                     l.setProgress(progress);
                     l.setRandom(random);
-                    l.setMoveAmount(0.15f);
-                    l.setMoveDir(0.94f, -0.34f);
+                    l.setFlySpeed(1.2f);
+                }
+                break;
+            case LIGHTEVAPORATE:
+                if (shader instanceof LightEvaporateShader) {
+                    LightEvaporateShader e = (LightEvaporateShader) shader;
+                    e.setProgress(progress);
+                    e.setRandom(random);
+                    // 原作在 HDR + bloom 下从 1 升到 10；LDR 下 4 已接近全白。
+                    e.setEmissive(1f + 3f * progress);
+                    e.setCellScale(1f);
                 }
                 break;
         }
@@ -149,6 +171,12 @@ public class ShaderEffect extends Gizmo {
 
         elapsed += Game.elapsed;
         progress = Math.min(elapsed / duration, 1.0f);
+
+        // 原作会复制精灵并沿弹道方向整体漂移，这里直接推动当前 sprite
+        if (shaderType == ShaderType.LIGHTEVAPORATE && target != null) {
+            target.x += driftX * Game.elapsed;
+            target.y += driftY * Game.elapsed;
+        }
 
         if (progress >= 1.0f) {
             killAndErase();
@@ -195,6 +223,20 @@ public class ShaderEffect extends Gizmo {
             float pxH = frame.height() * texture.height;
             l.setPixelSize(pxW > 0f ? 1f / pxW : 1f / 16f,
                            pxH > 0f ? 1f / pxH : 1f / 16f);
+            // 直接从实际四边形 UV 判断翻转方向：flipHorizontal 只有在下一次
+            // updateFrame() 后才会反映到顶点上，直接读精灵标志可能和实际渲染不一致。
+            float uSign = verticesBuffer.get(6) >= verticesBuffer.get(2) ? 1f : -1f;
+            float vSign = verticesBuffer.get(11) >= verticesBuffer.get(3) ? 1f : -1f;
+            alignLightDissolveDir(l, spriteWidth, spriteHeight, uSign, vSign);
+        }
+
+        // 光蒸发同样需要像素格对齐，但不做方向换算
+        if (shaderType == ShaderType.LIGHTEVAPORATE && shader instanceof LightEvaporateShader) {
+            LightEvaporateShader e = (LightEvaporateShader) shader;
+            float pxW = frame.width() * texture.width;
+            float pxH = frame.height() * texture.height;
+            e.setPixelSize(pxW > 0f ? 1f / pxW : 1f / 16f,
+                           pxH > 0f ? 1f / pxH : 1f / 16f);
         }
 
         uploadShaderParams();
@@ -224,6 +266,51 @@ public class ShaderEffect extends Gizmo {
         com.watabou.glscripts.Script.unuse();
     }
 
+    /**
+     * 把屏幕上的"右上"方向换算到当前精灵帧的局部 UV 空间。
+     * 精灵可能被水平/垂直翻转或旋转，只有逆变换后飞散方向在屏幕上才保持一致。
+     */
+    private void alignLightDissolveDir(LightDissolveShader shader, float spriteWidth, float spriteHeight,
+                                       float uSign, float vSign) {
+        if (target == null) {
+            shader.setMoveDir(0.7071f, -0.7071f);
+            return;
+        }
+
+        // 屏幕方向：45° 向右上（屏幕坐标 y 向下）
+        float sx = 0.7071f;
+        float sy = -0.7071f;
+
+        // 逆旋转：精灵局部向量 -> 屏幕向量的矩阵为 Rotate(angle)
+        double inv = Math.toRadians(-target.angle);
+        float cos = (float) Math.cos(inv);
+        float sin = (float) Math.sin(inv);
+        float lx = sx * cos - sy * sin;
+        float ly = sx * sin + sy * cos;
+
+        // 逆缩放
+        float scaleX = Math.abs(target.scale.x) > 1e-6f ? target.scale.x : 1f;
+        float scaleY = Math.abs(target.scale.y) > 1e-6f ? target.scale.y : 1f;
+        lx /= scaleX;
+        ly /= scaleY;
+
+        // 局部像素方向 -> 帧 UV 方向（UV 轴的实际朝向由顶点数据给出）
+        if (spriteWidth <= 0f) spriteWidth = 1f;
+        if (spriteHeight <= 0f) spriteHeight = 1f;
+        float ux = lx / spriteWidth * uSign;
+        float uy = ly / spriteHeight * vSign;
+
+        float len = (float) Math.sqrt(ux * ux + uy * uy);
+        if (len > 1e-6f) {
+            ux /= len;
+            uy /= len;
+        } else {
+            ux = 0.7071f;
+            uy = -0.7071f;
+        }
+        shader.setMoveDir(ux, uy);
+    }
+
     public boolean isFinished() {
         return elapsed >= duration;
     }
@@ -236,37 +323,7 @@ public class ShaderEffect extends Gizmo {
         }
     }
 
-    // ========== 静态入口 ==========
-
-    /**
-     * 死亡着色器动画：准备状态清理 → 渲染线程挂载 shader → 进度走完后清理尸体并回调。
-     */
-    public static DeathAnimation deathAnimation( ShaderType type, float duration ) {
-        return (sprite, onFinished) -> {
-            sprite.prepareDeathVisual();
-
-            Game.runOnRenderThread( () -> {
-                if (sprite.parent == null) {
-                    if (onFinished != null) {
-                        onFinished.run();
-                    }
-                    return;
-                }
-
-                ShaderEffect old = sprite.getShaderEffect();
-                if (old != null) {
-                    old.killAndErase();
-                }
-
-                ShaderEffect effect = new ShaderEffect(sprite, type, duration);
-                effect.onComplete( onFinished );
-                sprite.setShaderEffect(effect);
-                sprite.parent.add(effect);
-            } );
-        };
-    }
-
     public enum ShaderType {
-        CUT, BURN, ELLIPSE, ACID, WIPE, ALPHA, SINGULARITY, NOISE, LIGHTDISSOLVE
+        CUT, BURN, ELLIPSE, ACID, WIPE, ALPHA, SINGULARITY, NOISE, LIGHTDISSOLVE, LIGHTEVAPORATE
     }
 }

@@ -134,13 +134,28 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 		return shaderEffect;
 	}
 
-	/** 自定义死亡动画开始前的公共准备：清理休眠/麻痹状态，隐藏情绪图标与血条。 */
-	public void prepareDeathVisual() {
+	/**
+	 * 自定义死亡动画开始前的公共准备：清理休眠/麻痹状态，隐藏情绪图标与血条。
+	 *
+	 * @param playDeathAnimation 是否在特效播放期间继续播放正常的序列帧死亡动画；
+	 *                           false 时冻结序列帧，让贴图停留在当前可见帧供 shader 接管。
+	 */
+	public void prepareDeathVisual(boolean playDeathAnimation) {
 		sleeping = false;
 		remove(State.PARALYSED);
 		hideEmo();
 		if (health != null) {
 			health.killAndErase();
+		}
+
+		animCallback = null;
+		if (playDeathAnimation) {
+			play(die);
+		} else {
+			if (curAnim == die && idle != null && idle.frames != null && idle.frames.length > 0) {
+				frame(idle.frames[0]);
+			}
+			curAnim = null;
 		}
 	}
 

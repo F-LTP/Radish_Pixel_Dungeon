@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.DeathAnimations;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Lightning;
@@ -706,7 +707,7 @@ public class Belief extends Buff implements ActionIndicator.Action {
                 return;
             }
 
-            ch.die(true);
+            ch.die(new DeathAnimations.HolyDeath());
             GLog.n(Messages.get(Belief.class, "deadkill_success", ch.name()));
 
             // 扣减信仰值（如果不在冷却中且有足够信仰）

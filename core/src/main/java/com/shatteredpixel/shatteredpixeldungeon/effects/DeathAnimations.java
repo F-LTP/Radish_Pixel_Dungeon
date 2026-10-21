@@ -19,7 +19,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
@@ -71,8 +73,8 @@ public class DeathAnimations {
 
   /** @return 按受害者最近伤害类型选择的 shader 死亡动画；该类型无对应 shader 时返回 null */
   public static DeathAnimation shaderDeathFor(Char ch) {
-    ShaderEffect.ShaderType type = DiceMageShaderFor(ch.lastDamageType);
-    return type == null ? null : ShaderEffect.deathAnimation(type, 0.5f);
+    ShaderEffect.ShaderType type = shaderFor(ch.lastDamageType);
+    return type == null ? null : new ShaderDeathAnimation(type, ShaderDeathAnimation.durationFor(type));
   }
 
   /**
@@ -85,13 +87,28 @@ public class DeathAnimations {
     }
     return (sprite, onFinished) -> {
       Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG, 1f, 0.75f);
-      HalvedCorpse.animation(cleaveAngle(ch), 120f).play(sprite, onFinished);
+      HalvedCorpse.animation(cleaveAngle(ch), 90f).play(sprite, onFinished);
     };
   };
+
+  /**
+   * HOLY 伤害/处决当前使用的消散着色器。
+   * 暂时接入光蒸发；恢复光解只需改回 {@link ShaderEffect.ShaderType#LIGHTDISSOLVE}。
+   */
+  private static final ShaderEffect.ShaderType HOLY_SHADER = ShaderEffect.ShaderType.LIGHTEVAPORATE;
 
   static {
     // 斩首者：被斩首打击杀死 → 腰斩动画 + 特殊音效（先于通用 shader 规则）
     register(HEADCLEAVER_CLEAVE);
+
+    // 神圣伤害：任何怪物被神圣伤害杀死都化成光消散（不限职业）
+    registerShaderDeathRule(DeathAnimations::holyKill);
+
+    // 神圣处决：非伤害来源（如牧师·宽恕裁决）以 HolyDeath 标记，同样化成光消散
+    register((ch, src) -> src instanceof HolyDeath
+            ? new ShaderDeathAnimation(HOLY_SHADER,
+                    ShaderDeathAnimation.durationFor(HOLY_SHADER))
+            : null);
 
     // 骰子法师：敌方怪物死亡时按伤害类型播放 shader 死亡动画
     registerShaderDeathRule(DeathAnimations::diceMageEnemyKill);
@@ -100,13 +117,32 @@ public class DeathAnimations {
     register((ch, src) -> (sprite, onFinished) -> sprite.die());
   }
 
-  /** 上半段抛出方向：背对攻击者斜向上（攻击者在左 → 右上 45°，在右 → 左上 135°）。 */
+  /**
+   * 上半段抛出方向：沿被斩者相对攻击者的位置方向飞离，而不再只按左/右分两档。
+   * 尸体本身只是粒子效果，直接取两者中心的连续像素方向，不做格子对齐。
+   * 武器怪物也可使用，故攻击者可能是任意角色，而非特指玩家。
+   */
   private static float cleaveAngle(Char ch) {
+    if (ch.sprite == null) {
+      return Random.Int(2) == 0 ? 45f : 135f;
+    }
     Char attacker = ch.lastAttacker;
-    if (attacker != null && attacker.sprite != null && ch.sprite != null) {
-      return attacker.sprite.x < ch.sprite.x ? 45f : 135f;
+    if (attacker != null && attacker.sprite != null && attacker != ch) {
+      return flightAngle(attacker.sprite, ch.sprite);
     }
     return Random.Int(2) == 0 ? 45f : 135f;
+  }
+
+  /** 从 from 指向 to 的抛出角：0 度为正右方，逆时针为正（屏幕 y 轴向下，故取 -dy）。 */
+  private static float flightAngle(CharSprite from, CharSprite to) {
+    PointF a = from.center();
+    PointF b = to.center();
+    return (float) Math.toDegrees(Math.atan2(-(b.y - a.y), b.x - a.x));
+  }
+
+  /** 被神圣属性伤害杀死的怪物：任何人都触发光解死亡动画。 */
+  private static boolean holyKill(Char ch) {
+    return ch instanceof Mob && ch.lastDamageType == DamageType.HOLY;
   }
 
   private static boolean diceMageEnemyKill(Char ch) {
@@ -117,7 +153,7 @@ public class DeathAnimations {
     return hero != null && hero.subClass == HeroSubClasses.DICE_MAGE;
   }
 
-  private static ShaderEffect.ShaderType DiceMageShaderFor(DamageType type) {
+  private static ShaderEffect.ShaderType shaderFor(DamageType type) {
     if (type == null) {
       return null;
     }
@@ -138,6 +174,8 @@ public class DeathAnimations {
       case MAGICAL:
       case CORRUPTION:
         return ShaderEffect.ShaderType.NOISE;
+      case HOLY:
+        return HOLY_SHADER;
       case PHYSICAL:
       case PHYSICAL_NO_ARMOR:
       case BLEEDING:
@@ -149,4 +187,11 @@ public class DeathAnimations {
         return null;
     }
   }
+
+  /**
+   * 神圣处决的死亡标记（非伤害来源）。
+   * 由 {@code ch.die(new HolyDeath())} 传入，命中后播放 {@link #HOLY_SHADER} 对应的消散动画，
+   * 供宽恕裁决这类"直接处决而非造成伤害"的神圣击杀复用。
+   */
+  public static class HolyDeath {}
 }

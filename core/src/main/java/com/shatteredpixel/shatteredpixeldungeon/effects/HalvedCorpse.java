@@ -73,6 +73,9 @@ public class HalvedCorpse extends Group {
 			return;
 		}
 
+		//必须先取父级：killAndErase() 会把 parent 置空
+		Group parent = sprite.parent;
+
 		RectF srcFrame = sprite.frame();
 		float sw = sprite.width;
 		float sh = sprite.height;
@@ -83,10 +86,10 @@ public class HalvedCorpse extends Group {
 		sprite.killAndErase();
 
 		HalvedCorpse corpse = new HalvedCorpse( sprite, srcFrame, cutFrac );
-		sprite.parent.add( corpse );
-		sprite.parent.sendToBack( corpse );
+		parent.add( corpse );
+		parent.sendToBack( corpse );
 
-		bloodAtCut( sprite, sprite.x, cutY, sw );
+		bloodAtCut( parent, sprite, sprite.x, cutY, sw );
 
 		float rad = (float) Math.toRadians( angleDeg );
 		float vx0 = speed * (float) Math.cos( rad );
@@ -136,7 +139,7 @@ public class HalvedCorpse extends Group {
 	}
 
 	//切口喷血 + 沿切口线持续冒 1-2px 血色粒子
-	private static void bloodAtCut( CharSprite sprite, float x, float cutY, float width ) {
+	private static void bloodAtCut( Group parent, CharSprite sprite, float x, float cutY, float width ) {
 		int color = sprite.blood();
 
 		PointF cutCenter = new PointF( x + width / 2f, cutY );
@@ -145,7 +148,7 @@ public class HalvedCorpse extends Group {
 		Emitter emitter = new Emitter();
 		emitter.pos( x, cutY - 1f, width, 2f );
 		emitter.start( new CutBloodFactory( color ), 0.04f, (int) (width / 2) );
-		sprite.parent.add( emitter );
+		parent.add( emitter );
 	}
 
 	private static class CutBloodFactory extends Emitter.Factory {
