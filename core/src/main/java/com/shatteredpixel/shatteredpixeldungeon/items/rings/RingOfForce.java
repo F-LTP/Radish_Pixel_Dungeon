@@ -40,6 +40,11 @@ public class RingOfForce extends Ring {
 	}
 
 	public static int armedDamageBonus( Char ch ){
+		if (ch instanceof com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero
+				&& ((com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero) ch).subClass
+				== com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.ILLUSIONIST) {
+			return 0;
+		}
 		return getBuffedBonus( ch, Force.class);
 	}
 

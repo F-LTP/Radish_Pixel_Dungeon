@@ -97,6 +97,14 @@ public class HeroIcon extends Image {
 	public static final String DICE_MAGE = "dice_mage";
 	public static final String JUTTE_CHAMPION = "jutte_champion";
 
+	//Card Trickster
+	public static final String ILLUSIONIST = "illusionist";
+	public static final String SPINMASTER = "spinmaster";
+	public static final String JOKER = "joker";
+	public static final String CARD_BARRAGE = "card_barrage";
+	public static final String DECK_RESTORE = "deck_restore";
+	public static final String WILD_CARD = "wild_card";
+
 	//Moonlight ArmorAbility
 	public static final String TOY_BACKPACK = "toy_backpack";
 	public static final String FATED_DRAW = "fated_draw";

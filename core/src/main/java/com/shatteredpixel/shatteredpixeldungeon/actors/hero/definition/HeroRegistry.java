@@ -1,6 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.heroes.CardTrickster;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.heroes.Huntress;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.heroes.Mage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.heroes.Moonlight;
@@ -43,5 +44,6 @@ public class HeroRegistry {
 		register(new Huntress());
 		register(new Rector());
 		register(new Moonlight());
+		register(new CardTrickster());
 	}
 }

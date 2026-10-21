@@ -11,6 +11,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasse
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Freerunner;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Gladiator;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.JutteChampion;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Illusionist;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Joker;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.SpinMaster;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.LittleKnight;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.RedCardinal;
@@ -56,6 +59,9 @@ public final class HeroSubClasses {
 	public static final HeroSubClass LITTLE_KNIGHT = new LittleKnight();
 	public static final HeroSubClass DICE_MAGE     = new DiceMage();
 	public static final HeroSubClass JUTTE_CHAMPION= new JutteChampion();
+	public static final HeroSubClass ILLUSIONIST    = new Illusionist();
+	public static final HeroSubClass SPIN_MASTER   = new SpinMaster();
+	public static final HeroSubClass JOKER         = new Joker();
 	public static final HeroSubClass CHAMPION      = new HeroSubClass("CHAMPION", HeroIcon.CHAMPION){
 		@Override public Talent[] subclassT3() { return new Talent[0]; }
 		@Override public Talent[] subclassT4() { return new Talent[0]; }
@@ -74,7 +80,7 @@ public final class HeroSubClasses {
 			SNIPER, WARDEN, DRUID,
 			BATTLEPREIST, REDCARDINAL, DEAD_KNIGHT,
 			LITTLE_KNIGHT, DICE_MAGE, JUTTE_CHAMPION,
-			CHAMPION, MONK
+			CHAMPION, MONK, ILLUSIONIST, SPIN_MASTER, JOKER
 	);
 
 	//存档反序列化

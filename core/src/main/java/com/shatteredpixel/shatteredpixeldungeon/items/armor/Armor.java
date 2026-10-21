@@ -1230,7 +1230,15 @@ public class Armor extends EquipableItem {
 	public static abstract class Glyph implements Bundlable {
 
 		public static float genericProcChanceMultiplier( Char defender ){
-			return RingOfArcana.enchantPowerMultiplier(defender);
+			float multi = RingOfArcana.enchantPowerMultiplier(defender);
+			if (defender instanceof Hero) {
+				com.shatteredpixel.shatteredpixeldungeon.items.cards.CardEffects.CardGlyphBoost boost =
+						((Hero) defender).buff(com.shatteredpixel.shatteredpixeldungeon.items.cards.CardEffects.CardGlyphBoost.class);
+				if (boost != null) {
+					multi *= boost.strength();
+				}
+			}
+			return multi;
 		}
 
 

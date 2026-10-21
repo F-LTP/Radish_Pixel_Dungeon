@@ -298,6 +298,21 @@ public class ItemSpriteSheet {
 	public static final String ARMOR_SILVERSCALE = "armor_silverscale";
 	public static final String ARMOR_BLACKCOAT = "armor_blackcoat";
 	public static final String ARMOR_MOONLIGHT = "armor_moonlight";
+	public static final String ARMOR_CARDTRICKSTER = "armor_cardtrickster";
+
+	public static final String PAPER_CUTTER = "paper_cutter";
+	public static final String CARD_DRAWER = "card_drawer";
+	public static final String CARD_BLANK = "card_blank";
+	public static final String CARD_SMALL_RATION = "card_small_ration";
+	public static final String CARD_RATION = "card_ration";
+	public static final String CARD_IDENTIFY = "card_identify";
+	public static final String CARD_RIGID = "card_rigid";
+	public static final String CARD_HORMONE = "card_hormone";
+	public static final String CARD_SPIN = "card_spin";
+	public static final String CARD_FINALE = "card_finale";
+	public static final String CARD_PREPARED = "card_prepared";
+	public static final String CARD_ATTACK = "card_attack";
+	public static final String CARD_DEFENSE = "card_defense";
 
 	public static final String WAND_MAGIC_MISSILE = "wand_magic_missile";
 	public static final String WAND_FIREBOLT = "wand_firebolt";

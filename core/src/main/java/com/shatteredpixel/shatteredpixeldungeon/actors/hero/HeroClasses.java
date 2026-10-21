@@ -21,10 +21,11 @@ public final class HeroClasses {
 	public static final HeroClass HUNTRESS  = new HeroClass("HUNTRESS");
 	public static final HeroClass RECTOR    = new HeroClass("RECTOR");
 	public static final HeroClass MOONLIGHT = new HeroClass("MOONLIGHT");
+	public static final HeroClass CARDTRICKSTER = new HeroClass("CARDTRICKSTER");
 
 	//所有职业集合
 	public static final Collection<HeroClass> ALL = Arrays.asList(
-			WARRIOR, MAGE, ROGUE, HUNTRESS, RECTOR, MOONLIGHT
+			WARRIOR, MAGE, ROGUE, HUNTRESS, RECTOR, MOONLIGHT, CARDTRICKSTER
 	);
 
 	/** 盗贼的可选皮肤：赌徒。数值需大于普通头像皮肤索引。 */

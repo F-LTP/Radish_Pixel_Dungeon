@@ -74,6 +74,8 @@ public class WndHeroInfo extends WndTabbed {
 			tabIcon = new ItemSprite(ItemSpriteSheet.HOLYANKH, null);
 		} else if (cl == HeroClasses.MOONLIGHT) {
 			tabIcon = new ItemSprite(ItemSpriteSheet.SNAKE_BITED_YENDOR, null);
+		} else if (cl == HeroClasses.CARDTRICKSTER) {
+			tabIcon = new ItemSprite(ItemSpriteSheet.CARD_DRAWER, null);
 		} else {
 			tabIcon = new ItemSprite(ItemSpriteSheet.SEAL, null);
 		}
@@ -210,6 +212,11 @@ public class WndHeroInfo extends WndTabbed {
 				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.THROWING_KNIFE),
 				new ItemSprite(ItemSpriteSheet.ARTIFACT_WHEELCHAIR),
 				new BuffIcon(BuffIndicator.CORRUPT, true),
+				new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
+			} else if (cls == HeroClasses.CARDTRICKSTER) {
+				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.CARD_DRAWER),
+				new ItemSprite(ItemSpriteSheet.PAPER_CUTTER),
+				new ItemSprite(ItemSpriteSheet.CARD_BLANK),
 				new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 			} else {
 				icons = new Image[]{ new ItemSprite(ItemSpriteSheet.SEAL),

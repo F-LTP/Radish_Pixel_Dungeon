@@ -27,11 +27,15 @@ import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CardConversionBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.cards.Card;
+import com.shatteredpixel.shatteredpixeldungeon.items.cards.CardDeck;
+import com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HornOfPlenty;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -70,6 +74,35 @@ public class Food extends Item {
 		super.execute( hero, action );
 
 		if (action.equals( AC_EAT )) {
+			// Advanced Food conversion takes priority over meal talents and diet challenges.
+			CardConversionBuff conversion = hero.buff(CardConversionBuff.class);
+			if (this.getClass() == Food.class && conversion != null && conversion.charges > 0
+					&& hero.hasTalent(Talent.ADVANCED_FOOD)) {
+				Item removed = detach( hero.belongings.backpack );
+				if (removed == null) return;
+				conversion.consume();
+				CardDeck deck = CardDeck.getOrCreate(hero);
+				deck.addToDiscard(CardFactory.ration());
+				if (hero.pointsInTalent(Talent.ADVANCED_FOOD) >= 2) {
+					boolean upgraded = false;
+					for (Card c : deck.allCards()) {
+						if (c.type == com.shatteredpixel.shatteredpixeldungeon.items.cards.CardType.SMALL_RATION) {
+							c.type = com.shatteredpixel.shatteredpixeldungeon.items.cards.CardType.RATION;
+							upgraded = true;
+							break;
+						}
+					}
+					if (!upgraded) {
+						deck.addToDiscard(CardFactory.ration());
+					}
+				}
+				GLog.i( Messages.get(this, "card_conversion") );
+				hero.sprite.operate( hero.pos );
+				hero.busy();
+				hero.spend( 1f );
+				return;
+			}
+
 			if (hero.hasTalent(Talent.MEAL_UTILIZATION) && !(this instanceof HalfFood)) {
 				Food eaten = (Food) detach( hero.belongings.backpack );
 				if (eaten == null) return;

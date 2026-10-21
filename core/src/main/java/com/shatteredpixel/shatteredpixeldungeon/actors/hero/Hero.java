@@ -111,6 +111,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.MasterThievesArm
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
+import com.shatteredpixel.shatteredpixeldungeon.items.cards.CardDeck;
+import com.shatteredpixel.shatteredpixeldungeon.items.cards.CardDrawer;
 import com.shatteredpixel.shatteredpixeldungeon.items.journal.Guidebook;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.CrystalKey;
 import com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToyEffects;
@@ -367,6 +369,9 @@ public class Hero extends Char {
 
 	public Belongings belongings;
 
+	/** Card Trickster deck; null for other heroes and for old saves until needed. */
+	public CardDeck cardDeck;
+
 	public int STR;
 
 	public float awareness;
@@ -560,6 +565,7 @@ public class Hero extends Char {
 	private static final String HTBOOST     = "htboost";
 
 	private static final String DEADKNGITH = "deadknight";
+	private static final String CARD_DECK = "card_deck";
 
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -587,6 +593,7 @@ public class Hero extends Char {
 			bundle.put(DEADKNGITH, rectorDeadKngithDeadMode );
 
 			belongings.storeInBundle( bundle );
+			bundle.put( CARD_DECK, cardDeck );
 		}
 	}
 
@@ -615,6 +622,16 @@ public class Hero extends Char {
 		STR = bundle.getInt( STRENGTH );
 
 		belongings.restoreFromBundle( bundle );
+		cardDeck = (CardDeck) bundle.get( CARD_DECK );
+		if (heroClass == HeroClasses.CARDTRICKSTER) {
+			if (cardDeck == null) {
+				cardDeck = CardDeck.starterDeck();
+			}
+			if (belongings.getItem(CardDrawer.class) == null) {
+				new CardDrawer().collect(belongings.backpack);
+			}
+		}
+		HeldCardTracker.sync(this);
 	}
 
 	public static void preview( GamesInProgress.Info info, Bundle bundle ) {
@@ -967,7 +984,10 @@ public class Hero extends Char {
 	public int damageRoll() {  //TODO FIX
 		KindOfWeapon wep = isGamblerSkin() ? belongings.attackingWeapon() : belongings.weapon();
 		int dmg;
-		if (wep!=null){
+		if (subClass == HeroSubClasses.ILLUSIONIST) {
+			// Illusionist weapons (and the Ring of Force) do not contribute to damage.
+			dmg = Random.NormalIntRange(1, Math.max(STR() - 8, 1));
+		} else if (wep!=null){
 			if (isGamblerSkin()) {
 				int roll = Random.Int(10);
 				int max = wep.max();
@@ -1004,6 +1024,18 @@ public class Hero extends Char {
 			int killBoatSwordBonus = hero.belongings.attackingWeapon() instanceof KillBoatSword ? 1 : 0;
 			float pointBonus = 0.33f * pointsInTalent(Talent.STRONGMAN);
 			dmg += (int) (dmg * (attackDelay() + killBoatSwordBonus - 1) * pointBonus);
+		}
+
+		// Cross-class effects of Card Trickster talents.
+		if (heroClass != HeroClasses.CARDTRICKSTER) {
+			int empowerment = pointsInTalent(Talent.BLANK_EMPOWERMENT);
+			if (empowerment == 1) dmg += Random.NormalIntRange(0, 1);
+			else if (empowerment >= 2) dmg += Random.NormalIntRange(1, 2);
+			if (wep instanceof MissileWeapon) {
+				int wind = pointsInTalent(Talent.BORROW_WIND_CUT);
+				if (wind == 1) dmg += Random.NormalIntRange(1, 3);
+				else if (wind >= 2) dmg += Random.NormalIntRange(3, 3);
+			}
 		}
 
 
@@ -2082,6 +2114,21 @@ public class Hero extends Char {
 
 		KindOfWeapon wep;
 		wep = belongings.attackingWeapon();
+
+		if (heroClass != HeroClasses.CARDTRICKSTER) {
+			int protection = pointsInTalent(Talent.BLANK_PROTECTION);
+			if (protection > 0 && wep instanceof MissileWeapon
+					&& buff(Talent.CardProtectionCooldown.class) == null) {
+				int shield = protection == 1 ? 2 : 4;
+				Barrier barrier = Buff.affect(this, Barrier.class);
+				barrier.setShield(barrier.shielding() + shield);
+				Buff.affect(this, Talent.CardProtectionCooldown.class, 20f);
+			}
+			int hormone = pointsInTalent(Talent.HORMONE_CARD);
+			if (hormone > 0 && Random.Float() < (hormone == 1 ? 0.1f : 0.2f)) {
+				Buff.affect(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline.class, 1f);
+			}
+		}
 
 		if (wep != null){
 			damage = wep.proc( this, enemy, damage );
@@ -3224,7 +3271,14 @@ public class Hero extends Char {
 			// 出其不意天赋：十手伏击减少回合消耗
 			boolean surpriseAttack = enemy instanceof Mob && ((Mob) enemy).surprisedBy(this);
 			float multiplier = subClass.attackDelayMultiplier(this, enemy, surpriseAttack);
-			spend(attackDelay() * multiplier);
+			float delay = attackDelay() * multiplier;
+			Talent.CardScrollConditioningTracker conditioning = buff(Talent.CardScrollConditioningTracker.class);
+			if (conditioning != null) {
+				delay *= 0.5f;
+				conditioning.charges--;
+				if (conditioning.charges <= 0) conditioning.detach();
+			}
+			spend(delay);
 		}
 
 		subClass.onAttackProc(this, enemy, 0, hit, wasEnemy);

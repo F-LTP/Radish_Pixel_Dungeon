@@ -49,6 +49,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.events.CharFinalDamageEvent;
 import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
 import com.shatteredpixel.shatteredpixeldungeon.events.HeroEatFoodEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.ReadScrollEvent;
 import com.shatteredpixel.shatteredpixeldungeon.events.ShieldBreakEvent;
 import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -58,6 +59,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HornOfPlenty;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTransmutation;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.HerbMaker;
 import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.SpellQueue;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
@@ -668,6 +672,35 @@ public class Talent {
 
 	public static final Talent FATAL_BLADE = new Talent("FATAL_BLADE", 4);
 
+	// Card Trickster
+	public static final Talent FOOD_CARD = new Talent("FOOD_CARD");
+	public static final Talent IDENTIFY_CARD = new Talent("IDENTIFY_CARD");
+	public static final Talent BLANK_EMPOWERMENT = new Talent("BLANK_EMPOWERMENT");
+	public static final Talent BLANK_PROTECTION = new Talent("BLANK_PROTECTION");
+
+	public static final Talent ADVANCED_FOOD = new Talent("ADVANCED_FOOD");
+	public static final Talent SCROLL_CONDITIONING = new Talent("SCROLL_CONDITIONING");
+	public static final Talent RIGID_CARD = new Talent("RIGID_CARD");
+	public static final Talent HORMONE_CARD = new Talent("HORMONE_CARD");
+	public static final Talent BORROW_WIND_CUT = new Talent("BORROW_WIND_CUT");
+
+	public static final Talent STREAMLINE = new Talent("STREAMLINE", 3);
+	public static final Talent BLANK_FILL = new Talent("BLANK_FILL", 3);
+
+	public static final Talent CARD_ENCHANT = new Talent("CARD_ENCHANT", 3);
+	public static final Talent REFINED_ATTACK_DEFENSE = new Talent("REFINED_ATTACK_DEFENSE", 3);
+	public static final Talent CARD_ASSIST = new Talent("CARD_ASSIST", 3);
+
+	public static final Talent SPIN_CARD = new Talent("SPIN_CARD", 3);
+	public static final Talent GRAND_FINALE = new Talent("GRAND_FINALE", 3);
+	public static final Talent PREPARED = new Talent("PREPARED", 3);
+
+	public static final Talent PLACEHOLDER_T3_1 = new Talent("PLACEHOLDER_T3_1", 3);
+	public static final Talent PLACEHOLDER_T3_2 = new Talent("PLACEHOLDER_T3_2", 3);
+	public static final Talent PLACEHOLDER_T3_3 = new Talent("PLACEHOLDER_T3_3", 3);
+	public static final Talent PLACEHOLDER_T4_1 = new Talent("PLACEHOLDER_T4_1", 4);
+	public static final Talent PLACEHOLDER_T4_2 = new Talent("PLACEHOLDER_T4_2", 4);
+
 	public static final Talent ERROR = new Talent("ERROR");
 
 	public static class MagicRootDropped extends CounterBuff{{revivePersists = true;}};
@@ -1006,7 +1039,149 @@ public class Talent {
 				Dungeon.level.drop(toGive, hero.pos).sprite.drop();
 			}
 		}
+
+		handleCardTricksterTalent(hero, talent);
 	}
+
+	private static void handleCardTricksterTalent(Hero hero, Talent talent) {
+		int points = hero.pointsInTalent(talent);
+		boolean cardHero = hero.heroClass == HeroClasses.CARDTRICKSTER;
+		com.shatteredpixel.shatteredpixeldungeon.items.cards.CardDeck deck =
+				cardHero ? com.shatteredpixel.shatteredpixeldungeon.items.cards.CardDeck.getOrCreate(hero) : null;
+
+		if (cardHero) {
+			if (talent == FOOD_CARD) {
+				deck.addToDiscard(com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory.smallRation());
+			} else if (talent == ADVANCED_FOOD) {
+				if (points == 1) {
+					deck.addToDiscard(com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory.ration());
+				}
+			} else if (talent == IDENTIFY_CARD) {
+				if (points == 1) {
+					deck.addToDiscard(com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory.identify());
+				} else {
+					enhanceCard(deck, com.shatteredpixel.shatteredpixeldungeon.items.cards.CardType.IDENTIFY,
+							com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory.identify());
+				}
+			} else if (talent == RIGID_CARD) {
+				if (points == 1) {
+					deck.addToDiscard(com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory.rigid());
+				} else {
+					enhanceCard(deck, com.shatteredpixel.shatteredpixeldungeon.items.cards.CardType.RIGID,
+							com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory.rigid());
+				}
+			} else if (talent == HORMONE_CARD) {
+				if (points == 1) {
+					deck.addToDiscard(com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory.hormone());
+				} else {
+					enhanceCard(deck, com.shatteredpixel.shatteredpixeldungeon.items.cards.CardType.HORMONE,
+							com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory.hormone());
+				}
+			} else if (talent == BLANK_FILL) {
+				deck.addToDiscard(com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory.blank());
+			} else if (talent == STREAMLINE) {
+				deck.deletesLeft++;
+			} else if (talent == SPIN_CARD) {
+				if (points == 1) {
+					deck.addToDiscard(com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory.spin());
+				} else {
+					for (com.shatteredpixel.shatteredpixeldungeon.items.cards.Card c : deck.allCards()) {
+						if (c.type == com.shatteredpixel.shatteredpixeldungeon.items.cards.CardType.SPIN) {
+							c.power = points;
+						}
+					}
+					if (points >= 3) {
+						deck.addToDiscard(com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory.spin().copyPower(3));
+					}
+				}
+			} else if (talent == GRAND_FINALE) {
+				if (points == 1) {
+					deck.addToDiscard(com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory.grandFinale());
+				} else {
+					for (com.shatteredpixel.shatteredpixeldungeon.items.cards.Card c : deck.allCards()) {
+						if (c.type == com.shatteredpixel.shatteredpixeldungeon.items.cards.CardType.GRAND_FINALE) {
+							c.power = points;
+						}
+					}
+				}
+			} else if (talent == PREPARED) {
+				if (points == 1) {
+					deck.addToDiscard(com.shatteredpixel.shatteredpixeldungeon.items.cards.CardFactory.prepared());
+				} else {
+					for (com.shatteredpixel.shatteredpixeldungeon.items.cards.Card c : deck.allCards()) {
+						if (c.type == com.shatteredpixel.shatteredpixeldungeon.items.cards.CardType.PREPARED) {
+							c.power = points;
+						}
+					}
+				}
+			}
+			return;
+		}
+
+		if (talent == FOOD_CARD) {
+			giveItem(hero, new com.shatteredpixel.shatteredpixeldungeon.items.food.SmallRation().quantity(points));
+		} else if (talent == ADVANCED_FOOD) {
+			giveItem(hero, new com.shatteredpixel.shatteredpixeldungeon.items.food.Food().quantity(points));
+		} else if (talent == IDENTIFY_CARD) {
+			com.shatteredpixel.shatteredpixeldungeon.items.cards.CardEffects.identifyRandom(hero, points);
+		} else if (talent == STREAMLINE) {
+			int total = points == 1 ? 1 : points == 2 ? 3 : 5;
+			int previous = points == 1 ? 0 : points == 2 ? 1 : 3;
+			int count = total - previous;
+			if (count > 0) {
+				giveItem(hero, new com.shatteredpixel.shatteredpixeldungeon.items.spells.Recycle().quantity(count));
+			}
+		} else if (talent == BLANK_FILL) {
+			com.shatteredpixel.shatteredpixeldungeon.items.Generator.Category cat =
+					points == 1 ? com.shatteredpixel.shatteredpixeldungeon.items.Generator.Category.MIS_T2
+							: points == 2 ? com.shatteredpixel.shatteredpixeldungeon.items.Generator.Category.MIS_T3
+							: com.shatteredpixel.shatteredpixeldungeon.items.Generator.Category.MIS_T4;
+			Item item = com.shatteredpixel.shatteredpixeldungeon.items.Generator.random(cat);
+			if (item != null) giveItem(hero, item);
+		}
+	}
+
+	private static void enhanceCard(com.shatteredpixel.shatteredpixeldungeon.items.cards.CardDeck deck,
+	                                com.shatteredpixel.shatteredpixeldungeon.items.cards.CardType type,
+	                                com.shatteredpixel.shatteredpixeldungeon.items.cards.Card fallback) {
+		fallback.power = 2;
+		for (com.shatteredpixel.shatteredpixeldungeon.items.cards.Card c : deck.allCards()) {
+			if (c.type == type) {
+				c.power = 2;
+				return;
+			}
+		}
+		deck.addToDiscard(fallback);
+	}
+
+	private static void giveItem(Hero hero, Item item) {
+		if (!item.collect(hero.belongings.backpack)) {
+			Dungeon.level.drop(item, hero.pos).sprite.drop();
+		}
+	}
+
+	public static class CardProtectionCooldown extends FlavourBuff {
+		public String icon() { return BuffIndicator.TIME; }
+		public void tintIcon(Image icon) { icon.hardlight(0.54f, 0.23f, 0.72f); }
+		public float iconFadePercent() { return Math.max(0, visualcooldown() / 20f); }
+	};
+
+	public static class CardRigidCooldown extends FlavourBuff {
+		public String icon() { return BuffIndicator.TIME; }
+		public void tintIcon(Image icon) { icon.hardlight(0.54f, 0.23f, 0.72f); }
+		public float iconFadePercent() { return Math.max(0, visualcooldown() / 50f); }
+	};
+
+	public static class CardScrollConditioningTracker extends Buff {
+		public int charges = 1;
+		{ type = buffType.POSITIVE; }
+		public String icon() { return BuffIndicator.TIME; }
+		public void tintIcon(Image icon) { icon.hardlight(0.54f, 0.23f, 0.72f); }
+		@Override public boolean act() { spend(TICK); return true; }
+		private static final String CHARGES = "charges";
+		@Override public void storeInBundle(Bundle bundle) { super.storeInBundle(bundle); bundle.put(CHARGES, charges); }
+		@Override public void restoreFromBundle(Bundle bundle) { super.restoreFromBundle(bundle); charges = bundle.getInt(CHARGES); }
+	};
 
 	public static class CachedRationsDropped extends CounterBuff{{revivePersists = true;}};
 	public static class NatureBerriesDropped extends CounterBuff{{revivePersists = true;}};
@@ -1133,8 +1308,30 @@ public class Talent {
 
 	public static void onScrollUsed( Hero hero, int pos, float factor ){
 
+		if (hero.heroClass != HeroClasses.CARDTRICKSTER && hero.hasTalent(SCROLL_CONDITIONING)) {
+			CardScrollConditioningTracker tracker = hero.buff(CardScrollConditioningTracker.class);
+			if (tracker == null) tracker = Buff.affect(hero, CardScrollConditioningTracker.class);
+			tracker.charges += hero.pointsInTalent(SCROLL_CONDITIONING);
+		}
+
 		if (hero.subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.MAGIC_WARRIOR){
 			com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior.magicIngenuityDamage(hero);
+		}
+	}
+
+	@SubscribeEvent(event = ReadScrollEvent.class)
+	public static void onCardScrollRead( ReadScrollEvent event ){
+		Hero hero = event.getUser();
+		if (hero == null || hero.heroClass != HeroClasses.CARDTRICKSTER
+				|| !hero.hasTalent(SCROLL_CONDITIONING)) return;
+		int points = hero.pointsInTalent(SCROLL_CONDITIONING);
+		com.shatteredpixel.shatteredpixeldungeon.items.cards.CardDeck deck =
+				com.shatteredpixel.shatteredpixeldungeon.items.cards.CardDeck.getOrCreate(hero);
+		deck.freeDraws += points;
+		if (event.getScroll() instanceof ScrollOfUpgrade
+				|| event.getScroll() instanceof ScrollOfTransmutation
+				|| event.getScroll() instanceof ExoticScroll){
+			deck.freeDraws += points;
 		}
 	}
 

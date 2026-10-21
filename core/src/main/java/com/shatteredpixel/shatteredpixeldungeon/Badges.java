@@ -204,7 +204,8 @@ public class Badges {
 		GAMES_PLAYED_5              ( 122, BadgeType.GLOBAL ),
 		HIGH_SCORE_5                ( 123 ),
 		CHAMPION_2                  ( 124 ),
-		CHAMPION_3                  ( 125 );
+		CHAMPION_3                  ( 125 ),
+		MASTERY_CARDTRICKSTER;
 
 		public boolean meta;
 
@@ -920,6 +921,8 @@ public class Badges {
 			badge = Badge.MASTERY_RECTOR;
 		} else if (Dungeon.hero.heroClass == HeroClasses.MOONLIGHT) {
 			badge = Badge.MASTERY_MOONLIGHT;
+		} else if (Dungeon.hero.heroClass == HeroClasses.CARDTRICKSTER) {
+			badge = Badge.MASTERY_CARDTRICKSTER;
 		}
 
 		unlock(badge);

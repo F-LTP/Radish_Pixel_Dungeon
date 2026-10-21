@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bleeding;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
@@ -779,6 +780,15 @@ public class Item implements Bundlable {
 									Buff.affect(enemy, Blindness.class, 1f + curUser.pointsInTalent(Talent.IMPROVISED_PROJECTILES));
 									Buff.affect(curUser, Talent.ImprovisedProjectileCooldown.class, 50f);
 								}
+							}
+							if (curUser.heroClass != HeroClasses.CARDTRICKSTER
+									&& curUser.hasTalent(Talent.RIGID_CARD)
+									&& !(Item.this instanceof MissileWeapon)
+									&& enemy != null && enemy.alignment != curUser.alignment
+									&& curUser.buff(Talent.CardRigidCooldown.class) == null){
+								int turns = curUser.pointsInTalent(Talent.RIGID_CARD) >= 2 ? 2 : 1;
+								Buff.affect(enemy, Paralysis.class, turns);
+								Buff.affect(curUser, Talent.CardRigidCooldown.class, 50f);
 							}
 							// 左弓连射天赋：投掷武器不消耗回合（如果目标有足够中矢层数）
 							if (user.heroClass == HeroClasses.MOONLIGHT
