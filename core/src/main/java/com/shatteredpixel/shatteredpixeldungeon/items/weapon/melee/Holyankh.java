@@ -37,7 +37,7 @@ public class Holyankh extends MeleeWeapon{
             Char ch = Actor.findChar(defender.pos + i);
             if (ch!=null){
                 if (ch.alignment != attacker.alignment) {
-                    ch.damage(new DamageInfo(damageRoll(attacker), DamageType.MAGICAL, attacker, this, this));
+                    ch.damage(new DamageInfo(damageRoll(attacker), DamageType.HOLY, attacker, this, this));
                     ch.sprite.emitter().burst(Speck.factory(Speck.LIGHT), 6 );
                     active=true;
                 }

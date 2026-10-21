@@ -164,7 +164,7 @@ public class Belief extends Buff implements ActionIndicator.Action {
                         mob.sprite.parent.add(new Lightning(new PointF(x-5f, y), new PointF( x-5f, y-300f),null));
                         mob.sprite.parent.add(new Lightning(new PointF(x+5f, y), new PointF( x+5f, y-300f),null));
                         Sample.INSTANCE.play( Assets.Sounds.LIGHTNING, 1.5f);
-                        mob.damage(DamageInfo.of(altFixedDamage + altFixedDamagePlus, DamageType.LIGHTNING, null, this));
+                        mob.damage(DamageInfo.of(altFixedDamage + altFixedDamagePlus, DamageType.HOLY, null, this));
                         mob.sprite.centerEmitter().burst( SparkParticle.FACTORY, 32 );
                         mob.sprite.flash();
                     } else {

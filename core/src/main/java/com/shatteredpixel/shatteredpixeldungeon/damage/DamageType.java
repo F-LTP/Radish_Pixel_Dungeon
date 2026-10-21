@@ -45,6 +45,9 @@ public enum DamageType {
 	/** 一般魔法伤害 */
 	MAGICAL("magical", FloatingText.MAGIC_DMG, true, false),
 	
+	/** 神圣伤害 */
+	HOLY("holy", FloatingText.HOLY, true, false),
+	
 	// ========== 元素伤害 ==========
 	/** 火焰伤害 */
 	FIRE("fire", FloatingText.BURNING, true, false),

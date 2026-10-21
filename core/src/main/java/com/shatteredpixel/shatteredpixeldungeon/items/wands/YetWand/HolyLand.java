@@ -108,7 +108,7 @@ public class HolyLand extends Item {
         public boolean act() {
             if (target.isAlive()) {
                 int dmgS = Dungeon.depth/5 == 0 ? 1 : Dungeon.depth/5;
-                target.damage(new DamageInfo(dmgS, DamageType.LIGHTNING, null, null, new DM100.LightningBolt()));
+                target.damage(new DamageInfo(dmgS, DamageType.HOLY, null, null, new DM100.LightningBolt()));
                 spend(interval);
                 if (level <= 0) {
                     detach();

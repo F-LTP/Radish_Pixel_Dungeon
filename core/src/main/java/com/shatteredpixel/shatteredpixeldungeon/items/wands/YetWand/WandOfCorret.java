@@ -115,7 +115,7 @@ public class WandOfCorret extends DamageWand {
                 ch.sprite.parent.add(new Lightning(new PointF(x-5f, y), new PointF( x-5f, y-300f),null));
                 ch.sprite.parent.add(new Lightning(new PointF(x+5f, y), new PointF( x+5f, y-300f),null));
                 Sample.INSTANCE.play( Assets.Sounds.LIGHTNING, 1.5f);
-                ch.damage(new DamageInfo(fixedDamage + fixedDamagePlus, DamageType.LIGHTNING, curUser, this, this));
+                ch.damage(new DamageInfo(fixedDamage + fixedDamagePlus, DamageType.HOLY, curUser, this, this));
                 ch.sprite.centerEmitter().burst( SparkParticle.FACTORY, 32 );
                 ch.sprite.flash();
                 damageDealt = true;

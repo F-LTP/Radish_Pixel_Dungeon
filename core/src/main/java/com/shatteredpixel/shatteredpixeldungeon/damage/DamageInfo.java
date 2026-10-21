@@ -626,6 +626,11 @@ public class DamageInfo {
 		return new DamageInfo(baseDamage, DamageType.MAGICAL, null, null, source);
 	}
 	
+	/** 创建神圣伤害 */
+	public static DamageInfo holy(int baseDamage, Object source) {
+		return new DamageInfo(baseDamage, DamageType.HOLY, null, null, source);
+	}
+	
 	/** 创建火焰伤害 */
 	public static DamageInfo fire(int baseDamage, Object source) {
 		return new DamageInfo(baseDamage, DamageType.FIRE, null, null, source);
