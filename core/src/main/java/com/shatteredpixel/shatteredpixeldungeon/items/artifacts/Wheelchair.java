@@ -14,7 +14,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Speed;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Stamina;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.NaturesPower;
@@ -76,8 +75,8 @@ public class Wheelchair extends Artifact {
         if (isEquipped(hero) && (charge > 0 || canRideWithoutCharge(hero)) && !cursed) {
             actions.add(AC_RIDE);
         }
-        // 轮椅翻车：月华英雄在加速状态下可使用
-        if (isEquipped(hero) && !cursed && hero.heroClass == HeroClasses.MOONLIGHT) {
+        // 轮椅翻车：装备轮椅且在加速状态下可使用
+        if (isEquipped(hero) && !cursed) {
             int points = hero.pointsInTalent(Talent.WHEELCHAIR_CRASH);
             if (points > 0 && hasAnySpeedBuff(hero)) {
                 actions.add(AC_CRASH);
@@ -199,7 +198,7 @@ public class Wheelchair extends Artifact {
         int range = 2 + (int)(level() * 0.2f);
         // 检查弹射起步天赋+2
         if (curUser != null) {
-            if (curUser.heroClass == HeroClasses.MOONLIGHT && curUser.pointsInTalent(Talent.CATAPULT_START) >= 2) {
+            if (curUser.pointsInTalent(Talent.CATAPULT_START) >= 2) {
                 range += 1;
             }
         }

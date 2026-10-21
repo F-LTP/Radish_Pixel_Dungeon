@@ -24,8 +24,6 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
@@ -94,8 +92,7 @@ public class Frost extends FlavourBuff {
 				Hero hero = (Hero)target;
 
 				// 弹射起步天赋触发：受到冻伤时获得免费轮椅使用机会
-				if (hero.heroClass == HeroClasses.MOONLIGHT
-						&& hero.pointsInTalent(Talent.CATAPULT_START) >= 1
+				if (hero.pointsInTalent(Talent.CATAPULT_START) >= 1
 						&& hero.buff(CatapultStartCooldown.class) == null) {
 					Buff.affect(hero, CatapultStartBuff.class, 1f);
 					Buff.affect(hero, CatapultStartCooldown.class, CatapultStartCooldown.DURATION);

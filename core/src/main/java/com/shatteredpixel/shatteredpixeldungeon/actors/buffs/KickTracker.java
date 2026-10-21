@@ -28,8 +28,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BlastParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -174,8 +172,6 @@ public class KickTracker extends Buff implements ActionIndicator.Action {
      * 检测是否应该给予踹飞技能
      */
     public static void checkKick(Hero hero) {
-        if (hero.heroClass != HeroClasses.MOONLIGHT) return;
-
         // 检查是否已有该buff
         if (hero.buff(KickTracker.class) != null) return;
 

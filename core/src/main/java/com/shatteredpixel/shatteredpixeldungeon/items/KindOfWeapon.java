@@ -28,7 +28,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroAction;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
@@ -409,7 +408,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 	private String swordShieldKnightInfo() {
 		// 剑盾骑士天赋：显示护甲最小值提升（仅对近战武器生效）
 		if (this instanceof MeleeWeapon) {
-			if (Dungeon.hero != null && Dungeon.hero.heroClass == HeroClasses.MOONLIGHT) {
+			if (Dungeon.hero != null) {
 				int points = Dungeon.hero.pointsInTalent(Talent.SWORD_SHIELD_KNIGHT);
 				if (points > 0 && Dungeon.hero.belongings.armor != null) {
 					// 计算天赋加成后的护甲最小值
