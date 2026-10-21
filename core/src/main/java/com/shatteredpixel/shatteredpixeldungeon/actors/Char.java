@@ -37,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.ImmortalShieldAffecter;
 import com.shatteredpixel.shatteredpixeldungeon.damage.*;
+import com.shatteredpixel.shatteredpixeldungeon.effects.DamagePalette;
 import com.shatteredpixel.shatteredpixeldungeon.effects.DeathAnimation;
 import com.shatteredpixel.shatteredpixeldungeon.effects.DeathAnimations;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
@@ -1071,11 +1072,18 @@ public abstract class Char extends Actor {
 
         if (sprite != null && !immuneHit) {
             // 免疫伤害（元素/来源免疫被完全抵挡）时不弹出 "0" 伤害数字
+            int displayAmount = info.getFloatingTextAmount() >= 0
+                    ? info.getFloatingTextAmount()
+                    : dmg + shielded;
+            // 跳字颜色取伤害图标的代表色（见 DamagePalette）
             if (info.isMixed() && info.getMixed() != null) {
-                // 混合伤害：按成分占比排序，左侧显示多个图标
-                sprite.showStatusWithIcons(CharSprite.NEGATIVE, Integer.toString(dmg + shielded), info.getFloatingTextIcons());
+                // 混合伤害：按成分占比排序，左侧显示多个图标，颜色取占比最高的成分
+                int[] icons = info.getFloatingTextIcons();
+                int color = DamagePalette.colorFor(icons.length > 0 ? icons[0] : FloatingText.NO_ICON);
+                sprite.showStatusWithIcons(color, Integer.toString(displayAmount), icons);
             } else {
-                sprite.showStatusWithIcon(CharSprite.NEGATIVE, Integer.toString(dmg + shielded), info.getFloatingTextIcon());
+                int icon = info.getFloatingTextIcon();
+                sprite.showStatusWithIcon(DamagePalette.colorFor(icon), Integer.toString(displayAmount), icon);
             }
         }
 

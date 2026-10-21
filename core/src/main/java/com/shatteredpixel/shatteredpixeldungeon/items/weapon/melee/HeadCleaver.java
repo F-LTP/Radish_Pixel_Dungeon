@@ -8,6 +8,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamagePipeline;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BloodParticle;
 import com.shatteredpixel.shatteredpixeldungeon.events.CharFinalDamageEvent;
@@ -56,7 +57,9 @@ public class HeadCleaver extends MeleeWeapon{
                     // 非英雄目标保持即时结算
                     Buff.affect(defender, headCleaverTracker.class);
                     defender.HP=1;
-                    defender.damage(new DamageInfo(1, DamageType.PHYSICAL_NO_ARMOR, attacker, this, new headCleaverTracker()));
+                    // 斩首跳字显示目标生命上限与本次攻击伤害中的较大值
+                    defender.damage(new DamageInfo(1, DamageType.PHYSICAL_NO_ARMOR, attacker, this, new headCleaverTracker())
+                            .setFloatingTextAmount(Math.max(defender.HT, damage)));
                 }
             }
         }
@@ -71,6 +74,12 @@ public class HeadCleaver extends MeleeWeapon{
         if (defender.buff(headCleaverTracker.class) == null) return;
 
         Buff.detach(defender, headCleaverTracker.class);
+
+        // 斩首跳字显示目标生命上限与本次攻击伤害中的较大值
+        DamageInfo info = DamagePipeline.activeInfo();
+        if (info != null) {
+            info.setFloatingTextAmount(Math.max(defender.HT, event.getDamage()));
+        }
 
         if (defender.HP < defender.HT * 0.3f) {
             // 处决：HP 归零，由伤害管线正常触发死亡

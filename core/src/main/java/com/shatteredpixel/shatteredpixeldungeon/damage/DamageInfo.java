@@ -98,6 +98,9 @@ public class DamageInfo {
 	/** 浮动文字图标覆盖；-1 表示按伤害类型/暴击推断（见 getFloatingTextIcon）。 */
 	private int floatingTextIcon = -1;
 
+	/** 浮动文字数值覆盖；-1 表示显示实际伤害（见 getFloatingTextAmount）。 */
+	private int floatingTextAmount = -1;
+
 	/** 伤害来源链：有序的因果对象列表，按「引发→中间传导→最终」顺序排列。
 	 *  例如 [玩家, 玩家武器, 烈焰附魔, 怪物身上的火, 草, 门]。
 	 *  链会随伤害/火焰/流血等传导机制逐层传递，用于死亡信息与来源追踪。 */
@@ -541,6 +544,21 @@ public class DamageInfo {
 	}
 
 	/**
+	 * 获取浮动文字数值。返回 -1 表示未覆盖，显示实际伤害。
+	 */
+	public int getFloatingTextAmount() {
+		return floatingTextAmount;
+	}
+
+	/**
+	 * 覆盖浮动文字数值（如斩首时显示生命上限与本次伤害中的较大值），不影响实际 HP 扣减。
+	 */
+	public DamageInfo setFloatingTextAmount(int amount) {
+		this.floatingTextAmount = amount;
+		return this;
+	}
+
+	/**
 	 * 获取浮动文字图标列表（考虑暴击）。
 	 * 混合伤害时按成分占比从高到低返回各成分图标；否则为单个元素列表。
 	 */
@@ -786,6 +804,7 @@ public class DamageInfo {
 		copy.critical = this.critical;
 		copy.criticalMultiplier = this.criticalMultiplier;
 		copy.floatingTextIcon = this.floatingTextIcon;
+		copy.floatingTextAmount = this.floatingTextAmount;
 		copy.setCauseChain(this.causeChain);
 		if (this.mixed != null) {
 			MixedDamage mc = new MixedDamage();
