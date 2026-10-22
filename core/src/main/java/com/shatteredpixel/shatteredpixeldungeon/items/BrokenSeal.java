@@ -55,7 +55,8 @@ public class BrokenSeal extends ItemArmorAttachable {
 	private Armor.Glyph glyph;
 
 	public Armor.Glyph getGlyph(){
-		if (!Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE))
+		// 读档期间 Dungeon.hero 尚未赋值：此时不能判天赋，也不能清空刻印
+		if (Dungeon.hero != null && !Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE))
 			setGlyph(null);
 		return glyph;
 	}
