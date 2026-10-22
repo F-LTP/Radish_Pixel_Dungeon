@@ -107,6 +107,18 @@ public class CustomWeapon extends MeleeWeapon {
         enchPrio.put(DoubleEdged.class, 2);
         enchPrio.put(Heavy.class, 2);
         enchPrio.put(Ultralight.class, 2);
+
+        // 池数组驱动扫描(与TestArmor的GLYPH_LISTS同思路)：追加四个池中未显式注册的附魔，
+        // 使新增附魔入池后自动出现在选框。追加在末尾，保证既有存档 ench_on 位掩码的位序不变。
+        for (Class<?>[] pool : new Class<?>[][]{Enchantment.common, Enchantment.uncommon, Enchantment.rare, Enchantment.curses}) {
+            for (Class<?> c : pool) {
+                @SuppressWarnings("unchecked")
+                Class<? extends Enchantment> e = (Class<? extends Enchantment>) c;
+                if (!enchPrio.containsKey(e)) {
+                    enchPrio.put(e, e.getName().endsWith(".curses.") ? 2 : 1);
+                }
+            }
+        }
     }
 
     @Override

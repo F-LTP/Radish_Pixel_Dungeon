@@ -21,24 +21,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Stubbornness
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Temporal;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Ultralight;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Wayward;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blocking;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blooming;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Chilling;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Combos;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Corrupting;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Elastic;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Euphoria;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lamprey;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Seeking;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Striking;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Unstable;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Vampiric;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -107,6 +89,8 @@ public class TestMelee extends TestGenerator {
         }
     }
 
+    private static final Class<?>[][] ENCH_LISTS = {null, Weapon.Enchantment.common, Weapon.Enchantment.uncommon, Weapon.Enchantment.rare, Weapon.Enchantment.curses};
+
     @Override
     public void storeInBundle(Bundle bundle) {
         super.storeInBundle(bundle);
@@ -129,86 +113,15 @@ public class TestMelee extends TestGenerator {
         weapon_id = bundle.getInt("weapon_id");
     }
 
+    // 池数组驱动(与TestArmor的GLYPH_LISTS同思路)：直接引用四个附魔池，新增附魔入池后自动可选。
+    // 超出列表长度时取最后一项(与TestArmor的越界钳制一致)。
     private Class<? extends Weapon.Enchantment> generateEnchant(int category, int id) {
-        if (category == 1) switch (id) {
-            case 0:
-                return Blazing.class;
-            case 1:
-                return Shocking.class;
-            case 2:
-                return Chilling.class;
-            case 3:
-                return Kinetic.class;
-            case 4:
-                return Lamprey.class;
-            default:
-                return null;
+        Class<?>[] enchs = ENCH_LISTS[category];
+        if (enchs == null) {
+            return null;
         }
-        else if (category == 2) switch (id) {
-            case 0:
-                return Blocking.class;
-            case 1:
-                return Blooming.class;
-            case 2:
-                return Projecting.class;
-            case 3:
-                return Elastic.class;
-            case 4:
-                return Lucky.class;
-            case 5:
-                return Unstable.class;
-            case 6:
-                return Combos.class;
-            case 7:
-                return Seeking.class;
-            default:
-                return null;
-        }
-        else if (category == 3) switch (id) {
-            case 0:
-                return Corrupting.class;
-            case 1:
-                return Grim.class;
-            case 2:
-                return Vampiric.class;
-            case 3:
-                return Striking.class;
-            case 4:
-                return Euphoria.class;
-            default:
-                return null;
-        }
-        else if (category == 4) switch (id) {
-            case 0:
-                return Annoying.class;
-            case 1:
-                return Displacing.class;
-            case 2:
-                return Explosive.class;
-            case 3:
-                return Dazzling.class;
-            case 4:
-                return Friendly.class;
-            case 5:
-                return Polarized.class;
-            case 6:
-                return Sacrificial.class;
-            case 7:
-                return Wayward.class;
-            case 8:
-                return Stubbornness.class;
-            case 9:
-                return Temporal.class;
-            case 10:
-                return DoubleEdged.class;
-            case 11:
-                return Heavy.class;
-            case 12:
-                return Ultralight.class;
-            default:
-                return null;
-        }
-        return null;
+        int idx = Math.min(id, enchs.length - 1);
+        return (Class<? extends Weapon.Enchantment>) enchs[idx];
     }
 
     private Class<? extends Weapon>[] weaponList(int t) {
@@ -319,7 +232,7 @@ public class TestMelee extends TestGenerator {
             o_enchant_rarity.setSelectedValue(enchant_rarity);
             add(o_enchant_rarity);
 
-            o_enchant_id = new OptionSlider(Messages.get(this, "enchant_id"), "0", "7", 0, 7) {
+            o_enchant_id = new OptionSlider(Messages.get(this, "enchant_id"), "0", "12", 0, 12) {
                 @Override
                 protected void onChange() {
                     enchant_id = getSelectedValue();
