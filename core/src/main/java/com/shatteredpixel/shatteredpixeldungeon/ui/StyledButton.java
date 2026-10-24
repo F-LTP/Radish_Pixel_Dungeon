@@ -151,6 +151,10 @@ public class StyledButton extends Button {
 		return icon;
 	}
 
+	public void setTopBorderVisible( boolean value ){
+		skin.setChromeTopVisible( value );
+	}
+
 	public void alpha(float value){
 		if (icon != null) icon.alpha(value);
 		if (text != null) text.alpha(value);

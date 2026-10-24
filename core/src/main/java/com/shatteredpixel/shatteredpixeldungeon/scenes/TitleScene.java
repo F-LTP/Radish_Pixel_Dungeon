@@ -192,9 +192,12 @@ public class TitleScene extends PixelScene {
 
 		StyledButton seed = new JoinButton(Chrome.Type.GREY_BUTTON_TR, Messages.get(this, "seed"));
 		seed.icon(Icons.get(Icons.ENERGY));
+		seed.icon().scale.set(align(0.5f));
 		add(seed);
 
 		final int BTN_HEIGHT = 20;
+		final int seedWidth = Math.max(40, (int)Math.ceil(seed.reqWidth()) + 8);
+		final int seedHeight = Math.max(20, (int)Math.ceil(seed.reqHeight()) + 4);
 		int GAP = (int)(h - topRegion - (landscape() ? 3 : 6)*BTN_HEIGHT)/3;
 		GAP /= landscape() ? 3 : 5;
 		GAP = Math.max(GAP, 2);
@@ -220,9 +223,9 @@ public class TitleScene extends PixelScene {
 
 			btnSettings.setRect(btnSeedAnalysis.right()+2, btnPlay.bottom()+ GAP, (btnPlay.width()*.5f)-1, BTN_HEIGHT);
 			btnAbout.setRect(btnSeedAnalysis.left(), btnSeedAnalysis.bottom() + GAP, ((title.width()+180)/2)-1, BTN_HEIGHT);
-			seed.setRect(10, 0,40,20);
+			seed.setRect(10, 0, seedWidth, seedHeight);
 		} else {
-			seed.setRect(10, version.y-10,40,20);
+			seed.setRect(10, version.y-10, seedWidth, seedHeight);
 			btnPlay.setRect(title.x-5, topRegion+GAP, title.width()+10, BTN_HEIGHT);
 			align(btnPlay);
 			btnRankings.setRect(btnPlay.left(), btnPlay.bottom()+ GAP, btnPlay.width(), BTN_HEIGHT);
