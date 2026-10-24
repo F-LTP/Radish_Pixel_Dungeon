@@ -111,6 +111,11 @@ public class ReplacePoint extends MeleeWeapon {
     }
 
     @Override
+    public String statsInfo() {
+        return "";
+    }
+
+    @Override
     public int min(int lvl) {
         return 2 + lvl;
     }
