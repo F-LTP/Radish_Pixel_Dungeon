@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.input.PointerEvent;
 import com.watabou.noosa.TextInput;
+import com.watabou.utils.DeviceCompat;
 
 public class WndTextInput extends Window {
 
@@ -204,7 +205,12 @@ public class WndTextInput extends Window {
 	public synchronized void update() {
 		super.update();
 		btnCopy.enable(!textBox.getText().isEmpty());
-		btnPaste.enable(Gdx.app.getClipboard().hasContents());
+		if (DeviceCompat.isDesktop()){
+			//X11 clipboard probing can spam GLFW_FORMAT_UNAVAILABLE, so keep paste available.
+			btnPaste.enable(true);
+		} else {
+			btnPaste.enable(Gdx.app.getClipboard().hasContents());
+		}
 	}
 
 	@Override

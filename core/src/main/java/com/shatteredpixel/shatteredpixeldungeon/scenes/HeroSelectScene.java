@@ -35,11 +35,12 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.HeroDefin
 import com.shatteredpixel.shatteredpixeldungeon.effects.Fireball;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Journal;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Archs;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
-import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.StyledButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.shatteredpixel.shatteredpixeldungeon.utils.DungeonSeed;
@@ -50,6 +51,7 @@ import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTextInput;
 import com.watabou.gltextures.SmartTexture;
 import com.watabou.gltextures.TextureCache;
+import com.watabou.glwrap.Blending;
 import com.watabou.glwrap.Matrix;
 import com.watabou.glwrap.Quad;
 import com.watabou.input.GameAction;
@@ -59,6 +61,7 @@ import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Group;
 import com.watabou.noosa.Image;
+import com.watabou.noosa.NinePatch;
 import com.watabou.noosa.NoosaScript;
 import com.watabou.noosa.PointerArea;
 import com.watabou.noosa.TextureFilm;
@@ -102,13 +105,13 @@ public class HeroSelectScene extends PixelScene {
 	private static final int FRAME_HEIGHT    = 125;
 
 	private static final int FRAME_MARGIN_TOP    = 9;
+	private static final int FRAME_BORDER        = 6;
 	private static final int FRAME_MARGIN_X        = 4;
 
 	private static final int BUTTON_HEIGHT    = 20;
 	private static final int TITLE_HEIGHT = 32;
-	private static final int TITLE_BOTTOM_GAP = 4;
-	private static final int TITLE_OFFSET_UP = 8;
-	private static final int SELECT_UI_OFFSET_DOWN = 8;
+	private static final int TITLE_BOTTOM_GAP = 14;
+	private static final int ROW_GAP = 6;
 
 	private static final int SKY_WIDTH    = 80;
 	private static final int SKY_HEIGHT    = 112;
@@ -119,12 +122,13 @@ public class HeroSelectScene extends PixelScene {
 	private Camera viewport;
 
 	private Avatar a;
-	private RedButton startBtn;
+	private StyledButton startBtn;
 	private StyledButton skin;
-	private Image frame;
+	private StyledButton seedButton;
+	private NinePatch frame;
 
 	private IconButton infoButton;
-	private IconButton challengeButton;
+	private StyledButton challengeButton;
 
 	private StyledButton holidayButton;
 
@@ -156,12 +160,32 @@ public class HeroSelectScene extends PixelScene {
 		archs.setSize( w, h );
 		add( archs );
 
+		btnExit = new IconButton(Icons.get(Icons.LEFTARROW)) {
+			@Override
+			protected void onClick() {
+				ShatteredPixelDungeon.switchNoFade(TitleScene.class);
+			}
+
+			@Override
+			public GameAction keyAction() {
+				return GameAction.BACK;
+			}
+
+			@Override
+			protected String hoverText() {
+				return Messages.titleCase(Messages.get(WndKeyBindings.class, "back"));
+			}
+		};
+		btnExit.setSize(BUTTON_HEIGHT, BUTTON_HEIGHT);
+		btnExit.setPos(2, 2);
+		PixelScene.align(btnExit);
+		add(btnExit);
+
 		float vx = align((w - SKY_WIDTH) / 2f);
-		float centeredVy = align((h - SKY_HEIGHT - BUTTON_HEIGHT) / 2f + SELECT_UI_OFFSET_DOWN);
-		float titleY = Math.max(2, centeredVy - FRAME_MARGIN_TOP + FRAME_HEIGHT / 8f
-				- BUTTON_HEIGHT - 25 - SELECT_UI_OFFSET_DOWN - TITLE_OFFSET_UP);
-		float vy = Math.max(centeredVy,
-				titleY + TITLE_HEIGHT + TITLE_BOTTOM_GAP + FRAME_MARGIN_TOP);
+		float belowFrame = ROW_GAP + BUTTON_HEIGHT;
+		float contentHeight = TITLE_HEIGHT + TITLE_BOTTOM_GAP + FRAME_HEIGHT + belowFrame;
+		float titleY = align(Math.max(2, (h - contentHeight) / 2f));
+		float vy = titleY + TITLE_HEIGHT + TITLE_BOTTOM_GAP + FRAME_MARGIN_TOP;
 
 		Point s = Camera.main.cameraToScreen( vx, vy );
 		viewport = new Camera( s.x, s.y, SKY_WIDTH, SKY_HEIGHT, defaultZoom );
@@ -224,11 +248,11 @@ public class HeroSelectScene extends PixelScene {
 		}
 
 
-		frame = new Image( Assets.Interfaces.SURFACE );
-
-		frame.frame( FRAME_WIDTH + GrassPatch.WIDTH*4, 0, FRAME_WIDTH, FRAME_HEIGHT );
+		frame = Chrome.get( Chrome.Type.WINDOW );
+		frame.setCenterVisible( false );
 		frame.x = vx - FRAME_MARGIN_X;
-		frame.y = vy - FRAME_MARGIN_TOP;
+		frame.y = vy - FRAME_BORDER;
+		frame.size( FRAME_WIDTH, FRAME_HEIGHT );
 		add( frame );
 
 		if (dayTime) {
@@ -237,7 +261,7 @@ public class HeroSelectScene extends PixelScene {
 			frame.hardlight( 0xDDEEFF );
 		}
 
-		startBtn = new RedButton( "" ) {
+		startBtn = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "", 9) {
 			@Override
 			protected void onClick() {
 				super.onClick();
@@ -259,8 +283,7 @@ public class HeroSelectScene extends PixelScene {
 		startBtn.icon(Icons.get(Icons.ENTER));
 		add( startBtn );
 
-		skin = new StyledButton( Chrome.Type.GREY_BUTTON_TR,Messages.get(WndKeyBindings.class, "skin"),6 ){
-			private float time = 0;
+		skin = new StyledButton( Chrome.Type.GREY_BUTTON_TR, "", 6 ){
 			@Override
 			protected void onClick() {
 				super.onClick();
@@ -274,9 +297,9 @@ public class HeroSelectScene extends PixelScene {
 			}
 		};
 		skin.icon(Icons.get(Icons.CHANGES));
-		skin.icon().scale.set(0.6f);
-		skin.setSize( 60, BUTTON_HEIGHT );
-		skin.setPos(frame.x- 35 + frame.width - 35 + FRAME_MARGIN_X,frame.y);
+		skin.icon().scale.set(0.8f);
+		skin.setTopBorderVisible(false);
+		skin.setSize(BUTTON_HEIGHT, BUTTON_HEIGHT);
 		add(skin);
 
 		infoButton = new IconButton(Icons.get(Icons.INFO)){
@@ -302,8 +325,7 @@ public class HeroSelectScene extends PixelScene {
 		infoButton.setSize(21, 21);
 		add(infoButton);
 
-		challengeButton = new IconButton(
-				Icons.get( SPDSettings.challenges() > 0 ? Icons.CHALLENGE_ON :Icons.CHALLENGE_OFF)){
+		challengeButton = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "", 6){
 			@Override
 			protected void onClick() {
 				//TheCatist 2026.8.8 取消胜利过一次才能开挑战的限制
@@ -336,10 +358,9 @@ public class HeroSelectScene extends PixelScene {
 				return Messages.titleCase(Messages.get(WndChallenges.class, "title"));
 			}
 		};
-		challengeButton.setRect(startBtn.left() + 16, Camera.main.height- BUTTON_HEIGHT-16, 21, 21);
+		challengeButton.icon(Icons.get(SPDSettings.challenges() > 0 ? Icons.CHALLENGE_ON : Icons.CHALLENGE_OFF));
+		challengeButton.setSize(21, 21);
 		add(challengeButton);
-
-		setSelectedHero();
 
 		//TODO 翻页按钮图标需要自己搞一下
 		IconButton prevBtn = new IconButton( Icons.get(Icons.LEFTARROW) ) {
@@ -394,12 +415,12 @@ public class HeroSelectScene extends PixelScene {
 				return GameAction.NONE;
 			}
 		};
-		//nextBtn.setSize( BUTTON_HEIGHT, BUTTON_HEIGHT );
+		nextBtn.setSize( BUTTON_HEIGHT, BUTTON_HEIGHT );
 		nextBtn.setPos( frame.x + frame.width + FRAME_MARGIN_X, frame.y + frame.height / 2 - BUTTON_HEIGHT / 2f);
 		PixelScene.align(nextBtn);
 		add( nextBtn );
 
-		StyledButton seedButton = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "", 6){
+		seedButton = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "", 6){
 			@Override
 			protected void onClick() {
 				String existingSeedtext = SPDSettings.customSeed();
@@ -425,20 +446,44 @@ public class HeroSelectScene extends PixelScene {
 				});
 			}
 		};
-		seedButton.leftJustify = true;
 		seedButton.setSize( BUTTON_HEIGHT, BUTTON_HEIGHT );
-		seedButton.setPos( frame.x-58+frame.width-58 + FRAME_MARGIN_X, frame.y-10 + frame.height-10 - BUTTON_HEIGHT);
-		seedButton.icon(Icons.get(Icons.ENTER));
+		seedButton.icon(new ItemSprite(ItemSpriteSheet.SEED_SUNGRASS, null));
 		if (!SPDSettings.customSeed().isEmpty()) seedButton.icon().hardlight(1f, 1.5f, 0.67f);;
 		buttons.add(seedButton);
 		add(seedButton);
 
+		setSelectedHero();
+
+		skin.setPos(frame.x + frame.width * 0.618f - skin.width() / 2f, frame.y);
+		PixelScene.align(skin);
+
 		Image title = new Image(Assets.Interfaces.BANNERS, 0, 0, 126, TITLE_HEIGHT);
-		title.setPos(frame.x - frame.width / 5f + FRAME_MARGIN_X / 5f, titleY);
+		title.setPos(
+				frame.x + (frame.width - title.width()) / 2f,
+				titleY + (TITLE_HEIGHT - title.height()) / 2f);
 		add(title);
 
-		placeTorch(title.x - 8, title.y + 42);
-		placeTorch(title.x + 132, title.y + 42);
+		Image signs = new Image(Assets.Interfaces.BANNERS, 132, 0, 124, TITLE_HEIGHT) {
+			private float time = 0;
+			@Override
+			public void update() {
+				super.update();
+				am = Math.max(0f, (float)Math.sin( time += Game.elapsed ));
+				if (time >= 1.5f*Math.PI) time = 0;
+			}
+			@Override
+			public void draw() {
+				Blending.setLightMode();
+				super.draw();
+				Blending.setNormalMode();
+			}
+		};
+		signs.setPos(title.x + 3, title.y);
+		add(signs);
+
+		float torchY = title.y + title.height() / 2f;
+		placeTorch(title.x - 8, torchY);
+		placeTorch(title.x + title.width() + 4, torchY);
 
 		fadeIn();
 
@@ -475,14 +520,28 @@ public class HeroSelectScene extends PixelScene {
 
 		startBtn.text(Messages.titleCase(cl.title()));
 		startBtn.textColor(Window.WHITE);
-		startBtn.setSize(Math.max(startBtn.reqWidth() + 8, SKY_WIDTH - FRAME_MARGIN_X * 2), BUTTON_HEIGHT);
-		startBtn.setPos( (Camera.main.width - startBtn.width())/2f, frame.y + frame.height + FRAME_MARGIN_X );
+
+		float totalWidth = Math.max(startBtn.reqWidth() + 8 + seedButton.width(), SKY_WIDTH - FRAME_MARGIN_X * 2);
+		float startWidth = totalWidth - seedButton.width();
+		float rowY = frame.y + frame.height + ROW_GAP;
+
+		startBtn.setSize(startWidth, BUTTON_HEIGHT);
+
+		float groupWidth = challengeButton.width() + seedButton.width() + startWidth;
+		float groupX = align((Camera.main.width - groupWidth) / 2f);
+
+		challengeButton.setPos(groupX, rowY + (startBtn.height() - challengeButton.height()) / 2f);
+		PixelScene.align(challengeButton);
+
+		seedButton.setPos(challengeButton.right(), rowY);
+		PixelScene.align(seedButton);
+
+		startBtn.setPos(seedButton.right(), rowY);
 		PixelScene.align(startBtn);
 		startBtn.enable( cl.isUnlocked() );
 
-		infoButton.setPos(startBtn.right(), startBtn.top());
-
-		challengeButton.setPos(startBtn.left()-challengeButton.width(), startBtn.top());
+		infoButton.setPos(startBtn.right(), startBtn.top() + (startBtn.height() - infoButton.height()) / 2f);
+		PixelScene.align(infoButton);
 	}
 
 	@Override

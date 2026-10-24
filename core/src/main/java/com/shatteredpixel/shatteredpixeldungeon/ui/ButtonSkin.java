@@ -23,6 +23,10 @@ public class ButtonSkin {
         themedFrameVisible = visible;
     }
 
+    public void setChromeTopVisible(boolean visible) {
+        chrome.setTopVisible(visible);
+    }
+
     public NinePatch chrome() {
         return chrome;
     }
