@@ -7,7 +7,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.ChangesScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.TitleScene;
-import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.MoonLightSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.StyledButton;
@@ -134,7 +134,7 @@ public class RDChangesButton extends StyledButton {
 			int width = PixelScene.landscape() ? WIDTH_L : WIDTH_P;
 
 			float pos = 0;
-			IconTitle tfTitle = new IconTitle(Icons.get(Icons.DATA), update.versionName == null ? Messages.get(TitleScene.ChangesButton.class, "title") : Messages.get(TitleScene.ChangesButton.class, "versioned_title", update.versionName));
+			IconTitle tfTitle = new IconTitle(new Image(new MoonLightSprite()), update.versionName == null ? Messages.get(TitleScene.ChangesButton.class, "title") : Messages.get(TitleScene.ChangesButton.class, "versioned_title", update.versionName));
 			tfTitle.setRect(0, pos, width, 0);
 			add(tfTitle);
 
@@ -224,31 +224,8 @@ public class RDChangesButton extends StyledButton {
 			add(btn);
 			pos += BUTTON_HEIGHT + MARGIN*3;
 
-			RedButton btn2 = new RedButton(Messages.get(RDChangesButton.class,"download2")) {
-				@Override
-				public void update() {
-					if (downloadSuccess) {
-						text(updateProgress);
-					}
-				}
-				@Override
-				protected void onClick() {
-					if(Objects.equals(update.URL2, "null") && !downloadSuccess){
-						ShatteredPixelDungeon.scene().add( new WndError( Messages.get(RDChangesButton.class, "null") ) );
-					} else if(DeviceCompat.isDesktop()){
-						ShatteredPixelDungeon.platform.openURI( update.URL2 );
-					} else if (!downloadSuccess) {
-						if(downloadFailure) downloadFailure = false;
-						Game.platform.updateGame(update.URL2, listener);
-					} else {
-						Game.platform.install(file);
-					}
-				}
-			};
-			btn2.setRect(0, pos, width, BUTTON_HEIGHT);
-
 			if(!DeviceCompat.isDesktop()){
-				add(btn2);
+				add(btn);
 				pos += BUTTON_HEIGHT + MARGIN;
 			}
 

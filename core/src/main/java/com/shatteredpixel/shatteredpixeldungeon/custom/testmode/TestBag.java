@@ -24,6 +24,6 @@ public class TestBag extends Bag {
     }
 
     public int capacity(){
-        return 19;
+        return 25;
     }
 }

@@ -30,6 +30,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -39,6 +41,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMappi
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
@@ -96,11 +99,11 @@ public class WandOfPrismaticLight extends DamageWand {
 			ch.sprite.emitter().start( ShadowParticle.UP, 0.05f, 10+buffedLvl() );
 			Sample.INSTANCE.play(Assets.Sounds.BURNING);
 
-			ch.damage(Math.round(dmg*1.333f), this);
+			ch.damage(new DamageInfo(Math.round(dmg*1.333f), DamageType.MAGICAL, curUser, this, this));
 		} else {
 			ch.sprite.centerEmitter().burst( RainbowParticle.BURST, 10+buffedLvl() );
 
-			ch.damage(dmg, this);
+			ch.damage(new DamageInfo(dmg, DamageType.MAGICAL, curUser, this, this));
 		}
 
 	}
@@ -142,6 +145,20 @@ public class WandOfPrismaticLight extends DamageWand {
 		curUser.sprite.parent.add(
 				new Beam.LightRay(curUser.sprite.center(), DungeonTilemap.raisedTileCenterToWorld(beam.collisionPos)));
 		callback.call();
+	}
+
+	@Override
+	public String upgradeStat2(int level) {
+		return Messages.decimalFormat("#", 100*(1-(3/(float)(5+level)))) + "%";
+	}
+
+	@Override
+	public String upgradeStat3(int level) {
+		if (Dungeon.isChallenged(Challenges.DARKNESS)){
+			return Integer.toString(2 + level);
+		} else {
+			return Integer.toString(10 + 5*level);
+		}
 	}
 
 	@Override

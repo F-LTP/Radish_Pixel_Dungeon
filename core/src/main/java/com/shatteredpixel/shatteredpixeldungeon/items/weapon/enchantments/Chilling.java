@@ -22,7 +22,6 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
@@ -46,16 +45,8 @@ public class Chilling extends Weapon.Enchantment {
 
 			float powerMulti = Math.max(1f, procChance);
 
-			//adds 3 turns of chill per proc, with a cap of 6 turns
-			float durationToAdd = 3f * powerMulti;
-			Chill existing = defender.buff(Chill.class);
-			if (existing != null){
-				durationToAdd = Math.min(durationToAdd, (6f*powerMulti)-existing.cooldown());
-			}
-
-			if (durationToAdd > 0) {
-				Buff.affect(defender, Chill.class, durationToAdd);
-			}
+			//adds 3 turns of chill per proc, freezing the target if chill exceeds its cap
+			Chill.chillOrFreeze(defender, 3f * powerMulti);
 			Splash.at( defender.sprite.center(), 0xFFB2D6FF, 5);
 
 		}

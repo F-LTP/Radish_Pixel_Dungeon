@@ -27,16 +27,24 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfCompression;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Elastic;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SpaceFragment;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.TenguDartTrap;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
+import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
+import com.shatteredpixel.shatteredpixeldungeon.plants.VineTrap;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
@@ -75,6 +83,11 @@ public class WandOfBlastWave extends DamageWand {
 			if (!(Dungeon.level.traps.get(bolt.collisionPos+i) instanceof TenguDartTrap)) {
 				Dungeon.level.pressCell(bolt.collisionPos + i);
 			}
+			Plant plant = Dungeon.level.plants.get(bolt.collisionPos+i );
+			if (plant != null){
+				if (plant instanceof VineTrap)
+					plant.wither();
+			}
 		}
 
 		//throws other chars around the center.
@@ -83,7 +96,7 @@ public class WandOfBlastWave extends DamageWand {
 
 			if (ch != null){
 				wandProc(ch, chargesPerCast());
-				if (ch.alignment != Char.Alignment.ALLY) ch.damage(damageRoll(), this);
+				if (ch.alignment != Char.Alignment.ALLY) ch.damage(new DamageInfo(damageRoll(), DamageType.MAGICAL, curUser, this, this));
 
 				if (ch.pos == bolt.collisionPos + i) {
 					Ballistica trajectory = new Ballistica(ch.pos, ch.pos + i, Ballistica.MAGIC_BOLT);
@@ -98,7 +111,7 @@ public class WandOfBlastWave extends DamageWand {
 		Char ch = Actor.findChar(bolt.collisionPos);
 		if (ch != null){
 			wandProc(ch, chargesPerCast());
-			ch.damage(damageRoll(), this);
+			ch.damage(new DamageInfo(damageRoll(), DamageType.MAGICAL, curUser, this, this));
 
 			if (bolt.path.size() > bolt.dist+1 && ch.pos == bolt.collisionPos) {
 				Ballistica trajectory = new Ballistica(ch.pos, bolt.path.get(bolt.dist + 1), Ballistica.MAGIC_BOLT);
@@ -106,16 +119,35 @@ public class WandOfBlastWave extends DamageWand {
 				throwChar(ch, trajectory, strength, false, true, this);
 			}
 		}
-		
+
 	}
 
 	public static void throwChar(final Char ch, final Ballistica trajectory, int power,
-	                             boolean closeDoors, boolean collideDmg, Object cause){
+								 boolean closeDoors, boolean collideDmg, Object cause){
+		// 空间碎片：免疫来自外部的位移
+		if (SpaceFragment.blocksPassiveDisplacement(ch)) {
+			return;
+		}
 		if (ch.properties().contains(Char.Property.BOSS)) {
 			power = (power+1)/2;
 		}
+		float damageMultiplier;
+		// 挤压之戒：对于非英雄单位增加击退距离，怪物都不会装备戒指所以不可能对英雄生效
+		if (!(ch instanceof Hero)){
+			Char attacker = Dungeon.hero;
+			// 挤压之戒：碰撞伤害倍率
+			damageMultiplier = RingOfCompression.collisionDamageMultiplier(attacker);
 
-		int dist = Math.min(trajectory.dist, power);
+			int compressionBonus = RingOfCompression.knockbackDistanceBonus(attacker);
+			if (compressionBonus > 0) {
+				power += compressionBonus;
+			}
+		} else {
+            damageMultiplier = 1;
+        }
+
+
+        int dist = Math.min(trajectory.dist, power);
 
 		boolean collided = dist == trajectory.dist;
 
@@ -149,6 +181,7 @@ public class WandOfBlastWave extends DamageWand {
 		final boolean finalCollided = collided && collideDmg;
 		final int initialpos = ch.pos;
 
+
 		Actor.add(new Pushing(ch, ch.pos, newPos, new Callback() {
 			public void call() {
 				if (initialpos != ch.pos || Actor.findChar(newPos) != null) {
@@ -159,7 +192,9 @@ public class WandOfBlastWave extends DamageWand {
 				int oldPos = ch.pos;
 				ch.pos = newPos;
 				if (finalCollided && ch.isActive()) {
-					ch.damage(Char.combatRoll(finalDist, 2*finalDist), new Knockback());
+					int baseDamage = Random.NormalIntRange(finalDist, 2*finalDist);
+					int boostedDamage = Math.round(baseDamage * damageMultiplier);
+					ch.damage(new DamageInfo(boostedDamage, DamageType.PHYSICAL_NO_ARMOR, null, null, new Knockback()));
 					if (ch.isActive()) {
 						Paralysis.prolong(ch, Paralysis.class, 1 + finalDist/2f);
 					} else if (ch == Dungeon.hero){
@@ -214,7 +249,7 @@ public class WandOfBlastWave extends DamageWand {
 
 	private static class BlastWaveOnHit extends Elastic{
 		@Override
-		protected float procChanceMultiplier(Char attacker) {
+		public float procChanceMultiplier(Char attacker) {
 			return Wand.procChanceMultiplier(attacker);
 		}
 	}
@@ -238,24 +273,36 @@ public class WandOfBlastWave extends DamageWand {
 		particle.radiateXY(2.5f);
 	}
 
+	@Override
+	public String upgradeStat1(int level) {
+		return (1+level) + "-" + (2+2*level);
+	}
+
+	@Override
+	public String upgradeStat2(int level) {
+		return (2+2*level) + "-" + 2*(4+2*level);
+	}
+
 	public static class BlastWave extends Image {
 
 		private static final float TIME_TO_FADE = 0.2f;
 
 		private float time;
+		private float size;
 
 		public BlastWave(){
 			super(Effects.get(Effects.Type.RIPPLE));
 			origin.set(width / 2, height / 2);
 		}
 
-		public void reset(int pos) {
+		public void reset(int pos, float size) {
 			revive();
 
 			x = (pos % Dungeon.level.width()) * DungeonTilemap.SIZE + (DungeonTilemap.SIZE - width) / 2;
 			y = (pos / Dungeon.level.width()) * DungeonTilemap.SIZE + (DungeonTilemap.SIZE - height) / 2;
 
 			time = TIME_TO_FADE;
+			this.size = size;
 		}
 
 		@Override
@@ -267,15 +314,19 @@ public class WandOfBlastWave extends DamageWand {
 			} else {
 				float p = time / TIME_TO_FADE;
 				alpha(p);
-				scale.y = scale.x = (1-p)*3;
+				scale.y = scale.x = (1-p)*size;
 			}
 		}
 
 		public static void blast(int pos) {
+			blast(pos, 3);
+		}
+
+		public static void blast(int pos, float radius) {
 			Group parent = Dungeon.hero.sprite.parent;
 			BlastWave b = (BlastWave) parent.recycle(BlastWave.class);
 			parent.bringToFront(b);
-			b.reset(pos);
+			b.reset(pos, radius);
 		}
 
 	}

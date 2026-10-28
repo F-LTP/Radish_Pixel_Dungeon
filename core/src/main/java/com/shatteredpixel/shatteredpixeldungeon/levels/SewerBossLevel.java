@@ -22,12 +22,14 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SnDBGM;
 import com.shatteredpixel.shatteredpixeldungeon.Bones;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Goo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishBoss.BigSnake_Zikk;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.levels.builders.Builder;
@@ -60,20 +62,21 @@ public class SewerBossLevel extends SewerLevel {
 	
 	@Override
 	public void playLevelMusic() {
+        if (SnDBGM.playLevelMusic()) return;
 		if (locked){
 			Music.INSTANCE.play(Assets.Music.SEWERS_BOSS, true);
 			return;
 		}
 
-		boolean gooAlive = false;
+		boolean bossAlive = false;
 		for (Mob m : mobs){
-			if (m instanceof Goo) {
-				gooAlive = true;
+			if (m instanceof Goo || m instanceof BigSnake_Zikk) {
+				bossAlive = true;
 				break;
 			}
 		}
 
-		if (gooAlive){
+		if (bossAlive){
 			Music.INSTANCE.end();
 		} else {
 			Music.INSTANCE.playTracks(SewerLevel.SEWER_TRACK_LIST, SewerLevel.SEWER_TRACK_CHANCES, false);
@@ -188,7 +191,9 @@ public class SewerBossLevel extends SewerLevel {
 			Game.runOnRenderThread(new Callback() {
 				@Override
 				public void call() {
-					Music.INSTANCE.play(Assets.Music.SEWERS_BOSS, true);
+					if (!SnDBGM.playLevelMusic()) {
+						Music.INSTANCE.play(Assets.Music.SEWERS_BOSS, true);
+					}
 				}
 			});
 		}

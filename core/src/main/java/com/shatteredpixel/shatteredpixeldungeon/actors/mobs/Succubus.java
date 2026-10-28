@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Deminion;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -79,6 +80,11 @@ public class Succubus extends Mob {
 		
 		if (enemy.buff(Charm.class) != null ){
 			int shield = (HP - HT) + (5 + damage);
+
+			if (enemy.buff(Deminion.Sigil.class)!=null){
+				shield += 10;
+			}
+
 			if (shield > 0){
 				HP = HT;
 				if (shield < 5){

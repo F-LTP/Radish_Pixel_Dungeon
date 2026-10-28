@@ -3,9 +3,8 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
 android {
-    //noinspection GradleDependency
-    compileSdk 33
-
+    namespace 'com.shatteredpixel.shatteredpixeldungeon.android'
+    compileSdk appAndroidCompileSDK
     compileOptions.sourceCompatibility = compileOptions.targetCompatibility = appJavaCompatibility
 
     sourceSets.main.assets.srcDirs = [new File(project(':core').projectDir, "/src/main/assets")]
@@ -13,45 +12,46 @@ android {
     defaultConfig {
         manifestPlaceholders = [appName:appName]
         applicationId appPackageName
-        //接入多Dex,解决代码方法超过65535的问题
-        multiDexEnabled true
+
         versionCode appVersionCode
         versionName appVersionName
 
         //noinspection MinSdkTooLow
         minSdkVersion appAndroidMinSDK
         targetSdkVersion appAndroidTargetSDK
+        resourceConfigurations += ['en_US', 'cs', 'de', 'el', 'es', 'fr', 'hu', 'in', 'it', 'ja', 'ko', 'nl', 'pl', 'pt', 'ru', 'tr', 'uk', 'vi', 'zh_CN']
 
-        resConfigs "en_US", "cs", "tr", "ca", "ko", "pl", "it", "ja",
-                "eo", "ru", "zh_CN", "de", "fr", "es", "pt", "fi", "hu", "in"
     }
 
     buildTypes {
         debug {
             //兼容FireBase Debug调试，因此请在虚拟机上运行！（包名一致）
             //            applicationIdSuffix ".indev"
+
+            //Debug环境下会超方法 调用多Dex
+            multiDexEnabled true
+            //屏蔽CrashMap地图
+            firebaseCrashlytics {mappingFileUploadEnabled false}
             versionNameSuffix '-INDEV'
             dependencies {
                 debugImplementation project(':services:updates:debugUpdates')
                 debugImplementation project(':services:news:debugNews')
             }
         }
-
         release {
-            //as the information produced in stack traces must be de-obfuscated.
-            //See here: https://developer.android.com/studio/build/shrink-code#decode-stack-trace
-            shrinkResources true
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            //Disabled R8/minify to prevent removal of reflection-loaded classes (e.g. EventSubscriberIndex)
+            shrinkResources false
+            minifyEnabled false
+            //启用MultiDex解决64k方法限制
+            multiDexEnabled true
             firebaseCrashlytics {mappingFileUploadEnabled false}
             dependencies {
                 releaseImplementation project(':services:updates:githubUpdates')
                 releaseImplementation project(':services:news:shatteredNews')
             }
-            signingConfig signingConfigs.debug
         }
     }
-    namespace 'com.shatteredpixel.shatteredpixeldungeon.android'
 
     sourceSets {
         main {
@@ -62,13 +62,22 @@ android {
 
 configurations { natives }
 
+preBuild.dependsOn rootProject.tasks.named('generateRuntimeAtlasManifests')
+
 dependencies {
     implementation project(':core')
+
+    // 事件系统模块引入（订阅者在 core 模块，annotationProcessor 已在 core 模块配置）
+    implementation project(':event-annotations')
+
     implementation 'cat.ereza:customactivityoncrash:2.3.0'
 
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
-    //接入多DEX
-    implementation 'com.android.support:multidex:1.0.3'
+
+
+    //接入多DEX 仅在Debug状态下使用
+    implementation "androidx.multidex:multidex:2.0.1"
+
     //只考虑安卓端 电脑端直接呼出URL
     //----------AndroidX 版本
     //app-updater
@@ -76,9 +85,13 @@ dependencies {
     //app-dialog
     implementation 'com.github.jenly1314.AppUpdater:app-dialog:1.2.0'
 
-
+    //noinspection GradleDependency
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'com.blankj:utilcodex:1.30.6'
     //android:lintVitalAnalyzeRelease Error可忽略
 
+    //noinspection GradleDependency
     implementation 'com.google.firebase:firebase-crashlytics:18.6.2'
     implementation 'com.google.firebase:firebase-analytics:21.5.1'
     implementation platform('com.google.firebase:firebase-bom:32.7.4')

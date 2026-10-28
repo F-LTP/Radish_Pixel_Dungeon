@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BlobImmunity;
@@ -37,6 +38,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
@@ -90,7 +92,7 @@ public class Shopkeeper extends NPC {
 	}
 	
 	@Override
-	public void damage( int dmg, Object src ) {
+	public void damage( DamageInfo info ) {
 		processHarm();
 	}
 	
@@ -187,8 +189,14 @@ public class Shopkeeper extends NPC {
 	public static int sellPrice(Item item){
 		int ax= 5 * (Dungeon.depth / 5 + 1);
 		if (item instanceof MeleeWeapon){
+
 			int price = 20 * ((MeleeWeapon)item).tier;
-			if (((MeleeWeapon)item).hasGoodEnchant()) {
+
+            if (((Weapon) item).enchantment != null) {
+                price *= 1.2;  // 附魔增加 20%
+            }
+
+            if (((MeleeWeapon)item).hasGoodEnchant()) {
 				price *= 1.2;
 			}
 			if (item.cursedKnown && (item.cursed || ((MeleeWeapon)item).hasCurseEnchant())) {
@@ -233,8 +241,20 @@ public class Shopkeeper extends NPC {
 			if (price < 1) {
 				price = 1;
 			}
+
+			if(item.level > 0){
+				price *= (int) (1 + (item.level() * 0.3f));  // 不做强制转换
+			}
+
+
+
 			return price *ax;
+
+
+
 		}
+
+
 		return item.value() * ax;
 	}
 	
@@ -284,7 +304,7 @@ public class Shopkeeper extends NPC {
 				options[i++] = Messages.get(Shopkeeper.this, "sell");
 				options[i++] = Messages.get(Shopkeeper.this, "talk");
 				for (Item item : buybackItems){
-					options[i] = Messages.get(Heap.class, "for_sale", item.value(), Messages.titleCase(item.title()));
+					options[i] = Messages.get(Heap.class, "for_sale", item.value()*2, Messages.titleCase(item.title()));
 					if (options[i].length() > maxLen) options[i] = options[i].substring(0, maxLen-3) + "...";
 					i++;
 				}
@@ -299,8 +319,8 @@ public class Shopkeeper extends NPC {
 						} else if (index > 1){
 							GLog.i(Messages.get(Shopkeeper.this, "buyback"));
 							Item returned = buybackItems.remove(index-2);
-							Dungeon.gold -= returned.value();
-							Statistics.goldCollected -= returned.value();
+							Dungeon.gold -= returned.value()*2;
+							Statistics.goldCollected -= returned.value()*2;
 							if (!returned.doPickUp(Dungeon.hero)){
 								Dungeon.level.drop(returned, Dungeon.hero.pos);
 							}
@@ -310,7 +330,7 @@ public class Shopkeeper extends NPC {
 					@Override
 					protected boolean enabled(int index) {
 						if (index > 1){
-							return Dungeon.gold >= buybackItems.get(index-2).value();
+							return Dungeon.gold >= buybackItems.get(index-2).value()*3;
 						} else {
 							return super.enabled(index);
 						}

@@ -21,29 +21,32 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.ui;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.watabou.gltextures.AtlasFrame;
+import com.watabou.gltextures.AtlasSource;
+import com.watabou.gltextures.RuntimeAtlas;
+import com.watabou.gltextures.RuntimeAtlasRegistry;
 import com.watabou.noosa.Image;
-import com.watabou.noosa.TextureFilm;
 
 public class BuffIcon extends Image {
 
-	private static TextureFilm smallFilm;
-	private static final int SML_SIZE = 7;
-
-	private static TextureFilm largeFilm;
-	private static final int LRG_SIZE = 16;
+	public static final AtlasSource SMALL_ATLAS =
+			new AtlasSource("interfaces/buffs/small", "none");
+	public static final AtlasSource LARGE_ATLAS =
+			new AtlasSource("interfaces/buffs/large", "none");
+	private static final RuntimeAtlas SMALL = RuntimeAtlasRegistry.get(SMALL_ATLAS);
+	private static final RuntimeAtlas LARGE = RuntimeAtlasRegistry.get(LARGE_ATLAS);
 
 	private final boolean large;
 
 	public BuffIcon(Buff buff, boolean large){
-		super( large ? Assets.Interfaces.BUFFS_LARGE : Assets.Interfaces.BUFFS_SMALL );
+		super();
 		this.large = large;
 		refresh(buff);
 	}
 
-	public BuffIcon(int icon, boolean large){
-		super( large ? Assets.Interfaces.BUFFS_LARGE : Assets.Interfaces.BUFFS_SMALL );
+	public BuffIcon(String icon, boolean large){
+		super();
 		this.large = large;
 		refresh(icon);
 	}
@@ -53,14 +56,10 @@ public class BuffIcon extends Image {
 		buff.tintIcon(this);
 	}
 
-	public void refresh(int icon){
-		if (large){
-			if (largeFilm == null) largeFilm = new TextureFilm(texture, LRG_SIZE, LRG_SIZE);
-			frame(largeFilm.get(icon));
-		} else {
-			if (smallFilm == null ) smallFilm = new TextureFilm(texture, SML_SIZE, SML_SIZE);
-			frame(smallFilm.get(icon));
-		}
+	public void refresh(String icon){
+		AtlasFrame atlasFrame = (large ? LARGE : SMALL).frame(icon);
+		texture = atlasFrame.texture;
+		frame(atlasFrame.uv);
 	}
 
 }

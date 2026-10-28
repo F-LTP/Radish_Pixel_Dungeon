@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SnDBGM;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -29,7 +30,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Wandmaker;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlameParticle;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.PrisonPainter;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.ConvictEnterRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.AlarmTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.BurningTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.ChillingTrap;
@@ -71,6 +74,7 @@ public class PrisonLevel extends RegularLevel {
 
 	@Override
 	public void playLevelMusic() {
+        if (SnDBGM.playLevelMusic()) return;
 		if (Wandmaker.Quest.active() || Statistics.amuletObtained){
 			Music.INSTANCE.play(Assets.Music.PRISON_TENSE, true);
 		} else {
@@ -81,7 +85,11 @@ public class PrisonLevel extends RegularLevel {
 
 	@Override
 	protected ArrayList<Room> initRooms() {
-		return Wandmaker.Quest.spawnRoom(super.initRooms());
+		ArrayList<Room> rooms = Wandmaker.Quest.spawnRoom(super.initRooms());
+		if (Dungeon.depth == 8 && Dungeon.branchId.equals(Branches.MAIN)) {
+			rooms.add(new ConvictEnterRoom());
+		}
+		return rooms;
 	}
 
 	@Override

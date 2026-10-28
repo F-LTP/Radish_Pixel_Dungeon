@@ -1,5 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator;
 
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
@@ -222,8 +224,7 @@ public class TestMissile extends TestGenerator {
                         updateText();
                     }
                 };
-                Image im = new Image(Assets.Sprites.ITEMS);
-                im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(missileList.get(i))).image));
+                Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(missileList.get(i))).image);
                 im.scale.set(1.0f);
                 btn.icon(im);
                 btn.setRect(left + placed * BTN_SIZE, top + (row - 1) * (BTN_SIZE + GAP), BTN_SIZE, BTN_SIZE);

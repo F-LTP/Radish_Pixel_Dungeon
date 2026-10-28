@@ -57,23 +57,26 @@ public class SnakeSpear extends MeleeWeapon{
     }
     @Override
     public String statsInfo(){
-        if (isEquipped(Dungeon.hero)){
-            int toget=4;
-            Hero owner=Dungeon.hero;
-            if (owner.belongings.armor!=null){
-                toget--;
+        if(Dungeon.hero !=null){
+            if (isEquipped(Dungeon.hero)){
+                int toget=4;
+                Hero owner=Dungeon.hero;
+                if (owner.belongings.armor!=null){
+                    toget--;
+                }
+                if (owner.belongings.ring!=null){
+                    toget--;
+                }
+                if (owner.belongings.misc!=null){
+                    toget--;
+                }
+                if (owner.belongings.artifact!=null){
+                    toget--;
+                }
+                return Messages.get(this, "stats_desc2",(3+buffedLvl())*toget);
             }
-            if (owner.belongings.ring!=null){
-                toget--;
-            }
-            if (owner.belongings.misc!=null){
-                toget--;
-            }
-            if (owner.belongings.artifact!=null){
-                toget--;
-            }
-            return Messages.get(this, "stats_desc2",(3+buffedLvl())*toget);
         }
+
         return Messages.get(this, "stats_desc");
     }
 }

@@ -21,7 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.ui;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -47,7 +46,7 @@ public class ItemSlot extends Button {
 	public static final int ENHANCED	= 0x3399FF;
 	public static final int MASTERED	= 0xFFFF44;
 	public static final int CURSE_INFUSED	= 0x8800FF;
-	
+
 	private static final float ENABLED	= 1.0f;
 	private static final float DISABLED	= 0.3f;
 
@@ -59,7 +58,8 @@ public class ItemSlot extends Button {
 	protected BitmapText extra;
 	protected Image      itemIcon;
 	protected BitmapText level;
-	
+	protected BitmapText special;
+
 	private static final String TXT_STRENGTH	= ":%d";
 	private static final String TXT_TYPICAL_STR	= "%d?";
 
@@ -67,67 +67,70 @@ public class ItemSlot extends Button {
 
 	// Special "virtual items"
 	public static final Item CHEST = new Item() {
-		public int image() { return ItemSpriteSheet.CHEST; }
+		public String image() { return ItemSpriteSheet.CHEST; }
 		public String name() { return Messages.get(Heap.class, "chest"); }
 	};
 	public static final Item LOCKED_CHEST = new Item() {
-		public int image() { return ItemSpriteSheet.LOCKED_CHEST; }
+		public String image() { return ItemSpriteSheet.LOCKED_CHEST; }
 		public String name() { return Messages.get(Heap.class, "locked_chest"); }
 	};
 	public static final Item CRYSTAL_CHEST = new Item() {
-		public int image() { return ItemSpriteSheet.CRYSTAL_CHEST; }
+		public String image() { return ItemSpriteSheet.CRYSTAL_CHEST; }
 		public String name() { return Messages.get(Heap.class, "crystal_chest"); }
 	};
 	public static final Item TOMB = new Item() {
-		public int image() { return ItemSpriteSheet.TOMB; }
+		public String image() { return ItemSpriteSheet.TOMB; }
 		public String name() { return Messages.get(Heap.class, "tomb"); }
 	};
 	public static final Item SKELETON = new Item() {
-		public int image() { return ItemSpriteSheet.BONES; }
+		public String image() { return ItemSpriteSheet.BONES; }
 		public String name() { return Messages.get(Heap.class, "skeleton"); }
 	};
 	public static final Item REMAINS = new Item() {
-		public int image() { return ItemSpriteSheet.REMAINS; }
+		public String image() { return ItemSpriteSheet.REMAINS; }
 		public String name() { return Messages.get(Heap.class, "remains"); }
 	};
-	
+
 	public ItemSlot() {
 		super();
 		sprite.visible(false);
 		enable(false);
 	}
-	
+
 	public ItemSlot( Item item ) {
 		this();
 		item( item );
 	}
-		
+
 	@Override
 	protected void createChildren() {
-		
+
 		super.createChildren();
-		
+
 		sprite = new ItemSprite();
 		add(sprite);
-		
+
 		status = new BitmapText( PixelScene.pixelFont);
 		add(status);
-		
+
 		extra = new BitmapText( PixelScene.pixelFont);
 		add(extra);
-		
+
 		level = new BitmapText( PixelScene.pixelFont);
 		add(level);
+
+		special = new BitmapText( PixelScene.pixelFont);
+		add(special);
 	}
-	
+
 	@Override
 	protected void layout() {
 		super.layout();
-		
+
 		sprite.x = x + margin.left + (width - sprite.width - (margin.left + margin.right)) / 2f;
 		sprite.y = y + margin.top + (height - sprite.height - (margin.top + margin.bottom)) / 2f;
 		PixelScene.align(sprite);
-		
+
 		if (status != null) {
 			status.measure();
 			if (status.width > width - (margin.left + margin.right)){
@@ -139,7 +142,7 @@ public class ItemSlot extends Button {
 			status.y = y + margin.top;
 			PixelScene.align(status);
 		}
-		
+
 		if (extra != null) {
 			extra.x = x + (width - extra.width()) - margin.right;
 			extra.y = y + margin.top;
@@ -157,13 +160,23 @@ public class ItemSlot extends Button {
 			itemIcon.y = y + (ItemSpriteSheet.Icons.SIZE - itemIcon.height)/2f + margin.top;
 			PixelScene.align(itemIcon);
 		}
-		
+
 		if (level != null) {
 			level.x = x + (width - level.width()) - margin.right;
 			level.y = y + (height - level.baseLine() - 1) - margin.bottom;
 			PixelScene.align(level);
 		}
-
+		if (special!=null){
+			special.measure();
+			if (special.width > width - (margin.left + margin.right)){
+				special.scale.set(PixelScene.align(0.8f));
+			} else {
+				special.scale.set(1f);
+			}
+			special.x = x + margin.left;
+			special.y = y + (height - level.baseLine() - 1) - margin.bottom;
+			PixelScene.align(special);
+		}
 	}
 
 	public void alpha( float value ){
@@ -182,7 +195,7 @@ public class ItemSlot extends Button {
 		sprite.view(ItemSpriteSheet.SOMETHING, null);
 		layout();
 	}
-	
+
 	public void item( Item item ) {
 		if (this.item == item) {
 			if (item != null) {
@@ -200,9 +213,9 @@ public class ItemSlot extends Button {
 			sprite.visible(false);
 
 			updateText();
-			
+
 		} else {
-			
+
 			enable(true);
 			sprite.visible(true);
 
@@ -219,28 +232,26 @@ public class ItemSlot extends Button {
 		}
 
 		if (item == null){
-			status.visible = extra.visible = level.visible = false;
+			status.visible = extra.visible = level.visible = special.visible = false;
 			return;
 		} else {
-			status.visible = extra.visible = level.visible = true;
+			status.visible = extra.visible = level.visible = special.visible = true;
 		}
 
 		status.text( item.status() );
+			//thrown weapons on their last use show quantity in orange, unless they are single-use
+			if (item instanceof MissileWeapon
+					&& ((MissileWeapon) item).durabilityLeft() <= 50f
+					&& ((MissileWeapon) item).durabilityLeft() <= ((MissileWeapon) item).durabilityPerUse()){
+				status.hardlight(WARNING);
+			} else {
+				status.resetColor();
+			}
 
-		//thrown weapons on their last use show quantity in orange, unless they are single-use
-		if (item instanceof MissileWeapon
-				&& ((MissileWeapon) item).durabilityLeft() <= 50f
-				&& ((MissileWeapon) item).durabilityLeft() <= ((MissileWeapon) item).durabilityPerUse()){
-			status.hardlight(WARNING);
-		} else {
-			status.resetColor();
-		}
-
-		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()))){
+		if (item.icon() != null && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()))){
 			extra.text( null );
 
-			itemIcon = new Image(Assets.Sprites.ITEM_ICONS);
-			itemIcon.frame(ItemSpriteSheet.Icons.film.get(item.icon));
+			itemIcon = ItemSpriteSheet.Icons.image(item.icon());
 			add(itemIcon);
 
 		} else if (item instanceof Weapon || item instanceof Armor) {
@@ -248,7 +259,7 @@ public class ItemSlot extends Button {
 			if (item.levelKnown){
 				int str = item instanceof Weapon ? ((Weapon)item).STRReq() : ((Armor)item).STRReq();
 				extra.text( Messages.format( TXT_STRENGTH, str ) );
-				if (str > Dungeon.hero.STR()) {
+				if (Dungeon.hero != null && str > Dungeon.hero.STR()) {
 					extra.hardlight( DEGRADED );
 				} else if (item instanceof Weapon && ((Weapon) item).masteryPotionBonus){
 					extra.hardlight( MASTERED );
@@ -279,7 +290,7 @@ public class ItemSlot extends Button {
 			if (trueLvl == buffedLvl || buffedLvl <= 0) {
 				if (buffedLvl > 0){
 					if ((item instanceof Weapon && ((Weapon) item).curseInfusionBonus)
-						|| (item instanceof Armor && ((Armor) item).curseInfusionBonus)
+							|| (item instanceof Armor && ((Armor) item).curseInfusionBonus)
 							|| (item instanceof Wand && ((Wand) item).curseInfusionBonus)){
 						level.hardlight(CURSE_INFUSED);
 					} else {
@@ -295,13 +306,20 @@ public class ItemSlot extends Button {
 			level.text( null );
 		}
 
+		special.text( item.special() );
+		if (item.specialColorChange()){
+			special.hardlight(WARNING);
+		}else {
+			special.resetColor();
+		}
+
 		layout();
 	}
-	
+
 	public void enable( boolean value ) {
-		
+
 		active = value;
-		
+
 		float alpha = value ? ENABLED : DISABLED;
 		sprite.alpha( alpha );
 		status.alpha( alpha );

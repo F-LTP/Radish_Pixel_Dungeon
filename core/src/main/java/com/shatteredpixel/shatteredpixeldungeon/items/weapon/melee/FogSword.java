@@ -9,7 +9,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
-import com.watabou.noosa.Image;
 
 public class FogSword extends MeleeWeapon {
 
@@ -32,19 +31,20 @@ public class FogSword extends MeleeWeapon {
         return (7 + tier * 2) - (int)(Math.sqrt(8 * lvl + 1) - 1)/2;
     }
 
-    public int proc(Char attacker, Char defender, int damage ) {
-        if(defender instanceof Mob){
-            Mob ks =(Mob)defender;
-            if (ks.onlyActDown){
-                ks.onlyActDown = false;
-                Buff.affect(attacker, ActBless.class, 2+level());
-            }
-        }
-        else {
-            Buff.affect(attacker, ActBless.class, 2+level());
-        }
-        return super.proc(attacker, defender, damage);
-    }
+    public int proc(Char attacker, Char defender, int damage) {
+    		// 只有当伤害大于0时（即击中敌人）才触发效果
+    		if (damage > 0) {
+    			Buff.affect(attacker, ActBless.class, 2 + buffedLvl());
+    			if (defender instanceof Mob) {
+    				Mob ks = (Mob) defender;
+    				if (ks.onlyActDown) {
+    					ks.onlyActDown = false;
+    				}
+    			}
+    		}
+    		return super.proc(attacker, defender, damage);
+    	}
+
 
     public static class ActBless extends FlavourBuff {
 
@@ -56,24 +56,19 @@ public class FogSword extends MeleeWeapon {
         }
 
         @Override
-        public int icon() {
-            return BuffIndicator.HEX;
+        public String icon() {
+            return BuffIndicator.FOG_ROAD;
         }
 
         @Override
-        public String desc() {
-            float s = 0;
-            if(hero.belongings.weapon() instanceof FogSword) {
-                FogSword ks = (FogSword) hero.belongings.weapon;
-                s = (20 + (float) (ks.level() * 4));
-            }
-            return Messages.get(this, "desc", s , dispTurns());
-        }
-
-        @Override
-        public void tintIcon(Image icon) {
-            icon.hardlight(0xccbb00);
-        }
+        	public String desc() {
+        		float s = 0;
+        		if(hero.belongings.weapon() instanceof FogSword) {
+        			FogSword ks = (FogSword) hero.belongings.weapon;
+        			s = (20 + (float) (ks.buffedLvl() * 4));
+        		}
+        		return Messages.get(this, "desc", s , dispTurns());
+        	}
 
         @Override
         public float iconFadePercent() {

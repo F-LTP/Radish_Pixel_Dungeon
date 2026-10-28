@@ -48,6 +48,7 @@ public class Journal {
 		
 		Catalog.restore( bundle );
 		Document.restore( bundle );
+		MobBestiary.restore( bundle );
 		
 		loaded = true;
 	}
@@ -68,6 +69,7 @@ public class Journal {
 		
 		Catalog.store(bundle);
 		Document.store(bundle);
+		MobBestiary.store(bundle);
 		
 		try {
 			FileUtils.bundleToFile( JOURNAL_FILE, bundle );

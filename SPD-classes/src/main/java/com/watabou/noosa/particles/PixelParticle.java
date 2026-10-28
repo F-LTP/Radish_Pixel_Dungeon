@@ -29,7 +29,7 @@ public class PixelParticle extends PseudoPixel {
 	protected float size;
 	
 	protected float lifespan;
-	protected float left;
+	public float left;
 	
 	public PixelParticle() {
 		super();

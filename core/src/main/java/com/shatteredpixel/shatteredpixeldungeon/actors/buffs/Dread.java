@@ -96,7 +96,7 @@ public class Dread extends Buff {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.TERROR;
 	}
 

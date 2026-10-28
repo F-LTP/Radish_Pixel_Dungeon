@@ -37,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.GhoulSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
@@ -159,7 +160,12 @@ public class Ghoul extends Mob {
 				Actor.remove(this);
 				Dungeon.level.mobs.remove( this );
 				Buff.append(nearby, GhoulLifeLink.class).set(timesDowned*5, this);
-				((GhoulSprite)sprite).crumple();
+				// 蛇的动画
+				if (sprite instanceof GhoulSprite){
+					((GhoulSprite)sprite).crumple();
+				} else if (sprite instanceof SnakeSprite) {
+					((SnakeSprite) sprite).crumple();
+				}
 				return;
 			}
 		}
@@ -320,7 +326,12 @@ public class Ghoul extends Mob {
 		public void fx(boolean on) {
 			if (on && ghoul != null && ghoul.sprite == null){
 				GameScene.addSprite(ghoul);
-				((GhoulSprite)ghoul.sprite).crumple();
+				// Snake Bite challenge: call crumple() via reflection for SnakeSprite
+				try {
+					ghoul.sprite.getClass().getMethod("crumple").invoke(ghoul.sprite);
+				} catch (Exception e) {
+					((GhoulSprite)ghoul.sprite).crumple();
+				}
 			}
 		}
 

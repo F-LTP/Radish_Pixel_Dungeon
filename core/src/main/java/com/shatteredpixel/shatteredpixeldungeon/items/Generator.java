@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -29,12 +30,10 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.DuelistArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.EnergyArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.HuntressArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.LeatherArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.MageArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.MailArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PlateArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
@@ -45,10 +44,13 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.WarriorArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.AlchemistsToolkit;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.ChaliceOfBlood;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfConcealment;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EliteBadge;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EtherealChains;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HornOfPlenty;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.MagneticCrown;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.MasterThievesArmband;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.SandalsOfNature;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
@@ -75,10 +77,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.Brew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.Elixir;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfCompression;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfConcentration;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfDestruction;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfElements;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEvasion;
@@ -118,14 +121,24 @@ import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFear;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFlock;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfIntuition;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfShock;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ChaoticCenser;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.CrackedSpyglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.DimensionalSundial;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ExoticCrystals;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.EyeOfNewt;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.FerretTuft;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.GoldRadish;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.LightKing;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.MimicTooth;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.MossyClump;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ParchmentScrap;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.PetrifiedSeed;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Radish;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RatSkull;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RiverCrystal;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.SaltCube;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Sprouted_Potato;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ThirteenLeafClover;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrapMechanism;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
@@ -138,77 +151,62 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorruption;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFireblast;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFrost;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfGnollKing;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLightning;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfMagicMissile;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfNewStar;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfPrismaticLight;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfRegrowth;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfShockBomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfTransfusion;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.AssassinsBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Axe_D;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.BattleAxe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Beecomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Belladonna;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.BladeShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bloodblade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.BoneClaw;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CelestialSphere;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.BoneSpear;import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CelestialSphere;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CircleSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CompositeCrossbow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Cutterhead;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dagger;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.DarkShadowSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Darksword;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dirk;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EchoplexHammer;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EndGuard;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EnemyFlag;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gauntlet;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GrapplingHook;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GiantKiller;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Glaive;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Glasssword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gloves;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Greataxe;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Greatshield;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Greatsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Grimtooth;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HandAxe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Katana;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Katar;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeavyCannon;import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Katar;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Longsword;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Mace;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LockChain;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LongStick;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Morello;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Quarterstaff;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rapier;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.PneumFistGloves;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ReplacePoint;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RottenLance;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RunicBlade;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sai;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scimitar;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RuneSlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ScorpionCrossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Seekingspear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Shortsword;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sickle;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SilverSting;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SnakeSpear;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SilverSting;import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SnakeSpear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Spanner;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Spear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SufferingDagger;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Taijutsu;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Tonfa;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WarHammer;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WarScythe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Waterwheel;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Whip;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WhiteKingGodSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WingSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.Bolas;
@@ -363,7 +361,7 @@ public class Generator {
 			if (catResult != -1) return catResult*100 + subResult;
 
 			//items without a category-defined order are sorted based on the spritesheet
-			return Short.MAX_VALUE+item.image();
+			return Short.MAX_VALUE + (item.image().hashCode() & 0x7FFF);
 		}
 
 		static {
@@ -452,8 +450,12 @@ public class Generator {
 					WandOfWarding.class,
 					WandOfTransfusion.class,
 					WandOfCorruption.class,
-					WandOfRegrowth.class };
-			WAND.defaultProbs = new float[]{ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 };
+					WandOfRegrowth.class,
+					WandOfGnollKing.class,
+					WandOfNewStar.class,
+					WandOfShockBomb.class
+			};
+			WAND.defaultProbs = new float[]{ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 };
 			WAND.probs = WAND.defaultProbs.clone();
 
 			//see generator.randomWeapon
@@ -476,17 +478,18 @@ public class Generator {
 			WEP_T1_NEW.probs = new float[]{ 1, 1, 1 };
 
 			WEP_T2.classes = new Class<?>[]{
-					Shortsword.class,
+					Spanner.class,
+					Rlyeh.class,
+					RuneSlade.class,
+					DarkShadowSword.class,
 					Glasssword.class,
-					RottenLance.class,
-					SilverSting.class,
 					Katar.class,
 					BladeShield.class,
+					SilverSting.class,
 					BoneClaw.class,
-					Spanner.class,
-					Rlyeh.class
+					RottenLance.class
 			};
-			WEP_T2.probs = new float[]{ 0, 5, 5, 5, 5, 5, 5, 5, 5 };
+			WEP_T2.probs = new float[]{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
 
 			WEP_T2_NEW.classes = new Class<?>[]{
 					Glasssword.class,
@@ -499,71 +502,76 @@ public class Generator {
 			WEP_T2_NEW.probs = new float[]{ 5, 5, 5, 5, 5, 5 };
 
 			WEP_T3.classes = new Class<?>[]{
-					Beecomb.class,
 					EnemyFlag.class,
+					LockChain.class,
+					LongStick.class,
+					WhiteKingGodSword.class,
+					Beecomb.class,
 					Waterwheel.class,
-					RoundShield.class,
-					Sai.class,
-					SnakeSpear.class,
 					WingSword.class,
-					SufferingDagger.class
+					SnakeSpear.class,
+					SufferingDagger.class,
+					PneumFistGloves.class,
+					GrapplingHook.class,
+					Belladonna.class,
 			};
-			WEP_T3.probs = new float[]{ 5, 5, 5, 0, 0, 5, 6, 5 };
+			WEP_T3.probs = new float[]{ 5, 5, 5, 5,5, 5, 6, 5, 5, 5, 5, 5 };
 
 			WEP_T3_NEW.classes = new Class<?>[]{
 					Beecomb.class,
 					Waterwheel.class,
 					WingSword.class,
 					SnakeSpear.class,
-					SufferingDagger.class
+					SufferingDagger.class,
+					PneumFistGloves.class,
+					GrapplingHook.class,
+					Belladonna.class,
 			};
-			WEP_T3_NEW.probs = new float[]{ 5, 5, 6, 5, 5 };
+			WEP_T3_NEW.probs = new float[]{ 5, 5, 6, 5, 5, 5, 5, 5 };
 
 			WEP_T4.classes = new Class<?>[]{
-					Bloodblade.class,
-					CompositeCrossbow.class,
-					Darksword.class,
 					Morello.class,
-					HeadCleaver.class,
-					Seekingspear.class,
-					RunicBlade.class,
+					CircleSword.class,
 					Grimtooth.class,
-					Crossbow.class,
 					CelestialSphere.class,
 					EndGuard.class,
 					ShadowBooks.class,
+					Bloodblade.class,
+					CompositeCrossbow.class,
+					Darksword.class,
+					HeadCleaver.class,
+					Seekingspear.class,
+					Grimtooth.class,
+					ReplacePoint.class,
+					BoneSpear.class
 			};
-			WEP_T4.probs = new float[]{ 5, 5, 0, 5, 5, 5, 0, 5, 0, 5, 5, 5 };
+			WEP_T4.probs = new float[]{ 5, 5, 5, 5, 5, 5,5, 5, 5, 5, 5, 5,5, 1 };
 
 			WEP_T4_NEW.classes = new Class<?>[]{
 					Bloodblade.class,
 					CompositeCrossbow.class,
 					Darksword.class,
 					HeadCleaver.class,
-					//Holyankh.class,
 					Seekingspear.class,
 					Grimtooth.class,
+					ReplacePoint.class
 			};
-			WEP_T4_NEW.probs = new float[]{ 5, 5, 5, 5, 5, 5 };
+			WEP_T4_NEW.probs = new float[]{ 5, 5, 5, 5, 5, 5, 5 };
 
 			WEP_T5.classes = new Class<?>[]{
-					Greatsword.class,
-					Cutterhead.class,
-					Glaive.class,
-					Scythe.class,
-					Greataxe.class,
 					Taijutsu.class,
-					Greatshield.class,
-					Tonfa.class,
-					Axe_D.class,
-					ScorpionCrossbow.class,
 					GiantKiller.class,
 					FogSword.class,
 					EchoplexHammer.class,
-					KillBoatSword.class
+					KillBoatSword.class,
+					Cutterhead.class,
+					Scythe.class,
+					Axe_D.class,
+					ScorpionCrossbow.class,
+					Tonfa.class
 
 			};
-			WEP_T5.probs = new float[]{ 0, 0, 0, 5, 0, 5, 5, 5, 5, 5, 5, 5, 7, 5 };
+			WEP_T5.probs = new float[]{ 5, 5, 5, 5, 5,5, 5, 5, 5, 5 };
 
 			WEP_T5_NEW.classes = new Class<?>[]{
 					Cutterhead.class,
@@ -576,7 +584,8 @@ public class Generator {
 
 			//see Generator.randomArmor
 			ARMOR.classes = new Class<?>[]{};
-			ARMOR.probs = new float[]{};
+			ARMOR.probs = new float[]{
+			};
 
 			ARM_T1.classes = new Class<?>[]{
 					ClothArmor.class
@@ -673,7 +682,9 @@ public class Generator {
 			FOOD.probs = FOOD.defaultProbs.clone();
 
 			RING.classes = new Class<?>[]{
+					RingOfCompression.class,
 					RingOfConcentration.class,
+					RingOfDestruction.class,
 					RingOfArcana.class,
 					RingOfBenediction.class,
 					RingOfEvasion.class,
@@ -687,7 +698,7 @@ public class Generator {
 					RingOfTenacity.class,
 					RingOfWealth.class,
 					RingOfKing.class};
-			RING.probs = new float[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+			RING.probs = new float[]{ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 			//RING.probs = RING.defaultProbs.clone();
 			
 			ARTIFACT.classes = new Class<?>[]{
@@ -701,9 +712,14 @@ public class Generator {
 					SandalsOfNature.class,
 					TalismanOfForesight.class,
 					TimekeepersHourglass.class,
-					UnstableSpellbook.class
+					UnstableSpellbook.class,
+
+					EliteBadge.class,
+					CloakOfConcealment.class,
+					MagneticCrown.class
+
 			};
-			ARTIFACT.defaultProbs = new float[]{ 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1 };
+			ARTIFACT.defaultProbs = new float[]{ 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 			ARTIFACT.probs = ARTIFACT.defaultProbs.clone();
 
 			//Trinkets are unique like artifacts, but unlike them you can only have one at once
@@ -719,9 +735,21 @@ public class Generator {
 					TrapMechanism.class,
 					MimicTooth.class,
 					WondrousResin.class,
-					EyeOfNewt.class
+					EyeOfNewt.class,
+
+					SaltCube.class,
+					ChaoticCenser.class,
+					ShardOfOblivion.class,
+
+					Sprouted_Potato.class,
+					Radish.class,
+					GoldRadish.class,
+					LightKing.class,
+					RiverCrystal.class,
+					FerretTuft.class,
+					CrackedSpyglass.class
 			};
-			TRINKET.defaultProbs = new float[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+			TRINKET.defaultProbs = new float[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 0.1f, 1, 1, 1, 1 };
 			TRINKET.probs = TRINKET.defaultProbs.clone();
 
 			for (Category cat : Category.values()){
@@ -754,23 +782,138 @@ public class Generator {
 	private static HashMap<Category,Float> defaultCatProbs = new LinkedHashMap<>();
 	private static HashMap<Category,Float> categoryProbs = new LinkedHashMap<>();
 
-	public static void fullReset() {
-		usingFirstDeck = Random.Int(2) == 0;
-		generalReset();
-		for (Category cat : Category.values()) {
-			cat.using2ndProbs =  cat.defaultProbs2 != null && Random.Int(2) == 0;
-			reset(cat);
-			if (cat.defaultProbs != null) {
-				cat.seed = Random.Long();
-				cat.dropped = 0;
-			}
+	// ===== per-branch deck state =====
+	// The static fields above (usingFirstDeck, categoryProbs) and each Category's
+	// seed/dropped/probs/using2ndProbs always reflect the ACTIVE branch's deck state.
+	// Each branch keeps its own independent decks so that whether or when a branch is
+	// explored never perturbs another branch's generated items (route-independent seeds).
+	private static String activeBranch = Branches.MAIN;
+
+	private static class BranchDeck {
+		boolean usingFirstDeck;
+		HashMap<Category,Float> categoryProbs = new LinkedHashMap<>();
+		HashMap<Category, CategoryDeck> decks = new LinkedHashMap<>();
+	}
+
+	private static class CategoryDeck {
+		long seed;
+		int dropped;
+		float[] probs;
+		boolean using2ndProbs;
+	}
+
+	private static final HashMap<String, BranchDeck> branchDecks = new LinkedHashMap<>();
+
+	// deterministically derives a seed for a branch's decks from the run seed + branchId
+	// this is a pure function: it never reads the ambient RNG stream, so entering a branch
+	// at any time always yields the same initial decks for that branch.
+	private static long branchDeckSeed(String branchId){
+		long h = Dungeon.seed;
+		for (int i = 0; i < branchId.length(); i++){
+			h = h * 31 + branchId.charAt(i);
 		}
+		return h ^ 0x9E3779B97F4A7C15L;
+	}
+
+	private static void deriveBranchDeck(String branchId){
+		BranchDeck bd = new BranchDeck();
+		Random.pushGenerator( branchDeckSeed(branchId) );
+		try {
+			bd.usingFirstDeck = Random.Int(2) == 0;
+			for (Category cat : Category.values()) {
+				bd.categoryProbs.put( cat, bd.usingFirstDeck ? cat.firstProb : cat.secondProb );
+			}
+			for (Category cat : Category.values()) {
+				CategoryDeck cd = new CategoryDeck();
+				cd.dropped = 0;
+				if (cat.defaultProbs != null){
+					if (cat.defaultProbs2 != null){
+						// mirrors fullReset(): draw using2ndProbs, then reset() toggles it
+						cd.using2ndProbs = Random.Int(2) == 0;
+						cd.using2ndProbs = !cd.using2ndProbs;
+						cd.probs = cd.using2ndProbs ? cat.defaultProbs2.clone() : cat.defaultProbs.clone();
+					} else {
+						cd.using2ndProbs = false;
+						cd.probs = cat.defaultProbs.clone();
+					}
+					cd.seed = Random.Long();
+				} else {
+					cd.using2ndProbs = false;
+					cd.seed = 0;
+					cd.probs = cat.probs.clone();
+				}
+				bd.decks.put(cat, cd);
+			}
+		} finally {
+			Random.popGenerator();
+		}
+		branchDecks.put(branchId, bd);
+	}
+
+	private static void loadBranchDeck(String branchId){
+		BranchDeck bd = branchDecks.get(branchId);
+		if (bd == null) return;
+		usingFirstDeck = bd.usingFirstDeck;
+		categoryProbs.clear();
+		categoryProbs.putAll(bd.categoryProbs);
+		for (Category cat : Category.values()) {
+			CategoryDeck cd = bd.decks.get(cat);
+			if (cd == null) continue;
+			cat.seed = cd.seed;
+			cat.dropped = cd.dropped;
+			cat.probs = cd.probs;
+			cat.using2ndProbs = cd.using2ndProbs;
+		}
+		activeBranch = branchId;
+	}
+
+	private static void saveBranchDeck(String branchId){
+		BranchDeck bd = branchDecks.get(branchId);
+		if (bd == null) return;
+		bd.usingFirstDeck = usingFirstDeck;
+		bd.categoryProbs.clear();
+		bd.categoryProbs.putAll(categoryProbs);
+		for (Category cat : Category.values()) {
+			CategoryDeck cd = bd.decks.get(cat);
+			if (cd == null) continue;
+			cd.seed = cat.seed == null ? 0 : cat.seed;
+			cd.dropped = cat.dropped;
+			cd.probs = cat.probs;
+			cd.using2ndProbs = cat.using2ndProbs;
+		}
+	}
+
+	// Ensures the given branch's deck state is the active one, lazily initializing it
+	// (deterministically from the run seed) if that branch has not been entered yet.
+	public static void ensureBranchState(String branchId){
+		if (branchId == null) branchId = Branches.MAIN;
+		if (branchId.equals(activeBranch) && branchDecks.containsKey(activeBranch)){
+			return;
+		}
+		if (branchDecks.containsKey(activeBranch)){
+			saveBranchDeck(activeBranch);
+		}
+		if (!branchDecks.containsKey(branchId)){
+			deriveBranchDeck(branchId);
+		}
+		loadBranchDeck(branchId);
+	}
+
+	public static void fullReset() {
+		defaultCatProbs.clear();
+		for (Category cat : Category.values()) {
+			defaultCatProbs.put( cat, cat.firstProb + cat.secondProb );
+		}
+
+		branchDecks.clear();
+		activeBranch = Branches.MAIN;
+		deriveBranchDeck(activeBranch);
+		loadBranchDeck(activeBranch);
 	}
 
 	public static void generalReset(){
 		for (Category cat : Category.values()) {
 			categoryProbs.put( cat, usingFirstDeck ? cat.firstProb : cat.secondProb );
-			defaultCatProbs.put( cat, cat.firstProb + cat.secondProb );
 		}
 	}
 
@@ -955,6 +1098,14 @@ public class Generator {
 			Category.WEP_T5
 	};
 
+	public static final Category[] newWepTiers = new Category[]{
+			Category.WEP_T1_NEW,
+			Category.WEP_T2_NEW,
+			Category.WEP_T3_NEW,
+			Category.WEP_T4_NEW,
+			Category.WEP_T5_NEW
+	};
+
 	public static MeleeWeapon randomWeapon(){
 		return randomWeapon(Dungeon.depth / 5);
 	}
@@ -966,17 +1117,16 @@ public class Generator {
 	public static MeleeWeapon randomWeapon(boolean useDefaults) {
 		return randomWeapon(Dungeon.depth / 5, useDefaults);
 	}
-	
-	public static MeleeWeapon randomWeapon(int floorSet, boolean useDefaults) {
+
+	public static MeleeWeapon randomWeapon(int floorSet,boolean requireNew) {
 
 		floorSet = (int)GameMath.gate(0, floorSet, floorSetTierProbs.length-1);
 
-		MeleeWeapon w;
-		if (useDefaults){
-			w = (MeleeWeapon) randomUsingDefaults(wepTiers[Random.chances(floorSetTierProbs[floorSet])]);
-		} else {
-			w = (MeleeWeapon) random(wepTiers[Random.chances(floorSetTierProbs[floorSet])]);
-		}
+		Category c ;
+		if (!requireNew)c=wepTiers[Random.chances(floorSetTierProbs[floorSet])];
+		else c=newWepTiers[Random.chances(floorSetTierProbs[floorSet])];
+		MeleeWeapon w = (MeleeWeapon)Reflection.newInstance(c.classes[Random.chances(c.probs)]);
+		w.random();
 		return w;
 	}
 	
@@ -1058,63 +1208,116 @@ public class Generator {
 	private static final String CATEGORY_SEED = "_seed";
 	private static final String CATEGORY_DROPPED = "_dropped";
 
-	public static void storeInBundle(Bundle bundle) {
-		bundle.put(FIRST_DECK, usingFirstDeck);
+	// key format: <cat>_branch_<branchId>_seed, branch_<branchId>_first_deck, etc.
+	private static String branchDeckKey(String branchId, String catName, String suffix){
+		return catName + "_branch_" + branchId + suffix;
+	}
 
-		Float[] genProbs = categoryProbs.values().toArray(new Float[0]);
+	private static String branchGlobalKey(String branchId, String suffix){
+		return "branch_" + branchId + "_" + suffix;
+	}
+
+	private static void storeBranchInBundle(Bundle bundle, String branchId){
+		BranchDeck bd = branchDecks.get(branchId);
+		if (bd == null) return;
+
+		bundle.put(branchGlobalKey(branchId, FIRST_DECK), bd.usingFirstDeck);
+
+		Float[] genProbs = bd.categoryProbs.values().toArray(new Float[0]);
 		float[] storeProbs = new float[genProbs.length];
 		for (int i = 0; i < storeProbs.length; i++){
 			storeProbs[i] = genProbs[i];
 		}
-		bundle.put( GENERAL_PROBS, storeProbs);
+		bundle.put( branchGlobalKey(branchId, GENERAL_PROBS), storeProbs);
 
 		for (Category cat : Category.values()){
 			if (cat.defaultProbs == null) continue;
+			CategoryDeck cd = bd.decks.get(cat);
+			if (cd == null) continue;
+			String catName = cat.name().toLowerCase();
 
-			bundle.put(cat.name().toLowerCase() + CATEGORY_PROBS, cat.probs);
+			bundle.put(branchDeckKey(branchId, catName, CATEGORY_PROBS), cd.probs);
 
 			if (cat.defaultProbs2 != null){
-				bundle.put(cat.name().toLowerCase() + CATEGORY_USING_PROBS2, cat.using2ndProbs);
+				bundle.put(branchDeckKey(branchId, catName, CATEGORY_USING_PROBS2), cd.using2ndProbs);
 			}
 
-			if (cat.seed != null) {
-				bundle.put(cat.name().toLowerCase() + CATEGORY_SEED, cat.seed);
-				bundle.put(cat.name().toLowerCase() + CATEGORY_DROPPED, cat.dropped);
+			bundle.put(branchDeckKey(branchId, catName, CATEGORY_SEED), cd.seed);
+			bundle.put(branchDeckKey(branchId, catName, CATEGORY_DROPPED), cd.dropped);
+		}
+	}
+
+	private static void restoreBranchFromBundle(Bundle bundle, String branchId){
+		BranchDeck bd = branchDecks.get(branchId);
+		if (bd == null) {
+			deriveBranchDeck(branchId);
+			bd = branchDecks.get(branchId);
+		}
+
+		bd.usingFirstDeck = bundle.getBoolean(branchGlobalKey(branchId, FIRST_DECK));
+
+		if (bundle.contains(branchGlobalKey(branchId, GENERAL_PROBS))){
+			float[] probs = bundle.getFloatArray(branchGlobalKey(branchId, GENERAL_PROBS));
+			if (probs.length == Category.values().length) {
+				bd.categoryProbs.clear();
+				for (int i = 0; i < probs.length; i++) {
+					bd.categoryProbs.put(Category.values()[i], probs[i]);
+				}
 			}
+		}
+
+		for (Category cat : Category.values()){
+			if (cat.defaultProbs == null) continue;
+			String catName = cat.name().toLowerCase();
+			if (!bundle.contains(branchDeckKey(branchId, catName, CATEGORY_PROBS))) continue;
+
+			CategoryDeck cd = bd.decks.get(cat);
+			if (cd == null) continue;
+
+			float[] probs = bundle.getFloatArray(branchDeckKey(branchId, catName, CATEGORY_PROBS));
+			if (probs.length == cat.defaultProbs.length){
+				cd.probs = probs;
+			}
+			if (bundle.contains(branchDeckKey(branchId, catName, CATEGORY_USING_PROBS2))){
+				cd.using2ndProbs = bundle.getBoolean(branchDeckKey(branchId, catName, CATEGORY_USING_PROBS2));
+			} else {
+				cd.using2ndProbs = false;
+			}
+			if (bundle.contains(branchDeckKey(branchId, catName, CATEGORY_SEED))){
+				cd.seed = bundle.getLong(branchDeckKey(branchId, catName, CATEGORY_SEED));
+				cd.dropped = bundle.getInt(branchDeckKey(branchId, catName, CATEGORY_DROPPED));
+			}
+		}
+	}
+
+	public static void storeInBundle(Bundle bundle) {
+		// ensure the currently-active branch's live deck state is reflected in branchDecks first
+		if (branchDecks.containsKey(activeBranch)){
+			saveBranchDeck(activeBranch);
+		}
+		for (String branchId : branchDecks.keySet()){
+			storeBranchInBundle(bundle, branchId);
 		}
 	}
 
 	public static void restoreFromBundle(Bundle bundle) {
 		fullReset();
 
-		usingFirstDeck = bundle.getBoolean(FIRST_DECK);
-
-		if (bundle.contains(GENERAL_PROBS)){
-			float[] probs = bundle.getFloatArray(GENERAL_PROBS);
-			if (probs.length == Category.values().length) {
-				for (int i = 0; i < probs.length; i++) {
-					categoryProbs.put(Category.values()[i], probs[i]);
-				}
+		// detect new format by presence of per-branch keys. Old saves (single global deck)
+		// are silently reset to the freshly derived state and may be played on.
+		boolean newFormat = false;
+		for (String branchId : Branches.getAllIds()){
+			if (bundle.contains(branchGlobalKey(branchId, FIRST_DECK))){
+				newFormat = true;
+				restoreBranchFromBundle(bundle, branchId);
 			}
 		}
-
-		for (Category cat : Category.values()){
-			if (bundle.contains(cat.name().toLowerCase() + CATEGORY_PROBS)){
-				float[] probs = bundle.getFloatArray(cat.name().toLowerCase() + CATEGORY_PROBS);
-				if (cat.defaultProbs != null && probs.length == cat.defaultProbs.length){
-					cat.probs = probs;
-				}
-				if (bundle.contains(cat.name().toLowerCase() + CATEGORY_USING_PROBS2)){
-					cat.using2ndProbs = bundle.getBoolean(cat.name().toLowerCase() + CATEGORY_USING_PROBS2);
-				} else {
-					cat.using2ndProbs = false;
-				}
-				if (bundle.contains(cat.name().toLowerCase() + CATEGORY_SEED)){
-					cat.seed = bundle.getLong(cat.name().toLowerCase() + CATEGORY_SEED);
-					cat.dropped = bundle.getInt(cat.name().toLowerCase() + CATEGORY_DROPPED);
-				}
-			}
+		if (!newFormat){
+			return;
 		}
-		
+
+		// always restore to the main branch's deck state on load; other branches are
+		// initialized deterministically when first entered (see ensureBranchState)
+		loadBranchDeck(Branches.MAIN);
 	}
 }

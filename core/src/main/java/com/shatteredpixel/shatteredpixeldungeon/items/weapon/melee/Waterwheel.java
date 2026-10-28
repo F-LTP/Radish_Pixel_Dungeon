@@ -5,6 +5,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -40,7 +42,7 @@ public class Waterwheel extends MeleeWeapon{
                 for (int i  : PathFinder.NEIGHBOURS8){
                     Char ch = Actor.findChar(attacker.pos + i);
                     if (ch != null){
-                        if (ch.alignment != Char.Alignment.ALLY) ch.damage(3+buffedLvl(), this);
+                        if (ch.alignment != Char.Alignment.ALLY) ch.damage(new DamageInfo(3+buffedLvl(), DamageType.WATER, attacker, this, this));
                         if (ch.pos == attacker.pos + i) {
                             Ballistica trajectory = new Ballistica(ch.pos, ch.pos + i, Ballistica.MAGIC_BOLT);
                             int strength = 1 ;

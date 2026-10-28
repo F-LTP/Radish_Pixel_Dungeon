@@ -32,6 +32,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.WildMagic;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
@@ -132,7 +134,7 @@ public class WandOfFireblast extends DamageWand {
 
 		for ( Char ch : affectedChars ){
 			wandProc(ch, chargesPerCast());
-			ch.damage(damageRoll(), this);
+			ch.damage(new DamageInfo(damageRoll(), DamageType.FIRE, curUser, this, this));
 			if (ch.isAlive()) {
 				Buff.affect(ch, Burning.class).reignite(ch);
 				switch (chargesPerCast()) {
@@ -223,6 +225,21 @@ public class WandOfFireblast extends DamageWand {
 		particle.acc.set(0, -40);
 		particle.setSize( 0f, 3f);
 		particle.shuffleXY( 1.5f );
+	}
+
+	@Override
+	public String upgradeStat1(int level) {
+		return (1+level) + "-" + (2+2*level);
+	}
+
+	@Override
+	public String upgradeStat2(int level) {
+		return (2+2*level) + "-" + 2*(4+2*level);
+	}
+
+	@Override
+	public String upgradeStat3(int level) {
+		return (3+3*level) + "-" + 3*(6+2*level);
 	}
 
 }

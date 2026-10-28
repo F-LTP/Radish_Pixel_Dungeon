@@ -63,7 +63,7 @@ public class FeatherFall extends Spell {
 		public static final float DURATION	= 30f;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.LEVITATION;
 		}
 

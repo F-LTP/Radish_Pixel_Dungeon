@@ -40,14 +40,14 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.GameMath;
 
 public class Momentum extends Buff implements ActionIndicator.Action {
-	
+
 	{
 		type = buffType.POSITIVE;
 
 		//acts before the hero
 		actPriority = HERO_PRIO+1;
 	}
-	
+
 	private int momentumStacks = 0;
 	private int freerunTurns = 0;
 	private int freerunCooldown = 0;
@@ -75,15 +75,14 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 
 		if (freerunTurns > 0){
 			if (target.invisible == 0 || Dungeon.hero.pointsInTalent(Talent.SPEEDY_STEALTH) < 2) {
-				freerunTurns--;
+				if(Dungeon.hero.pointsInTalent(Talent.STORM_RUSH)<2 || (target.buff(Haste.class)==null && target.buff(Adrenaline.class)==null && target.buff(Stamina.class)==null))
+					freerunTurns--;
 			}
 		} else if (!movedLastTurn){
 			momentumStacks = (int)GameMath.gate(0, momentumStacks-1, Math.round(momentumStacks * 0.667f));
 			if (momentumStacks <= 0) {
 				ActionIndicator.clearAction(this);
-				BuffIndicator.refreshHero();
-			} else {
-				ActionIndicator.refresh();
+				if (freerunCooldown <= 0) detach();
 			}
 		}
 		movedLastTurn = false;
@@ -91,7 +90,7 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 		spend(TICK);
 		return true;
 	}
-	
+
 	public void gainStack(){
 		movedLastTurn = true;
 		if (freerunCooldown <= 0 && !freerunning()){
@@ -105,7 +104,7 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 	public boolean freerunning(){
 		return freerunTurns > 0;
 	}
-	
+
 	public float speedMultiplier(){
 		if (freerunning()){
 			return 2;
@@ -115,7 +114,7 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 			return 1;
 		}
 	}
-	
+
 	public int evasionBonus( int heroLvl, int excessArmorStr ){
 		if (freerunTurns > 0) {
 			return heroLvl/2 + excessArmorStr*Dungeon.hero.pointsInTalent(Talent.EVASIVE_ARMOR);
@@ -123,13 +122,13 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 			return 0;
 		}
 	}
-	
+
 	@Override
-	public int icon() {
+	public String icon() {
 		if (momentumStacks > 0 || freerunCooldown > 0)  return BuffIndicator.MOMENTUM;
 		else                                            return BuffIndicator.NONE;
 	}
-	
+
 	@Override
 	public void tintIcon(Image icon) {
 		if (freerunCooldown == 0 || freerunTurns > 0){
@@ -171,7 +170,7 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 			return Messages.get(this, "momentum");
 		}
 	}
-	
+
 	@Override
 	public String desc() {
 		if (freerunTurns > 0){
@@ -182,11 +181,11 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 			return Messages.get(this, "momentum_desc", momentumStacks);
 		}
 	}
-	
+
 	private static final String STACKS =        "stacks";
 	private static final String FREERUN_TURNS = "freerun_turns";
 	private static final String FREERUN_CD =    "freerun_CD";
-	
+
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
@@ -194,7 +193,7 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 		bundle.put(FREERUN_TURNS, freerunTurns);
 		bundle.put(FREERUN_CD, freerunCooldown);
 	}
-	
+
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
@@ -213,7 +212,7 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 	}
 
 	@Override
-	public int actionIcon() {
+	public String actionIcon() {
 		return HeroIcon.MOMENTUM;
 	}
 

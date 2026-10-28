@@ -33,8 +33,10 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.utils.LegacyItemWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Stubbornness;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -85,7 +87,7 @@ public class ScrollOfRemoveCurse extends InventoryScroll {
 			return true;
 		} if ((item instanceof EquipableItem || item instanceof Wand) && ((!item.isIdentified() && !item.cursedKnown) || item.cursed)){
 			return true;
-		} else if (item instanceof Weapon){
+		} else if (item instanceof Weapon && !(item instanceof LegacyItemWeapon)){
 			return ((Weapon)item).hasCurseEnchant();
 		} else if (item instanceof Armor){
 			return ((Armor)item).hasCurseGlyph();
@@ -104,8 +106,17 @@ public class ScrollOfRemoveCurse extends InventoryScroll {
 			Degrade.detach(curUser, Degrade.class);
 			procced = true;
 		}
+		if (item instanceof Weapon){
 
-		if (procced) {
+			//We Must Spiral LoadApp
+			Weapon w = (Weapon) item;
+			if(w.hasCurseEnchant() && w.enchantment instanceof Stubbornness){
+				GLog.w(Messages.get(ScrollOfRemoveCurse.class, "cleansed_to"));
+			} else if (procced) {
+				GLog.p( Messages.get(this, "cleansed") );
+			}
+
+		} else if (procced) {
 			GLog.p( Messages.get(this, "cleansed") );
 		} else {
 			GLog.i( Messages.get(this, "not_cleansed") );
@@ -125,6 +136,15 @@ public class ScrollOfRemoveCurse extends InventoryScroll {
 			}
 			if (item instanceof Weapon){
 				Weapon w = (Weapon) item;
+				// DoggingDog 20241223
+				if(w.hasCurseEnchant() && w.enchantment instanceof Stubbornness ){
+					Stubbornness w1 = ((Stubbornness) w.enchantment);
+                    if (!w1.isRemoveOnce()) {
+                        procced = true;
+                        ((Stubbornness) (w.enchantment)).setRemovedOnce();
+                        continue;
+                    }
+                }
 				if (w.hasCurseEnchant()){
 					w.enchant(null);
 					procced = true;

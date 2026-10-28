@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
@@ -227,6 +228,11 @@ public enum Rankings {
 					+ Statistics.totalBossScore + Statistics.totalQuestScore;
 
 		Statistics.totalScore *= Statistics.winMultiplier * Statistics.chalMultiplier;
+
+		// Snake Bite challenge: 10x score multiplier
+		if (Dungeon.isChallenged(Challenges.SNAKE_BITE)) {
+			Statistics.totalScore *= 10;
+		}
 
 		return Statistics.totalScore;
 	}
@@ -517,7 +523,7 @@ public enum Rankings {
 			customSeed  = bundle.getString( SEED );
 			daily       = bundle.getBoolean( DAILY );
 
-			heroClass	= bundle.getEnum( CLASS, HeroClass.class );
+			heroClass	= HeroClasses.fromSaveName(bundle.getString( CLASS ));
 			armorTier	= bundle.getInt( TIER );
 			herolevel   = bundle.getInt( LEVEL );
 			depth       = bundle.getInt( DEPTH );
@@ -547,7 +553,7 @@ public enum Rankings {
 			bundle.put( SEED, customSeed );
 			bundle.put( DAILY, daily );
 
-			bundle.put( CLASS, heroClass );
+			bundle.put( CLASS, heroClass.name() );
 			bundle.put( TIER, armorTier );
 			bundle.put( LEVEL, herolevel );
 			bundle.put( DEPTH, depth );

@@ -26,7 +26,10 @@ import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Button;
+import com.shatteredpixel.shatteredpixeldungeon.ui.DiceMageUI;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RoundedFrame;
+import com.shatteredpixel.shatteredpixeldungeon.ui.UITheme;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.input.KeyBindings;
 import com.watabou.input.KeyEvent;
@@ -113,6 +116,7 @@ public class WndTabbed extends Window {
 		chrome.size(
 			width + chrome.marginHor(),
 			height + chrome.marginVer() );
+		layoutChromeTheme();
 		
 		camera.resize( (int)chrome.width, chrome.marginTop() + height + tabHeight() );
 		camera.x = (int)(Game.width - camera.screenWidth()) / 2;
@@ -167,6 +171,7 @@ public class WndTabbed extends Window {
 		protected boolean selected;
 		
 		protected NinePatch bg;
+		protected RoundedFrame themedBg;
 		
 		@Override
 		protected void layout() {
@@ -176,6 +181,12 @@ public class WndTabbed extends Window {
 				bg.x = x;
 				bg.y = y;
 				bg.size( width, height );
+				bg.alpha(UITheme.isDiceMage() ? 0f : 1f);
+			}
+			if (themedBg != null) {
+				themedBg.visible = UITheme.isDiceMage();
+				themedBg.setFillColor(selected ? DiceMageUI.PANEL_ALT : DiceMageUI.BLACK);
+				themedBg.setRect(x, y, width, height);
 			}
 		}
 		
@@ -187,10 +198,16 @@ public class WndTabbed extends Window {
 				remove( bg );
 			}
 			
+			// Use the same rounded button chrome for tabs so inventory and hero
+			// information screens do not fall back to the legacy cut-corner tabs.
 			bg = Chrome.get( selected ?
-				Chrome.Type.TAB_SELECTED :
-				Chrome.Type.TAB_UNSELECTED );
+				Chrome.Type.GREY_BUTTON :
+					Chrome.Type.GREY_BUTTON_TR );
 			addToBack( bg );
+			if (themedBg == null) {
+				themedBg = UITheme.roundedFrame(DiceMageUI.BLACK, DiceMageUI.ORANGE);
+				addToBack(themedBg);
+			}
 			
 			layout();
 		}

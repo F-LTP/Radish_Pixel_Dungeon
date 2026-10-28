@@ -53,6 +53,15 @@ public class Greatshield extends MeleeWeapon {
 		}
 	}
 
+	public int DRMax(){
+		return DRMax(buffedLvl());
+	}
+
+	//6 extra defence, plus 2 per level
+	public int DRMax(int lvl){
+		return 6 + 2*lvl;
+	}
+
 	@Override
 	protected void duelistAbility(Hero hero, Integer target) {
 		RoundShield.guardAbility(hero, 3+buffedLvl(), this);

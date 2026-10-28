@@ -1,0 +1,18 @@
+apply plugin: 'java-library'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+    // 注解定义模块
+    implementation project(':event-annotations')
+
+    // JavaPoet 用于代码生成
+    implementation 'com.squareup:javapoet:1.13.0'
+    
+    // AutoService 用于自动生成服务注册文件
+    compileOnly 'com.google.auto.service:auto-service-annotations:1.1.1'
+    annotationProcessor 'com.google.auto.service:auto-service:1.1.1'
+}

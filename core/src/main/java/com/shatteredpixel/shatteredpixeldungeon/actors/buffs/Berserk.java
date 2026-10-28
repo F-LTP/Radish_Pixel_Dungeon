@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal.WarriorShield;
@@ -34,8 +36,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
-import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBerserk;
 import com.watabou.noosa.Image;
@@ -183,6 +185,14 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		return dmg * Math.min(1.5f, 1f + (power / 2f));
 	}
 
+	@Override
+	public void modifyOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+		int before = info.getDamage();
+		if (before > 0) {
+			info.addDirectMultModifier(damageFactor(before) / before, "berserk", this);
+		}
+	}
+
 	public boolean berserking(){
 		if (target.HP == 0
 				&& state == State.NORMAL
@@ -282,8 +292,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 
 	@Override
-	public int actionIcon() {
-		return BuffIndicator.FURY;
+	public String actionIcon() {
+		return HeroIcon.ENDURE;
 	}
 
 	@Override
@@ -296,15 +306,13 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		WarriorShield shield = target.buff(WarriorShield.class);
 		if (shield != null) {
 			GameScene.show(new WndBerserk(this));
-			/*startBerserking();
-			ActionIndicator.clearAction(this);*/
 		} else {
 			GLog.w(Messages.get(this, "no_seal"));
 		}
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.BERSERK;
 	}
 
@@ -402,7 +410,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				if (p>1){
 					Buff.affect( mob, Blindness.class,5f);
 					if (p>3){
-						mob.damage(Dungeon.hero.damageRoll(),Dungeon.hero);
+						mob.damage(DamageInfo.of(Dungeon.hero.damageRoll(), DamageType.PHYSICAL, Dungeon.hero, this));
 					}
 				}
 			}

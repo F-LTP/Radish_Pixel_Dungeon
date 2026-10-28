@@ -38,6 +38,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branch;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
@@ -49,6 +51,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.journal.GuidePage;
 import com.shatteredpixel.shatteredpixeldungeon.items.journal.RegionLorePage;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.GoldenKey;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.Key;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.CrackedSpyglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.MimicTooth;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
@@ -64,11 +67,11 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MagicalFire
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.PitRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.ShopRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.EntranceRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.ExitRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.StandardRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.CavesFissureEntranceRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.EntranceRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.exit.CavesFissureExitRoom;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.exit.ExitRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.BlazingTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.BurningTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.ChillingTrap;
@@ -101,9 +104,9 @@ public abstract class RegularLevel extends Level {
 	
 	@Override
 	protected boolean build() {
-		
+
 		builder = builder();
-		
+
 		ArrayList<Room> initRooms = initRooms();
 		Random.shuffle(initRooms);
 		
@@ -113,31 +116,79 @@ public abstract class RegularLevel extends Level {
 				r.connected.clear();
 			}
 			rooms = builder.build((ArrayList<Room>)initRooms.clone());
-		} while (rooms == null);
+		} while (rooms == null && !Thread.currentThread().isInterrupted());
 		
-		return painter().paint(this, rooms);
+		// 如果线程被中断，返回 false 表示构建失败
+		if (Thread.currentThread().isInterrupted()) {
+			return false;
+		}
+		
+		if (!painter().paint(this, rooms)) {
+			return false;
+		}
+		addBranchStairsVisuals();
+		return true;
 		
 	}
-	
+
+	// 为所有副本（分支）上下楼梯加上带黄边的贴图覆盖
+	private void addBranchStairsVisuals() {
+		for (LevelTransition t : transitions) {
+			if (t.type == LevelTransition.Type.BRANCH_ENTRANCE
+					|| t.type == LevelTransition.Type.BRANCH_EXIT) {
+				BranchStairsVisual vis = new BranchStairsVisual(
+						t.type == LevelTransition.Type.BRANCH_ENTRANCE);
+				int cell = t.cell();
+				vis.pos( cell % width(), cell / width() );
+				customTiles.add( vis );
+			}
+		}
+	}
+
 	protected ArrayList<Room> initRooms() {
 		ArrayList<Room> initRooms = new ArrayList<>();
-		initRooms.add ( roomEntrance = EntranceRoom.createEntrance());
-		initRooms.add( roomExit = ExitRoom.createExit());
+		initRooms.add(roomEntrance = EntranceRoom.createEntrance());
 
-		//force max standard rooms and multiple by 1.5x for large levels
-		int standards = standardRooms(feeling == Feeling.LARGE);
-		if (feeling == Feeling.LARGE){
-			standards = (int)Math.ceil(standards * 1.5f);
+		// 检查是否需要生成出口房间
+		// 主线总是需要出口；支线只有还有下一层时才需要
+		boolean needExit = true;
+		if (!Dungeon.branchId.equals(Branches.MAIN)) {
+			Branch branch = Branches.get(Dungeon.branchId);
+			needExit = branch != null && branch.hasMoreDepth(Dungeon.depth);
 		}
+
+		if (needExit) {
+			initRooms.add(roomExit = ExitRoom.createExit());
+		} else {
+			roomExit = null;
+		}
+
+		// 计算当前区域（每5层为一个区域）
+		int region = (Dungeon.depth - 1) / 5 + 1;
+
+		// 每区平均房间数增加：1/1/2/2/2
+		int roomIncrement = 0;
+		if (region >= 3) roomIncrement = 2;
+		else if (region >= 1) roomIncrement = 1;
+
+		//force max special rooms and add one more for large levels
+		int standards = standardRooms(feeling == Feeling.LARGE);
+		standards += roomIncrement;
+
+		if (feeling == Feeling.LARGE) {
+			standards = (int) Math.ceil(standards * 1.5f);
+		}
+
 		for (int i = 0; i < standards; i++) {
 			StandardRoom s;
 			do {
 				s = StandardRoom.createRoom();
-			} while (!s.setSizeCat( standards-i ));
-			i += s.sizeFactor()-1;
+			} while (!s.setSizeCat(standards - i));
+			i += s.sizeFactor() - 1;
 			initRooms.add(s);
 		}
-		
+
+		// 商店房间
 		if (Dungeon.shopOnLevel())
 			initRooms.add(new ShopRoom());
 
@@ -152,14 +203,14 @@ public abstract class RegularLevel extends Level {
 			if (s instanceof PitRoom) specials++;
 			initRooms.add(s);
 		}
-		
+
 		int secrets = SecretRoom.secretsForFloor(Dungeon.depth);
 		//one additional secret for secret levels
 		if (feeling == Feeling.SECRETS) secrets++;
 		for (int i = 0; i < secrets; i++) {
 			initRooms.add(SecretRoom.createRoom());
 		}
-		
+
 		return initRooms;
 	}
 	
@@ -206,18 +257,20 @@ public abstract class RegularLevel extends Level {
 			if (!Statistics.amuletObtained) return 0;
 			else                            return 10;
 		}
-
 		int mobs = 3 + Dungeon.depth % 5 + Random.Int(3);
 		if (feeling == Feeling.LARGE){
 			mobs = (int)Math.ceil(mobs * 1.33f);
 		}
+
 		return mobs;
 	}
 	
 	@Override
 	protected void createMobs() {
 		//on floor 1, 8 pre-set mobs are created so the player can get level 2.
-		int mobsToSpawn = Dungeon.depth == 1 ? 8 : mobLimit();
+		int mobsToSpawn = Dungeon.depth == 1 ? 8-1 : mobLimit();//一层只生成 7 个怪物 配合额外两个达到一层额外一个
+
+		mobsToSpawn += 2;
 
 		ArrayList<Room> stdRooms = new ArrayList<>();
 		for (Room room : rooms) {
@@ -365,6 +418,8 @@ public abstract class RegularLevel extends Level {
 		// drops 3/4/5 items 60%/30%/10% of the time
 		int nItems = 3 + Random.chances(new float[]{6, 3, 1});
 
+		nItems *= 1.15f;
+		
 		if (feeling == Feeling.LARGE){
 			nItems += 2;
 		}
@@ -631,6 +686,58 @@ public abstract class RegularLevel extends Level {
 			}
 		Random.popGenerator();
 
+		Random.pushGenerator( Random.Long() );
+		Document regionDoc_LS = null;
+
+		if (Dungeon.depth != 26 && !Dungeon.bossLevel()) {
+			regionDoc_LS = Document.LEGENDS_STORY;
+		}
+
+		if (regionDoc_LS != null && !regionDoc_LS.allPagesFound()) {
+
+			Dungeon.LimitedDrops limit = limitedDocs.get(regionDoc_LS);
+
+			if (limit == null || !limit.dropped()) {
+
+				float totalPages = 0;
+				float pagesFound = 0;
+				String pageToDrop = null;
+
+				// 对 `Document.LengStory` 进行特殊处理，假设该文档总共有 11 本书
+				for (String page : regionDoc_LS.pageNames()) {
+					totalPages++;
+					if (!regionDoc_LS.isPageFound(page)) {
+						if (pageToDrop == null) {
+							pageToDrop = page;
+						}
+					} else {
+						pagesFound++;
+					}
+				}
+
+				float percentComplete = pagesFound / totalPages;
+				int region = 1+(Dungeon.depth-1)/5;
+				// 对于 `Document.LengStory`，目标楼层的计算可以基于进度调整
+				int targetFloor = 5 * (region - 1) + 1;
+				targetFloor += Math.round(3 * percentComplete);
+
+				// 针对 `Document.LengStory`，确保不在 Boss 层或第 26 层掉落
+				if (Dungeon.depth >= targetFloor && Dungeon.depth != 26 && !Dungeon.bossLevel()) {
+					DocumentPage page = RegionLorePage.pageForDoc(regionDoc_LS);
+					page.page(pageToDrop);
+					int cell = randomDropCell();
+					if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
+						map[cell] = Terrain.GRASS;
+						losBlocking[cell] = false;
+					}
+					drop(page, cell);
+					if (limit != null) limit.drop();
+				}
+
+			}
+		}
+		Random.popGenerator();
+
 		//ebony mimics >:)
 		Random.pushGenerator(Random.Long());
 			if (Random.Float() < MimicTooth.ebonyMimicChance()){
@@ -660,6 +767,19 @@ public abstract class RegularLevel extends Level {
 			}
 		Random.popGenerator();
 
+		//extra spyglass loot
+		Random.pushGenerator(Random.Long());
+			int items = (int)(Random.Float() + CrackedSpyglass.extraLootChance());
+			for (int i = 0; i < items; i++){
+				int cell = randomDropCell();
+				if (map[cell] == Terrain.HIGH_GRASS || map[cell] == Terrain.FURROWED_GRASS) {
+					map[cell] = Terrain.GRASS;
+					losBlocking[cell] = false;
+				}
+				drop( Generator.randomUsingDefaults(), cell).hidden = true;
+			}
+		Random.popGenerator();
+
 	}
 
 	private static HashMap<Document, Dungeon.LimitedDrops> limitedDocs = new HashMap<>();
@@ -669,6 +789,7 @@ public abstract class RegularLevel extends Level {
 		limitedDocs.put(Document.CAVES_EXPLORER, Dungeon.LimitedDrops.LORE_CAVES);
 		limitedDocs.put(Document.CITY_WARLOCK, Dungeon.LimitedDrops.LORE_CITY);
 		limitedDocs.put(Document.HALLS_KING, Dungeon.LimitedDrops.LORE_HALLS);
+		limitedDocs.put(Document.LEGENDS_STORY, Dungeon.LimitedDrops.LORE_STORS);
 	}
 	
 	public ArrayList<Room> rooms() {
@@ -800,7 +921,7 @@ public abstract class RegularLevel extends Level {
 
 		//There are no unused keys for this depth in the journal
 		for (Notes.KeyRecord rec : Notes.getRecords(Notes.KeyRecord.class)){
-			if (rec.depth() == depth){
+			if (rec.depth() == depth && Dungeon.branchId.equals(rec.branchId())){
 				return false;
 			}
 		}
@@ -836,8 +957,10 @@ public abstract class RegularLevel extends Level {
 				if (t.type == LevelTransition.Type.REGULAR_EXIT && roomEntrance.inside(t.center())){
 					set(t.centerCell, Terrain.ENTRANCE, this);
 					t.type = LevelTransition.Type.REGULAR_ENTRANCE;
+					t.direction = LevelTransition.Direction.UP;
+					t.linkId = LevelTransition.regularLinkId(Dungeon.branchId, Dungeon.depth - 1);
+					t.destBranch = Dungeon.branchId;
 					t.destDepth = Dungeon.depth-1;
-					t.destType =  LevelTransition.Type.REGULAR_EXIT;
 				}
 			}
 		}
@@ -847,8 +970,10 @@ public abstract class RegularLevel extends Level {
 				if (t.type == LevelTransition.Type.REGULAR_ENTRANCE && roomExit.inside(t.center())){
 					set(t.centerCell, Terrain.EXIT, this);
 					t.type = LevelTransition.Type.REGULAR_EXIT;
+					t.direction = LevelTransition.Direction.DOWN;
+					t.linkId = LevelTransition.regularLinkId(Dungeon.branchId, Dungeon.depth);
+					t.destBranch = Dungeon.branchId;
 					t.destDepth = Dungeon.depth+1;
-					t.destType =  LevelTransition.Type.REGULAR_ENTRANCE;
 				}
 			}
 		}

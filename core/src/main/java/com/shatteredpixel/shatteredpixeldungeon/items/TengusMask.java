@@ -23,11 +23,14 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -35,8 +38,10 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndChooseSubclass;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
+import com.watabou.utils.DeviceCompat;
 
 import java.util.ArrayList;
 
@@ -66,11 +71,8 @@ public class TengusMask extends Item {
 		super.execute( hero, action );
 
 		if (action.equals( AC_WEAR )) {
-			
 			curUser = hero;
-
 			GameScene.show( new WndChooseSubclass( this, hero ) );
-			
 		}
 	}
 	
@@ -100,7 +102,7 @@ public class TengusMask extends Item {
 		curUser.subClass = way;
 		Talent.initSubclassTalents(curUser);
 
-		if (way == HeroSubClass.ASSASSIN && curUser.invisible > 0){
+		if (way == HeroSubClasses.ASSASSIN && curUser.invisible > 0){
 			Buff.affect(curUser, Preparation.class);
 		}
 		
@@ -111,6 +113,29 @@ public class TengusMask extends Item {
 		e.pos(e.x-2, e.y-6, 4, 4);
 		e.start(Speck.factory(Speck.MASK), 0.05f, 20);
 		GLog.p( Messages.get(this, "used"));
+		if (way == HeroSubClasses.DICE_MAGE) {
+			WndMessage msg = new WndMessage("世界变得大不相同了！"){
+				@Override
+				public void hide() {
+					super.hide();
+					// 转职时若已有累积的三层天赋点，切换场景后一口气让玩家选择完
+					boolean pending = com.shatteredpixel.shatteredpixeldungeon.windows.WndDiceMageTalentChoice.canShow();
+					ShatteredPixelDungeon.seamlessResetScene(new com.watabou.noosa.Game.SceneChangeCallback() {
+						@Override
+						public void beforeCreate() {
+						}
+						@Override
+						public void afterCreate() {
+							if (pending) {
+								com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene.show(
+										new com.shatteredpixel.shatteredpixeldungeon.windows.WndDiceMageTalentChoice());
+							}
+						}
+					});
+				}
+			};
+			GameScene.show(msg);
+		}
 		
 	}
 }

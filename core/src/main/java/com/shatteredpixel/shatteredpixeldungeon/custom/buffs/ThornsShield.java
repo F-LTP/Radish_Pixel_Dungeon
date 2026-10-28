@@ -13,7 +13,7 @@ public class ThornsShield extends FlavourBuff {
     }
 
     @Override
-    public int icon() {
+    public String icon() {
         return BuffIndicator.ENDURE;
     }
 

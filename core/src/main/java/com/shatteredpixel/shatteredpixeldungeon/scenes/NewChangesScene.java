@@ -39,7 +39,12 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.ChangeInfo;
 import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.WndChanges;
 import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.WndChangesTabbed;
-import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.rapd.RA_v0_13_X_Changes;
+import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.rapd.RA_v0_3_X_Changes;
+import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.rapd.RA_v0_4_X_Changes;
+import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.rapd.RA_v0_5_X_Changes;
+import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.rapd.RA_v0_6_X_Changes;
+import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.rapd.RA_v0_7_X_Changes;
+import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.rapd.RA_v0_8_X_Changes;
 import com.shatteredpixel.shatteredpixeldungeon.windows.IconTitle;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Image;
@@ -139,7 +144,12 @@ public class NewChangesScene extends PixelScene {
 
         switch (changesSelected){
             case 0: default:
-                RA_v0_13_X_Changes.addAllChanges(changeInfos);
+                RA_v0_8_X_Changes.addAllChanges(changeInfos);
+                RA_v0_7_X_Changes.addAllChanges(changeInfos);
+                RA_v0_6_X_Changes.addAllChanges(changeInfos);
+                RA_v0_5_X_Changes.addAllChanges(changeInfos);
+                RA_v0_4_X_Changes.addAllChanges(changeInfos);
+                RA_v0_3_X_Changes.addAllChanges(changeInfos);
                 break;
         }
 

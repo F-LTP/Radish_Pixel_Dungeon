@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
 public class ScaleArmor extends Armor {
@@ -28,9 +30,19 @@ public class ScaleArmor extends Armor {
 	{
 		image = ItemSpriteSheet.ARMOR_SCALE;
 	}
-	
+
 	public ScaleArmor() {
 		super( 4 );
+	}
+
+	@Override
+	public float evasionFactor(Char owner, float evasion) {
+		// 鳞甲特效：在水中额外拥有 2+等级点闪避
+		if (Dungeon.level != null && Dungeon.level.water[owner.pos]) {
+			evasion += 2 + buffedLvl();
+		}
+		// 将计算后的闪避值传递给超类处理
+		return super.evasionFactor(owner, evasion);
 	}
 
 }

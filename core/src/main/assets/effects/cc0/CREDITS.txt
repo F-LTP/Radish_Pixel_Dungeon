@@ -1,0 +1,23 @@
+Free effect assets used by this mod
+====================================
+
+All files in this folder are CC0 (Creative Commons Zero / public domain).
+They may be used commercially without attribution.
+
+sword_slash.png
+  "Pixel art sword slash effect" by tbbk
+  Source: https://opengameart.org/content/pixel-art-sword-slash-effect
+  License: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+  Sheet: 3x3 grid of 64x47 frames (192x141).
+
+explosion_f1..f5.png / pixel_explosion.png
+  "16x16 Explosion" by BitingChaos
+  Source: https://opengameart.org/content/16x16-explosion
+  License: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+  five 16x16 frames; pixel_explosion.png is an 80x16 horizontal composite.
+
+simplefx.png
+  "16x16 Simple Fantasy RPG FX" by Emcee Flesher
+  Source: https://opengameart.org/content/16x16-simple-fantasy-rpg-fx
+  License: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+  Sheet of 16x16 frames (16 columns x 13 rows).

@@ -31,6 +31,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
@@ -101,12 +103,9 @@ public class WandOfTransfusion extends DamageWand {
 					shielding = 0;
 				}
 				
-				ch.HP += healing;
+				ch.heal(healing);
 				
 				ch.sprite.emitter().burst(Speck.factory(Speck.HEALING), 2 + buffedLvl() / 2);
-				if (healing > 0) {
-					ch.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(healing), FloatingText.HEALING);
-				}
 				if (shielding > 0){
 					ch.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(shielding), FloatingText.SHIELDING);
 				}
@@ -134,7 +133,7 @@ public class WandOfTransfusion extends DamageWand {
 				
 				//harms the undead
 				} else {
-					ch.damage(damageRoll(), this);
+					ch.damage(new DamageInfo(damageRoll(), DamageType.MAGICAL, curUser, this, this));
 					ch.sprite.emitter().start(ShadowParticle.UP, 0.05f, 10 + buffedLvl());
 					Sample.INSTANCE.play(Assets.Sounds.BURNING);
 				}
@@ -148,7 +147,7 @@ public class WandOfTransfusion extends DamageWand {
 	//this wand costs health too
 	private void damageHero(int damage){
 		
-		curUser.damage(damage, this);
+		curUser.damage(new DamageInfo(damage, DamageType.TRUE, curUser, this, this));
 
 		if (!curUser.isAlive()){
 			Badges.validateDeathFromFriendlyMagic();
@@ -178,6 +177,22 @@ public class WandOfTransfusion extends DamageWand {
 	}
 
 	@Override
+	public String upgradeStat1(int level) {
+		int selfDMG = Dungeon.hero != null ? Math.round(Dungeon.hero.HT*0.05f): 1;
+		return Integer.toString(selfDMG + 3*level);
+	}
+
+	@Override
+	public String upgradeStat2(int level) {
+		return Integer.toString(5 + level);
+	}
+
+	@Override
+	public String upgradeStat3(int level) {
+		return super.upgradeStat1(level); //damage
+	}
+
+	@Override
 	public void staffFx(MagesStaff.StaffParticle particle) {
 		particle.color( 0xCC0000 );
 		particle.am = 0.6f;
@@ -189,7 +204,7 @@ public class WandOfTransfusion extends DamageWand {
 
 	@Override
 	public String statsDesc() {
-		int selfDMG = Math.round(Dungeon.hero.HT*0.05f);
+		int selfDMG = Dungeon.hero != null ? Math.round(Dungeon.hero.HT*0.05f): 1;
 		if (levelKnown)
 			return Messages.get(this, "stats_desc", selfDMG, selfDMG + 3*buffedLvl(), 5+buffedLvl(), min(), max());
 		else

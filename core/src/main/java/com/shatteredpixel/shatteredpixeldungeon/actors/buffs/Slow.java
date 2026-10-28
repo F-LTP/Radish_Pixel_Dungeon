@@ -34,7 +34,7 @@ public class Slow extends FlavourBuff {
 	public static final float DURATION = 10f;
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.TIME;
 	}
 

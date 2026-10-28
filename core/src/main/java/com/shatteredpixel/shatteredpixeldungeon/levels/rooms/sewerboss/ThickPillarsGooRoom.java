@@ -21,11 +21,14 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.sewerboss;
 
+import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Goo;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishBoss.BigSnake_Zikk;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.connection.PerimeterRoom;
+import com.watabou.utils.Random;
 
 public class ThickPillarsGooRoom extends GooBossRoom {
 	
@@ -50,9 +53,20 @@ public class ThickPillarsGooRoom extends GooBossRoom {
 		}
 		
 		setupGooNest(level);
-		
-		Goo boss = new Goo();
-		boss.pos = level.pointToCell(center());
-		level.mobs.add( boss );
+
+		if(Statistics.bigsnake_zikk){
+			BigSnake_Zikk boss = new BigSnake_Zikk();
+			boss.pos = level.pointToCell(center());
+			level.mobs.add(boss);
+		} else if(Random.Float()<0.32f){
+			Statistics.bigsnake_zikk = true;
+			BigSnake_Zikk boss = new BigSnake_Zikk();
+			boss.pos = level.pointToCell(center());
+			level.mobs.add(boss);
+		} else {
+			Goo boss = new Goo();
+			boss.pos = level.pointToCell(center());
+			level.mobs.add(boss);
+		}
 	}
 }

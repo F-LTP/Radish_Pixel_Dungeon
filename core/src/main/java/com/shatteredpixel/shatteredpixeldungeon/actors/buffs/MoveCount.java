@@ -4,7 +4,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.watabou.utils.Bundle;
 
-public class MoveCount extends Buff{
+public class MoveCount extends Buff {
 
     {
         type = buffType.POSITIVE;

@@ -20,6 +20,8 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -62,12 +64,12 @@ public class RotLasher extends Mob {
 	}
 
 	@Override
-	public void damage(int dmg, Object src) {
-		if (src instanceof Burning) {
+	public void damage(DamageInfo info) {
+		if (info.getSource() instanceof Burning) {
 			destroy();
 			sprite.die();
 		} else {
-			super.damage(dmg, src);
+			super.damage(info);
 		}
 	}
 
@@ -109,7 +111,7 @@ public class RotLasher extends Mob {
 	}
 	
 	{
-		immunities.add( ToxicGas.class );
+		typeImmunities.add(DamageType.TOXIC);
 	}
 
 	private class Waiting extends Mob.Wandering{

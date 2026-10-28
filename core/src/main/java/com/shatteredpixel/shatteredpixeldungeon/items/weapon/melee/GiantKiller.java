@@ -1,8 +1,11 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+
+import java.util.Set;
 
 public class GiantKiller extends MeleeWeapon {
 
@@ -22,10 +25,30 @@ public class GiantKiller extends MeleeWeapon {
 
     public boolean isMustCrit;
 
-    public int proc(Char attacker, Char defender, int damage ) {
-        //see Char.java Notes MUST CRITS METHOD
-        isMustCrit = defender.properties().contains(Char.Property.BOSS) || defender.properties().contains(Char.Property.MINIBOSS) || defender.properties().contains(Char.Property.ELITES) || defender.buff(ChampionEnemy.class) != null;
+    @Override
+    public int proc(Char attacker, Char defender, int damage) {
+
+        Set<Char.Property> properties = defender.properties();
+
+        boolean isSpecialEnemy =
+                   properties.contains(Char.Property.BOSS)
+                || properties.contains(Char.Property.MINIBOSS)
+                || properties.contains(Char.Property.ELITES);
+
+        boolean hasChampionBuff = false;
+        for (Buff b : defender.buffs(ChampionEnemy.class)) {
+            if (b != null) {
+                hasChampionBuff = true;
+                break;
+            }
+        }
+        
+        isMustCrit = isSpecialEnemy || hasChampionBuff;
+
         return super.proc(attacker, defender, damage);
     }
+
+
+
 
 }

@@ -61,6 +61,7 @@ public class InventoryPane extends Component {
 
 	private NinePatch bg;
 	private NinePatch bg2; //2 backgrounds to reduce transparency
+	private RoundedFrame themedBg;
 
 	//used to prevent clicks through the BG normally, or to cancel selectors if they're enabled
 	private PointerArea blocker;
@@ -81,10 +82,11 @@ public class InventoryPane extends Component {
 	private ArrayList<BagButton> bags;
 
 	public static final int WIDTH = 187;
-	public static final int HEIGHT = 82;
+	public static final int HEIGHT = 107;
 
 	private static final int SLOT_WIDTH = 17;
 	private static final int SLOT_HEIGHT = 24;
+//	private static final int MIN_BAG_BUTTON_WIDTH = 12; // 背包按钮最小宽度
 
 	private WndBag.ItemSelector selector;
 
@@ -120,6 +122,10 @@ public class InventoryPane extends Component {
 		bg2 = Chrome.get(Chrome.Type.TOAST_TR);
 		add(bg2);
 
+		themedBg = UITheme.roundedFrame(DiceMageUI.BLACK, DiceMageUI.ORANGE);
+		themedBg.visible = false;
+		add(themedBg);
+
 		blocker = new PointerArea(0, 0, PixelScene.uiCamera.width, PixelScene.uiCamera.height){
 			@Override
 			protected void onClick(PointerEvent event) {
@@ -143,7 +149,10 @@ public class InventoryPane extends Component {
 						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_2
 						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_3
 						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_4
-						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_5){
+						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_5
+						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_6
+						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_7
+						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_8){
 					//any windows opened as a consequence of this should be centered on the inventory
 					GameScene.centerNextWndOnInvPane();
 					selector.onSelect(null);
@@ -179,14 +188,17 @@ public class InventoryPane extends Component {
 		add(promptTxt);
 
 		bagItems = new ArrayList<>();
-		for (int i = 0; i < 20; i++){
+		for (int i = 0; i < 25; i++){
 			InventorySlot btn = new InventoryPaneSlot(null);
 			bagItems.add(btn);
 			add(btn);
 		}
 
 		bags = new ArrayList<>();
-		for (int i = 0; i < 5; i++){
+		// 创建 12 个背包按钮，支持挑战模式/测试模式下的多个背包
+		// 主背包 + ChallengeBag + TestBag×N + ScrollHolder + PotionBandolier + VelvetPouch + MagicalHolster = 最多 12 个
+		// 如果背包数量过多，按钮宽度会自动缩小以适应
+		for (int i = 0; i < 12; i++){
 			BagButton btn = new BagButton(null, i+1);
 			bags.add(btn);
 			add(btn);
@@ -215,6 +227,10 @@ public class InventoryPane extends Component {
 		bg.y = bg2.y = y;
 		bg.size(width, height);
 		bg2.size(width, height);
+		boolean themed = UITheme.isDiceMage();
+		bg.visible = bg2.visible = !themed;
+		themedBg.visible = themed;
+		themedBg.setRect(x, y, width, height);
 
 		float left = x+4;
 		for (InventorySlot i : equipped){
@@ -243,13 +259,39 @@ public class InventoryPane extends Component {
 		energy.x = energyTxt.x + energyTxt.width() + 1;
 		energy.y = energyTxt.y;
 
-		for (BagButton b : bags){
-			b.setRect(left, y + 14, SLOT_WIDTH, 14);
-			left = b.right()+1;
+		float bagRowStart = left;
+		float availableWidth = width - (bagRowStart - x);
+		
+		// 计算实际有背包的按钮数量（最多 12 个）
+		// 请注意，只在挑战模式/调试模式会出现这么多的背包
+		int bagsWithItems = 0;
+		for (BagButton b : bags) {
+			if (b.bag != null) bagsWithItems++;
 		}
 
+		float bagButtonWidth = SLOT_WIDTH;
+		if (bagsWithItems > 0) {
+			float neededWidth = bagsWithItems * (SLOT_WIDTH + 1);
+			if (neededWidth > availableWidth) {
+				// 空间不足，缩小按钮宽度
+				bagButtonWidth = (availableWidth - bagsWithItems) / bagsWithItems;
+			}
+		}
+		
+		// 布局背包按钮
+		for (BagButton b : bags) {
+			if (b.bag != null) {
+				b.setRect(left, y + 14, bagButtonWidth, (float) Math.min(14,bagButtonWidth / 0.618));
+				left = b.right() + 1;
+			} else {
+				// 没有背包的按钮隐藏
+				b.setRect(0, 0, 0, 0);
+			}
+		}
+
+		// 更新 bagItems 的起始位置
 		left = x+4;
-		float top = y+4+SLOT_HEIGHT+1;
+		float top = y + 14 + 14 + 1;
 		for (InventorySlot b : bagItems){
 			b.setRect(left, top, SLOT_WIDTH, SLOT_HEIGHT);
 			left = b.right()+1;
@@ -315,7 +357,7 @@ public class InventoryPane extends Component {
 		}
 
 		int j = 0;
-		for (int i = 0; i < 20; i++){
+		for (int i = 0; i < 25; i++){
 			if (i == 0 && lastBag != stuff.backpack){
 				bagItems.get(i).item(lastBag);
 				continue;
@@ -611,6 +653,7 @@ public class InventoryPane extends Component {
 
 		private ColorBlock bgTop;
 		private ColorBlock bgBottom;
+		private RoundedFrame themedBg;
 
 		private Bag bag;
 		private int index;
@@ -645,6 +688,10 @@ public class InventoryPane extends Component {
 
 			bgBottom = new ColorBlock(1, 1, ACTIVE);
 			add(bgBottom);
+
+			themedBg = UITheme.roundedFrame(DiceMageUI.BLACK, DiceMageUI.ORANGE);
+			themedBg.visible = false;
+			addToBack(themedBg);
 		}
 
 		@Override
@@ -658,11 +705,27 @@ public class InventoryPane extends Component {
 			bgBottom.size(width, height-1);
 			bgBottom.y = y+1;
 			bgBottom.x = x;
+
+			boolean themed = UITheme.isDiceMage();
+			bgTop.visible = bgBottom.visible = !themed;
+			themedBg.visible = themed;
+			themedBg.setFillColor(lastBag == bag ? DiceMageUI.PANEL_ALT : DiceMageUI.BLACK);
+			themedBg.setRect(x, y, width, height);
+			
+			// 缩放图标以适应按钮宽度
+			if (icon != null) {
+				float iconScale = Math.min(1f, (width - 4) / SLOT_WIDTH);
+				icon.scale.set(iconScale);
+				icon.x = x + (width - icon.width()) / 2;
+				icon.y = y + 1 + (13 - icon.height()) / 2;
+				PixelScene.align(icon);
+			}
 		}
 		
 		public void alpha( float value ){
 			bgTop.alpha(value);
 			bgBottom.alpha(value);
+			themedBg.alpha(value);
 			icon.alpha(value);
 		}
 
@@ -677,7 +740,7 @@ public class InventoryPane extends Component {
 		@Override
 		public GameAction keyAction() {
 			switch (index){
-				case 1: default:
+				case 1:
 					return SPDAction.BAG_1;
 				case 2:
 					return SPDAction.BAG_2;
@@ -687,6 +750,15 @@ public class InventoryPane extends Component {
 					return SPDAction.BAG_4;
 				case 5:
 					return SPDAction.BAG_5;
+				case 6:
+					return SPDAction.BAG_6;
+				case 7:
+					return SPDAction.BAG_7;
+				case 8:
+					return SPDAction.BAG_8;
+				default:
+					// 超过 8 个的背包没有独立快捷键
+					return null;
 			}
 		}
 

@@ -28,7 +28,7 @@ public abstract class NPC extends Mob {
 	{
 		HP = HT = 1;
 		EXP = 0;
-
+		properties.add(Property.NPC);
 		alignment = Alignment.NEUTRAL;
 		state = PASSIVE;
 	}

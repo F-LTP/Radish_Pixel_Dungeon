@@ -1,5 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator;
 
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -9,22 +11,32 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Annoying;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Dazzling;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Displacing;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.DoubleEdged;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Explosive;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Friendly;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Heavy;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Polarized;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Sacrificial;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Stubbornness;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Temporal;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Ultralight;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Wayward;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blooming;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Chilling;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Combos;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Corrupting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Elastic;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Euphoria;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lamprey;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Seeking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Striking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Unstable;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Vampiric;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
@@ -127,6 +139,8 @@ public class TestMelee extends TestGenerator {
                 return Chilling.class;
             case 3:
                 return Kinetic.class;
+            case 4:
+                return Lamprey.class;
             default:
                 return null;
         }
@@ -143,6 +157,10 @@ public class TestMelee extends TestGenerator {
                 return Lucky.class;
             case 5:
                 return Unstable.class;
+            case 6:
+                return Combos.class;
+            case 7:
+                return Seeking.class;
             default:
                 return null;
         }
@@ -153,6 +171,10 @@ public class TestMelee extends TestGenerator {
                 return Grim.class;
             case 2:
                 return Vampiric.class;
+            case 3:
+                return Striking.class;
+            case 4:
+                return Euphoria.class;
             default:
                 return null;
         }
@@ -173,6 +195,16 @@ public class TestMelee extends TestGenerator {
                 return Sacrificial.class;
             case 7:
                 return Wayward.class;
+            case 8:
+                return Stubbornness.class;
+            case 9:
+                return Temporal.class;
+            case 10:
+                return DoubleEdged.class;
+            case 11:
+                return Heavy.class;
+            case 12:
+                return Ultralight.class;
             default:
                 return null;
         }
@@ -334,8 +366,7 @@ public class TestMelee extends TestGenerator {
                         super.onClick();
                     }
                 };
-                Image im = new Image(Assets.Sprites.ITEMS);
-                im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(all[i])).image));
+                Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(all[i])).image);
                 im.scale.set(1f);
                 btn.icon(im);
                 left = (WIDTH - BTN_SIZE * ((i/r_limit+1<t_row)?r_limit:length-(t_row-1)*r_limit) )/2f;

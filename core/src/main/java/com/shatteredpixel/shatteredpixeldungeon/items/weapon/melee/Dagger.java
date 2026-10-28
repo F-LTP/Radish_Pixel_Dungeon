@@ -52,10 +52,14 @@ public class Dagger extends MeleeWeapon {
 		bones = false;
 	}
 
+	//rogue weapon
+	@Override
+	public int min(int lvl) {
+		return  1 + lvl;
+	}
 	@Override
 	public int max(int lvl) {
-		return  4*(tier+1) +    //8 base, down from 10
-				lvl*(tier+1);   //scaling unchanged
+		return  9 + lvl * 2;
 	}
 	
 	@Override

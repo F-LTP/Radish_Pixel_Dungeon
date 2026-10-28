@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Journal;
@@ -68,7 +69,7 @@ public class WndStartGame extends Window {
 		float heroBtnSpacing = (WIDTH - 4*HeroBtn.WIDTH)/5f;
 		
 		float curX = heroBtnSpacing;
-		for (HeroClass cl : HeroClass.values()){
+		for (HeroClass cl : HeroClasses.ALL){
 			HeroBtn button = new HeroBtn(cl);
 			button.setRect(curX, title.height() + 7, HeroBtn.WIDTH, HeroBtn.HEIGHT);
 			curX += HeroBtn.WIDTH + heroBtnSpacing;
@@ -307,27 +308,22 @@ public class WndStartGame extends Window {
 					
 					name.text(Messages.capitalize(cl.title()));
 					
-					switch(cl){
-						case WARRIOR:
-							heroItem.icon(new ItemSprite(ItemSpriteSheet.SEAL, null));
-							heroLoadout.icon(new ItemSprite(ItemSpriteSheet.WORN_SHORTSWORD, null));
-							heroMisc.icon(new ItemSprite(ItemSpriteSheet.RATION, null));
-							break;
-						case MAGE:
-							heroItem.icon(new ItemSprite(ItemSpriteSheet.MAGES_STAFF, null));
-							heroLoadout.icon(new ItemSprite(ItemSpriteSheet.HOLDER, null));
-							heroMisc.icon(new ItemSprite(ItemSpriteSheet.WAND_MAGIC_MISSILE, null));
-							break;
-						case ROGUE:
-							heroItem.icon(new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK, null));
-							heroLoadout.icon(new ItemSprite(ItemSpriteSheet.DAGGER, null));
-							heroMisc.icon(Icons.get(Icons.STAIRS));
-							break;
-						case HUNTRESS:
-							heroItem.icon(new ItemSprite(ItemSpriteSheet.SPIRIT_BOW, null));
-							heroLoadout.icon(new ItemSprite(ItemSpriteSheet.GLOVES, null));
-							heroMisc.icon(new Image(Assets.Environment.TILES_SEWERS, 112, 96, 16, 16 ));
-							break;
+					if (cl == HeroClasses.MAGE) {
+						heroItem.icon(new ItemSprite(ItemSpriteSheet.MAGES_STAFF, null));
+						heroLoadout.icon(new ItemSprite(ItemSpriteSheet.HOLDER, null));
+						heroMisc.icon(new ItemSprite(ItemSpriteSheet.WAND_MAGIC_MISSILE, null));
+					} else if (cl == HeroClasses.ROGUE) {
+						heroItem.icon(new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK, null));
+						heroLoadout.icon(new ItemSprite(ItemSpriteSheet.DAGGER, null));
+						heroMisc.icon(Icons.get(Icons.STAIRS));
+					} else if (cl == HeroClasses.HUNTRESS) {
+						heroItem.icon(new ItemSprite(ItemSpriteSheet.SPIRIT_BOW, null));
+						heroLoadout.icon(new ItemSprite(ItemSpriteSheet.GLOVES, null));
+						heroMisc.icon(new Image(Assets.Environment.TILES_SEWERS, 112, 96, 16, 16 ));
+					} else {
+						heroItem.icon(new ItemSprite(ItemSpriteSheet.SEAL, null));
+						heroLoadout.icon(new ItemSprite(ItemSpriteSheet.WORN_SHORTSWORD, null));
+						heroMisc.icon(new ItemSprite(ItemSpriteSheet.RATION, null));
 					}
 					
 					layout();

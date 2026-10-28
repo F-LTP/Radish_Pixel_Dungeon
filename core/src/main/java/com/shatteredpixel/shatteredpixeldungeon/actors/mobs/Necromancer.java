@@ -25,6 +25,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
@@ -76,7 +78,12 @@ public class Necromancer extends Mob {
 	protected boolean act() {
 		if (summoning && state != HUNTING){
 			summoning = false;
-			if (sprite instanceof NecromancerSprite) ((NecromancerSprite) sprite).cancelSummoning();
+			// Snake Bite challenge: call cancelSummoning() via reflection
+			try {
+				sprite.getClass().getMethod("cancelSummoning").invoke(sprite);
+			} catch (Exception e) {
+				if (sprite instanceof NecromancerSprite) ((NecromancerSprite) sprite).cancelSummoning();
+			}
 		}
 		return super.act();
 	}
@@ -196,9 +203,15 @@ public class Necromancer extends Mob {
 		if (Actor.findChar(summoningPos) != null) {
 
 			//cancel if character cannot be moved
-			if (Char.hasProp(Actor.findChar(summoningPos), Property.IMMOVABLE)){
+			if (Char.hasProp(Actor.findChar(summoningPos), Property.IMMOVABLE)
+					|| com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SpaceFragment.blocksPassiveDisplacement(Actor.findChar(summoningPos))){
 				summoning = false;
-				((NecromancerSprite)sprite).finishSummoning();
+				// Snake Bite challenge: call finishSummoning() via reflection
+				try {
+					sprite.getClass().getMethod("finishSummoning").invoke(sprite);
+				} catch (Exception e) {
+					((NecromancerSprite)sprite).finishSummoning();
+				}
 				spend(TICK);
 				return;
 			}
@@ -225,7 +238,7 @@ public class Necromancer extends Mob {
 
 				Char blocker = Actor.findChar(summoningPos);
 				if (blocker.alignment != alignment){
-					blocker.damage( Char.combatRoll(2, 10), new SummoningBlockDamage() );
+					blocker.damage( DamageInfo.of(Char.combatRoll(2, 10), DamageType.PHYSICAL_NO_ARMOR, this, new SummoningBlockDamage()) );
 					if (blocker == Dungeon.hero && !blocker.isAlive()){
 						Badges.validateDeathFromEnemyMagic();
 						Dungeon.fail(this);
@@ -244,7 +257,12 @@ public class Necromancer extends Mob {
 		mySkeleton.pos = summoningPos;
 		GameScene.add( mySkeleton );
 		Dungeon.level.occupyCell( mySkeleton );
-		((NecromancerSprite)sprite).finishSummoning();
+		// Snake Bite challenge: call finishSummoning() via reflection
+		try {
+			sprite.getClass().getMethod("finishSummoning").invoke(sprite);
+		} catch (Exception e) {
+			((NecromancerSprite)sprite).finishSummoning();
+		}
 
 		for (Buff b : buffs(AllyBuff.class)){
 			Buff.affect(mySkeleton, b.getClass());

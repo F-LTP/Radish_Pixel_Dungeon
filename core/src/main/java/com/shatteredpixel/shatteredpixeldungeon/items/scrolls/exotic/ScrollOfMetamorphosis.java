@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Transmuting;
@@ -43,6 +44,7 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
@@ -51,7 +53,7 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 	{
 		icon = ItemSpriteSheet.Icons.SCROLL_METAMORPH;
 
-		talentFactor = 2f;
+//		talentFactor = 2f;
 	}
 
 	protected static boolean identifiedByUse = false;
@@ -173,6 +175,13 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 
 	public static class WndMetamorphReplace extends Window {
 
+		//talents that can only be used by one hero class
+		private static HashMap<Talent, HeroClass> restrictedTalents = new HashMap<>();
+		static {
+			restrictedTalents.put(Talent.RUNIC_TRANSFERENCE, HeroClasses.WARRIOR);
+			restrictedTalents.put(Talent.WAND_PRESERVATION, HeroClasses.MAGE);
+		}
+
 		public static WndMetamorphReplace INSTANCE;
 
 		public Talent replacing;
@@ -196,7 +205,6 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 
 		public WndMetamorphReplace(Talent replacing, int tier){
 			super();
-
 			if (!identifiedByUse && curItem instanceof ScrollOfMetamorphosis) {
 				curItem.detach(curUser.belongings.backpack);
 			}
@@ -210,7 +218,7 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 			LinkedHashMap<Talent, Integer> options = new LinkedHashMap<>();
 			Set<Talent> curTalentsAtTier = Dungeon.hero.talents.get(tier-1).keySet();
 
-			for (HeroClass cls : HeroClass.values()){
+			for (HeroClass cls : HeroClasses.ALL){
 				ArrayList<LinkedHashMap<Talent, Integer>> clsTalents = new ArrayList<>();
 				Talent.initClassTalents(cls, clsTalents);
 
@@ -222,6 +230,10 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 						break;
 					} else {
 						if (curTalentsAtTier.contains(talent)){
+							clsTalentsAtTier.remove(talent);
+						}
+						if (restrictedTalents.containsKey(talent)
+								&& restrictedTalents.get(talent) != curUser.heroClass){
 							clsTalentsAtTier.remove(talent);
 						}
 					}

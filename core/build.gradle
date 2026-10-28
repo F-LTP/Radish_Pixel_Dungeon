@@ -7,7 +7,11 @@ dependencies {
     api project(':SPD-classes')
     implementation project(':services')
 
+    //事件系统模块引入
+    implementation project(':event-annotations')
+    annotationProcessor project(':event-processor')
+
     //Add JackSon
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.14.3'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.3'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.21.1'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.1'
 }

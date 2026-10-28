@@ -22,12 +22,9 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.custom.messages.M;
-import com.shatteredpixel.shatteredpixeldungeon.custom.utils.CustomGameSettings;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.text.TextChallenges;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CheckBox;
@@ -37,8 +34,6 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
-import com.shatteredpixel.shatteredpixeldungeon.utils.DungeonSeed;
-import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.ui.Component;
 
@@ -121,14 +116,12 @@ public class WndChallenges extends Window {
 			CanScrollCheckBox cb = new CanScrollCheckBox( M.TL(isCustom ? TextChallenges.class : Challenges.class, challenge));
 			cb.checked((checked & Challenges.MASKS[i]) != 0);
 			cb.active = editable;
-			/*
-			if(Challenges.NAME_IDS[i].equals("mimic_dungeon")){
+
+			if(Challenges.NAME_IDS[i].equals("bad_podyduiint")){
 				cb.active = false;
 				cb.checked(false);
 				cb.alpha(0.5f);
 			}
-
-			 */
 
 			if (i > 0) {
 				pos += GAP;

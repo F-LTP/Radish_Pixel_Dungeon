@@ -16,12 +16,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -30,78 +32,85 @@ import com.watabou.utils.Random;
 
 public class Ooze extends Buff {
 
-	public static final float DURATION = 20f;
+        public static final float DURATION = 20f;
 
-	{
-		type = buffType.NEGATIVE;
-		announced = true;
-	}
-	
-	private float left;
-	private static final String LEFT	= "left";
-	
-	@Override
-	public void storeInBundle( Bundle bundle ) {
-		super.storeInBundle( bundle );
-		bundle.put( LEFT, left );
-	}
-	
-	@Override
-	public void restoreFromBundle( Bundle bundle ) {
-		super.restoreFromBundle(bundle);
-		left = bundle.getFloat(LEFT);
-	}
-	
-	@Override
-	public int icon() {
-		return BuffIndicator.OOZE;
-	}
+        {
+                type = buffType.NEGATIVE;
+                announced = true;
+        }
 
-	@Override
-	public float iconFadePercent() {
-		return Math.max(0, (DURATION - left) / DURATION);
-	}
+        private float left;
+        private static final String LEFT        = "left";
 
-	@Override
-	public String iconTextDisplay() {
-		return Integer.toString((int)left);
-	}
+        @Override
+        public void storeInBundle( Bundle bundle ) {
+                super.storeInBundle( bundle );
+                bundle.put( LEFT, left );
+        }
 
-	@Override
-	public String desc() {
-		return Messages.get(this, "desc", dispTurns(left));
-	}
-	
-	public void set(float left){
-		this.left = left;
-	}
+        @Override
+        public void restoreFromBundle( Bundle bundle ) {
+                super.restoreFromBundle(bundle);
+                left = bundle.getFloat(LEFT);
+        }
 
-	@Override
-	public boolean act() {
-		if (target.isAlive()) {
-			if (Dungeon.scalingDepth() > 5) {
-				target.damage(1 + Dungeon.scalingDepth() / 5, this);
-			} else if (Dungeon.scalingDepth() == 5){
-				target.damage(1, this); //1 dmg per turn vs Goo
-			} else if (Random.Int(2) == 0) {
-				target.damage(1, this); //0.5 dmg per turn in sewers
-			}
+        @Override
+        public String icon() {
+                return BuffIndicator.OOZE;
+        }
 
-			if (!target.isAlive() && target == Dungeon.hero) {
-				Dungeon.fail( this );
-				GLog.n( Messages.get(this, "ondeath") );
-			}
-			spend( TICK );
-			left -= TICK;
-			if (left <= 0){
-				detach();
-			}
-		} else {
-			detach();
-		}
-		if (Dungeon.level.water[target.pos]) {
-			detach();
-		}
-		return true;
-	}
+        @Override
+        public float iconFadePercent() {
+                return Math.max(0, (DURATION - left) / DURATION);
+        }
+
+        @Override
+        public String iconTextDisplay() {
+                return Integer.toString((int)left);
+        }
+
+        @Override
+        public String desc() {
+                return Messages.get(this, "desc", dispTurns(left));
+        }
+
+        public void set(float left){
+                this.left = left;
+        }
+
+        @Override
+        public boolean act() {
+                if (target.isAlive()) {
+                        int damage;
+                        if (Dungeon.scalingDepth() > 5) {
+                                damage = 1 + Dungeon.scalingDepth() / 5;
+                        } else if (Dungeon.scalingDepth() == 5){
+                                damage = 1; //1 dmg per turn vs Goo
+                        } else if (Random.Int(2) == 0) {
+                                damage = 1; //0.5 dmg per turn in sewers
+                        } else {
+                                damage = 0;
+                        }
+
+                        if (damage > 0) {
+                                target.damage(new DamageInfo(damage, DamageType.OOZE, null, null, this));
+                        }
+
+                        if (!target.isAlive() && target == Dungeon.hero) {
+                                Dungeon.fail( this );
+                                GLog.n( Messages.get(this, "ondeath") );
+                        }
+                        spend( TICK );
+                        left -= TICK;
+                        if (left <= 0){
+                                detach();
+                        }
+                } else {
+                        detach();
+                }
+                if (Dungeon.level.water[target.pos]) {
+                        detach();
+                }
+                return true;
+        }
 }

@@ -23,11 +23,13 @@ package com.shatteredpixel.shatteredpixeldungeon.ui;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
+import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -35,7 +37,9 @@ import com.shatteredpixel.shatteredpixeldungeon.windows.WndChallenges;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndGame;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndJournal;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndKeyBindings;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndScrollTitledMessage;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndStory;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.watabou.input.GameAction;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Game;
@@ -70,7 +74,12 @@ public class MenuPane extends Component {
 	protected void createChildren() {
 		super.createChildren();
 
-		bg = new Image(Assets.Interfaces.MENU);
+		if(!SPDSettings.NORMAL_SKIN()){
+			bg = new Image(Assets.Interfaces.MENU);
+		} else {
+			bg = new Image(Assets.Interfaces.NORMAL_MENU);
+		}
+
 		add(bg);
 
 		depthIcon = Icons.get(Dungeon.level.feeling);
@@ -84,23 +93,24 @@ public class MenuPane extends Component {
 		depthButton = new Button(){
 			@Override
 			protected String hoverText() {
-				switch (Dungeon.level.feeling) {
-					case CHASM:     return Messages.get(GameScene.class, "chasm");
-					case WATER:     return Messages.get(GameScene.class, "water");
-					case GRASS:     return Messages.get(GameScene.class, "grass");
-					case DARK:      return Messages.get(GameScene.class, "dark");
-					case LARGE:     return Messages.get(GameScene.class, "large");
-					case TRAPS:     return Messages.get(GameScene.class, "traps");
-					case SECRETS:   return Messages.get(GameScene.class, "secrets");
+				if (Dungeon.level.feeling != Level.Feeling.NONE){
+					return Dungeon.level.feeling.desc();
+				} else {
+					return null;
 				}
-				return null;
 			}
 
 			@Override
 			protected void onClick() {
 				super.onClick();
-				//just open journal for now, maybe have it open landmarks after expanding that page?
-				GameScene.show( new WndJournal() );
+
+				if (Dungeon.level.feeling == Level.Feeling.NONE){
+					GameScene.show(new WndJournal());
+				} else {
+					GameScene.show(new WndTitledMessage(Icons.getLarge(Dungeon.level.feeling),
+							Messages.titleCase(Dungeon.level.feeling.title()),
+							Dungeon.level.feeling.desc()));
+				}
 			}
 		};
 		add(depthButton);
@@ -231,10 +241,10 @@ public class MenuPane extends Component {
 		protected void createChildren() {
 			super.createChildren();
 
-			bg = new Image( Assets.Interfaces.MENU_BTN, 2, 2, 13, 11 );
+			bg = new Image( !SPDSettings.NORMAL_SKIN() ? Assets.Interfaces.MENU_BTN : Assets.Interfaces.NORMAL_MENU_BTN, 2, 2, 13, 11 );
 			add( bg );
 
-			journalIcon = new Image( Assets.Interfaces.MENU_BTN, 31, 0, 11, 7);
+			journalIcon = new Image( !SPDSettings.NORMAL_SKIN() ? Assets.Interfaces.MENU_BTN : Assets.Interfaces.NORMAL_MENU_BTN, 31, 0, 11, 7);
 			add( journalIcon );
 
 			keyIcon = new KeyDisplay();
@@ -311,18 +321,24 @@ public class MenuPane extends Component {
 					WndJournal.last_index = 1;
 					GameScene.show( new WndJournal() );
 				} else if (flashingDoc.pageNames().contains(flashingPage)){
-					GameScene.show( new WndStory( flashingDoc.pageSprite(flashingPage),
-							flashingDoc.pageTitle(flashingPage),
-							flashingDoc.pageBody(flashingPage) ){
-						@Override
-						public void hide() {
-							super.hide();
-							if (SPDSettings.intro()){
-								GameScene.endIntro();
+					if (flashingDoc ==  Document.LEGENDS_STORY){
+						GameScene.show(new WndScrollTitledMessage(flashingDoc.pageSprite(flashingPage),
+								flashingDoc.pageTitle(flashingPage),
+								flashingDoc.pageBody(flashingPage), 152, Chrome.Type.GEM));
+					} else {
+						GameScene.show( new WndStory( flashingDoc.pageSprite(flashingPage),
+								flashingDoc.pageTitle(flashingPage),
+								flashingDoc.pageBody(flashingPage) ){
+							@Override
+							public void hide() {
+								super.hide();
+								if (SPDSettings.intro()){
+									GameScene.endIntro();
+								}
 							}
-						}
-					});
-					flashingDoc.readPage(flashingPage);
+						});
+						flashingDoc.readPage(flashingPage);
+					}
 				} else {
 					GameScene.show( new WndJournal() );
 				}
@@ -353,7 +369,7 @@ public class MenuPane extends Component {
 		protected void createChildren() {
 			super.createChildren();
 
-			image = new Image( Assets.Interfaces.MENU_BTN, 17, 2, 12, 11 );
+			image = new Image( !SPDSettings.NORMAL_SKIN() ? Assets.Interfaces.MENU_BTN : Assets.Interfaces.NORMAL_MENU_BTN, 17, 2, 12, 11 );
 			add( image );
 		}
 

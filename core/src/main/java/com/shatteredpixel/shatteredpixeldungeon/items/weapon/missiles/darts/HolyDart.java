@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -52,7 +53,7 @@ public class HolyDart extends TippedDart {
 		if (Char.hasProp(defender, Char.Property.UNDEAD) || Char.hasProp(defender, Char.Property.DEMONIC)){
 			defender.sprite.emitter().start( ShadowParticle.UP, 0.05f, 10+buffedLvl() );
 			Sample.INSTANCE.play(Assets.Sounds.BURNING);
-			defender.damage(Char.combatRoll(10 + Dungeon.scalingDepth()/3, 20 + Dungeon.scalingDepth()/3), this);
+			defender.damage(DamageInfo.magical(Char.combatRoll(10 + Dungeon.scalingDepth()/3, 20 + Dungeon.scalingDepth()/3), this));
 		//also do not bless enemies if processing charged shot
 		} else if (!processingChargedShot){
 			Buff.affect(defender, Bless.class, Math.round(Bless.DURATION));

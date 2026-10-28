@@ -7,23 +7,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.Random;
 
 public class ShadowBooks extends MeleeWeapon {
 
-    public float chance;
-
-    //概率减半持续递归
-    public float AloneChance = 1;
-
-
-    public boolean aloneToChance(){
-        return Random.NormalFloat(0,1)<=chance;
-    }
-
-    public boolean aloneDoubleChance(){
-        return Random.NormalFloat(0,1)<=chance/2;
-    }
+    public int chance;
 
     {
         image = ItemSpriteSheet.SHADOW_BOOK;
@@ -45,20 +32,19 @@ public class ShadowBooks extends MeleeWeapon {
     public static class ShadowProject extends Buff {
 
         {
-            type=buffType.POSITIVE;
+            type = buffType.POSITIVE;
         }
 
         @Override
         public boolean act() {
             ShadowBooks w2 = (ShadowBooks) hero.belongings.weapon;
-            if(w2 != null){
-                w2.chance = (0.2f + 0.04f * w2.level())/w2.AloneChance;
-            }
-            spend( TICK );
+            if (w2 != null) {
+            			w2.chance = (int) (1 + 0.2*w2.buffedLvl());
+            		}
+            spend(TICK);
             return true;
         }
     }
-
 
     @Override
     public int STRReq(int lvl) {
@@ -68,15 +54,13 @@ public class ShadowBooks extends MeleeWeapon {
     @Override
     public void restoreFromBundle(Bundle bundle) {
         super.restoreFromBundle(bundle);
-        chance = bundle.getFloat("chance");
-        AloneChance = bundle.getFloat("lowchance");
+        chance = bundle.getInt("chance");
     }
 
     @Override
     public void storeInBundle(Bundle bundle) {
         super.storeInBundle(bundle);
         bundle.put("chance", chance);
-        bundle.put("lowchance",AloneChance);
     }
 
     @Override
@@ -94,9 +78,9 @@ public class ShadowBooks extends MeleeWeapon {
         String desc;
 
         if(isIdentified()){
-            desc = Messages.get(this, "desc", Math.round(Math.min(chance*100f,100)));
+            desc = Messages.get(this, "desc", chance);
         } else {
-            desc = Messages.get(this, "normal_desc",20);
+            desc = Messages.get(this, "normal_desc",1);
         }
 
         return desc;

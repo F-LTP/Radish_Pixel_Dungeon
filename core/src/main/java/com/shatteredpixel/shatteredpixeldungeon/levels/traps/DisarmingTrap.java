@@ -24,6 +24,8 @@ package com.shatteredpixel.shatteredpixeldungeon.levels.traps;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Calm;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CriticalAttack;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
@@ -32,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Honeypot;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Taijutsu;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -100,6 +103,11 @@ public class DisarmingTrap extends Trap{
 				for (int i : PathFinder.NEIGHBOURS9)
 					Dungeon.level.mapped[cell+i] = true;
 				GameScene.updateFog(cell, 1);
+
+				if(weapon instanceof Taijutsu){
+					if(hero.buff(Calm.class) != null) hero.buff(Calm.class).detach();
+					if(hero.buff(CriticalAttack.class) != null) hero.buff(CriticalAttack.class).detach();
+				}
 
 				GLog.w( Messages.get(this, "disarm") );
 

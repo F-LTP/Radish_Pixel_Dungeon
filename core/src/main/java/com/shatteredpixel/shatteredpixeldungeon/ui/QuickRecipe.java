@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.ui;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArcaneResin;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -95,9 +96,9 @@ public class QuickRecipe extends Component {
 	public QuickRecipe(Recipe.SimpleRecipe r){
 		this(r, r.getIngredients(), r.sampleOutput(null));
 	}
-	
+
 	public QuickRecipe(Recipe r, ArrayList<Item> inputs, final Item output) {
-		
+
 		ingredients = inputs;
 		int cost = r.cost(inputs);
 		boolean hasInputs = true;
@@ -115,14 +116,17 @@ public class QuickRecipe extends Component {
 					ShatteredPixelDungeon.scene().addToFront(new WndInfoItem(in));
 				}
 			};
-			
-			ArrayList<Item> similar = Dungeon.hero.belongings.getAllSimilar(in);
+
 			int quantity = 0;
-			for (Item sim : similar) {
-				//if we are looking for a specific item, it must be IDed
-				if (sim.getClass() != in.getClass() || sim.isIdentified()) quantity += sim.quantity();
+			if (Dungeon.hero != null) {
+				ArrayList<Item> similar = Dungeon.hero.belongings.getAllSimilar(in);
+				for (Item sim : similar) {
+					//if we are looking for a specific item, it must be IDed
+					if (sim.getClass() != in.getClass() || sim.isIdentified())
+						quantity += sim.quantity();
+				}
 			}
-			
+
 			if (quantity < in.quantity()) {
 				curr.sprite.alpha(0.3f);
 				hasInputs = false;
@@ -131,7 +135,7 @@ public class QuickRecipe extends Component {
 			add(curr);
 			this.inputs.add(curr);
 		}
-		
+
 		if (cost > 0) {
 			arrow = new arrow(Icons.get(Icons.ARROW), cost);
 			arrow.hardlightText(0x44CCFF);
@@ -148,7 +152,7 @@ public class QuickRecipe extends Component {
 			arrow.enable(false);
 		}
 		add(arrow);
-		
+
 		anonymize(output);
 		this.output = new ItemSlot(output){
 			@Override
@@ -161,7 +165,7 @@ public class QuickRecipe extends Component {
 		}
 		this.output.showExtraInfo(false);
 		add(this.output);
-		
+
 		layout();
 	}
 	
@@ -351,6 +355,22 @@ public class QuickRecipe extends Component {
 				result.add(new QuickRecipe( new ArcaneResin.Recipe(),
 						new ArrayList<Item>(Arrays.asList(new Wand.PlaceHolder())),
 						new ArcaneResin()));
+				//奥术精炼T4-4 实现
+				if(Dungeon.hero != null){
+					if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) < 4) {
+						result.add(null);
+						result.add(null);
+					} else if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 4) {
+						result.add(null);
+						result.add(null);
+						result.add(new QuickRecipe(new ArcaneResin.TalentRecipe(),
+								new ArrayList<Item>(Arrays.asList(
+										new UnstableSpell(),
+										new UnstableSpell(),
+										new UnstableSpell())),
+								new ArcaneResin()));
+					}
+				}
 				return result;
 			case 7:
 				result.add(new QuickRecipe(new UnstableBrew.Recipe(), new ArrayList<>(Arrays.asList(new Potion.PlaceHolder(), new  Plant.Seed.PlaceHolder())), new UnstableBrew()));

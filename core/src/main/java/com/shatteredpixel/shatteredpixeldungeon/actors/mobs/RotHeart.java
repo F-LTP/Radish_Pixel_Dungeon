@@ -20,6 +20,8 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
@@ -56,13 +58,13 @@ public class RotHeart extends Mob {
 	}
 
 	@Override
-	public void damage(int dmg, Object src) {
+	public void damage(DamageInfo info) {
 		//TODO: when effect properties are done, change this to FIRE
-		if (src instanceof Burning) {
+		if (info.getSource() instanceof Burning) {
 			destroy();
 			sprite.die();
 		} else {
-			super.damage(dmg, src);
+			super.damage(info);
 		}
 	}
 
@@ -129,7 +131,7 @@ public class RotHeart extends Mob {
 	}
 	
 	{
-		immunities.add( ToxicGas.class );
+		typeImmunities.add(DamageType.TOXIC);
 	}
 
 }

@@ -43,117 +43,148 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 
 public class BuffIndicator extends Component {
-	
+
 	//transparent icon
-	public static final int NONE    = 127;
+	public static final String NONE = "none";
 
 	//FIXME this is becoming a mess, should do a big cleaning pass on all of these
 	//and think about tinting options
-	public static final int MIND_VISION = 0;
-	public static final int LEVITATION  = 1;
-	public static final int FIRE        = 2;
-	public static final int POISON      = 3;
-	public static final int PARALYSIS   = 4;
-	public static final int HUNGER      = 5;
-	public static final int STARVATION  = 6;
-	public static final int TIME        = 7;
-	public static final int OOZE        = 8;
-	public static final int AMOK        = 9;
-	public static final int TERROR      = 10;
-	public static final int ROOTS       = 11;
-	public static final int INVISIBLE   = 12;
-	public static final int SHADOWS     = 13;
-	public static final int WEAKNESS    = 14;
-	public static final int FROST       = 15;
-	public static final int BLINDNESS   = 16;
-	public static final int COMBO       = 17;
-	public static final int FURY        = 18;
-	public static final int HERB_HEALING= 19;
-	public static final int ARMOR       = 20;
-	public static final int HEART       = 21;
-	public static final int LIGHT       = 22;
-	public static final int CRIPPLE     = 23;
-	public static final int BARKSKIN    = 24;
-	public static final int IMMUNITY    = 25;
-	public static final int BLEEDING    = 26;
-	public static final int MARK        = 27;
-	public static final int DEFERRED    = 28;
-	public static final int DROWSY      = 29;
-	public static final int MAGIC_SLEEP = 30;
-	public static final int THORNS      = 31;
-	public static final int FORESIGHT   = 32;
-	public static final int VERTIGO     = 33;
-	public static final int RECHARGING  = 34;
-	public static final int LOCKED_FLOOR= 35;
-	public static final int CORRUPT     = 36;
-	public static final int BLESS       = 37;
-	public static final int RAGE        = 38;
-	public static final int SACRIFICE   = 39;
-	public static final int BERSERK     = 40;
-	public static final int HASTE       = 41;
-	public static final int PREPARATION = 42;
-	public static final int WELL_FED    = 43;
-	public static final int HEALING     = 44;
-	public static final int WEAPON      = 45;
-	public static final int VULNERABLE  = 46;
-	public static final int HEX         = 47;
-	public static final int DEGRADE     = 48;
-	public static final int PINCUSHION  = 49;
-	public static final int UPGRADE     = 50;
-	public static final int MOMENTUM    = 51;
-	public static final int ANKH        = 52;
-	public static final int NOINV       = 53;
-	public static final int TARGETED    = 54;
-	public static final int IMBUE       = 55;
-	public static final int ENDURE      = 56;
-	public static final int INVERT_MARK = 57;
-	public static final int NATURE_POWER= 58;
-	public static final int AMULET      = 59;
-	public static final int DUEL_CLEAVE = 60;
-	public static final int DUEL_GUARD  = 61;
-	public static final int DUEL_SPIN   = 62;
-	public static final int DUEL_EVASIVE= 63;
-	public static final int DUEL_DANCE  = 64;
-	public static final int DUEL_BRAWL  = 65;
-	public static final int DUEL_XBOW   = 66;
-	public static final int CHALLENGE   = 67;
-	public static final int MONK_ENERGY = 68;
-	public static final int DUEL_COMBO  = 69;
-	public static final int DAZE        = 70;
+	public static final String MIND_VISION = "mind_vision";
+	public static final String LEVITATION = "levitation";
+	public static final String FIRE = "fire";
+	public static final String POISON = "poison";
+	public static final String PARALYSIS = "paralysis";
+	public static final String HUNGER = "hunger";
+	public static final String STARVATION = "starvation";
+	public static final String TIME = "time";
+	public static final String OOZE = "ooze";
+	public static final String AMOK = "amok";
+	public static final String TERROR = "terror";
+	public static final String ROOTS = "roots";
+	public static final String INVISIBLE = "invisible";
+	public static final String SHADOWS = "shadows";
+	public static final String WEAKNESS = "weakness";
+	public static final String FROST = "frost";
+	public static final String BLINDNESS = "blindness";
+	public static final String COMBO = "combo";
+	public static final String FURY = "fury";
+	public static final String HERB_HEALING = "herb_healing";
+	public static final String ARMOR = "armor";
+	public static final String HEART = "heart";
+	public static final String LIGHT = "light";
+	public static final String CRIPPLE = "cripple";
+	public static final String BARKSKIN = "barkskin";
+	public static final String IMMUNITY = "immunity";
+	public static final String BLEEDING = "bleeding";
+	public static final String MARK = "mark";
+	public static final String DEFERRED = "deferred";
+	public static final String DROWSY = "drowsy";
+	public static final String MAGIC_SLEEP = "magic_sleep";
+	public static final String THORNS = "thorns";
+	public static final String FORESIGHT = "foresight";
+	public static final String VERTIGO = "vertigo";
+	public static final String RECHARGING = "recharging";
+	public static final String LOCKED_FLOOR = "locked_floor";
+	public static final String CORRUPT = "corrupt";
+	public static final String BLESS = "bless";
+	public static final String RAGE = "rage";
+	public static final String SACRIFICE = "sacrifice";
+	public static final String BERSERK = "berserk";
+	public static final String HASTE = "haste";
+	public static final String PREPARATION = "preparation";
+	public static final String WELL_FED = "well_fed";
+	public static final String HEALING = "healing";
+	public static final String WEAPON = "weapon";
+	public static final String VULNERABLE = "vulnerable";
+	public static final String HEX = "hex";
+	public static final String DEGRADE = "degrade";
+	public static final String PINCUSHION = "pincushion";
+	public static final String UPGRADE = "upgrade";
+	public static final String MOMENTUM = "momentum";
+	public static final String ANKH = "ankh";
+	public static final String NOINV = "noinv";
+	public static final String TARGETED = "targeted";
+	public static final String IMBUE = "imbue";
+	public static final String ENDURE = "endure";
+	public static final String INVERT_MARK = "invert_mark";
+	public static final String NATURE_POWER = "nature_power";
+	public static final String AMULET = "amulet";
+	public static final String DUEL_CLEAVE = "duel_cleave";
+	public static final String DUEL_GUARD = "duel_guard";
+	public static final String DUEL_SPIN = "duel_spin";
+	public static final String DUEL_EVASIVE = "duel_evasive";
+	public static final String DUEL_DANCE = "duel_dance";
+	public static final String DUEL_BRAWL = "duel_brawl";
+	public static final String DUEL_XBOW = "duel_xbow";
+	public static final String CHALLENGE = "challenge";
+	public static final String MONK_ENERGY = "monk_energy";
+	public static final String DUEL_COMBO = "duel_combo";
+	public static final String DAZE = "daze";
 
-	public static final int HOLD_BREATH = 71;
-	public static final int A_EVA	    = 72;
-//	public static final int DUEL_DANCE  = 73;
-	public static final int SCYTHE_S    = 78;
+	public static final String HOLD_BREATH = "hold_breath";
+	public static final String A_EVA = "a_eva";
+	//	public static final String DUEL_DANCE = "duel_dance";
+	public static final String SCYTHE_S = "scythe_s";
+
+	public static final String FOG_ROAD = "fog_road";
+
+	public static final String TAI_COLD = "tai_cold";
+
+	public static final String TAI_CRIT = "tai_crit";
+
+	public static final String WAND = "wand";
+
+	public static final String BELIEF_LINK = "belief_link";
+	public static final String BELIEF_DNOT = "belief_dnot";
+
+	public static final String CORRUPT_SPIRIT = "corrupt_spirit"; // 术士4-4 腐化怨灵debuff
+
+	public static final String MAGIC_POINT = "magic_point";
+
+	public static final String SPELL_VULNERABLE = "spell_vulnerable";
 
 	public static final int SIZE_SMALL  = 7;
 	public static final int SIZE_LARGE  = 16;
-	
+
 	private static BuffIndicator heroInstance;
-	private static BuffIndicator bossInstance;
-	
+	// 修改：将单个bossInstance改为数组，支持最多4个Boss
+	private static BuffIndicator[] bossInstances = new BuffIndicator[4];
+
 	private LinkedHashMap<Buff, BuffButton> buffButtons = new LinkedHashMap<>();
-	private boolean needsRefresh;
+	public boolean needsRefresh;
 	private Char ch;
 
 	private boolean large = false;
-	
+	private boolean threeColumnGrid = false;
+
 	public BuffIndicator( Char ch, boolean large ) {
+		this(ch, large, false);
+	}
+
+	public BuffIndicator( Char ch, boolean large, boolean threeColumnGrid ) {
 		super();
-		
+
 		this.ch = ch;
 		this.large = large;
+		this.threeColumnGrid = threeColumnGrid;
 		if (ch == Dungeon.hero) {
 			heroInstance = this;
 		}
 	}
-	
+
 	@Override
 	public void destroy() {
 		super.destroy();
-		
+
 		if (this == heroInstance) {
 			heroInstance = null;
+		}
+		// 修改：销毁时清理对应的boss实例引用
+		for (int i = 0; i < bossInstances.length; i++) {
+			if (bossInstances[i] == this) {
+				bossInstances[i] = null;
+				break;
+			}
 		}
 	}
 
@@ -173,7 +204,7 @@ public class BuffIndicator extends Component {
 
 		ArrayList<Buff> newBuffs = new ArrayList<>();
 		for (Buff buff : ch.buffs()) {
-			if (buff.icon() != NONE) {
+			if (!NONE.equals(buff.icon())) {
 				newBuffs.add(buff);
 			}
 		}
@@ -193,19 +224,19 @@ public class BuffIndicator extends Component {
 						super.updateValues( progress );
 						image.scale.set( 1 + 5 * progress );
 					}
-					
+
 					@Override
 					protected void onComplete() {
 						image.killAndErase();
 					}
 				} );
-				
+
 				buffButtons.get( buff ).destroy();
 				remove(buffButtons.get( buff ));
 				buffButtons.remove( buff );
 			}
 		}
-		
+
 		//add new icons
 		for (Buff buff : newBuffs) {
 			if (!buffButtons.containsKey(buff)) {
@@ -214,8 +245,13 @@ public class BuffIndicator extends Component {
 				buffButtons.put( buff, icon );
 			}
 		}
-		
+
 		//layout
+		if (threeColumnGrid) {
+			layoutThreeColumnGrid(size);
+			return;
+		}
+
 		int pos = 0;
 		float lastIconLeft = 0;
 		for (BuffButton icon : buffButtons.values()){
@@ -253,6 +289,38 @@ public class BuffIndicator extends Component {
 		}
 	}
 
+	private void layoutThreeColumnGrid(int size) {
+		int count = buffButtons.size();
+		if (count == 0) {
+			buffsHidden = false;
+			return;
+		}
+
+		float buttonWidth = size + 1f;
+		float buttonHeight = size + (large ? 0f : 5f);
+		float columnStep = Math.max(0f, (width - buttonWidth) / 2f);
+		int rows = (count + 2) / 3;
+		float normalRowStep = Math.max(0f, (height - buttonHeight) / 2f);
+		float rowStep = rows <= 3
+				? normalRowStep
+				: Math.max(0f, (height - buttonHeight) / (rows - 1f));
+
+		int index = 0;
+		for (BuffButton icon : buffButtons.values()) {
+			int column = index % 3;
+			int row = index / 3;
+			icon.updateIcon();
+			icon.setRect(x + column * columnStep, y + row * rowStep,
+					buttonWidth, buttonHeight);
+			icon.visible = true;
+			PixelScene.align(icon);
+			bringToFront(icon);
+			icon.givePointerPriority();
+			index++;
+		}
+		buffsHidden = false;
+	}
+
 	public boolean allBuffsVisible(){
 		return !buffsHidden;
 	}
@@ -287,8 +355,18 @@ public class BuffIndicator extends Component {
 
 		public void updateIcon(){
 			((BuffIcon)icon).refresh(buff);
-			//round up to the nearest pixel if <50% faded, otherwise round down
-			if (!large || buff.iconTextDisplay().isEmpty()) {
+			//如果有文字显示（如剩余次数），则显示文字而非灰色进度条
+			if (!buff.iconTextDisplay().isEmpty()) {
+				text.visible = true;
+				grey.visible = false;
+				if (buff.type == Buff.buffType.POSITIVE)        text.hardlight(CharSprite.POSITIVE);
+				else if (buff.type == Buff.buffType.NEGATIVE)   text.hardlight(CharSprite.NEGATIVE);
+				text.alpha(0.7f);
+
+				text.text(buff.iconTextDisplay());
+				text.measure();
+			} else {
+				//round up to the nearest pixel if <50% faded, otherwise round down
 				text.visible = false;
 				grey.visible = true;
 				float fadeHeight = GameMath.gate(0, buff.iconFadePercent(), 1) * icon.height();
@@ -298,15 +376,6 @@ public class BuffIndicator extends Component {
 				} else {
 					grey.scale.set(icon.width(), (float) Math.floor(zoom * fadeHeight) / zoom);
 				}
-			} else if (!buff.iconTextDisplay().isEmpty()) {
-				text.visible = true;
-				grey.visible = false;
-				if (buff.type == Buff.buffType.POSITIVE)        text.hardlight(CharSprite.POSITIVE);
-				else if (buff.type == Buff.buffType.NEGATIVE)   text.hardlight(CharSprite.NEGATIVE);
-				text.alpha(0.7f);
-
-				text.text(buff.iconTextDisplay());
-				text.measure();
 			}
 		}
 
@@ -316,7 +385,10 @@ public class BuffIndicator extends Component {
 			grey.x = icon.x = this.x + (large ? 0 : 1);
 			grey.y = icon.y = this.y + (large ? 0 : 2);
 
-			if (text.width > width()){
+			//小型图标使用更小的字体
+			if (!large) {
+				text.scale.set(PixelScene.align(0.5f));
+			} else if (text.width > width()){
 				text.scale.set(PixelScene.align(0.5f));
 			} else {
 				text.scale.set(1f);
@@ -327,7 +399,7 @@ public class BuffIndicator extends Component {
 
 		@Override
 		protected void onClick() {
-			if (buff.icon() != NONE) GameScene.show(new WndInfoBuff(buff));
+			if (!NONE.equals(buff.icon())) GameScene.show(new WndInfoBuff(buff));
 		}
 
 		@Override
@@ -346,20 +418,57 @@ public class BuffIndicator extends Component {
 			return Messages.titleCase(buff.name());
 		}
 	}
-	
+
 	public static void refreshHero() {
 		if (heroInstance != null) {
 			heroInstance.needsRefresh = true;
 		}
 	}
 
+	/**
+	 * 兼容原有方法：刷新第一个Boss的Buff指示器
+	 */
 	public static void refreshBoss(){
-		if (bossInstance != null) {
-			bossInstance.needsRefresh = true;
+		// 刷新第一个Boss
+		if (bossInstances[0] != null) {
+			bossInstances[0].needsRefresh = true;
 		}
 	}
 
+	/**
+	 * 新增方法：刷新所有活跃的Boss Buff指示器
+	 */
+	public static void refreshAllBosses() {
+		for (BuffIndicator instance : bossInstances) {
+			if (instance != null) {
+				instance.needsRefresh = true;
+			}
+		}
+	}
+
+	/**
+	 * 兼容原有方法：设置第一个Boss的Buff实例
+	 */
 	public static void setBossInstance(BuffIndicator boss){
-		bossInstance = boss;
+		bossInstances[0] = boss;
+	}
+
+	/**
+	 * 新增方法：设置指定索引的Boss Buff实例（适配多Boss血条）
+	 */
+	public static void setBossInstance(int index, BuffIndicator boss) {
+		if (index >= 0 && index < bossInstances.length) {
+			bossInstances[index] = boss;
+		}
+	}
+
+	/**
+	 * 新增方法：获取指定索引的Boss Buff实例
+	 */
+	public static BuffIndicator getBossInstance(int index) {
+		if (index >= 0 && index < bossInstances.length) {
+			return bossInstances[index];
+		}
+		return null;
 	}
 }

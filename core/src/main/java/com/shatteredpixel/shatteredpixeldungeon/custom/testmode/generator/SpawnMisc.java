@@ -1,5 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator;
 
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
@@ -8,11 +10,16 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TestItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Ankh;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArcaneResin;
+import com.shatteredpixel.shatteredpixeldungeon.items.BonePile;
+import com.shatteredpixel.shatteredpixeldungeon.items.FlashCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Honeypot;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KingsCrown;
+import com.shatteredpixel.shatteredpixeldungeon.items.LawFragment;
 import com.shatteredpixel.shatteredpixeldungeon.items.LiquidMetal;
+import com.shatteredpixel.shatteredpixeldungeon.items.MechanicalFragment;
+import com.shatteredpixel.shatteredpixeldungeon.items.SoulEmber;
 import com.shatteredpixel.shatteredpixeldungeon.items.Stylus;
 import com.shatteredpixel.shatteredpixeldungeon.items.TengusMask;
 import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
@@ -58,6 +65,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.quest.GooBlob;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.MetalShard;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfBlessGoTend;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.Alchemize;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.BeaconOfReturning;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.CurseInfusion;
@@ -71,20 +79,32 @@ import com.shatteredpixel.shatteredpixeldungeon.items.spells.TelekineticGrab;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.WildEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.Runestone;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfFear;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ChaoticCenser;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.CrackedSpyglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.DimensionalSundial;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ExoticCrystals;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.EyeOfNewt;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.FerretTuft;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.GoldRadish;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.LightKing;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.MimicTooth;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.MossyClump;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ParchmentScrap;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.PetrifiedSeed;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Radish;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RatSkull;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RiverCrystal;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.SaltCube;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Sprouted_Potato;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ThirteenLeafClover;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrapMechanism;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.WondrousResin;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
+import com.shatteredpixel.shatteredpixeldungeon.items.DogLeg;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MakeshiftSlingshot;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -167,6 +187,7 @@ public class SpawnMisc extends TestItem {
             for (int i = 0; i < Generator.Category.SCROLL.classes.length; i++) {
                 scrollList.add((Class<? extends Scroll>) Generator.Category.SCROLL.classes[i]);
             }
+            scrollList.add(ScrollOfBlessGoTend.class);
         }
 
         if(exoticScrollList.isEmpty()) {
@@ -211,6 +232,7 @@ public class SpawnMisc extends TestItem {
             brewList.add(ElixirOfIcyTouch.class);
             brewList.add(ElixirOfMight.class);
             brewList.add(ElixirOfToxicEssence.class);
+            brewList.add(com.shatteredpixel.shatteredpixeldungeon.items.potions.DaughterWine.class);
         }
 
         //Spell
@@ -245,7 +267,7 @@ public class SpawnMisc extends TestItem {
             foodList.add(PhantomMeat.class);
         }
 
-        //Book
+        //trList
         if(trList.isEmpty()) {
             trList.add(DimensionalSundial.class);
             trList.add(ExoticCrystals.class);
@@ -258,10 +280,29 @@ public class SpawnMisc extends TestItem {
             trList.add(ThirteenLeafClover.class);
             trList.add(TrapMechanism.class);
             trList.add(WondrousResin.class);
+
+            trList.add(ChaoticCenser.class);
+            trList.add(SaltCube.class);
+            trList.add(ShardOfOblivion.class);
+
+            trList.add(Sprouted_Potato.class);
+            trList.add(Radish.class);
+            trList.add(GoldRadish.class);
+            trList.add(LightKing.class);
+            trList.add(RiverCrystal.class);
+            trList.add(FerretTuft.class);
+            trList.add(CrackedSpyglass.class);
         }
 
         //Misc
         if(miscList.isEmpty()) {
+            miscList.add(BonePile.class);
+            miscList.add(DogLeg.class);
+            miscList.add(FlashCrystal.class);
+            miscList.add(LawFragment.class);
+            miscList.add(MakeshiftSlingshot.class);
+            miscList.add(MechanicalFragment.class);
+            miscList.add(SoulEmber.class);
             miscList.add(TrinketCatalyst.class);
             miscList.add(Torch.class);
             miscList.add(GooBlob.class);
@@ -348,7 +389,7 @@ public class SpawnMisc extends TestItem {
         }
     }
 
-    private int idToCategoryImage(int selected){
+    private String idToCategoryImage(int selected){
         switch (selected){
             case 0: return ItemSpriteSheet.POTION_AZURE;
             case 1: return ItemSpriteSheet.EXOTIC_CRIMSON;
@@ -485,8 +526,7 @@ public class SpawnMisc extends TestItem {
                         super.onClick();
                     }
                 };
-                Image im =  new Image(Assets.Sprites.ITEMS);
-                im.frame(ItemSpriteSheet.film.get(idToCategoryImage(i)));
+                Image im = new ItemSprite(idToCategoryImage(i));
                 im.scale.set(1.0f);
                 btn.icon(im);
 
@@ -516,88 +556,74 @@ public class SpawnMisc extends TestItem {
                 };
                 switch (cateSelected){
                     case 0 :{
-                        Image im = new Image(Assets.Sprites.ITEM_ICONS);
-                        im.frame(ItemSpriteSheet.Icons.film.get(Objects.requireNonNull(Reflection.newInstance(potionList.get(i))).icon));
+						Image im = ItemSpriteSheet.Icons.image(Objects.requireNonNull(Reflection.newInstance(potionList.get(i))).icon);
                         im.scale.set(1.6f);
                         btn.icon(im);
                     } break;
                     case 1:{
-                        Image im = new Image(Assets.Sprites.ITEM_ICONS);
-                        im.frame(ItemSpriteSheet.Icons.film.get(Objects.requireNonNull(Reflection.newInstance(exoticPotionList.get(i))).icon));
+						Image im = ItemSpriteSheet.Icons.image(Objects.requireNonNull(Reflection.newInstance(exoticPotionList.get(i))).icon);
                         im.scale.set(1.6f);
                         btn.icon(im);
                     } break;
                     case 2:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(seedList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(seedList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 3:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(dartList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(dartList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 4:{
                         Image im;
                         if(i<=11) {
-                            im = new Image(Assets.Sprites.ITEM_ICONS);
-                            im.frame(ItemSpriteSheet.Icons.film.get(Objects.requireNonNull(Reflection.newInstance(scrollList.get(i))).icon));
+							im = ItemSpriteSheet.Icons.image(Objects.requireNonNull(Reflection.newInstance(scrollList.get(i))).icon);
                             im.scale.set(1.6f);
                         }
                         else {
-                            im = new Image(Assets.Sprites.ITEMS);
-                            im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(scrollList.get(i))).image));
+                            im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(scrollList.get(i))).image);
                             im.scale.set(1.0f);
                         }
                         btn.icon(im);
                     }break;
                     case 5:{
-                        Image im = new Image(Assets.Sprites.ITEM_ICONS);
-                        im.frame(ItemSpriteSheet.Icons.film.get(Objects.requireNonNull(Reflection.newInstance(exoticScrollList.get(i))).icon));
+						Image im = ItemSpriteSheet.Icons.image(Objects.requireNonNull(Reflection.newInstance(exoticScrollList.get(i))).icon);
                         im.scale.set(1.6f);
                         btn.icon(im);
                     } break;
                     case 6:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(stoneList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(stoneList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 7:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(bombList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(bombList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 8:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(brewList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(brewList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 9: {
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(spellList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(spellList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 10: {
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(foodList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(foodList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     } break;
                     case 11:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(trList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(trList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     }break;
                     case 12: default:{
-                        Image im = new Image(Assets.Sprites.ITEMS);
-                        im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(miscList.get(i))).image));
+                        Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(miscList.get(i))).image);
                         im.scale.set(1.0f);
                         btn.icon(im);
                     }

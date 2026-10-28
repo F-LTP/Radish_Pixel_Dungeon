@@ -133,9 +133,6 @@ public class TitleScene extends PixelScene {
 		btnPlay.icon(Icons.get(Icons.ENTER));
 		add(btnPlay);
 
-		StyledButton btnSupport = new SupportButton(GREY_TR, Messages.get(this, "support"));
-		add(btnSupport);
-
 		StyledButton btnRankings = new StyledButton(GREY_TR,Messages.get(this, "rankings")){
 			@Override
 			protected void onClick() {
@@ -146,13 +143,13 @@ public class TitleScene extends PixelScene {
 		add(btnRankings);
 		Dungeon.daily = Dungeon.dailyReplay = false;
 
-		StyledButton btnBadges = new StyledButton(GREY_TR, Messages.get(this, "badges")){
+		StyledButton btnBadges = new StyledButton(GREY_TR, Messages.get(JournalScene.class, "title")){
 			@Override
 			protected void onClick() {
-				ShatteredPixelDungeon.switchNoFade( BadgesScene.class );
+				ShatteredPixelDungeon.switchNoFade(JournalScene.class);
 			}
 		};
-		btnBadges.icon(Icons.get(Icons.BADGES));
+		btnBadges.icon(Icons.get(Icons.CATALOG));
 		add(btnBadges);
 
 		/*StyledButton btnNews = new NewsButton(GREY_TR, Messages.get(this, "news"));
@@ -193,11 +190,14 @@ public class TitleScene extends PixelScene {
 		btnSeedAnalysis.icon(Icons.get(Icons.MAGNIFY));
 		add(btnSeedAnalysis);
 
-		StyledButton seed = new JoinButton(landscape() ? Chrome.Type.GREY_BUTTON_TR : Chrome.Type.BLANK, Messages.get(this, "seed"));
+		StyledButton seed = new JoinButton(Chrome.Type.GREY_BUTTON_TR, Messages.get(this, "seed"));
 		seed.icon(Icons.get(Icons.ENERGY));
+		seed.icon().scale.set(align(0.5f));
 		add(seed);
 
 		final int BTN_HEIGHT = 20;
+		final int seedWidth = Math.max(40, (int)Math.ceil(seed.reqWidth()) + 8);
+		final int seedHeight = Math.max(20, (int)Math.ceil(seed.reqHeight()) + 4);
 		int GAP = (int)(h - topRegion - (landscape() ? 3 : 6)*BTN_HEIGHT)/3;
 		GAP /= landscape() ? 3 : 5;
 		GAP = Math.max(GAP, 2);
@@ -213,22 +213,22 @@ public class TitleScene extends PixelScene {
 		if (landscape()) {
 			btnPlay.setRect(title.x-90, topRegion+GAP, ((title.width()+180)/2)-1, BTN_HEIGHT);
 			align(btnPlay);
-			btnSupport.setRect(btnPlay.right()+2, btnPlay.top(), btnPlay.width(), BTN_HEIGHT);
 			btnRankings.setRect(btnPlay.left(), btnPlay.bottom()+ GAP, (btnPlay.width()*.5f)-1, BTN_HEIGHT);
 			btnSeedTest.setRect(btnRankings.right()+2, btnPlay.bottom()+ GAP, (btnPlay.width()*.5f)-1, BTN_HEIGHT);
 			btnSeedAnalysis.setRect(btnSeedTest.right()+2, btnPlay.bottom()+ GAP, (btnPlay.width()*.5f)-1, BTN_HEIGHT);
-			btnBadges.setRect(btnRankings.left(), btnRankings.bottom()+GAP, (btnPlay.width()*.67f)-1, BTN_HEIGHT);
+			btnBadges.setRect(btnRankings.left(), btnRankings.bottom()+GAP, ((title.width()+180)/2)-1, BTN_HEIGHT);
 			//btnNews.setRect(btnRankings.right()+2, btnRankings.top(), btnRankings.width(), BTN_HEIGHT);
-			btnChanges.setRect(btnBadges.right()+2, btnBadges.top(), btnBadges.width(), BTN_HEIGHT);
-			btnSettings.setRect(btnSupport.centerX(), btnSupport.bottom()+ GAP, (btnPlay.width()*.5f)-1, BTN_HEIGHT);
-			btnAbout.setRect(btnChanges.right()+2, btnSettings.bottom() + GAP, btnBadges.width(), BTN_HEIGHT);
-			seed.setRect(10, 0,40,20);
+
+			btnChanges.setRect(btnPlay.right()+2, btnPlay.top(), ((title.width()+180)/2)-1, BTN_HEIGHT);
+
+			btnSettings.setRect(btnSeedAnalysis.right()+2, btnPlay.bottom()+ GAP, (btnPlay.width()*.5f)-1, BTN_HEIGHT);
+			btnAbout.setRect(btnSeedAnalysis.left(), btnSeedAnalysis.bottom() + GAP, ((title.width()+180)/2)-1, BTN_HEIGHT);
+			seed.setRect(10, 0, seedWidth, seedHeight);
 		} else {
-			seed.setRect(10, version.y-10,40,20);
+			seed.setRect(10, version.y-10, seedWidth, seedHeight);
 			btnPlay.setRect(title.x-5, topRegion+GAP, title.width()+10, BTN_HEIGHT);
 			align(btnPlay);
-			btnSupport.setRect(btnPlay.left(), btnPlay.bottom()+ GAP, btnPlay.width(), BTN_HEIGHT);
-			btnRankings.setRect(btnPlay.left(), btnSupport.bottom()+ GAP, btnPlay.width(), BTN_HEIGHT);
+			btnRankings.setRect(btnPlay.left(), btnPlay.bottom()+ GAP, btnPlay.width(), BTN_HEIGHT);
 			btnBadges.setRect(btnRankings.left(), btnRankings.bottom()+ GAP, (btnPlay.width()/2)-1, BTN_HEIGHT);
 			//btnNews.setRect(btnRankings.left(), btnRankings.bottom()+ GAP, btnRankings.width(), BTN_HEIGHT);
 			btnChanges.setRect(btnBadges.right()+2, btnBadges.top(), btnBadges.width(), BTN_HEIGHT);
@@ -334,22 +334,6 @@ public class TitleScene extends PixelScene {
 				WndSettings.last_index = 4;
 			}
 			ShatteredPixelDungeon.scene().add(new WndSettings());
-		}
-	}
-
-
-
-	private static class SupportButton extends StyledButton{
-
-		public SupportButton( Chrome.Type type, String label ){
-			super(type, label);
-			icon(Icons.get(Icons.TALENT));
-			textColor(Window.TITLE_COLOR);
-		}
-
-		@Override
-		protected void onClick() {
-			ShatteredPixelDungeon.switchNoFade(SupporterScene.class);
 		}
 	}
 

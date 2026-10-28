@@ -20,6 +20,8 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.traps;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
@@ -95,7 +97,7 @@ public class GrimTrap extends Trap {
 								new Callback() {
 									@Override
 									public void call() {
-										finalTarget.damage(finalDmg, GrimTrap.this);
+										finalTarget.damage(new DamageInfo(finalDmg, DamageType.TRUE, null, null, GrimTrap.this));
 										if (finalTarget == Dungeon.hero) {
 											Sample.INSTANCE.play(Assets.Sounds.CURSED);
 											if (!finalTarget.isAlive()) {
@@ -112,7 +114,7 @@ public class GrimTrap extends Trap {
 								});
 						return false;
 					} else {
-						finalTarget.damage(finalDmg, GrimTrap.this);
+						finalTarget.damage(new DamageInfo(finalDmg, DamageType.TRUE, null, null, GrimTrap.this));
 						return true;
 					}
 				} else {

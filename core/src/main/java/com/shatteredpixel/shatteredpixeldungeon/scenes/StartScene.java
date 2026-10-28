@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Journal;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Archs;
@@ -34,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.ExitButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndGameInProgress;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Camera;
@@ -166,14 +168,16 @@ public class StartScene extends PixelScene {
 				}
 			} else {
 				
-				if (info.subClass != HeroSubClass.NONE){
+				if (info.skin > 0 && info.heroClass.skin(info.skin) != null){
+					name.text(Messages.titleCase(info.heroClass.title(info.skin)));
+				} else if (info.subClass != HeroSubClasses.NONE){
 					name.text(Messages.titleCase(info.subClass.title()));
 				} else {
-					name.text(Messages.titleCase(info.heroClass.title()));
+					name.text(Messages.titleCase(info.heroClass.title(info.skin)));
 				}
 				
 				if (hero == null){
-					hero = new Image(info.heroClass.spritesheet(), 0, 15*info.armorTier, 12, 15);
+					hero = HeroSprite.body(info.heroClass, info.armorTier, info.skin);
 					add(hero);
 					
 					steps = new Image(Icons.get(Icons.STAIRS));
@@ -186,7 +190,7 @@ public class StartScene extends PixelScene {
 					level = new BitmapText(PixelScene.pixelFont);
 					add(level);
 				} else {
-					hero.copy(new Image(info.heroClass.spritesheet(), 0, 15*info.armorTier, 12, 15));
+					hero.copy(HeroSprite.body(info.heroClass, info.armorTier, info.skin));
 					
 					classIcon.copy(Icons.get(info.heroClass));
 				}

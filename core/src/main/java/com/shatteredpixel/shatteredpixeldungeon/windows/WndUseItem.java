@@ -22,10 +22,17 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
+import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.InventoryPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import com.watabou.noosa.Image;
 
 import java.util.ArrayList;
 
@@ -40,12 +47,12 @@ public class WndUseItem extends WndInfoItem {
 		super(item);
 
 		float y = height;
-		
+
 		if (Dungeon.hero.isAlive() && Dungeon.hero.belongings.contains(item)) {
 			y += GAP;
 			ArrayList<RedButton> buttons = new ArrayList<>();
 			for (final String action : item.actions( Dungeon.hero )) {
-				
+
 				RedButton btn = new RedButton( item.actionName(action, Dungeon.hero), 8 ) {
 					@Override
 					protected void onClick() {
@@ -55,7 +62,7 @@ public class WndUseItem extends WndInfoItem {
 							item.execute( Dungeon.hero, action );
 						}
 						Item.updateQuickslot();
-						if (action.equals(item.defaultAction()) && item.usesTargeting && owner == null){
+						if (action == item.defaultAction && item.usesTargeting && owner == null){
 							InventoryPane.useTargeting();
 						}
 					}
@@ -64,10 +71,57 @@ public class WndUseItem extends WndInfoItem {
 				buttons.add(btn);
 				add( btn );
 
-				if (action.equals(item.defaultAction())) {
+				if (action.equals(item.defaultAction)) {
 					btn.textColor( TITLE_COLOR );
 				}
-				
+
+				boolean itemname = item instanceof EquipableItem || item instanceof Wand;
+				if (itemname){
+					Image renamebutton = Icons.get(Icons.RENAME_OFF);
+					if (item instanceof EquipableItem) {
+						if (!((EquipableItem) item).customName.equals("")) {
+							renamebutton = Icons.get(Icons.RENAME_ON);
+						}
+					}
+					if (item instanceof Wand) {
+						if (!((Wand)item).customName.equals("")) {
+							Icons.get(Icons.RENAME_ON);
+						}
+					}
+
+					IconButton Rename = new IconButton(renamebutton) {
+						public String hoverText() {
+							return Messages.titleCase(Messages.get(WndGame.class, "rename"));
+						}
+
+						public void onClick() {
+							GameScene.show(new WndTextInput(Messages.get(WndGame.class, "dialog"), Messages.get(WndGame.class, "dialog_title"), item.name(), 20, false, Messages.get(WndGame.class, "dialog_rename"), Messages.get(WndGame.class, "dialog_revert")) {
+								public void onSelect(boolean name, String str) {
+									if (name) {
+										if (item instanceof EquipableItem) {
+											((EquipableItem) item).customName = str;
+										} else {
+											((Wand) item).customName = str;
+										}
+									} else {
+										if (item instanceof EquipableItem) {
+											((EquipableItem) item).customName = "";
+										} else  {
+											((Wand) item).customName = "";
+										}
+									}
+
+									WndUseItem.this.hide();
+									GameScene.show(new WndUseItem(owner, item));
+								}
+							});
+							icon(Icons.get(!item.name().equals("") ? Icons.RENAME_OFF : Icons.RENAME_ON));
+						}
+					};
+					Rename.setRect((float)(super.width - 16), 0.0F, 16.0F, 16.0F);
+					this.add(Rename);
+				}
+
 			}
 			y = layoutButtons(buttons, width, y);
 		}

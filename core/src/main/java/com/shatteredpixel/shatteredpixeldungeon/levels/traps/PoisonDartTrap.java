@@ -20,6 +20,8 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.traps;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -96,7 +98,7 @@ public class PoisonDartTrap extends Trap {
 									@Override
 									public void call() {
 										int dmg = Char.combatRoll(4, 8) - finalTarget.drRoll();
-										finalTarget.damage(dmg, PoisonDartTrap.this);
+										finalTarget.damage(new DamageInfo(dmg, DamageType.PHYSICAL, null, null, PoisonDartTrap.this));
 										if (finalTarget == Dungeon.hero){
 											//for the poison dart traps in the Tengu fight
 											if (Dungeon.depth == 10) {
@@ -116,7 +118,7 @@ public class PoisonDartTrap extends Trap {
 								});
 						return false;
 					} else {
-						finalTarget.damage(Char.combatRoll(4, 8) - finalTarget.drRoll(), PoisonDartTrap.this);
+						finalTarget.damage(new DamageInfo(Char.combatRoll(4, 8) - finalTarget.drRoll(), DamageType.PHYSICAL, null, null, PoisonDartTrap.this));
 						Buff.affect( finalTarget, Poison.class ).set( poisonAmount() );
 						return true;
 					}

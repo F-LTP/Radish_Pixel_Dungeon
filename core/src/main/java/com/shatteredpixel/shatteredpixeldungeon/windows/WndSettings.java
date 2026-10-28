@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.SeedFindScene;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.News;
 import com.shatteredpixel.shatteredpixeldungeon.services.updates.Updates;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -50,7 +51,6 @@ import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Locale;
 
 public class WndSettings extends WndTabbed {
@@ -110,7 +110,8 @@ public class WndSettings extends WndTabbed {
 		input.setSize(width, 0);
 		height = Math.max(height, input.height());
 
-		if (DeviceCompat.hasHardKeyboard() || ControllerHandler.isControllerConnected()) {
+		boolean inputTabVisible = DeviceCompat.hasHardKeyboard() || ControllerHandler.isControllerConnected();
+		if (inputTabVisible) {
 			add( input );
 			Image icon;
 			if (ControllerHandler.controllerActive || !DeviceCompat.hasHardKeyboard()){
@@ -190,12 +191,11 @@ public class WndSettings extends WndTabbed {
 
 		layoutTabs();
 
-		if (tabs.size() == 5 && last_index >= 3){
-			//input tab isn't visible
-			select(last_index-1);
-		} else {
-			select(last_index);
+		int selectedIndex = last_index;
+		if (!inputTabVisible && selectedIndex >= 3) {
+			selectedIndex--;
 		}
+		select(Math.max(0, Math.min(selectedIndex, tabs.size() - 1)));
 
 	}
 
@@ -418,6 +418,9 @@ public class WndSettings extends WndTabbed {
 		ColorBlock sep2;
 		CheckBox chkFont;
 		CheckBox chkVibrate;
+		CheckBox origri_map;
+		RedButton btnStatusStyle;
+		CheckBox chkDetourPrompt;
 
 		@Override
 		protected void createChildren() {
@@ -651,6 +654,70 @@ public class WndSettings extends WndTabbed {
 				chkVibrate.checked(SPDSettings.vibration());
 			}
 			add(chkVibrate);
+
+			origri_map = new CheckBox(Messages.get(this, "origin_map")){
+				@Override
+				protected void onClick() {
+					super.onClick();
+					SPDSettings.origin_map(checked());
+				}
+			};
+			origri_map.checked(SPDSettings.origin_map());
+			add(origri_map);
+
+			btnStatusStyle = new RedButton( statusStyleLabel() ) {
+				@Override
+				protected void onClick() {
+					super.onClick();
+					ShatteredPixelDungeon.scene().addToFront(new WndOptions(
+							Messages.get(WndSettings.UITab.this, "status_style_title"),
+							Messages.get(WndSettings.UITab.this, "status_style_desc"),
+							Messages.get(WndSettings.UITab.this, "status_style_shattered"),
+							Messages.get(WndSettings.UITab.this, "status_style_old_radish"),
+							Messages.get(WndSettings.UITab.this, "status_style_garden"),
+							Messages.get(WndSettings.UITab.this, "status_style_white"),
+							Messages.get(WndSettings.UITab.this, "status_style_plain")) {
+						@Override
+						protected void onSelect(int index) {
+							SPDSettings.statusStyle(index);
+							//破碎风格=启用原版主题；其余萝卜主题风格=关闭原版主题
+							SPDSettings.NORMAL_SKIN(index == SPDSettings.STYLE_SHATTERED);
+							//切换贴图需重建场景才能刷新
+							ShatteredPixelDungeon.seamlessResetScene();
+						}
+					});
+				}
+			};
+			add(btnStatusStyle);
+
+			chkDetourPrompt = new CheckBox(Messages.get(this, "detour_prompt")) {
+				@Override protected void onClick() {
+					super.onClick();
+					SPDSettings.detourPrompt(checked());
+				}
+			};
+			chkDetourPrompt.checked(SPDSettings.detourPrompt());
+			add(chkDetourPrompt);
+		}
+
+		private String statusStyleLabel(){
+			String style;
+			switch (SPDSettings.statusStyle()){
+				case SPDSettings.STYLE_SHATTERED:
+					style = Messages.get(this, "status_style_shattered");
+					break;
+				case SPDSettings.STYLE_WHITE_RADISH:
+					style = Messages.get(this, "status_style_white");
+					break;
+				case SPDSettings.STYLE_RADISH:
+					style = Messages.get(this, "status_style_plain");
+					break;
+				case SPDSettings.STYLE_RADISH_GARDEN:
+				default:
+					style = Messages.get(this, "status_style_garden");
+					break;
+			}
+			return Messages.get(this, "status_style") + ": " + style;
 		}
 
 		@Override
@@ -691,14 +758,18 @@ public class WndSettings extends WndTabbed {
 			if (width > 200) {
 				chkFont.setRect(0, sep2.y + 1 + GAP, width/2-1, BTN_HEIGHT);
 				chkVibrate.setRect(chkFont.right()+2, chkFont.top(), width/2-1, BTN_HEIGHT);
-				height = chkVibrate.bottom();
-
-			} else {
+				origri_map.setRect(0, chkVibrate.bottom(), width/2-1, BTN_HEIGHT);
+				btnStatusStyle.setRect(origri_map.right()+2, origri_map.top(), width/2-1, BTN_HEIGHT);
+				chkDetourPrompt.setRect(0, btnStatusStyle.bottom() + GAP, width/2-1, BTN_HEIGHT);
+            } else {
 				chkFont.setRect(0, sep2.y + 1 + GAP, width, BTN_HEIGHT);
 				chkVibrate.setRect(0, chkFont.bottom() + GAP, width, BTN_HEIGHT);
-				height = chkVibrate.bottom();
-			}
-		}
+				origri_map.setRect(0, chkVibrate.bottom() + GAP, width, BTN_HEIGHT);
+				btnStatusStyle.setRect(0, origri_map.bottom() + GAP, width, BTN_HEIGHT);
+				chkDetourPrompt.setRect(0, btnStatusStyle.bottom() + GAP, width, BTN_HEIGHT);
+            }
+            height = chkDetourPrompt.bottom();
+        }
 
 	}
 
@@ -832,7 +903,7 @@ public class WndSettings extends WndTabbed {
 		CheckBox chkUpdates;
 		CheckBox chkBetas;
 		CheckBox chkWifi;
-
+		OptionSlider seedFindMaxDepth;
 		@Override
 		protected void createChildren() {
 			title = PixelScene.renderTextBlock(Messages.get(this, "title"), 9);
@@ -890,6 +961,21 @@ public class WndSettings extends WndTabbed {
 				chkWifi.checked(SPDSettings.WiFi());
 				add(chkWifi);
 			}
+
+			seedFindMaxDepth = new OptionSlider(Messages.get(SeedFindScene.class, "depth"),"1","24",1,24 ) {
+				@Override
+				protected void onChange() {
+					if (getSelectedValue() != SPDSettings.getKeySeedDepth()) {
+						SPDSettings.setKeySeeddepth(getSelectedValue());
+					}
+				}
+				@Override
+				public int getTitleTextSize(){
+					return 6;
+				}
+			};
+			seedFindMaxDepth.setSelectedValue(SPDSettings.getKeySeedDepth());
+			add(seedFindMaxDepth);
 		}
 
 		@Override
@@ -921,6 +1007,9 @@ public class WndSettings extends WndTabbed {
 				chkWifi.setRect(0, pos + GAP, width, BTN_HEIGHT);
 				pos = chkWifi.bottom();
 			}
+
+			seedFindMaxDepth.setRect(0, pos + GAP, width, BTN_HEIGHT);
+			pos = seedFindMaxDepth.bottom();
 
 			height = pos;
 
@@ -1104,7 +1193,10 @@ public class WndSettings extends WndTabbed {
 			sep1 = new ColorBlock(1, 1, 0xFF000000);
 			add(sep1);
 
-			final ArrayList<Languages> langs = new ArrayList<>(Arrays.asList(Languages.values()));
+			final ArrayList<Languages> langs = new ArrayList<>();
+			for (Languages lang : Languages.values()){
+				if (Languages.isSupported(lang)) langs.add(lang);
+			}
 
 			Languages nativeLang = Languages.matchLocale(Locale.getDefault());
 			langs.remove(nativeLang);
@@ -1308,4 +1400,5 @@ public class WndSettings extends WndTabbed {
 
 		}
 	}
+
 }

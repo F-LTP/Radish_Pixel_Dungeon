@@ -74,7 +74,7 @@ public class Levitation extends FlavourBuff {
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.LEVITATION;
 	}
 

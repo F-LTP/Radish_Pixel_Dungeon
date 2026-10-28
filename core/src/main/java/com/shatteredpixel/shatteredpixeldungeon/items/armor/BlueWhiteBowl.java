@@ -1,12 +1,11 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.audio.Sample;
@@ -27,11 +26,15 @@ public class BlueWhiteBowl extends Armor{
 
     public int proc(Char attacker, Char defender, int damage ){
         if (cd<=0){
-            for (Mob mob : Dungeon.level.mobs.toArray( new Mob[0] )) {
-                if (mob.alignment == Char.Alignment.ENEMY && Dungeon.level.heroFOV[mob.pos]) {
-                    Charm c = Buff.affect( mob, Charm.class, Charm.DURATION );
+            for (Char target : Actor.chars()) {
+                if (target != defender && target.alignment != Char.Alignment.NEUTRAL
+                        && target.alignment != defender.alignment
+                        && defender.fieldOfView != null
+                        && target.pos >= 0 && target.pos < defender.fieldOfView.length
+                        && defender.fieldOfView[target.pos]) {
+                    Charm c = Buff.affect( target, Charm.class, Charm.DURATION );
                     c.object=defender.id();
-                    mob.sprite.centerEmitter().start(Speck.factory(Speck.HEART), 0.2f, 5);
+                    target.sprite.centerEmitter().start(Speck.factory(Speck.HEART), 0.2f, 5);
                 }
             }
             Sample.INSTANCE.play(Assets.Sounds.CHARMS);

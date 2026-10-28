@@ -15,6 +15,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Bat;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Brute;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CausticSlime;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Crab;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Headcrab;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.LegendaryFelon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM200;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM201;
@@ -69,6 +71,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Swarm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Thief;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Warlock;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Wraith;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.stats.DM100H;
 import com.shatteredpixel.shatteredpixeldungeon.custom.dict.DictSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.custom.messages.M;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
@@ -404,6 +407,8 @@ public class MobPlacer extends TestItem{
         SNAKE(Snake.class, DictSpriteSheet.SNAKE),
         ALBINO(Albino.class, DictSpriteSheet.ALBINO),
         CRAB(Crab.class, DictSpriteSheet.CRAB),
+        HEADCRAB(Headcrab.class, DictSpriteSheet.HEADCRAB),
+        FELON(LegendaryFelon.class, DictSpriteSheet.FELON),
         SWARM(Swarm.class, DictSpriteSheet.SWARM),
         SLIME(Slime.class, DictSpriteSheet.SLIME),
         C_SLIME(CausticSlime.class, DictSpriteSheet.CAUSTIC_SLIME),

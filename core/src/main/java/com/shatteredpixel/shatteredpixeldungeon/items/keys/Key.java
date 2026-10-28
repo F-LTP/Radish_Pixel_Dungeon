@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.keys;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
@@ -29,6 +30,8 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndJournal;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
+
+import java.util.Objects;
 
 public abstract class Key extends Item {
 
@@ -39,12 +42,14 @@ public abstract class Key extends Item {
 		unique = true;
 	}
 
-	//TODO currently keys can only appear on branch = 0, add branch support here if that changes
 	public int depth;
+	public String branchId = Dungeon.branchId;
 	
 	@Override
 	public boolean isSimilar( Item item ) {
-		return super.isSimilar(item) && ((Key)item).depth == depth;
+		return super.isSimilar(item)
+				&& ((Key)item).depth == depth
+				&& Objects.equals(((Key)item).branchId, branchId);
 	}
 
 	@Override
@@ -59,17 +64,20 @@ public abstract class Key extends Item {
 	}
 
 	private static final String DEPTH = "depth";
+	private static final String BRANCH_ID = "branch_id";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
 		super.storeInBundle( bundle );
 		bundle.put( DEPTH, depth );
+		bundle.put( BRANCH_ID, branchId );
 	}
 	
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		super.restoreFromBundle( bundle );
 		depth = bundle.getInt( DEPTH );
+		branchId = bundle.getString( BRANCH_ID );
 	}
 	
 	@Override

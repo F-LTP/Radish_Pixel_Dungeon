@@ -152,7 +152,7 @@ public class SmokeBomb extends ArmorAbility {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return HeroIcon.SMOKE_BOMB;
 	}
 
@@ -163,6 +163,11 @@ public class SmokeBomb extends ArmorAbility {
 
 	public static class NinjaLog extends NPC {
 
+		@Override
+		protected boolean isDamageable() {
+			return true;
+		}
+
 		{
 			spriteClass = NinjaLogSprite.class;
 			defenseSkill = 0;
@@ -171,7 +176,7 @@ public class SmokeBomb extends ArmorAbility {
 
 			alignment = Alignment.ALLY;
 
-			HP = HT = 20*Dungeon.hero.pointsInTalent(Talent.BODY_REPLACEMENT);
+			HP = HT = 20*(Dungeon.hero != null ? Dungeon.hero.pointsInTalent(Talent.BODY_REPLACEMENT) : 1);
 		}
 
 		@Override

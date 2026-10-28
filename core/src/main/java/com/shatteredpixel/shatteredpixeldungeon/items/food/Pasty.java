@@ -155,8 +155,7 @@ public class Pasty extends Food {
 			case HALLOWEEN:
 				//heals for 5% max hp, min of 3
 				int toHeal = Math.max(3, hero.HT/20);
-				hero.HP = Math.min(hero.HP + toHeal, hero.HT);
-				hero.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(toHeal), FloatingText.HEALING );
+				hero.heal(toHeal);
 				break;
 			case WINTER_HOLIDAYS:
 				hero.belongings.charge(0.5f); //2 turns worth

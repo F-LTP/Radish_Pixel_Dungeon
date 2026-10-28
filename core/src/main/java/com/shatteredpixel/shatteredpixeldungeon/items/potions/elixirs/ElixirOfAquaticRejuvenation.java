@@ -25,11 +25,12 @@ import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.GooBlob;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
@@ -45,62 +46,69 @@ public class ElixirOfAquaticRejuvenation extends Elixir {
 	
 	@Override
 	public void apply(Hero hero) {
-		if (Dungeon.isChallenged(Challenges.NO_HEALING)){
-			PotionOfHealing.pharmacophobiaProc(hero);
+		if (Dungeon.isChallenged(Challenges.DAMAGE_NO)){
+			Buff.affect(hero, AquaHealing.class).set(Math.round(hero.HT * 1.5f)/5);
 		} else {
 			Buff.affect(hero, AquaHealing.class).set(Math.round(hero.HT * 1.5f));
 		}
+
 	}
-	
+
 	public static class AquaHealing extends Buff {
-		
+
 		{
 			type = buffType.POSITIVE;
 			announced = true;
 		}
-		
+
 		private int left;
-		
+
 		public void set( int amount ){
+			if (target == Dungeon.hero ){
+				Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+				if (ben!=null){
+					amount=Math.round(amount*RingOfBenediction.periodMultiplier(target));
+				}
+			}
 			if (amount > left) left = amount;
 		}
-		
+
 		@Override
 		public boolean act() {
-			
+
 			if (!target.flying && Dungeon.level.water[target.pos] && target.HP < target.HT){
-				float healAmt = GameMath.gate( 1, target.HT/50f, left );
+				float healAmt = target.HT/50f;
+				if (target == Dungeon.hero ){
+					Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+					if (ben!=null){
+						healAmt*=RingOfBenediction.periodMultiplier(target);
+					}
+				}
+				healAmt = GameMath.gate(1,healAmt,left);
 				healAmt = Math.min(healAmt, target.HT - target.HP);
 				if (Random.Float() < (healAmt % 1)){
 					healAmt = (float)Math.ceil(healAmt);
 				} else {
 					healAmt = (float)Math.floor(healAmt);
 				}
-				target.HP += (int)healAmt;
-				left -= (int)healAmt;
-				target.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString((int)healAmt), FloatingText.HEALING );
-
-				if (target.HP >= target.HT) {
-					target.HP = target.HT;
-					if (target instanceof Hero) {
-						((Hero) target).resting = false;
-					}
+				target.heal((int)healAmt);
+				left -= healAmt;
+				if (target.buff(AfterGlow.Warmth.class)!=null){
+					target.buff(AfterGlow.Warmth.class).getWarmth();
 				}
+				target.sprite.emitter().burst( Speck.factory( Speck.HEALING ), 1 );
 			}
-			
+
 			if (left <= 0){
 				detach();
-				if (target instanceof Hero) {
-					((Hero) target).resting = false;
-				}
 			} else {
 				spend(TICK);
 			}
 			return true;
 		}
-		
+
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.HEALING;
 		}
 
@@ -119,25 +127,25 @@ public class ElixirOfAquaticRejuvenation extends Elixir {
 		public String iconTextDisplay() {
 			return Integer.toString(left);
 		}
-		
+
 		@Override
 		public String desc() {
 			return Messages.get(this, "desc", left);
 		}
-		
+
 		private static final String LEFT = "left";
-		
+
 		@Override
 		public void storeInBundle( Bundle bundle ) {
 			super.storeInBundle( bundle );
 			bundle.put( LEFT, left );
 		}
-		
+
 		@Override
 		public void restoreFromBundle( Bundle bundle ) {
 			super.restoreFromBundle( bundle );
 			left = bundle.getInt( LEFT );
-			
+
 		}
 	}
 	

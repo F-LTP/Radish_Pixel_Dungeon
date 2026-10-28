@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blizzard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ConfusionGas;
@@ -48,7 +49,7 @@ public class BlobImmunity extends FlavourBuff {
 	public static final float DURATION	= 20f;
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.IMMUNITY;
 	}
 
@@ -61,21 +62,21 @@ public class BlobImmunity extends FlavourBuff {
 		//all harmful blobs
 		immunities.add( Blizzard.class );
 		immunities.add( ConfusionGas.class );
-		immunities.add( CorrosiveGas.class );
-		immunities.add( Electricity.class );
-		immunities.add( Fire.class );
-		immunities.add( MagicalFireRoom.EternalFire.class );
+		immunities.add(CorrosiveGas.class); typeImmunities.add(DamageType.CORROSIVE);
+		typeImmunities.add(DamageType.LIGHTNING);
+		typeImmunities.add(DamageType.FIRE);
+		typeImmunities.add(DamageType.FIRE);
 		immunities.add( Freezing.class );
-		immunities.add( Inferno.class );
+		typeImmunities.add(DamageType.FIRE);
 		immunities.add( ParalyticGas.class );
 		immunities.add( Regrowth.class );
 		immunities.add( SmokeScreen.class );
 		immunities.add( StenchGas.class );
-		immunities.add( StormCloud.class );
-		immunities.add( ToxicGas.class );
+		typeImmunities.add(DamageType.LIGHTNING);
+		typeImmunities.add(DamageType.TOXIC);
 		immunities.add( Web.class );
 
-		immunities.add(Tengu.FireAbility.FireBlob.class);
+		typeImmunities.add(DamageType.FIRE);
 	}
 
 }

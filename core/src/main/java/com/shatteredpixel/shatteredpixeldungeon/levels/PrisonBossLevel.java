@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SnDBGM;
 import com.shatteredpixel.shatteredpixeldungeon.Bones;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -88,9 +89,11 @@ public class PrisonBossLevel extends Level {
 	
 	private State state;
 	private Tengu tengu;
+	private int fightPauseStartPos = -1;
 
 	@Override
 	public void playLevelMusic() {
+        if (SnDBGM.playLevelMusic()) return;
 		if (state == State.START){
 			Music.INSTANCE.end();
 		} else if (state == State.WON) {
@@ -106,18 +109,19 @@ public class PrisonBossLevel extends Level {
 	
 	@Override
 	public String tilesTex() {
-		return Assets.Environment.TILES_PRISON;
+		return Assets.Environment.TILES_BLOOD_PRISON;
 	}
 	
 	@Override
 	public String waterTex() {
-		return Assets.Environment.WATER_PRISON;
+		return Assets.Environment.WATER_B;
 	}
 	
 	private static final String STATE	        = "state";
 	private static final String TENGU	        = "tengu";
 	private static final String STORED_ITEMS    = "storeditems";
 	private static final String TRIGGERED       = "triggered";
+	private static final String FIGHT_PAUSE_START_POS = "fight_pause_start_pos";
 	
 	@Override
 	public void storeInBundle( Bundle bundle ) {
@@ -126,6 +130,7 @@ public class PrisonBossLevel extends Level {
 		bundle.put( TENGU, tengu );
 		bundle.put( STORED_ITEMS, storedItems);
 		bundle.put(TRIGGERED, triggered );
+		bundle.put(FIGHT_PAUSE_START_POS, fightPauseStartPos);
 	}
 	
 	@Override
@@ -150,6 +155,7 @@ public class PrisonBossLevel extends Level {
 		}
 		
 		triggered = bundle.getBooleanArray(TRIGGERED);
+		fightPauseStartPos = bundle.getInt(FIGHT_PAUSE_START_POS);
 		
 	}
 	
@@ -422,7 +428,9 @@ public class PrisonBossLevel extends Level {
 				Game.runOnRenderThread(new Callback() {
 					@Override
 					public void call() {
-						Music.INSTANCE.play(Assets.Music.PRISON_BOSS, true);
+						if (!SnDBGM.playLevelMusic()) {
+							Music.INSTANCE.play(Assets.Music.PRISON_BOSS, true);
+						}
 					}
 				});
 				break;
@@ -445,6 +453,7 @@ public class PrisonBossLevel extends Level {
 				Sample.INSTANCE.play(Assets.Sounds.BLAST);
 				
 				state = State.FIGHT_PAUSE;
+				fightPauseStartPos = Dungeon.hero.pos;
 				break;
 
 			case FIGHT_PAUSE:
@@ -544,7 +553,11 @@ public class PrisonBossLevel extends Level {
 					break;
 				case FIGHT_PAUSE:
 					
-					if (cellToPoint(ch.pos).y <= startHallway.top+1){
+					// A map refresh can re-occupy the hero's current cell immediately after
+					// phase one ends. Require actual movement during the pause before the
+					// arena transition can fire.
+					if (ch.pos != fightPauseStartPos
+							&& cellToPoint(ch.pos).y <= startHallway.top+1){
 						progress();
 					}
 					break;
@@ -791,7 +804,7 @@ public class PrisonBossLevel extends Level {
 			return super.desc(tileX, tileY);
 		}
 		
-		private void setFade( ){
+		private void setFade(){
 			if (vis == null){
 				return;
 			}
@@ -835,12 +848,12 @@ public class PrisonBossLevel extends Level {
 	
 	public static class ExitVisual extends CustomTilemap {
 		
-		{
-			texture = Assets.Environment.PRISON_EXIT;
+			{
+				texture = Assets.Environment.BLOOD_PRISON_EXIT;
 			
-			tileW = 14;
-			tileH = 11;
-		}
+				tileW = 14;
+				tileH = 11;
+			}
 		
 		final int TEX_WIDTH = 256;
 		
@@ -881,12 +894,12 @@ public class PrisonBossLevel extends Level {
 	
 	public static class ExitVisualWalls extends CustomTilemap {
 		
-		{
-			texture = Assets.Environment.PRISON_EXIT;
+			{
+				texture = Assets.Environment.BLOOD_PRISON_EXIT;
 			
-			tileW = 14;
-			tileH = 22;
-		}
+				tileW = 14;
+				tileH = 22;
+			}
 		
 		final int TEX_WIDTH = 256;
 		

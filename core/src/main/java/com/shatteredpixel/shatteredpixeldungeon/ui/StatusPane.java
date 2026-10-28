@@ -21,11 +21,11 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.ui;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
-import com.shatteredpixel.shatteredpixeldungeon.Statistics;
+import com.shatteredpixel.shatteredpixeldungeon.*;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicPoint;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.VitaeBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CircleArc;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -35,11 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndHero;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndKeyBindings;
 import com.watabou.input.GameAction;
-import com.watabou.noosa.BitmapText;
-import com.watabou.noosa.Camera;
-import com.watabou.noosa.Game;
-import com.watabou.noosa.Image;
-import com.watabou.noosa.NinePatch;
+import com.watabou.noosa.*;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.noosa.ui.Component;
 import com.watabou.utils.ColorMath;
@@ -53,13 +49,17 @@ public class StatusPane extends Component {
 	public static float talentBlink;
 	private float warning;
 
-	public static final float FLASH_RATE = (float)(Math.PI*1.5f); //1.5 blinks per second
+	public static final float FLASH_RATE = (float)(Math.PI*1.5f);
 
 	private int lastTier = 0;
 
 	private Image rawShielding;
 	private Image shieldedHP;
 	private Image hp;
+
+	private Image vitae;
+	private BitmapText vitaeText;
+
 	private BitmapText hpText;
 	private Button heroInfoOnBar;
 
@@ -76,14 +76,35 @@ public class StatusPane extends Component {
 	private BusyIndicator busy;
 	private CircleArc counter;
 
-	private static String asset = Assets.Interfaces.STATUS;
+	// 骰子法师使用离散生命格代替普通血条
+	private DiceMageUI.HealthPips diceHp;
 
 	private boolean large;
+
+	//破碎主题风格开启时始终使用原版状态栏；否则按玩家选择的萝卜主题状态栏风格
+	private static String statusAsset(){
+		if (SPDSettings.NORMAL_SKIN()) return Assets.Interfaces.NORMAL_STATUS;
+		switch (SPDSettings.statusStyle()){
+			case SPDSettings.OLD_RADISH:
+				return Assets.Interfaces.STATUS_OLD_RADISH;
+			case SPDSettings.STYLE_SHATTERED:
+				return Assets.Interfaces.STATUS_SHATTERED;
+			case SPDSettings.STYLE_WHITE_RADISH:
+				return Assets.Interfaces.STATUS_WHITE_RADISH;
+			case SPDSettings.STYLE_RADISH:
+				return Assets.Interfaces.STATUS_RADISH;
+			case SPDSettings.STYLE_RADISH_GARDEN:
+			default:
+				return Assets.Interfaces.STATUS_RADISH_GARDEN;
+		}
+	}
 
 	public StatusPane( boolean large ){
 		super();
 
 		this.large = large;
+
+		String asset = statusAsset();
 
 		if (large)  bg = new NinePatch( asset, 0, 64, 41, 39, 33, 0, 4, 0 );
 		else        bg = new NinePatch( asset, 0, 0, 128, 36, 85, 0, 45, 0 );
@@ -129,6 +150,14 @@ public class StatusPane extends Component {
 		else        hp = new Image(asset, 0, 36, 50, 4);
 		add( hp );
 
+		if(large) vitae =new Image(asset, 0, 121, 128, 9);
+		else        vitae = new Image(asset, 0, 121, 50, 4);
+		add(vitae);
+
+		vitaeText = new BitmapText(PixelScene.pixelFont);
+		vitaeText.alpha(0.6f);
+		if(large) add(vitaeText);
+
 		hpText = new BitmapText(PixelScene.pixelFont);
 		hpText.alpha(0.6f);
 		add(hpText);
@@ -166,6 +195,10 @@ public class StatusPane extends Component {
 		counter = new CircleArc(18, 4.25f);
 		counter.color( 0x808080, true );
 		counter.show(this, busy.center(), 0f);
+
+		diceHp = new DiceMageUI.HealthPips();
+		diceHp.visible = false;
+		add(diceHp);
 	}
 
 	@Override
@@ -175,7 +208,7 @@ public class StatusPane extends Component {
 
 		bg.x = x;
 		bg.y = y;
-		if (large)  bg.size( 160, bg.height ); //HP bars must be 128px wide atm
+		if (large)  bg.size( 160, bg.height );
 		else        bg.size( width, bg.height );
 
 		avatar.x = bg.x - avatar.width / 2f + 15;
@@ -195,9 +228,16 @@ public class StatusPane extends Component {
 			hp.x = shieldedHP.x = rawShielding.x = x + 30;
 			hp.y = shieldedHP.y = rawShielding.y = y + 19;
 
+			vitae.x = hp.x;
+			vitae.y = hp.y;
+
 			hpText.x = hp.x + (128 - hpText.width())/2f;
 			hpText.y = hp.y + 1;
 			PixelScene.align(hpText);
+
+			vitaeText.x = vitae.x + vitae.width()/2f - vitaeText.width()/2f;
+			vitaeText.y = vitae.y + 1;
+			PixelScene.align(vitaeText);
 
 			expText.x = exp.x + (128 - expText.width())/2f;
 			expText.y = exp.y;
@@ -216,10 +256,13 @@ public class StatusPane extends Component {
 			hp.x = shieldedHP.x = rawShielding.x = x + 30;
 			hp.y = shieldedHP.y = rawShielding.y = y + 3;
 
+			vitae.x = hp.x;
+			vitae.y = hp.y;
+
 			hpText.scale.set(PixelScene.align(0.5f));
 			hpText.x = hp.x + 1;
 			hpText.y = hp.y + (hp.height - (hpText.baseLine()+hpText.scale.y))/2f;
-			hpText.y -= 0.001f; //prefer to be slightly higher
+			hpText.y -= 0.001f;
 			PixelScene.align(hpText);
 
 			heroInfoOnBar.setRect(heroInfo.right(), y, 50, 9);
@@ -231,13 +274,36 @@ public class StatusPane extends Component {
 		}
 
 		counter.point(busy.center());
+
+		layoutDiceMageHealth();
 	}
-	
+
+	private void layoutDiceMageHealth() {
+		boolean dice = UITheme.isDiceMage();
+		diceHp.visible = dice;
+		hp.visible = shieldedHP.visible = rawShielding.visible = !dice;
+		hpText.visible = !dice;
+		vitae.visible = !dice;
+		if (vitaeText != null) vitaeText.visible = !dice;
+		if (!dice) return;
+
+		float barWidth = large ? 128f : 50f;
+		float barHeight = large ? 9f : 4f;
+		diceHp.maxWidth(barWidth);
+		diceHp.level(Dungeon.hero);
+		diceHp.setPos(
+				hp.x + (barWidth - diceHp.width()) / 2f,
+				hp.y + (barHeight - diceHp.height()) / 2f);
+		PixelScene.align(diceHp);
+		bringToFront(diceHp);
+	}
 	private static final int[] warningColors = new int[]{0x660000, 0xCC0000, 0x660000};
 
 	private int oldHP = 0;
 	private int oldShield = 0;
 	private int oldMax = 0;
+	private int oldvt = 0;
+	private int oldVitae = 0;
 
 	@Override
 	public void update() {
@@ -246,6 +312,10 @@ public class StatusPane extends Component {
 		int health = Dungeon.hero.HP;
 		int shield = Dungeon.hero.shielding();
 		int max = Dungeon.hero.HT;
+		boolean maxChanged = oldMax != max;
+		int vt = Dungeon.hero.getVitae();
+		boolean healthDisplayChanged = oldHP != health || oldShield != shield
+				|| oldMax != max || oldvt != vt;
 
 		if (!Dungeon.hero.isAlive()) {
 			avatar.tint(0x000000, 0.5f);
@@ -253,7 +323,7 @@ public class StatusPane extends Component {
 			warning += Game.elapsed * 5f *(0.4f - (health/(float)max));
 			warning %= 1f;
 			avatar.tint(ColorMath.interpolate(warning, warningColors), 0.5f );
-		} else if (talentBlink > 0.33f){ //stops early so it doesn't end in the middle of a blink
+		} else if (talentBlink > 0.33f){
 			talentBlink -= Game.elapsed;
 			avatar.tint(1, 1, 0, (float)Math.abs(Math.cos(talentBlink*FLASH_RATE))/2f);
 		} else {
@@ -263,45 +333,64 @@ public class StatusPane extends Component {
 		hp.scale.x = Math.max( 0, (health-shield)/(float)max);
 		shieldedHP.scale.x = health/(float)max;
 
+		float vitaeMax = hp.scale.x/6f;
+		float vitaeSpan = 0;
+		for(VitaeBuff s:Dungeon.hero.buffs(VitaeBuff.class)){
+			vitaeSpan += (float) s.maxVitae;
+		}
+		vitae.scale.x = vitaeMax/vitaeSpan * Math.min(vitaeSpan,vt);
+
 		if (shield > health) {
 			rawShielding.scale.x = Math.min(1, shield / (float) max);
 		} else {
 			rawShielding.scale.x = 0;
 		}
 
-		if (oldHP != health || oldShield != shield || oldMax != max){
-			if (shield <= 0) {
-				hpText.text(health + "/" + max);
-			} else {
+		if (healthDisplayChanged) {
+			if (shield > 0 && vt > 0) {
+				hpText.text(health + "+" + vt + "+" + shield + "/" + max);
+			} else if (shield > 0) {
 				hpText.text(health + "+" + shield + "/" + max);
+			} else if (vt > 0) {
+				hpText.text(health + "+" + vt + "/" + max);
+			} else {
+				hpText.text(health + "/" + max);
 			}
 			oldHP = health;
 			oldShield = shield;
 			oldMax = max;
+			oldvt = vt;
 		}
+
+		if(oldVitae != vt){
+			oldVitae = vt;
+		}
+		if(!large) vitaeText.text("");
+		if(vitae.width() > 0) vitaeText.text(vt+"");
+		else vitaeText.text("");
 
 		if (large) {
 			exp.scale.x = (128 / exp.width) * Dungeon.hero.exp / Dungeon.hero.maxExp();
-
 			hpText.measure();
 			hpText.x = hp.x + (128 - hpText.width())/2f;
+			vitaeText.measure();
+			vitaeText.x = vitae.x + vitae.width()/2 - vitaeText.width()/2;
 
-			expText.text(Dungeon.hero.exp + "/" + Dungeon.hero.maxExp());
+			if (Dungeon.hero.subClass == HeroSubClasses.DICE_MAGE) {
+				MagicPoint mp = Dungeon.hero.buff(MagicPoint.class);
+				expText.text("MP " + (mp == null ? 0 : mp.getIntPoints()) + " | " + Dungeon.hero.exp + "/" + Dungeon.hero.maxExp());
+			} else {
+				expText.text(Dungeon.hero.exp + "/" + Dungeon.hero.maxExp());
+			}
 			expText.measure();
 			expText.x = hp.x + (128 - expText.width())/2f;
-
 		} else {
 			exp.scale.x = (width / exp.width) * Dungeon.hero.exp / Dungeon.hero.maxExp();
 		}
 
 		if (Dungeon.hero.lvl != lastLvl) {
-
-			if (lastLvl != -1) {
-				showStarParticles();
-			}
-
+			if (lastLvl != -1) showStarParticles();
 			lastLvl = Dungeon.hero.lvl;
-
 			if (large){
 				level.text( "lv. " + lastLvl );
 				level.measure();
@@ -316,13 +405,21 @@ public class StatusPane extends Component {
 			PixelScene.align(level);
 		}
 
-		int tier = Dungeon.hero.tier();
+		int tier = Dungeon.hero.tier_for_image();
 		if (tier != lastTier) {
 			lastTier = tier;
 			avatar.copy( HeroSprite.avatar( Dungeon.hero.heroClass, tier ) );
 		}
 
 		counter.setSweep((1f - Actor.now()%1f)%1f);
+
+		// 骰子法师生命格实时更新
+		if (diceHp.visible) {
+			diceHp.level(Dungeon.hero);
+			if (maxChanged || healthDisplayChanged) {
+				layoutDiceMageHealth();
+			}
+		}
 	}
 
 	public void alpha( float value ){
@@ -339,6 +436,7 @@ public class StatusPane extends Component {
 		compass.alpha(value);
 		busy.alpha(value);
 		counter.alpha(value);
+		diceHp.alpha(value);
 	}
 
 	public void showStarParticles(){
@@ -348,4 +446,7 @@ public class StatusPane extends Component {
 		emitter.burst( Speck.factory( Speck.STAR ), 12 );
 	}
 
+	public void updateAvatar(){
+		avatar.copy( HeroSprite.avatar( Dungeon.hero ) );
+	}
 }

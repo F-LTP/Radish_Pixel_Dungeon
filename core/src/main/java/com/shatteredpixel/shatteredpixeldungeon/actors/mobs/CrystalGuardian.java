@@ -35,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CrystalGuardianSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
@@ -74,7 +75,11 @@ public class CrystalGuardian extends Mob{
 			}
 			if (HP == HT){
 				recovering = false;
-				if (sprite instanceof CrystalGuardianSprite) ((CrystalGuardianSprite) sprite).endCrumple();
+				if (sprite instanceof CrystalGuardianSprite) {
+					((CrystalGuardianSprite) sprite).endCrumple();
+				} else if (sprite instanceof SnakeSprite) {
+					((SnakeSprite) sprite).endCrumple();
+				}
 			}
 			spend(TICK);
 			return true;
@@ -138,7 +143,11 @@ public class CrystalGuardian extends Mob{
 
 			if (!recovering) {
 				recovering = true;
-				if (sprite != null) ((CrystalGuardianSprite) sprite).crumple();
+				if (sprite instanceof CrystalGuardianSprite){
+					((CrystalGuardianSprite) sprite).crumple();
+				} else if (sprite instanceof SnakeSprite){
+					((SnakeSprite) sprite).crumple();
+				}
 			}
 		}
 		return super.isAlive();

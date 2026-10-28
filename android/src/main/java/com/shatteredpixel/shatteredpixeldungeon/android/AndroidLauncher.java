@@ -37,15 +37,18 @@ import com.badlogic.gdx.backends.android.AndroidAudio;
 import com.badlogic.gdx.backends.android.AsynchronousAndroidAudio;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
 import com.badlogic.gdx.utils.GdxNativesLoader;
+import com.google.firebase.FirebaseApp;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.News;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.NewsImpl;
-import com.shatteredpixel.shatteredpixeldungeon.services.updates.UpdateImpl;
-import com.shatteredpixel.shatteredpixeldungeon.services.updates.Updates;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Button;
+import com.shatteredpixel.shatteredpixeldungeon.update.UpdateImpl;
+import com.shatteredpixel.shatteredpixeldungeon.update.Updates;
 import com.watabou.noosa.Game;
 import com.watabou.utils.FileUtils;
+
+import cat.ereza.customactivityoncrash.config.CaocConfig;
 
 public class AndroidLauncher extends AndroidApplication {
 	
@@ -57,12 +60,16 @@ public class AndroidLauncher extends AndroidApplication {
 	@Override
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		CaocConfig.Builder.create()
+				.backgroundMode(CaocConfig.BACKGROUND_MODE_SHOW_CUSTOM) //default: CaocConfig.BACKGROUND_MODE_SHOW_CUSTOM
+				.minTimeBetweenCrashesMs(2000) //default: 3000
+				.errorActivity(ErrorActivity.class) //default: null (default error activity)
+				.apply();
+		FirebaseApp.initializeApp(this);
 		try {
 			GdxNativesLoader.load();
 			FreeType.initFreeType();
 		} catch (Exception e){
-
 			Intent intent = new Intent(this, AndroidMissingNativesHandler.class);
 			startActivity(intent);
 			finish();
@@ -87,9 +94,7 @@ public class AndroidLauncher extends AndroidApplication {
 
 			if (NewsImpl.supportsNews()) {
 				News.service = NewsImpl.getNewsService();
-
 				Updates.service = UpdateImpl.getUpdateService();
-
 			}
 
 			FileUtils.setDefaultFileProperties(Files.FileType.Local, "");

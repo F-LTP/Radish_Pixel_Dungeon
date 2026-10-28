@@ -236,6 +236,16 @@ public class WandOfCorruption extends Wand {
 	}
 
 	@Override
+	public String upgradeStat1(int level) {
+		return Messages.decimalFormat("#.##", 3f + level/3f);
+	}
+
+	@Override
+	public String upgradeStat2(int level) {
+		return Integer.toString(6 + 3*level);
+	}
+
+	@Override
 	public void onHit(MagesStaff staff, Char attacker, Char defender, int damage) {
 		int level = Math.max( 0, buffedLvl() );
 

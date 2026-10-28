@@ -21,12 +21,24 @@ public class RingOfKing extends Ring {
     }
 
     @Override
+    public String upgradeStat1(int level) {
+        if (cursed && cursedKnown) level = Math.min(-1, level-3);
+        return Integer.toString(level+1);
+    }
+
+    @Override
+    public String upgradeStat2(int level) {
+        if (cursed && cursedKnown) level = Math.min(-1, level-3);
+        return Integer.toString(level+1);
+    }
+
+    @Override
     protected RingBuff buff( ) {
         return new KingUpdate();
     }
 
     public static int updateMultiplier( Char target ){
-        return getBonus( target, KingUpdate.class );
+        return getBuffedBonus( target, KingUpdate.class );
     }
 
     public class KingUpdate extends RingBuff {

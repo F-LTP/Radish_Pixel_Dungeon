@@ -51,7 +51,16 @@ public class PathFinder {
 	//Useful for some logic functions, but is slower due to lack of array-access order.
 	public static int[] CIRCLE4;
 	public static int[] CIRCLE8;
-	
+
+	public static int[] CIRCLE5x;
+
+	public static int[] CIRCLE5;
+
+	public static int[] CIRCLE7x;
+
+	public static int[] CIRCLE7;
+
+
 	public static void setMapSize( int width, int height ) {
 		
 		PathFinder.width = width;
@@ -84,6 +93,43 @@ public class PathFinder {
 
 		CIRCLE4 = new int[]{-width, +1, +width, -1};
 		CIRCLE8 = new int[]{-width-1, -width, -width+1, +1, +width+1, +width, +width-1, -1};
+
+		CIRCLE5x = new int[]{
+				-2*width-1, -2*width, -2*width+1,
+				-width-2, -width-1, -width, -width+1, -width+2,
+				-2, -1, 0, +1, +2,
+				+width-2, +width-1, +width, +width+1, +width+2,
+				+2*width-1, +2*width, +2*width+1,
+		};
+
+		CIRCLE5 = new int[]{
+				-2*width-2, -2*width-1, -2*width, -2*width+1, -2*width+2,
+				-width-2, -width-1, -width, -width+1, -width+2,
+				-2, -1, 0, +1, +2,
+				+width-2, +width-1, +width, +width+1, +width+2,
+				+2*width-2, +2*width-1, +2*width, +2*width+1, +2*width+2
+		};
+
+		CIRCLE7x = new int[]{
+				-3*width-2, -3*width-1, -3*width, -3*width+1, -3*width+2,
+				-2*width-3, -2*width-2, -2*width-1, -2*width, -2*width+1, -2*width+2, -2*width+3,
+				-width-3, -width-2, -width-1, -width, -width+1, -width+2, -width+3,
+				-3, -2, -1, 0, +1, +2, +3,
+				+width-3, +width-2, +width-1, +width, +width+1, +width+2, +width+3,
+				+2*width-3, +2*width-2, +2*width-1, +2*width, +2*width+1, +2*width+2, +2*width+3,
+				+3*width-2, +3*width-1, +3*width, +3*width+1, +3*width+2
+		};
+
+
+		CIRCLE7 = new int[]{
+				-3*width-3, -3*width-2, -3*width-1, -3*width, -3*width+1, -3*width+2, -3*width+3,
+				-2*width-3, -2*width-2, -2*width-1, -2*width, -2*width+1, -2*width+2, -2*width+3,
+				-width-3, -width-2, -width-1, -width, -width+1, -width+2, -width+3,
+				-3, -2, -1, 0, +1, +2, +3,
+				+width-3, +width-2, +width-1, +width, +width+1, +width+2, +width+3,
+				+2*width-3, +2*width-2, +2*width-1, +2*width, +2*width+1, +2*width+2, +2*width+3,
+				+3*width-3, +3*width-2, +3*width-1, +3*width, +3*width+1, +3*width+2, +3*width+3
+		};
 	}
 
 	public static Path find( int from, int to, boolean[] passable ) {

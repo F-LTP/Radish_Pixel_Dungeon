@@ -105,12 +105,20 @@ public class MovieClip extends Image {
 		frameTimer = 0;
 		
 		if (anim != null) {
+			// 诊断：打印空帧（哪个动画、哪一帧、总帧数）
+			if (anim.frames == null || anim.frames[curFrame] == null) {
+				com.watabou.utils.DeviceCompat.log( "MovieClip.play null frame",
+						"anim=" + anim.name() + ", curFrame=" + curFrame
+						+ ", totalFrames=" + (anim.frames == null ? "null" : String.valueOf(anim.frames.length))
+						+ ", instance=" + getClass().getSimpleName() );
+			}
 			frame( anim.frames[curFrame] );
 		}
 	}
 	
 	public static class Animation {
 		
+		public String name;
 		public float delay;
 		public RectF[] frames;
 		public boolean looped;
@@ -118,6 +126,15 @@ public class MovieClip extends Image {
 		public Animation( int fps, boolean looped ) {
 			this.delay = 1f / fps;
 			this.looped = looped;
+		}
+		
+		public Animation named( String name ) {
+			this.name = name;
+			return this;
+		}
+		
+		public String name() {
+			return name != null ? name : getClass().getSimpleName() + "@" + System.identityHashCode(this);
 		}
 		
 		public Animation frames( RectF... frames ) {

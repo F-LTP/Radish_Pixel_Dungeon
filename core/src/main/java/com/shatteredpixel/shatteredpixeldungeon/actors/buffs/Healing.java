@@ -21,11 +21,16 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.GameMath;
 
@@ -47,14 +52,18 @@ public class Healing extends Buff {
 	@Override
 	public boolean act(){
 
-		if (target.HP < target.HT) {
-			target.HP = Math.min(target.HT, target.HP + healingThisTick());
+		if (HealingBlocked.isBlocked(target)){
+			spend( TICK );
+			return true;
+		}
 
-			if (target.HP == target.HT && target instanceof Hero) {
-				((Hero) target).resting = false;
-			}
-
-			target.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(healingThisTick()), FloatingText.HEALING);
+		if (target instanceof Hero) {
+			com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToyEffects.heal((Hero) target, healingThisTick());
+			if (target.HP == target.HT) ((Hero) target).resting = false;
+		} else if (target.HP < target.HT) {
+				target.HP = Math.min(target.HT, target.HP + healingThisTick());
+				target.sprite.showStatusWithIcon(
+						CharSprite.POSITIVE, Integer.toString(healingThisTick()), FloatingText.HEALING);
 		}
 
 		healingLeft -= healingThisTick();
@@ -71,21 +80,29 @@ public class Healing extends Buff {
 		return true;
 	}
 	
+
+
+
 	private int healingThisTick(){
-		return (int)GameMath.gate(1,
-				Math.round(healingLeft * percentHealPerTick) + flatHealPerTick,
+		int heal = (int)GameMath.gate(1, Math.round(healingLeft * percentHealPerTick) + flatHealPerTick,
 				healingLeft);
+
+		if (Dungeon.isChallenged(Challenges.DAMAGE_NO)){
+			heal = 1;
+		}
+		return heal;
 	}
 
 	public void setHeal(int amount, float percentPerTick, int flatPerTick){
-		//multiple sources of healing do not overlap, but do combine the best of their properties
-		healingLeft = Math.max(healingLeft, amount);
-		percentHealPerTick = Math.max(percentHealPerTick, percentPerTick);
-		flatHealPerTick = Math.max(flatHealPerTick, flatPerTick);
-	}
-	
-	public void increaseHeal( int amount ){
-		healingLeft += amount;
+		if (target == Dungeon.hero){
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				amount*= (int) RingOfBenediction.periodMultiplier(target);
+			}
+		}
+		healingLeft = amount;
+		percentHealPerTick = percentPerTick;
+		flatHealPerTick = flatPerTick;
 	}
 	
 	@Override
@@ -115,7 +132,7 @@ public class Healing extends Buff {
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.HEALING;
 	}
 
@@ -128,4 +145,18 @@ public class Healing extends Buff {
 	public String desc() {
 		return Messages.get(this, "desc", healingThisTick(), healingLeft);
 	}
+
+	public static class StarHealing extends Healing{
+
+		@Override
+		public void tintIcon(Image icon) {
+			icon.hardlight(Window.SHPX_COLOR);
+		}
+
+		@Override
+		public String icon() {
+			return BuffIndicator.HERB_HEALING;
+		}
+	}
+
 }

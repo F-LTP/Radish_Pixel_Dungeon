@@ -137,7 +137,7 @@ public class DeathMark extends ArmorAbility {
 	public static class DoubleMarkTracker extends FlavourBuff{};
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return HeroIcon.DEATH_MARK;
 	}
 
@@ -158,7 +158,7 @@ public class DeathMark extends ArmorAbility {
 		}
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.INVERT_MARK;
 		}
 

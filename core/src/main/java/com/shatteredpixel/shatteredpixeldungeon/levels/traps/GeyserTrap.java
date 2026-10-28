@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -79,7 +81,7 @@ public class GeyserTrap extends Trap {
 					int dmg = Char.combatRoll(5 + scalingDepth(), 10 + scalingDepth()*2);
 					dmg *= 0.67f;
 					if (!ch.isImmune(GeyserTrap.class)){
-						ch.damage(dmg, this);
+						ch.damage(new DamageInfo(dmg, DamageType.WATER, null, null, this));
 					}
 				}
 
@@ -124,7 +126,7 @@ public class GeyserTrap extends Trap {
 			if (Char.hasProp(ch, Char.Property.FIERY)){
 				int dmg = Char.combatRoll(5 + scalingDepth(), 10 + scalingDepth()*2);
 				if (!ch.isImmune(GeyserTrap.class)){
-					ch.damage(dmg, this);
+					ch.damage(new DamageInfo(dmg, DamageType.WATER, null, null, this));
 				}
 			}
 

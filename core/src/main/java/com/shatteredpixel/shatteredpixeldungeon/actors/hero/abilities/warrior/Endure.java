@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
@@ -80,7 +81,7 @@ public class Endure extends ArmorAbility {
 		public int hitsLeft = 0;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return enduring ? BuffIndicator.NONE : BuffIndicator.ARMOR;
 		}
 
@@ -112,6 +113,14 @@ public class Endure extends ArmorAbility {
 				return damage*damageMulti;
 			}
 			return damage;
+		}
+
+		@Override
+		public void modifyIncomingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+			int before = info.getDamage();
+			if (before > 0) {
+				info.addFinalMultModifier(adjustDamageTaken(before) / before, "defender endure", this);
+			}
 		}
 
 		public void endEnduring(){
@@ -156,6 +165,14 @@ public class Endure extends ArmorAbility {
 			}
 		}
 
+		@Override
+		public void modifyFinalOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+			int before = info.getDamage();
+			if (before > 0) {
+				info.addFinalMultModifier(damageFactor(before) / before, "attacker endure", this);
+			}
+		}
+
 		public static String ENDURING       = "enduring";
 		public static String DAMAGE_BONUS   = "damage_bonus";
 		public static String HITS_LEFT      = "hits_left";
@@ -178,7 +195,7 @@ public class Endure extends ArmorAbility {
 	};
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return HeroIcon.ENDURE;
 	}
 

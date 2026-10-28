@@ -21,17 +21,20 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.plants;
 
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Healing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
-import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
@@ -47,11 +50,16 @@ public class Sungrass extends Plant {
 	public void activate( Char ch ) {
 		
 		if (ch != null){
-			if (ch instanceof Hero && ((Hero) ch).subClass == HeroSubClass.WARDEN) {
-				Buff.affect(ch, Healing.class).setHeal(ch.HT, 0, 1);
+			if(Dungeon.isChallenged(Challenges.DAMAGE_NO)){
+				Buff.affect(ch, Health.class).boost(ch.HT/5);
 			} else {
-				Buff.affect(ch, Health.class).boost(ch.HT);
+				if (ch instanceof Hero && ((Hero) ch).subClass == HeroSubClasses.WARDEN) {
+					Buff.affect(ch, Healing.class).setHeal(ch.HT, 0, 1);
+				} else {
+					Buff.affect(ch, Health.class).boost(ch.HT);
+				}
 			}
+
 		}
 		
 		if (Dungeon.level.heroFOV[pos]) {
@@ -87,29 +95,32 @@ public class Sungrass extends Plant {
 			if (target.pos != pos) {
 				detach();
 			}
-			
+
 			//for the hero, full heal takes ~50/93/111/120 turns at levels 1/10/20/30
 			partialHeal += (40 + target.HT)/150f;
-			
+			if (target.buff(AfterGlow.Warmth.class)!=null){
+				target.buff(AfterGlow.Warmth.class).getWarmth();
+			}
+			if (target == Dungeon.hero ){
+				Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+				if (ben!=null){
+					partialHeal*=RingOfBenediction.periodMultiplier(target);
+				}
+			}
 			if (partialHeal > 1){
-				int healThisTurn = (int)partialHeal;
-				partialHeal -= healThisTurn;
-				level -= healThisTurn;
+				target.heal((int)partialHeal);
+				level -= (int)partialHeal;
+				partialHeal -= (int)partialHeal;
+				target.sprite.emitter().burst(Speck.factory(Speck.HEALING), 1);
 
-				if (target.HP < target.HT) {
-
-					target.HP += healThisTurn;
-					target.sprite.showStatusWithIcon(CharSprite.POSITIVE, Integer.toString(healThisTurn), FloatingText.HEALING);
-
-					if (target.HP >= target.HT) {
-						target.HP = target.HT;
-						if (target instanceof Hero) {
-							((Hero) target).resting = false;
-						}
+				if (target.HP >= target.HT) {
+					target.HP = target.HT;
+					if (target instanceof Hero){
+						((Hero)target).resting = false;
 					}
 				}
 			}
-			
+
 			if (level <= 0) {
 				detach();
 				if (target instanceof Hero){
@@ -122,13 +133,19 @@ public class Sungrass extends Plant {
 
 		public void boost( int amount ){
 			if (target != null) {
+				if (target == Dungeon.hero ){
+					Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+					if (ben!=null){
+						amount=Math.round(amount*RingOfBenediction.periodMultiplier(target));
+					}
+				}
 				level += amount;
 				pos = target.pos;
 			}
 		}
 		
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.HERB_HEALING;
 		}
 
