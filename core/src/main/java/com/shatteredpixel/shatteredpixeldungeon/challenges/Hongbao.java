@@ -80,6 +80,18 @@ public class Hongbao {
 		}
 	}
 
+	/**
+	 * 从当前层级可生成的怪物中随机放出一只（用于红包里的“怪物”结果）。
+	 */
+	public static void spawnMonster() {
+		if (Dungeon.level == null || Dungeon.hero == null || !Dungeon.hero.isAlive()) {
+			return;
+		}
+		if (Dungeon.level.spawnMob(2)) {
+			GLog.w(Messages.get(Hongbao.class, "monster"));
+		}
+	}
+
 	public static int visibleEnvelope(Char ch) {
 		if (ch == null || ch.fieldOfView == null || Dungeon.level == null) {
 			return -1;

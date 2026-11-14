@@ -809,6 +809,7 @@ public abstract class Mob extends Char {
 		} else {
 			delay /= RingOfFuror.attackSpeedMultiplier(this);
 		}
+		delay /= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.attackCountMult(this);
 		return delay;
 	}
 
@@ -1902,6 +1903,12 @@ public abstract class Mob extends Char {
 					Dungeon.fail(getClass());
 					GLog.n(heroKilledMessage());
 				}
+			}
+
+			// 红包吸血：怪物只享受正收益
+			float steal = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.steal(this);
+			if (steal > 0 && damage > 0) {
+				HP = Math.min(HT, HP + Math.max(1, Math.round(damage * steal)));
 			}
 
 			return damage;

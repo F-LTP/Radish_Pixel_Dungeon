@@ -1323,6 +1323,7 @@ public class Hero extends Char {
 		}
 
         delay /= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.ATK);
+        delay /= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.attackCountMult(this);
         return delay/speed;
     }
 
@@ -2374,6 +2375,14 @@ public class Hero extends Char {
 
 		damage = Math.round(damage * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(
 				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.DMG));
+
+		// 红包吸血：正数回复伤害的一定比例，负数反噬（不致死）
+		float envelopeSteal = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.steal(this);
+		if (damage > 0 && envelopeSteal > 0) {
+			HP = Math.min(HT, HP + Math.max(1, Math.round(damage * envelopeSteal)));
+		} else if (damage > 0 && envelopeSteal < 0) {
+			HP = Math.max(1, HP - Math.max(1, Math.round(damage * -envelopeSteal)));
+		}
 
 
 		if (buff(Talent.SpiritBladesTracker.class) != null

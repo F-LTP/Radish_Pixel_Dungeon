@@ -1,6 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
@@ -22,14 +23,20 @@ public class MobEnvelope extends Buff {
 	public static final String SIGHT = "sight";
 	public static final String ENCH = "ench";
 	public static final String RCH = "rch";
+	public static final String CHG = "chg";
+	public static final String APT = "apt";
+	public static final String STEAL = "steal";
 	/** 立即回血，不进入持久属性列表。 */
 	public static final String LIFE = "life";
+	/** 立即放出一只当前层级可生成的怪物。 */
+	public static final String MONSTER = "monster";
 
-	/** 属性池数量：7 项旧属性 + 视野/附魔强度/攻击距离 + 立即回血。 */
-	public static final int STAT_COUNT = 11;
+	/** 属性池数量：10 项旧属性 + 充能/攻击次数/吸血 + 立即回血 + 怪物。 */
+	public static final int STAT_COUNT = 15;
 
 	private int count = 0;
 	private float dmg = 0f, def = 0f, acc = 0f, eva = 0f, spd = 0f, hp = 0f, atk = 0f, sight = 0f, ench = 0f;
+	private float chg = 0f, apt = 0f, steal = 0f;
 	private int rch = 0;
 
 	public int count() {
@@ -84,9 +91,15 @@ public class MobEnvelope extends Buff {
 			case 7: sight += roll(); break;
 			case 8: ench += roll(); break;
 			case 9: rch += Random.IntRange(1, 2); break;
-			default:
+			case 10: chg += roll(); break;
+			case 11: apt += Random.Float(0.1f, 0.3f); break;
+			case 12: steal += roll(); break;
+			case 13:
 				int heal = Math.max(1, Math.round(target.HT * roll()));
 				target.HP = Math.min(target.HT, target.HP + heal);
+				break;
+			default:
+				Hongbao.spawnMonster();
 				break;
 		}
 	}
@@ -102,6 +115,9 @@ public class MobEnvelope extends Buff {
 			case HP: return hp;
 			case SIGHT: return sight;
 			case ENCH: return ench;
+			case CHG: return chg;
+			case APT: return apt;
+			case STEAL: return steal;
 			default: return 0f;
 		}
 	}
@@ -131,6 +147,24 @@ public class MobEnvelope extends Buff {
 		return b == null ? 0 : b.reachBonus();
 	}
 
+	/** 每回合攻击次数倍率：1 + 额外次数；负数会拉长攻击间隔。 */
+	public static float attackCountMult(Char ch) {
+		if (!affects(ch)) {
+			return 1f;
+		}
+		MobEnvelope b = ch.buff(MobEnvelope.class);
+		return b == null ? 1f : Math.max(0.2f, 1f + b.apt);
+	}
+
+	/** 吸血比例。怪物只取正值。 */
+	public static float steal(Char ch) {
+		if (!affects(ch)) {
+			return 0f;
+		}
+		MobEnvelope b = ch.buff(MobEnvelope.class);
+		return b == null ? 0f : Math.max(0f, b.steal);
+	}
+
 	@Override
 	public boolean act() {
 		spend(TICK);
@@ -151,7 +185,8 @@ public class MobEnvelope extends Buff {
 	public String desc() {
 		return Messages.get(this, "desc", count,
 				pct(dmg), pct(def), pct(acc), pct(eva), pct(spd), pct(hp), pct(atk),
-				pct(sight), pct(ench), signedInt(rch));
+				pct(sight), pct(ench), signedInt(rch), pct(chg),
+				EnvelopeBoost.attackText(apt), pct(steal));
 	}
 
 	public static String pct(float v) {
@@ -176,6 +211,9 @@ public class MobEnvelope extends Buff {
 		bundle.put("sight", sight);
 		bundle.put("ench", ench);
 		bundle.put("rch", rch);
+		bundle.put("chg", chg);
+		bundle.put("apt", apt);
+		bundle.put("steal", steal);
 	}
 
 	@Override
@@ -192,5 +230,8 @@ public class MobEnvelope extends Buff {
 		sight = bundle.getFloat("sight");
 		ench = bundle.getFloat("ench");
 		rch = bundle.getInt("rch");
+		chg = bundle.getFloat("chg");
+		apt = bundle.getFloat("apt");
+		steal = bundle.getFloat("steal");
 	}
 }

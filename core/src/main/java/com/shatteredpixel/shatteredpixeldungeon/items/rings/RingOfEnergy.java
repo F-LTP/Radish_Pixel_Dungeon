@@ -62,7 +62,11 @@ public class RingOfEnergy extends Ring {
 	}
 	
 	public static float wandChargeMultiplier( Char target ){
-		return (float)Math.pow(1.15, getBuffedBonus(target, Energy.class));
+		return (float)Math.pow(1.15, getBuffedBonus(target, Energy.class))
+				* com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(
+						target, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.CHG)
+				* com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
+						target, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.CHG);
 	}
 
 	public static float artifactChargeMultiplier( Char target ){
@@ -72,11 +76,20 @@ public class RingOfEnergy extends Ring {
 			bonus *= 1f + (0.2f * ((Hero) target).pointsInTalent(Talent.LIGHT_CLOAK)/3f);
 		}
 
+		bonus *= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(
+				target, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.CHG);
+		bonus *= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
+				target, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.CHG);
+
 		return bonus;
 	}
 
 	public static float armorChargeMultiplier( Char target ){
-		return (float)Math.pow(1.15, getBuffedBonus(target, Energy.class));
+		return (float)Math.pow(1.15, getBuffedBonus(target, Energy.class))
+				* com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(
+						target, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.CHG)
+				* com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
+						target, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.CHG);
 	}
 	
 	public class Energy extends RingBuff {
