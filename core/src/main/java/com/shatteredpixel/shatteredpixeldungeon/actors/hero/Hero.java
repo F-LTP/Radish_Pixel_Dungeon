@@ -469,6 +469,7 @@ public class Hero extends Char {
 		if (buff(BarkskinToyBuff.class) != null) {
 			HT += BarkskinToyBuff.MAX_HP_BONUS;
 		}
+
 		float multiplier = RingOfMight.HTMultiplier(this);
 		HT = Math.round(multiplier * HT);
 
@@ -480,6 +481,11 @@ public class Hero extends Char {
 		if (buff(Sprouted_Potato.Potato_Poison.class) != null){
 			HT -= buff(Sprouted_Potato.Potato_Poison.class).level();
 		}
+
+		// 红包生命上限：放在 updateHT 内计算，升级等重算 HT 时不会丢失已有的叠加加成
+		HT = Math.round(HT * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(
+				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.HP));
+		HT = Math.max(1, HT);
 
 		// DoggingDog on 20250914
 		// 用 misc() / ring() 而不是字段：丢失背包期间没被保留的装备不生效
@@ -882,12 +888,16 @@ public class Hero extends Char {
 		int spirit = LittleKnight.spiritAccuracy( this );
 		if (hero.buff(RingOfForce.Force.class) == null) {
 			if(wep != null)
-				return (int)(attackSkill * accuracy * wep.accuracyFactor( this, target )) + spirit;
+				return (int)(attackSkill * accuracy * wep.accuracyFactor( this, target )
+						* com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.ACC)) + spirit;
 		} else {
-			return (int)(attackSkill * accuracy) + spirit;
+			return (int)(attackSkill * accuracy
+					* com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.ACC)) + spirit;
 		}
 
-		return (int)(attackSkill * accuracy) + spirit;
+		return (int)(attackSkill * accuracy
+				* com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.ACC)) + spirit;
+
 	}
 
 	@Override
@@ -928,7 +938,10 @@ public class Hero extends Char {
 			evasion = belongings.armor().evasionFactor(this, evasion);
 		}
 
-		return Math.round(evasion) + LittleKnight.spiritEvasion( this );
+		return Math.round(evasion
+				* com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.EVA))
+				+ LittleKnight.spiritEvasion( this );
+
 	}
 
 	@Override
@@ -1167,6 +1180,7 @@ public class Hero extends Char {
 		}
 
 		speed = AscensionChallenge.modifyHeroSpeed(speed);
+		speed *= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.SPD);
 
 		//TS
 		if (buff(DarkCoat.myPace.class)!=null) speed=Math.max(1f,speed);
@@ -1215,6 +1229,15 @@ public class Hero extends Char {
 
 		//can always attack adjacent enemies
 		if (Dungeon.level.adjacent(pos, enemy.pos)) {
+			return true;
+		}
+
+		// 红包：攻击距离强化，允许在视野内隔格攻击
+		int envelopeReach = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.reachBonus(this);
+		if (envelopeReach > 0
+				&& Dungeon.level.distance(pos, enemy.pos) <= 1 + envelopeReach
+				&& fieldOfView != null && fieldOfView.length == Dungeon.level.length()
+				&& fieldOfView[enemy.pos]) {
 			return true;
 		}
 
@@ -1299,6 +1322,7 @@ public class Hero extends Char {
 			speed *= (1f + ((float) t_lvl)/3);
 		}
 
+        delay /= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.ATK);
         return delay/speed;
     }
 
@@ -1450,6 +1474,12 @@ public class Hero extends Char {
 		checkVisibleMobs();
 		BuffIndicator.refreshHero();
 		BuffIndicator.refreshAllBosses();
+
+		//红包挑战：确保计时器存在
+		if (com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.active()
+				&& buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HongbaoClock.class) == null) {
+			Buff.affect(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HongbaoClock.class);
+		}
 
 		// 不消耗时间的阻塞动画播放中（如杂散变身）：真正阻塞英雄行动，让动画一口气播完，不被移动/攻击/ready 打断，也不消耗回合
 		if (animationBusy) {
@@ -2341,6 +2371,10 @@ public class Hero extends Char {
 					|| !enemy.buffs(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy.class).isEmpty())) {
 			damage = Math.round(damage * (1f + (10 + 5 * champBelt.level()) / 100f));
 		}
+
+		damage = Math.round(damage * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(
+				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.DMG));
+
 
 		if (buff(Talent.SpiritBladesTracker.class) != null
 				&& Random.Int(10) < 3*pointsInTalent(Talent.SPIRIT_BLADES)){

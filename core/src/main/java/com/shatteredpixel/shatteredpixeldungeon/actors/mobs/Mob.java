@@ -384,6 +384,24 @@ public abstract class Mob extends Char {
 			return true;
 		}
 
+		//红包挑战：视野内的红包优先去拾取
+		if (com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.active()
+				&& alignment == Alignment.ENEMY) {
+			int envelope = com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.visibleEnvelope(this);
+			if (envelope != -1) {
+				if (pos == envelope) {
+					com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.mobPickup(this, envelope);
+					spend(TICK);
+					return true;
+				}
+				int oldPos = pos;
+				if (getCloser(envelope)) {
+					spend(1 / speed());
+					return moveSprite(oldPos, pos);
+				}
+			}
+		}
+
 		return state.act( enemyInFOV, justAlerted );
 	}
 
@@ -585,6 +603,14 @@ public abstract class Mob extends Char {
 
 	protected boolean canAttack( Char enemy ) {
 		if (Dungeon.level.adjacent( pos, enemy.pos )){
+			return true;
+		}
+		//红包：怪物从红包获得的攻击距离强化
+		int envelopeReach = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.reachBonus(this);
+		if (envelopeReach > 0
+				&& Dungeon.level.distance(pos, enemy.pos) <= 1 + envelopeReach
+				&& fieldOfView != null && fieldOfView.length == Dungeon.level.length()
+				&& fieldOfView[enemy.pos]) {
 			return true;
 		}
 		if (mobEquipment.weapon != null && mobEquipment.weapon.canReach(this, enemy.pos)) {
@@ -813,7 +839,7 @@ public abstract class Mob extends Char {
 		if ( !surprisedBy(enemy)
 				&& paralysed == 0
 				&& !(alignment == Alignment.ALLY && enemy == Dungeon.hero)) {
-			return this.defenseSkill;
+			return this.defenseSkill + envelopeEvasionBonus();
 		} else {
 			return 0;
 		}
@@ -891,8 +917,18 @@ public abstract class Mob extends Char {
 		public float speed() {
 			float speed = super.speed() * AscensionChallenge.enemySpeedModifier(this);
 			if (mobEquipment.armor != null) speed = mobEquipment.armor.speedFactor(this, speed);
-			return speed * RingOfHaste.speedMultiplier(this)
+			speed *= RingOfHaste.speedMultiplier(this)
 					* com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Warden.grassSpeedFactor(this);
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
+					envelopeBoost();
+			if (env != null) {
+				speed *= 1f + env.get(
+						com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.SPD);
+				speed *= 1f + env.get(
+						com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.ATK);
+			}
+			return speed;
+
 		}
 
 		public final boolean surprisedBy( Char enemy ){
@@ -954,10 +990,61 @@ public abstract class Mob extends Char {
 
 	@Override
 	public int damageRoll() {
+		int base;
 		if (mobEquipment.weapon == null) {
-			return RingOfForce.damageRoll(this);
+			base = RingOfForce.damageRoll(this);
+		} else {
+			base = super.damageRoll();
 		}
-		return super.damageRoll();
+		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
+				envelopeBoost();
+		if (env != null) {
+			base = Math.round(base * (1f + env.get(
+					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.DMG)));
+		}
+		return base;
+	}
+
+	@Override
+	public int drRoll() {
+		int dr = super.drRoll();
+		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
+				envelopeBoost();
+		if (env != null) {
+			dr = Math.round(dr * (1f + env.get(
+					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.DEF)));
+		}
+		return dr;
+	}
+
+	@Override
+	public int attackSkill(Char target) {
+		int skill = super.attackSkill(target);
+		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
+				envelopeBoost();
+		if (env != null) {
+			skill = Math.round(skill * (1f + env.get(
+					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.ACC)));
+		}
+		return skill;
+	}
+
+	public int envelopeEvasionBonus() {
+		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
+				envelopeBoost();
+		return env == null ? 0 : Math.round(env.get(
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.EVA) * 100);
+	}
+
+	/**
+	 * 红包强化入口：无法移动的怪物不承受红包效果。
+	 * 新拾取在 attachTo 层已被拦截，这里再兜底旧存档/残留 Buff。
+	 */
+	public com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope envelopeBoost() {
+		if (Char.hasProp(this, Property.IMMOVABLE)) {
+			return null;
+		}
+		return buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.class);
 	}
 
 	/** 查找当前可影响 AI 的修改器：先看 Buff，再看攻击武器的 aiTag。 */

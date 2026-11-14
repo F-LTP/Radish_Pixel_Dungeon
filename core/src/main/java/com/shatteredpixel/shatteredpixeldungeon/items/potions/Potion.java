@@ -376,6 +376,34 @@ public class Potion extends Item {
 		}
 	}
 
+	/** 怪物投掷/使用药水时的入口：不依赖 Item.curUser，也不需要英雄背包。 */
+	public void mobUseAt( int cell ) {
+		if (Dungeon.level == null) {
+			return;
+		}
+		if (Dungeon.level.map[cell] == Terrain.WELL || Dungeon.level.pit[cell]) {
+			Dungeon.level.drop(this, cell).sprite.drop();
+			return;
+		}
+		if (!(this instanceof AquaBrew) && !(this instanceof PotionOfStormClouds)) {
+			Dungeon.level.pressCell(cell);
+		}
+		shatter(cell);
+		identify();
+	}
+
+	/** 是否是会伤害饮用者的有害药水（怪物会把它丢向玩家）。 */
+	public static boolean isHarmful( Potion potion ) {
+		if (potion == null) {
+			return false;
+		}
+		if (mustThrowPots.contains(potion.getClass())) {
+			return true;
+		}
+		return potion instanceof com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.Brew
+				&& !(potion instanceof com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.UnstableBrew);
+	}
+
 	@Override
 	public void cast( final Hero user, int dst ) {
 		super.cast(user, dst);

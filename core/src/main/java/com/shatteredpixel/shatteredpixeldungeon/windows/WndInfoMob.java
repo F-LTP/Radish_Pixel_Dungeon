@@ -150,7 +150,14 @@ public class WndInfoMob extends Window {
 
 	private String info(Mob mob) {
 		String info = mob.info();
-		if (!Dungeon.isChallenged(Challenges.REAL_INTELLIGENCE)) return info;
+
+		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope envelope = mob.envelopeBoost();
+		if (envelope != null && envelope.count() > 0) {
+			info += "\n\n" + Messages.get(WndInfoMob.class, "envelope", envelope.count())
+					+ "\n" + envelope.desc();
+		}
+		if (!Dungeon.isChallenged(Challenges.REAL_INTELLIGENCE)
+				&& !Dungeon.isChallenged(Challenges.HONGBAO)) return info;
 
 		StringBuilder items = new StringBuilder();
 		String separator = Messages.get(WndInfoMob.class, "item_separator");

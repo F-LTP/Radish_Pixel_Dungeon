@@ -123,6 +123,8 @@ public class BuffIndicator extends Component {
 	public static final String DAZE = "daze";
 
 	public static final String HOLD_BREATH = "hold_breath";
+
+	public static final String HONGBAO = "hongbao";
 	public static final String A_EVA = "a_eva";
 	//	public static final String DUEL_DANCE = "duel_dance";
 	public static final String SCYTHE_S = "scythe_s";

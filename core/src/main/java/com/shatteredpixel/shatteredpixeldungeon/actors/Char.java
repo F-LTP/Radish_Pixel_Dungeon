@@ -944,6 +944,14 @@ public abstract class Char extends Actor {
         }
         int dmg = info.getDamage();
 
+        // 红包防御强化/削弱：防御低于 100% 时反而承受更多伤害
+        if (this instanceof com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero) {
+            float def = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(
+                    this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.DEF);
+            if (def != 1f) {
+                info.addFinalMultModifier(1f / def, "envelope_def");
+            }
+        }
         // NPC overrides still receive the hit, while base NPC damage remains immune.
         if (properties.contains(Property.NPC) && !isDamageable()) {
             return new DamageResult(info.getBaseDamage(), dmg, 0, 0, 0, 0, true);
