@@ -386,6 +386,13 @@ public abstract class Mob extends Char {
 			return true;
 		}
 
+		// 存着的有害药水：看到玩家就丢
+		if (mobEquipment.harmfulPotion != null && enemyInFOV && enemy != null
+				&& com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.throwStoredPotion(this)) {
+			spend(TICK);
+			return true;
+		}
+
 		//红包挑战：视野内的红包优先去拾取
 		if (com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.active()
 				&& alignment == Alignment.ENEMY) {

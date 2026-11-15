@@ -398,11 +398,11 @@ public class Hongbao {
 		return true;
 	}
 
-	/** 有害药水砸向玩家，其余药水由怪物自己立即使用。 */
+	/** 有害药水先收起来，等看到玩家再丢。 */
 	private static void mobUsePotion(Mob mob, Potion potion) {
 		if (Potion.isHarmful(potion)) {
-			mobLog(mob, "mob_throw", mob.name(), potion.name());
-			throwPotionAtHero(mob, potion);
+			mob.mobEquipment.harmfulPotion = potion;
+			mobLog(mob, "mob_store", mob.name(), potion.name());
 			return;
 		}
 
@@ -429,6 +429,18 @@ public class Hongbao {
 		} else {
 			potion.mobUseAt(mob.pos);
 		}
+	}
+
+	/** 看到玩家时，把存着的有害药水丢出去。 */
+	public static boolean throwStoredPotion(Mob mob) {
+		Potion potion = mob.mobEquipment.harmfulPotion;
+		if (potion == null || Dungeon.hero == null || !Dungeon.hero.isAlive()) {
+			return false;
+		}
+		mob.mobEquipment.harmfulPotion = null;
+		mobLog(mob, "mob_throw", mob.name(), potion.name());
+		throwPotionAtHero(mob, potion);
+		return true;
 	}
 
 	private static void throwPotionAtHero(Mob mob, Potion potion) {

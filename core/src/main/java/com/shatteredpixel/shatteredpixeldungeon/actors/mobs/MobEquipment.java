@@ -27,6 +27,7 @@ public class MobEquipment {
 	private static final String POTION = "real_intelligence_potion";
 	private static final String SCROLL = "real_intelligence_scroll";
 	private static final String WAND = "hongbao_wand";
+	private static final String HARMFUL_POTION = "hongbao_harmful_potion";
 
 	private final Mob owner;
 
@@ -38,6 +39,7 @@ public class MobEquipment {
 	public Potion potion;
 	public Scroll scroll;
 	public Wand wand;
+	public Potion harmfulPotion;
 
 	public MobEquipment(Mob owner) {
 		this.owner = owner;
@@ -72,6 +74,7 @@ public class MobEquipment {
 		bundle.put(POTION, potion);
 		bundle.put(SCROLL, scroll);
 		bundle.put(WAND, wand);
+		bundle.put(HARMFUL_POTION, harmfulPotion);
 	}
 
 	public void restoreFromBundle(Bundle bundle) {
@@ -85,6 +88,7 @@ public class MobEquipment {
 		potion = (Potion) bundle.get(POTION);
 		scroll = (Scroll) bundle.get(SCROLL);
 		wand = (Wand) bundle.get(WAND);
+		harmfulPotion = (Potion) bundle.get(HARMFUL_POTION);
 	}
 
 	/** 怪物法杖按回合回复充能；耗尽后恢复普通攻击，充满后自动切回法杖。 */
@@ -111,6 +115,7 @@ public class MobEquipment {
 		drop(potion);
 		drop(scroll);
 		drop(wand);
+		drop(harmfulPotion);
 		weapon = null;
 		armor = null;
 		artifact = null;
@@ -119,6 +124,7 @@ public class MobEquipment {
 		potion = null;
 		scroll = null;
 		wand = null;
+		harmfulPotion = null;
 	}
 
 	public ArrayList<Item> carriedItems() {
@@ -131,6 +137,7 @@ public class MobEquipment {
 		if (potion != null) items.add(potion);
 		if (scroll != null) items.add(scroll);
 		if (wand != null) items.add(wand);
+		if (harmfulPotion != null) items.add(harmfulPotion);
 		return items;
 	}
 
