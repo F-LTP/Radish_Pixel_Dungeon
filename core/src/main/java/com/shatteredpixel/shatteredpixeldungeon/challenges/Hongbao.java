@@ -129,11 +129,11 @@ public class Hongbao {
 		CellEmitter.get(cell).burst(Speck.factory(Speck.LIGHT), 6);
 	}
 
-	/** 怪物开红包：60% 获得装备/道具并立即使用，40% 获得属性强化。 */
+	/** 怪物开红包：35% 获得装备/道具并立即使用，65% 获得属性强化。 */
 	private static void mobReward(Mob mob) {
 		MobEnvelope envelope = Buff.affect(mob, MobEnvelope.class);
 		envelope.recordPickup();
-		if (Random.Int(10) < 6 && mobGetItem(mob)) {
+		if (Random.Int(100) < 35 && mobGetItem(mob)) {
 			return;
 		}
 		envelope.addRandom();
@@ -317,7 +317,7 @@ public class Hongbao {
 	}
 
 	public static void rewardHero(Hero hero) {
-		if (Random.Int(10) < 6) {
+		if (Random.Int(100) < 50) {
 			Item item;
 			switch (Random.Int(7)) {
 				case 0: item = Generator.random(Generator.Category.WEAPON); break;

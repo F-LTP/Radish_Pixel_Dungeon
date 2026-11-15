@@ -36,8 +36,8 @@ public class EnvelopeBoost extends Buff {
 	/** 立即放出一只当前层级可生成的怪物。 */
 	public static final String MONSTER = "monster";
 
-	/** 英雄开红包时，属性被削弱（负值）的概率。 */
-	public static final float NEGATIVE_CHANCE = 0.35f;
+	/** 英雄开红包时，属性被削弱（负值）的概率。与强化概率相同。 */
+	public static final float NEGATIVE_CHANCE = 0.5f;
 
 	/** 属性池数量：10 项旧属性 + 充能/攻击次数/吸血 + 立即加血扣血 + 怪物。 */
 	public static final int STAT_COUNT = 15;
