@@ -234,15 +234,49 @@ public class MobEnvelope extends Buff {
 
 	@Override
 	public String desc() {
-		return Messages.get(this, "desc", count,
-				pct(gDmg), pct(gDef), pct(gAcc), pct(gEva), pct(gSpd), pct(gHp), pct(gAtk),
-				pct(gSight), pct(gEnch), signedInt(gRch), pct(gChg), pct(gSteal), signedInt(gCombo));
+		return Messages.get(this, "header", count) + "\n" + globalSummary();
 	}
 
 	public static String globalDesc() {
-		return Messages.get(MobEnvelope.class, "desc", gPickups,
-				pct(gDmg), pct(gDef), pct(gAcc), pct(gEva), pct(gSpd), pct(gHp), pct(gAtk),
-				pct(gSight), pct(gEnch), signedInt(gRch), pct(gChg), pct(gSteal), signedInt(gCombo));
+		return globalSummary();
+	}
+
+	private static String globalSummary() {
+		StringBuilder sb = new StringBuilder();
+		appendStat(sb, DMG, gDmg);
+		appendStat(sb, DEF, gDef);
+		appendStat(sb, ACC, gAcc);
+		appendStat(sb, EVA, gEva);
+		appendStat(sb, SPD, gSpd);
+		appendStat(sb, HP, gHp);
+		appendStat(sb, ATK, gAtk);
+		appendStat(sb, SIGHT, gSight);
+		appendStat(sb, ENCH, gEnch);
+		appendInt(sb, RCH, gRch);
+		appendStat(sb, CHG, gChg);
+		appendStat(sb, STEAL, gSteal);
+		appendInt(sb, COMBO, gCombo);
+		return sb.length() == 0 ? Messages.get(MobEnvelope.class, "desc_empty") : sb.toString();
+	}
+
+	private static StringBuilder appendStat(StringBuilder sb, String key, float value) {
+		if (Math.abs(value) < 0.0001f) {
+			return sb;
+		}
+		if (sb.length() > 0) {
+			sb.append(Messages.get(EnvelopeBoost.class, "sep"));
+		}
+		return sb.append(Messages.get(EnvelopeBoost.class, key)).append(' ').append(pct(value));
+	}
+
+	private static StringBuilder appendInt(StringBuilder sb, String key, int value) {
+		if (value == 0) {
+			return sb;
+		}
+		if (sb.length() > 0) {
+			sb.append(Messages.get(EnvelopeBoost.class, "sep"));
+		}
+		return sb.append(Messages.get(EnvelopeBoost.class, key)).append(' ').append(signedInt(value));
 	}
 
 	public static String pct(float v) {

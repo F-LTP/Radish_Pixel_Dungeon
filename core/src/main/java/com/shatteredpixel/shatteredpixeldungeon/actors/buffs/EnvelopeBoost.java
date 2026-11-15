@@ -218,10 +218,41 @@ public class EnvelopeBoost extends Buff {
 
 	@Override
 	public String desc() {
-		return Messages.get(this, "desc",
-				signedPct(dmg), signedPct(def), signedPct(acc), signedPct(eva), signedPct(spd),
-				signedPct(hp), signedPct(atk), signedPct(sight), signedPct(ench), signedInt(rch),
-				signedPct(chg), signedPct(steal), signedInt(combo));
+		StringBuilder sb = new StringBuilder();
+		appendStat(sb, DMG, dmg);
+		appendStat(sb, DEF, def);
+		appendStat(sb, ACC, acc);
+		appendStat(sb, EVA, eva);
+		appendStat(sb, SPD, spd);
+		appendStat(sb, HP, hp);
+		appendStat(sb, ATK, atk);
+		appendStat(sb, SIGHT, sight);
+		appendStat(sb, ENCH, ench);
+		appendInt(sb, RCH, rch);
+		appendStat(sb, CHG, chg);
+		appendStat(sb, STEAL, steal);
+		appendInt(sb, COMBO, combo);
+		return sb.length() == 0 ? Messages.get(this, "desc_empty") : sb.toString();
+	}
+
+	private StringBuilder appendStat(StringBuilder sb, String key, float value) {
+		if (Math.abs(value) < 0.0001f) {
+			return sb;
+		}
+		if (sb.length() > 0) {
+			sb.append(Messages.get(this, "sep"));
+		}
+		return sb.append(Messages.get(this, key)).append(' ').append(signedPct(value));
+	}
+
+	private StringBuilder appendInt(StringBuilder sb, String key, int value) {
+		if (value == 0) {
+			return sb;
+		}
+		if (sb.length() > 0) {
+			sb.append(Messages.get(this, "sep"));
+		}
+		return sb.append(Messages.get(this, key)).append(' ').append(signedInt(value));
 	}
 
 	@Override
