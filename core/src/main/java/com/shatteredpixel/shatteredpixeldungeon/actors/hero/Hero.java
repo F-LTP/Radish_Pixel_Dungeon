@@ -2375,6 +2375,13 @@ public class Hero extends Char {
 		damage = Math.round(damage * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(
 				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.DMG));
 
+		// 红包连击：每次攻击追加数次半伤害命中
+		int comboHits = Math.min(10, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.combo(this));
+		for (int i = 0; i < comboHits && enemy != null && enemy.isAlive(); i++) {
+			enemy.damage(new DamageInfo(Math.max(1, damage / 2), DamageType.PHYSICAL,
+					this, belongings.attackingWeapon(), this));
+		}
+
 		// 红包吸血：正数回复伤害的一定比例，负数反噬（不致死）
 		float envelopeSteal = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.steal(this);
 		if (damage > 0 && envelopeSteal > 0) {

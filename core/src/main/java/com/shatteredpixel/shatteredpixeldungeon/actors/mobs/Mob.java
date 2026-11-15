@@ -202,6 +202,7 @@ public abstract class Mob extends Char {
 				HP = Math.min(HT, Math.round(HT * percent));
 			}
 			firstAdded = false;
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.applyGlobalHP(this);
 		}
 	}
 
@@ -389,7 +390,8 @@ public abstract class Mob extends Char {
 		if (com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.active()
 				&& alignment == Alignment.ENEMY) {
 			int envelope = com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.visibleEnvelope(this);
-			if (envelope != -1) {
+			int enemyDist = enemy == null ? Integer.MAX_VALUE : Dungeon.level.distance(pos, enemy.pos);
+			if (envelope != -1 && Dungeon.level.distance(pos, envelope) <= enemyDist) {
 				if (pos == envelope) {
 					com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.mobPickup(this, envelope);
 					spend(TICK);
@@ -933,14 +935,10 @@ public abstract class Mob extends Char {
 			if (mobEquipment.armor != null) speed = mobEquipment.armor.speedFactor(this, speed);
 			speed *= RingOfHaste.speedMultiplier(this)
 					* com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Warden.grassSpeedFactor(this);
-			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
-					envelopeBoost();
-			if (env != null) {
-				speed *= 1f + env.get(
-						com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.SPD);
-				speed *= 1f + env.get(
-						com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.ATK);
-			}
+			speed *= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
+					this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.SPD);
+			speed *= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
+					this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.ATK);
 			return speed;
 
 		}
@@ -1010,44 +1008,30 @@ public abstract class Mob extends Char {
 		} else {
 			base = super.damageRoll();
 		}
-		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
-				envelopeBoost();
-		if (env != null) {
-			base = Math.round(base * (1f + env.get(
-					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.DMG)));
-		}
+		base = Math.round(base * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
+				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.DMG));
 		return base;
 	}
 
 	@Override
 	public int drRoll() {
 		int dr = super.drRoll();
-		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
-				envelopeBoost();
-		if (env != null) {
-			dr = Math.round(dr * (1f + env.get(
-					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.DEF)));
-		}
+		dr = Math.round(dr * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
+				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.DEF));
 		return dr;
 	}
 
 	@Override
 	public int attackSkill(Char target) {
 		int skill = super.attackSkill(target);
-		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
-				envelopeBoost();
-		if (env != null) {
-			skill = Math.round(skill * (1f + env.get(
-					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.ACC)));
-		}
+		skill = Math.round(skill * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
+				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.ACC));
 		return skill;
 	}
 
 	public int envelopeEvasionBonus() {
-		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
-				envelopeBoost();
-		return env == null ? 0 : Math.round(env.get(
-				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.EVA) * 100);
+		return Math.round((com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
+				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.EVA) - 1f) * 100);
 	}
 
 	/**
@@ -1922,6 +1906,16 @@ public abstract class Mob extends Char {
 			float steal = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.steal(this);
 			if (steal > 0 && damage > 0) {
 				HP = Math.min(HT, HP + Math.max(1, Math.round(damage * steal)));
+			}
+
+			// 红包连击：追加数次半伤害命中
+			int comboHits = Math.min(10,
+					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.combo(this));
+			for (int i = 0; i < comboHits && enemy != null && enemy.isAlive(); i++) {
+				enemy.damage(new com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo(
+						Math.max(1, damage / 2),
+						com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.PHYSICAL,
+						this, attackingWeapon(), this));
 			}
 
 			return damage;

@@ -1,6 +1,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -8,8 +10,8 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 /**
- * 怪物拾取红包后的属性强化记录。
- * 怪物只会获得强化，不会像英雄一样被红包削弱。
+ * 怪物拾取红包后的全局强化记录。
+ * 属性由本局所有怪物共享、永久保留，新生成怪物也会继承；装备仍是拾取者本地使用。
  */
 public class MobEnvelope extends Buff {
 
@@ -25,18 +27,30 @@ public class MobEnvelope extends Buff {
 	public static final String RCH = "rch";
 	public static final String CHG = "chg";
 	public static final String STEAL = "steal";
-	/** 立即回血，不进入持久属性列表。 */
-	public static final String LIFE = "life";
-	/** 立即放出一只当前层级可生成的怪物。 */
-	public static final String MONSTER = "monster";
+	public static final String COMBO = "combo";
 
-	/** 属性池数量：10 项旧属性 + 充能/吸血 + 立即回血 + 怪物。 */
+	/** 属性池数量：11 项旧属性 + 充能/吸血/连击 + 立即回血。 */
 	public static final int STAT_COUNT = 14;
 
+	private static final String G_DMG = "g_mobenv_dmg";
+	private static final String G_DEF = "g_mobenv_def";
+	private static final String G_ACC = "g_mobenv_acc";
+	private static final String G_EVA = "g_mobenv_eva";
+	private static final String G_SPD = "g_mobenv_spd";
+	private static final String G_HP = "g_mobenv_hp";
+	private static final String G_ATK = "g_mobenv_atk";
+	private static final String G_SIGHT = "g_mobenv_sight";
+	private static final String G_ENCH = "g_mobenv_ench";
+	private static final String G_RCH = "g_mobenv_rch";
+	private static final String G_CHG = "g_mobenv_chg";
+	private static final String G_STEAL = "g_mobenv_steal";
+	private static final String G_COMBO = "g_mobenv_combo";
+	private static final String G_PICKUPS = "g_mobenv_pickups";
+
+	private static float gDmg, gDef, gAcc, gEva, gSpd, gHp, gAtk, gSight, gEnch, gChg, gSteal;
+	private static int gRch, gCombo, gPickups;
+
 	private int count = 0;
-	private float dmg = 0f, def = 0f, acc = 0f, eva = 0f, spd = 0f, hp = 0f, atk = 0f, sight = 0f, ench = 0f;
-	private float chg = 0f, steal = 0f;
-	private int rch = 0;
 
 	public int count() {
 		return count;
@@ -46,10 +60,6 @@ public class MobEnvelope extends Buff {
 		return Random.Float(0.01f, 0.05f);
 	}
 
-	/**
-	 * 无法移动的怪物不拾取红包、也不承受红包效果。
-	 * 直接在 attachTo 层拦截，旧存档里的残留 Buff 重新挂载时也会被丢弃。
-	 */
 	public static boolean affects(Char ch) {
 		return ch != null && !Char.hasProp(ch, Char.Property.IMMOVABLE);
 	}
@@ -62,10 +72,11 @@ public class MobEnvelope extends Buff {
 		return super.attachTo(target);
 	}
 
-	/** 记录拾取到一个红包（不增加属性）。 */
+	/** 记录拾取到一个红包。 */
 	public void recordPickup() {
 		if (affects(target)) {
 			count++;
+			gPickups++;
 		}
 	}
 
@@ -74,83 +85,135 @@ public class MobEnvelope extends Buff {
 			return;
 		}
 		switch (Random.Int(STAT_COUNT)) {
-			case 0: dmg += roll(); break;
-			case 1: def += roll(); break;
-			case 2: acc += roll(); break;
-			case 3: eva += roll(); break;
-			case 4: spd += roll(); break;
-			case 5: atk += roll(); break;
+			case 0: gDmg += roll(); break;
+			case 1: gDef += roll(); break;
+			case 2: gAcc += roll(); break;
+			case 3: gEva += roll(); break;
+			case 4: gSpd += roll(); break;
+			case 5: gAtk += roll(); break;
 			case 6:
 				float pct = roll();
-				hp += pct;
-				int gain = Math.max(1, Math.round(target.HT * pct));
-				target.HT += gain;
-				target.HP += gain;
+				float oldMult = Math.max(0.2f, 1f + gHp);
+				gHp += pct;
+				float newMult = Math.max(0.2f, 1f + gHp);
+				if (Dungeon.level != null) {
+					for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
+						if (mob.alignment == Char.Alignment.ENEMY && affects(mob)) {
+							int before = mob.HT;
+							mob.HT = Math.max(1, Math.round(mob.HT / oldMult * newMult));
+							mob.HP = Math.min(mob.HT, mob.HP + Math.max(0, mob.HT - before));
+						}
+					}
+				}
 				break;
-			case 7: sight += roll(); break;
-			case 8: ench += roll(); break;
-			case 9: rch += Random.IntRange(1, 2); break;
-			case 10: chg += roll(); break;
-			case 11: steal += roll(); break;
-			case 12:
+			case 7: gSight += roll(); break;
+			case 8: gEnch += roll(); break;
+			case 9: gRch += Random.IntRange(1, 2); break;
+			case 10: gChg += roll(); break;
+			case 11: gSteal += roll(); break;
+			case 12: gCombo += 1; break;
+			default:
 				int heal = Math.max(1, Math.round(target.HT * roll()));
 				target.HP = Math.min(target.HT, target.HP + heal);
-				break;
-			default:
-				Hongbao.spawnMonster(target != null ? target.pos : 0);
 				break;
 		}
 	}
 
 	public float get(String stat) {
 		switch (stat) {
-			case DMG: return dmg;
-			case DEF: return def;
-			case ACC: return acc;
-			case EVA: return eva;
-			case SPD: return spd;
-			case ATK: return atk;
-			case HP: return hp;
-			case SIGHT: return sight;
-			case ENCH: return ench;
-			case CHG: return chg;
-			case STEAL: return steal;
+			case DMG: return gDmg;
+			case DEF: return gDef;
+			case ACC: return gAcc;
+			case EVA: return gEva;
+			case SPD: return gSpd;
+			case HP: return gHp;
+			case ATK: return gAtk;
+			case SIGHT: return gSight;
+			case ENCH: return gEnch;
+			case CHG: return gChg;
+			case STEAL: return gSteal;
+			case COMBO: return gCombo;
 			default: return 0f;
 		}
 	}
 
 	public int reachBonus() {
-		return rch;
+		return gRch;
 	}
 
-	/** 取该属性带来的倍率（1 + 累计强化值），最低保留 20%。 */
 	public static float mult(Char ch, String stat) {
 		if (!affects(ch)) {
 			return 1f;
 		}
-		MobEnvelope b = ch.buff(MobEnvelope.class);
-		if (b == null) {
-			return 1f;
+		float value;
+		switch (stat) {
+			case DMG: value = gDmg; break;
+			case DEF: value = gDef; break;
+			case ACC: value = gAcc; break;
+			case EVA: value = gEva; break;
+			case SPD: value = gSpd; break;
+			case HP: value = gHp; break;
+			case ATK: value = gAtk; break;
+			case SIGHT: value = gSight; break;
+			case ENCH: value = gEnch; break;
+			case CHG: value = gChg; break;
+			case STEAL: value = gSteal; break;
+			case COMBO: value = gCombo; break;
+			default: value = 0f; break;
 		}
-		return Math.max(0.2f, 1f + b.get(stat));
+		return Math.max(0.2f, 1f + value);
 	}
 
-	/** 怪物从红包获得的额外攻击距离（格）。 */
 	public static int reachBonus(Char ch) {
-		if (!affects(ch)) {
-			return 0;
-		}
-		MobEnvelope b = ch.buff(MobEnvelope.class);
-		return b == null ? 0 : b.reachBonus();
+		return affects(ch) ? gRch : 0;
 	}
 
-	/** 吸血比例。怪物只取正值。 */
 	public static float steal(Char ch) {
-		if (!affects(ch)) {
-			return 0f;
+		return affects(ch) ? Math.max(0f, gSteal) : 0f;
+	}
+
+	public static int combo(Char ch) {
+		return affects(ch) ? gCombo : 0;
+	}
+
+	public static int globalPickups() {
+		return gPickups;
+	}
+
+	public static boolean hasGlobalGains() {
+		return gPickups > 0;
+	}
+
+	/** 新生成/重新加入的怪物继承已累计的生命上限强化。 */
+	public static void applyGlobalHP(Mob mob) {
+		if (!affects(mob)) {
+			return;
 		}
-		MobEnvelope b = ch.buff(MobEnvelope.class);
-		return b == null ? 0f : Math.max(0f, b.steal);
+		mob.HT = Math.max(1, Math.round(mob.HT * Math.max(0.2f, 1f + gHp)));
+		mob.HP = Math.min(mob.HT, mob.HP);
+	}
+
+	public static void resetGlobal() {
+		gDmg = gDef = gAcc = gEva = gSpd = gHp = gAtk = gSight = gEnch = gChg = gSteal = 0f;
+		gRch = gCombo = gPickups = 0;
+	}
+
+	public static void storeGlobal(Bundle bundle) {
+		bundle.put(G_DMG, gDmg); bundle.put(G_DEF, gDef); bundle.put(G_ACC, gAcc);
+		bundle.put(G_EVA, gEva); bundle.put(G_SPD, gSpd); bundle.put(G_HP, gHp);
+		bundle.put(G_ATK, gAtk); bundle.put(G_SIGHT, gSight); bundle.put(G_ENCH, gEnch);
+		bundle.put(G_RCH, gRch); bundle.put(G_CHG, gChg); bundle.put(G_STEAL, gSteal);
+		bundle.put(G_COMBO, gCombo); bundle.put(G_PICKUPS, gPickups);
+	}
+
+	public static void restoreGlobal(Bundle bundle) {
+		gDmg = bundle.getFloat(G_DMG); gDef = bundle.getFloat(G_DEF);
+		gAcc = bundle.getFloat(G_ACC); gEva = bundle.getFloat(G_EVA);
+		gSpd = bundle.getFloat(G_SPD); gHp = bundle.getFloat(G_HP);
+		gAtk = bundle.getFloat(G_ATK); gSight = bundle.getFloat(G_SIGHT);
+		gEnch = bundle.getFloat(G_ENCH); gRch = bundle.getInt(G_RCH);
+		gChg = bundle.getFloat(G_CHG); gSteal = bundle.getFloat(G_STEAL);
+		gCombo = bundle.getInt(G_COMBO); gPickups = bundle.getInt(G_PICKUPS);
 	}
 
 	@Override
@@ -172,9 +235,14 @@ public class MobEnvelope extends Buff {
 	@Override
 	public String desc() {
 		return Messages.get(this, "desc", count,
-				pct(dmg), pct(def), pct(acc), pct(eva), pct(spd), pct(hp), pct(atk),
-				pct(sight), pct(ench), signedInt(rch), pct(chg),
-				pct(steal));
+				pct(gDmg), pct(gDef), pct(gAcc), pct(gEva), pct(gSpd), pct(gHp), pct(gAtk),
+				pct(gSight), pct(gEnch), signedInt(gRch), pct(gChg), pct(gSteal), signedInt(gCombo));
+	}
+
+	public static String globalDesc() {
+		return Messages.get(MobEnvelope.class, "desc", gPickups,
+				pct(gDmg), pct(gDef), pct(gAcc), pct(gEva), pct(gSpd), pct(gHp), pct(gAtk),
+				pct(gSight), pct(gEnch), signedInt(gRch), pct(gChg), pct(gSteal), signedInt(gCombo));
 	}
 
 	public static String pct(float v) {
@@ -189,35 +257,11 @@ public class MobEnvelope extends Buff {
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put("count", count);
-		bundle.put("dmg", dmg);
-		bundle.put("def", def);
-		bundle.put("acc", acc);
-		bundle.put("eva", eva);
-		bundle.put("spd", spd);
-		bundle.put("hp", hp);
-		bundle.put("atk", atk);
-		bundle.put("sight", sight);
-		bundle.put("ench", ench);
-		bundle.put("rch", rch);
-		bundle.put("chg", chg);
-		bundle.put("steal", steal);
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		count = bundle.getInt("count");
-		dmg = bundle.getFloat("dmg");
-		def = bundle.getFloat("def");
-		acc = bundle.getFloat("acc");
-		eva = bundle.getFloat("eva");
-		spd = bundle.getFloat("spd");
-		hp = bundle.getFloat("hp");
-		atk = bundle.getFloat("atk");
-		sight = bundle.getFloat("sight");
-		ench = bundle.getFloat("ench");
-		rch = bundle.getInt("rch");
-		chg = bundle.getFloat("chg");
-		steal = bundle.getFloat("steal");
 	}
 }

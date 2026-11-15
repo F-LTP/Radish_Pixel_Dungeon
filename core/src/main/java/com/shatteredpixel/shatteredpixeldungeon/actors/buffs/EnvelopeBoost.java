@@ -30,19 +30,20 @@ public class EnvelopeBoost extends Buff {
 	public static final String RCH = "rch";
 	public static final String CHG = "chg";
 	public static final String STEAL = "steal";
+	public static final String COMBO = "combo";
 	/** 立即加血/扣血，不进入持久属性列表。 */
 	public static final String LIFE = "life";
 	/** 立即放出一只当前层级可生成的怪物。 */
 	public static final String MONSTER = "monster";
 
-	/** 英雄开红包时，属性被削弱（负值）的概率。 */
-	public static final float NEGATIVE_CHANCE = 0.35f;
+	/** 红包不再出现减少属性的效果。 */
+	public static final float NEGATIVE_CHANCE = 0f;
 
-	/** 属性池数量：10 项旧属性 + 充能/吸血 + 立即加血扣血 + 怪物。 */
-	public static final int STAT_COUNT = 14;
+	/** 属性池数量：10 项旧属性 + 充能/吸血 + 连击 + 立即加血扣血 + 怪物。 */
+	public static final int STAT_COUNT = 15;
 
 	private float dmg, def, acc, eva, spd, hp, atk, sight, ench, chg, steal;
-	private int rch;
+	private int rch, combo;
 
 	public void roll() {
 		boolean curse = Random.Float() < NEGATIVE_CHANCE;
@@ -83,6 +84,12 @@ public class EnvelopeBoost extends Buff {
 				applyLifeChange(life);
 				stat = LIFE;
 				value = signedInt(life);
+				break;
+			case 13:
+				// 连击次数：每次红包最多 +1
+				combo++;
+				stat = COMBO;
+				value = signedInt(1);
 				break;
 			default:
 				// 怪物：从当前层级可生成的怪物中随机放出一只
@@ -143,6 +150,7 @@ public class EnvelopeBoost extends Buff {
 			case ENCH: return ench;
 			case CHG: return chg;
 			case STEAL: return steal;
+			case COMBO: return combo;
 			default: return 0f;
 		}
 	}
@@ -170,6 +178,12 @@ public class EnvelopeBoost extends Buff {
 	public static float steal(Char ch) {
 		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
 		return b == null ? 0f : b.steal;
+	}
+
+	/** 连击次数：每次攻击后追加的额外命中次数。 */
+	public static int combo(Char ch) {
+		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
+		return b == null ? 0 : b.combo;
 	}
 
 	public static String pct(float v) {
@@ -207,7 +221,7 @@ public class EnvelopeBoost extends Buff {
 		return Messages.get(this, "desc",
 				signedPct(dmg), signedPct(def), signedPct(acc), signedPct(eva), signedPct(spd),
 				signedPct(hp), signedPct(atk), signedPct(sight), signedPct(ench), signedInt(rch),
-				signedPct(chg), signedPct(steal));
+				signedPct(chg), signedPct(steal), signedInt(combo));
 	}
 
 	@Override
@@ -217,6 +231,7 @@ public class EnvelopeBoost extends Buff {
 		bundle.put("eva", eva); bundle.put("spd", spd); bundle.put("hp", hp);
 		bundle.put("atk", atk); bundle.put("sight", sight); bundle.put("ench", ench);
 		bundle.put("rch", rch); bundle.put("chg", chg); bundle.put("steal", steal);
+		bundle.put("combo", combo);
 	}
 
 	@Override
@@ -228,5 +243,6 @@ public class EnvelopeBoost extends Buff {
 		atk = bundle.getFloat("atk"); sight = bundle.getFloat("sight");
 		ench = bundle.getFloat("ench"); rch = bundle.getInt("rch");
 		chg = bundle.getFloat("chg"); steal = bundle.getFloat("steal");
+		combo = bundle.getInt("combo");
 	}
 }

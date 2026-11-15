@@ -86,6 +86,12 @@ public class Hongbao {
 			}
 			Dungeon.level.drop(new RedEnvelope(), cell);
 			CellEmitter.get(cell).burst(Speck.factory(Speck.LIGHT), 8);
+			// 红包出现时叫醒所有可移动的敌人，并让它们朝红包移动
+			for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
+				if (mob.alignment == Char.Alignment.ENEMY && MobEnvelope.affects(mob)) {
+					mob.beckon(cell);
+				}
+			}
 			return;
 		}
 	}
@@ -129,6 +135,20 @@ public class Hongbao {
 		Dungeon.level.occupyCell(mob);
 		mob.beckon(Dungeon.hero.pos);
 		GLog.w(Messages.get(Hongbao.class, "monster"));
+	}
+
+	/** 每回合给玩家视野内的红包加一点高亮粒子。 */
+	public static void highlightEnvelopes() {
+		if (!active() || Dungeon.level == null) {
+			return;
+		}
+		for (int cell : Dungeon.level.heaps.keyArray()) {
+			Heap heap = Dungeon.level.heaps.get(cell);
+			if (heap != null && !heap.isEmpty() && heap.peek() instanceof RedEnvelope
+					&& cell < Dungeon.level.heroFOV.length && Dungeon.level.heroFOV[cell]) {
+				CellEmitter.get(cell).burst(Speck.factory(Speck.LIGHT), 2);
+			}
+		}
 	}
 
 	public static int visibleEnvelope(Char ch) {
@@ -313,19 +333,55 @@ public class Hongbao {
 		}
 		final int boltDamage = Math.max(1, dmg);
 
+		// 不同法杖使用不同的弹道/伤害类型，避免所有法杖都变成魔弹
+		int boltType = MagicMissile.MAGIC_MISSILE;
+		DamageType damageType = DamageType.MAGICAL;
+		if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFrost) {
+			boltType = MagicMissile.FROST;
+			damageType = DamageType.FROST;
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFireblast) {
+			boltType = MagicMissile.FIRE;
+			damageType = DamageType.FIRE;
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLightning) {
+			boltType = MagicMissile.SHAMAN_BLUE;
+			damageType = DamageType.LIGHTNING;
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorrosion) {
+			boltType = MagicMissile.CORROSION;
+			damageType = DamageType.CORROSIVE;
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave) {
+			boltType = MagicMissile.FORCE;
+			damageType = DamageType.PHYSICAL;
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth) {
+			boltType = MagicMissile.EARTH;
+			damageType = DamageType.PHYSICAL;
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfPrismaticLight) {
+			boltType = MagicMissile.RAINBOW;
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfRegrowth) {
+			boltType = MagicMissile.FOLIAGE;
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding) {
+			boltType = MagicMissile.WARD;
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfTransfusion
+				|| wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorruption) {
+			boltType = MagicMissile.SHADOW;
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration) {
+			boltType = MagicMissile.BEACON;
+		}
+		final int finalBoltType = boltType;
+		final DamageType finalDamageType = damageType;
+
 		if (mob.sprite == null || mob.sprite.parent == null) {
-			enemy.damage(new DamageInfo(boltDamage, DamageType.MAGICAL, mob, wand, wand));
+			enemy.damage(new DamageInfo(boltDamage, finalDamageType, mob, wand, wand));
 			return true;
 		}
 
 		Sample.INSTANCE.play(Assets.Sounds.ZAP);
-		MagicMissile.boltFromChar(mob.sprite.parent, MagicMissile.MAGIC_MISSILE,
+		MagicMissile.boltFromChar(mob.sprite.parent, finalBoltType,
 				mob.sprite, enemy.pos, new Callback() {
 					@Override
 					public void call() {
 						if (enemy.isAlive()) {
 							enemy.damage(new DamageInfo(
-									boltDamage, DamageType.MAGICAL, mob, wand, wand));
+									boltDamage, finalDamageType, mob, wand, wand));
 						}
 					}
 				});
