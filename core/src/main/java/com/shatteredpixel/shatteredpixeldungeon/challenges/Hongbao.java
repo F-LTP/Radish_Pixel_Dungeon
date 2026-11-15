@@ -46,11 +46,13 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.DamageWand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Callback;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
@@ -89,13 +91,42 @@ public class Hongbao {
 	/**
 	 * 从当前层级可生成的怪物中随机放出一只（用于红包里的“怪物”结果）。
 	 */
-	public static void spawnMonster() {
+	public static void spawnMonster(int cell) {
 		if (Dungeon.level == null || Dungeon.hero == null || !Dungeon.hero.isAlive()) {
 			return;
 		}
-		if (Dungeon.level.spawnMob(2)) {
-			GLog.w(Messages.get(Hongbao.class, "monster"));
+		Mob mob = Dungeon.level.createMob();
+		if (mob == null) {
+			return;
 		}
+
+		int pos = -1;
+		if (cell >= 0 && cell < Dungeon.level.length()
+				&& Dungeon.level.passable[cell] && Actor.findChar(cell) == null) {
+			pos = cell;
+		} else {
+			for (int offset : PathFinder.NEIGHBOURS8) {
+				int p = cell + offset;
+				if (p >= 0 && p < Dungeon.level.length()
+						&& Dungeon.level.passable[p] && Actor.findChar(p) == null) {
+					pos = p;
+					break;
+				}
+			}
+		}
+		if (pos == -1) {
+			pos = Dungeon.level.randomRespawnCell(mob);
+		}
+		if (pos == -1) {
+			return;
+		}
+
+		mob.pos = pos;
+		mob.state = mob.WANDERING;
+		GameScene.add(mob);
+		Dungeon.level.occupyCell(mob);
+		mob.beckon(Dungeon.hero.pos);
+		GLog.w(Messages.get(Hongbao.class, "monster"));
 	}
 
 	public static int visibleEnvelope(Char ch) {
@@ -210,13 +241,16 @@ public class Hongbao {
 				}
 				return false;
 			case 4: {
-				for (int i = 0; i < 3; i++) {
-					Item generated = Generator.random(Generator.Category.WAND);
-					if (generated instanceof Wand) {
-						Wand wand = (Wand) generated;
-						wand.identify();
-						mobUseWand(mob, wand);
-						return true;
+				if (mob.mobEquipment.wand == null) {
+					for (int i = 0; i < 3; i++) {
+						Item generated = Generator.random(Generator.Category.WAND);
+						if (generated instanceof Wand) {
+							Wand wand = (Wand) generated;
+							wand.identify();
+							mob.mobEquipment.wand = wand;
+							mobLog(mob, "mob_equip", mob.name(), wand.name());
+							return true;
+						}
 					}
 				}
 				return false;
@@ -245,16 +279,23 @@ public class Hongbao {
 
 
 	private static int mobStrength() {
-		// 怪物按层数获得大致与英雄成长相近的力量
-		return 10 + Math.min(8, ((Math.max(1, Dungeon.depth) - 1) / 5) * 2);
+		// 1-5 层 12 力量，之后每 5 层 +2
+		return 12 + ((Math.max(1, Dungeon.depth) - 1) / 5) * 2;
 	}
 
-	private static void mobUseWand(Mob mob, Wand wand) {
-		mobLog(mob, "mob_wand", mob.name(), wand.name());
-		Hero hero = Dungeon.hero;
-		if (hero == null || !hero.isAlive()) {
-			return;
+	public static boolean canMobZap(Mob mob, Char enemy) {
+		return enemy != null && Dungeon.level != null
+				&& mob.fieldOfView != null && mob.fieldOfView.length == Dungeon.level.length()
+				&& mob.fieldOfView[enemy.pos]
+				&& new Ballistica(mob.pos, enemy.pos, Ballistica.MAGIC_BOLT).collisionPos == enemy.pos;
+	}
+
+	public static boolean mobWandAttack(Mob mob, Char enemy) {
+		Wand wand = mob.mobEquipment.wand;
+		if (wand == null || wand.curCharges <= 0 || !canMobZap(mob, enemy)) {
+			return false;
 		}
+		wand.curCharges--;
 
 		int dmg;
 		if (wand instanceof DamageWand) {
@@ -268,21 +309,22 @@ public class Hongbao {
 		final int boltDamage = Math.max(1, dmg);
 
 		if (mob.sprite == null || mob.sprite.parent == null) {
-			hero.damage(new DamageInfo(boltDamage, DamageType.MAGICAL, mob, wand, wand));
-			return;
+			enemy.damage(new DamageInfo(boltDamage, DamageType.MAGICAL, mob, wand, wand));
+			return true;
 		}
 
 		Sample.INSTANCE.play(Assets.Sounds.ZAP);
 		MagicMissile.boltFromChar(mob.sprite.parent, MagicMissile.MAGIC_MISSILE,
-				mob.sprite, hero.pos, new Callback() {
+				mob.sprite, enemy.pos, new Callback() {
 					@Override
 					public void call() {
-						if (Dungeon.hero != null && Dungeon.hero.isAlive()) {
-							Dungeon.hero.damage(new DamageInfo(
+						if (enemy.isAlive()) {
+							enemy.damage(new DamageInfo(
 									boltDamage, DamageType.MAGICAL, mob, wand, wand));
 						}
 					}
 				});
+		return true;
 	}
 
 	/** 有害药水砸向玩家，其余药水由怪物自己立即使用。 */

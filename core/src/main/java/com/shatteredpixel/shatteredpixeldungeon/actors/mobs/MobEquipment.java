@@ -10,6 +10,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
@@ -25,6 +26,7 @@ public class MobEquipment {
 	private static final String RING = "real_intelligence_ring";
 	private static final String POTION = "real_intelligence_potion";
 	private static final String SCROLL = "real_intelligence_scroll";
+	private static final String WAND = "hongbao_wand";
 
 	private final Mob owner;
 
@@ -35,6 +37,7 @@ public class MobEquipment {
 	public Ring ring;
 	public Potion potion;
 	public Scroll scroll;
+	public Wand wand;
 
 	public MobEquipment(Mob owner) {
 		this.owner = owner;
@@ -68,6 +71,7 @@ public class MobEquipment {
 		bundle.put(RING, ring);
 		bundle.put(POTION, potion);
 		bundle.put(SCROLL, scroll);
+		bundle.put(WAND, wand);
 	}
 
 	public void restoreFromBundle(Bundle bundle) {
@@ -80,6 +84,22 @@ public class MobEquipment {
 		ring = activate((Ring) bundle.get(RING));
 		potion = (Potion) bundle.get(POTION);
 		scroll = (Scroll) bundle.get(SCROLL);
+		wand = (Wand) bundle.get(WAND);
+	}
+
+	/** 怪物法杖按回合回复充能；耗尽后恢复普通攻击，充满后自动切回法杖。 */
+	public void tickWand() {
+		if (wand == null || wand.curCharges >= wand.maxCharges) {
+			return;
+		}
+		wand.partialCharge += 0.1f;
+		while (wand.partialCharge >= 1f && wand.curCharges < wand.maxCharges) {
+			wand.partialCharge -= 1f;
+			wand.curCharges++;
+		}
+		if (wand.curCharges >= wand.maxCharges) {
+			wand.partialCharge = 0f;
+		}
 	}
 
 	public void dropAll() {
@@ -90,6 +110,7 @@ public class MobEquipment {
 		drop(ring);
 		drop(potion);
 		drop(scroll);
+		drop(wand);
 		weapon = null;
 		armor = null;
 		artifact = null;
@@ -97,6 +118,7 @@ public class MobEquipment {
 		ring = null;
 		potion = null;
 		scroll = null;
+		wand = null;
 	}
 
 	public ArrayList<Item> carriedItems() {
@@ -108,6 +130,7 @@ public class MobEquipment {
 		if (ring != null) items.add(ring);
 		if (potion != null) items.add(potion);
 		if (scroll != null) items.add(scroll);
+		if (wand != null) items.add(wand);
 		return items;
 	}
 

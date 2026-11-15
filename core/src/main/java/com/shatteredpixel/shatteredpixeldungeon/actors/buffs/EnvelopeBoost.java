@@ -94,7 +94,7 @@ public class EnvelopeBoost extends Buff {
 				break;
 			default:
 				// 怪物：从当前层级可生成的怪物中随机放出一只
-				Hongbao.spawnMonster();
+				Hongbao.spawnMonster(target != null ? target.pos : 0);
 				GLog.w(Messages.get(this, "monster"));
 				return;
 		}

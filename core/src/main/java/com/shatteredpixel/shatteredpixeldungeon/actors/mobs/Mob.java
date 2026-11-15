@@ -312,6 +312,7 @@ public abstract class Mob extends Char {
 	protected boolean act() {
 
 		super.act();
+		mobEquipment.tickWand();
 
 
 
@@ -605,6 +606,11 @@ public abstract class Mob extends Char {
 		if (Dungeon.level.adjacent( pos, enemy.pos )){
 			return true;
 		}
+		// 有充能的法杖允许远程攻击
+		if (mobEquipment.wand != null && mobEquipment.wand.curCharges > 0
+				&& com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.canMobZap(this, enemy)) {
+			return true;
+		}
 		//红包：怪物从红包获得的攻击距离强化
 		int envelopeReach = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.reachBonus(this);
 		if (envelopeReach > 0
@@ -825,6 +831,15 @@ public abstract class Mob extends Char {
 			spend( attackDelay() );
 			return true;
 		}
+	}
+
+	@Override
+	public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
+		if (enemy != null && mobEquipment.wand != null && mobEquipment.wand.curCharges > 0
+				&& com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.canMobZap(this, enemy)) {
+			return com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.mobWandAttack(this, enemy);
+		}
+		return super.attack( enemy, dmgMulti, dmgBonus, accMulti );
 	}
 
 	@Override

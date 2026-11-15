@@ -99,7 +99,7 @@ public class MobEnvelope extends Buff {
 				target.HP = Math.min(target.HT, target.HP + heal);
 				break;
 			default:
-				Hongbao.spawnMonster();
+				Hongbao.spawnMonster(target != null ? target.pos : 0);
 				break;
 		}
 	}
