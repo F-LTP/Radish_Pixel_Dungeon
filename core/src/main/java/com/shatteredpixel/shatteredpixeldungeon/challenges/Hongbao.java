@@ -84,12 +84,22 @@ public class Hongbao {
 			if (heap != null && !heap.isEmpty()) {
 				continue;
 			}
-			Dungeon.level.drop(new RedEnvelope(), cell);
+			Heap envelopeHeap = Dungeon.level.drop(new RedEnvelope(), cell);
+			envelopeHeap.seen = true;
 			CellEmitter.get(cell).burst(Speck.factory(Speck.LIGHT), 8);
-			// 红包出现时叫醒所有可移动的敌人，并让它们朝红包移动
+
+			// 红包出现时让玩家获得该格的视野，并给出提示
+			Dungeon.level.visited[cell] = true;
+			Dungeon.level.mapped[cell] = true;
+			GameScene.updateFog();
+			GLog.p(Messages.get(Hongbao.class, "spawned"));
+
+			// 叫醒所有可移动的敌人，清掉旧的追击目标，让它们先去找红包
 			for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
 				if (mob.alignment == Char.Alignment.ENEMY && MobEnvelope.affects(mob)) {
+					mob.clearEnemy();
 					mob.beckon(cell);
+					mob.state = mob.WANDERING;
 				}
 			}
 			return;
