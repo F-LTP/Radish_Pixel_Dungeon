@@ -1475,12 +1475,6 @@ public class Hero extends Char {
 		BuffIndicator.refreshHero();
 		BuffIndicator.refreshAllBosses();
 
-		//红包挑战：确保计时器存在
-		if (com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.active()
-				&& buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HongbaoClock.class) == null) {
-			Buff.affect(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HongbaoClock.class);
-		}
-
 		// 不消耗时间的阻塞动画播放中（如杂散变身）：真正阻塞英雄行动，让动画一口气播完，不被移动/攻击/ready 打断，也不消耗回合
 		if (animationBusy) {
 			return false;

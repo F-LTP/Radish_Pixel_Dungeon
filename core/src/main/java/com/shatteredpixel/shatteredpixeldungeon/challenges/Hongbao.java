@@ -47,6 +47,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.DamageWand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.levels.RegularLevel;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -80,29 +83,27 @@ public class Hongbao {
 			if (Actor.findChar(cell) != null) {
 				continue;
 			}
+			// 不上锁、不需要条件进入的房间才生成红包
+			if (Dungeon.level instanceof RegularLevel) {
+				Room room = ((RegularLevel) Dungeon.level).room(cell);
+				if (room instanceof SpecialRoom) {
+					continue;
+				}
+			}
 			Heap heap = Dungeon.level.heaps.get(cell);
 			if (heap != null && !heap.isEmpty()) {
 				continue;
 			}
-			Heap envelopeHeap = Dungeon.level.drop(new RedEnvelope(), cell);
-			envelopeHeap.seen = true;
+			Dungeon.level.drop(new RedEnvelope(), cell);
 			CellEmitter.get(cell).burst(Speck.factory(Speck.LIGHT), 8);
-
-			// 红包出现时让玩家获得该格的视野，并给出提示
-			Dungeon.level.visited[cell] = true;
-			Dungeon.level.mapped[cell] = true;
-			GameScene.updateFog();
-			GLog.p(Messages.get(Hongbao.class, "spawned"));
-
-			// 叫醒所有可移动的敌人，清掉旧的追击目标，让它们先去找红包
-			for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])) {
-				if (mob.alignment == Char.Alignment.ENEMY && MobEnvelope.affects(mob)) {
-					mob.clearEnemy();
-					mob.beckon(cell);
-					mob.state = mob.WANDERING;
-				}
-			}
 			return;
+		}
+	}
+
+	/** 每层开局在随机位置生成 5 个红包。 */
+	public static void spawnFloorEnvelopes() {
+		for (int i = 0; i < 5; i++) {
+			spawn();
 		}
 	}
 

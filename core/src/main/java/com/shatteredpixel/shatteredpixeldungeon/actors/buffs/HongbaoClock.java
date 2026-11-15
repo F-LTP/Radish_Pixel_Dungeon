@@ -11,13 +11,7 @@ public class HongbaoClock extends Buff {
 
 	@Override
 	public boolean act() {
-		if (Hongbao.active()) {
-			turns++;
-			if (turns >= Hongbao.SPAWN_INTERVAL) {
-				turns = 0;
-				Hongbao.spawn();
-			}
-		}
+		// 红包改为每层开局生成，旧的计时器只保留兼容，不再刷新红包。
 		spend(TICK);
 		return true;
 	}

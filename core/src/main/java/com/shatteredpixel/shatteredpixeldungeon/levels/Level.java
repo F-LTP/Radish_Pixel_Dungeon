@@ -159,6 +159,9 @@ public abstract class Level implements Bundlable {
 
 	public boolean[] heroFOV;
 
+	/** 本层红包是否已经生成过。 */
+	public boolean hongbaoSpawned = false;
+
 	public boolean[] passable;
 	public boolean[] losBlocking;
 	public boolean[] flamable;

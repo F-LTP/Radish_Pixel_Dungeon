@@ -569,8 +569,6 @@ public class Dungeon {
 	
 	public static void switchLevel( final Level level, int pos ) {
 
-		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.onLevelEnter(depth, branchId);
-
 		//Position of -2 specifically means trying to place the hero the exit
 		if (pos == -2){
 			LevelTransition t = level.getTransition(LevelTransition.Type.REGULAR_EXIT);
@@ -613,6 +611,12 @@ public class Dungeon {
 			}
 		}
 		
+		if (levelJustGenerated && !level.hongbaoSpawned
+				&& com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.active()) {
+			level.hongbaoSpawned = true;
+			com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.spawnFloorEnvelopes();
+		}
+
 		Light light = hero.buff( Light.class );
 		hero.viewDistance = light == null ? level.viewDistance : Math.max( Light.DISTANCE, level.viewDistance );
 		
