@@ -1323,7 +1323,6 @@ public class Hero extends Char {
 		}
 
         delay /= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.ATK);
-        delay /= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.attackCountMult(this);
         return delay/speed;
     }
 

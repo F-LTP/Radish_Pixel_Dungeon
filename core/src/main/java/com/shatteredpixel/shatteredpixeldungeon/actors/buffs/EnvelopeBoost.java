@@ -29,7 +29,6 @@ public class EnvelopeBoost extends Buff {
 	public static final String ENCH = "ench";
 	public static final String RCH = "rch";
 	public static final String CHG = "chg";
-	public static final String APT = "apt";
 	public static final String STEAL = "steal";
 	/** 立即加血/扣血，不进入持久属性列表。 */
 	public static final String LIFE = "life";
@@ -39,10 +38,10 @@ public class EnvelopeBoost extends Buff {
 	/** 英雄开红包时，属性被削弱（负值）的概率。 */
 	public static final float NEGATIVE_CHANCE = 0.35f;
 
-	/** 属性池数量：10 项旧属性 + 充能/攻击次数/吸血 + 立即加血扣血 + 怪物。 */
-	public static final int STAT_COUNT = 15;
+	/** 属性池数量：10 项旧属性 + 充能/吸血 + 立即加血扣血 + 怪物。 */
+	public static final int STAT_COUNT = 14;
 
-	private float dmg, def, acc, eva, spd, hp, atk, sight, ench, chg, apt, steal;
+	private float dmg, def, acc, eva, spd, hp, atk, sight, ench, chg, steal;
 	private int rch;
 
 	public void roll() {
@@ -74,15 +73,8 @@ public class EnvelopeBoost extends Buff {
 				value = signedInt(reachDelta);
 				break;
 			case 10: chg += amount; stat = CHG; value = signedPct(amount); break;
-			case 11:
-				// 每回合攻击次数：正数表示每回合额外攻击次数；负数表示攻击间隔
-				float aptDelta = Random.Float(0.1f, 0.3f) * (curse ? -1f : 1f);
-				apt += aptDelta;
-				stat = APT;
-				value = attackText(aptDelta);
-				break;
-			case 12: steal += amount; stat = STEAL; value = signedPct(amount); break;
-			case 13:
+			case 11: steal += amount; stat = STEAL; value = signedPct(amount); break;
+			case 12:
 				// 加血扣血：立即改变当前生命，不改变生命上限
 				int life = Math.max(1, Math.round(target == null ? 1 : target.HT * Math.abs(amount)));
 				if (curse) {
@@ -150,7 +142,6 @@ public class EnvelopeBoost extends Buff {
 			case SIGHT: return sight;
 			case ENCH: return ench;
 			case CHG: return chg;
-			case APT: return apt;
 			case STEAL: return steal;
 			default: return 0f;
 		}
@@ -175,15 +166,6 @@ public class EnvelopeBoost extends Buff {
 		return b == null ? 0 : b.reachBonus();
 	}
 
-	/** 每回合攻击次数倍率：1 + 额外次数；负数会拉长攻击间隔。 */
-	public static float attackCountMult(Char ch) {
-		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
-		if (b == null) {
-			return 1f;
-		}
-		return Math.max(0.2f, 1f + b.apt);
-	}
-
 	/** 吸血比例（可为负，负值代表攻击时反噬）。 */
 	public static float steal(Char ch) {
 		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
@@ -202,17 +184,6 @@ public class EnvelopeBoost extends Buff {
 	/** 带符号的整数：+1 / -1。 */
 	public static String signedInt(int v) {
 		return (v >= 0 ? "+" : "") + v;
-	}
-
-	/** 攻击次数文案：正数显示每回合额外次数，负数显示攻击一次需要的回合数。 */
-	public static String attackText(float apt) {
-		if (apt >= 0f) {
-			return Messages.get(EnvelopeBoost.class, "apt_more",
-					Messages.decimalFormat("#.##", apt));
-		}
-		float turns = 1f / Math.max(0.2f, 1f + apt);
-		return Messages.get(EnvelopeBoost.class, "apt_less",
-				Messages.decimalFormat("#.##", turns));
 	}
 
 	@Override
@@ -236,7 +207,7 @@ public class EnvelopeBoost extends Buff {
 		return Messages.get(this, "desc",
 				signedPct(dmg), signedPct(def), signedPct(acc), signedPct(eva), signedPct(spd),
 				signedPct(hp), signedPct(atk), signedPct(sight), signedPct(ench), signedInt(rch),
-				signedPct(chg), attackText(apt), signedPct(steal));
+				signedPct(chg), signedPct(steal));
 	}
 
 	@Override
@@ -245,8 +216,7 @@ public class EnvelopeBoost extends Buff {
 		bundle.put("dmg", dmg); bundle.put("def", def); bundle.put("acc", acc);
 		bundle.put("eva", eva); bundle.put("spd", spd); bundle.put("hp", hp);
 		bundle.put("atk", atk); bundle.put("sight", sight); bundle.put("ench", ench);
-		bundle.put("rch", rch); bundle.put("chg", chg); bundle.put("apt", apt);
-		bundle.put("steal", steal);
+		bundle.put("rch", rch); bundle.put("chg", chg); bundle.put("steal", steal);
 	}
 
 	@Override
@@ -257,7 +227,6 @@ public class EnvelopeBoost extends Buff {
 		spd = bundle.getFloat("spd"); hp = bundle.getFloat("hp");
 		atk = bundle.getFloat("atk"); sight = bundle.getFloat("sight");
 		ench = bundle.getFloat("ench"); rch = bundle.getInt("rch");
-		chg = bundle.getFloat("chg"); apt = bundle.getFloat("apt");
-		steal = bundle.getFloat("steal");
+		chg = bundle.getFloat("chg"); steal = bundle.getFloat("steal");
 	}
 }

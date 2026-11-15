@@ -815,7 +815,6 @@ public abstract class Mob extends Char {
 		} else {
 			delay /= RingOfFuror.attackSpeedMultiplier(this);
 		}
-		delay /= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.attackCountMult(this);
 		return delay;
 	}
 
