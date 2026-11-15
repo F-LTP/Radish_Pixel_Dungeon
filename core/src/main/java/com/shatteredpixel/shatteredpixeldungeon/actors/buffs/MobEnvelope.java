@@ -46,9 +46,13 @@ public class MobEnvelope extends Buff {
 	private static final String G_STEAL = "g_mobenv_steal";
 	private static final String G_COMBO = "g_mobenv_combo";
 	private static final String G_PICKUPS = "g_mobenv_pickups";
+	private static final String G_LAST_DEPTH = "g_mobenv_last_depth";
+	private static final String G_LAST_BRANCH = "g_mobenv_last_branch";
 
 	private static float gDmg, gDef, gAcc, gEva, gSpd, gHp, gAtk, gSight, gEnch, gChg, gSteal;
 	private static int gRch, gCombo, gPickups;
+	private static int lastDepth = -1;
+	private static String lastBranch = "";
 
 	private int count = 0;
 
@@ -198,6 +202,17 @@ public class MobEnvelope extends Buff {
 	public static void resetGlobal() {
 		gDmg = gDef = gAcc = gEva = gSpd = gHp = gAtk = gSight = gEnch = gChg = gSteal = 0f;
 		gRch = gCombo = gPickups = 0;
+		lastDepth = -1;
+		lastBranch = "";
+	}
+
+	/** 红包强化只对当前楼层生效；换层/进入另一层的关卡时清空。 */
+	public static void onLevelEnter(int depth, String branch) {
+		if (depth != lastDepth || !branch.equals(lastBranch)) {
+			resetGlobal();
+		}
+		lastDepth = depth;
+		lastBranch = branch;
 	}
 
 	public static void storeGlobal(Bundle bundle) {
@@ -206,6 +221,7 @@ public class MobEnvelope extends Buff {
 		bundle.put(G_ATK, gAtk); bundle.put(G_SIGHT, gSight); bundle.put(G_ENCH, gEnch);
 		bundle.put(G_RCH, gRch); bundle.put(G_CHG, gChg); bundle.put(G_STEAL, gSteal);
 		bundle.put(G_COMBO, gCombo); bundle.put(G_PICKUPS, gPickups);
+		bundle.put(G_LAST_DEPTH, lastDepth); bundle.put(G_LAST_BRANCH, lastBranch);
 	}
 
 	public static void restoreGlobal(Bundle bundle) {
@@ -216,6 +232,7 @@ public class MobEnvelope extends Buff {
 		gEnch = bundle.getFloat(G_ENCH); gRch = bundle.getInt(G_RCH);
 		gChg = bundle.getFloat(G_CHG); gSteal = bundle.getFloat(G_STEAL);
 		gCombo = bundle.getInt(G_COMBO); gPickups = bundle.getInt(G_PICKUPS);
+		lastDepth = bundle.getInt(G_LAST_DEPTH); lastBranch = bundle.getString(G_LAST_BRANCH);
 	}
 
 	@Override

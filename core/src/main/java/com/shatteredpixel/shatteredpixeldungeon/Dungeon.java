@@ -569,6 +569,8 @@ public class Dungeon {
 	
 	public static void switchLevel( final Level level, int pos ) {
 
+		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.onLevelEnter(depth, branchId);
+
 		//Position of -2 specifically means trying to place the hero the exit
 		if (pos == -2){
 			LevelTransition t = level.getTransition(LevelTransition.Type.REGULAR_EXIT);
