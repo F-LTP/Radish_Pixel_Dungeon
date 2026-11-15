@@ -251,6 +251,9 @@ public class Hongbao {
 							wand.identify();
 							mob.mobEquipment.wand = wand;
 							mobLog(mob, "mob_equip", mob.name(), wand.name());
+							if (Dungeon.hero != null && canMobZap(mob, Dungeon.hero)) {
+								mobWandAttack(mob, Dungeon.hero);
+							}
 							return true;
 						}
 					}
@@ -289,12 +292,12 @@ public class Hongbao {
 		return enemy != null && Dungeon.level != null
 				&& mob.fieldOfView != null && mob.fieldOfView.length == Dungeon.level.length()
 				&& mob.fieldOfView[enemy.pos]
-				&& new Ballistica(mob.pos, enemy.pos, Ballistica.MAGIC_BOLT).collisionPos == enemy.pos;
+				&& Dungeon.level.distance(mob.pos, enemy.pos) <= 10;
 	}
 
 	public static boolean mobWandAttack(Mob mob, Char enemy) {
 		Wand wand = mob.mobEquipment.wand;
-		if (wand == null || wand.curCharges <= 0 || !canMobZap(mob, enemy)) {
+		if (wand == null || wand.curCharges <= 0 || enemy == null || !enemy.isAlive()) {
 			return false;
 		}
 		wand.curCharges--;

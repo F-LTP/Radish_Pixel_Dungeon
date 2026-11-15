@@ -835,8 +835,7 @@ public abstract class Mob extends Char {
 
 	@Override
 	public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
-		if (enemy != null && mobEquipment.wand != null && mobEquipment.wand.curCharges > 0
-				&& com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.canMobZap(this, enemy)) {
+		if (enemy != null && mobEquipment.wand != null && mobEquipment.wand.curCharges > 0) {
 			return com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.mobWandAttack(this, enemy);
 		}
 		return super.attack( enemy, dmgMulti, dmgBonus, accMulti );
