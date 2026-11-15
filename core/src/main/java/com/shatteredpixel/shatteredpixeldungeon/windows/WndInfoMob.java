@@ -152,7 +152,8 @@ public class WndInfoMob extends Window {
 		String info = mob.info();
 
 		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope envelope = mob.envelopeBoost();
-		if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.hasGlobalGains()) {
+		if (mob.alignment == com.shatteredpixel.shatteredpixeldungeon.actors.Char.Alignment.ENEMY
+				&& com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.hasGlobalGains()) {
 			info += "\n\n" + Messages.get(WndInfoMob.class, "envelope",
 					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.globalPickups())
 					+ "\n" + com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.globalDesc();

@@ -61,7 +61,9 @@ public class MobEnvelope extends Buff {
 	}
 
 	public static boolean affects(Char ch) {
-		return ch != null && !Char.hasProp(ch, Char.Property.IMMOVABLE);
+		return ch != null
+				&& ch.alignment == Char.Alignment.ENEMY
+				&& !Char.hasProp(ch, Char.Property.IMMOVABLE);
 	}
 
 	@Override
