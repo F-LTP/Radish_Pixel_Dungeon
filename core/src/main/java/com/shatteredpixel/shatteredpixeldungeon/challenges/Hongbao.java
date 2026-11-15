@@ -60,7 +60,7 @@ import java.util.ArrayList;
 /** 红包挑战的生成、拾取与奖励逻辑。 */
 public class Hongbao {
 
-	public static final int SPAWN_INTERVAL = 10;
+	public static final int SPAWN_INTERVAL = 15;
 
 	public static boolean active() {
 		return Dungeon.isChallenged(Challenges.HONGBAO);
