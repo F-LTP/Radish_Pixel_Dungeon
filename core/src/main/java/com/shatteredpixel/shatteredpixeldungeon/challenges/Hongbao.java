@@ -5,6 +5,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BlobImmunity;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost;
@@ -16,6 +18,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
@@ -39,6 +42,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurse;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.DamageWand;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
@@ -140,7 +146,7 @@ public class Hongbao {
 	}
 
 	private static boolean mobGetItem(Mob mob) {
-		switch (Random.Int(5)) {
+		switch (Random.Int(6)) {
 			case 0: {
 				for (int i = 0; i < 3; i++) {
 					Item generated = Generator.random(Generator.Category.POTION);
@@ -170,6 +176,10 @@ public class Hongbao {
 					for (int i = 0; i < 3; i++) {
 						Item generated = Generator.random(Generator.Category.WEAPON);
 						if (generated instanceof KindOfWeapon) {
+							if (generated instanceof Weapon
+									&& ((Weapon) generated).STRReq() > mobStrength()) {
+								continue;
+							}
 							KindOfWeapon weapon = (KindOfWeapon) generated;
 							weapon.identify();
 							mob.mobEquipment.weapon = weapon;
@@ -187,6 +197,9 @@ public class Hongbao {
 						Item generated = Generator.random(Generator.Category.ARMOR);
 						if (generated instanceof Armor) {
 							Armor armor = (Armor) generated;
+							if (armor.STRReq() > mobStrength()) {
+								continue;
+							}
 							armor.identify();
 							mob.mobEquipment.armor = armor;
 							armor.activate(mob);
@@ -196,6 +209,18 @@ public class Hongbao {
 					}
 				}
 				return false;
+			case 4: {
+				for (int i = 0; i < 3; i++) {
+					Item generated = Generator.random(Generator.Category.WAND);
+					if (generated instanceof Wand) {
+						Wand wand = (Wand) generated;
+						wand.identify();
+						mobUseWand(mob, wand);
+						return true;
+					}
+				}
+				return false;
+			}
 			default:
 				if (mob.mobEquipment.ring == null || mob.mobEquipment.misc == null) {
 					for (int i = 0; i < 3; i++) {
@@ -216,6 +241,48 @@ public class Hongbao {
 				}
 				return false;
 		}
+	}
+
+
+	private static int mobStrength() {
+		// 怪物按层数获得大致与英雄成长相近的力量
+		return 10 + Math.min(8, ((Math.max(1, Dungeon.depth) - 1) / 5) * 2);
+	}
+
+	private static void mobUseWand(Mob mob, Wand wand) {
+		mobLog(mob, "mob_wand", mob.name(), wand.name());
+		Hero hero = Dungeon.hero;
+		if (hero == null || !hero.isAlive()) {
+			return;
+		}
+
+		int dmg;
+		if (wand instanceof DamageWand) {
+			DamageWand damageWand = (DamageWand) wand;
+			dmg = Random.NormalIntRange(
+					damageWand.min(wand.buffedLvl()),
+					damageWand.max(wand.buffedLvl()));
+		} else {
+			dmg = 4 + 2 * wand.buffedLvl();
+		}
+		final int boltDamage = Math.max(1, dmg);
+
+		if (mob.sprite == null || mob.sprite.parent == null) {
+			hero.damage(new DamageInfo(boltDamage, DamageType.MAGICAL, mob, wand, wand));
+			return;
+		}
+
+		Sample.INSTANCE.play(Assets.Sounds.ZAP);
+		MagicMissile.boltFromChar(mob.sprite.parent, MagicMissile.MAGIC_MISSILE,
+				mob.sprite, hero.pos, new Callback() {
+					@Override
+					public void call() {
+						if (Dungeon.hero != null && Dungeon.hero.isAlive()) {
+							Dungeon.hero.damage(new DamageInfo(
+									boltDamage, DamageType.MAGICAL, mob, wand, wand));
+						}
+					}
+				});
 	}
 
 	/** 有害药水砸向玩家，其余药水由怪物自己立即使用。 */

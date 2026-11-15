@@ -52,34 +52,36 @@ public class EnvelopeBoost extends Buff {
 		String stat;
 		String value;
 		switch (Random.Int(STAT_COUNT)) {
-			case 0: dmg += amount; stat = DMG; value = signedPct(dmg); break;
-			case 1: def += amount; stat = DEF; value = signedPct(def); break;
-			case 2: acc += amount; stat = ACC; value = signedPct(acc); break;
-			case 3: eva += amount; stat = EVA; value = signedPct(eva); break;
-			case 4: spd += amount; stat = SPD; value = signedPct(spd); break;
-			case 5: atk += amount; stat = ATK; value = signedPct(atk); break;
+			case 0: dmg += amount; stat = DMG; value = signedPct(amount); break;
+			case 1: def += amount; stat = DEF; value = signedPct(amount); break;
+			case 2: acc += amount; stat = ACC; value = signedPct(amount); break;
+			case 3: eva += amount; stat = EVA; value = signedPct(amount); break;
+			case 4: spd += amount; stat = SPD; value = signedPct(amount); break;
+			case 5: atk += amount; stat = ATK; value = signedPct(amount); break;
 			case 6:
 				hp += amount;
 				stat = HP;
-				value = signedPct(hp);
+				value = signedPct(amount);
 				applyMaxHealthChange();
 				break;
-			case 7: sight += amount; stat = SIGHT; value = signedPct(sight); break;
-			case 8: ench += amount; stat = ENCH; value = signedPct(ench); break;
+			case 7: sight += amount; stat = SIGHT; value = signedPct(amount); break;
+			case 8: ench += amount; stat = ENCH; value = signedPct(amount); break;
 			case 9:
 				// 攻击距离按格数计算，不再用百分比
-				rch += (curse ? -1 : 1) * Random.IntRange(1, 2);
+				int reachDelta = (curse ? -1 : 1) * Random.IntRange(1, 2);
+				rch += reachDelta;
 				stat = RCH;
-				value = signedInt(rch);
+				value = signedInt(reachDelta);
 				break;
-			case 10: chg += amount; stat = CHG; value = signedPct(chg); break;
+			case 10: chg += amount; stat = CHG; value = signedPct(amount); break;
 			case 11:
 				// 每回合攻击次数：正数表示每回合额外攻击次数；负数表示攻击间隔
-				apt += Random.Float(0.1f, 0.3f) * (curse ? -1f : 1f);
+				float aptDelta = Random.Float(0.1f, 0.3f) * (curse ? -1f : 1f);
+				apt += aptDelta;
 				stat = APT;
-				value = attackText(apt);
+				value = attackText(aptDelta);
 				break;
-			case 12: steal += amount; stat = STEAL; value = signedPct(steal); break;
+			case 12: steal += amount; stat = STEAL; value = signedPct(amount); break;
 			case 13:
 				// 加血扣血：立即改变当前生命，不改变生命上限
 				int life = Math.max(1, Math.round(target == null ? 1 : target.HT * Math.abs(amount)));
@@ -97,6 +99,7 @@ public class EnvelopeBoost extends Buff {
 				return;
 		}
 
+		// 提示只显示本次变化量；Buff 描述里才是累计值
 		String msg = Messages.get(this, "gain", Messages.get(this, stat), value);
 		if (curse) {
 			GLog.w(msg);
