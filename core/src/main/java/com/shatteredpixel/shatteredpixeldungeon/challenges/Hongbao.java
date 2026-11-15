@@ -142,49 +142,77 @@ public class Hongbao {
 	private static boolean mobGetItem(Mob mob) {
 		switch (Random.Int(5)) {
 			case 0: {
-				Potion potion = (Potion) Generator.random(Generator.Category.POTION);
-				potion.identify();
-				mobUsePotion(mob, potion);
-				return true;
+				for (int i = 0; i < 3; i++) {
+					Item generated = Generator.random(Generator.Category.POTION);
+					if (generated instanceof Potion) {
+						Potion potion = (Potion) generated;
+						potion.identify();
+						mobUsePotion(mob, potion);
+						return true;
+					}
+				}
+				return false;
 			}
 			case 1: {
-				Scroll scroll = (Scroll) Generator.random(Generator.Category.SCROLL);
-				scroll.identify();
-				mobUseScroll(mob, scroll);
-				return true;
+				for (int i = 0; i < 3; i++) {
+					Item generated = Generator.random(Generator.Category.SCROLL);
+					if (generated instanceof Scroll) {
+						Scroll scroll = (Scroll) generated;
+						scroll.identify();
+						mobUseScroll(mob, scroll);
+						return true;
+					}
+				}
+				return false;
 			}
 			case 2:
 				if (mob.attackingWeapon() == null) {
-					KindOfWeapon weapon = (KindOfWeapon) Generator.random(Generator.Category.WEAPON);
-					weapon.identify();
-					mob.mobEquipment.weapon = weapon;
-					weapon.activate(mob);
-					mobLog(mob, "mob_equip", mob.name(), weapon.name());
-					return true;
+					for (int i = 0; i < 3; i++) {
+						Item generated = Generator.random(Generator.Category.WEAPON);
+						if (generated instanceof KindOfWeapon) {
+							KindOfWeapon weapon = (KindOfWeapon) generated;
+							weapon.identify();
+							mob.mobEquipment.weapon = weapon;
+							weapon.activate(mob);
+							mobLog(mob, "mob_equip", mob.name(), weapon.name());
+							return true;
+						}
+					}
 				}
 				return false;
 			case 3:
 				if (mob.armor() == null) {
-					Armor armor = (Armor) Generator.random(Generator.Category.ARMOR);
-					armor.identify();
-					mob.mobEquipment.armor = armor;
-					armor.activate(mob);
-					mobLog(mob, "mob_equip", mob.name(), armor.name());
-					return true;
+					// 护甲池里混有副手护甲（如 ThePure），它们不是 Armor，不能塞进 mobEquipment.armor
+					for (int i = 0; i < 3; i++) {
+						Item generated = Generator.random(Generator.Category.ARMOR);
+						if (generated instanceof Armor) {
+							Armor armor = (Armor) generated;
+							armor.identify();
+							mob.mobEquipment.armor = armor;
+							armor.activate(mob);
+							mobLog(mob, "mob_equip", mob.name(), armor.name());
+							return true;
+						}
+					}
 				}
 				return false;
 			default:
 				if (mob.mobEquipment.ring == null || mob.mobEquipment.misc == null) {
-					Ring ring = (Ring) Generator.randomUsingDefaults(Generator.Category.RING);
-					ring.identify();
-					if (mob.mobEquipment.ring == null) {
-						mob.mobEquipment.ring = ring;
-					} else {
-						mob.mobEquipment.misc = ring;
+					for (int i = 0; i < 3; i++) {
+						Item generated = Generator.randomUsingDefaults(Generator.Category.RING);
+						if (generated instanceof Ring) {
+							Ring ring = (Ring) generated;
+							ring.identify();
+							if (mob.mobEquipment.ring == null) {
+								mob.mobEquipment.ring = ring;
+							} else {
+								mob.mobEquipment.misc = ring;
+							}
+							ring.activate(mob);
+							mobLog(mob, "mob_equip", mob.name(), ring.name());
+							return true;
+						}
 					}
-					ring.activate(mob);
-					mobLog(mob, "mob_equip", mob.name(), ring.name());
-					return true;
 				}
 				return false;
 		}
