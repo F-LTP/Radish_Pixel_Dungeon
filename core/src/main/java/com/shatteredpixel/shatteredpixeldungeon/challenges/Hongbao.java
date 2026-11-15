@@ -1,8 +1,10 @@
 package com.shatteredpixel.shatteredpixeldungeon.challenges;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
@@ -428,14 +430,21 @@ public class Hongbao {
 	public static void rewardHero(Hero hero) {
 		if (Random.Int(100) < 50) {
 			Item item;
-			switch (Random.Int(7)) {
+			switch (Random.Int(8)) {
 				case 0: item = Generator.random(Generator.Category.WEAPON); break;
 				case 1: item = Generator.random(Generator.Category.ARMOR); break;
 				case 2: item = Generator.random(Generator.Category.WAND); break;
 				case 3: item = Generator.random(Generator.Category.POTION); break;
 				case 4: item = Generator.random(Generator.Category.SCROLL); break;
 				case 5: item = Generator.random(Generator.Category.STONE); break;
-				default: item = Generator.random(Generator.Category.SEED); break;
+				case 6: item = Generator.random(Generator.Category.SEED); break;
+				default:
+					int gold = Random.IntRange(20 + Dungeon.depth * 8, 40 + Dungeon.depth * 16);
+					Dungeon.gold += gold;
+					Statistics.goldCollected += gold;
+					Badges.validateGoldCollected();
+					GLog.p(Messages.get(Hongbao.class, "gold", gold));
+					return;
 			}
 			item.identify();
 			if (!item.collect(hero.belongings.backpack)) {
