@@ -76,32 +76,66 @@ public class Hongbao {
 			return;
 		}
 		for (int tries = 0; tries < 300; tries++) {
-			int cell = Random.Int(Dungeon.level.length());
-			if (!Dungeon.level.passable[cell] || Dungeon.level.solid[cell]) {
-				continue;
+			if (placeEnvelope(Random.Int(Dungeon.level.length()))) {
+				return;
 			}
-			if (Actor.findChar(cell) != null) {
-				continue;
-			}
-			// 不上锁、不需要条件进入的房间才生成红包
-			if (Dungeon.level instanceof RegularLevel) {
-				Room room = ((RegularLevel) Dungeon.level).room(cell);
-				if (room instanceof SpecialRoom) {
-					continue;
-				}
-			}
-			Heap heap = Dungeon.level.heaps.get(cell);
-			if (heap != null && !heap.isEmpty()) {
-				continue;
-			}
-			Dungeon.level.drop(new RedEnvelope(), cell);
-			return;
 		}
 	}
 
-	/** 每层开局在随机位置生成 5 个红包。 */
+	/** 在玩家附近生成一个红包。 */
+	public static void spawnNearHero() {
+		if (!active() || Dungeon.level == null || Dungeon.hero == null) {
+			return;
+		}
+		int width = Dungeon.level.width();
+		int heroX = Dungeon.hero.pos % width;
+		int heroY = Dungeon.hero.pos / width;
+		for (int tries = 0; tries < 500; tries++) {
+			int x = heroX + Random.IntRange(-4, 4);
+			int y = heroY + Random.IntRange(-4, 4);
+			if (x < 0 || y < 0 || x >= width || y >= Dungeon.level.height()) {
+				continue;
+			}
+			int cell = x + y * width;
+			int dist = Dungeon.level.distance(Dungeon.hero.pos, cell);
+			if (dist < 2 || dist > 4) {
+				continue;
+			}
+			if (placeEnvelope(cell)) {
+				return;
+			}
+		}
+		// 极端情况下找不到合适近点，退化为随机位置
+		spawn();
+	}
+
+	private static boolean placeEnvelope(int cell) {
+		if (!Dungeon.level.passable[cell] || Dungeon.level.solid[cell]) {
+			return false;
+		}
+		if (Actor.findChar(cell) != null) {
+			return false;
+		}
+		// 不上锁、不需要条件进入的房间才生成红包
+		if (Dungeon.level instanceof RegularLevel) {
+			Room room = ((RegularLevel) Dungeon.level).room(cell);
+			if (room instanceof SpecialRoom) {
+				return false;
+			}
+		}
+		Heap heap = Dungeon.level.heaps.get(cell);
+		if (heap != null && !heap.isEmpty()) {
+			return false;
+		}
+		Dungeon.level.drop(new RedEnvelope(), cell);
+		return true;
+	}
+
+	/** 每层开局生成 5 个红包：2 个在玩家附近，3 个随机。 */
 	public static void spawnFloorEnvelopes() {
-		for (int i = 0; i < 5; i++) {
+		spawnNearHero();
+		spawnNearHero();
+		for (int i = 0; i < 3; i++) {
 			spawn();
 		}
 	}
@@ -381,6 +415,7 @@ public class Hongbao {
 
 		if (mob.sprite == null || mob.sprite.parent == null) {
 			enemy.damage(new DamageInfo(boltDamage, finalDamageType, mob, wand, wand));
+			applyMobWandStatus(mob, enemy, wand);
 			return true;
 		}
 
@@ -392,10 +427,38 @@ public class Hongbao {
 						if (enemy.isAlive()) {
 							enemy.damage(new DamageInfo(
 									boltDamage, finalDamageType, mob, wand, wand));
+							applyMobWandStatus(mob, enemy, wand);
 						}
 					}
 				});
 		return true;
+	}
+
+	/** 给不同法杖补上对应的附加效果，而不只是换弹道颜色。 */
+	private static void applyMobWandStatus(Mob mob, Char enemy, Wand wand) {
+		if (enemy == null || !enemy.isAlive()) {
+			return;
+		}
+		if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFrost) {
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill.chillOrFreeze(enemy, 5f);
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFireblast) {
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff.affect(
+					enemy, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning.class).reignite(enemy);
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorrosion) {
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff.affect(
+					enemy, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corrosion.class).set(5f, 2);
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave) {
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff.affect(
+					enemy, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo.class, 3f);
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfPrismaticLight) {
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff.affect(
+					enemy, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness.class, 3f);
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth) {
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff.affect(
+					enemy, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Roots.class, 3f);
+		} else if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfTransfusion) {
+			mob.HP = Math.min(mob.HT, mob.HP + 2);
+		}
 	}
 
 	/** 有害药水先收起来，等看到玩家再丢。 */
