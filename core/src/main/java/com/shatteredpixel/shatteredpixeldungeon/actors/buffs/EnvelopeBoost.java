@@ -32,7 +32,6 @@ public class EnvelopeBoost extends Buff {
 	public static final String STEAL = "steal";
 	public static final String COMBO = "combo";
 	/** 立即加血/扣血，不进入持久属性列表。 */
-	public static final String LIFE = "life";
 	/** 立即放出一只当前层级可生成的怪物。 */
 	public static final String MONSTER = "monster";
 
@@ -40,7 +39,7 @@ public class EnvelopeBoost extends Buff {
 	public static final float NEGATIVE_CHANCE = 0f;
 
 	/** 属性池数量：10 项旧属性 + 充能/吸血 + 连击 + 立即加血扣血 + 怪物。 */
-	public static final int STAT_COUNT = 15;
+	public static final int STAT_COUNT = 14;
 
 	private float dmg, def, acc, eva, spd, hp, atk, sight, ench, chg, steal;
 	private int rch, combo;
@@ -76,16 +75,6 @@ public class EnvelopeBoost extends Buff {
 			case 10: chg += amount; stat = CHG; value = signedPct(amount); break;
 			case 11: steal += amount; stat = STEAL; value = signedPct(amount); break;
 			case 12:
-				// 加血扣血：立即改变当前生命，不改变生命上限
-				int life = Math.max(1, Math.round(target == null ? 1 : target.HT * Math.abs(amount)));
-				if (curse) {
-					life = -life;
-				}
-				applyLifeChange(life);
-				stat = LIFE;
-				value = signedInt(life);
-				break;
-			case 13:
 				// 连击次数：每次红包最多 +1
 				combo++;
 				stat = COMBO;
@@ -123,17 +112,6 @@ public class EnvelopeBoost extends Buff {
 			hero.updateHT(false);
 			int delta = hero.HT - beforeHT;
 			hero.HP = Math.max(1, Math.min(hero.HT, beforeHP + delta));
-		}
-	}
-
-	private void applyLifeChange(int amount) {
-		if (target == null) {
-			return;
-		}
-		if (amount > 0) {
-			target.HP = Math.min(target.HT, target.HP + amount);
-		} else {
-			target.HP = Math.max(1, target.HP + amount);
 		}
 	}
 

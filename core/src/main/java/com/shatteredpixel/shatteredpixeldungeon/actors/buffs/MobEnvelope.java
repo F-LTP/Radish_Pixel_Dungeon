@@ -30,7 +30,7 @@ public class MobEnvelope extends Buff {
 	public static final String COMBO = "combo";
 
 	/** 属性池数量：11 项旧属性 + 充能/吸血/连击 + 立即回血。 */
-	public static final int STAT_COUNT = 14;
+	public static final int STAT_COUNT = 13;
 
 	private static final String G_DMG = "g_mobenv_dmg";
 	private static final String G_DEF = "g_mobenv_def";
@@ -114,10 +114,6 @@ public class MobEnvelope extends Buff {
 			case 10: gChg += roll(); break;
 			case 11: gSteal += roll(); break;
 			case 12: gCombo += 1; break;
-			default:
-				int heal = Math.max(1, Math.round(target.HT * roll()));
-				target.HP = Math.min(target.HT, target.HP + heal);
-				break;
 		}
 	}
 
