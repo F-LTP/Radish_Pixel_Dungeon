@@ -1286,6 +1286,10 @@ public abstract class Mob extends Char {
 		if (alignment == Alignment.ENEMY){
 			rollToDropLoot();
 			mobEquipment.dropAll();
+			if (properties.contains(Property.BOSS)
+					&& com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.active()) {
+				com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.dropBossEnvelopes(pos);
+			}
 
 			if (cause == Dungeon.hero || cause instanceof Weapon || cause instanceof Weapon.Enchantment){
 

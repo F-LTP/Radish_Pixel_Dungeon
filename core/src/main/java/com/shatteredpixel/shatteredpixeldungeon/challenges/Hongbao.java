@@ -98,14 +98,41 @@ public class Hongbao {
 			}
 			int cell = x + y * width;
 			int dist = Dungeon.level.distance(Dungeon.hero.pos, cell);
-			if (dist < 2 || dist > 4) {
+			if (dist < 1 || dist > 4) {
 				continue;
 			}
 			if (placeEnvelope(cell)) {
 				return;
 			}
 		}
-		// 极端情况下找不到合适近点，退化为随机位置
+		// 找不到随机近点时，改为从玩家周围一圈圈向外找最近的空位
+		spawnNearestHero();
+	}
+
+	private static void spawnNearestHero() {
+		if (!active() || Dungeon.level == null || Dungeon.hero == null) {
+			return;
+		}
+		int width = Dungeon.level.width();
+		int heroX = Dungeon.hero.pos % width;
+		int heroY = Dungeon.hero.pos / width;
+		for (int radius = 1; radius <= 12; radius++) {
+			for (int dy = -radius; dy <= radius; dy++) {
+				for (int dx = -radius; dx <= radius; dx++) {
+					if (Math.max(Math.abs(dx), Math.abs(dy)) != radius) {
+						continue;
+					}
+					int x = heroX + dx;
+					int y = heroY + dy;
+					if (x < 0 || y < 0 || x >= width || y >= Dungeon.level.height()) {
+						continue;
+					}
+					if (placeEnvelope(x + y * width)) {
+						return;
+					}
+				}
+			}
+		}
 		spawn();
 	}
 
@@ -129,6 +156,42 @@ public class Hongbao {
 		}
 		Dungeon.level.drop(new RedEnvelope(), cell);
 		return true;
+	}
+
+	/** BOSS 死亡时在尸体周围掉落 5 个红包。 */
+	public static void dropBossEnvelopes(int center) {
+		if (!active() || Dungeon.level == null) {
+			return;
+		}
+		int width = Dungeon.level.width();
+		int cx = center % width;
+		int cy = center / width;
+		for (int n = 0; n < 5; n++) {
+			boolean placed = placeEnvelope(center);
+			if (!placed) {
+				for (int radius = 1; radius <= 4 && !placed; radius++) {
+					for (int dy = -radius; dy <= radius && !placed; dy++) {
+						for (int dx = -radius; dx <= radius; dx++) {
+							if (Math.max(Math.abs(dx), Math.abs(dy)) != radius) {
+								continue;
+							}
+							int x = cx + dx;
+							int y = cy + dy;
+							if (x < 0 || y < 0 || x >= width || y >= Dungeon.level.height()) {
+								continue;
+							}
+							if (placeEnvelope(x + y * width)) {
+								placed = true;
+								break;
+							}
+						}
+					}
+				}
+			}
+			if (!placed) {
+				spawn();
+			}
+		}
 	}
 
 	/** 每层开局生成 5 个红包：2 个在玩家附近，3 个随机。 */
