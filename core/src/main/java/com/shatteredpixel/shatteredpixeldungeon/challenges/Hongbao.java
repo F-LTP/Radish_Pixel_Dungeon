@@ -428,9 +428,14 @@ public class Hongbao {
 			return false;
 		}
 		// 直接伤害类法杖直接走玩家同款 onZap，不再另写一套近似效果
-		if ((wand instanceof DamageWand
-				&& !(wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfTransfusion))
-				|| wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorrosion) {
+		if (wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfMagicMissile
+				|| wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFrost
+				|| wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFireblast
+				|| wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLightning
+				|| wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorrosion
+				|| wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave
+				|| wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfPrismaticLight
+				|| wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration) {
 			return castMobWand(mob, wand, enemy);
 		}
 
