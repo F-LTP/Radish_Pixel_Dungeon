@@ -232,9 +232,9 @@ public class EnvelopeBoost extends Buff {
 			return sb;
 		}
 		if (sb.length() > 0) {
-			sb.append(Messages.get(this, "sep"));
+			sb.append('\n');
 		}
-		return sb.append(Messages.get(this, key)).append(' ').append(signedPct(value));
+		return sb.append("· ").append(Messages.get(this, key)).append(' ').append(signedPct(value));
 	}
 
 	private StringBuilder appendInt(StringBuilder sb, String key, int value) {
@@ -242,9 +242,9 @@ public class EnvelopeBoost extends Buff {
 			return sb;
 		}
 		if (sb.length() > 0) {
-			sb.append(Messages.get(this, "sep"));
+			sb.append('\n');
 		}
-		return sb.append(Messages.get(this, key)).append(' ').append(signedInt(value));
+		return sb.append("· ").append(Messages.get(this, key)).append(' ').append(signedInt(value));
 	}
 
 	@Override

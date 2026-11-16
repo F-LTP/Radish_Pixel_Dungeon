@@ -271,9 +271,9 @@ public class MobEnvelope extends Buff {
 			return sb;
 		}
 		if (sb.length() > 0) {
-			sb.append(Messages.get(EnvelopeBoost.class, "sep"));
+			sb.append('\n');
 		}
-		return sb.append(Messages.get(EnvelopeBoost.class, key)).append(' ').append(pct(value));
+		return sb.append("· ").append(Messages.get(EnvelopeBoost.class, key)).append(' ').append(pct(value));
 	}
 
 	private static StringBuilder appendInt(StringBuilder sb, String key, int value) {
@@ -281,9 +281,9 @@ public class MobEnvelope extends Buff {
 			return sb;
 		}
 		if (sb.length() > 0) {
-			sb.append(Messages.get(EnvelopeBoost.class, "sep"));
+			sb.append('\n');
 		}
-		return sb.append(Messages.get(EnvelopeBoost.class, key)).append(' ').append(signedInt(value));
+		return sb.append("· ").append(Messages.get(EnvelopeBoost.class, key)).append(' ').append(signedInt(value));
 	}
 
 	public static String pct(float v) {
