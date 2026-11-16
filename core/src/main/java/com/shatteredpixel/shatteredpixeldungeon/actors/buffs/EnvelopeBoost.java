@@ -31,6 +31,7 @@ public class EnvelopeBoost extends Buff {
 	public static final String CHG = "chg";
 	public static final String STEAL = "steal";
 	public static final String COMBO = "combo";
+	public static final String MRES = "mres";
 	/** 立即加血/扣血，不进入持久属性列表。 */
 	/** 立即放出一只当前层级可生成的怪物。 */
 	public static final String MONSTER = "monster";
@@ -38,10 +39,10 @@ public class EnvelopeBoost extends Buff {
 	/** 红包不再出现减少属性的效果。 */
 	public static final float NEGATIVE_CHANCE = 0f;
 
-	/** 属性池数量：10 项旧属性 + 充能/吸血 + 连击 + 立即加血扣血 + 怪物。 */
-	public static final int STAT_COUNT = 14;
+	/** 属性池数量：10 项旧属性 + 充能/吸血 + 连击 + 魔抗 + 怪物。 */
+	public static final int STAT_COUNT = 15;
 
-	private float dmg, def, acc, eva, spd, hp, atk, sight, ench, chg, steal;
+	private float dmg, def, acc, eva, spd, hp, atk, sight, ench, chg, steal, mres;
 	private int rch, combo;
 
 	public void roll() {
@@ -79,6 +80,11 @@ public class EnvelopeBoost extends Buff {
 				combo++;
 				stat = COMBO;
 				value = signedInt(1);
+				break;
+			case 13:
+				mres += amount;
+				stat = MRES;
+				value = signedPct(amount);
 				break;
 			default:
 				// 怪物：从当前层级可生成的怪物中随机放出一只
@@ -129,6 +135,7 @@ public class EnvelopeBoost extends Buff {
 			case CHG: return chg;
 			case STEAL: return steal;
 			case COMBO: return combo;
+			case MRES: return mres;
 			default: return 0f;
 		}
 	}
@@ -162,6 +169,12 @@ public class EnvelopeBoost extends Buff {
 	public static int combo(Char ch) {
 		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
 		return b == null ? 0 : b.combo;
+	}
+
+	/** 魔抗倍率：1 - 累计魔抗，最低保留 20% 伤害。 */
+	public static float magicResist(Char ch) {
+		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
+		return b == null ? 1f : Math.max(0.2f, 1f - b.mres);
 	}
 
 	public static String pct(float v) {
@@ -210,6 +223,7 @@ public class EnvelopeBoost extends Buff {
 		appendStat(sb, CHG, chg);
 		appendStat(sb, STEAL, steal);
 		appendInt(sb, COMBO, combo);
+		appendStat(sb, MRES, mres);
 		return sb.length() == 0 ? Messages.get(this, "desc_empty") : sb.toString();
 	}
 
@@ -240,7 +254,7 @@ public class EnvelopeBoost extends Buff {
 		bundle.put("eva", eva); bundle.put("spd", spd); bundle.put("hp", hp);
 		bundle.put("atk", atk); bundle.put("sight", sight); bundle.put("ench", ench);
 		bundle.put("rch", rch); bundle.put("chg", chg); bundle.put("steal", steal);
-		bundle.put("combo", combo);
+		bundle.put("combo", combo); bundle.put("mres", mres);
 	}
 
 	@Override
@@ -252,6 +266,6 @@ public class EnvelopeBoost extends Buff {
 		atk = bundle.getFloat("atk"); sight = bundle.getFloat("sight");
 		ench = bundle.getFloat("ench"); rch = bundle.getInt("rch");
 		chg = bundle.getFloat("chg"); steal = bundle.getFloat("steal");
-		combo = bundle.getInt("combo");
+		combo = bundle.getInt("combo"); mres = bundle.getFloat("mres");
 	}
 }

@@ -28,9 +28,10 @@ public class MobEnvelope extends Buff {
 	public static final String CHG = "chg";
 	public static final String STEAL = "steal";
 	public static final String COMBO = "combo";
+	public static final String MRES = "mres";
 
 	/** 属性池数量：11 项旧属性 + 充能/吸血/连击 + 立即回血。 */
-	public static final int STAT_COUNT = 13;
+	public static final int STAT_COUNT = 14;
 
 	private static final String G_DMG = "g_mobenv_dmg";
 	private static final String G_DEF = "g_mobenv_def";
@@ -47,7 +48,7 @@ public class MobEnvelope extends Buff {
 	private static final String G_COMBO = "g_mobenv_combo";
 	private static final String G_PICKUPS = "g_mobenv_pickups";
 
-	private static float gDmg, gDef, gAcc, gEva, gSpd, gHp, gAtk, gSight, gEnch, gChg, gSteal;
+	private static float gDmg, gDef, gAcc, gEva, gSpd, gHp, gAtk, gSight, gEnch, gChg, gSteal, gMres;
 	private static int gRch, gCombo, gPickups;
 
 	private int count = 0;
@@ -114,6 +115,7 @@ public class MobEnvelope extends Buff {
 			case 10: gChg += roll(); break;
 			case 11: gSteal += roll(); break;
 			case 12: gCombo += 1; break;
+			case 13: gMres += roll(); break;
 		}
 	}
 
@@ -130,6 +132,7 @@ public class MobEnvelope extends Buff {
 			case ENCH: return gEnch;
 			case CHG: return gChg;
 			case STEAL: return gSteal;
+			case MRES: return gMres;
 			case COMBO: return gCombo;
 			default: return 0f;
 		}
@@ -174,6 +177,11 @@ public class MobEnvelope extends Buff {
 		return affects(ch) ? gCombo : 0;
 	}
 
+	/** 魔抗倍率：1 - 累计魔抗，最低保留 20% 伤害。 */
+	public static float magicResist(Char ch) {
+		return affects(ch) ? Math.max(0.2f, 1f - gMres) : 1f;
+	}
+
 	public static int globalPickups() {
 		return gPickups;
 	}
@@ -192,7 +200,7 @@ public class MobEnvelope extends Buff {
 	}
 
 	public static void resetGlobal() {
-		gDmg = gDef = gAcc = gEva = gSpd = gHp = gAtk = gSight = gEnch = gChg = gSteal = 0f;
+		gDmg = gDef = gAcc = gEva = gSpd = gHp = gAtk = gSight = gEnch = gChg = gSteal = gMres = 0f;
 		gRch = gCombo = gPickups = 0;
 	}
 
@@ -200,7 +208,7 @@ public class MobEnvelope extends Buff {
 		bundle.put(G_DMG, gDmg); bundle.put(G_DEF, gDef); bundle.put(G_ACC, gAcc);
 		bundle.put(G_EVA, gEva); bundle.put(G_SPD, gSpd); bundle.put(G_HP, gHp);
 		bundle.put(G_ATK, gAtk); bundle.put(G_SIGHT, gSight); bundle.put(G_ENCH, gEnch);
-		bundle.put(G_RCH, gRch); bundle.put(G_CHG, gChg); bundle.put(G_STEAL, gSteal);
+		bundle.put(G_RCH, gRch); bundle.put(G_CHG, gChg); bundle.put(G_STEAL, gSteal); bundle.put("g_mobenv_mres", gMres);
 		bundle.put(G_COMBO, gCombo); bundle.put(G_PICKUPS, gPickups);
 	}
 
@@ -210,7 +218,7 @@ public class MobEnvelope extends Buff {
 		gSpd = bundle.getFloat(G_SPD); gHp = bundle.getFloat(G_HP);
 		gAtk = bundle.getFloat(G_ATK); gSight = bundle.getFloat(G_SIGHT);
 		gEnch = bundle.getFloat(G_ENCH); gRch = bundle.getInt(G_RCH);
-		gChg = bundle.getFloat(G_CHG); gSteal = bundle.getFloat(G_STEAL);
+		gChg = bundle.getFloat(G_CHG); gSteal = bundle.getFloat(G_STEAL); gMres = bundle.getFloat("g_mobenv_mres");
 		gCombo = bundle.getInt(G_COMBO); gPickups = bundle.getInt(G_PICKUPS);
 	}
 
@@ -254,6 +262,7 @@ public class MobEnvelope extends Buff {
 		appendStat(sb, CHG, gChg);
 		appendStat(sb, STEAL, gSteal);
 		appendInt(sb, COMBO, gCombo);
+		appendStat(sb, MRES, gMres);
 		return sb.length() == 0 ? Messages.get(MobEnvelope.class, "desc_empty") : sb.toString();
 	}
 

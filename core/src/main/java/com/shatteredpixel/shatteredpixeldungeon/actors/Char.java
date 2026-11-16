@@ -1035,6 +1035,13 @@ public abstract class Char extends Actor {
         // 最终伤害修正（抗性作为乘算项并入同一乘区）
         dmg = applyFinalDamageModifiers(dmg, info, damageModifiers, resistanceMultiplier);
 
+        // 红包魔抗：减少受到的魔法/元素伤害
+        if (damageType.isMagical()) {
+            dmg = Math.max(0, Math.round(dmg
+                    * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.magicResist(this)
+                    * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.magicResist(this)));
+        }
+
         // 护盾前反应相位：携带护盾前伤害与受击前 HP（只读，供 Paralysis 等）
         for (Buff b : buffs().toArray(new Buff[0])) {
             b.onPreShieldDamage(dmg, HP, info);
