@@ -47,7 +47,7 @@ public class EnvelopeBoost extends Buff {
 
 	public void roll() {
 		boolean curse = Random.Float() < NEGATIVE_CHANCE;
-		float amount = Random.Float(0.01f, 0.05f) * (curse ? -1f : 1f);
+		float amount = Random.Float(0.05f, 0.10f) * (curse ? -1f : 1f);
 
 		String stat;
 		String value;

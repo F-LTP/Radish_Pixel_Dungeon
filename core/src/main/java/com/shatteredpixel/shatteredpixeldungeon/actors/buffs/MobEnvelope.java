@@ -58,7 +58,7 @@ public class MobEnvelope extends Buff {
 	}
 
 	private float roll() {
-		return Random.Float(0.01f, 0.05f);
+		return Random.Float(0.05f, 0.10f);
 	}
 
 	public static boolean affects(Char ch) {
