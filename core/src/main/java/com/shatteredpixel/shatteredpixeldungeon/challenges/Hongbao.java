@@ -95,7 +95,6 @@ public class Hongbao {
 				continue;
 			}
 			Dungeon.level.drop(new RedEnvelope(), cell);
-			CellEmitter.get(cell).burst(Speck.factory(Speck.LIGHT), 8);
 			return;
 		}
 	}
@@ -150,7 +149,7 @@ public class Hongbao {
 
 	/** 每回合给玩家视野内的红包加一点高亮粒子。 */
 	public static void highlightEnvelopes() {
-		if (!active() || Dungeon.level == null) {
+		if (!active() || Dungeon.level == null || GameScene.emitter() == null) {
 			return;
 		}
 		for (int cell : Dungeon.level.heaps.keyArray()) {
