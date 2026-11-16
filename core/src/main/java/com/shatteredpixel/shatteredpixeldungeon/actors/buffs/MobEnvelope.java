@@ -273,7 +273,7 @@ public class MobEnvelope extends Buff {
 		if (sb.length() > 0) {
 			sb.append('\n');
 		}
-		return sb.append("· ").append(Messages.get(EnvelopeBoost.class, key)).append(' ').append(pct(value));
+		return sb.append("· ").append(Messages.get(EnvelopeBoost.class, key)).append(' ').append(EnvelopeBoost.signedPct(value));
 	}
 
 	private static StringBuilder appendInt(StringBuilder sb, String key, int value) {
