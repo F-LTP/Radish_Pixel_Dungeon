@@ -352,11 +352,13 @@ abstract public class Weapon extends KindOfWeapon {
 
 	@Override
 	public int reachFactor(Char owner) {
+		int reach;
 		if (hasEnchant(Projecting.class, owner)){
 			if (this instanceof CustomWeapon) {
-				return RCH + 1;
+				reach = RCH + 1;
+			} else {
+				reach = RCH + Math.round(RingOfArcana.enchantPowerMultiplier(owner));
 			}
-			return RCH + Math.round(RingOfArcana.enchantPowerMultiplier(owner));
 		} else {
 			//天球仪-距离
 			if (this instanceof CelestialSphere) {
@@ -365,11 +367,14 @@ abstract public class Weapon extends KindOfWeapon {
 				for (Wand w : wands.toArray(new Wand[0])){
 					wandTotalLevel += w.quantity();
 				}
-				return RCH + wandTotalLevel/3;
+				reach = RCH + wandTotalLevel/3;
 			} else {
-				return RCH;
+				reach = RCH;
 			}
 		}
+		// 红包攻击距离与索敌附魔一致，直接计入武器攻击距离
+		return reach + com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.reachBonus(owner)
+				+ com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.reachBonus(owner);
 	}
 
 	public int STRReq(){
