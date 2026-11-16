@@ -148,7 +148,7 @@ public class WandOfReflectDisintegration extends WandOfDisintegration {
     public void onZap( Ballistica beam ) {
 
         if(isTest) {
-            curUser.spend(-0.9f);
+            ((Hero) curUser).spend(-0.9f);
             isTest = false;
             curCharges++;
             return;

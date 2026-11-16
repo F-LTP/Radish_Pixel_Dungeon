@@ -86,6 +86,9 @@ import java.util.ArrayList;
 
 public abstract class Wand extends Item {
 
+	/** 法杖施法者：玩家时是 Hero，怪物时是 Mob。 */
+	public static Char curUser;
+
 	public static final String AC_ZAP	= "ZAP";
 	public String customName = "";
 
@@ -240,6 +243,10 @@ public abstract class Wand extends Item {
 
 	//TODO Consider externalizing char awareness buff
 	protected static void wandProc(Char target, int wandLevel, int chargesUsed){
+		// 怪物施法时不触发只属于玩家的天赋/背包效果
+		if (curUser != null && !(curUser instanceof Hero)) {
+			return;
+		}
 		if (hero.hasTalent(Talent.ARCANE_VISION)) {
 			int dur = 5 + 5* hero.pointsInTalent(Talent.ARCANE_VISION);
 			Buff.append(hero, TalismanOfForesight.CharAwareness.class, dur).charID = target.id();
@@ -658,17 +665,17 @@ public abstract class Wand extends Item {
 		}
 
 		if (hero.belongings.contains(this) && hero.hasTalent(Talent.MAGIC_TACTICS)) {
-			int talentLevel = curUser.pointsInTalent(Talent.MAGIC_TACTICS);
+			int talentLevel = hero.pointsInTalent(Talent.MAGIC_TACTICS);
 			int chance = 7 * talentLevel + (int) Math.floor(talentLevel / 2f);
 			if (Random.Int(100) <= chance)
 				timeToZap = -hero.cooldown();
 		}
 
 		if( !(hero.buff(MagicStick.class)!=null && isMagesStaff)) {
-			curUser.spendAndNext(timeToZap);
+			hero.spendAndNext(timeToZap);
 		}else{
 			hero.buff(MagicStick.class).detach();
-			curUser.spendAndNext(0);
+			hero.spendAndNext(0);
 		}
 
 		if (hero.hasTalent(Talent.DUEL_DANCE) && hero.cooldown() >= 0)
@@ -838,9 +845,9 @@ public abstract class Wand extends Item {
 				int cell = shot.collisionPos;
 
 				if (target == curUser.pos || cell == curUser.pos) {
-					if (target == curUser.pos && curUser.hasTalent(Talent.SHIELD_BATTERY)){
+					if (target == curUser.pos && hero.hasTalent(Talent.SHIELD_BATTERY)){
 						float shield = curUser.HT * (0.04f*curWand.curCharges);
-						if (curUser.pointsInTalent(Talent.SHIELD_BATTERY) == 2) shield *= 1.5f;
+						if (hero.pointsInTalent(Talent.SHIELD_BATTERY) == 2) shield *= 1.5f;
 
 						if(hero.belongings.weapon() instanceof EndGuard) {
 							EndGuard w2 = (EndGuard) hero.belongings.weapon;
@@ -860,7 +867,7 @@ public abstract class Wand extends Item {
 						Sample.INSTANCE.play(Assets.Sounds.CHARGEUP);
 						ScrollOfRecharging.charge(curUser);
 						updateQuickslot();
-						curUser.spendAndNext(Actor.TICK);
+						hero.spendAndNext(Actor.TICK);
 						return;
 					}
 					GLog.i( Messages.get(Wand.class, "self_target") );
@@ -875,16 +882,16 @@ public abstract class Wand extends Item {
 				else
 					QuickSlotButton.target(Actor.findChar(cell));
 
-				if (curWand.tryToZap(curUser, target)) {
+				if (curWand.tryToZap(hero, target)) {
 
-					curUser.busy();
+					hero.busy();
 
 					if (curWand.cursed){
 						if (!curWand.cursedKnown){
 							GLog.n(Messages.get(Wand.class, "curse_discover", curWand.name()));
 						}
 						CursedWand.cursedZap(curWand,
-								curUser,
+								hero,
 								new Ballistica(curUser.pos, target, Ballistica.MAGIC_BOLT),
 								new Callback() {
 									@Override
@@ -899,7 +906,7 @@ public abstract class Wand extends Item {
 								if (Random.Float() < WondrousResin.extraCurseEffectChance()){
 									WondrousResin.forcePositive = true;
 									CursedWand.cursedZap(curWand,
-											curUser,
+											hero,
 											new Ballistica(curUser.pos, target, Ballistica.MAGIC_BOLT), new Callback() {
 												@Override
 												public void call() {

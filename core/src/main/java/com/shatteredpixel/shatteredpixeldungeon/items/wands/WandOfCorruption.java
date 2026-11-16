@@ -229,7 +229,7 @@ public class WandOfCorruption extends Wand {
 		if (!enemy.isImmune(Corruption.class)){
 			Corruption.corruptionHeal(enemy);
 
-			AllyBuff.affectAndLoot(enemy, curUser, Corruption.class);
+			AllyBuff.affectAndLoot(enemy, (com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero) curUser, Corruption.class);
 		} else {
 			Buff.affect(enemy, Doom.class);
 		}

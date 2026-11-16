@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.WandEmpower;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.LightKing;
@@ -53,8 +54,10 @@ public abstract class DamageWand extends Wand{
 
 	// 骰子法师 4-2 鸡蛋篮子：最小伤害变为 1，最大伤害增加「最小值降低量 × 125% / 150% / 175% / 200%」
 	private static float eggBasketFactor(){
-		if (hero == null || hero.subClass != HeroSubClasses.DICE_MAGE) return 0f;
-		int points = hero.pointsInTalent(Talent.EGG_BASKET);
+		if (!(curUser instanceof Hero)) return 0f;
+		Hero caster = (Hero) curUser;
+		if (caster.subClass != HeroSubClasses.DICE_MAGE) return 0f;
+		int points = caster.pointsInTalent(Talent.EGG_BASKET);
 		return points > 0 ? 1f + 0.25f * points : 0f;
 	}
 
@@ -77,14 +80,19 @@ public abstract class DamageWand extends Wand{
     public int damageRoll(int lvl){
 		int dmg = Char.combatRoll(rollMin(lvl), rollMax(lvl));
 
-		if(hero.hasTalent(Talent.FANATICISM_MAGIC)){
+		Hero caster = curUser instanceof Hero ? (Hero) curUser : null;
+		if (caster == null) {
+			return dmg;
+		}
+
+		if(caster.hasTalent(Talent.FANATICISM_MAGIC)){
 			if (dmg > 0){
-				Berserk berserk = Buff.affect(hero, Berserk.class);
+				Berserk berserk = Buff.affect(caster, Berserk.class);
 				berserk.damage(dmg/2);
 			}
 		}
 
-		RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
+		RiverCrystal riverGlass = caster.belongings.getItem(RiverCrystal.class);
 		if(riverGlass != null){
 			dmg = Integer.MAX_VALUE;
 			for (int i = 0; i < riverGlass.judgeTimes(); i++){
@@ -93,13 +101,13 @@ public abstract class DamageWand extends Wand{
 		}
 
 
-		LightKing lightKing = hero.belongings.getItem(LightKing.class);
+		LightKing lightKing = caster.belongings.getItem(LightKing.class);
 		if (lightKing != null) {
 			int lkLvl = lightKing.buffedLvl();
 			float[] thresholds = {0.9f, 0.85f, 0.8f, 0.75f};
 			float[] damageModifiers = {1.25f, 1.33f, 1.41f, 1.50f};
 
-			float hpPercentage = (float) hero.HP / hero.HT;
+			float hpPercentage = (float) caster.HP / caster.HT;
 			int originalDamage = dmg;
 
 			if (hpPercentage >= thresholds[lkLvl]) {
@@ -114,7 +122,7 @@ public abstract class DamageWand extends Wand{
 			}
 		}
 
-		WandEmpower emp = hero.buff(WandEmpower.class);
+		WandEmpower emp = caster.buff(WandEmpower.class);
 		if (emp != null){
 			dmg += emp.dmgBoost;
 			emp.left--;

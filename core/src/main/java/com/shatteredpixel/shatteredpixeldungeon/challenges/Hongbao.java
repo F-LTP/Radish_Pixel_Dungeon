@@ -364,6 +364,13 @@ public class Hongbao {
 		if (wand == null || wand.curCharges <= 0 || enemy == null || !enemy.isAlive()) {
 			return false;
 		}
+		// 直接伤害类法杖直接走玩家同款 onZap，不再另写一套近似效果
+		if ((wand instanceof DamageWand
+				&& !(wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfTransfusion))
+				|| wand instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorrosion) {
+			return castMobWand(mob, wand, enemy);
+		}
+
 		wand.curCharges--;
 
 		int dmg;
@@ -431,6 +438,36 @@ public class Hongbao {
 						}
 					}
 				});
+		return true;
+	}
+
+	/** 用怪物作为施法者执行法杖原本的 onZap。 */
+	private static boolean castMobWand(Mob mob, Wand wand, Char enemy) {
+		if (enemy == null || !enemy.isAlive()) {
+			return false;
+		}
+		Ballistica bolt = new Ballistica(mob.pos, enemy.pos, wand.collisionProperties(enemy.pos));
+		final Char previousCaster = Wand.curUser;
+		Wand.curUser = mob;
+
+		if (mob.sprite == null || mob.sprite.parent == null) {
+			wand.onZap(bolt);
+			wand.curCharges = Math.max(0, wand.curCharges - 1);
+			Wand.curUser = previousCaster;
+			return true;
+		}
+
+		wand.fx(bolt, new Callback() {
+			@Override
+			public void call() {
+				try {
+					wand.onZap(bolt);
+				} finally {
+					wand.curCharges = Math.max(0, wand.curCharges - 1);
+					Wand.curUser = previousCaster;
+				}
+			}
+		});
 		return true;
 	}
 

@@ -100,7 +100,7 @@ public class WandOfLivingEarth extends DamageWand {
 		//shooting at the guardian
 		if (guardian != null && guardian == ch){
 			guardian.sprite.centerEmitter().burst(MagicMissile.EarthParticle.ATTRACT, 8 + buffedLvl() / 2);
-			guardian.setInfo(curUser, buffedLvl(), armorToAdd);
+			guardian.setInfo((Hero) curUser, buffedLvl(), armorToAdd);
 			wandProc(guardian, chargesPerCast());
 			Sample.INSTANCE.play( Assets.Sounds.HIT_MAGIC, 1, 0.9f * Random.Float(0.87f, 1.15f) );
 
@@ -109,7 +109,7 @@ public class WandOfLivingEarth extends DamageWand {
 
 			//create a new guardian
 			guardian = new EarthGuardian();
-			guardian.setInfo(curUser, buffedLvl(), buff.armor);
+			guardian.setInfo((Hero) curUser, buffedLvl(), buff.armor);
 			int extra=armorToAdd-guardian.HT;
 			if (extra>0)
 				Buff.affect(guardian, Barrier.class).setShield(extra);
@@ -172,7 +172,7 @@ public class WandOfLivingEarth extends DamageWand {
 					curUser.sprite.centerEmitter().burst(MagicMissile.EarthParticle.ATTRACT, 8 + buffedLvl() / 2);
 				} else {
 					guardian.sprite.centerEmitter().burst(MagicMissile.EarthParticle.ATTRACT, 8 + buffedLvl() / 2);
-					guardian.setInfo(curUser, buffedLvl(), armorToAdd);
+					guardian.setInfo((Hero) curUser, buffedLvl(), armorToAdd);
 					int extra=armorToAdd-guardian.HT;
 					if (extra>0)
 						Buff.affect(guardian, Barrier.class).setShield(extra);
