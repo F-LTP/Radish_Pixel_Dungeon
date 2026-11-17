@@ -399,6 +399,15 @@ public abstract class Mob extends Char {
 			int envelope = com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.visibleEnvelope(this);
 			int enemyDist = enemy == null ? Integer.MAX_VALUE : Dungeon.level.distance(pos, enemy.pos);
 			if (envelope != -1 && Dungeon.level.distance(pos, envelope) <= enemyDist) {
+				// 看到红包时先醒来，不能保持睡眠状态直接走过去
+				if (state == SLEEPING) {
+					enemySeen = enemyInFOV;
+					notice();
+					state = enemyInFOV ? HUNTING : WANDERING;
+					alerted = true;
+					spend(TICK);
+					return true;
+				}
 				if (pos == envelope) {
 					com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.mobPickup(this, envelope);
 					spend(TICK);
