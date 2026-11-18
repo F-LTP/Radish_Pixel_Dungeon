@@ -6,6 +6,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Bestiary;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Rat;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -132,21 +135,35 @@ public class EnvelopeBoost extends Buff {
 	public static void grantAlly(Hero hero) {
 		EnvelopeBoost b = Buff.affect(hero, EnvelopeBoost.class);
 		if (b.allyClass != null) return;
-		Mob chosen = null;
-		for (Mob m : Dungeon.level.mobs) {
-			if (m.alignment == Char.Alignment.ENEMY
-					&& !Char.hasProp(m, Char.Property.IMMOVABLE)
-					&& !m.properties().contains(Char.Property.BOSS)) {
-				if (chosen == null || Random.Int(2) == 0) chosen = m;
+
+		java.util.ArrayList<Class<? extends Mob>> candidates = new java.util.ArrayList<>();
+		for (int depth = 1; depth <= 26; depth++) {
+			for (Class<? extends Mob> cls : Bestiary.getMobRotation(depth)) {
+				if (!candidates.contains(cls)) {
+					try {
+						Mob m = cls.newInstance();
+						if (m.properties().contains(Char.Property.BOSS)
+								|| m.properties().contains(Char.Property.IMMOVABLE)) {
+							continue;
+						}
+						candidates.add(cls);
+					} catch (Exception ignored) {
+					}
+				}
 			}
 		}
-		if (chosen != null) {
-			b.allyClass = chosen.getClass().getName();
-			Buff.affect(chosen, EnvelopeAllyBuff.class);
-			GLog.p("红包开出：怪物盟友 " + chosen.name());
-		} else {
-			b.allyClass = "com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Rat";
-			GLog.p("红包开出：怪物盟友 老鼠");
+		if (candidates.isEmpty()) {
+			candidates.add(Rat.class);
+		}
+		Class<? extends Mob> cls = candidates.get(Random.Int(candidates.size()));
+		b.allyClass = cls.getName();
+		GLog.p("红包开出：怪物盟友 " + Messages.get(cls, "name"));
+
+		// 当前层同种怪物立即转化
+		for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
+			if (m.getClass() == cls) {
+				Buff.affect(m, EnvelopeAllyBuff.class);
+			}
 		}
 		spawnAlly(Dungeon.level, hero.pos);
 	}
