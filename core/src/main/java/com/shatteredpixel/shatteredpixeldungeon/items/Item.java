@@ -638,6 +638,11 @@ public class Item implements Bundlable {
 		String base = desc();
 		if (fusedItems != null && !fusedItems.isEmpty()) {
 			StringBuilder sb = new StringBuilder(base);
+			boolean hasWand = false;
+			for (Item it : fusedItems) if (it instanceof Wand) hasWand = true;
+			if (hasWand) {
+				sb.append("\n\n融合法杖：施法时会同时释放所有融合法杖的法术。");
+			}
 			sb.append("\n\n融合装备：");
 			for (Item it : fusedItems) {
 				sb.append("\n- ").append(it.name());
