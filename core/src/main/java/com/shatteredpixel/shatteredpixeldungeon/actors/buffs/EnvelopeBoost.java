@@ -14,6 +14,10 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -41,6 +45,8 @@ public class EnvelopeBoost extends Buff {
 	private String allyClass = null;
 	private final java.util.ArrayList<String> freeScrolls = new java.util.ArrayList<>();
 	private final java.util.HashMap<String,Float> freeScrollCooldowns = new java.util.HashMap<>();
+	private final java.util.ArrayList<String> freePotions = new java.util.ArrayList<>();
+	private final java.util.HashMap<String,Float> freePotionCooldowns = new java.util.HashMap<>();
 
 	public void addWandFreeChance(float amount) {
 		wandFreeChance = Math.min(WAND_FREE_CAP, wandFreeChance + amount);
@@ -153,6 +159,46 @@ public class EnvelopeBoost extends Buff {
 		Class<? extends Scroll> cls = pool.get(Random.Int(pool.size()));
 		b.freeScrolls.add(cls.getName());
 		GLog.p("红包开出：卷轴免耗 " + Messages.get(cls, "name"));
+	}
+
+	public static void grantFreePotion(Hero hero) {
+		EnvelopeBoost b = Buff.affect(hero, EnvelopeBoost.class);
+		java.util.ArrayList<Class<? extends Potion>> pool = new java.util.ArrayList<>();
+		for (Class<?> c : Generator.Category.POTION.classes) {
+			if (c == PotionOfStrength.class || c == PotionOfExperience.class
+					|| !Potion.class.isAssignableFrom(c)) continue;
+			pool.add((Class<? extends Potion>) c);
+		}
+		for (Class<? extends ExoticPotion> c : ExoticPotion.regToExo.values()) {
+			if (c != null) pool.add(c);
+		}
+		for (String selected : b.freePotions) {
+			pool.removeIf(c -> c.getName().equals(selected));
+		}
+		if (pool.isEmpty()) {
+			GLog.w("红包开出：所有药水都已免耗，本次无新增");
+			return;
+		}
+		Class<? extends Potion> cls = pool.get(Random.Int(pool.size()));
+		b.freePotions.add(cls.getName());
+		GLog.p("红包开出：药水免耗 " + Messages.get(cls, "name"));
+	}
+
+	public static boolean tryStartFreePotion(Potion potion) {
+		if (Dungeon.hero == null || potion == null) return false;
+		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
+		if (b == null) return false;
+		String name = potion.getClass().getName();
+		if (!b.freePotions.contains(name)) return false;
+		float ready = b.freePotionCooldowns.getOrDefault(name, 0f);
+		return Statistics.turnsPassed >= ready;
+	}
+
+	public static void markFreePotionUsed(Potion potion) {
+		if (Dungeon.hero == null || potion == null) return;
+		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
+		if (b == null) return;
+		b.freePotionCooldowns.put(potion.getClass().getName(), Statistics.turnsPassed + 50f);
 	}
 
 	public static boolean tryStartFreeScroll(Scroll scroll) {
@@ -313,7 +359,7 @@ public class EnvelopeBoost extends Buff {
 		return Messages.get(this, "desc", Math.round(wandFreeChance * 100), comboHits, reachBonus,
 				Math.round(missileReturnChance * 100), Math.round(enchantPower * 100),
 				flamewalker ? "是" : "否", knockbackOnApproach ? "是" : "否",
-				allyClass != null ? "是" : "否", freeScrolls.isEmpty() ? "否" : "是");
+				allyClass != null ? "是" : "否", freeScrolls.isEmpty() ? "否" : "是", freePotions.isEmpty() ? "否" : "是");
 	}
 
 	private static final String WAND_FREE = "wand_free_chance";
@@ -326,6 +372,8 @@ public class EnvelopeBoost extends Buff {
 	private static final String ALLY_CLASS = "ally_class";
 	private static final String FREE_SCROLLS = "free_scrolls";
 	private static final String FREE_SCROLL_COOLDOWNS = "free_scroll_cooldowns";
+	private static final String FREE_POTIONS = "free_potions";
+	private static final String FREE_POTION_COOLDOWNS = "free_potion_cooldowns";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
@@ -344,6 +392,12 @@ public class EnvelopeBoost extends Buff {
 			cool.put(e.getKey(), e.getValue());
 		}
 		bundle.put(FREE_SCROLL_COOLDOWNS, cool);
+		bundle.put(FREE_POTIONS, freePotions.toArray(new String[0]));
+		Bundle pcool = new Bundle();
+		for (java.util.Map.Entry<String,Float> e : freePotionCooldowns.entrySet()) {
+			pcool.put(e.getKey(), e.getValue());
+		}
+		bundle.put(FREE_POTION_COOLDOWNS, pcool);
 	}
 
 	@Override
@@ -365,6 +419,15 @@ public class EnvelopeBoost extends Buff {
 		if (bundle.contains(FREE_SCROLL_COOLDOWNS)) {
 			Bundle cool = bundle.getBundle(FREE_SCROLL_COOLDOWNS);
 			for (String k : cool.getKeys()) freeScrollCooldowns.put(k, cool.getFloat(k));
+		}
+		freePotions.clear();
+		if (bundle.contains(FREE_POTIONS)) {
+			for (String n : bundle.getStringArray(FREE_POTIONS)) freePotions.add(n);
+		}
+		freePotionCooldowns.clear();
+		if (bundle.contains(FREE_POTION_COOLDOWNS)) {
+			Bundle cool = bundle.getBundle(FREE_POTION_COOLDOWNS);
+			for (String k : cool.getKeys()) freePotionCooldowns.put(k, cool.getFloat(k));
 		}
 	}
 }

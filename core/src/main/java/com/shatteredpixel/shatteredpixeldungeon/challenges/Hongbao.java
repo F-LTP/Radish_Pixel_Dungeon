@@ -761,8 +761,10 @@ public class Hongbao {
 				} else {
 					GLog.p("红包开出：怪物盟友已拥有，本次无新增");
 				}
-			} else {
+			} else if (roll == 9) {
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFreeScroll(hero);
+			} else {
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFreePotion(hero);
 			}
 		}
 	}

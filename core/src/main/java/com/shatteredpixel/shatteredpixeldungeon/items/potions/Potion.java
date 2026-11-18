@@ -84,6 +84,18 @@ import java.util.LinkedHashMap;
 
 public class Potion extends Item {
 
+	private boolean freePotionPending = false;
+
+	@Override
+	public Item detach(com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag bag) {
+		if (freePotionPending && Dungeon.hero != null && bag == Dungeon.hero.belongings.backpack) {
+			freePotionPending = false;
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.markFreePotionUsed(this);
+			return this;
+		}
+		return super.detach(bag);
+	}
+
 	public static final String AC_DRINK = "DRINK";
 
 	//used internally for potions that can be drunk or thrown
@@ -306,6 +318,7 @@ public class Potion extends Item {
 
 		com.shatteredpixel.shatteredpixeldungeon.items.armor.secondary.CatalystBracer.onUse( hero );
 
+		freePotionPending = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.tryStartFreePotion(this);
 		detach( hero.belongings.backpack );
 
 		hero.spend( TIME_TO_DRINK );
