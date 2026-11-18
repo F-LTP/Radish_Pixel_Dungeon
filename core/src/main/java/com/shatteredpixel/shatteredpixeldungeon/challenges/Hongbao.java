@@ -700,11 +700,11 @@ public class Hongbao {
 			GLog.p("红包开出：戒指栏位 +1");
 			com.shatteredpixel.shatteredpixeldungeon.ui.InventoryPane.refresh();
 		} else {
-			// 法杖不消耗充能概率：每次 +5%，最高 75%
+			// 法杖不消耗充能概率：每次随机 +1%~10%
 			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
 					Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
 			float before = boost.wandFreeChance();
-			boost.addWandFreeChance(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.WAND_FREE_PER_PICKUP);
+			boost.addWandFreeChance(Random.Float(0.01f, 0.10f));
 			float after = boost.wandFreeChance();
 			GLog.p("红包开出：法杖不消耗充能概率 " + Math.round(before * 100) + "% → " + Math.round(after * 100) + "%");
 		}
