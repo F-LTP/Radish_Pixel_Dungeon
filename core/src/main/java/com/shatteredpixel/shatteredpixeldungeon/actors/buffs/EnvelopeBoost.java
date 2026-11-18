@@ -99,10 +99,9 @@ public class EnvelopeBoost extends Buff {
 		return b != null && b.flamewalker;
 	}
 
-	/** 走过地格留下火焰；只烧可燃格。 */
+	/** 走过地格留下火焰；任何地格都会尝试燃烧。 */
 	public static void burnWalkedCell(int cell) {
 		if (Dungeon.level == null || cell < 0 || cell >= Dungeon.level.length()) return;
-		if (!Dungeon.level.flamable[cell]) return;
 		if (Blob.volumeAt(cell, Fire.class) == 0) {
 			GameScene.add(Blob.seed(cell, 4, Fire.class));
 		}
