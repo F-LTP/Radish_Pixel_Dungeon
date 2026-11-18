@@ -909,8 +909,13 @@ public abstract class Wand extends Item {
 									Item prevItem = curItem;
 									for (Item it : curWand.fusedItems) {
 										if (it instanceof Wand) {
-											curItem = it;
-											((Wand) it).onZap(shot);
+											final Wand fused = (Wand) it;
+											curItem = fused;
+											fused.fx(shot, new Callback() {
+												public void call() {
+													fused.onZap(shot);
+												}
+											});
 										}
 									}
 									curItem = prevItem;
