@@ -242,6 +242,9 @@ public class Belongings implements Iterable<Item> {
 
 		ring2 = (Ring) bundle.get(RING2);
 		extraRingSlots = bundle.getInt(EXTRA_RING_SLOTS);
+		if (owner != null && owner.buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RingSlotBonus.class) != null) {
+			extraRingSlots = 1;
+		}
 		if (ring2() != null)        ring2().activate( owner );
 
 		secondWep = (KindOfWeapon) bundle.get(SECOND_WEP);
