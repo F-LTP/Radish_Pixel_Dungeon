@@ -2504,6 +2504,13 @@ public class Hero extends Char {
 			subClass.onAttackProc(this, enemy, damage, true, enemy.alignment == Char.Alignment.ENEMY);
 		}
 
+		// 红包：连击次数，每次攻击追加半伤害命中
+		int comboHits = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.comboHits(this);
+		for (int i = 0; i < comboHits && enemy != null && enemy.isAlive(); i++) {
+			enemy.damage(new DamageInfo(Math.max(1, damage / 2), DamageType.PHYSICAL,
+					this, belongings.attackingWeapon(), this));
+		}
+
 		return damage;
 	}
 

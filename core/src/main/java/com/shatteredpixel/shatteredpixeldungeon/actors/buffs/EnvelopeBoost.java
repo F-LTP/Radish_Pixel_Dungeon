@@ -16,6 +16,7 @@ public class EnvelopeBoost extends Buff {
 	public static final float WAND_FREE_CAP = 1.0f;
 
 	private float wandFreeChance = 0f;
+	private int comboHits = 0;
 
 	public void addWandFreeChance(float amount) {
 		wandFreeChance = Math.min(WAND_FREE_CAP, wandFreeChance + amount);
@@ -23,6 +24,19 @@ public class EnvelopeBoost extends Buff {
 
 	public float wandFreeChance() {
 		return wandFreeChance;
+	}
+
+	public void addComboHits(int amount) {
+		comboHits = Math.min(10, comboHits + amount);
+	}
+
+	public int comboHits() {
+		return comboHits;
+	}
+
+	public static int comboHits(Char ch) {
+		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
+		return b == null ? 0 : b.comboHits;
 	}
 
 	public static float wandFreeChance(Char ch) {
@@ -53,20 +67,23 @@ public class EnvelopeBoost extends Buff {
 
 	@Override
 	public String desc() {
-		return Messages.get(this, "desc", Math.round(wandFreeChance * 100));
+		return Messages.get(this, "desc", Math.round(wandFreeChance * 100), comboHits);
 	}
 
 	private static final String WAND_FREE = "wand_free_chance";
+	private static final String COMBO_HITS = "combo_hits";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(WAND_FREE, wandFreeChance);
+		bundle.put(COMBO_HITS, comboHits);
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		wandFreeChance = bundle.getFloat(WAND_FREE);
+		comboHits = bundle.getInt(COMBO_HITS);
 	}
 }
