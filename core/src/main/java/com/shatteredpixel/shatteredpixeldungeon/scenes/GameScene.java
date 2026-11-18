@@ -1710,6 +1710,7 @@ public class GameScene extends PixelScene {
 			if (cell != null && cell >= 0 && cell < Dungeon.level.length() && cell != Dungeon.hero.pos) {
 				Char c = Actor.findChar(cell);
 				if (c instanceof Mob && c.alignment == Char.Alignment.ALLY
+						&& Dungeon.level.distance(Dungeon.hero.pos, cell) <= 1
 						&& c.buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeAllyBuff.class) != null) {
 					int heroPos = Dungeon.hero.pos;
 					Dungeon.hero.pos = cell;

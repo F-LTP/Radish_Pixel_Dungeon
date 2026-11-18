@@ -1096,7 +1096,21 @@ public abstract class Mob extends Char {
 	}
 
 	@Override
+	public boolean isImmuneTo(com.shatteredpixel.shatteredpixeldungeon.damage.DamageType type) {
+		if (type == com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.FIRE
+				&& buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeAllyBuff.class) != null) {
+			return true;
+		}
+		return super.isImmuneTo(type);
+	}
+
 	public void damage( DamageInfo info ) {
+		// 红包盟友：免疫来自玩家的伤害，以及烈焰人的火焰
+		if (buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeAllyBuff.class) != null
+				&& (info.getAttacker() == Dungeon.hero
+					|| info.getType() == com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.FIRE)) {
+			return;
+		}
 		Object src = info.getSource();
 		if (!isInvulnerable(src.getClass())) {
 			if (state == SLEEPING) {
