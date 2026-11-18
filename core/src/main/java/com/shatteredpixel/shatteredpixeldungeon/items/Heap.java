@@ -246,6 +246,10 @@ public class Heap implements Bundlable {
 	}
 	
 	public void burn() {
+		burn(true);
+	}
+
+	public void burn(boolean burnScrolls) {
 		hidden = false;
 
 		if (type != Type.HEAP) {
@@ -256,7 +260,7 @@ public class Heap implements Bundlable {
 		boolean evaporated = false;
 		
 		for (Item item : items.toArray( new Item[0] )) {
-			if (item instanceof Scroll && !item.unique) {
+			if (item instanceof Scroll && burnScrolls && !item.unique) {
 				items.remove( item );
 				burnt = true;
 			} else if (item instanceof Dewdrop) {

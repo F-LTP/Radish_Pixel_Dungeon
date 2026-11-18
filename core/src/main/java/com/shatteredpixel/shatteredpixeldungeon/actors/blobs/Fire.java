@@ -105,7 +105,8 @@ public class Fire extends Blob {
 		
 		Heap heap = Dungeon.level.heaps.get( pos );
 		if (heap != null) {
-			heap.burn();
+			// 烈焰人：自己产生的火焰不烧卷轴
+			heap.burn(!com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFlamewalker(Dungeon.hero));
 		}
 
 		Plant plant = Dungeon.level.plants.get( pos );
