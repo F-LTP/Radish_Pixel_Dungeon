@@ -48,6 +48,7 @@ public class EnvelopeBoost extends Buff {
 	private final java.util.HashMap<String,Float> freeScrollCooldowns = new java.util.HashMap<>();
 	private final java.util.ArrayList<String> freePotions = new java.util.ArrayList<>();
 	private final java.util.HashMap<String,Float> freePotionCooldowns = new java.util.HashMap<>();
+	private int fovDamage = 0;
 
 	public void addWandFreeChance(float amount) {
 		wandFreeChance = Math.min(WAND_FREE_CAP, wandFreeChance + amount);
@@ -160,6 +161,20 @@ public class EnvelopeBoost extends Buff {
 		Class<? extends Scroll> cls = pool.get(Random.Int(pool.size()));
 		b.freeScrolls.add(cls.getName());
 		GLog.p("红包开出：卷轴免耗 " + Messages.get(cls, "name"));
+	}
+
+	public void addFovDamage(int amount) {
+		fovDamage += amount;
+	}
+
+	public int fovDamage() {
+		return fovDamage;
+	}
+
+	public static void grantFovDamage(Hero hero) {
+		EnvelopeBoost b = Buff.affect(hero, EnvelopeBoost.class);
+		b.addFovDamage(1);
+		GLog.p("红包开出：视野内每回合真实伤害 " + b.fovDamage);
 	}
 
 	public static void grantFreePotion(Hero hero) {
@@ -369,6 +384,18 @@ public class EnvelopeBoost extends Buff {
 
 	@Override
 	public boolean act() {
+		if (fovDamage > 0 && Dungeon.hero != null && Dungeon.level != null) {
+			for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
+				if (m.isAlive() && m.alignment == Char.Alignment.ENEMY
+						&& Dungeon.level.heroFOV[m.pos]
+						&& m.fieldOfView != null && m.fieldOfView.length == Dungeon.level.length()
+						&& m.fieldOfView[Dungeon.hero.pos]) {
+					m.damage(new com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo(
+							fovDamage, com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.PHYSICAL_NO_ARMOR,
+							null, null, this));
+				}
+			}
+		}
 		spend(TICK);
 		return true;
 	}
@@ -388,7 +415,8 @@ public class EnvelopeBoost extends Buff {
 		return Messages.get(this, "desc", Math.round(wandFreeChance * 100), comboHits, reachBonus,
 				Math.round(missileReturnChance * 100), Math.round(enchantPower * 100),
 				flamewalker ? "是" : "否", knockbackOnApproach ? "是" : "否",
-				allyClass != null ? "是" : "否", freeScrolls.isEmpty() ? "否" : "是", freePotions.isEmpty() ? "否" : "是");
+				allyClass != null ? "是" : "否", freeScrolls.isEmpty() ? "否" : "是",
+				freePotions.isEmpty() ? "否" : "是", fovDamage);
 	}
 
 	private static final String WAND_FREE = "wand_free_chance";
@@ -403,6 +431,7 @@ public class EnvelopeBoost extends Buff {
 	private static final String FREE_SCROLL_COOLDOWNS = "free_scroll_cooldowns";
 	private static final String FREE_POTIONS = "free_potions";
 	private static final String FREE_POTION_COOLDOWNS = "free_potion_cooldowns";
+	private static final String FOV_DAMAGE = "fov_damage";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
@@ -427,6 +456,7 @@ public class EnvelopeBoost extends Buff {
 			pcool.put(e.getKey(), e.getValue());
 		}
 		bundle.put(FREE_POTION_COOLDOWNS, pcool);
+		bundle.put(FOV_DAMAGE, fovDamage);
 	}
 
 	@Override
@@ -458,5 +488,6 @@ public class EnvelopeBoost extends Buff {
 			Bundle cool = bundle.getBundle(FREE_POTION_COOLDOWNS);
 			for (String k : cool.getKeys()) freePotionCooldowns.put(k, cool.getFloat(k));
 		}
+		fovDamage = bundle.getInt(FOV_DAMAGE);
 	}
 }
