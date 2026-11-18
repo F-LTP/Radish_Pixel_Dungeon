@@ -80,6 +80,10 @@ public class Fusion {
 			return false;
 		}
 		removeEquipped(b);
+		if (b instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WhiteKingGodSword) {
+			Buff.affect(Dungeon.hero,
+					com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WhiteKingGodSword.OnlyOneEyeAttack.class);
+		}
 		b.detachAll(Dungeon.hero.belongings.backpack);
 		GLog.p("融合完成：" + a.name() + " 获得了 " + b.name() + " 的力量");
 		return true;
