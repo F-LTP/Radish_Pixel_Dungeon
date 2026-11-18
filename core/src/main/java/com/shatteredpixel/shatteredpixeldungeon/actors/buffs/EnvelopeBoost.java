@@ -27,7 +27,7 @@ public class EnvelopeBoost extends Buff {
 	}
 
 	public void addComboHits(int amount) {
-		comboHits = Math.min(10, comboHits + amount);
+		comboHits += amount;
 	}
 
 	public int comboHits() {

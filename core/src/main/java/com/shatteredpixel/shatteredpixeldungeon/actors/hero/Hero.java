@@ -2322,6 +2322,8 @@ public class Hero extends Char {
 		}
 	}
 
+	private boolean comboAttacking = false;
+
 	@Override
 	public int attackProc( final Char enemy, int damage ) {
 		damage = super.attackProc( enemy, damage );
@@ -2504,11 +2506,14 @@ public class Hero extends Char {
 			subClass.onAttackProc(this, enemy, damage, true, enemy.alignment == Char.Alignment.ENEMY);
 		}
 
-		// 红包：连击次数，每次攻击追加半伤害命中
-		int comboHits = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.comboHits(this);
-		for (int i = 0; i < comboHits && enemy != null && enemy.isAlive(); i++) {
-			enemy.damage(new DamageInfo(Math.max(1, damage / 2), DamageType.PHYSICAL,
-					this, belongings.attackingWeapon(), this));
+		// 红包连击：每次连击都是一次独立攻击，但不额外消耗回合
+		if (!comboAttacking) {
+			comboAttacking = true;
+			int comboHits = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.comboHits(this);
+			for (int i = 0; i < comboHits && enemy != null && enemy.isAlive(); i++) {
+				attack(enemy, 1f, 0f, 1f);
+			}
+			comboAttacking = false;
 		}
 
 		return damage;

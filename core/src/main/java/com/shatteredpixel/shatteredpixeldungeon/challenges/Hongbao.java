@@ -710,7 +710,7 @@ public class Hongbao {
 				float after = boost.wandFreeChance();
 				GLog.p("红包开出：法杖不消耗充能概率 " + Math.round(before * 100) + "% → " + Math.round(after * 100) + "%");
 			} else {
-				// 连击次数 +1，最多 10 次
+				// 连击次数 +1，无上限
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
 						Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
 				int before = boost.comboHits();
