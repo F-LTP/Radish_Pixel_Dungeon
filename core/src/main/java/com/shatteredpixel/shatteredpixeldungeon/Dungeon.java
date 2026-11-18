@@ -307,6 +307,7 @@ public class Dungeon {
 		generatedLevels.clear();
 		levelJustGenerated = false;
 		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.clearCarriedAllies();
+		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.resetGlobal();
 
 		gold = 0;
 		energy = 0;
@@ -827,6 +828,7 @@ public class Dungeon {
 				SecretRoom.storeRoomsInBundle( bundle );
 			
 				Statistics.storeInBundle( bundle );
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.storeGlobal(bundle);
 				Notes.storeInBundle( bundle );
 				Generator.storeInBundle( bundle );
 
@@ -993,6 +995,7 @@ public class Dungeon {
 		energy = bundle.getInt( ENERGY );
 
 		Statistics.restoreFromBundle( bundle );
+		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.restoreGlobal(bundle);
 		Generator.restoreFromBundle( bundle );
 
 		generatedLevels.clear();
