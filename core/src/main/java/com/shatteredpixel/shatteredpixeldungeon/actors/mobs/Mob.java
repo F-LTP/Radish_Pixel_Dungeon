@@ -446,31 +446,18 @@ public abstract class Mob extends Char {
 		int w = Dungeon.level.width();
 		int dx = Integer.signum(pos % w - source.pos % w);
 		int dy = Integer.signum(pos / w - source.pos / w);
-		int best = -1;
-		int bestDist = Dungeon.level.distance(pos, source.pos);
-		for (int ox = -1; ox <= 1; ox++) {
-			for (int oy = -1; oy <= 1; oy++) {
-				if (ox == 0 && oy == 0) continue;
-				int cx = pos % w + ox;
-				int cy = pos / w + oy;
-				if (cx < 0 || cy < 0 || cx >= w || cy >= Dungeon.level.height()) continue;
-				int cell = cx + cy * w;
-				if (!Dungeon.level.passable[cell] || Dungeon.level.pit[cell]) continue;
-				if (Actor.findChar(cell) != null) continue;
-				int d = Dungeon.level.distance(cell, source.pos);
-				if (d > bestDist || (d == bestDist && ox == dx && oy == dy)) {
-					best = cell;
-					bestDist = d;
-				}
-			}
+		if (dx == 0 && dy == 0) {
+			dx = Random.Int(2) == 0 ? -1 : 1;
 		}
-		if (best != -1) {
-			int oldPos = pos;
-			move(best, true);
-			moveSprite(oldPos, pos);
-			return true;
-		}
-		return false;
+		int next = pos + dx + dy * w;
+		if (!Dungeon.level.insideMap(next) || next == pos) return false;
+		com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica trajectory =
+				new com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica(pos, next,
+						com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica.MAGIC_BOLT);
+		// 无限距离：直到撞墙/撞到其他角色才停下，并结算撞击伤害
+		com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave.throwChar(
+				this, trajectory, Integer.MAX_VALUE, false, true, null);
+		return true;
 	}
 
 	protected Char chooseEnemy() {
