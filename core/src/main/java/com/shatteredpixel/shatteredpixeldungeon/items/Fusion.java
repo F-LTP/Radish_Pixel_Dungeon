@@ -40,6 +40,15 @@ public class Fusion {
 		if (a.fusedItems == null) a.fusedItems = new java.util.ArrayList<>();
 		a.fusedItems.add(b);
 
+		if (a instanceof Weapon && b instanceof Weapon) {
+			Weapon wa = (Weapon) a, wb = (Weapon) b;
+			wa.fusionMin += Math.min(wa.min(), wb.min());
+			wa.fusionMax += Math.min(wa.max(), wb.max());
+		} else if (a instanceof Armor && b instanceof Armor) {
+			Armor aa = (Armor) a, ab = (Armor) b;
+			aa.fusionDRMin += Math.min(aa.DRMin(), ab.DRMin());
+			aa.fusionDRMax += Math.min(aa.DRMax(), ab.DRMax());
+		}
 		// 效果由各装备的 proc/activate 读取 fusedItems 合并；
 		// 这里只把第二件挂到第一件上，外观保持第一件。
 

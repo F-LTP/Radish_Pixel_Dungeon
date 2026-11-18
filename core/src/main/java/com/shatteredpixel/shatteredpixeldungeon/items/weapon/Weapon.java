@@ -128,6 +128,7 @@ abstract public class Weapon extends KindOfWeapon {
 	public float    ACC = 1f;	// Accuracy modifier
 	public float	DLY	= 1f;	// Speed modifier
 	public int      RCH = 1;    // Reach modifier (only applies to melee hits)
+	public int fusionMin = 0, fusionMax = 0;
 
 	// 怪物持有时授予的 AI 标签（由各武器子类在初始化块中设定）
 	public WeaponAITag aiTag = WeaponAITag.NONE;
@@ -264,6 +265,8 @@ abstract public class Weapon extends KindOfWeapon {
 		bundle.put( AUGMENT, augment );
 
 		bundle.put("is_shining",isShining);
+		bundle.put("fusion_min", fusionMin);
+		bundle.put("fusion_max", fusionMax);
 	}
 	
 	@Override
@@ -281,6 +284,8 @@ abstract public class Weapon extends KindOfWeapon {
 		if (bundle.contains("is_shining")){
 			isShining=bundle.getBoolean("is_shining");
 		}
+		fusionMin = bundle.getInt("fusion_min");
+		fusionMax = bundle.getInt("fusion_max");
 
 	}
 	

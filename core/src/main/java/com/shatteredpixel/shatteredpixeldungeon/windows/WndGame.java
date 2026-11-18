@@ -76,9 +76,9 @@ public class WndGame extends Window {
 			curBtn.icon(Icons.get(Icons.CHALLENGE_ON));
 		}
 
-		if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFusion(Dungeon.hero)
-				|| Dungeon.isChallenged(com.shatteredpixel.shatteredpixeldungeon.Challenges.TEST_MODE)) {
-			addButton(curBtn = new RedButton("融合装备") {
+		if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.fusionCharges(Dungeon.hero) > 0) {
+			int fusionCharges = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.fusionCharges(Dungeon.hero);
+			addButton(curBtn = new RedButton("使用融合机会 (" + fusionCharges + ")") {
 				@Override
 				protected void onClick() {
 					hide();
