@@ -706,7 +706,7 @@ public class Hongbao {
 			float before = boost.wandFreeChance();
 			boost.addWandFreeChance(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.WAND_FREE_PER_PICKUP);
 			float after = boost.wandFreeChance();
-			GLog.p("红包开出：法杖免充能概率 " + Math.round(before * 100) + "% → " + Math.round(after * 100) + "%");
+			GLog.p("红包开出：法杖不消耗充能概率 " + Math.round(before * 100) + "% → " + Math.round(after * 100) + "%");
 		}
 	}
 }
