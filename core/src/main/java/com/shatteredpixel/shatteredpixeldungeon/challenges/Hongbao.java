@@ -697,7 +697,8 @@ public class Hongbao {
 		} else {
 			boolean hasFlamewalker = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFlamewalker(hero);
 			boolean hasKnockback = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasKnockbackOnApproach(hero);
-			int roll = Random.Int(8);
+			boolean hasAlly = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasAlly(hero);
+			int roll = Random.Int(9);
 			if (roll == 0) {
 				// 戒指栏位 +1：每次红包最多 +1，可以无限叠加
 				hero.belongings.growExtraRingSlots();
@@ -747,7 +748,7 @@ public class Hongbao {
 				} else {
 					GLog.p("红包开出：烈焰人已拥有，本次无新增");
 				}
-			} else {
+			} else if (roll == 7) {
 				if (!hasKnockback) {
 					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
 							Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
@@ -755,6 +756,12 @@ public class Hongbao {
 					GLog.p("红包开出：怪物初次贴近时击退 1 格");
 				} else {
 					GLog.p("红包开出：击退已拥有，本次无新增");
+				}
+			} else {
+				if (!hasAlly) {
+					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantAlly(hero);
+				} else {
+					GLog.p("红包开出：怪物盟友已拥有，本次无新增");
 				}
 			}
 		}

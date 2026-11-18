@@ -593,6 +593,11 @@ public class Dungeon {
 
 		Mob.restoreAllies( level, pos );
 
+		// 红包：每到一个新楼层，在英雄旁边生成一个盟友
+		if (levelJustGenerated) {
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.spawnFloorAlly(level, pos);
+		}
+
 		Actor.init();
 
 		level.addRespawner();

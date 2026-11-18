@@ -5,6 +5,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
@@ -26,6 +30,7 @@ public class EnvelopeBoost extends Buff {
 	private float enchantPower = 0f;
 	private boolean flamewalker = false;
 	private boolean knockbackOnApproach = false;
+	private String allyClass = null;
 
 	public void addWandFreeChance(float amount) {
 		wandFreeChance = Math.min(WAND_FREE_CAP, wandFreeChance + amount);
@@ -109,6 +114,75 @@ public class EnvelopeBoost extends Buff {
 		return b != null && b.knockbackOnApproach;
 	}
 
+	public boolean hasAlly() {
+		return allyClass != null;
+	}
+
+	public static boolean hasAlly(Char ch) {
+		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
+		return b != null && b.allyClass != null;
+	}
+
+	public static boolean isAllyClass(String className) {
+		if (Dungeon.hero == null) return false;
+		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
+		return b != null && b.allyClass != null && b.allyClass.equals(className);
+	}
+
+	public static void grantAlly(Hero hero) {
+		EnvelopeBoost b = Buff.affect(hero, EnvelopeBoost.class);
+		if (b.allyClass != null) return;
+		Mob chosen = null;
+		for (Mob m : Dungeon.level.mobs) {
+			if (m.alignment == Char.Alignment.ENEMY
+					&& !Char.hasProp(m, Char.Property.IMMOVABLE)
+					&& !m.properties().contains(Char.Property.BOSS)) {
+				if (chosen == null || Random.Int(2) == 0) chosen = m;
+			}
+		}
+		if (chosen != null) {
+			b.allyClass = chosen.getClass().getName();
+			Buff.affect(chosen, EnvelopeAllyBuff.class);
+			GLog.p("红包开出：怪物盟友 " + chosen.name());
+		} else {
+			b.allyClass = "com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Rat";
+			GLog.p("红包开出：怪物盟友 老鼠");
+		}
+		spawnAlly(Dungeon.level, hero.pos);
+	}
+
+	public static void spawnFloorAlly(Level level, int pos) {
+		if (Dungeon.hero == null || level == null) return;
+		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
+		if (b == null || b.allyClass == null) return;
+		spawnAlly(level, pos);
+	}
+
+	private static void spawnAlly(Level level, int pos) {
+		if (level == null || Dungeon.hero == null) return;
+		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
+		if (b == null || b.allyClass == null) return;
+		try {
+			Mob mob = (Mob) Class.forName(b.allyClass).newInstance();
+			int at = -1;
+			for (int off : com.watabou.utils.PathFinder.NEIGHBOURS8) {
+				int c = pos + off;
+				if (c >= 0 && c < level.length() && level.passable[c]
+						&& !level.pit[c] && com.shatteredpixel.shatteredpixeldungeon.actors.Actor.findChar(c) == null) {
+					at = c;
+					break;
+				}
+			}
+			if (at == -1) at = pos;
+			mob.pos = at;
+			mob.state = mob.WANDERING;
+			GameScene.add(mob);
+			Buff.affect(mob, EnvelopeAllyBuff.class);
+		} catch (Exception e) {
+			GLog.w("红包盟友生成失败：" + b.allyClass);
+		}
+	}
+
 	/** 走过地格留下火焰；任何地格都会尝试燃烧。 */
 	public static void burnWalkedCell(int cell) {
 		if (Dungeon.level == null || cell < 0 || cell >= Dungeon.level.length()) return;
@@ -147,7 +221,8 @@ public class EnvelopeBoost extends Buff {
 	public String desc() {
 		return Messages.get(this, "desc", Math.round(wandFreeChance * 100), comboHits, reachBonus,
 				Math.round(missileReturnChance * 100), Math.round(enchantPower * 100),
-				flamewalker ? "是" : "否", knockbackOnApproach ? "是" : "否");
+				flamewalker ? "是" : "否", knockbackOnApproach ? "是" : "否",
+				allyClass != null ? "是" : "否");
 	}
 
 	private static final String WAND_FREE = "wand_free_chance";
@@ -157,6 +232,7 @@ public class EnvelopeBoost extends Buff {
 	private static final String ENCHANT_POWER = "enchant_power";
 	private static final String FLAMEWALKER = "flamewalker";
 	private static final String KNOCKBACK_ON_APPROACH = "knockback_on_approach";
+	private static final String ALLY_CLASS = "ally_class";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
@@ -168,6 +244,7 @@ public class EnvelopeBoost extends Buff {
 		bundle.put(ENCHANT_POWER, enchantPower);
 		bundle.put(FLAMEWALKER, flamewalker);
 		bundle.put(KNOCKBACK_ON_APPROACH, knockbackOnApproach);
+		if (allyClass != null) bundle.put(ALLY_CLASS, allyClass);
 	}
 
 	@Override
@@ -180,5 +257,6 @@ public class EnvelopeBoost extends Buff {
 		enchantPower = bundle.getFloat(ENCHANT_POWER);
 		flamewalker = bundle.getBoolean(FLAMEWALKER);
 		knockbackOnApproach = bundle.getBoolean(KNOCKBACK_ON_APPROACH);
+		allyClass = bundle.contains(ALLY_CLASS) ? bundle.getString(ALLY_CLASS) : null;
 	}
 }

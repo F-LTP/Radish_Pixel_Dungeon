@@ -202,6 +202,11 @@ public abstract class Mob extends Char {
 				HP = Math.min(HT, Math.round(HT * percent));
 			}
 			firstAdded = false;
+			// 红包盟友物种：同种怪物自动变成盟友
+			if (alignment == Alignment.ENEMY
+					&& com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.isAllyClass(getClass().getName())) {
+				Buff.affect(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeAllyBuff.class);
+			}
 		}
 	}
 
@@ -441,6 +446,10 @@ public abstract class Mob extends Char {
 
 	//FIXME this is sort of a band-aid correction for allies needing more intelligent behaviour
 	protected boolean intelligentAlly = false;
+
+	public void makeIntelligentAlly() {
+		intelligentAlly = true;
+	}
 
 	private boolean knockbackAway(Char source) {
 		int w = Dungeon.level.width();
