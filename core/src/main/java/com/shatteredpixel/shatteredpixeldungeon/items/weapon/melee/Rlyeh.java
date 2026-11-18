@@ -155,8 +155,7 @@ public class Rlyeh extends MeleeWeapon {
         @Override
         public boolean act() {
             Rlyeh w2 = null;
-            if(hero.belongings.weapon instanceof Rlyeh)
-                w2 = (Rlyeh) hero.belongings.weapon;
+            w2 = com.shatteredpixel.shatteredpixeldungeon.items.Fusion.fusedItem(hero.belongings.weapon, Rlyeh.class);
             if(w2 != null){
             			w2.chance = 0.15f + 0.03f * w2.buffedLvl();
             		}

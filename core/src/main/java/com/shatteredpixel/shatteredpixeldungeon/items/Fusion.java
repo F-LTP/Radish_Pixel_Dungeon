@@ -49,6 +49,46 @@ public class Fusion {
 		if (bel.extraRings.remove(b)) { /* removed */ }
 	}
 
+	public static <T> T fusedItem(Item weapon, Class<T> type) {
+		if (weapon == null) return null;
+		if (type.isInstance(weapon)) return type.cast(weapon);
+		if (weapon.fusedItems != null) {
+			for (Item it : weapon.fusedItems) {
+				if (type.isInstance(it)) return type.cast(it);
+			}
+		}
+		return null;
+	}
+
+	private static void applyFusedPassives(Item b) {
+		if (!(b instanceof Weapon)) return;
+		if (b instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WhiteKingGodSword) {
+			Buff.affect(Dungeon.hero,
+					com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WhiteKingGodSword.OnlyOneEyeAttack.class);
+		}
+		if (b instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EnemyFlag) {
+			Buff.affect(Dungeon.hero,
+					com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EnemyFlag.MobWarningProject.class);
+		}
+		if (b instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Morello) {
+			Buff.affect(Dungeon.hero,
+					com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Morello.MorelloCabala.class)
+					.updateMaxCharge(Dungeon.hero);
+		}
+		if (b instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh) {
+			Buff.affect(Dungeon.hero,
+					com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh.StateProject.class);
+		}
+		if (b instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks) {
+			Buff.affect(Dungeon.hero,
+					com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShadowBooks.ShadowProject.class);
+		}
+		if (b instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Taijutsu) {
+			Buff.affect(Dungeon.hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Calm.class);
+			Buff.affect(Dungeon.hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CriticalAttack.class);
+		}
+	}
+
 	public static boolean fuse(Item a, Item b) {
 		if (!canFuse(a, b)) return false;
 		if (a.fusedItems == null) a.fusedItems = new java.util.ArrayList<>();
@@ -80,10 +120,7 @@ public class Fusion {
 			return false;
 		}
 		removeEquipped(b);
-		if (b instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WhiteKingGodSword) {
-			Buff.affect(Dungeon.hero,
-					com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WhiteKingGodSword.OnlyOneEyeAttack.class);
-		}
+		applyFusedPassives(b);
 		b.detachAll(Dungeon.hero.belongings.backpack);
 		GLog.p("融合完成：" + a.name() + " 获得了 " + b.name() + " 的力量");
 		return true;
