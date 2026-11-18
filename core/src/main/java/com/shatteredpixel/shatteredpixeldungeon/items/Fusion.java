@@ -35,6 +35,20 @@ public class Fusion {
 		return false;
 	}
 
+	private static void removeEquipped(Item b) {
+		if (Dungeon.hero == null) return;
+		com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings bel = Dungeon.hero.belongings;
+		if (bel.weapon == b) bel.weapon = null;
+		if (bel.secondWep == b) bel.secondWep = null;
+		if (bel.armor == b) bel.armor = null;
+		if (bel.secondaryArmor == b) bel.secondaryArmor = null;
+		if (bel.artifact == b) bel.artifact = null;
+		if (bel.misc == b) bel.misc = null;
+		if (bel.ring == b) bel.ring = null;
+		if (bel.ring2 == b) bel.ring2 = null;
+		if (bel.extraRings.remove(b)) { /* removed */ }
+	}
+
 	public static boolean fuse(Item a, Item b) {
 		if (!canFuse(a, b)) return false;
 		if (a.fusedItems == null) a.fusedItems = new java.util.ArrayList<>();
@@ -57,6 +71,7 @@ public class Fusion {
 			a.fusedItems.remove(b);
 			return false;
 		}
+		removeEquipped(b);
 		b.detachAll(Dungeon.hero.belongings.backpack);
 		GLog.p("融合完成：" + a.name() + " 获得了 " + b.name() + " 的力量");
 		return true;
