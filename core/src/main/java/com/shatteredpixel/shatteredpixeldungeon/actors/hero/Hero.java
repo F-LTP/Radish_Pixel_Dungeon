@@ -1228,6 +1228,14 @@ public class Hero extends Char {
 			return true;
 		}
 
+		int envelopeReach = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.reachBonus(this);
+		if (envelopeReach > 0
+				&& Dungeon.level.distance(pos, enemy.pos) <= 1 + envelopeReach
+				&& fieldOfView != null && fieldOfView.length == Dungeon.level.length()
+				&& fieldOfView[enemy.pos]) {
+			return true;
+		}
+
 		KindOfWeapon wep = Dungeon.hero.belongings.attackingWeapon();
 
 		if (wep != null){

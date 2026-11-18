@@ -695,7 +695,7 @@ public class Hongbao {
 			}
 			GLog.p("红包开出：" + item.name());
 		} else {
-			int roll = Random.Int(3);
+			int roll = Random.Int(4);
 			if (roll == 0) {
 				// 戒指栏位 +1：每次红包最多 +1，可以无限叠加
 				hero.belongings.growExtraRingSlots();
@@ -709,13 +709,19 @@ public class Hongbao {
 				boost.addWandFreeChance(Random.Float(0.01f, 0.10f));
 				float after = boost.wandFreeChance();
 				GLog.p("红包开出：法杖不消耗充能概率 " + Math.round(before * 100) + "% → " + Math.round(after * 100) + "%");
-			} else {
+			} else if (roll == 2) {
 				// 连击次数 +1，无上限
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
 						Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
 				int before = boost.comboHits();
 				boost.addComboHits(1);
 				GLog.p("红包开出：连击次数 +" + (boost.comboHits() - before) + "（当前 " + boost.comboHits() + "）");
+			} else {
+				// 攻击距离 +1，无上限
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
+						Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
+				boost.addReachBonus(1);
+				GLog.p("红包开出：攻击距离 +1（当前 +" + boost.reachBonus() + "）");
 			}
 		}
 	}
