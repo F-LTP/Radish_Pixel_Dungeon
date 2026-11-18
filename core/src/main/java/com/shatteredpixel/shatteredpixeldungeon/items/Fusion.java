@@ -14,6 +14,18 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 /** 红包融合：把第二件装备挂到第一件上，保留第一件外观。 */
 public class Fusion {
 
+	public static boolean hasValidPair() {
+		if (Dungeon.hero == null) return false;
+		int weapons = 0, armors = 0, wands = 0, rings = 0;
+		for (Item it : Dungeon.hero.belongings) {
+			if (it instanceof Weapon) weapons++;
+			else if (it instanceof Armor) armors++;
+			else if (it instanceof Wand) wands++;
+			else if (it instanceof Ring) rings++;
+		}
+		return weapons >= 2 || armors >= 2 || wands >= 2 || rings >= 2;
+	}
+
 	public static boolean canFuse(Item a, Item b) {
 		if (a == null || b == null || a == b) return false;
 		if (a instanceof Weapon && b instanceof Weapon) return true;
@@ -28,6 +40,16 @@ public class Fusion {
 		if (a.fusedItems == null) a.fusedItems = new java.util.ArrayList<>();
 		a.fusedItems.add(b);
 
+		if (a instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon
+				&& b instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon) {
+			com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon wa =
+					(com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon) a;
+			com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon wb =
+					(com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon) b;
+			wa.tier = Math.min(wa.tier, wb.tier);
+		} else if (a instanceof Armor && b instanceof Armor) {
+			((Armor) a).tier = Math.min(((Armor) a).tier, ((Armor) b).tier);
+		}
 		// 效果由各装备的 proc/activate 读取 fusedItems 合并；
 		// 这里只把第二件挂到第一件上，外观保持第一件。
 

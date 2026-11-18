@@ -12,6 +12,11 @@ public class WndFusion extends WndBag {
 
 	public WndFusion() {
 		super(Dungeon.hero.belongings.backpack, new ItemSelector() {
+			{
+				if (!Fusion.hasValidPair()) {
+					com.shatteredpixel.shatteredpixeldungeon.utils.GLog.w("没有可融合的同类装备，融合机会保留");
+				}
+			}
 			@Override
 			public void onSelect(Item first) {
 				if (first == null) return;
