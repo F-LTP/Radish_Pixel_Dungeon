@@ -1,6 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
@@ -191,14 +192,14 @@ public class EnvelopeBoost extends Buff {
 		String name = potion.getClass().getName();
 		if (!b.freePotions.contains(name)) return false;
 		float ready = b.freePotionCooldowns.getOrDefault(name, 0f);
-		return Statistics.turnsPassed >= ready;
+		return Actor.now() >= ready;
 	}
 
 	public static void markFreePotionUsed(Potion potion) {
 		if (Dungeon.hero == null || potion == null) return;
 		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
 		if (b == null) return;
-		b.freePotionCooldowns.put(potion.getClass().getName(), Statistics.turnsPassed + 50f);
+		b.freePotionCooldowns.put(potion.getClass().getName(), Actor.now() + 50f);
 	}
 
 	public static boolean isFreeScroll(Scroll scroll) {
@@ -212,7 +213,7 @@ public class EnvelopeBoost extends Buff {
 		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
 		if (b == null) return 0;
 		float ready = b.freeScrollCooldowns.getOrDefault(scroll.getClass().getName(), 0f);
-		return Math.max(0, (int) Math.ceil(ready - Statistics.turnsPassed));
+		return Math.max(0, (int) Math.ceil(ready - Actor.now()));
 	}
 
 	public static boolean isFreePotion(Potion potion) {
@@ -226,7 +227,7 @@ public class EnvelopeBoost extends Buff {
 		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
 		if (b == null) return 0;
 		float ready = b.freePotionCooldowns.getOrDefault(potion.getClass().getName(), 0f);
-		return Math.max(0, (int) Math.ceil(ready - Statistics.turnsPassed));
+		return Math.max(0, (int) Math.ceil(ready - Actor.now()));
 	}
 
 	public static boolean tryStartFreeScroll(Scroll scroll) {
@@ -236,14 +237,14 @@ public class EnvelopeBoost extends Buff {
 		String name = scroll.getClass().getName();
 		if (!b.freeScrolls.contains(name)) return false;
 		float ready = b.freeScrollCooldowns.getOrDefault(name, 0f);
-		return Statistics.turnsPassed >= ready;
+		return Actor.now() >= ready;
 	}
 
 	public static void markFreeScrollUsed(Scroll scroll) {
 		if (Dungeon.hero == null || scroll == null) return;
 		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
 		if (b == null) return;
-		b.freeScrollCooldowns.put(scroll.getClass().getName(), Statistics.turnsPassed + 50f);
+		b.freeScrollCooldowns.put(scroll.getClass().getName(), Actor.now() + 50f);
 	}
 
 	public static boolean isAllyClass(String className) {
