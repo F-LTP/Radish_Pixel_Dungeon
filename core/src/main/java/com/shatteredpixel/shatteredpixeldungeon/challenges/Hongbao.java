@@ -702,12 +702,7 @@ public class Hongbao {
 			do {
 				roll = Random.Int(9);
 			} while (roll == 8 && hasAlly);
-			if (roll == 0) {
-				// 戒指栏位 +1：每次红包最多 +1，可以无限叠加
-				hero.belongings.growExtraRingSlots();
-				GLog.p("红包开出：戒指栏位 +1");
-				com.shatteredpixel.shatteredpixeldungeon.ui.InventoryPane.refresh();
-			} else if (roll == 1) {
+			if (roll == 1) {
 				// 法杖不消耗充能概率：每次随机 +1%~10%
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
 						Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
