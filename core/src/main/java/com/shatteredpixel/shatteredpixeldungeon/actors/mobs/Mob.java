@@ -1117,7 +1117,7 @@ public abstract class Mob extends Char {
 			if (thorns > 0 && info.getAttacker() != null
 					&& Dungeon.level.adjacent(pos, info.getAttacker().pos)) {
 				info.getAttacker().damage(new DamageInfo(Math.max(1, Math.round(
-						info.getBaseDamage() * 0.3f * thorns)),
+						info.getBaseDamage() * Math.min(0.5f, 0.1f * thorns))),
 						DamageType.PHYSICAL, this, null, this));
 			}
 		}

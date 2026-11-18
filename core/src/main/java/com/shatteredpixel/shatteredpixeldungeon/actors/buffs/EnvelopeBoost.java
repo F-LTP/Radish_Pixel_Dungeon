@@ -237,14 +237,14 @@ public class EnvelopeBoost extends Buff {
 		String name = potion.getClass().getName();
 		if (!b.freePotions.contains(name)) return false;
 		float ready = b.freePotionCooldowns.getOrDefault(name, 0f);
-		return Actor.now() >= ready;
+		return ready <= 0f;
 	}
 
 	public static void markFreePotionUsed(Potion potion) {
 		if (Dungeon.hero == null || potion == null) return;
 		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
 		if (b == null) return;
-		b.freePotionCooldowns.put(potion.getClass().getName(), Actor.now() + 50f);
+		b.freePotionCooldowns.put(potion.getClass().getName(), 50f);
 	}
 
 	public static boolean isFreeScroll(Scroll scroll) {
@@ -258,7 +258,7 @@ public class EnvelopeBoost extends Buff {
 		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
 		if (b == null) return 0;
 		float ready = b.freeScrollCooldowns.getOrDefault(scroll.getClass().getName(), 0f);
-		return Math.max(0, (int) Math.ceil(ready - Actor.now()));
+		return Math.max(0, (int) Math.ceil(ready));
 	}
 
 	public static boolean isFreePotion(Potion potion) {
@@ -272,7 +272,7 @@ public class EnvelopeBoost extends Buff {
 		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
 		if (b == null) return 0;
 		float ready = b.freePotionCooldowns.getOrDefault(potion.getClass().getName(), 0f);
-		return Math.max(0, (int) Math.ceil(ready - Actor.now()));
+		return Math.max(0, (int) Math.ceil(ready));
 	}
 
 	public static boolean tryStartFreeScroll(Scroll scroll) {
@@ -282,14 +282,14 @@ public class EnvelopeBoost extends Buff {
 		String name = scroll.getClass().getName();
 		if (!b.freeScrolls.contains(name)) return false;
 		float ready = b.freeScrollCooldowns.getOrDefault(name, 0f);
-		return Actor.now() >= ready;
+		return ready <= 0f;
 	}
 
 	public static void markFreeScrollUsed(Scroll scroll) {
 		if (Dungeon.hero == null || scroll == null) return;
 		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
 		if (b == null) return;
-		b.freeScrollCooldowns.put(scroll.getClass().getName(), Actor.now() + 50f);
+		b.freeScrollCooldowns.put(scroll.getClass().getName(), 50f);
 	}
 
 	public static boolean isAllyClass(String className) {
@@ -414,6 +414,12 @@ public class EnvelopeBoost extends Buff {
 
 	@Override
 	public boolean act() {
+		for (String k : new java.util.ArrayList<>(freeScrollCooldowns.keySet())) {
+			freeScrollCooldowns.put(k, Math.max(0f, freeScrollCooldowns.get(k) - TICK));
+		}
+		for (String k : new java.util.ArrayList<>(freePotionCooldowns.keySet())) {
+			freePotionCooldowns.put(k, Math.max(0f, freePotionCooldowns.get(k) - TICK));
+		}
 		if (fovDamage > 0 && Dungeon.hero != null && Dungeon.level != null) {
 			for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
 				if (m.isAlive() && m.alignment == Char.Alignment.ENEMY

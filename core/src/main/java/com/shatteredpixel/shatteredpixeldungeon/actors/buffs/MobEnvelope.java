@@ -78,7 +78,7 @@ public class MobEnvelope extends Buff {
 				case RAGE: sb.append("造成伤害 +").append(10 * n).append("%"); break;
 				case COMBO: sb.append("每次攻击 ").append(10 * n).append("% 概率追加半伤害攻击"); break;
 				case IRON: sb.append("受到伤害 -").append(10 * n).append("%"); break;
-				case THORNS: sb.append("反弹 ").append(30 * n).append("% 近战伤害"); break;
+				case THORNS: sb.append("反弹 ").append(Math.min(50, 10 * n)).append("% 近战伤害"); break;
 				case HASTE: sb.append("移动速度提高约 ").append(Math.round((Math.pow(1.2, n) - 1) * 100)).append("%"); break;
 				case EVOLVE: sb.append("生命上限 +").append(20 * n).append("%"); break;
 				case SHIELD: sb.append("每层 10% 最大生命护盾"); break;
