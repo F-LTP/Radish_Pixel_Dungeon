@@ -1538,11 +1538,6 @@ public abstract class Level implements Bundlable {
 				viewDist *= 1f + 0.25f*((Hero) c).pointsInTalent(Talent.FARSIGHT);
 				viewDist *= EyeOfNewt.visionRangeMultiplier();
 			}
-			// 红包：视野范围强化/削弱
-			viewDist *= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(
-					c, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.SIGHT);
-			viewDist *= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
-					c, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.SIGHT);
 			viewDist = Math.max(1f, viewDist);
 
 			ShadowCaster.castShadow( cx, cy, width(), fieldOfView, blocking, Math.round(viewDist) );

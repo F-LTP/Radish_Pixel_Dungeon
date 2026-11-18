@@ -481,10 +481,6 @@ public class Hero extends Char {
 		if (buff(Sprouted_Potato.Potato_Poison.class) != null){
 			HT -= buff(Sprouted_Potato.Potato_Poison.class).level();
 		}
-
-		// 红包生命上限：放在 updateHT 内计算，升级等重算 HT 时不会丢失已有的叠加加成
-		HT = Math.round(HT * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(
-				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.HP));
 		HT = Math.max(1, HT);
 
 		// DoggingDog on 20250914
@@ -888,15 +884,12 @@ public class Hero extends Char {
 		int spirit = LittleKnight.spiritAccuracy( this );
 		if (hero.buff(RingOfForce.Force.class) == null) {
 			if(wep != null)
-				return (int)(attackSkill * accuracy * wep.accuracyFactor( this, target )
-						* com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.ACC)) + spirit;
+				return (int)(attackSkill * accuracy * wep.accuracyFactor( this, target )) + spirit;
 		} else {
-			return (int)(attackSkill * accuracy
-					* com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.ACC)) + spirit;
+			return (int)(attackSkill * accuracy) + spirit;
 		}
 
-		return (int)(attackSkill * accuracy
-				* com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.ACC)) + spirit;
+		return (int)(attackSkill * accuracy) + spirit;
 
 	}
 
@@ -938,8 +931,7 @@ public class Hero extends Char {
 			evasion = belongings.armor().evasionFactor(this, evasion);
 		}
 
-		return Math.round(evasion
-				* com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.EVA))
+		return Math.round(evasion)
 				+ LittleKnight.spiritEvasion( this );
 
 	}
@@ -1180,7 +1172,6 @@ public class Hero extends Char {
 		}
 
 		speed = AscensionChallenge.modifyHeroSpeed(speed);
-		speed *= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.SPD);
 
 		//TS
 		if (buff(DarkCoat.myPace.class)!=null) speed=Math.max(1f,speed);
@@ -1229,15 +1220,6 @@ public class Hero extends Char {
 
 		//can always attack adjacent enemies
 		if (Dungeon.level.adjacent(pos, enemy.pos)) {
-			return true;
-		}
-
-		// 红包：攻击距离强化，允许在视野内隔格攻击
-		int envelopeReach = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.reachBonus(this);
-		if (envelopeReach > 0
-				&& Dungeon.level.distance(pos, enemy.pos) <= 1 + envelopeReach
-				&& fieldOfView != null && fieldOfView.length == Dungeon.level.length()
-				&& fieldOfView[enemy.pos]) {
 			return true;
 		}
 
@@ -1321,8 +1303,6 @@ public class Hero extends Char {
 			t_lvl = Math.max(0,t_lvl-1);
 			speed *= (1f + ((float) t_lvl)/3);
 		}
-
-        delay /= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.ATK);
         return delay/speed;
     }
 
@@ -2364,24 +2344,6 @@ public class Hero extends Char {
 					|| enemy.properties.contains(Char.Property.MINIBOSS)
 					|| !enemy.buffs(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy.class).isEmpty())) {
 			damage = Math.round(damage * (1f + (10 + 5 * champBelt.level()) / 100f));
-		}
-
-		damage = Math.round(damage * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(
-				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.DMG));
-
-		// 红包连击：每次攻击追加数次半伤害命中
-		int comboHits = Math.min(10, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.combo(this));
-		for (int i = 0; i < comboHits && enemy != null && enemy.isAlive(); i++) {
-			enemy.damage(new DamageInfo(Math.max(1, damage / 2), DamageType.PHYSICAL,
-					this, belongings.attackingWeapon(), this));
-		}
-
-		// 红包吸血：正数回复伤害的一定比例，负数反噬（不致死）
-		float envelopeSteal = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.steal(this);
-		if (damage > 0 && envelopeSteal > 0) {
-			HP = Math.min(HT, HP + Math.max(1, Math.round(damage * envelopeSteal)));
-		} else if (damage > 0 && envelopeSteal < 0) {
-			HP = Math.max(1, HP - Math.max(1, Math.round(damage * -envelopeSteal)));
 		}
 
 

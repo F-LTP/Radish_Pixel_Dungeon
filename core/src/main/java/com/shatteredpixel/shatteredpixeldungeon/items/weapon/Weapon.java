@@ -372,9 +372,7 @@ abstract public class Weapon extends KindOfWeapon {
 				reach = RCH;
 			}
 		}
-		// 红包攻击距离与索敌附魔一致，直接计入武器攻击距离
-		return reach + com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.reachBonus(owner)
-				+ com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.reachBonus(owner);
+		return reach;
 	}
 
 	public int STRReq(){

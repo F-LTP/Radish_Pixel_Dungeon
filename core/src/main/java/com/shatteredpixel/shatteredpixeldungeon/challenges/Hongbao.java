@@ -11,12 +11,10 @@ import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BlobImmunity;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Levitation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
@@ -297,12 +295,9 @@ public class Hongbao {
 
 	/** 怪物开红包：35% 获得装备/道具并立即使用，65% 获得属性强化。 */
 	private static void mobReward(Mob mob) {
-		MobEnvelope envelope = Buff.affect(mob, MobEnvelope.class);
-		envelope.recordPickup();
 		if (Random.Int(100) < 35 && mobGetItem(mob)) {
 			return;
 		}
-		envelope.addRandom();
 	}
 
 	private static boolean mobGetItem(Mob mob) {
@@ -666,7 +661,6 @@ public class Hongbao {
 		} else {
 			// 镜像、催眠、狂怒、恐惧、报应、嬗变等卷轴以英雄为目标，怪物无法直接套用，
 			// 这里改为吸收卷轴力量获得一次红包强化，避免“空读”。
-			Buff.affect(mob, MobEnvelope.class).addRandom();
 		}
 	}
 
@@ -700,8 +694,6 @@ public class Hongbao {
 				Dungeon.level.drop(item, hero.pos);
 			}
 			GLog.p("红包开出：" + item.name());
-		} else {
-			Buff.affect(hero, EnvelopeBoost.class).roll();
 		}
 	}
 }

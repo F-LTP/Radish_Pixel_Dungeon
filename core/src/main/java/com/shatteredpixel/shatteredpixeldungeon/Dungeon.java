@@ -252,8 +252,6 @@ public class Dungeon {
 	
 	public static void init() {
 
-		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.resetGlobal();
-
 		// 初始化事件系统（自动扫描并注册订阅类）
 		EventManager.init();
 		
@@ -825,7 +823,6 @@ public class Dungeon {
 				Statistics.storeInBundle( bundle );
 				Notes.storeInBundle( bundle );
 				Generator.storeInBundle( bundle );
-				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.storeGlobal( bundle );
 
 				// Save Snake Bite Manager state
 				SnakeBiteChallengeManager.save(bundle);
@@ -991,7 +988,6 @@ public class Dungeon {
 
 		Statistics.restoreFromBundle( bundle );
 		Generator.restoreFromBundle( bundle );
-		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.restoreGlobal( bundle );
 
 		generatedLevels.clear();
 			for (String key : bundle.getStringArray(GENERATED_LEVELS)){

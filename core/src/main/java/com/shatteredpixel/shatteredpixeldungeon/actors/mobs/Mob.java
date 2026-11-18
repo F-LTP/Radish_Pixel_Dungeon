@@ -202,7 +202,6 @@ public abstract class Mob extends Char {
 				HP = Math.min(HT, Math.round(HT * percent));
 			}
 			firstAdded = false;
-			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.applyGlobalHP(this);
 		}
 	}
 
@@ -629,14 +628,6 @@ public abstract class Mob extends Char {
 				&& com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.canMobZap(this, enemy)) {
 			return true;
 		}
-		//红包：怪物从红包获得的攻击距离强化
-		int envelopeReach = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.reachBonus(this);
-		if (envelopeReach > 0
-				&& Dungeon.level.distance(pos, enemy.pos) <= 1 + envelopeReach
-				&& fieldOfView != null && fieldOfView.length == Dungeon.level.length()
-				&& fieldOfView[enemy.pos]) {
-			return true;
-		}
 		if (mobEquipment.weapon != null && mobEquipment.weapon.canReach(this, enemy.pos)) {
 			return true;
 		}
@@ -871,7 +862,7 @@ public abstract class Mob extends Char {
 		if ( !surprisedBy(enemy)
 				&& paralysed == 0
 				&& !(alignment == Alignment.ALLY && enemy == Dungeon.hero)) {
-			return this.defenseSkill + envelopeEvasionBonus();
+			return this.defenseSkill;
 		} else {
 			return 0;
 		}
@@ -951,10 +942,6 @@ public abstract class Mob extends Char {
 			if (mobEquipment.armor != null) speed = mobEquipment.armor.speedFactor(this, speed);
 			speed *= RingOfHaste.speedMultiplier(this)
 					* com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Warden.grassSpeedFactor(this);
-			speed *= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
-					this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.SPD);
-			speed *= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
-					this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.ATK);
 			return speed;
 
 		}
@@ -1024,41 +1011,19 @@ public abstract class Mob extends Char {
 		} else {
 			base = super.damageRoll();
 		}
-		base = Math.round(base * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
-				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.DMG));
 		return base;
 	}
 
 	@Override
 	public int drRoll() {
 		int dr = super.drRoll();
-		dr = Math.round(dr * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
-				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.DEF));
 		return dr;
 	}
 
 	@Override
 	public int attackSkill(Char target) {
 		int skill = super.attackSkill(target);
-		skill = Math.round(skill * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
-				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.ACC));
 		return skill;
-	}
-
-	public int envelopeEvasionBonus() {
-		return Math.round((com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
-				this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.EVA) - 1f) * 100);
-	}
-
-	/**
-	 * 红包强化入口：无法移动的怪物不承受红包效果。
-	 * 新拾取在 attachTo 层已被拦截，这里再兜底旧存档/残留 Buff。
-	 */
-	public com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope envelopeBoost() {
-		if (Char.hasProp(this, Property.IMMOVABLE)) {
-			return null;
-		}
-		return buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.class);
 	}
 
 	/** 查找当前可影响 AI 的修改器：先看 Buff，再看攻击武器的 aiTag。 */
@@ -1920,22 +1885,6 @@ public abstract class Mob extends Char {
 					Dungeon.fail(getClass());
 					GLog.n(heroKilledMessage());
 				}
-			}
-
-			// 红包吸血：怪物只享受正收益
-			float steal = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.steal(this);
-			if (steal > 0 && damage > 0) {
-				HP = Math.min(HT, HP + Math.max(1, Math.round(damage * steal)));
-			}
-
-			// 红包连击：追加数次半伤害命中
-			int comboHits = Math.min(10,
-					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.combo(this));
-			for (int i = 0; i < comboHits && enemy != null && enemy.isAlive(); i++) {
-				enemy.damage(new com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo(
-						Math.max(1, damage / 2),
-						com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.PHYSICAL,
-						this, attackingWeapon(), this));
 			}
 
 			return damage;

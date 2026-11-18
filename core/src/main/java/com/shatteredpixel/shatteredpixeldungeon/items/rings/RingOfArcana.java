@@ -59,11 +59,6 @@ public class RingOfArcana extends Ring {
 	public static float enchantPowerMultiplier(Char target ){
 		float base = (float)Math.pow(1.175f, getBuffedBonus(target, Arcana.class));
 		base *= com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior.stormAssaultMultiplier(target);
-		// 红包：附魔强度强化/削弱
-		base *= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(
-				target, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.ENCH);
-		base *= com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.mult(
-				target, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.ENCH);
 		return base;
 	}
 

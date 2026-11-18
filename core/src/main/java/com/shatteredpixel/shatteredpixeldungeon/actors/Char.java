@@ -943,15 +943,6 @@ public abstract class Char extends Actor {
             damageType = DamageType.PHYSICAL;
         }
         int dmg = info.getDamage();
-
-        // 红包防御强化/削弱：防御低于 100% 时反而承受更多伤害
-        if (this instanceof com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero) {
-            float def = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.mult(
-                    this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.DEF);
-            if (def != 1f) {
-                info.addFinalMultModifier(1f / def, "envelope_def");
-            }
-        }
         // NPC overrides still receive the hit, while base NPC damage remains immune.
         if (properties.contains(Property.NPC) && !isDamageable()) {
             return new DamageResult(info.getBaseDamage(), dmg, 0, 0, 0, 0, true);
@@ -1034,13 +1025,6 @@ public abstract class Char extends Actor {
 
         // 最终伤害修正（抗性作为乘算项并入同一乘区）
         dmg = applyFinalDamageModifiers(dmg, info, damageModifiers, resistanceMultiplier);
-
-        // 红包魔抗：减少受到的魔法/元素伤害
-        if (damageType.isMagical()) {
-            dmg = Math.max(0, Math.round(dmg
-                    * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.magicResist(this)
-                    * com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.magicResist(this)));
-        }
 
         // 护盾前反应相位：携带护盾前伤害与受击前 HP（只读，供 Paralysis 等）
         for (Buff b : buffs().toArray(new Buff[0])) {
