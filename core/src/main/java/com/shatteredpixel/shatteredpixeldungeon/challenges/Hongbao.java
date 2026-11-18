@@ -696,7 +696,8 @@ public class Hongbao {
 			GLog.p("红包开出：" + item.name());
 		} else {
 			boolean hasFlamewalker = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFlamewalker(hero);
-			int roll = Random.Int(hasFlamewalker ? 6 : 7);
+			boolean hasKnockback = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasKnockbackOnApproach(hero);
+			int roll = Random.Int(8);
 			if (roll == 0) {
 				// 戒指栏位 +1：每次红包最多 +1，可以无限叠加
 				hero.belongings.growExtraRingSlots();
@@ -737,12 +738,24 @@ public class Hongbao {
 						Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
 				boost.addEnchantPower(0.05f);
 				GLog.p("红包开出：附魔触发与效果 +" + Math.round(boost.enchantPower() * 100) + "%");
+			} else if (roll == 6) {
+				if (!hasFlamewalker) {
+					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
+							Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
+					boost.grantFlamewalker();
+					GLog.p("红包开出：烈焰人（走过地格燃烧，免疫燃烧）");
+				} else {
+					GLog.p("红包开出：烈焰人已拥有，本次无新增");
+				}
 			} else {
-				// 烈焰人：一次性，走过地格燃烧并免疫燃烧
-				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
-						Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
-				boost.grantFlamewalker();
-				GLog.p("红包开出：烈焰人（走过地格燃烧，免疫燃烧）");
+				if (!hasKnockback) {
+					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
+							Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
+					boost.grantKnockbackOnApproach();
+					GLog.p("红包开出：怪物初次贴近时击退 1 格");
+				} else {
+					GLog.p("红包开出：击退已拥有，本次无新增");
+				}
 			}
 		}
 	}

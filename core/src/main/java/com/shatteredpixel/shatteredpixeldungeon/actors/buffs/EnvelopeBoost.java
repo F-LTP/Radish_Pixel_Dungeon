@@ -25,6 +25,7 @@ public class EnvelopeBoost extends Buff {
 	private float missileReturnChance = 0f;
 	private float enchantPower = 0f;
 	private boolean flamewalker = false;
+	private boolean knockbackOnApproach = false;
 
 	public void addWandFreeChance(float amount) {
 		wandFreeChance = Math.min(WAND_FREE_CAP, wandFreeChance + amount);
@@ -99,6 +100,15 @@ public class EnvelopeBoost extends Buff {
 		return b != null && b.flamewalker;
 	}
 
+	public void grantKnockbackOnApproach() {
+		knockbackOnApproach = true;
+	}
+
+	public static boolean hasKnockbackOnApproach(Char ch) {
+		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
+		return b != null && b.knockbackOnApproach;
+	}
+
 	/** 走过地格留下火焰；任何地格都会尝试燃烧。 */
 	public static void burnWalkedCell(int cell) {
 		if (Dungeon.level == null || cell < 0 || cell >= Dungeon.level.length()) return;
@@ -137,7 +147,7 @@ public class EnvelopeBoost extends Buff {
 	public String desc() {
 		return Messages.get(this, "desc", Math.round(wandFreeChance * 100), comboHits, reachBonus,
 				Math.round(missileReturnChance * 100), Math.round(enchantPower * 100),
-				flamewalker ? "是" : "否");
+				flamewalker ? "是" : "否", knockbackOnApproach ? "是" : "否");
 	}
 
 	private static final String WAND_FREE = "wand_free_chance";
@@ -146,6 +156,7 @@ public class EnvelopeBoost extends Buff {
 	private static final String MISSILE_RETURN = "missile_return_chance";
 	private static final String ENCHANT_POWER = "enchant_power";
 	private static final String FLAMEWALKER = "flamewalker";
+	private static final String KNOCKBACK_ON_APPROACH = "knockback_on_approach";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
@@ -156,6 +167,7 @@ public class EnvelopeBoost extends Buff {
 		bundle.put(MISSILE_RETURN, missileReturnChance);
 		bundle.put(ENCHANT_POWER, enchantPower);
 		bundle.put(FLAMEWALKER, flamewalker);
+		bundle.put(KNOCKBACK_ON_APPROACH, knockbackOnApproach);
 	}
 
 	@Override
@@ -167,5 +179,6 @@ public class EnvelopeBoost extends Buff {
 		missileReturnChance = bundle.getFloat(MISSILE_RETURN);
 		enchantPower = bundle.getFloat(ENCHANT_POWER);
 		flamewalker = bundle.getBoolean(FLAMEWALKER);
+		knockbackOnApproach = bundle.getBoolean(KNOCKBACK_ON_APPROACH);
 	}
 }

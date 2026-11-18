@@ -214,6 +214,8 @@ public abstract class Mob extends Char {
 
 	private static final String ENEMY_ID	= "enemy_id";
 	private static final String ONLY_ACTDOWN = "only_actdown";
+	private static final String ENVELOPE_KNOCKBACK = "envelope_knockback";
+	public boolean envelopeKnockbackUsed = false;
 
 	public boolean onlyActDown = true;
 
@@ -252,6 +254,7 @@ public abstract class Mob extends Char {
 		}
 
 		bundle.put(ONLY_ACTDOWN,onlyActDown);
+		bundle.put(ENVELOPE_KNOCKBACK, envelopeKnockbackUsed);
 		mobEquipment.storeInBundle(bundle);
 
 	}
@@ -287,6 +290,7 @@ public abstract class Mob extends Char {
 		if(bundle.contains(ONLY_ACTDOWN)){
 			onlyActDown = bundle.getBoolean(ONLY_ACTDOWN);
 		}
+		envelopeKnockbackUsed = bundle.getBoolean(ENVELOPE_KNOCKBACK);
 
 
 		eyeAttack = bundle.getBoolean(EYEATTACK);
@@ -378,6 +382,18 @@ public abstract class Mob extends Char {
 			enemyInFOV = false;
 		}
 
+		// 红包：怪物第一次贴近英雄时被击退 1 格（每个怪物一次）
+		if (!envelopeKnockbackUsed && enemyInFOV && enemy == Dungeon.hero
+				&& alignment == Alignment.ENEMY
+				&& com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasKnockbackOnApproach(Dungeon.hero)
+				&& Dungeon.level.distance(pos, enemy.pos) <= 1) {
+			envelopeKnockbackUsed = true;
+			if (knockbackAway(enemy)) {
+				spend(TICK);
+				return true;
+			}
+		}
+
 		//prevents action, but still updates enemy seen status
 		if (buff(Feint.AfterImage.FeintConfusion.class) != null){
 			enemySeen = enemyInFOV;
@@ -425,6 +441,37 @@ public abstract class Mob extends Char {
 
 	//FIXME this is sort of a band-aid correction for allies needing more intelligent behaviour
 	protected boolean intelligentAlly = false;
+
+	private boolean knockbackAway(Char source) {
+		int w = Dungeon.level.width();
+		int dx = Integer.signum(pos % w - source.pos % w);
+		int dy = Integer.signum(pos / w - source.pos / w);
+		int best = -1;
+		int bestDist = Dungeon.level.distance(pos, source.pos);
+		for (int ox = -1; ox <= 1; ox++) {
+			for (int oy = -1; oy <= 1; oy++) {
+				if (ox == 0 && oy == 0) continue;
+				int cx = pos % w + ox;
+				int cy = pos / w + oy;
+				if (cx < 0 || cy < 0 || cx >= w || cy >= Dungeon.level.height()) continue;
+				int cell = cx + cy * w;
+				if (!Dungeon.level.passable[cell] || Dungeon.level.pit[cell]) continue;
+				if (Actor.findChar(cell) != null) continue;
+				int d = Dungeon.level.distance(cell, source.pos);
+				if (d > bestDist || (d == bestDist && ox == dx && oy == dy)) {
+					best = cell;
+					bestDist = d;
+				}
+			}
+		}
+		if (best != -1) {
+			int oldPos = pos;
+			move(best, true);
+			moveSprite(oldPos, pos);
+			return true;
+		}
+		return false;
+	}
 
 	protected Char chooseEnemy() {
 

@@ -21,6 +21,7 @@ public class WndHongbaoDebug extends WndOptions {
 				"投掷物返回概率 +10%",
 				"附魔触发与效果 +10%",
 				"烈焰人（一次性）",
+				"怪物首次贴近击退",
 				"全部属性各提升一次");
 	}
 
@@ -59,6 +60,10 @@ public class WndHongbaoDebug extends WndOptions {
 				GLog.p("测试：烈焰人已获得");
 				break;
 			case 7:
+				boost.grantKnockbackOnApproach();
+				GLog.p("测试：已获得怪物首次贴近击退");
+				break;
+			case 8:
 				Dungeon.hero.belongings.growExtraRingSlots();
 				boost.addWandFreeChance(0.10f);
 				boost.addComboHits(1);
@@ -66,6 +71,7 @@ public class WndHongbaoDebug extends WndOptions {
 				boost.addMissileReturnChance(0.10f);
 				boost.addEnchantPower(0.10f);
 				boost.grantFlamewalker();
+				boost.grantKnockbackOnApproach();
 				InventoryPane.refresh();
 				GLog.p("测试：全部红包属性各提升一次");
 				break;
