@@ -11,6 +11,11 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Rat;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
+import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -34,6 +39,8 @@ public class EnvelopeBoost extends Buff {
 	private boolean flamewalker = false;
 	private boolean knockbackOnApproach = false;
 	private String allyClass = null;
+	private final java.util.ArrayList<String> freeScrolls = new java.util.ArrayList<>();
+	private final java.util.HashMap<String,Float> freeScrollCooldowns = new java.util.HashMap<>();
 
 	public void addWandFreeChance(float amount) {
 		wandFreeChance = Math.min(WAND_FREE_CAP, wandFreeChance + amount);
@@ -124,6 +131,45 @@ public class EnvelopeBoost extends Buff {
 	public static boolean hasAlly(Char ch) {
 		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
 		return b != null && b.allyClass != null;
+	}
+
+	public static void grantFreeScroll(Hero hero) {
+		EnvelopeBoost b = Buff.affect(hero, EnvelopeBoost.class);
+		java.util.ArrayList<Class<? extends Scroll>> pool = new java.util.ArrayList<>();
+		for (Class<?> c : Generator.Category.SCROLL.classes) {
+			if (c == ScrollOfUpgrade.class || !Scroll.class.isAssignableFrom(c)) continue;
+			pool.add((Class<? extends Scroll>) c);
+		}
+		for (Class<? extends ExoticScroll> c : ExoticScroll.regToExo.values()) {
+			if (c != null) pool.add(c);
+		}
+		for (String selected : b.freeScrolls) {
+			pool.removeIf(c -> c.getName().equals(selected));
+		}
+		if (pool.isEmpty()) {
+			GLog.w("红包开出：所有卷轴都已免耗，本次无新增");
+			return;
+		}
+		Class<? extends Scroll> cls = pool.get(Random.Int(pool.size()));
+		b.freeScrolls.add(cls.getName());
+		GLog.p("红包开出：卷轴免耗 " + Messages.get(cls, "name"));
+	}
+
+	public static boolean tryStartFreeScroll(Scroll scroll) {
+		if (Dungeon.hero == null || scroll == null) return false;
+		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
+		if (b == null) return false;
+		String name = scroll.getClass().getName();
+		if (!b.freeScrolls.contains(name)) return false;
+		float ready = b.freeScrollCooldowns.getOrDefault(name, 0f);
+		return Statistics.turnsPassed >= ready;
+	}
+
+	public static void markFreeScrollUsed(Scroll scroll) {
+		if (Dungeon.hero == null || scroll == null) return;
+		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
+		if (b == null) return;
+		b.freeScrollCooldowns.put(scroll.getClass().getName(), Statistics.turnsPassed + 50f);
 	}
 
 	public static boolean isAllyClass(String className) {
@@ -267,7 +313,7 @@ public class EnvelopeBoost extends Buff {
 		return Messages.get(this, "desc", Math.round(wandFreeChance * 100), comboHits, reachBonus,
 				Math.round(missileReturnChance * 100), Math.round(enchantPower * 100),
 				flamewalker ? "是" : "否", knockbackOnApproach ? "是" : "否",
-				allyClass != null ? "是" : "否");
+				allyClass != null ? "是" : "否", freeScrolls.isEmpty() ? "否" : "是");
 	}
 
 	private static final String WAND_FREE = "wand_free_chance";
@@ -278,6 +324,8 @@ public class EnvelopeBoost extends Buff {
 	private static final String FLAMEWALKER = "flamewalker";
 	private static final String KNOCKBACK_ON_APPROACH = "knockback_on_approach";
 	private static final String ALLY_CLASS = "ally_class";
+	private static final String FREE_SCROLLS = "free_scrolls";
+	private static final String FREE_SCROLL_COOLDOWNS = "free_scroll_cooldowns";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
@@ -290,6 +338,12 @@ public class EnvelopeBoost extends Buff {
 		bundle.put(FLAMEWALKER, flamewalker);
 		bundle.put(KNOCKBACK_ON_APPROACH, knockbackOnApproach);
 		if (allyClass != null) bundle.put(ALLY_CLASS, allyClass);
+		bundle.put(FREE_SCROLLS, freeScrolls.toArray(new String[0]));
+		Bundle cool = new Bundle();
+		for (java.util.Map.Entry<String,Float> e : freeScrollCooldowns.entrySet()) {
+			cool.put(e.getKey(), e.getValue());
+		}
+		bundle.put(FREE_SCROLL_COOLDOWNS, cool);
 	}
 
 	@Override
@@ -303,5 +357,14 @@ public class EnvelopeBoost extends Buff {
 		flamewalker = bundle.getBoolean(FLAMEWALKER);
 		knockbackOnApproach = bundle.getBoolean(KNOCKBACK_ON_APPROACH);
 		allyClass = bundle.contains(ALLY_CLASS) ? bundle.getString(ALLY_CLASS) : null;
+		freeScrolls.clear();
+		if (bundle.contains(FREE_SCROLLS)) {
+			for (String n : bundle.getStringArray(FREE_SCROLLS)) freeScrolls.add(n);
+		}
+		freeScrollCooldowns.clear();
+		if (bundle.contains(FREE_SCROLL_COOLDOWNS)) {
+			Bundle cool = bundle.getBundle(FREE_SCROLL_COOLDOWNS);
+			for (String k : cool.getKeys()) freeScrollCooldowns.put(k, cool.getFloat(k));
+		}
 	}
 }

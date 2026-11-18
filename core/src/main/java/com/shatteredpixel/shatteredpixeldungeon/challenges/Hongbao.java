@@ -760,12 +760,14 @@ public class Hongbao {
 				} else {
 					GLog.p("红包开出：击退已拥有，本次无新增");
 				}
-			} else {
+			} else if (roll == 8) {
 				if (!hasAlly) {
 					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantAlly(hero);
 				} else {
 					GLog.p("红包开出：怪物盟友已拥有，本次无新增");
 				}
+			} else {
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFreeScroll(hero);
 			}
 		}
 	}

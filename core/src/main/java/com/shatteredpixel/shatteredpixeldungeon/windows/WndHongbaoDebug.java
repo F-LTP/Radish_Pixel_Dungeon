@@ -23,6 +23,7 @@ public class WndHongbaoDebug extends WndOptions {
 				"烈焰人（一次性）",
 				"怪物首次贴近击退",
 				"随机怪物盟友（一次性）",
+				"随机卷轴免耗（可重复）",
 				"全部属性各提升一次");
 	}
 
@@ -68,6 +69,9 @@ public class WndHongbaoDebug extends WndOptions {
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantAlly(Dungeon.hero);
 				break;
 			case 9:
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFreeScroll(Dungeon.hero);
+				break;
+			case 10:
 				Dungeon.hero.belongings.growExtraRingSlots();
 				boost.addWandFreeChance(0.10f);
 				boost.addComboHits(1);
@@ -77,6 +81,7 @@ public class WndHongbaoDebug extends WndOptions {
 				boost.grantFlamewalker();
 				boost.grantKnockbackOnApproach();
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantAlly(Dungeon.hero);
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFreeScroll(Dungeon.hero);
 				InventoryPane.refresh();
 				GLog.p("测试：全部红包属性各提升一次");
 				break;

@@ -390,7 +390,7 @@ public class Item implements Bundlable {
 		return dupe;
 	}
 	
-	public final Item detach( Bag container ) {
+	public Item detach( Bag container ) {
 		
 		if (quantity <= 0) {
 			

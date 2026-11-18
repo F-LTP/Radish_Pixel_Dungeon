@@ -79,6 +79,18 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 public abstract class Scroll extends Item {
+
+	private boolean freeScrollPending = false;
+
+	@Override
+	public Item detach(com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag bag) {
+		if (freeScrollPending && curUser != null && bag == curUser.belongings.backpack) {
+			freeScrollPending = false;
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.markFreeScrollUsed(this);
+			return this;
+		}
+		return super.detach(bag);
+	}
 	//affects how strongly on-scroll talents trigger from this scroll
 	protected float talentFactor = 1;
 	//the chance (0-1) of whether on-scroll talents trigger from this potion
@@ -249,6 +261,7 @@ public abstract class Scroll extends Item {
 				GLog.n( Messages.get(this, "cursed") );
 			} else {
 				curUser = hero;
+				freeScrollPending = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.tryStartFreeScroll(this);
 				doRead();
 			}
 
