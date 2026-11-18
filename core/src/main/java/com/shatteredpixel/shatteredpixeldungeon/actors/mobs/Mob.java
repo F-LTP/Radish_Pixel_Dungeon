@@ -985,6 +985,9 @@ public abstract class Mob extends Char {
 			if (mobEquipment.armor != null) speed = mobEquipment.armor.speedFactor(this, speed);
 			speed *= RingOfHaste.speedMultiplier(this)
 					* com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Warden.grassSpeedFactor(this);
+			int haste = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.stack(
+					this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.HASTE);
+			speed *= (float) Math.pow(1.2f, haste);
 			return speed;
 
 		}
@@ -1105,6 +1108,19 @@ public abstract class Mob extends Char {
 	}
 
 	public void damage( DamageInfo info ) {
+		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
+				buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.class);
+		if (env != null) {
+			int iron = env.stack(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.IRON);
+			if (iron > 0) info.addFinalMultModifier(1f - 0.1f * iron, "mob_iron");
+			int thorns = env.stack(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.THORNS);
+			if (thorns > 0 && info.getAttacker() != null
+					&& Dungeon.level.adjacent(pos, info.getAttacker().pos)) {
+				info.getAttacker().damage(new DamageInfo(Math.max(1, Math.round(
+						info.getBaseDamage() * 0.3f * thorns)),
+						DamageType.PHYSICAL, this, null, this));
+			}
+		}
 		// 红包盟友：免疫来自玩家的伤害，以及烈焰人的火焰
 		if (buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeAllyBuff.class) != null
 				&& (info.getAttacker() == Dungeon.hero
@@ -1203,6 +1219,20 @@ public abstract class Mob extends Char {
 
 	@Override
 	public void die( Object cause ) {
+		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
+				buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.class);
+		if (env != null) {
+			int explode = env.stack(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.EXPLODE);
+			if (explode > 0) {
+				for (int off : com.watabou.utils.PathFinder.NEIGHBOURS9) {
+					int c = pos + off;
+					Char ch = c >= 0 && c < Dungeon.level.length() ? Actor.findChar(c) : null;
+					if (ch != null && ch != this && ch.isAlive()) {
+						ch.damage(new DamageInfo(2 * explode + 1, DamageType.FIRE, this, null, this));
+					}
+				}
+			}
+		}
 
 		if (alignment == Alignment.ENEMY
 				&& hero.subClass == HeroSubClasses.DICE_MAGE
@@ -1934,6 +1964,18 @@ public abstract class Mob extends Char {
 		@Override
 		public int attackProc( final Char enemy, int damage ) {
 			damage = super.attackProc(enemy,damage);
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
+					buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.class);
+			if (env != null) {
+				damage = Math.round(damage * (1f + 0.1f * env.stack(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.RAGE)));
+				int combo = env.stack(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.COMBO);
+				if (combo > 0 && enemy != null && enemy.isAlive()
+						&& com.watabou.utils.Random.Float() < 0.1f * combo) {
+					enemy.damage(new com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo(
+							Math.max(1, damage / 2), com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.PHYSICAL,
+							this, attackingWeapon(), this));
+				}
+			}
 			if (mobEquipment.weapon instanceof Weapon) {
 				boolean wasAlive = enemy.isAlive();
 				damage = ((Weapon) mobEquipment.weapon).proc(this, enemy, damage);

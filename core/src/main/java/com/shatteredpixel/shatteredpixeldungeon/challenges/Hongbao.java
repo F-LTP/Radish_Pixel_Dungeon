@@ -298,6 +298,7 @@ public class Hongbao {
 		if (Random.Int(100) < 35 && mobGetItem(mob)) {
 			return;
 		}
+		Buff.affect(mob, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.class).addRandom(mob);
 	}
 
 	private static boolean mobGetItem(Mob mob) {
