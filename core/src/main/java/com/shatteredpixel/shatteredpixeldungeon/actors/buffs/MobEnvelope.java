@@ -32,14 +32,23 @@ public class MobEnvelope extends Buff {
 
 		java.util.ArrayList<String> available = new java.util.ArrayList<>();
 		for (String key : new String[]{RAGE, COMBO, IRON, THORNS, HASTE, EVOLVE, SHIELD, EXPLODE}) {
-			if (GLOBAL.getOrDefault(key, 0) < 3) available.add(key);
+			if (GLOBAL.getOrDefault(key, 0) < cap(key)) available.add(key);
 		}
 		if (available.isEmpty()) return;
 		String key = available.get(Random.Int(available.size()));
-		GLOBAL.put(key, GLOBAL.getOrDefault(key, 0) + 1);
+		GLOBAL.put(key, Math.min(cap(key), GLOBAL.getOrDefault(key, 0) + 1));
 		if (EVOLVE.equals(key)) {
 			mob.HT = Math.round(mob.HT * 1.2f);
 			mob.HP = Math.min(mob.HT, Math.round(mob.HP * 1.2f));
+		}
+	}
+
+	public static int cap(String key) {
+		switch (key) {
+			case HASTE: return 2;
+			case EVOLVE: return 1;
+			case EXPLODE: return 1;
+			default: return 3;
 		}
 	}
 
