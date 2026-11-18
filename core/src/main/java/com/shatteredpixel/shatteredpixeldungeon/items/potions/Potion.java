@@ -316,6 +316,14 @@ public class Potion extends Item {
 
 	protected void drink( Hero hero ) {
 
+		if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.isFreePotion(this)) {
+			int cd = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.freePotionRemaining(this);
+			if (cd > 0) {
+				com.shatteredpixel.shatteredpixeldungeon.utils.GLog.w("药水免耗冷却中，剩余 " + cd + " 回合");
+				return;
+			}
+		}
+
 		com.shatteredpixel.shatteredpixeldungeon.items.armor.secondary.CatalystBracer.onUse( hero );
 
 		freePotionPending = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.tryStartFreePotion(this);

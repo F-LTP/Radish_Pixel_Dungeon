@@ -259,9 +259,17 @@ public abstract class Scroll extends Item {
 					&& hero.buff(UnstableSpellbook.bookRecharge.class).isCursed()
 					&& !(this instanceof ScrollOfRemoveCurse || this instanceof ScrollOfAntiMagic)){
 				GLog.n( Messages.get(this, "cursed") );
+			} else if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.isFreeScroll(this)) {
+				int cd = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.freeScrollRemaining(this);
+				if (cd > 0) {
+					com.shatteredpixel.shatteredpixeldungeon.utils.GLog.w("卷轴免耗冷却中，剩余 " + cd + " 回合");
+					return;
+				}
+				curUser = hero;
+				freeScrollPending = true;
+				doRead();
 			} else {
 				curUser = hero;
-				freeScrollPending = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.tryStartFreeScroll(this);
 				doRead();
 			}
 

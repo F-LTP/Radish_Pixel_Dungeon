@@ -201,6 +201,34 @@ public class EnvelopeBoost extends Buff {
 		b.freePotionCooldowns.put(potion.getClass().getName(), Statistics.turnsPassed + 50f);
 	}
 
+	public static boolean isFreeScroll(Scroll scroll) {
+		if (scroll == null || Dungeon.hero == null) return false;
+		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
+		return b != null && b.freeScrolls.contains(scroll.getClass().getName());
+	}
+
+	public static int freeScrollRemaining(Scroll scroll) {
+		if (scroll == null || Dungeon.hero == null) return 0;
+		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
+		if (b == null) return 0;
+		float ready = b.freeScrollCooldowns.getOrDefault(scroll.getClass().getName(), 0f);
+		return Math.max(0, (int) Math.ceil(ready - Statistics.turnsPassed));
+	}
+
+	public static boolean isFreePotion(Potion potion) {
+		if (potion == null || Dungeon.hero == null) return false;
+		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
+		return b != null && b.freePotions.contains(potion.getClass().getName());
+	}
+
+	public static int freePotionRemaining(Potion potion) {
+		if (potion == null || Dungeon.hero == null) return 0;
+		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
+		if (b == null) return 0;
+		float ready = b.freePotionCooldowns.getOrDefault(potion.getClass().getName(), 0f);
+		return Math.max(0, (int) Math.ceil(ready - Statistics.turnsPassed));
+	}
+
 	public static boolean tryStartFreeScroll(Scroll scroll) {
 		if (Dungeon.hero == null || scroll == null) return false;
 		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
