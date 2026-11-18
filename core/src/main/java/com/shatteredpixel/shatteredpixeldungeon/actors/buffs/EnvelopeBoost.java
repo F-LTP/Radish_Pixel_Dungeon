@@ -451,11 +451,25 @@ public class EnvelopeBoost extends Buff {
 		if (flamewalker) append(sb, "烈焰人", "已获得");
 		if (knockbackOnApproach) append(sb, "怪物初次贴近击飞", "已获得");
 		if (allyClass != null) append(sb, "怪物盟友", "已获得");
-		if (!freeScrolls.isEmpty()) append(sb, "免耗卷轴", Integer.toString(freeScrolls.size()));
-		if (!freePotions.isEmpty()) append(sb, "免耗药水", Integer.toString(freePotions.size()));
+		if (!freeScrolls.isEmpty()) append(sb, "免耗卷轴", itemNames(freeScrolls));
+		if (!freePotions.isEmpty()) append(sb, "免耗药水", itemNames(freePotions));
 		if (fovDamage > 0) append(sb, "视野内真实伤害", Integer.toString(fovDamage));
 		if (fusionUnlocked) append(sb, "装备融合", "机会 " + fusionCharges);
 		return sb.length() == 0 ? "尚未获得红包属性" : sb.toString();
+	}
+
+	private String itemNames(java.util.ArrayList<String> classes) {
+		StringBuilder sb = new StringBuilder();
+		for (String name : classes) {
+			if (sb.length() > 0) sb.append("、");
+			try {
+				Class<?> cls = Class.forName(name);
+				sb.append(Messages.get(cls, "name"));
+			} catch (Exception e) {
+				sb.append(name.substring(name.lastIndexOf('.') + 1));
+			}
+		}
+		return sb.toString();
 	}
 
 	private String pct(float v) {
