@@ -306,6 +306,7 @@ public class Dungeon {
 		gateChains.clear();
 		generatedLevels.clear();
 		levelJustGenerated = false;
+		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.clearCarriedAllies();
 
 		gold = 0;
 		energy = 0;

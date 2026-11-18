@@ -168,11 +168,38 @@ public class EnvelopeBoost extends Buff {
 		spawnAlly(Dungeon.level, hero.pos);
 	}
 
+	private static final java.util.ArrayList<Mob> allyMobs = new java.util.ArrayList<>();
+
+	public static void clearCarriedAllies() {
+		allyMobs.clear();
+	}
+
 	public static void spawnFloorAlly(Level level, int pos) {
 		if (Dungeon.hero == null || level == null) return;
 		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
 		if (b == null || b.allyClass == null) return;
+		// 先把上一层的存活盟友直接搬过来，避免首次切换时 holdAllies 失效
+		for (Mob ally : allyMobs.toArray(new Mob[0])) {
+			if (!ally.isAlive() || level.mobs.contains(ally)) continue;
+			int at = freeCellNear(level, pos);
+			if (at != -1) {
+				ally.pos = at;
+				ally.state = ally.WANDERING;
+				GameScene.add(ally);
+			}
+		}
 		spawnAlly(level, pos);
+	}
+
+	private static int freeCellNear(Level level, int pos) {
+		for (int off : com.watabou.utils.PathFinder.NEIGHBOURS8) {
+			int c = pos + off;
+			if (c >= 0 && c < level.length() && level.passable[c] && !level.pit[c]
+					&& com.shatteredpixel.shatteredpixeldungeon.actors.Actor.findChar(c) == null) {
+				return c;
+			}
+		}
+		return -1;
 	}
 
 	private static void spawnAlly(Level level, int pos) {
@@ -195,6 +222,7 @@ public class EnvelopeBoost extends Buff {
 			mob.state = mob.WANDERING;
 			GameScene.add(mob);
 			Buff.affect(mob, EnvelopeAllyBuff.class);
+			if (!allyMobs.contains(mob)) allyMobs.add(mob);
 		} catch (Exception e) {
 			GLog.w("红包盟友生成失败：" + b.allyClass);
 		}
