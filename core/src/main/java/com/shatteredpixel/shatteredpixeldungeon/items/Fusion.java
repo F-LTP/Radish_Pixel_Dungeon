@@ -40,19 +40,14 @@ public class Fusion {
 		if (a.fusedItems == null) a.fusedItems = new java.util.ArrayList<>();
 		a.fusedItems.add(b);
 
-		if (a instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon
-				&& b instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon) {
-			com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon wa =
-					(com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon) a;
-			com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon wb =
-					(com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon) b;
-			wa.tier = Math.min(wa.tier, wb.tier);
-		} else if (a instanceof Armor && b instanceof Armor) {
-			((Armor) a).tier = Math.min(((Armor) a).tier, ((Armor) b).tier);
-		}
 		// 效果由各装备的 proc/activate 读取 fusedItems 合并；
 		// 这里只把第二件挂到第一件上，外观保持第一件。
 
+		if (!com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.consumeFusionCharge()) {
+			GLog.w("没有融合机会");
+			a.fusedItems.remove(b);
+			return false;
+		}
 		b.detachAll(Dungeon.hero.belongings.backpack);
 		GLog.p("融合完成：" + a.name() + " 获得了 " + b.name() + " 的力量");
 		return true;

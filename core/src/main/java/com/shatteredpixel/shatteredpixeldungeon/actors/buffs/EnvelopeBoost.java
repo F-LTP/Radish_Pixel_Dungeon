@@ -50,6 +50,7 @@ public class EnvelopeBoost extends Buff {
 	private final java.util.HashMap<String,Float> freePotionCooldowns = new java.util.HashMap<>();
 	private int fovDamage = 0;
 	private boolean fusionUnlocked = false;
+	private int fusionCharges = 0;
 
 	public void addWandFreeChance(float amount) {
 		wandFreeChance = Math.min(WAND_FREE_CAP, wandFreeChance + amount);
@@ -174,6 +175,20 @@ public class EnvelopeBoost extends Buff {
 
 	public void grantFusion() {
 		fusionUnlocked = true;
+		fusionCharges++;
+	}
+
+	public static int fusionCharges(Char ch) {
+		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
+		return b == null ? 0 : b.fusionCharges;
+	}
+
+	public static boolean consumeFusionCharge() {
+		if (Dungeon.hero == null) return false;
+		EnvelopeBoost b = Dungeon.hero.buff(EnvelopeBoost.class);
+		if (b == null || b.fusionCharges <= 0) return false;
+		b.fusionCharges--;
+		return true;
 	}
 
 	public static boolean hasFusion(Char ch) {
@@ -183,7 +198,7 @@ public class EnvelopeBoost extends Buff {
 
 	public static void grantFusion(Hero hero) {
 		Buff.affect(hero, EnvelopeBoost.class).grantFusion();
-		GLog.p("红包开出：装备融合");
+		GLog.p("红包开出：装备融合机会 +1（当前 " + fusionCharges(Dungeon.hero) + "）");
 	}
 
 	public static void grantFovDamage(Hero hero) {
@@ -474,6 +489,7 @@ public class EnvelopeBoost extends Buff {
 		bundle.put(FREE_POTION_COOLDOWNS, pcool);
 		bundle.put(FOV_DAMAGE, fovDamage);
 		bundle.put(FUSION_UNLOCKED, fusionUnlocked);
+		bundle.put("fusion_charges", fusionCharges);
 	}
 
 	@Override
@@ -507,5 +523,6 @@ public class EnvelopeBoost extends Buff {
 		}
 		fovDamage = bundle.getInt(FOV_DAMAGE);
 		fusionUnlocked = bundle.getBoolean(FUSION_UNLOCKED);
+		fusionCharges = bundle.getInt("fusion_charges");
 	}
 }
