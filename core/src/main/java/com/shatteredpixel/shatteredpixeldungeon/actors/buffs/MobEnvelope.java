@@ -75,7 +75,18 @@ public class MobEnvelope extends Buff {
 		StringBuilder sb = new StringBuilder();
 		for (java.util.Map.Entry<String,Integer> e : stacks.entrySet()) {
 			if (sb.length() > 0) sb.append('\n');
-			sb.append("- ").append(label(e.getKey())).append(" +").append(e.getValue());
+			int n = e.getValue();
+			sb.append("- ").append(label(e.getKey())).append(" +").append(n).append("：");
+			switch (e.getKey()) {
+				case RAGE: sb.append("造成的伤害 +").append(10 * n).append("%"); break;
+				case COMBO: sb.append("每次攻击有 ").append(10 * n).append("% 概率追加一次半伤害攻击"); break;
+				case IRON: sb.append("受到的伤害 -").append(10 * n).append("%"); break;
+				case THORNS: sb.append("反弹 ").append(30 * n).append("% 近战伤害"); break;
+				case HASTE: sb.append("移动速度提高约 ").append(Math.round((Math.pow(1.2, n) - 1) * 100)).append("%"); break;
+				case EVOLVE: sb.append("生命上限 +").append(20 * n).append("%"); break;
+				case SHIELD: sb.append("每层提供 10% 最大生命的红包护盾"); break;
+				case EXPLODE: sb.append("死亡时造成 ").append(2 * n + 1).append(" 点范围火焰伤害"); break;
+			}
 		}
 		return sb.length() == 0 ? "尚未获得突变" : sb.toString();
 	}
