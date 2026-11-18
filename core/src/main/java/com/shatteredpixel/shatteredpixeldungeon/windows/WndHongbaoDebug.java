@@ -76,6 +76,7 @@ public class WndHongbaoDebug extends WndOptions {
 				break;
 			case 11:
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFusion(Dungeon.hero);
+				com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene.show(new WndFusion());
 				break;
 			case 12:
 				boost.addWandFreeChance(0.10f);
