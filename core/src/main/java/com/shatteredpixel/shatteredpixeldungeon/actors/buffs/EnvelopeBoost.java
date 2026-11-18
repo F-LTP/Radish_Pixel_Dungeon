@@ -1,6 +1,10 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
@@ -20,6 +24,7 @@ public class EnvelopeBoost extends Buff {
 	private int reachBonus = 0;
 	private float missileReturnChance = 0f;
 	private float enchantPower = 0f;
+	private boolean flamewalker = false;
 
 	public void addWandFreeChance(float amount) {
 		wandFreeChance = Math.min(WAND_FREE_CAP, wandFreeChance + amount);
@@ -81,6 +86,28 @@ public class EnvelopeBoost extends Buff {
 		return b == null ? 0f : b.enchantPower;
 	}
 
+	public void grantFlamewalker() {
+		flamewalker = true;
+	}
+
+	public boolean hasFlamewalker() {
+		return flamewalker;
+	}
+
+	public static boolean hasFlamewalker(Char ch) {
+		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
+		return b != null && b.flamewalker;
+	}
+
+	/** 走过地格留下火焰；只烧可燃格。 */
+	public static void burnWalkedCell(int cell) {
+		if (Dungeon.level == null || cell < 0 || cell >= Dungeon.level.length()) return;
+		if (!Dungeon.level.flamable[cell]) return;
+		if (Blob.volumeAt(cell, Fire.class) == 0) {
+			GameScene.add(Blob.seed(cell, 4, Fire.class));
+		}
+	}
+
 	public static float wandFreeChance(Char ch) {
 		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
 		return b == null ? 0f : b.wandFreeChance;
@@ -110,7 +137,8 @@ public class EnvelopeBoost extends Buff {
 	@Override
 	public String desc() {
 		return Messages.get(this, "desc", Math.round(wandFreeChance * 100), comboHits, reachBonus,
-				Math.round(missileReturnChance * 100), Math.round(enchantPower * 100));
+				Math.round(missileReturnChance * 100), Math.round(enchantPower * 100),
+				flamewalker ? "是" : "否");
 	}
 
 	private static final String WAND_FREE = "wand_free_chance";
@@ -118,6 +146,7 @@ public class EnvelopeBoost extends Buff {
 	private static final String REACH_BONUS = "reach_bonus";
 	private static final String MISSILE_RETURN = "missile_return_chance";
 	private static final String ENCHANT_POWER = "enchant_power";
+	private static final String FLAMEWALKER = "flamewalker";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
@@ -127,6 +156,7 @@ public class EnvelopeBoost extends Buff {
 		bundle.put(REACH_BONUS, reachBonus);
 		bundle.put(MISSILE_RETURN, missileReturnChance);
 		bundle.put(ENCHANT_POWER, enchantPower);
+		bundle.put(FLAMEWALKER, flamewalker);
 	}
 
 	@Override
@@ -137,5 +167,6 @@ public class EnvelopeBoost extends Buff {
 		reachBonus = bundle.getInt(REACH_BONUS);
 		missileReturnChance = bundle.getFloat(MISSILE_RETURN);
 		enchantPower = bundle.getFloat(ENCHANT_POWER);
+		flamewalker = bundle.getBoolean(FLAMEWALKER);
 	}
 }

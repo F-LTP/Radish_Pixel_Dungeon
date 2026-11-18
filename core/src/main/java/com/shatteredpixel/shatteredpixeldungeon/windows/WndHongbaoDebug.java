@@ -20,6 +20,7 @@ public class WndHongbaoDebug extends WndOptions {
 				"攻击距离 +1",
 				"投掷物返回概率 +10%",
 				"附魔触发与效果 +10%",
+				"烈焰人（一次性）",
 				"全部属性各提升一次");
 	}
 
@@ -54,12 +55,17 @@ public class WndHongbaoDebug extends WndOptions {
 				GLog.p("测试：附魔触发与效果 +" + Math.round(boost.enchantPower() * 100) + "%");
 				break;
 			case 6:
+				boost.grantFlamewalker();
+				GLog.p("测试：烈焰人已获得");
+				break;
+			case 7:
 				Dungeon.hero.belongings.growExtraRingSlots();
 				boost.addWandFreeChance(0.10f);
 				boost.addComboHits(1);
 				boost.addReachBonus(1);
 				boost.addMissileReturnChance(0.10f);
 				boost.addEnchantPower(0.10f);
+				boost.grantFlamewalker();
 				InventoryPane.refresh();
 				GLog.p("测试：全部红包属性各提升一次");
 				break;

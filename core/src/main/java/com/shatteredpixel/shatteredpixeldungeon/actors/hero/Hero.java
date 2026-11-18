@@ -3510,6 +3510,11 @@ public class Hero extends Char {
 		// 被门或其它规则拦下时位置没有变化，不能算一次移动
 		if (fromPos != pos) {
 			EventManager.emit(new HeroMoveEvent(this, fromPos, pos));
+			// 烈焰人：走过的地格燃烧
+			if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFlamewalker(this)) {
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.burnWalkedCell(fromPos);
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.burnWalkedCell(pos);
+			}
 		}
 
 		if (!flying && travelling) {
@@ -3650,6 +3655,11 @@ public class Hero extends Char {
 
 	@Override
 	public boolean isImmune(Class effect) {
+		// 烈焰人：免疫燃烧类效果
+		if (effect == com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning.class
+				&& com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFlamewalker(this)) {
+			return true;
+		}
 		if (effect == Burning.class
 				&& belongings.armor() != null
 				&& belongings.armor().hasGlyph(Brimstone.class, this)){

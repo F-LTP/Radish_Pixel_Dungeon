@@ -695,7 +695,8 @@ public class Hongbao {
 			}
 			GLog.p("红包开出：" + item.name());
 		} else {
-			int roll = Random.Int(6);
+			boolean hasFlamewalker = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFlamewalker(hero);
+			int roll = Random.Int(hasFlamewalker ? 6 : 7);
 			if (roll == 0) {
 				// 戒指栏位 +1：每次红包最多 +1，可以无限叠加
 				hero.belongings.growExtraRingSlots();
@@ -730,12 +731,18 @@ public class Hongbao {
 				boost.addMissileReturnChance(Random.Float(0.01f, 0.10f));
 				GLog.p("红包开出：投掷物返回概率 " + Math.round(before * 100) + "% → "
 						+ Math.round(boost.missileReturnChance() * 100) + "%");
-			} else {
+			} else if (roll == 5) {
 				// 附魔触发概率与效果 +5%
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
 						Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
 				boost.addEnchantPower(0.05f);
 				GLog.p("红包开出：附魔触发与效果 +" + Math.round(boost.enchantPower() * 100) + "%");
+			} else {
+				// 烈焰人：一次性，走过地格燃烧并免疫燃烧
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
+						Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
+				boost.grantFlamewalker();
+				GLog.p("红包开出：烈焰人（走过地格燃烧，免疫燃烧）");
 			}
 		}
 	}
