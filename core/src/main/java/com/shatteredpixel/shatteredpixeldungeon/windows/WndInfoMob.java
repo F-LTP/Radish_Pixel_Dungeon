@@ -153,7 +153,10 @@ public class WndInfoMob extends Window {
 		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope envelope =
 				mob.buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.class);
 		if (envelope != null) {
-			info += "\n\n红包突变：\n" + envelope.desc();
+			info += "
+
+红包突变：
+" + envelope.desc();
 		}
 		if (!Dungeon.isChallenged(Challenges.REAL_INTELLIGENCE)
 				&& !Dungeon.isChallenged(Challenges.HONGBAO)) return info;
