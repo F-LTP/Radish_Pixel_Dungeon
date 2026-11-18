@@ -297,7 +297,7 @@ public class StatusPane extends Component {
 		layoutDiceMageHealth();
 
 		if (fusionButton != null) {
-			fusionButton.setRect(x + width - 34, y + 2, 16, 16);
+			fusionButton.setRect(x + width - 20, y + bg.height + 4, 16, 16);
 			fusionText.x = fusionButton.left() + 8;
 			fusionText.y = fusionButton.top() + 9;
 		}
