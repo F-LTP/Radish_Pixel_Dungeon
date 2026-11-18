@@ -635,7 +635,16 @@ public class Item implements Bundlable {
 				return Messages.get(this, "custom_note", note.title()) + "\n\n" + desc();
 			}
 		}
-		return desc();
+		String base = desc();
+		if (fusedItems != null && !fusedItems.isEmpty()) {
+			StringBuilder sb = new StringBuilder(base);
+			sb.append("\n\n融合装备：");
+			for (Item it : fusedItems) {
+				sb.append("\n- ").append(it.name());
+			}
+			return sb.toString();
+		}
+		return base;
 	}
 
 	public final String displayInfo() {
