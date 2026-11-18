@@ -370,7 +370,7 @@ public class Ring extends KindofMisc {
 			if(riverGlass != null){
 				return super.buffedLvl() + riverGlass.virtualLevel();
 			}
-			if(hero.belongings.misc == this || hero.belongings.ring == this || hero.belongings.ring2 == this){
+			if(hero.belongings.misc == this || hero.belongings.ring == this || hero.belongings.ring2 == this || hero.belongings.extraRings.contains(this)){
 				GoldRadish goldRadish = hero.belongings.getItem(GoldRadish.class);
 				if(goldRadish != null){
 					return goldRadish.fixedLevel(goldRadish.buffedLvl());
@@ -427,6 +427,9 @@ public class Ring extends KindofMisc {
 		if (hero.belongings.ring2() != null && hero.belongings.ring2().getClass() == getClass()) {
 			bonus += hero.belongings.ring2().soloBonus();
 		}
+		for (Ring r : hero.belongings.extraRings) {
+			if (r != null && r.getClass() == getClass()) bonus += r.soloBonus();
+		}
 		if (hero.belongings.misc() != null && hero.belongings.misc().getClass() == getClass()) {
 			bonus += ((Ring) hero.belongings.misc()).soloBonus();
 		}
@@ -441,6 +444,9 @@ public class Ring extends KindofMisc {
 		}
 		if (hero.belongings.ring2() != null && hero.belongings.ring2().getClass() == getClass()) {
 			bonus += hero.belongings.ring2().soloBuffedBonus();
+		}
+		for (Ring r : hero.belongings.extraRings) {
+			if (r != null && r.getClass() == getClass()) bonus += r.soloBuffedBonus();
 		}
 		if (hero.belongings.misc() != null && hero.belongings.misc().getClass() == getClass()) {
 			bonus += ((Ring) hero.belongings.misc()).soloBuffedBonus();

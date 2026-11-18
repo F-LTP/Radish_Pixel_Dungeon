@@ -2563,6 +2563,7 @@ public class Hero extends Char {
 		addDamageModifier(out, belongings.misc());
 		addDamageModifier(out, belongings.ring());
 		addDamageModifier(out, belongings.ring2());
+		for (com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring r : belongings.extraRings) addDamageModifier(out, r);
 		addDamageModifier(out, belongings.secondWep());
 		for (Item it : belongings) {
 			if (it instanceof Trinket) addDamageModifier(out, it);

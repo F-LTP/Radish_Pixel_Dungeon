@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.PotionBandolier;
@@ -247,8 +248,10 @@ public class InventoryPane extends Component {
 		themedBg.setRect(x, y, width, height);
 
 		float left = x+4;
+		float slotW = Math.min(SLOT_WIDTH, (width - 8f) / Math.max(1, equipped.size()) - 1f);
+		slotW = Math.max(8f, slotW);
 		for (InventorySlot i : equipped){
-			i.setRect(left, y+4, SLOT_WIDTH, SLOT_HEIGHT);
+			i.setRect(left, y+4, slotW, SLOT_HEIGHT);
 			left = i.right()+1;
 		}
 
@@ -378,10 +381,26 @@ public class InventoryPane extends Component {
 		equipped.get(2).item(stuff.artifact == null ? new WndBag.Placeholder( ItemSpriteSheet.ARTIFACT_HOLDER ) : stuff.artifact);
 		equipped.get(3).item(stuff.misc == null ? new WndBag.Placeholder( ItemSpriteSheet.SOMETHING ) : stuff.misc);
 		equipped.get(4).item(stuff.ring == null ? new WndBag.Placeholder( ItemSpriteSheet.RING_HOLDER ) : stuff.ring);
-		equipped.get(6).visible = stuff.extraRingSlots > 0;
-		equipped.get(6).item(stuff.extraRingSlots <= 0
-				? new WndBag.Placeholder( ItemSpriteSheet.RING_HOLDER )
-				: (stuff.ring2 == null ? new WndBag.Placeholder( ItemSpriteSheet.RING_HOLDER ) : stuff.ring2));
+		for (int i = 0; i < stuff.extraRings.size(); i++) {
+			int slotIdx = 7 + i;
+			while (equipped.size() <= slotIdx) {
+				InventorySlot btn = new InventoryPaneSlot(null);
+				equipped.add(btn);
+				add(btn);
+			}
+			equipped.get(slotIdx).visible = true;
+			Ring r = stuff.extraRings.get(i);
+			equipped.get(slotIdx).item(r == null
+					? new WndBag.Placeholder( ItemSpriteSheet.RING_HOLDER ) : r);
+		}
+		if (equipped.size() > 6) {
+			equipped.get(6).visible = stuff.extraRingSlotCount() > 0;
+			equipped.get(6).item(stuff.ring2 == null
+					? new WndBag.Placeholder( ItemSpriteSheet.RING_HOLDER ) : stuff.ring2);
+		}
+		for (int i = 7 + stuff.extraRings.size(); i < equipped.size(); i++) {
+			equipped.get(i).visible = false;
+		}
 
 		ArrayList<Item> items = (ArrayList<Item>) lastBag.items.clone();
 

@@ -90,9 +90,43 @@ public class Belongings implements Iterable<Item> {
 	public Artifact artifact = null;
 	public KindofMisc misc = null;
 	public Ring ring = null;
-	/** 红包属性：额外戒指栏位。最多 1 个。 */
+	/** 红包属性：额外戒指栏位，可无限叠加。 */
 	public int extraRingSlots = 0;
 	public Ring ring2 = null;
+	public java.util.ArrayList<Ring> extraRings = new java.util.ArrayList<>();
+
+	public int extraRingSlotCount() {
+		return Math.max(extraRingSlots, ring2 != null ? 1 : 0);
+	}
+
+	public Ring extraRing(int idx) {
+		if (idx == 0) return ring2;
+		int i = idx - 1;
+		return i >= 0 && i < extraRings.size() ? extraRings.get(i) : null;
+	}
+
+	public void setExtraRing(int idx, Ring ring) {
+		if (idx == 0) {
+			ring2 = ring;
+		} else {
+			int i = idx - 1;
+			while (extraRings.size() <= i) extraRings.add(null);
+			extraRings.set(i, ring);
+		}
+	}
+
+	public int firstEmptyExtraRing() {
+		if (ring2 == null) return 0;
+		for (int i = 0; i < extraRings.size(); i++) {
+			if (extraRings.get(i) == null) return i + 1;
+		}
+		return extraRings.size() + 1;
+	}
+
+	public void growExtraRingSlots() {
+		extraRingSlots++;
+		while (extraRings.size() < extraRingSlots - 1) extraRings.add(null);
+	}
 
 	//used when thrown weapons temporary become the current weapon
 	public KindOfWeapon thrownWeapon = null;
@@ -216,6 +250,10 @@ public class Belongings implements Iterable<Item> {
 		bundle.put( RING, ring );
 		bundle.put( RING2, ring2 );
 		bundle.put( EXTRA_RING_SLOTS, extraRingSlots );
+		bundle.put( "extra_rings_count", extraRings.size() );
+		for (int i = 0; i < extraRings.size(); i++) {
+			bundle.put("extra_ring_" + i, extraRings.get(i));
+		}
 		bundle.put( SECOND_WEP, secondWep );
 		bundle.put( SECONDARY_ARMOR, secondaryArmor );
 	}
@@ -242,9 +280,15 @@ public class Belongings implements Iterable<Item> {
 
 		ring2 = (Ring) bundle.get(RING2);
 		extraRingSlots = bundle.getInt(EXTRA_RING_SLOTS);
-		if (owner != null && owner.buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RingSlotBonus.class) != null) {
-			extraRingSlots = 1;
+		extraRings = new java.util.ArrayList<>();
+		int extraCount = bundle.getInt("extra_rings_count");
+		for (int i = 0; i < extraCount; i++) {
+			Ring r = (Ring) bundle.get("extra_ring_" + i);
+			extraRings.add(r);
+			if (r != null) r.activate( owner );
 		}
+		if (ring2 != null && extraRingSlots < 1) extraRingSlots = 1;
+		while (extraRings.size() < extraRingSlots - 1) extraRings.add(null);
 		if (ring2() != null)        ring2().activate( owner );
 
 		secondWep = (KindOfWeapon) bundle.get(SECOND_WEP);
@@ -421,6 +465,7 @@ public class Belongings implements Iterable<Item> {
 	
 	public void uncurseEquipped() {
 		ScrollOfRemoveCurse.uncurse( owner, armor(), weapon(), artifact(), misc(), ring(), ring2(), secondWep());
+		for (Ring r : extraRings) if (r != null) ScrollOfRemoveCurse.uncurse(owner, r);
 	}
 	
 	public Item randomUnequipped() {
@@ -459,26 +504,18 @@ public class Belongings implements Iterable<Item> {
 		
 		@Override
 		public boolean hasNext() {
-			
 			for (int i=index; i < backpackIndex; i++) {
-				if (equipped[i] != null) {
-					return true;
-				}
+				if (equipped[i] != null) return true;
 			}
-			
 			return backpackIterator.hasNext();
 		}
 
 		@Override
 		public Item next() {
-			
 			while (index < backpackIndex) {
 				Item item = equipped[index++];
-				if (item != null) {
-					return item;
-				}
+				if (item != null) return item;
 			}
-			
 			return backpackIterator.next();
 		}
 

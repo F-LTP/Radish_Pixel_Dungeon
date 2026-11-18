@@ -131,6 +131,7 @@ public class InventorySlot extends ItemSlot {
 					item == Dungeon.hero.belongings.misc ||
 					item == Dungeon.hero.belongings.ring ||
 					item == Dungeon.hero.belongings.ring2 ||
+					Dungeon.hero.belongings.extraRings.contains(item) ||
 					item == Dungeon.hero.belongings.secondWep;
 
 			if (diceMage) {
