@@ -71,6 +71,9 @@ public class WndHongbaoDebug extends WndOptions {
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFreePotion(Dungeon.hero);
 				break;
 			case 10:
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFovDamage(Dungeon.hero);
+				break;
+			case 11:
 				boost.addWandFreeChance(0.10f);
 				boost.addComboHits(1);
 				boost.addReachBonus(1);
