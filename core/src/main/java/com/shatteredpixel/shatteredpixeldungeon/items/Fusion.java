@@ -54,10 +54,10 @@ public class Fusion {
 		if (a.fusedItems == null) a.fusedItems = new java.util.ArrayList<>();
 		a.fusedItems.add(b);
 
-		if (a instanceof Weapon && b instanceof Weapon) {
-			Weapon wa = (Weapon) a, wb = (Weapon) b;
-			wa.fusionMin += Math.min(wa.min(), wb.min());
-			wa.fusionMax += Math.min(wa.max(), wb.max());
+		if (a instanceof KindOfWeapon && b instanceof KindOfWeapon) {
+			KindOfWeapon wa = (KindOfWeapon) a, wb = (KindOfWeapon) b;
+			wa.fusionMin += Math.max(1, Math.min(wa.min(), wb.min()));
+			wa.fusionMax += Math.max(1, Math.min(wa.max(), wb.max()));
 		} else if (a instanceof Armor && b instanceof Armor) {
 			Armor aa = (Armor) a, ab = (Armor) b;
 			aa.fusionDRMin += Math.min(aa.DRMin(), ab.DRMin());
