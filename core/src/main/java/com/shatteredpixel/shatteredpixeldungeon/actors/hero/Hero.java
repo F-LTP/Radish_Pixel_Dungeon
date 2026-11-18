@@ -2562,6 +2562,7 @@ public class Hero extends Char {
 		addDamageModifier(out, belongings.artifact());
 		addDamageModifier(out, belongings.misc());
 		addDamageModifier(out, belongings.ring());
+		addDamageModifier(out, belongings.ring2());
 		addDamageModifier(out, belongings.secondWep());
 		for (Item it : belongings) {
 			if (it instanceof Trinket) addDamageModifier(out, it);

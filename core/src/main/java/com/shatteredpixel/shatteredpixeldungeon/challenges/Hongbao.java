@@ -694,6 +694,17 @@ public class Hongbao {
 				Dungeon.level.drop(item, hero.pos);
 			}
 			GLog.p("红包开出：" + item.name());
+		} else if (hero.belongings.extraRingSlots < 1) {
+			// 第一个红包属性：戒指栏位 +1，单次最多 1，且总数封顶 1
+			hero.belongings.extraRingSlots = 1;
+			GLog.p("红包开出：戒指栏位 +1");
+			com.shatteredpixel.shatteredpixeldungeon.ui.InventoryPane.refresh();
+		} else {
+			int gold = Random.IntRange(20 + Dungeon.depth * 8, 40 + Dungeon.depth * 16);
+			Dungeon.gold += gold;
+			Statistics.goldCollected += gold;
+			Badges.validateGoldCollected();
+			GLog.p(Messages.get(Hongbao.class, "gold", gold));
 		}
 	}
 }

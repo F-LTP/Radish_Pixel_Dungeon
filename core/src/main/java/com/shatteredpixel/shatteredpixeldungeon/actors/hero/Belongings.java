@@ -90,6 +90,9 @@ public class Belongings implements Iterable<Item> {
 	public Artifact artifact = null;
 	public KindofMisc misc = null;
 	public Ring ring = null;
+	/** 红包属性：额外戒指栏位。最多 1 个。 */
+	public int extraRingSlots = 0;
+	public Ring ring2 = null;
 
 	//used when thrown weapons temporary become the current weapon
 	public KindOfWeapon thrownWeapon = null;
@@ -173,6 +176,14 @@ public class Belongings implements Iterable<Item> {
 		}
 	}
 
+	public Ring ring2(){
+		if (!lostInventory() || (ring2 != null && ring2.keptThroughLostInventory())){
+			return ring2;
+		} else {
+			return null;
+		}
+	}
+
 	public KindOfWeapon secondWep(){
 		if (!lostInventory() || (secondWep != null && secondWep.keptThroughLostInventory())){
 			return secondWep;
@@ -188,6 +199,8 @@ public class Belongings implements Iterable<Item> {
 	private static final String ARTIFACT   = "artifact";
 	private static final String MISC       = "misc";
 	private static final String RING       = "ring";
+	private static final String RING2      = "ring2";
+	private static final String EXTRA_RING_SLOTS = "extra_ring_slots";
 
 	private static final String SECOND_WEP = "second_wep";
 	private static final String SECONDARY_ARMOR = "secondary_armor";
@@ -201,6 +214,8 @@ public class Belongings implements Iterable<Item> {
 		bundle.put( ARTIFACT, artifact );
 		bundle.put( MISC, misc );
 		bundle.put( RING, ring );
+		bundle.put( RING2, ring2 );
+		bundle.put( EXTRA_RING_SLOTS, extraRingSlots );
 		bundle.put( SECOND_WEP, secondWep );
 		bundle.put( SECONDARY_ARMOR, secondaryArmor );
 	}
@@ -224,6 +239,10 @@ public class Belongings implements Iterable<Item> {
 
 		ring = (Ring) bundle.get(RING);
 		if (ring() != null)         ring().activate( owner );
+
+		ring2 = (Ring) bundle.get(RING2);
+		extraRingSlots = bundle.getInt(EXTRA_RING_SLOTS);
+		if (ring2() != null)        ring2().activate( owner );
 
 		secondWep = (KindOfWeapon) bundle.get(SECOND_WEP);
 
@@ -398,7 +417,7 @@ public class Belongings implements Iterable<Item> {
 	}
 	
 	public void uncurseEquipped() {
-		ScrollOfRemoveCurse.uncurse( owner, armor(), weapon(), artifact(), misc(), ring(), secondWep());
+		ScrollOfRemoveCurse.uncurse( owner, armor(), weapon(), artifact(), misc(), ring(), ring2(), secondWep());
 	}
 	
 	public Item randomUnequipped() {
@@ -432,7 +451,7 @@ public class Belongings implements Iterable<Item> {
 		
 		// 次要护甲栏也要遍历到：捡回遗失的背包时靠这个遍历清掉「复活时保留」的标记，
 		// 漏掉它，被选中保留的次要护甲以后每次复活都会白白多保留一件。放在最后，不改动原有各栏的顺序
-		private Item[] equipped = {weapon, armor, artifact, misc, ring, secondWep, secondaryArmor};
+		private Item[] equipped = {weapon, armor, artifact, misc, ring, secondWep, secondaryArmor, ring2};
 		private int backpackIndex = equipped.length;
 		
 		@Override
@@ -480,6 +499,12 @@ public class Belongings implements Iterable<Item> {
 				break;
 			case 5:
 				equipped[5] = secondWep = null;
+				break;
+			case 6:
+				equipped[6] = secondaryArmor = null;
+				break;
+			case 7:
+				equipped[7] = ring2 = null;
 				break;
 			default:
 				backpackIterator.remove();
