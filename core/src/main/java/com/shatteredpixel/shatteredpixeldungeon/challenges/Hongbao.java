@@ -698,7 +698,10 @@ public class Hongbao {
 			boolean hasFlamewalker = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFlamewalker(hero);
 			boolean hasKnockback = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasKnockbackOnApproach(hero);
 			boolean hasAlly = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasAlly(hero);
-			int roll = Random.Int(9);
+			int roll;
+			do {
+				roll = Random.Int(9);
+			} while (roll == 8 && hasAlly);
 			if (roll == 0) {
 				// 戒指栏位 +1：每次红包最多 +1，可以无限叠加
 				hero.belongings.growExtraRingSlots();
