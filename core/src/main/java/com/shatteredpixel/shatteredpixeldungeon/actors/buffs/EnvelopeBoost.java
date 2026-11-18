@@ -442,11 +442,25 @@ public class EnvelopeBoost extends Buff {
 
 	@Override
 	public String desc() {
-		return Messages.get(this, "desc", Math.round(wandFreeChance * 100), comboHits, reachBonus,
-				Math.round(missileReturnChance * 100), Math.round(enchantPower * 100),
-				flamewalker ? "是" : "否", knockbackOnApproach ? "是" : "否",
-				allyClass != null ? "是" : "否", freeScrolls.isEmpty() ? "否" : "是",
-				freePotions.isEmpty() ? "否" : "是", fovDamage, fusionUnlocked ? "是" : "否");
+		StringBuilder sb = new StringBuilder();
+		if (wandFreeChance > 0) append(sb, "法杖不消耗充能概率", Math.round(wandFreeChance * 100) + "%");
+		if (comboHits > 0) append(sb, "连击次数", "+" + comboHits);
+		if (reachBonus > 0) append(sb, "攻击距离", "+" + reachBonus);
+		if (missileReturnChance > 0) append(sb, "投掷物返回概率", Math.round(missileReturnChance * 100) + "%");
+		if (enchantPower > 0) append(sb, "附魔触发与效果", "+" + Math.round(enchantPower * 100) + "%");
+		if (flamewalker) append(sb, "烈焰人", "已获得");
+		if (knockbackOnApproach) append(sb, "怪物初次贴近击飞", "已获得");
+		if (allyClass != null) append(sb, "怪物盟友", "已获得");
+		if (!freeScrolls.isEmpty()) append(sb, "免耗卷轴", Integer.toString(freeScrolls.size()));
+		if (!freePotions.isEmpty()) append(sb, "免耗药水", Integer.toString(freePotions.size()));
+		if (fovDamage > 0) append(sb, "视野内真实伤害", Integer.toString(fovDamage));
+		if (fusionUnlocked) append(sb, "装备融合", "机会 " + fusionCharges);
+		return sb.length() == 0 ? "尚未获得红包属性" : sb.toString();
+	}
+
+	private void append(StringBuilder sb, String key, String value) {
+		if (sb.length() > 0) sb.append('\n');
+		sb.append("- ").append(key).append(": ").append(value);
 	}
 
 	private static final String WAND_FREE = "wand_free_chance";

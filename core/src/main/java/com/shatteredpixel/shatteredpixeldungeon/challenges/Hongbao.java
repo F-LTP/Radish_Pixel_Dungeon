@@ -701,8 +701,11 @@ public class Hongbao {
 			boolean hasAlly = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasAlly(hero);
 			int roll;
 			do {
-				roll = Random.Int(9);
-			} while (roll == 8 && hasAlly);
+				roll = Random.Int(13);
+			} while (roll == 0
+					|| (roll == 6 && hasFlamewalker)
+					|| (roll == 7 && hasKnockback)
+					|| (roll == 8 && hasAlly));
 			if (roll == 1) {
 				// 法杖不消耗充能概率：每次随机 +1%~10%
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
