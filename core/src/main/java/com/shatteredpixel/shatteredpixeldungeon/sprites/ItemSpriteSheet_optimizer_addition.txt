@@ -1,0 +1,12 @@
+
+	/**
+	 * 优化器调用：在所有静态块执行完后运行
+	 * 自动计算最小外接矩形并为空贴图生成文字
+	 */
+	static {
+		// 可通过设置 debugMode = true 来查看优化日志
+		// ItemSpriteOptimizer.debugMode = true;
+		ItemSpriteOptimizer.optimize(film);
+	}
+
+}

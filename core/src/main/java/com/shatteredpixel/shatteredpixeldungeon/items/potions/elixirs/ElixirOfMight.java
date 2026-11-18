@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -50,7 +51,9 @@ public class ElixirOfMight extends Elixir {
 		identify();
 		
 		hero.STR++;
-		hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, "1", FloatingText.STRENGTH);
+		if (hero.sprite != null) {
+			hero.sprite.showStatusWithIcon(CharSprite.POSITIVE, "1", FloatingText.STRENGTH);
+		}
 		
 		Buff.affect(hero, HTBoost.class).reset();
 		HTBoost boost = Buff.affect(hero, HTBoost.class);
@@ -60,11 +63,10 @@ public class ElixirOfMight extends Elixir {
 		GLog.p( Messages.get(this, "msg", hero.STR()) );
 
 		Badges.validateStrengthAttained();
-		Badges.validateDuelistUnlock();
 	}
 	
 	public String desc() {
-		return Messages.get(this, "desc", HTBoost.boost(Dungeon.hero.HT));
+		return Messages.get(this, "desc", HTBoost.boost(Dungeon.hero != null ? Dungeon.hero.HT : 20));
 	}
 	
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe.SimpleRecipe {
@@ -92,9 +94,16 @@ public class ElixirOfMight extends Elixir {
 		public void reset(){
 			left = 5;
 		}
-		
+
 		public int boost(){
-			return Math.round(left*boost(15 + 5*((Hero)target).lvl)/5f);
+			int might_boost=Math.round(left*boost(15 + 5*((Hero)target).lvl)/5f);
+			if (target==Dungeon.hero) {
+				Buff ben = target.buff(RingOfBenediction.Benediction.class);
+				if (ben != null) {
+					might_boost = Math.round(might_boost * RingOfBenediction.periodMultiplier(target));
+				}
+			}
+			return might_boost;
 		}
 		
 		public static int boost(int HT){
@@ -109,7 +118,7 @@ public class ElixirOfMight extends Elixir {
 		}
 		
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.HEALING;
 		}
 

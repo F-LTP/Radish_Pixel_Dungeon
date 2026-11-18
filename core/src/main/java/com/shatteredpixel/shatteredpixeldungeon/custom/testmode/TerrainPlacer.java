@@ -21,7 +21,7 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoCell;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
-import com.sun.org.apache.bcel.internal.generic.I2F;
+// import com.sun.org.apache.bcel.internal.generic.I2F;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Reflection;
@@ -58,8 +58,14 @@ public class TerrainPlacer extends TestItem {
                     if (chosen == 17 || chosen == 18 || chosen == 19) {
 //                        GLog.i("不能放置此类型的地形");
                     } else if (cell != null) {
-                        Level.set(cell,chosen);
-                        GameScene.updateMap(cell);
+                        // 地图最外一圈必须一直是墙：视野、寻路这些「看周围 8 格」的代码都默认没有角色会站在最外一圈上，
+                        // 把它改成能走的地形再走上去就会数组越界
+                        if (!Dungeon.level.insideMap(cell)) {
+                            GLog.w(M.L(TrapPlacer.class, "invalid_tile"));
+                        } else {
+                            Level.set(cell,chosen);
+                            GameScene.updateMap(cell);
+                        }
                     }
                     curUser.next();
                 }

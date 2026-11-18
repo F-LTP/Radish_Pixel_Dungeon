@@ -81,9 +81,10 @@ public class GuardianTrap extends Trap {
 
 		public Guardian(){
 			super();
-			weapon = Generator.randomWeapon();
-			weapon.enchant(null);
-			weapon.degrade(weapon.level());
+			Weapon w = Generator.randomWeapon();
+			w.enchant(null);
+			w.degrade(w.level());
+			mobEquipment.weapon = w;
 		}
 
 		@Override

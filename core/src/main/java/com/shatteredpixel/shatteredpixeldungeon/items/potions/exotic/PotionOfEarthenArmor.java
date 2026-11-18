@@ -22,20 +22,24 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EarthenArmorGuard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
+//Grants temporary natural armor, and while that armor lasts grants 1 shielding
+//each turn.
 public class PotionOfEarthenArmor extends ExoticPotion {
-	
+
 	{
 		icon = ItemSpriteSheet.Icons.POTION_EARTHARMR;
 	}
-	
+
 	@Override
 	public void apply( Hero hero ) {
 		identify();
-		
+
 		Barkskin.conditionallyAppend( hero, 2 + hero.lvl/3, 50 );
+		Buff.affect( hero, EarthenArmorGuard.class );
 	}
-	
 }

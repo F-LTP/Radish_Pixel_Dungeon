@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
+import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Muramasa;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -37,6 +38,15 @@ public abstract class KindofMisc extends EquipableItem {
 
 	@Override
 	public boolean doEquip(final Hero hero) {
+
+		// func 4 Muramasa mania
+		// DoggingDog on 20250419
+		if(Dungeon.hero.buff(Muramasa.MuramasaMania.class)!=null && Dungeon.hero!=null){
+			GLog.n(Messages.get(Muramasa.MuramasaMania.class,"mania"));
+			return false;
+		}
+		//
+
 
 		boolean equipFull = false;
 		if ( this instanceof Artifact
@@ -52,7 +62,8 @@ public abstract class KindofMisc extends EquipableItem {
 			}
 		} else if (this instanceof Ring
 				&& hero.belongings.misc != null
-				&& hero.belongings.ring != null){
+				&& hero.belongings.ring != null
+				&& hero.belongings.firstEmptyExtraRing() >= hero.belongings.extraRingSlotCount()){
 
 			//see if we can re-arrange items first
 			if (hero.belongings.misc instanceof Artifact && hero.belongings.artifact == null){
@@ -137,7 +148,11 @@ public abstract class KindofMisc extends EquipableItem {
 				else                                    hero.belongings.misc = (Artifact) this;
 			} else if (this instanceof Ring){
 				if (hero.belongings.ring == null)   hero.belongings.ring = (Ring) this;
-				else                                hero.belongings.misc = (Ring) this;
+				else {
+					int idx = hero.belongings.firstEmptyExtraRing();
+					if (idx < hero.belongings.extraRingSlotCount()) hero.belongings.setExtraRing(idx, (Ring) this);
+					else                                hero.belongings.misc = (Ring) this;
+				}
 			}
 
 			detach( hero.belongings.backpack );
@@ -152,6 +167,10 @@ public abstract class KindofMisc extends EquipableItem {
 			}
 
 			hero.spendAndNext( timeToEquip(hero) );
+
+			// DoggingDog on 20250914
+			hero.updateHT(false);
+
 			return true;
 
 		}
@@ -168,6 +187,10 @@ public abstract class KindofMisc extends EquipableItem {
 				hero.belongings.misc = null;
 			} else if (hero.belongings.ring == this){
 				hero.belongings.ring = null;
+			} else if (hero.belongings.ring2 == this){
+				hero.belongings.ring2 = null;
+			} else if (hero.belongings.extraRings.remove(this)){
+				// removed from extra list
 			}
 
 			return true;
@@ -181,9 +204,11 @@ public abstract class KindofMisc extends EquipableItem {
 
 	@Override
 	public boolean isEquipped( Hero hero ) {
-		return hero.belongings.artifact() == this
+		return hero != null && (hero.belongings.artifact() == this
 				|| hero.belongings.misc() == this
-				|| hero.belongings.ring() == this;
+				|| hero.belongings.ring() == this
+				|| hero.belongings.ring2() == this
+				|| hero.belongings.extraRings.contains(this));
 	}
 
 }

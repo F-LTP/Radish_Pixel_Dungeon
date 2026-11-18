@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
@@ -31,10 +32,12 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.HeroSelectScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.InterlevelScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.RankingsScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.TitleScene;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.noosa.Game;
+import com.watabou.noosa.Image;
 
 import java.io.IOException;
 
@@ -73,6 +76,41 @@ public class WndGame extends Window {
 			curBtn.icon(Icons.get(Icons.CHALLENGE_ON));
 		}
 
+		if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.fusionCharges(Dungeon.hero) > 0) {
+			int fusionCharges = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.fusionCharges(Dungeon.hero);
+			addButton(curBtn = new RedButton("使用融合机会 (" + fusionCharges + ")") {
+				@Override
+				protected void onClick() {
+					hide();
+					GameScene.show(new WndFusion());
+				}
+			});
+			curBtn.icon(Icons.get(Icons.CHALLENGE_ON));
+		}
+
+		// 红包属性测试入口
+		if (Dungeon.isChallenged(com.shatteredpixel.shatteredpixeldungeon.Challenges.TEST_MODE)) {
+			addButton(curBtn = new RedButton("红包属性测试") {
+				@Override
+				protected void onClick() {
+					hide();
+					GameScene.show(new WndHongbaoDebug());
+				}
+			});
+			curBtn.icon(Icons.get(Icons.CHALLENGE_ON));
+		}
+
+		if(!Dungeon.hero.ready && Dungeon.hero.isAlive()) {
+			// Debug
+			addButton(curBtn = new RedButton(Messages.get(this, "debug")) {
+				@Override
+				protected void onClick() {
+					GameScene.logActorThread = true;
+				}
+			});
+			curBtn.icon(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16));
+		}
+
 		// Restart
 		if (Dungeon.hero == null || !Dungeon.hero.isAlive()) {
 
@@ -107,6 +145,7 @@ public class WndGame extends Window {
 					ShatteredPixelDungeon.reportException(e);
 				}
 				Game.switchScene(TitleScene.class);
+				BossHealthBar.clearAllBossData();
 			}
 		});
 		curBtn.icon(Icons.get(Icons.DISPLAY));

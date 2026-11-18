@@ -52,13 +52,16 @@ public class VirtualActor extends Visual {
     }
     //delay time and decide if delayer from the same class can parallel with callback enabled
     public static void delay(float time, final boolean parallel, Object obj, Callback callback){
+        //下面的匿名 Actor 里不能直接写 time：Actor.time 是 public 字段，在匿名子类里写 time 取到的是
+        //那个 Actor 被排到的游戏时间（约等于当前回合数），而不是这里传进来的秒数
+        final float duration = time;
         if(!parallel) {
             Actor.addDelayed(new Actor() {
                 final Actor toRemove = this;
                 @Override
                 protected boolean act() {
                     Actor.remove(toRemove);
-                    VirtualActor.addDelayerVisual(time, () -> {
+                    VirtualActor.addDelayerVisual(duration, () -> {
                         if (callback != null) callback.call();
                         toRemove.next();
                     });
@@ -75,7 +78,7 @@ public class VirtualActor extends Visual {
                 protected boolean act() {
                     //remove this first to avoid deadlock when multiple events ends simultaneously.
                     Actor.remove(toRemove);
-                    VirtualActor.addDelayerVisual(time, () -> {
+                    VirtualActor.addDelayerVisual(duration, () -> {
                         if (callback != null) callback.call();
                         toRemove.next();
                     });
@@ -93,12 +96,13 @@ public class VirtualActor extends Visual {
     }
     //simple delay that ANY DelayerEffect can interrupt
     public static void delaySoft(float time, Callback callback){
+        final float duration = time;
         Actor.addDelayed(new Delayer() {
             final Actor toRemove = this;
             @Override
             protected boolean act() {
                 Actor.remove(toRemove);
-                VirtualActor.addDelayerVisual(time, () -> {
+                VirtualActor.addDelayerVisual(duration, () -> {
                     if (callback != null) callback.call();
                     toRemove.next();
                 });

@@ -97,9 +97,17 @@ public enum Languages {
 		return matchCode(locale.getLanguage());
 	}
 
+	//Only english and chinese are currently supported. The message files of every
+	// other language have been removed and are meant to be regenerated later.
+	// Selecting (or having a system locale matching) an unsupported language falls
+	// back to english.
+	public static boolean isSupported(Languages lang){
+		return lang == ENGLISH || lang == CHINESE;
+	}
+
 	public static Languages matchCode(String code){
 		for (Languages lang : Languages.values()){
-			if (lang.code().equals(code))
+			if (isSupported(lang) && lang.code().equals(code))
 				return lang;
 		}
 		return ENGLISH;

@@ -23,12 +23,21 @@ package com.shatteredpixel.shatteredpixeldungeon.ui;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.Ratmogrify;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
+import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.PotionBandolier;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
+import com.shatteredpixel.shatteredpixeldungeon.ui.DiceMageUI;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.watabou.noosa.ColorBlock;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.ui.Component;
@@ -71,7 +80,7 @@ public class TalentsPane extends ScrollPane {
 					&& Dungeon.hero.lvl+1 >= Talent.tierLevelThresholds[tiersAvailable+1]){
 				tiersAvailable++;
 			}
-			if (tiersAvailable > 2 && Dungeon.hero.subClass == HeroSubClass.NONE){
+			if (tiersAvailable > 2 && Dungeon.hero.subClass == HeroSubClasses.NONE){
 				tiersAvailable = 2;
 			} else if (tiersAvailable > 3 && (Dungeon.hero.armorAbility == null && !Dungeon.hero.powerOfImp)){
 				tiersAvailable = 3;
@@ -159,6 +168,7 @@ public class TalentsPane extends ScrollPane {
 
 		public RenderedTextBlock title;
 		ArrayList<TalentButton> buttons;
+		RenderedTextBlock emptyNote;
 
 		ArrayList<Image> stars = new ArrayList<>();
 
@@ -173,8 +183,16 @@ public class TalentsPane extends ScrollPane {
 
 			if (mode == TalentButton.Mode.UPGRADE) setupStars();
 
+			// 骰子法师3T：隐藏未投入点数的学派与隐藏的跳过天赋
+			boolean diceT3 = tier == 3 && Dungeon.hero != null
+					&& Dungeon.hero.subClass == HeroSubClasses.DICE_MAGE;
+
 			buttons = new ArrayList<>();
+			boolean diceEmpty = diceT3;
 			for (Talent talent : talents.keySet()){
+				if (diceT3 && talent == Talent.D3_SKIPPED) continue;
+				if (diceT3 && Talent.isDiceMageSpellTalent(talent) && talents.get(talent) == 0) continue;
+				diceEmpty = false;
 				TalentButton btn = new TalentButton(tier, talent, talents.get(talent), mode){
 					@Override
 					public void upgradeTalent() {
@@ -182,6 +200,14 @@ public class TalentsPane extends ScrollPane {
 						if (parent != null) {
 							setupStars();
 							TalentTierPane.this.layout();
+							//光辉灌注天赋
+							if(talent == Talent.LIGHT_STEP){
+								Dungeon.level.drop(new PotionOfExperience(),Dungeon.hero.pos);
+							}
+							// TheCatist 2026/7/30 月华剑盾骑士更新自身贴图代码
+							if (talent == Talent.SWORD_SHIELD_KNIGHT) {
+								((HeroSprite) Dungeon.hero.sprite).updateArmor();
+							}
 						}
 					}
 				};
@@ -189,6 +215,12 @@ public class TalentsPane extends ScrollPane {
 				add(btn);
 			}
 
+			if (diceEmpty){
+				emptyNote = PixelScene.renderTextBlock(Messages.get(TalentsPane.class, "dice_empty"), 6);
+				emptyNote.hardlight(DiceMageUI.CREAM);
+				emptyNote.maxWidth(110);
+				add(emptyNote);
+			}
 		}
 
 		private void setupStars(){
@@ -241,15 +273,24 @@ public class TalentsPane extends ScrollPane {
 				}
 			}
 
-			float gap = (width - buttons.size()*TalentButton.WIDTH)/(buttons.size()+1);
-			left = x + gap;
-			for (TalentButton btn : buttons){
-				btn.setPos(left, title.bottom() + 4);
-				PixelScene.align(btn);
-				left += btn.width() + gap;
+			if (emptyNote != null){
+				emptyNote.setPos(x + (width - emptyNote.width())/2f, title.bottom() + 6);
+				height = emptyNote.bottom() - y;
+				return;
 			}
 
-			height = buttons.get(0).bottom() - y;
+			int columns = Math.min(6, buttons.size());
+			float gap = (width - columns*TalentButton.WIDTH)/(columns+1);
+			for (int i = 0; i < buttons.size(); i++) {
+				int column = i % 6;
+				int row = i / 6;
+				TalentButton btn = buttons.get(i);
+				left = x + gap + column * (TalentButton.WIDTH + gap);
+				btn.setPos(left, title.bottom() + 4 + row * (TalentButton.HEIGHT + 2));
+				PixelScene.align(btn);
+			}
+
+			height = buttons.isEmpty() ? title.height() : buttons.get(buttons.size()-1).bottom() - y;
 
 		}
 

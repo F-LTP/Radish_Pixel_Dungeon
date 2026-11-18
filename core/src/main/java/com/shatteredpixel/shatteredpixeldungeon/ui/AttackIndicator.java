@@ -149,7 +149,13 @@ public class AttackIndicator extends Tag {
 			sprite = null;
 		}
 		
-		sprite = Reflection.newInstance(lastTarget.spriteClass);
+		// Snake Bite challenge: use snake sprite in attack indicator (except Mimics)
+		if (Dungeon.isChallenged(com.shatteredpixel.shatteredpixeldungeon.Challenges.SNAKE_BITE)
+				&& !(lastTarget instanceof com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic)) {
+			sprite = new com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite();
+		} else {
+			sprite = Reflection.newInstance(lastTarget.spriteClass);
+		}
 		active = true;
 		sprite.linkVisuals(lastTarget);
 		sprite.idle();
@@ -174,14 +180,25 @@ public class AttackIndicator extends Tag {
 	}
 	
 	private synchronized void visible( boolean value ) {
-		bg.visible = value;
+		backgroundVisible(value);
 	}
 	
 	@Override
 	protected void onClick() {
 		super.onClick();
-		if (enabled && Dungeon.hero.ready) {
-			if (Dungeon.hero.handle( lastTarget.pos )) {
+		attack();
+	}
+
+	public static void attack() {
+		AttackIndicator current = instance;
+		if (current != null) {
+			current.attackTarget();
+		}
+	}
+
+	private synchronized void attackTarget() {
+		if (enabled && Dungeon.hero.ready && lastTarget != null) {
+			if (Dungeon.hero.handle(lastTarget.pos)) {
 				Dungeon.hero.next();
 			}
 		}

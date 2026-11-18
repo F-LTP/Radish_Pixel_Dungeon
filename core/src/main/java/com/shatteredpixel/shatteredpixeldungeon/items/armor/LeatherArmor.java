@@ -21,16 +21,33 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.events.HeroLevelUpEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 
 public class LeatherArmor extends Armor {
 
 	{
 		image = ItemSpriteSheet.ARMOR_LEATHER;
 	}
-	
+
 	public LeatherArmor() {
 		super( 2 );
 	}
 
+	/**
+	 * 皮甲特效：对 Property.GNOLL 类敌人的物品掉落率增加
+	 * @return 掉落率加成倍率 (25 + 15 * buffedlvl)%
+	 */
+	public float gnollLootBonus() {
+		if (Dungeon.hero != null && Dungeon.hero.belongings.armor() == this) {
+			return 0.25f + 0.05f * buffedLvl();
+		} else {
+			return 0f;
+		}
+	}
 }

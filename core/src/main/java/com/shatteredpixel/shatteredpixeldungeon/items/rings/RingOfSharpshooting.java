@@ -35,15 +35,28 @@ public class RingOfSharpshooting extends Ring {
 	public String statsInfo() {
 		if (isIdentified()){
 			String info = Messages.get(this, "stats",
-					soloBuffedBonus(), Messages.decimalFormat("#.##", 100f * (Math.pow(1.2, soloBonus()) - 1f)));
+					soloBuffedBonus(), Messages.decimalFormat("#.##", 100f * (Math.pow(1.1, soloBonus()) - 1f)));
 			if (isEquipped(Dungeon.hero) && soloBuffedBonus() != combinedBuffedBonus(Dungeon.hero)){
 				info += "\n\n" + Messages.get(this, "combined_stats",
-						combinedBuffedBonus(Dungeon.hero), Messages.decimalFormat("#.##", 100f * (Math.pow(1.2, combinedBonus(Dungeon.hero)) - 1f)));
+						combinedBuffedBonus(Dungeon.hero), Messages.decimalFormat("#.##", 100f * (Math.pow(1.1, combinedBonus(Dungeon.hero)) - 1f)));
 			}
 			return info;
 		} else {
-			return Messages.get(this, "typical_stats", 1, Messages.decimalFormat("#.##", 20f));
+			// 耐久每级 1.1 倍（见 durabilityMultiplier），+0 戒指是 10%；这里和下面的 upgradeStat2 原先留着旧的 1.2 倍
+			return Messages.get(this, "typical_stats", 1, Messages.decimalFormat("#.##", 10f));
 		}
+	}
+
+	@Override
+	public String upgradeStat1(int level) {
+		if (cursed && cursedKnown) level = Math.min(-1, level-3);
+		return Integer.toString(level+1);
+	}
+
+	@Override
+	public String upgradeStat2(int level) {
+		if (cursed && cursedKnown) level = Math.min(-1, level-3);
+		return Messages.decimalFormat("#.##", 100f * (Math.pow(1.1, level+1)-1f)) + "%";
 	}
 	
 	@Override
@@ -56,7 +69,7 @@ public class RingOfSharpshooting extends Ring {
 	}
 	
 	public static float durabilityMultiplier( Char target ){
-		return (float)(Math.pow(1.2, getBonus(target, Aim.class)));
+		return (float)(Math.pow(1.1, getBonus(target, Aim.class)));
 	}
 
 	public class Aim extends RingBuff {

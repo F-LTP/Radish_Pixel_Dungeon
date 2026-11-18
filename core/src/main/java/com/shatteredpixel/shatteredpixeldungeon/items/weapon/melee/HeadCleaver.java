@@ -4,12 +4,16 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamagePipeline;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BloodParticle;
-import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
-import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
+import com.shatteredpixel.shatteredpixeldungeon.events.AttackHitEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.CharFinalDamageEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -46,19 +50,60 @@ public class HeadCleaver extends MeleeWeapon{
                         b.detach();
                     }
                 }
-                Buff.affect(defender,headCleaverTracker.class);
-                defender.HP=1;
-                defender.damage(1,new headCleaverTracker());
                 defender.sprite.emitter().burst(BloodParticle.BURST, 50 );
-                if (defender == Dungeon.hero && !defender.isAlive()) {
-                    GLog.n(Messages.get(HeadCleaver.headCleaverTracker.class, "ondeath"));
-                    Dungeon.fail(HeadCleaver.headCleaverTracker.class);
+                if (defender == Dungeon.hero){
+                    // 英雄目标：本次攻击的伤害结算完成后，由 onHeroCleave 判定处决/留 1 血
+                    Buff.affect(defender, headCleaverTracker.class, headCleaverTracker.DURATION);
+                } else {
+                    // 非英雄目标保持即时结算
+                    Buff.affect(defender, headCleaverTracker.class);
+                    defender.HP=1;
+                    // 斩首跳字显示目标生命上限与本次攻击伤害中的较大值
+                    defender.damage(new DamageInfo(1, DamageType.PHYSICAL_NO_ARMOR, attacker, this, new headCleaverTracker())
+                            .setFloatingTextAmount(Math.max(defender.HT, damage)));
                 }
             }
         }
         return super.proc(attacker,defender,damage);
     }
-    public static class headCleaverTracker extends Buff{
 
+    @SubscribeEvent(event = CharFinalDamageEvent.class, priority = 0)
+    public static void onHeroCleave(CharFinalDamageEvent event) {
+        if (Dungeon.hero == null) return;
+        Char defender = event.getTarget();
+        if (defender != Dungeon.hero) return;
+        if (defender.buff(headCleaverTracker.class) == null) return;
+
+        Buff.detach(defender, headCleaverTracker.class);
+
+        // 斩首跳字显示目标生命上限与本次攻击伤害中的较大值
+        DamageInfo info = DamagePipeline.activeInfo();
+        if (info != null) {
+            info.setFloatingTextAmount(Math.max(defender.HT, event.getDamage()));
+        }
+
+        if (defender.HP < defender.HT * 0.3f) {
+            // 处决：HP 归零，由伤害管线正常触发死亡。
+            // 这里不能提交「本局失败」：此刻英雄还没走到死亡流程，十字架可能马上把人救活，
+            // 那条排行榜记录就成了假的；真死了的话，攻击流程在伤害结算后本来就会提交一次，这里再交就是两条
+            defender.HP = 0;
+            GLog.n(Messages.get(HeadCleaver.headCleaverTracker.class, "ondeath"));
+        } else {
+            // 留 1 血
+            defender.HP = 1;
+        }
+    }
+
+    // 斩首标记只对「触发它的那一击」有效。那一击没造成伤害时（被完全减免）上面的结算不会发生，
+    // 标记要在这一击结束时清掉，不然接下来一回合里任何一点别的伤害（中毒、别的怪）都会被当成斩首来结算
+    @SubscribeEvent(event = AttackHitEvent.class, priority = 0)
+    public static void onCleaveHitEnd(AttackHitEvent event) {
+        if (event.getDefender() == Dungeon.hero) {
+            Buff.detach(event.getDefender(), headCleaverTracker.class);
+        }
+    }
+
+    public static class headCleaverTracker extends FlavourBuff{
+        public static final float DURATION = 1f;
     }
 }

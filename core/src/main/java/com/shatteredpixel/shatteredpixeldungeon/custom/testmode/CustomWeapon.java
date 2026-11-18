@@ -4,13 +4,18 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.VoidRift;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Annoying;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Dazzling;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Displacing;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.DoubleEdged;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Explosive;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Friendly;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Heavy;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Polarized;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Sacrificial;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Temporal;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Ultralight;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Wayward;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blocking;
@@ -19,10 +24,13 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Chilli
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Corrupting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Elastic;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Jealousy;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Striking;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Survival;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Vampiric;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -49,7 +57,6 @@ public class CustomWeapon extends MeleeWeapon {
         image = ItemSpriteSheet.WEAPON_HOLDER;
         unique = true;
         bones = false;
-        adjustStatus();
         defaultAction = AC_SETTING;
     }
 
@@ -68,8 +75,17 @@ public class CustomWeapon extends MeleeWeapon {
     private boolean s_delay_swap = false;
     private int s_reach = 1;
 
+    // 必须写在上面这些默认值的后面：初始化按书写顺序执行，写在它们前面时读到的全是 0，
+    // 新武器的阶数、精度、攻击间隔、攻击距离都成了 0（距离 0 连相邻的敌人都够不着），
+    // 要等打开一次设置窗口或读一次档才恢复
+    {
+        adjustStatus();
+    }
+
     private long enchOn = 0L;
-    public static ArrayList<Enchantment> enchList = new ArrayList<>();
+    // 每把武器各有一份。以前这是所有自定义武器共用的一张表：同一次启动里再开一局，
+    // 新武器会带着上一局勾的附魔（它的勾选框却显示一个都没勾），读别的存档里的那把也会把这一把的附魔冲掉
+    private final ArrayList<Enchantment> enchList = new ArrayList<>();
     public static LinkedHashMap<Class<? extends Enchantment>, Integer> enchPrio = new LinkedHashMap<>();
     static{
         enchPrio.put(Blazing.class,1);
@@ -79,11 +95,14 @@ public class CustomWeapon extends MeleeWeapon {
         enchPrio.put(Corrupting.class, 0);
         enchPrio.put(Elastic.class, 1);
         enchPrio.put(Grim.class, 0);
+        enchPrio.put(Jealousy.class, 1);
         enchPrio.put(Kinetic.class, 0);
         enchPrio.put(Lucky.class, 0);
         enchPrio.put(Projecting.class, 2);
         enchPrio.put(Shocking.class, 1);
         enchPrio.put(Vampiric.class, 1);
+        enchPrio.put(Striking.class, 1);
+        enchPrio.put(Survival.class, 1);
 
         enchPrio.put(Annoying.class, 0);
         enchPrio.put(Displacing.class, 1);
@@ -93,6 +112,32 @@ public class CustomWeapon extends MeleeWeapon {
         enchPrio.put(Polarized.class, 2);
         enchPrio.put(Sacrificial.class, 1);
         enchPrio.put(Wayward.class, 2);
+        enchPrio.put(Temporal.class, 2);
+        enchPrio.put(DoubleEdged.class, 2);
+        enchPrio.put(Heavy.class, 2);
+        enchPrio.put(Ultralight.class, 2);
+
+        // 池数组驱动扫描(与TestArmor的GLYPH_LISTS同思路)：追加四个池中未显式注册的附魔，
+        // 使新增附魔入池后自动出现在选框。追加在末尾，保证既有存档 ench_on 位掩码的位序不变。
+        for (Class<?>[] pool : new Class<?>[][]{Enchantment.common, Enchantment.uncommon, Enchantment.rare, Enchantment.curses}) {
+            for (Class<?> c : pool) {
+                @SuppressWarnings("unchecked")
+                Class<? extends Enchantment> e = (Class<? extends Enchantment>) c;
+                // 虚空的位置固定在表尾，见循环后面的说明
+                if (e == VoidRift.class) continue;
+                if (!enchPrio.containsKey(e)) {
+                    // 诅咒排在最先结算的那一档。按「它是从哪个池里扫出来的」判断：
+                    // 以前这里拿类的全名去比是不是以 ".curses." 结尾，全名以类名结尾，永远比不上
+                    enchPrio.put(e, pool == Enchantment.curses ? 2 : 1);
+                }
+            }
+        }
+
+        // ench_on 按这张表的迭代顺序逐位存档。虚空是在上面的位序都定下来之后才加入的：
+        // 把它登记在表中间，或者让池扫描按 rare 池的位置把它排到诅咒前面，
+        // 都会让排在它后面的附魔在旧存档里整体错一位，所以单独接在最后。
+        // 优先级 0：和死神一样排在其它附魔之后结算。
+        enchPrio.put(VoidRift.class, 0);
     }
 
     @Override
@@ -103,7 +148,7 @@ public class CustomWeapon extends MeleeWeapon {
                 int i = 0;
                 for(Class<? extends Enchantment> e: enchPrio.keySet()){
                     if (ench.getClass() == e){
-                        enchOn += 1L<<i;
+                        enchOn |= 1L << i;
                         break;
                     }
                     ++i;
@@ -129,7 +174,8 @@ public class CustomWeapon extends MeleeWeapon {
             //so scan 3 times instead.
             for(int i=2;i>=0;--i){
                 for(Enchantment e: enchList){
-                    if(enchPrio.get(e.getClass())==i) damage = e.proc(this, attacker, defender, damage);
+                    Integer prio = enchPrio.get(e.getClass());
+                    if (prio != null && prio == i) damage = e.proc(this, attacker, defender, damage);
                 }
             }
 
@@ -140,14 +186,17 @@ public class CustomWeapon extends MeleeWeapon {
 
     public boolean dispelEnchant(Class<? extends Enchantment> ench){
         if(ench!=null){
-            int id = 0;
-            for(Enchantment e: enchList){
+            for (Enchantment e : enchList){
                 if (e.getClass() == ench){
                     enchList.remove(e);
-                    enchOn -= 1<<id;
+                    int id = 0;
+                    for (Class<? extends Enchantment> c : enchPrio.keySet()){
+                        if (c == ench) break;
+                        ++id;
+                    }
+                    enchOn &= ~(1L << id);
                     return true;
                 }
-                ++id;
             }
         }
         return false;
@@ -186,6 +235,13 @@ public class CustomWeapon extends MeleeWeapon {
         bundle.put("s_delay_swap", s_delay_swap);
         bundle.put("s_reach", s_reach);
         bundle.put("ench_on", enchOn);
+        // ench_on 只记「表里的第几位」，而表里靠扫描附魔池补进来的条目和排在表尾的虚空，位置都会随着
+        // 往池里加新附魔而移动：旧存档读回来会整体错成别的附魔。所以另外按类名存一份，读档以它为准
+        Class[] classes = new Class[enchList.size()];
+        for (int i = 0; i < classes.length; i++) {
+            classes[i] = enchList.get(i).getClass();
+        }
+        bundle.put("ench_classes", classes);
     }
 
     @Override
@@ -204,9 +260,23 @@ public class CustomWeapon extends MeleeWeapon {
         s_delay = bundle.getFloat("s_delay");
         s_delay_swap = bundle.getBoolean("s_delay_swap");
         s_reach = bundle.getInt("s_reach");
-        enchOn = bundle.getLong("ench_on");
         adjustStatus();
-        setEnchant(enchOn);
+        if (bundle.contains("ench_classes")) {
+            dispelAllEnch();
+            Class[] classes = bundle.getClassArray("ench_classes");
+            if (classes != null) {
+                for (Class<?> c : classes) {
+                    // 已经从游戏里删掉的附魔读出来是 null；不在表里的也跳过，否则它没有对应的勾选框，取消不掉
+                    if (c != null && enchPrio.containsKey(c)) {
+                        enchant((Enchantment) Reflection.newInstance(c));
+                    }
+                }
+            }
+        } else {
+            // 这一版之前的存档只有位掩码，只能按现在的位序解读
+            enchOn = bundle.getLong("ench_on");
+            setEnchant(enchOn);
+        }
     }
 
     private static final String AC_SETTING = "setting";
@@ -871,11 +941,15 @@ public class CustomWeapon extends MeleeWeapon {
         }
 
         private class EnchantWindow extends Window{
+            private static final int WIDTH = 200;
+            private static final int COLS = 2;
+            private static final int ROW_H = 18;
+            private static final int COL_W = 98;
             private ArrayList<canScrollCheckBox> checkBoxes = new ArrayList<>();
             public EnchantWindow(){
 
                 super();
-                resize(120, 108 + 36);
+                resize(WIDTH, 108 + 36);
                 int placed = 0;
                 ScrollPane list = new ScrollPane(new Component()) {
 
@@ -913,15 +987,16 @@ public class CustomWeapon extends MeleeWeapon {
                         }
                     };
                     cb.checked((enchOn&(1L<<placed)) > 0 );
-                    cb.setRect(0, 18*placed, 120, 16);
+                    // 双列排布，避免几十个附魔挤成一条很长的单列
+                    cb.setRect((placed % COLS) * COL_W, (placed / COLS) * ROW_H, COL_W - 2, 16);
                     PixelScene.align(cb);
                     placed ++;
                     content.add(cb);
                     checkBoxes.add(cb);
                 }
-                content.setSize(120, checkBoxes.get(checkBoxes.size()-1).bottom());
+                content.setSize(WIDTH, checkBoxes.get(checkBoxes.size()-1).bottom());
                 list.setSize( list.width(), list.height() );
-                list.setRect(0, 0, 120, 108);
+                list.setRect(0, 0, WIDTH, 108);
                 list.scrollTo(0,0);
 
                 RedButton allOn = new RedButton(Messages.get(this, "all_on")) {
@@ -930,7 +1005,7 @@ public class CustomWeapon extends MeleeWeapon {
                         allEnchOn();
                     }
                 };
-                allOn.setRect(0, 110, 59, 16);
+                allOn.setRect(0, 110, WIDTH/2 - 1, 16);
                 add(allOn);
 
                 RedButton allOff = new RedButton(Messages.get(this, "all_off")) {
@@ -939,7 +1014,7 @@ public class CustomWeapon extends MeleeWeapon {
                         allEnchOff();
                     }
                 };
-                allOff.setRect(61, 110, 59, 16);
+                allOff.setRect(WIDTH/2 + 1, 110, WIDTH/2 - 1, 16);
                 add(allOff);
 
                 RedButton posOn = new RedButton(Messages.get(this, "positive_on")) {
@@ -948,7 +1023,7 @@ public class CustomWeapon extends MeleeWeapon {
                         kindEnchOn(false);
                     }
                 };
-                posOn.setRect(0, 128, 59, 16);
+                posOn.setRect(0, 128, WIDTH/2 - 1, 16);
                 add(posOn);
 
                 RedButton negOn = new RedButton(Messages.get(this, "negative_on")) {
@@ -957,7 +1032,7 @@ public class CustomWeapon extends MeleeWeapon {
                         kindEnchOn(true);
                     }
                 };
-                negOn.setRect(61, 128, 59, 16);
+                negOn.setRect(WIDTH/2 + 1, 128, WIDTH/2 - 1, 16);
                 add(negOn);
             }
 

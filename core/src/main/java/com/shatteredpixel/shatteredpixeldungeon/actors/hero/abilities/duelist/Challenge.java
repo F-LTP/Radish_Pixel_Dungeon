@@ -59,7 +59,7 @@ public class Challenge extends ArmorAbility {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return HeroIcon.CHALLENGE;
 	}
 
@@ -207,7 +207,7 @@ public class Challenge extends ArmorAbility {
 		private int takenDmg = 0;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.CHALLENGE;
 		}
 
@@ -270,9 +270,8 @@ public class Challenge extends ArmorAbility {
 						hpToHeal += 5*Dungeon.hero.pointsInTalent(Talent.INVIGORATING_VICTORY);
 						hpToHeal = Math.min(hpToHeal, Dungeon.hero.HT - Dungeon.hero.HP);
 						if (hpToHeal > 0){
-							Dungeon.hero.HP += hpToHeal;
+							Dungeon.hero.heal(hpToHeal);
 							Dungeon.hero.sprite.emitter().start( Speck.factory( Speck.HEALING ), 0.33f, 6 );
-							Dungeon.hero.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(hpToHeal), FloatingText.HEALING );
 						}
 					}
 				}

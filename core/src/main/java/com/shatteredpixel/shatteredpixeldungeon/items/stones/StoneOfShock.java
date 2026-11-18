@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.WardenPrototype;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Lightning;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.EnergyParticle;
@@ -51,6 +52,7 @@ public class StoneOfShock extends Runestone {
 		
 		ArrayList<Lightning.Arc> arcs = new ArrayList<>();
 		int hits = 0;
+		boolean prototypeConverted = false;
 		
 		PathFinder.buildDistanceMap( cell, BArray.not( Dungeon.level.solid, null ), 2 );
 		for (int i = 0; i < PathFinder.distance.length; i++) {
@@ -59,6 +61,11 @@ public class StoneOfShock extends Runestone {
 				if (n != null) {
 					arcs.add(new Lightning.Arc(cell, n.sprite.center()));
 					Buff.prolong(n, Paralysis.class, 1f);
+					//典狱长 Boss 战：电击石可以把未激活的原型机直接拉拢到玩家阵营
+					if (!prototypeConverted && n instanceof WardenPrototype && ((WardenPrototype) n).isInactive()) {
+						((WardenPrototype) n).activateByHero();
+						prototypeConverted = true;
+					}
 					hits++;
 				}
 			}

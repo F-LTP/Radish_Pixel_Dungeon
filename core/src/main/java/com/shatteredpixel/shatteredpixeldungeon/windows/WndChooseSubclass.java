@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.items.TengusMask;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -35,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import com.watabou.noosa.Game;
 
 public class WndChooseSubclass extends Window {
 	
@@ -59,9 +61,15 @@ public class WndChooseSubclass extends Window {
 		float pos = message.bottom() + 3*GAP;
 
 		for (HeroSubClass subCls : hero.heroClass.subClasses()){
+			// Temporarily hide Jutte Champion from the Tengu's Mask choices.
+			if (subCls == HeroSubClasses.JUTTE_CHAMPION) continue;
 			RedButton btnCls = new RedButton( subCls.shortDesc(), 6 ) {
 				@Override
 				protected void onClick() {
+					//这里原先为了让确认框提前套上骰子法师的界面主题，在玩家确认之前就把 hero.subClass 写成了骰子法师，
+					//关窗时再改回去。但 hero.subClass 是进存档的：确认框开着时切到后台会存档，之后进程被回收的话，
+					//读档回来英雄已经是骰子法师而面具还在背包里；界面重建时窗口不经过 hide()，也改不回去。
+					//转职只在玩家确认之后由 tome.choose() 写入
 					GameScene.show(new WndOptions(new HeroIcon(subCls),
 							Messages.titleCase(subCls.title()),
 							Messages.get(WndChooseSubclass.this, "are_you_sure"),
@@ -69,15 +77,25 @@ public class WndChooseSubclass extends Window {
 							Messages.get(WndChooseSubclass.this, "no")){
 						@Override
 						protected void onSelect(int index) {
-							hide();
 							if (index == 0 && WndChooseSubclass.this.parent != null){
+								if (subCls == HeroSubClasses.DICE_MAGE) {
+									hero.subClass = subCls;
+									Game.platform.setTannFontMode(true);
+								}
 								WndChooseSubclass.this.hide();
 								tome.choose( subCls );
+								if (subCls == HeroSubClasses.DRUID
+										&& hero.buff( com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Druid.DruidEnergy.class ) == null) {
+									// 不在转职时赠送能量，按设计从 0 开始积累
+									com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff
+											.affect( hero, com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Druid.DruidEnergy.class );
+								}
 							}
 						}
 					});
 				}
 			};
+
 			btnCls.leftJustify = true;
 			btnCls.multiline = true;
 			btnCls.setSize(WIDTH-20, btnCls.reqHeight()+2);

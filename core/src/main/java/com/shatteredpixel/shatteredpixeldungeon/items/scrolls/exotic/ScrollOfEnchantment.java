@@ -22,16 +22,24 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.utils.LegacyItemWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.InventoryScroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RuneSlade;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -50,7 +58,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 
 		unique = true;
 
-		talentFactor = 2f;
+//		talentFactor = 2f;
 	}
 
 	protected static boolean identifiedByUse = false;
@@ -68,7 +76,10 @@ public class ScrollOfEnchantment extends ExoticScroll {
 	}
 
 	public static boolean enchantable( Item item ){
-		return (item instanceof MeleeWeapon || item instanceof SpiritBow || item instanceof Armor);
+		if(item instanceof LegacyItemWeapon){
+			return false;
+		}
+		return item instanceof MeleeWeapon || item instanceof SpiritBow || item instanceof Armor || Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE) && item instanceof BrokenSeal;
 	}
 
 	private void confirmCancelation() {
@@ -107,7 +118,9 @@ public class ScrollOfEnchantment extends ExoticScroll {
 
 		@Override
 		public boolean itemSelectable(Item item) {
-			return enchantable(item);
+			//enchantable 对有精巧纹章天赋的战士也放行破损纹章（附魔符石用得上），
+			//但秘卷这边的 onSelect 只处理武器和护甲，选中纹章什么都不会发生
+			return enchantable(item) && !(item instanceof BrokenSeal);
 		}
 
 		@Override
@@ -122,9 +135,13 @@ public class ScrollOfEnchantment extends ExoticScroll {
 				final Weapon.Enchantment enchants[] = new Weapon.Enchantment[3];
 				
 				Class<? extends Weapon.Enchantment> existing = ((Weapon) item).enchantment != null ? ((Weapon) item).enchantment.getClass() : null;
-				enchants[0] = Weapon.Enchantment.randomCommon( existing );
-				enchants[1] = Weapon.Enchantment.randomUncommon( existing );
-				enchants[2] = Weapon.Enchantment.random( existing, enchants[0].getClass(), enchants[1].getClass());
+				enchants[0] = Weapon.Enchantment.randomCommon( (Weapon) item, existing );
+				enchants[1] = Weapon.Enchantment.randomUncommon( (Weapon) item, existing );
+				//池子被过滤空时 pick() 会返回 null，这里兜底成不带武器过滤的抽取，避免下面 getClass() 空指针
+				if (enchants[0] == null) enchants[0] = Weapon.Enchantment.randomCommon( existing );
+				if (enchants[1] == null) enchants[1] = Weapon.Enchantment.randomUncommon( existing );
+				enchants[2] = Weapon.Enchantment.random( (Weapon) item, existing, enchants[0].getClass(), enchants[1].getClass());
+				if (enchants[2] == null) enchants[2] = enchants[0];
 
 				GameScene.show(new WndEnchantSelect((Weapon) item, enchants[0], enchants[1], enchants[2]));
 			
@@ -181,7 +198,17 @@ public class ScrollOfEnchantment extends ExoticScroll {
 			if (index < 3) {
 				wep.enchant(enchantments[index]);
 				GLog.p(Messages.get(StoneOfEnchantment.class, "weapon"));
-				((ScrollOfEnchantment)curItem).readAnimation();
+				((ScrollOfEnchantment)curItem).readAnimation(true);
+
+				//符文升级
+				if(wep instanceof RuneSlade){
+					wep.level++;
+					ScrollOfUpgrade.upgrade(curUser);
+					Badges.validateItemLevelAquired( wep );
+					Statistics.upgradesUsed++;
+					Badges.validateMageUnlock();
+					GLog.i(Messages.get(RuneSlade.class,"en_update"));
+				}
 
 				Sample.INSTANCE.play( Assets.Sounds.READ );
 				Enchanting.show(curUser, wep);
@@ -244,7 +271,7 @@ public class ScrollOfEnchantment extends ExoticScroll {
 			if (index < 3) {
 				arm.inscribe(glyphs[index]);
 				GLog.p(Messages.get(StoneOfEnchantment.class, "armor"));
-				((ScrollOfEnchantment)curItem).readAnimation();
+				((ScrollOfEnchantment)curItem).readAnimation(true);
 
 				Sample.INSTANCE.play( Assets.Sounds.READ );
 				Enchanting.show(curUser, arm);

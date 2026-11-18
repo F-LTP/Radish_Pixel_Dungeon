@@ -1,5 +1,8 @@
 # Shattered Pixel Dungeon
 
+> **本项目是 Shattered Pixel Dungeon 的深度改造分支（萝卜地牢）。**
+> 要改代码请先看 **[开发 Wiki](docs/wiki/README.md)** —— 按「快速开始 / 架构 / 构建打包 / 生物与 Boss / NPC / 物品 / UI / 文本 / 常见坑」分页，每页只讲最短可用的做法与对应源码位置。
+
 [Shattered Pixel Dungeon](https://shatteredpixel.com/shatteredpd/) is an open-source traditional roguelike dungeon crawler with randomized levels and enemies, and hundreds of items to collect and use. It's based on the [source code of Pixel Dungeon](https://github.com/00-Evan/pixel-dungeon-gradle), by [Watabou](https://www.watabou.ru).
 
 Shattered Pixel Dungeon currently compiles for Android, iOS, and Desktop platforms. You can find official releases of the game on:

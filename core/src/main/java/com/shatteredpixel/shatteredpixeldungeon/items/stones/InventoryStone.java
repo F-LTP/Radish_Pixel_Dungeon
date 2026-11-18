@@ -22,12 +22,16 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.stones;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Muramasa;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.watabou.noosa.audio.Sample;
 
@@ -40,7 +44,15 @@ public abstract class InventoryStone extends Runestone {
 	}
 	
 	public static final String AC_USE	= "USE";
-	
+
+	//anonymous stones don't count as consumed, do not drop, etc.
+	//useful for stones which are only spawned for their effects
+	protected boolean anonymous = false;
+	public void anonymize(){
+		image = ItemSpriteSheet.STONE_HOLDER;
+		anonymous = true;
+	}
+
 	@Override
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions( hero );
@@ -50,6 +62,15 @@ public abstract class InventoryStone extends Runestone {
 	
 	@Override
 	public void execute(Hero hero, String action) {
+
+		// func 4 Muramasa mania
+		// DoggingDog on 20250419
+		if(Dungeon.hero.buff(Muramasa.MuramasaMania.class)!=null && Dungeon.hero!=null){
+			GLog.n(Messages.get(Muramasa.MuramasaMania.class,"mania"));
+			return;
+		}
+		//
+
 		super.execute(hero, action);
 		if (action.equals(AC_USE)){
 			activate(curUser.pos);

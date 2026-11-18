@@ -31,8 +31,8 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.News;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.NewsImpl;
-import com.shatteredpixel.shatteredpixeldungeon.services.updates.UpdateImpl;
-import com.shatteredpixel.shatteredpixeldungeon.services.updates.Updates;
+import com.shatteredpixel.shatteredpixeldungeon.update.UpdateImpl;
+import com.shatteredpixel.shatteredpixeldungeon.update.Updates;
 import com.watabou.noosa.Game;
 import com.watabou.utils.FileUtils;
 import com.watabou.utils.Point;
@@ -46,6 +46,17 @@ import java.util.Locale;
 public class DesktopLauncher {
 
 	public static void main (String[] args) {
+
+		//把未捕获异常写进 crash.log，方便定位闪退
+		Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+			try {
+				java.io.PrintWriter pw = new java.io.PrintWriter("crash.log", "UTF-8");
+				throwable.printStackTrace(pw);
+				pw.close();
+			} catch (Exception ignored) {
+			}
+			throwable.printStackTrace();
+		});
 
 		if (!DesktopLaunchValidator.verifyValidJVMState(args)){
 			return;
@@ -123,11 +134,10 @@ public class DesktopLauncher {
 			Game.versionCode = Integer.parseInt(System.getProperty("Implementation-Version"));
 		}
 
-		if (UpdateImpl.supportsUpdates()){
-			Updates.service = UpdateImpl.getUpdateService();
-		}
+
 		if (NewsImpl.supportsNews()){
 			News.service = NewsImpl.getNewsService();
+			Updates.service = UpdateImpl.getUpdateService();
 		}
 		
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
@@ -145,6 +155,7 @@ public class DesktopLauncher {
 
 		String basePath = "";
 		Files.FileType baseFileType = null;
+		//TODO 目前电脑端与破碎存档会有冲突 建议修改存储位置
 		if (SharedLibraryLoader.isWindows) {
 			if (System.getProperties().getProperty("os.name").equals("Windows XP")) {
 				basePath = "Application Data/." + vendor + "/" + title + "/";

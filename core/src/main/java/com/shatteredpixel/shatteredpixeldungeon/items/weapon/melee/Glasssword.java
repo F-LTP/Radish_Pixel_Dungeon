@@ -1,11 +1,10 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
@@ -53,11 +52,12 @@ public class Glasssword extends MeleeWeapon{
             d+=Messages.get(this,"ruin2");
         else if (ruin>=3)
             d+=Messages.get(this,"ruin1");
-        if (buffedLvl()>=10) d+=Messages.get(this,"stable");
+        if(Dungeon.hero != null) {
+            if (buffedLvl() >= 10) d += Messages.get(this, "stable");
+        }
         return d;
     }
     private void updateImage(){
-        int oldimage=image;
         if (ruin>=ruinCap){
             image =ItemSpriteSheet.GLASSSWORD3;
         }

@@ -31,6 +31,7 @@ import java.util.HashMap;
 public class TextureCache {
 	
 	private static HashMap<Object,SmartTexture> all = new HashMap<>();
+	private static long generation;
 
 	public synchronized static SmartTexture createSolid( int color ) {
 		final String key = "1x1:" + color;
@@ -99,6 +100,18 @@ public class TextureCache {
 			return tx;
 		}
 	}
+
+	/**
+	 * Adds a runtime-generated texture to the cache. The cache takes ownership of
+	 * both the texture and its backing pixmap.
+	 */
+	public synchronized static SmartTexture put( Object key, SmartTexture texture ) {
+		SmartTexture previous = all.put( key, texture );
+		if (previous != null && previous != texture) {
+			previous.delete();
+		}
+		return texture;
+	}
 	
 	public synchronized static void remove( Object key ){
 		SmartTexture tx = all.get( key );
@@ -106,6 +119,11 @@ public class TextureCache {
 			all.remove(key);
 			tx.delete();
 		}
+	}
+
+	public synchronized static void reloadFromDisk( String path ){
+		remove( path );
+		// Next get() call will re-read from disk
 	}
 
 	public synchronized static SmartTexture get( Object src ) {
@@ -133,7 +151,12 @@ public class TextureCache {
 			txt.delete();
 		}
 		all.clear();
+		generation++;
 		
+	}
+
+	public synchronized static long generation() {
+		return generation;
 	}
 	
 	public synchronized static void reload() {

@@ -25,6 +25,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
@@ -57,6 +59,13 @@ public abstract class Shaman extends Mob {
 	@Override
 	public int damageRoll() {
 		return Char.combatRoll( 5, 10 );
+	}
+
+	@Override
+	public int wandLevel() {
+		// 法杖型远程怪：无实体法杖，用随机「伪法杖等级」代替。
+		// 未来挑战令其手持 CelestialSphere 时，该数值将决定法杖加成（NormalIntRange(level, level*2)）。
+		return Random.NormalIntRange( 4, 12 );
 	}
 	
 	@Override
@@ -124,7 +133,7 @@ public abstract class Shaman extends Mob {
 			
 			int dmg = Char.combatRoll( 6, 15 );
 			dmg = Math.round(dmg * AscensionChallenge.statModifier(this));
-			enemy.damage( dmg, new EarthenBolt() );
+			enemy.damage( DamageInfo.of(dmg, DamageType.MAGICAL, this, new EarthenBolt()) );
 			
 			if (!enemy.isAlive() && enemy == Dungeon.hero) {
 				Badges.validateDeathFromEnemyMagic();

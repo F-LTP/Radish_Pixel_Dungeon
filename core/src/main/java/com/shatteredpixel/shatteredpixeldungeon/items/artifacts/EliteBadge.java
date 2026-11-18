@@ -111,14 +111,16 @@ public class EliteBadge extends Artifact{
     @Override
     public ArrayList<String> actions(Hero hero) {
         ArrayList<String> actions = super.actions( hero );
-        if (isEquipped(hero) && charge >= 5+level()/5 && !cursed && hero.buff(MagicImmune.class) == null) {
+        if (!isEquipped(hero) || cursed || hero.buff(MagicImmune.class) != null) {
+            return actions;
+        }
+        // 身上已有精英状态时给「移除」（与 defaultAction() 一致），否则充能够了才给「激活」。
+        // 原先是「充能够就只给激活」：精英状态还在而充能又够时，物品窗口里只有一个点了没用的激活，移除只能从快捷栏点。
+        // 精英状态都是 ChampionHero 的子类：要用 buffs(...)（按 isInstance 匹配），buff(...) 只认完全相同的类
+        if (!hero.buffs(ChampionHero.class).isEmpty()) {
+            actions.add(AC_ELITE_REMOVE);
+        } else if (charge >= 5+level()/5) {
             actions.add(AC_ELITE);
-        } else {
-            for (Buff EliteBuffActive : hero.buffs(ChampionHero.class)) {
-                if (EliteBuffActive != null && !cursed && isEquipped(hero)) {
-                    actions.add(AC_ELITE_REMOVE);
-                }
-            }
         }
         return actions;
     }

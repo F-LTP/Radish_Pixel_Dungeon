@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CountessDress;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.MasterThievesArmband;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -72,7 +73,7 @@ public class WndTradeItem extends WndInfoItem {
 
 		if (item.quantity() == 1) {
 
-			RedButton btnSell = new RedButton( Messages.get(this, "sell", item.value()) ) {
+			RedButton btnSell = new RedButton( Messages.get(this, "sell", item.value()*2) ) {
 				@Override
 				protected void onClick() {
 					sell( item, finalShop);
@@ -87,7 +88,7 @@ public class WndTradeItem extends WndInfoItem {
 
 		} else {
 
-			int priceAll= item.value();
+			int priceAll= item.value()*2;
 			RedButton btnSell1 = new RedButton( Messages.get(this, "sell_1", priceAll / item.quantity()) ) {
 				@Override
 				protected void onClick() {
@@ -231,7 +232,7 @@ public class WndTradeItem extends WndInfoItem {
 		//selling items in the sell interface doesn't spend time
 		hero.spend(-hero.cooldown());
 
-		new Gold( item.value() ).doPickUp( hero );
+		new Gold( item.value()*2 ).doPickUp( hero );
 
 		if (shop != null){
 			shop.buybackItems.add(item);
@@ -258,7 +259,7 @@ public class WndTradeItem extends WndInfoItem {
 			//selling items in the sell interface doesn't spend time
 			hero.spend(-hero.cooldown());
 
-			new Gold( item.value() ).doPickUp( hero );
+			new Gold( item.value()*2 ).doPickUp( hero );
 
 			if (shop != null){
 				shop.buybackItems.add(item);
@@ -279,7 +280,12 @@ public class WndTradeItem extends WndInfoItem {
 		if (Dungeon.hero.hasTalent(Talent.ROGUES_INSTINCT)) {
 			chanceToPay -= 0.05f + Dungeon.hero.pointsInTalent(Talent.ROGUES_INSTINCT) * 0.175f;
 		}
-		if (Random.Float()<=chanceToPay) Dungeon.gold -= price;
+		if (Random.Float()<=chanceToPay) {
+			Dungeon.gold -= price;
+			//伯爵礼服「花费金币后回血」：游商那两处扣款都通知了，普通商店这里漏了。
+			//免单天赋触发时没有花钱，不算
+			CountessDress.onGoldChanged();
+		}
 		if (!item.doPickUp( Dungeon.hero )) {
 			Dungeon.level.drop( item, heap.pos ).sprite.drop();
 		}

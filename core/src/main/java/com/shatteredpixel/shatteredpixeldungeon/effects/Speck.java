@@ -49,7 +49,11 @@ public class Speck extends Image {
 	public static final int BUBBLE      = 12;
 	public static final int STEAM       = 13;
 	public static final int COIN        = 14;
-	
+
+	// 黑白蝴蝶帧（移植包的 specks.png 帧 16 / 17，本项目原先未占用 15~17 帧）
+	public static final int BUTTERFLY_BLACK = 16;
+	public static final int BUTTERFLY_WHITE = 17;
+
 	public static final int DISCOVER    = 101;
 	public static final int EVOKE       = 102;
 	public static final int MASK        = 103;
@@ -287,6 +291,14 @@ public class Speck extends Image {
 			lifespan = Random.Float( 0.8f, 1.5f );
 			break;
 			
+		case BUTTERFLY_BLACK:
+		case BUTTERFLY_WHITE:
+			speed.polar( Random.Float( 2 * 3.1415926f ), Random.Float( 8, 20 ) );
+			acc.set( 0, -8 );
+			angularSpeed = Random.Float( -180, 180 );
+			lifespan = Random.Float( 0.6f, 1f );
+			break;
+
 		case STEAM:
 			speed.y = -Random.Float( 10, 15 );
 			angularSpeed = Random.Float( +180 );

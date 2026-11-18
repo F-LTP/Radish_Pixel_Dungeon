@@ -46,4 +46,13 @@ public class MayflySprite extends MobSprite {
                 } );
 //        Sample.INSTANCE.play( Assets.Sounds.ZAP );
     }
+
+    // 施法动画播完后回待机这一步，基类不做，要贴图类自己做（同原版 ShamanSprite）；不做就会停在施法的最后一帧
+    @Override
+    public void onComplete( Animation anim ) {
+        if (anim == zap) {
+            idle();
+        }
+        super.onComplete( anim );
+    }
 }

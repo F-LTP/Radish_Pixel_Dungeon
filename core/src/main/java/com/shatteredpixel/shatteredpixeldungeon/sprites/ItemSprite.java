@@ -28,40 +28,63 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.food.HalfFood;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.CrackedSpyglass;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
+import com.watabou.gltextures.AtlasFrame;
+import com.watabou.gltextures.RuntimeAtlas;
+import com.watabou.gltextures.RuntimeAtlasRegistry;
 import com.watabou.gltextures.SmartTexture;
-import com.watabou.gltextures.TextureCache;
 import com.watabou.glwrap.Matrix;
 import com.watabou.glwrap.Vertexbuffer;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Game;
+import com.watabou.noosa.Image;
 import com.watabou.noosa.MovieClip;
 import com.watabou.noosa.NoosaScript;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
+import com.watabou.utils.RectF;
+import com.shatteredpixel.shatteredpixeldungeon.ui.UITheme;
 
 import java.nio.Buffer;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ItemSprite extends MovieClip {
 
-	public static final int SIZE	= 16;
-	
+	private static final int MIN_VISIBLE_ALPHA = 16;
+
 	private static final float DROP_INTERVAL = 0.4f;
-	
+
 	public Heap heap;
-	
+	private Item item;
+	private static final RuntimeAtlas ATLAS = RuntimeAtlasRegistry.get( ItemSpriteSheet.ATLAS );
+
+	// 声明式动画缓存：资产+片段名定位；图集重建（贴图身份变化）后自动失效重建
+	private static final Map<String, CachedAnim> animsCache = new HashMap<>();
+	private static class CachedAnim {
+		final MovieClip.Animation anim;
+		final SmartTexture texture;
+		CachedAnim( MovieClip.Animation anim, SmartTexture texture ){
+			this.anim = anim;
+			this.texture = texture;
+		}
+	}
+
 	private Glowing glowing;
+	private boolean invertDarkSprite;
 	//FIXME: a lot of this emitter functionality isn't very well implemented.
 	//right now I want to ship 0.3.0, but should refactor in the future.
 	protected Emitter emitter;
 	private float phase;
 	private boolean glowUp;
-	
+
 	private float dropInterval;
 
 	//the amount the sprite is raised from flat when viewed in a raised perspective
@@ -73,35 +96,34 @@ public class ItemSprite extends MovieClip {
 	protected float shadowWidth     = 1f;
 	protected float shadowHeight    = 0.25f;
 	protected float shadowOffset    = 0.5f;
-	
+
 	public ItemSprite() {
 		this( ItemSpriteSheet.SOMETHING, null );
 	}
-	
+
 	public ItemSprite( Heap heap ){
-		super(Assets.Sprites.ITEMS);
+		this();
 		view( heap );
 	}
-	
+
 	public ItemSprite( Item item ) {
-		super(Assets.Sprites.ITEMS);
+		this();
 		view( item );
 	}
-	
-	public ItemSprite( int image ){
+
+	public ItemSprite( String image ){
 		this( image, null );
 	}
-	
-	public ItemSprite( int image, Glowing glowing ) {
-		super( Assets.Sprites.ITEMS );
-		
+
+	public ItemSprite( String image, Glowing glowing ) {
+		super();
 		view(image, glowing);
 	}
-	
+
 	public void link() {
 		link(heap);
 	}
-	
+
 	public void link( Heap heap ) {
 		this.heap = heap;
 		view(heap);
@@ -109,20 +131,39 @@ public class ItemSprite extends MovieClip {
 		visible = heap.seen;
 		place(heap.pos);
 	}
-	
+
 	@Override
 	public void revive() {
 		super.revive();
-		
+
 		speed.set( 0 );
 		acc.set( 0 );
 		dropInterval = 0;
-		
+
 		heap = null;
+		item = null;
 		if (emitter != null) {
 			emitter.killAndErase();
 			emitter = null;
 		}
+	}
+
+	@Override
+	public void copy(Image other) {
+		super.copy(other);
+
+		ItemSprite src = other instanceof ItemSprite ? (ItemSprite) other : null;
+		if (src != null && src.glowing != null){
+			glow(src.glowing);
+		}
+		if (src != null) {
+			invertDarkSprite = src.invertDarkSprite;
+			applyDarkSpriteColor();
+			//目录页等copy出的图标跟随源sprite的序列帧动画
+			if (src.curAnim != null) play(src.curAnim);
+			else if (curAnim != null) curAnim = null;
+		}
+
 	}
 
 	public void visible(boolean value){
@@ -132,23 +173,23 @@ public class ItemSprite extends MovieClip {
 			emitter = null;
 		}
 	}
-	
+
 	public PointF worldToCamera( int cell ) {
 		final int csize = DungeonTilemap.SIZE;
-		
+
 		return new PointF(
 				PixelScene.align(Camera.main, ((cell % Dungeon.level.width()) + 0.5f) * csize - width() * 0.5f),
 				PixelScene.align(Camera.main, ((cell / Dungeon.level.width()) + 1.0f) * csize - height() - csize * perspectiveRaise)
 		);
 	}
-	
+
 	public void place( int p ) {
 		if (Dungeon.level != null) {
 			point(worldToCamera(p));
 			shadowOffset = 0.5f;
 		}
 	}
-	
+
 	public void drop() {
 
 		if (heap.isEmpty()) {
@@ -159,50 +200,90 @@ public class ItemSprite extends MovieClip {
 			// where as long as the player continually taps, the heap sails up into the air.
 			place(heap.pos);
 		}
-			
+
 		dropInterval = DROP_INTERVAL;
-		
+
 		speed.set( 0, -100 );
 		acc.set(0, -speed.y / DROP_INTERVAL * 2);
-		
+
 		if (heap != null && heap.seen && heap.peek() instanceof Gold) {
 			CellEmitter.center( heap.pos ).burst( Speck.factory( Speck.COIN ), 5 );
 			Sample.INSTANCE.play( Assets.Sounds.GOLD, 1, 1, Random.Float( 0.9f, 1.1f ) );
 		}
 	}
-	
+
 	public void drop( int from ) {
 
 		if (heap.pos == from) {
 			drop();
 		} else {
-			
+
 			float px = x;
 			float py = y;
 			drop();
-			
+
 			place(from);
-	
+
 			speed.offset((px - x) / DROP_INTERVAL, (py - y) / DROP_INTERVAL);
 		}
 	}
 
 	public ItemSprite view( Item item ){
-		view(item.image(), item.glowing());
+		this.item = item;
+		if (item.sndImageName != null) {
+			com.watabou.gltextures.SmartTexture tex = com.shatteredpixel.shatteredpixeldungeon.ui.SNDItems.texture();
+			com.watabou.utils.RectF sndFrame = com.shatteredpixel.shatteredpixeldungeon.ui.SNDItems.frame(item.sndImageName);
+			if (tex != null && sndFrame != null) {
+				if (this.emitter != null) this.emitter.killAndErase();
+				emitter = null;
+				this.texture = tex;
+				frame(sndFrame);
+				//SND贴图不经图集，清除可能残留的序列帧动画
+				curAnim = null;
+				glow(item.glowing());
+				applyDarkSpriteColor();
+				com.watabou.noosa.particles.Emitter emitter = item.emitter();
+				if (emitter != null && parent != null) {
+					emitter.pos(this);
+					parent.add(emitter);
+					this.emitter = emitter;
+				}
+				return this;
+			}
+		}
+		ItemAnimations anims = item.animations();
+		//image()被覆写时（如Snake Bite挑战换图）优先走静态贴图，避免动画泄漏真实物品
+		if (anims != null && anims.has( ItemAnimations.IDLE )
+				&& item.image().equals( item.image )){
+			glow(item.glowing());
+			playAnim( ItemAnimations.IDLE );
+		} else {
+			//静态贴图：清除遗留动画，防止旧帧覆盖
+			view(item.image(), item.glowing());
+		}
+		if (item instanceof HalfFood) {
+			AtlasFrame atlasFrame = ATLAS.trimmedFrame(item.image(), MIN_VISIBLE_ALPHA);
+			float middle = (atlasFrame.uv.top + atlasFrame.uv.bottom) / 2f;
+			texture = atlasFrame.texture;
+			frame(new com.watabou.utils.RectF(
+					atlasFrame.uv.left, middle, atlasFrame.uv.right, atlasFrame.uv.bottom));
+		}
 		Emitter emitter = item.emitter();
 		if (emitter != null && parent != null) {
 			emitter.pos( this );
 			parent.add( emitter );
 			this.emitter = emitter;
 		}
+		applyDarkSpriteColor();
 		return this;
 	}
-	
+
 	public ItemSprite view( Heap heap ){
+		alpha( heap.hidden ? CrackedSpyglass.hiddenAlpha() : 1f);
 		if (heap.size() <= 0 || heap.items == null){
-			return view( 0, null );
+			return view( ItemSpriteSheet.SOMETHING, null );
 		}
-		
+
 		switch (heap.type) {
 			case HEAP: case FOR_SALE:
 				return view( heap.peek() );
@@ -219,28 +300,115 @@ public class ItemSprite extends MovieClip {
 			case REMAINS:
 				return view( ItemSpriteSheet.REMAINS, null );
 			default:
-				return view( 0, null );
+				return view( ItemSpriteSheet.SOMETHING, null );
 		}
 	}
-	
-	public ItemSprite view( int image, Glowing glowing ) {
+
+	public ItemSprite view( String image, Glowing glowing ) {
 		if (this.emitter != null) this.emitter.killAndErase();
 		emitter = null;
 		frame( image );
 		glow( glowing );
+		applyDarkSpriteColor();
 		return this;
 	}
 
-	public void frame( int image ){
-		frame( ItemSpriteSheet.film.get( image ));
+	/** Makes nearly-black, opaque item art visible on the Dice Mage dark panels. */
+	private void applyDarkSpriteColor() {
+		invertDarkSprite = false;
+		if (UITheme.isDiceMage() && texture instanceof SmartTexture) {
+			SmartTexture tex = (SmartTexture) texture;
+			int left = Math.max(0, (int) (frame.left * tex.width));
+			int right = Math.min(tex.width, (int) Math.ceil(frame.right * tex.width));
+			int top = Math.max(0, (int) (frame.top * tex.height));
+			int bottom = Math.min(tex.height, (int) Math.ceil(frame.bottom * tex.height));
+			boolean hasOpaque = false;
+			boolean dark = true;
+			for (int py = top; py < bottom && dark; py++) {
+				for (int px = left; px < right; px++) {
+					int color = tex.getPixel(px, py);
+					int alpha = (color >>> 24) & 0xFF;
+					if (alpha < MIN_VISIBLE_ALPHA) continue;
+					hasOpaque = true;
+					int red = (color >>> 16) & 0xFF;
+					int green = (color >>> 8) & 0xFF;
+					int blue = color & 0xFF;
+					if (red > 24 || green > 24 || blue > 24) {
+						dark = false;
+						break;
+					}
+				}
+			}
+			invertDarkSprite = hasOpaque && dark;
+		}
+		if (invertDarkSprite && glowing == null) {
+			rm = gm = bm = -1f;
+			ra = ga = ba = 1f;
+		}
+	}
 
-		float height = ItemSpriteSheet.film.height( image );
+	public void frame( String image ){
+		//静态贴图：清除遗留动画，防止旧帧覆盖
+		if (curAnim != null) curAnim = null;
+
+		AtlasFrame atlasFrame = ATLAS.trimmedFrame( image, MIN_VISIBLE_ALPHA );
+		texture = atlasFrame.texture;
+		frame( atlasFrame.uv );
+
+		float height = atlasFrame.height;
 		//adds extra raise to very short items, so they are visible
 		if (height < 8f){
 			perspectiveRaise =  (5 + 8 - height) / 16f;
 		}
 	}
-	
+
+	/** 按名播放当前物品声明的动画；无声明/声明非法则忽略。重复触发的循环动画不会从头重播 */
+	public void playAnim( String name ){
+		ItemAnimations anims = item == null ? null : item.animations();
+		ItemAnimations.Clip clip = anims == null ? null : anims.get( name );
+		if (clip == null) return;
+
+		AtlasFrame whole = ATLAS.frame( anims.asset() );
+		MovieClip.Animation anim = buildAnim( whole, anims, clip );
+		if (anim == null){
+			//声明失效（资产缺失/帧序越界）：退回静态贴图
+			view(item.image(), glowing);
+			return;
+		}
+		if (curAnim == anim) return;
+
+		texture = whole.texture;
+		play( anim );
+	}
+
+	/** 从资产整帧内按网格坐标切出片段帧；帧序越界或网格不符返回null */
+	private MovieClip.Animation buildAnim( AtlasFrame whole, ItemAnimations anims, ItemAnimations.Clip clip ){
+		String cacheKey = anims.asset() + ":" + clip.name;
+		CachedAnim cached = animsCache.get( cacheKey );
+		if (cached != null && cached.texture == whole.texture) return cached.anim;
+
+		int cell = anims.cell();
+		if (cell <= 0 || whole.width % cell != 0 || whole.height % cell != 0) return null;
+
+		int cols = whole.width / cell;
+		RectF[] frames = new RectF[clip.count];
+		int left = Math.round( whole.uv.left * whole.texture.width );
+		int top = Math.round( whole.uv.top * whole.texture.height );
+		for (int i = 0; i < clip.count; i++){
+			int idx = clip.start + i;
+			int cy = idx / cols;
+			if (cy * cell >= whole.height) return null; //帧序号越界：声明与贴图不符
+			int cx = idx % cols;
+			frames[i] = whole.texture.uvRect(
+					left + cx * cell, top + cy * cell,
+					left + (cx + 1) * cell, top + (cy + 1) * cell );
+		}
+
+		MovieClip.Animation anim = new MovieClip.Animation( clip.fps, clip.looped ).frames( frames ).named( clip.name );
+		animsCache.put( cacheKey, new CachedAnim( anim, whole.texture ) );
+		return anim;
+	}
+
 	public synchronized void glow( Glowing glowing ){
 		this.glowing = glowing;
 		if (glowing == null) resetColor();
@@ -308,6 +476,16 @@ public class ItemSprite extends MovieClip {
 	public synchronized void update() {
 		super.update();
 
+		//一次性动画播完自动回到 idle（若有声明）
+		if (finished && curAnim != null && !curAnim.looped && item != null){
+			ItemAnimations anims = item.animations();
+			if (anims != null
+					&& anims.has( ItemAnimations.IDLE )
+					&& !ItemAnimations.IDLE.equals( curAnim.name )){
+				playAnim( ItemAnimations.IDLE );
+			}
+		}
+
 		visible = (heap == null || heap.seen);
 
 		if (emitter != null){
@@ -349,46 +527,54 @@ public class ItemSprite extends MovieClip {
 
 		if (visible && glowing != null) {
 			if (glowUp && (phase += Game.elapsed) > glowing.period) {
-				
+
 				glowUp = false;
 				phase = glowing.period;
-				
+
 			} else if (!glowUp && (phase -= Game.elapsed) < 0) {
-				
+
 				glowUp = true;
 				phase = 0;
-				
+
 			}
-			
+
 			float value = phase / glowing.period * 0.6f;
-			
-			rm = gm = bm = 1 - value;
-			ra = glowing.red * value;
-			ga = glowing.green * value;
-			ba = glowing.blue * value;
+
+			float base = 1 - value;
+			if (invertDarkSprite) {
+				rm = gm = bm = -base;
+				ra = base + glowing.red * value;
+				ga = base + glowing.green * value;
+				ba = base + glowing.blue * value;
+			} else {
+				rm = gm = bm = base;
+				ra = glowing.red * value;
+				ga = glowing.green * value;
+				ba = glowing.blue * value;
+			}
 		}
 	}
 
-	public static int pick( int index, int x, int y ) {
-		SmartTexture tx = TextureCache.get( Assets.Sprites.ITEMS );
-		int rows = tx.width / SIZE;
-		int row = index / rows;
-		int col = index % rows;
-		return tx.getPixel( col * SIZE + x, row * SIZE + y );
+	public static int pick( String name, int x, int y ) {
+		return ATLAS.pixel( name, x, y );
 	}
-	
+
+	public static AtlasFrame atlasFrame( String name ) {
+		return ATLAS.trimmedFrame( name, MIN_VISIBLE_ALPHA );
+	}
+
 	public static class Glowing {
-		
+
 		public int color;
 		public float red;
 		public float green;
 		public float blue;
 		public float period;
-		
+
 		public Glowing( int color ) {
 			this( color, 1f );
 		}
-		
+
 		public Glowing( int color, float period ) {
 
 			this.color = color;
@@ -396,7 +582,7 @@ public class ItemSprite extends MovieClip {
 			red = (color >> 16) / 255f;
 			green = ((color >> 8) & 0xFF) / 255f;
 			blue = (color & 0xFF) / 255f;
-			
+
 			this.period = period;
 		}
 	}

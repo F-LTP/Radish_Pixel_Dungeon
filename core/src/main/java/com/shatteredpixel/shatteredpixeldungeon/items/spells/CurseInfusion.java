@@ -23,8 +23,11 @@ package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -50,7 +53,7 @@ public class CurseInfusion extends InventorySpell {
 
 	@Override
 	protected boolean usableOnItem(Item item) {
-		return ((item instanceof EquipableItem && !(item instanceof MissileWeapon)) || item instanceof Wand);
+		return ((item instanceof EquipableItem && !(item instanceof MissileWeapon)) || item instanceof Wand || (item instanceof BrokenSeal && Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)));
 	}
 
 	@Override
@@ -88,6 +91,16 @@ public class CurseInfusion extends InventorySpell {
 		} else if (item instanceof Wand){
 			((Wand) item).curseInfusionBonus = true;
 			((Wand) item).updateLevel();
+		} else if (item instanceof BrokenSeal){
+			//usableOnItem 对有精巧纹章天赋的战士放行纹章，这里却没有对应的分支：结晶消耗了，纹章上什么都没有。
+			//与护甲分支一致：给一个随机诅咒刻印，已经是诅咒刻印就不替换
+			BrokenSeal seal = (BrokenSeal) item;
+			Armor.Glyph old = seal.getGlyph();
+			if (old == null) {
+				seal.inscribe(Armor.Glyph.randomCurse());
+			} else if (!old.curse()) {
+				seal.inscribe(Armor.Glyph.randomCurse(old.getClass()));
+			}
 		} else if (item instanceof RingOfMight){
 			curUser.updateHT(false);
 		}

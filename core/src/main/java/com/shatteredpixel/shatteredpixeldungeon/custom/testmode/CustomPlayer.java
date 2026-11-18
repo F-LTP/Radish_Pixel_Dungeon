@@ -100,10 +100,12 @@ public class CustomPlayer extends TestItem{
         baseMaxHealth = bundle.getInt("baseMaxHealth");
         baseDamage = bundle.getInt("baseDamage");
         baseArmor = bundle.getInt("baseArmor");
-        baseAttackDelay = bundle.getFloat("attackDelay");
-        baseAccuracy = bundle.getInt("accuracy");
-        baseEvasion = bundle.getInt("evasion");
-        baseSpeed = bundle.getInt("baseSpeed");
+        // 键名要和 storeInBundle 里写的一致：以前这三项按另一套名字去读，读回来永远是 0；
+        // 移速存的是小数，按整数读会丢掉小数部分
+        baseAttackDelay = bundle.getFloat("baseAttackDelay");
+        baseAccuracy = bundle.getInt("baseAccuracy");
+        baseEvasion = bundle.getInt("baseEvasion");
+        baseSpeed = bundle.getFloat("baseSpeed");
         baseStrength = bundle.getInt("baseStrength");
         baseLevel = bundle.getInt("baseLevel");
     }
@@ -230,7 +232,7 @@ public class CustomPlayer extends TestItem{
             baseArmorButton.setRect(0, baseDamageButton.bottom() + GAP, WIDTH, 16);
             add(baseArmorButton);
 
-            attackDelayButton = new RedButton(Messages.get(CustomPlayer.class, "accuracy_button", hero.attackDelay()), 7) {
+            attackDelayButton = new RedButton(Messages.get(CustomPlayer.class, "attackdelay_button", hero.attackDelay()), 7) {
                 @Override
                 protected void onClick() {
                     Game.runOnRenderThread(() ->GameScene.show(new WndTextNumberInput(

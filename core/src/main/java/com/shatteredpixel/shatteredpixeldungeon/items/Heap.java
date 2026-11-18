@@ -24,6 +24,8 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Wraith;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
@@ -83,6 +85,7 @@ public class Heap implements Bundlable {
 	public boolean seen = false;
 	public boolean haunted = false;
 	public boolean autoExplored = false; //used to determine if this heap should count for exploration bonus
+	public boolean hidden = false; //sets alpha to 15%
 	
 	public LinkedList<Item> items = new LinkedList<>();
 	
@@ -101,7 +104,7 @@ public class Heap implements Bundlable {
 		if (haunted){
 			if (Wraith.spawnAt( pos ) == null) {
 				hero.sprite.emitter().burst( ShadowParticle.CURSE, 6 );
-				hero.damage( hero.HP / 2, this );
+				hero.damage( DamageInfo.of( hero.HP / 2, DamageType.MAGICAL, null, this ) );
 				if (!hero.isAlive()){
 					Dungeon.fail(Wraith.class);
 					GLog.n( Messages.capitalize(Messages.get(Char.class, "kill", Messages.get(Wraith.class, "name"))));
@@ -154,8 +157,32 @@ public class Heap implements Bundlable {
 	public Item peek() {
 		return items.peek();
 	}
+
+	/**
+	 * 商品堆里要花钱买的那一件；不是商品堆时返回 null。
+	 * 和原版一样不另设标记：商品生成时是堆里唯一的一件，之后掉进这一格的东西都叠在它上面（见 drop），
+	 * 所以压在最底下的就是商品，它上面的东西可以直接捡走。
+	 */
+	public Item forSaleItem() {
+		return type == Type.FOR_SALE ? items.peekLast() : null;
+	}
+
+	/** 取走堆中指定的物品（用于多物品堆中选取特定物品拾取）。 */
+	public Item pickUp( Item item ) {
+		if (item == null || !items.contains( item )) {
+			return null;
+		}
+		items.remove( item );
+		if (items.isEmpty()) {
+			destroy();
+		} else if (sprite != null) {
+			sprite.view(this).place( pos );
+		}
+		return item;
+	}
 	
 	public void drop( Item item ) {
+		hidden = false;
 		
 		if (item.stackable && type != Type.FOR_SALE) {
 			
@@ -171,7 +198,12 @@ public class Heap implements Bundlable {
 
 		//lost backpack must always be on top of a heap
 		if ((item.dropsDownHeap && type != Type.FOR_SALE) || peek() instanceof LostBackpack) {
-			items.add( item );
+			if (type == Type.FOR_SALE) {
+				//商品堆最底下的位置只属于商品（见 forSaleItem），往下放也只能放到它上面
+				items.add( items.size()-1, item );
+			} else {
+				items.add( item );
+			}
 		} else {
 			items.addFirst( item );
 		}
@@ -189,6 +221,7 @@ public class Heap implements Bundlable {
 	}
 	
 	public void replace( Item a, Item b ) {
+		hidden = false;
 		int index = items.indexOf( a );
 		if (index != -1) {
 			items.remove( index );
@@ -203,6 +236,7 @@ public class Heap implements Bundlable {
 	}
 	
 	public void remove( Item a ){
+		hidden = false;
 		items.remove(a);
 		if (items.isEmpty()){
 			destroy();
@@ -212,6 +246,11 @@ public class Heap implements Bundlable {
 	}
 	
 	public void burn() {
+		burn(true);
+	}
+
+	public void burn(boolean burnScrolls) {
+		hidden = false;
 
 		if (type != Type.HEAP) {
 			return;
@@ -221,7 +260,7 @@ public class Heap implements Bundlable {
 		boolean evaporated = false;
 		
 		for (Item item : items.toArray( new Item[0] )) {
-			if (item instanceof Scroll && !item.unique) {
+			if (item instanceof Scroll && burnScrolls && !item.unique) {
 				items.remove( item );
 				burnt = true;
 			} else if (item instanceof Dewdrop) {
@@ -263,6 +302,7 @@ public class Heap implements Bundlable {
 
 	//Note: should not be called to initiate an explosion, but rather by an explosion that is happening.
 	public void explode() {
+		hidden = false;
 
 		//breaks open most standard containers, mimics die.
 		if (type == Type.CHEST || type == Type.SKELETON) {
@@ -430,6 +470,9 @@ public class Heap implements Bundlable {
 	private static final String ITEMS	= "items";
 	private static final String HAUNTED	= "haunted";
 	private static final String AUTO_EXPLORED	= "auto_explored";
+	private static final String HIDDEN	= "hidden";
+	//有一版存档用这个键记过商品的件数，现在只读不写
+	private static final String LEGACY_SALE_COUNT	= "for_sale_count";
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -455,6 +498,19 @@ public class Heap implements Bundlable {
 		
 		haunted = bundle.getBoolean( HAUNTED );
 		autoExplored = bundle.getBoolean( AUTO_EXPLORED );
+		hidden = bundle.getBoolean( HIDDEN );
+
+		// 带这个键的存档里，商品排在堆的最前面：挪回最底下，之后就和其它存档一样了
+		if (type == Type.FOR_SALE && bundle.contains( LEGACY_SALE_COUNT )) {
+			int goods = Math.min( bundle.getInt( LEGACY_SALE_COUNT ), items.size() );
+			if (goods <= 0) {
+				//商品已经不在了，剩下的都是后来掉进来的东西
+				type = Type.HEAP;
+			}
+			for (int i = 0; i < goods; i++) {
+				items.addLast( items.removeFirst() );
+			}
+		}
 	}
 
 	@Override
@@ -465,6 +521,7 @@ public class Heap implements Bundlable {
 		bundle.put( ITEMS, items );
 		bundle.put( HAUNTED, haunted );
 		bundle.put( AUTO_EXPLORED, autoExplored );
+		bundle.put( HIDDEN, hidden );
 	}
 	
 }

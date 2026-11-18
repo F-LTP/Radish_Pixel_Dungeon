@@ -21,24 +21,31 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 
-public class Doom extends Buff {
-	
+public class Doom extends Buff implements IDamageModifier {
+
 	{
 		type = buffType.NEGATIVE;
 		announced = true;
 	}
-	
+
 	@Override
 	public void fx(boolean on) {
 		if (on) target.sprite.add( CharSprite.State.DARKENED );
 		else if (target.invisible == 0) target.sprite.remove( CharSprite.State.DARKENED );
 	}
-	
+
 	@Override
-	public int icon() {
+	public float finalMultiply(int dmg, DamageInfo info) {
+		return 1.67f;
+	}
+
+	@Override
+	public String icon() {
 		return BuffIndicator.CORRUPT;
 	}
 }

@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.painters;
 
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
@@ -33,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.connection.Connecti
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.StandardRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Game;
 import com.watabou.utils.Graph;
 import com.watabou.utils.PathFinder;
@@ -416,6 +418,17 @@ public abstract class RegularPainter extends Painter {
 				}
 			}
 			l.map[i] = (Random.Float() < count / 12f) ? Terrain.HIGH_GRASS : Terrain.GRASS;
+
+			// DoggingDog on 2024-01-18
+			// 荒芜之地：每区（5 层）依次 50%/60%/70%/80%/90% 的草变为枯草
+			if(Dungeon.isChallenged(Challenges.NO_HERBALISM)){
+				int region = Math.min(4, Math.max(0, (Dungeon.depth - 1) / 5));
+				float chance = 50f + 10f * region;
+				if (Random.Float(0,100f) < chance){
+					l.map[i] = Terrain.FURROWED_GRASS;
+				}
+			}
+
 		}
 	}
 	

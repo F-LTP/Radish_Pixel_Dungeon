@@ -24,20 +24,24 @@ package com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Freezing;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Roots;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.IceBlock;
+import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.PathFinder;
 
+//Thrown flask that creates an icy field and several blocks of ice that obstruct
+//movement and continuously chill nearby characters.
 public class PotionOfSnapFreeze extends ExoticPotion {
-	
+
 	{
 		icon = ItemSpriteSheet.Icons.POTION_SNAPFREEZ;
 	}
-	
+
 	@Override
 	public void shatter(int cell) {
 
@@ -47,17 +51,26 @@ public class PotionOfSnapFreeze extends ExoticPotion {
 
 			Sample.INSTANCE.play( Assets.Sounds.SHATTER );
 		}
-		
+
 		for (int offset : PathFinder.NEIGHBOURS9){
-			if (!Dungeon.level.solid[cell+offset]) {
-				
-				Freezing.affect( cell + offset );
-				
-				Char ch = Actor.findChar( cell + offset);
-				if (ch != null){
-					Buff.affect(ch, Roots.class, Roots.DURATION*2f);
+			int c = cell + offset;
+			if (Dungeon.level.insideMap(c) && !Dungeon.level.solid[c]) {
+
+				GameScene.add(Blob.seed(c, 10, Freezing.class));
+
+				if (!Dungeon.level.pit[c]
+						&& Dungeon.level.passable[c]
+						&& Actor.findChar(c) == null) {
+					IceBlock ice = new IceBlock();
+					ice.lifespan = 10;
+					ice.pos = c;
+					GameScene.add(ice);
+					Dungeon.level.occupyCell(ice);
+
+					if (Dungeon.level.heroFOV[c]) {
+						CellEmitter.get(c).burst(Speck.factory(Speck.BLIZZARD), 4);
+					}
 				}
-				
 			}
 		}
 	}

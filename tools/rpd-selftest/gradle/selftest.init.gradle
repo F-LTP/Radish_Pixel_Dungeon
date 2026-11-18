@@ -1,0 +1,41 @@
+// rpd-selftest: Gradle init script（不修改目标仓库的任何文件）。
+//
+// 给 :desktop 追加一个任务 rpdSelftestClasspath：
+//   - 依赖 :desktop 的 main 运行期 classpath（会触发 :desktop:classes、:desktop:processResources
+//     以及 :core / :SPD-classes / :services 等依赖工程的 jar）；
+//   - 把解析出来的 classpath 与版本信息写到 -PrpdSelftestOut=<文件> 指定的文件里。
+//
+// 调用方式（由 run.ps1 负责，受具名信号量 rpd_gradle_build 约束）：
+//   gradlew.bat -I <本文件> :desktop:rpdSelftestClasspath -PrpdSelftestOut=<输出文件> --console=plain --no-daemon ...
+
+gradle.projectsEvaluated { g ->
+    def desktop = g.rootProject.findProject(':desktop')
+    if (desktop == null) {
+        throw new GradleException('rpd-selftest: target build has no :desktop project')
+    }
+
+    desktop.tasks.register('rpdSelftestClasspath') { t ->
+        def cp = desktop.sourceSets.main.runtimeClasspath
+        t.dependsOn(cp)
+        // 每次都重新写文件：这个任务很便宜，而输出文件在仓库之外
+        t.outputs.upToDateWhen { false }
+        t.doLast {
+            def outPath = desktop.findProperty('rpdSelftestOut')
+            if (outPath == null) {
+                throw new GradleException('rpd-selftest: missing -PrpdSelftestOut=<file>')
+            }
+            def out = new File(outPath.toString())
+            out.parentFile.mkdirs()
+            def sb = new StringBuilder()
+            sb.append('appName=').append(desktop.appName).append('\n')
+            sb.append('appPackageName=').append(desktop.appPackageName).append('\n')
+            sb.append('appVersionName=').append(desktop.appVersionName).append('\n')
+            sb.append('appVersionCode=').append(desktop.appVersionCode).append('\n')
+            cp.files.each { f ->
+                sb.append('cp=').append(f.absolutePath).append('\n')
+            }
+            out.setText(sb.toString(), 'UTF-8')
+            println "rpd-selftest: wrote ${cp.files.size()} classpath entries to ${out}"
+        }
+    }
+}

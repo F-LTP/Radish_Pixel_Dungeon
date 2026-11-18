@@ -17,25 +17,26 @@ public class DeviloonSprite extends MobSprite {
     public DeviloonSprite() {
         super();
 
-        texture(Assets.Sprites.DEVILOON);
+        texture(Assets.Sprites.DEMINION);
 
-        TextureFilm frames = new TextureFilm( texture, 24, 17 );
-        idle = new Animation( 9, true );
-        idle.frames( frames, 0,1,2,3);
+        TextureFilm frames = new TextureFilm( texture, 16, 16 );
+        idle = new Animation( 1, true );
+        idle.frames( frames, 0,1);
 
         run = new Animation( 9, true );
-        run.frames( frames,  3,4, 5, 6);
+        run.frames( frames,  2,3,4, 5);
 
-        attack = new Animation( 9, false );
-        attack.frames( frames, 7,8,9);
+        attack = new Animation( 11, false );
+        attack.frames( frames, 6,7,8);
 
         zap = new Animation(11,false);
-        zap.frames(frames,10,11,12,13);
+        zap.frames(frames,9,10,11,12,13);
 
+        // 蓄力沿用施法帧（与 DeminionSprite 一致）；不赋值的话 charge() 播放的是空动画，贴图只会冻在上一帧
         charging = zap.clone();
 
         die = new Animation( 11, false );
-        die.frames( frames, 14,15,16,17,18,19);
+        die.frames( frames, 14,15,16,17,18);
 
         play(idle);
     }
@@ -111,9 +112,9 @@ public class DeviloonSprite extends MobSprite {
         super.onComplete( anim );
 
         if (anim == zap) {
+            // 结算和 next() 由 zap() 里魔弹到达时的回调（Deviloon.onZapComplete）做，这里不能再做一遍：
+            // 一次 return false 只能对应一次 next()，多出来的那次会在它下一次行动的动画期间提前放行行动队列
             idle();
-            ((Deviloon)ch).callOfRune();
-            ch.next();
         } else if (anim == die){
             chargeParticles.killAndErase();
         }

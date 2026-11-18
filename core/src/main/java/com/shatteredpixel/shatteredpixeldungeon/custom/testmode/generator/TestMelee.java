@@ -1,5 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator;
 
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
@@ -9,24 +11,16 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Annoying;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Dazzling;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Displacing;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.DoubleEdged;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Explosive;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Friendly;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Heavy;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Polarized;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Sacrificial;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Stubbornness;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Temporal;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Ultralight;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Wayward;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blocking;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blooming;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Chilling;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Corrupting;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Elastic;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Unstable;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Vampiric;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -85,7 +79,10 @@ public class TestMelee extends TestGenerator {
     }
 
     private void createWeapon(){
-        Weapon melee = Reflection.newInstance(weaponList(tier)[weapon_id]);
+        // 换到武器更少的阶数后，记着的「第几把」可能已经超出这一阶的数量（各阶数量不同，还会随存档带过来），
+        // 和窗口上显示所选武器时一样收到最后一把，否则这里数组越界直接闪退
+        Class<? extends Weapon>[] list = weaponList(tier);
+        Weapon melee = Reflection.newInstance(list[Math.max(0, Math.min(weapon_id, list.length - 1))]);
         melee = modifyWeapon(melee);
         melee.identify();
         if(melee.collect()){
@@ -94,6 +91,8 @@ public class TestMelee extends TestGenerator {
             melee.doDrop(curUser);
         }
     }
+
+    private static final Class<?>[][] ENCH_LISTS = {null, Weapon.Enchantment.common, Weapon.Enchantment.uncommon, Weapon.Enchantment.rare, Weapon.Enchantment.curses};
 
     @Override
     public void storeInBundle(Bundle bundle) {
@@ -117,66 +116,18 @@ public class TestMelee extends TestGenerator {
         weapon_id = bundle.getInt("weapon_id");
     }
 
+    // 池数组驱动(与TestArmor的GLYPH_LISTS同思路)：直接引用四个附魔池，新增附魔入池后自动可选。
+    // 超出列表长度时取最后一项(与TestArmor的越界钳制一致)。
+    @SuppressWarnings("unchecked")
     private Class<? extends Weapon.Enchantment> generateEnchant(int category, int id) {
-        if (category == 1) switch (id) {
-            case 0:
-                return Blazing.class;
-            case 1:
-                return Shocking.class;
-            case 2:
-                return Chilling.class;
-            case 3:
-                return Kinetic.class;
-            default:
-                return null;
+        if (category <= 0 || category >= ENCH_LISTS.length) {
+            return null;
         }
-        else if (category == 2) switch (id) {
-            case 0:
-                return Blocking.class;
-            case 1:
-                return Blooming.class;
-            case 2:
-                return Projecting.class;
-            case 3:
-                return Elastic.class;
-            case 4:
-                return Lucky.class;
-            case 5:
-                return Unstable.class;
-            default:
-                return null;
+        Class<?>[] enchs = ENCH_LISTS[category];
+        if (enchs == null || enchs.length == 0) {
+            return null;
         }
-        else if (category == 3) switch (id) {
-            case 0:
-                return Corrupting.class;
-            case 1:
-                return Grim.class;
-            case 2:
-                return Vampiric.class;
-            default:
-                return null;
-        }
-        else if (category == 4) switch (id) {
-            case 0:
-                return Annoying.class;
-            case 1:
-                return Displacing.class;
-            case 2:
-                return Explosive.class;
-            case 3:
-                return Dazzling.class;
-            case 4:
-                return Friendly.class;
-            case 5:
-                return Polarized.class;
-            case 6:
-                return Sacrificial.class;
-            case 7:
-                return Wayward.class;
-            default:
-                return null;
-        }
-        return null;
+        return (Class<? extends Weapon.Enchantment>) enchs[Math.min(id, enchs.length - 1)];
     }
 
     private Class<? extends Weapon>[] weaponList(int t) {
@@ -204,15 +155,6 @@ public class TestMelee extends TestGenerator {
 
     private String currentEnchName(Class<? extends Weapon.Enchantment> ench, String wepName) {
         return Messages.get(ench, "name", wepName);
-    }
-
-    private int maxSlots(int t){
-        switch (t){
-            case 1:return 4;
-            case 4: case 5:return 12;
-            case 2:default:return 9;
-            case 3:return 8;
-        }
     }
 
     private class SettingsWindow extends Window {
@@ -287,7 +229,13 @@ public class TestMelee extends TestGenerator {
             o_enchant_rarity.setSelectedValue(enchant_rarity);
             add(o_enchant_rarity);
 
-            o_enchant_id = new OptionSlider(Messages.get(this, "enchant_id"), "0", "7", 0, 7) {
+            int maxEnchantId = 0;
+            for (int i = 1; i < ENCH_LISTS.length; i++) {
+                if (ENCH_LISTS[i] != null) {
+                    maxEnchantId = Math.max(maxEnchantId, ENCH_LISTS[i].length - 1);
+                }
+            }
+            o_enchant_id = new OptionSlider(Messages.get(this, "enchant_id"), "0", Integer.toString(maxEnchantId), 0, maxEnchantId) {
                 @Override
                 protected void onChange() {
                     enchant_id = getSelectedValue();
@@ -329,13 +277,14 @@ public class TestMelee extends TestGenerator {
                 IconButton btn = new IconButton() {
                     @Override
                     protected void onClick() {
-                        weapon_id = Math.min(maxSlots(tier)-1, j);
+                        // 图标就是按这一阶的武器表逐个建的，点第几个就是第几把。
+                        // 以前这里按一张写死的「每阶几把」再收一次，表早就对不上了，点靠后的图标会选成别的武器
+                        weapon_id = j;
                         updateSelectedWeaponText();
                         super.onClick();
                     }
                 };
-                Image im = new Image(Assets.Sprites.ITEMS);
-                im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(all[i])).image));
+                Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(all[i])).image);
                 im.scale.set(1f);
                 btn.icon(im);
                 left = (WIDTH - BTN_SIZE * ((i/r_limit+1<t_row)?r_limit:length-(t_row-1)*r_limit) )/2f;

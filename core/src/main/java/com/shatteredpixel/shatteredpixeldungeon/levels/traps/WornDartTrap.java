@@ -20,6 +20,8 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.traps;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -57,12 +59,13 @@ public class WornDartTrap extends Trap {
 			protected boolean act() {
 				Actor.remove(this);
 				Char target = Actor.findChar(pos);
+				if (cardSparesHero(target)) target = null;
 
 				//find the closest char that can be aimed at
 				if (target == null){
 					float closestDist = Float.MAX_VALUE;
 					for (Char ch : Actor.chars()){
-						if (!ch.isAlive()) continue;
+						if (!ch.isAlive() || cardSparesHero(ch)) continue;
 						float curDist = Dungeon.level.trueDistance(pos, ch.pos);
 						if (ch.invisible > 0) curDist += 1000;
 						Ballistica bolt = new Ballistica(pos, ch.pos, Ballistica.PROJECTILE);
@@ -81,7 +84,7 @@ public class WornDartTrap extends Trap {
 									@Override
 									public void call() {
 										int dmg = Char.combatRoll(4, 8) - finalTarget.drRoll();
-										finalTarget.damage(dmg, WornDartTrap.this);
+										finalTarget.damage(new DamageInfo(dmg, DamageType.PHYSICAL, null, null, WornDartTrap.this));
 										if (finalTarget == Dungeon.hero && !finalTarget.isAlive()){
 											Dungeon.fail( WornDartTrap.this  );
 										}
@@ -93,7 +96,7 @@ public class WornDartTrap extends Trap {
 								});
 						return false;
 					} else {
-						finalTarget.damage(Char.combatRoll(4, 8) - finalTarget.drRoll(), WornDartTrap.this);
+						finalTarget.damage(new DamageInfo(Char.combatRoll(4, 8) - finalTarget.drRoll(), DamageType.PHYSICAL, null, null, WornDartTrap.this));
 						return true;
 					}
 				} else {

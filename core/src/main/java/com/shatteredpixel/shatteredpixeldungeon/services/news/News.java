@@ -102,9 +102,9 @@ public class News {
 			//"ICON: <name of enum constant in Icons.java>"
 			if (article.icon.startsWith("ICON: ")){
 				return Icons.get(Icons.valueOf(article.icon.replace("ICON: ", "")));
-			//"ITEM: <integer constant corresponding to values in ItemSpriteSheet.java>"
+			//"ITEM: <runtime atlas resource name>"
 			} else if (article.icon.startsWith("ITEM: ")){
-				return new ItemSprite(Integer.parseInt(article.icon.replace("ITEM: ", "")));
+				return new ItemSprite(article.icon.replace("ITEM: ", ""));
 			//"<asset filename>, <tx left>, <tx top>, <width>, <height>"
 			} else {
 				String[] split = article.icon.split(", ");

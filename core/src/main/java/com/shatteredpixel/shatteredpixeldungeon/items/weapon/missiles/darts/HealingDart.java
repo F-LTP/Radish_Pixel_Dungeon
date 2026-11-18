@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts;
 
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Healing;
@@ -43,7 +45,14 @@ public class HealingDart extends TippedDart {
 		
 		//heals 30 hp at base, scaling with enemy HT
 		PotionOfHealing.cure( defender );
-		Buff.affect( defender, Healing.class ).setHeal((int)(0.5f*defender.HT + 30), 0.25f, 0);
+
+		if (Dungeon.isChallenged(Challenges.DAMAGE_NO)){
+			Buff.affect( defender, Healing.class ).setHeal((int)((0.5f*defender.HT + 30)/5), 0.25f, 0);
+		} else {
+			Buff.affect( defender, Healing.class ).setHeal((int)(0.5f*defender.HT + 30), 0.25f, 0);
+		}
+
+
 		
 		if (attacker.alignment == defender.alignment){
 			return 0;

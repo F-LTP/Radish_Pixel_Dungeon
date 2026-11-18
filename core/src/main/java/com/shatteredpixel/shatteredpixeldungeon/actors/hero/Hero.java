@@ -26,6 +26,7 @@ import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Bones;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
@@ -33,57 +34,55 @@ import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AdrenalineSurge;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AnkhInvulnerability;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ArtifactRecharge;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awareness;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Calm;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.DeferredShield;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Drowsy;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Foresight;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Frost;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HoldFast;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Levitation;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LostInventory;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MindVision;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Momentum;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MonkEnergy;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PhysicalEmpower;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Recharging;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Roots;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Slow;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SnipersMark;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.*;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.rector.Belief;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.LittleKnight;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.ElementalStrike;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.NaturesPower;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.AshKing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Elemental;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Eye;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Frog;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.WhitePlasticChair;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Monk;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
-import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
-import com.shatteredpixel.shatteredpixeldungeon.effects.CheckedCell;
-import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Surprise;
+import com.shatteredpixel.shatteredpixeldungeon.events.*;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Artillerist;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.GnollZealot;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy.Mayfly;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Rat;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Scorpio;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Shaman;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Snake;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Warlock;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.YogDzewa;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
+import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Chains;
+import com.shatteredpixel.shatteredpixeldungeon.effects.CheckedCell;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.EnergyParticle;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PurpleParticle;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.events.BeforeHeroMoveEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.EventManager;
+import com.shatteredpixel.shatteredpixeldungeon.events.HeroMoveEvent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Ankh;
 import com.shatteredpixel.shatteredpixeldungeon.items.Dewdrop;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
@@ -91,13 +90,20 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap.Type;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterGlow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.CrabArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.DarkCoat;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.EnergyArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.PrisonArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.RatArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.AlchemistsToolkit;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CapeOfThorns;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfConcealment;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.EtherealChains;
@@ -106,12 +112,17 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.MasterThievesArm
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
+import com.shatteredpixel.shatteredpixeldungeon.items.cards.CardDeck;
+import com.shatteredpixel.shatteredpixeldungeon.items.cards.CardDrawer;
 import com.shatteredpixel.shatteredpixeldungeon.items.journal.Guidebook;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.CrystalKey;
+import com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToyEffects;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.GoldenKey;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.IronKey;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.Key;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.SkeletonKey;
+import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.InversionBeta;
+import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Showdarker;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
@@ -119,6 +130,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfMi
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfDivineInspiration;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.DarkGold;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.Pickaxe;
+import com.shatteredpixel.shatteredpixeldungeon.items.quest.SmallWoodenCross;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfConcentration;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfElements;
@@ -132,16 +144,29 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.talentitem.SpellQueue;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Radish;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RiverCrystal;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Sprouted_Potato;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Seeking;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CircleSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.JutteChampionWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.KillBoatSword;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LockChain;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LongStick;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Quarterstaff;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Rlyeh;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sai;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scimitar;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.SpaceFragment;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Taijutsu;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
@@ -158,19 +183,24 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.AlchemyScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ArmorOutfit;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SphereSprite;
+import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.AttackIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.StatusPane;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndHero;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndDiceMageTalentChoice;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndResurrect;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTradeItem;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndHeapSelect;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.tweeners.Delayer;
@@ -185,52 +215,179 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class Hero extends Char {
 
 	{
 		actPriority = HERO_PRIO;
-		
+
 		alignment = Alignment.ALLY;
 	}
-	
+
 	public static final int MAX_LEVEL = 30;
 
 	public static final int STARTING_STR = 10;
-	
+
 	private static final float TIME_TO_REST		    = 1f;
 	private static final float TIME_TO_SEARCH	    = 2f;
 	private static final float HUNGER_FOR_SEARCH	= 6f;
-	
-	public HeroClass heroClass = HeroClass.ROGUE;
-	public HeroSubClass subClass = HeroSubClass.NONE;
+
+	public HeroClass heroClass = HeroClasses.ROGUE;
+	public HeroSubClass subClass = HeroSubClasses.NONE;
 	public ArmorAbility armorAbility = null;
 	public ArrayList<LinkedHashMap<Talent, Integer>> talents = new ArrayList<>();
 	public LinkedHashMap<Talent, Talent> metamorphedTalents = new LinkedHashMap<>();
-	
+
+	/** 本局所选皮肤索引（0 = 基础职业），随存档持久化。 */
+	public int skin = 0;
+
+	/** 圆球皮肤（SPHERE）专属：满周（360°）旋转所需的回合数。 */
+	private static final float SPHERE_ROTATE_FULL_TIME = 2.5f;
+
+	/** 圆球皮肤（SPHERE）专属：当前朝向角度（0-360）。0 = 滚动动画第 0 帧（正确角度）。 */
+	public float sphereAngle(){
+		SphereOrientation o = buff( SphereOrientation.class );
+		if (o == null){
+			o = Buff.affect( this, SphereOrientation.class );
+		}
+		return o.angle;
+	}
+
+	/** 设置圆球朝向角度（0-360，自动归一化）。 */
+	public void sphereAngle( float v ){
+		if (!isSphereSkin()) return;
+		SphereOrientation o = buff( SphereOrientation.class );
+		if (o == null){
+			o = Buff.affect( this, SphereOrientation.class );
+		}
+		o.angle = ((v % 360f) + 360f) % 360f;
+	}
+
+	/** 是否为月华的圆球皮肤。 */
+	public boolean isSphereSkin(){
+		return heroClass == HeroClasses.MOONLIGHT && skin == HeroClasses.MOONLIGHT_SKIN_SPHERE;
+	}
+
+	/** 是否为盗贼的赌徒皮肤。 */
+	public boolean isGamblerSkin(){
+		return heroClass == HeroClasses.ROGUE && skin == HeroClasses.ROGUE_SKIN_GAMBLER;
+	}
+
+	/**
+	 * 从当前朝向转到 targetAngle 的<em>有符号</em>最短旋转（-180 ~ 180）。
+	 * 正值为顺时针，负值为逆时针；圆球可从两个方向旋转，这里取耗时更短的一侧。
+	 */
+	private float sphereSignedRotation( float targetAngle ){
+		float target = ((targetAngle % 360f) + 360f) % 360f;
+		float diff = target - sphereAngle();
+		if (diff > 180f)      diff -= 360f;
+		else if (diff < -180f) diff += 360f;
+		return diff;
+	}
+
+	/** 旋转到 targetAngle 所需时间；角度已对准时返回 0。旋转一周（360°）耗 2.5 回合。 */
+	private float sphereRotationTime( float targetAngle ){
+		if (!isSphereSkin()) return 0f;
+		float diff = Math.abs( sphereSignedRotation( targetAngle ) );
+		if (diff < 1f) return 0f;
+		return (diff / 360f) * SPHERE_ROTATE_FULL_TIME;
+	}
+
+	/** 旋转回正确角度（0）所需的回合数（供 Buff 描述显示）。 */
+	public float sphereTurnsToCorrect(){
+		return sphereRotationTime( 0f );
+	}
+
+	/**
+	 * 由滚动帧索引（0-9，第 0 帧 = 正确角度）设置圆球朝向角度（帧 × 36°）。
+	 * 圆球滚动停止时，让逻辑角度始终跟随视觉帧，从而保证"角度为 0 一定显示第 0 帧"。
+	 */
+	public void sphereAngleFromFrame( int frame ){
+		sphereAngle( frame * 36f );
+	}
+
+	/**
+	 * 圆球旋转到目标朝向。若无需旋转返回 false；否则朝更短的一侧旋转（含可视滚动动画）、
+	 * 消耗对应时间并返回 true，表示本回合已被旋转消耗，动作需下一回合重新执行。
+	 *
+	 * @param targetAngle 目标角度（0-360）；正确角度为 0（滚动动画第 0 帧）
+	 */
+	public boolean sphereRotateTo( float targetAngle ){
+		float time = sphereRotationTime( targetAngle );
+		if (time <= 0f) return false;
+
+		float from = sphereAngle();
+		sphereAngle( targetAngle );
+
+		// 可视旋转：从当前角度沿正确方向旋转到目标角度（含滚动动画）
+		if (sprite instanceof SphereSprite){
+			((SphereSprite) sprite).spin( from, targetAngle );
+		}
+
+		spendAndNext( time );
+		return true;
+	}
+
+	/**
+	 * 圆球皮肤等待时：用至多 {@code time} 的时间朝正确角度（0，滚动动画第 0 帧）旋转。
+	 * 不额外消耗回合时间（由调用方的等待动作统一支付），仅推进朝向角并播放旋转表现。
+	 */
+	private void sphereRotateWhileWaiting( float time ){
+		if (!isSphereSkin() || time <= 0f) return;
+
+		float signed = sphereSignedRotation( 0f );
+		if (Math.abs( signed ) < 1f) return;
+
+		float degPerTime = 360f / SPHERE_ROTATE_FULL_TIME;
+		float step = Math.signum( signed ) * Math.min( Math.abs( signed ), time * degPerTime );
+		if (step == 0f) return;
+
+		float from = sphereAngle();
+		sphereAngle( from + step );
+
+		if (sprite instanceof SphereSprite){
+			((SphereSprite) sprite).spin( from, from + step );
+		}
+	}
+
 	private int attackSkill = 10;
 	private int defenseSkill = 5;
 
 	public boolean ready = false;
+
+	// 是否正在播放"不消耗时间的阻塞动画"（变身等）。期间 Hero.act() 被拦截且不 spend。
+	public boolean animationBusy = false;
+
+	public boolean rectorDeadKngithDeadMode = false;
+
 	public boolean damageInterrupt = true;
 	public HeroAction curAction = null;
 	public HeroAction lastAction = null;
 
 	private Char enemy;
-	
+
 	public boolean resting = false;
-	
+
 	public Belongings belongings;
-	
+
+	/** Card Trickster deck; null for other heroes and for old saves until needed. */
+	public CardDeck cardDeck;
+
 	public int STR;
-	
+
 	public float awareness;
-	
+
 	public int lvl = 1;
 	public int exp = 0;
-	private int resistHealth = 0;
-	private int originalHT = 20;
 
+	// 催化手环积累的炼金能量（暂时只做累积与提示）
+	public float alchemyEnergy = 0f;
+
+	// 仙女座：上一次视野内的敌人数与预警冷却
+	private int andromedaSeenFoes = 0;
+	private int andromedaCd = 0;
+	private int resistHealth = 0;
 	public int HTBoost = 0;
 
 	/**
@@ -250,39 +407,122 @@ public class Hero extends Char {
 	// for enemies we know we aren't seeing normally, resulting in better performance
 	public ArrayList<Mob> mindVisionEnemies = new ArrayList<>();
 
+	// Talent: Superstition by DoggingDog on 20250817
+	public static class SuperstitionCounter{
+		int cnt;
+
+		public SuperstitionCounter(){
+			cnt = 0;
+		}
+
+		public float briefRet(int exp){
+			int m = 24 - 4 * hero.pointsInTalent(Talent.SUPERSTITION);
+			cnt += exp;
+			if(cnt >= m){
+				// 这里原来写的是 cnt = m % cnt（取余写反了）：超出阈值后 cnt 停在 m 上，之后每次获得经验都给 1 点信仰。
+				// 按描述「每获取 m 点经验 1 点信仰」：一次给够几个 m 就给几点，零头留到下次
+				int gained = cnt / m;
+				cnt = cnt % m;
+				return gained;
+			}
+			return 0;
+		}
+	}
+	public SuperstitionCounter superstitionCounter = null;
+	//
+
 	public Hero() {
 		super();
 
 		HP = HT = 20;
 		STR = STARTING_STR;
-		
+
+		critSkill=5f;
+
 		belongings = new Belongings( this );
-		
+
 		visibleEnemies = new ArrayList<>();
 	}
-	
+
 	public void updateHT( boolean boostHP ){
 		int curHT = HT;
-		
-		HT = 20 + 5*(lvl-1) + HTBoost;
+
+		// 基础成长系数
+		int growthFactor = 5;
+		int initialHP = 20;
+		// 职业专属成长（月华：强壮肉体天赋）
+		int[] growth = heroClass.activeDefinition() == null ? null : heroClass.activeDefinition().baseHPGrowth();
+		if (growth != null) {
+			initialHP = growth[0];
+			growthFactor = growth[1]; // 基础成长
+			int strongBody = pointsInTalent(Talent.STRONG_BODY);
+			if (strongBody != 0) initialHP = 20;
+			if (strongBody >= 1) growthFactor = 5; // +1恢复至正常
+			if (strongBody >= 2) growthFactor = 6; // +2额外成长
+		}
+
+
+		HT = initialHP + growthFactor*(lvl-1) + HTBoost;
+		if (buff(ScarBuff.class) != null) {
+			HT += ScarBuff.MAX_HP_BONUS;
+		}
+		if (buff(BarkskinToyBuff.class) != null) {
+			HT += BarkskinToyBuff.MAX_HP_BONUS;
+		}
+
 		float multiplier = RingOfMight.HTMultiplier(this);
 		HT = Math.round(multiplier * HT);
-		
+
+
 		if (buff(ElixirOfMight.HTBoost.class) != null){
 			HT += buff(ElixirOfMight.HTBoost.class).boost();
 		}
-		
+
+		if (buff(Sprouted_Potato.Potato_Poison.class) != null){
+			HT -= buff(Sprouted_Potato.Potato_Poison.class).level();
+		}
+		HT = Math.max(1, HT);
+
+		// DoggingDog on 20250914
+		// 用 misc() / ring() 而不是字段：丢失背包期间没被保留的装备不生效
+		if(belongings.misc() instanceof InversionBeta || belongings.ring() instanceof InversionBeta){
+			HT = InversionBeta.betaHP(this);
+		}
+		HT = TieredToyEffects.adjustMaxHealth(HT);
+		HT = Math.max(1, HT - resistHealth);
+
 		if (boostHP){
 			HP += Math.max(HT - curHT, 0);
 		}
+
 		HP = Math.min(HP, HT);
 	}
+
+	public boolean resistWithPainScar() {
+		int points = pointsInTalent(Talent.PAIN_SCAR);
+		if (points == 0) {
+			return false;
+		}
+		int healthCost = 25 - 5 * points;
+		float rageCost = healthCost / 100f;
+		Berserk rage = buff(Berserk.class);
+		if (rage == null || rage.getPower() < rageCost || HT <= healthCost) {
+			return false;
+		}
+		resistHealth += healthCost;
+		HT -= healthCost;
+		HP = Math.min(HP, HT);
+		rage.reducePower(rageCost);
+		GLog.n(Messages.get(Talent.PAIN_SCAR, "resistDeath"));
+		return true;
+	}
+
 
 	public int STR() {
 		int strBonus = 0;
 
 		strBonus += RingOfMight.strengthBonus( this );
-		
+
 		AdrenalineSurge buff = buff(AdrenalineSurge.class);
 		if (buff != null){
 			strBonus += buff.boost();
@@ -297,6 +537,27 @@ public class Hero extends Char {
 	public float critSkill(){
 		if (buff(RingOfTenacity.Tenacity.class)!=null) {return 0;}
 		float critbonus=0;
+
+		if(hero.belongings.weapon() instanceof Taijutsu && critDamage()>=3f){
+			return 100f;
+		}
+
+		if(hero.belongings.weapon() instanceof LongStick){
+			float Boost = 0;
+			if(Dungeon.hero!=null){
+				Boost += Dungeon.hero.defenseSkill(new Rat());
+				Boost -= Dungeon.hero.lvl;
+				Boost = Math.max(Boost,0);
+				Boost = Math.min(100f,Boost);
+			}
+			critbonus += Boost;
+		}
+
+		// Radish 饰品提供的暴击率
+		Radish.GlobalCritChance globalCritChance = buff(Radish.GlobalCritChance.class);
+		if(globalCritChance != null){
+			critbonus += globalCritChance.critChance;
+		}
 
 		return critSkill+critbonus;
 	}
@@ -317,6 +578,7 @@ public class Hero extends Char {
 
 		return Math.min(critDamage+cdbouns,critDamageCap) * ( 1 + calm_bouns * 100 * ((float) (HT-HP) /HT)) ;
 	}
+
 	public int critDamage_shown(){
 		return (int)(100*critDamage());
 	}
@@ -324,6 +586,7 @@ public class Hero extends Char {
 	private static final String CLASS       = "class";
 	private static final String SUBCLASS    = "subClass";
 	private static final String ABILITY     = "armorAbility";
+	private static final String SKIN        = "skin";
 
 	private static final String IMP_POWER     = "imp_power";
 
@@ -332,58 +595,92 @@ public class Hero extends Char {
 	private static final String STRENGTH	= "STR";
 	private static final String LEVEL		= "lvl";
 	private static final String EXPERIENCE	= "exp";
+	private static final String PAIN_SCAR_HEALTH = "pain_scar_health";
 	private static final String HTBOOST     = "htboost";
-	
+
+	private static final String DEADKNGITH = "deadknight";
+	private static final String CARD_DECK = "card_deck";
+	private static final String SUPERSTITION_CNT = "superstition_cnt";
+
 	@Override
 	public void storeInBundle( Bundle bundle ) {
+		// Jumble 变身提交也使用此锁，避免存档抓到天赋/装备半提交状态。
+		synchronized (JumbleChangeBuff.STATE_LOCK) {
+			super.storeInBundle( bundle );
 
-		super.storeInBundle( bundle );
+			bundle.put( CLASS, heroClass.name() );
+			bundle.put( SUBCLASS, subClass.name() );
+			bundle.put( ABILITY, armorAbility );
+			bundle.put( SKIN, skin );
+			bundle.put( IMP_POWER, powerOfImp);
+			Talent.storeTalentsInBundle( bundle, this );
 
-		bundle.put( CLASS, heroClass );
-		bundle.put( SUBCLASS, subClass );
-		bundle.put( ABILITY, armorAbility );
-		Talent.storeTalentsInBundle( bundle, this );
-		
-		bundle.put( ATTACK, attackSkill );
-		bundle.put( DEFENSE, defenseSkill );
-		
-		bundle.put( STRENGTH, STR );
-		
-		bundle.put( LEVEL, lvl );
-		bundle.put( EXPERIENCE, exp );
-		
-		bundle.put( HTBOOST, HTBoost );
+			bundle.put( ATTACK, attackSkill );
+			bundle.put( DEFENSE, defenseSkill );
 
-		bundle.put( IMP_POWER, powerOfImp);
+			bundle.put( STRENGTH, STR );
 
-		belongings.storeInBundle( bundle );
+			bundle.put( LEVEL, lvl );
+			bundle.put( EXPERIENCE, exp );
+			bundle.put( "alchemy_energy", alchemyEnergy );
+
+			bundle.put( HTBOOST, HTBoost );
+			bundle.put( PAIN_SCAR_HEALTH, resistHealth );
+
+			bundle.put(DEADKNGITH, rectorDeadKngithDeadMode );
+
+			belongings.storeInBundle( bundle );
+			bundle.put( CARD_DECK, cardDeck );
+			if (superstitionCounter != null) bundle.put( SUPERSTITION_CNT, superstitionCounter.cnt );
+		}
 	}
-	
+
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 
 		lvl = bundle.getInt( LEVEL );
 		exp = bundle.getInt( EXPERIENCE );
+		alchemyEnergy = bundle.getFloat( "alchemy_energy" );
 
 		HTBoost = bundle.getInt(HTBOOST);
+		resistHealth = bundle.getInt(PAIN_SCAR_HEALTH);
+
+		rectorDeadKngithDeadMode = bundle.getBoolean(DEADKNGITH);
 
 		super.restoreFromBundle( bundle );
 
-		heroClass = bundle.getEnum( CLASS, HeroClass.class );
-		subClass = bundle.getEnum( SUBCLASS, HeroSubClass.class );
+		heroClass = HeroClasses.fromSaveName(bundle.getString( CLASS ));
+		subClass = HeroSubClasses.fromSaveName(bundle.getString( SUBCLASS ));
 		armorAbility = (ArmorAbility)bundle.get( ABILITY );
+		skin = bundle.getInt( SKIN );
+		powerOfImp = bundle.getBoolean(IMP_POWER);
 		Talent.restoreTalentsFromBundle( bundle, this );
-		
+
+		// 星界沟通的计数器只在点天赋的那一刻创建，以前不进存档：读档后一直是 null，这一局剩下的时间里天赋不再给信仰。
+		// 读档时按「有没有这个天赋」重建；旧存档没有这个键，从 0 开始攒
+		if (hasTalent(Talent.SUPERSTITION)) {
+			superstitionCounter = new SuperstitionCounter();
+			if (bundle.contains(SUPERSTITION_CNT)) superstitionCounter.cnt = bundle.getInt(SUPERSTITION_CNT);
+		}
+
 		attackSkill = bundle.getInt( ATTACK );
 		defenseSkill = bundle.getInt( DEFENSE );
-
-		powerOfImp = bundle.getBoolean(IMP_POWER);
 
 		STR = bundle.getInt( STRENGTH );
 
 		belongings.restoreFromBundle( bundle );
+		cardDeck = (CardDeck) bundle.get( CARD_DECK );
+		if (heroClass == HeroClasses.CARDTRICKSTER) {
+			if (cardDeck == null) {
+				cardDeck = CardDeck.starterDeck();
+			}
+			if (belongings.getItem(CardDrawer.class) == null) {
+				new CardDrawer().collect(belongings.backpack);
+			}
+		}
+		HeldCardTracker.sync(this);
 	}
-	
+
 	public static void preview( GamesInProgress.Info info, Bundle bundle ) {
 		info.level = bundle.getInt( LEVEL );
 		info.str = bundle.getInt( STRENGTH );
@@ -391,8 +688,9 @@ public class Hero extends Char {
 		info.hp = bundle.getInt( Char.TAG_HP );
 		info.ht = bundle.getInt( Char.TAG_HT );
 		info.shld = bundle.getInt( Char.TAG_SHLD );
-		info.heroClass = bundle.getEnum( CLASS, HeroClass.class );
-		info.subClass = bundle.getEnum( SUBCLASS, HeroSubClass.class );
+		info.heroClass = HeroClasses.fromSaveName(bundle.getString( CLASS ));
+		info.subClass = HeroSubClasses.fromSaveName(bundle.getString( SUBCLASS ));
+		info.skin = bundle.getInt( SKIN );
 		Belongings.preview( info, bundle );
 	}
 
@@ -410,12 +708,19 @@ public class Hero extends Char {
 	}
 
 	public void upgradeTalent( Talent talent ){
+		boolean changed = false;
 		for (LinkedHashMap<Talent, Integer> tier : talents){
 			for (Talent f : tier.keySet()){
-				if (f == talent) tier.put(talent, tier.get(talent)+1);
+				if (f == talent){
+					int cur = tier.get(f);
+					if (cur < talent.maxPoints()){
+						tier.put(talent, cur + 1);
+						changed = true;
+					}
+				}
 			}
 		}
-		Talent.onTalentUpgraded(this, talent);
+		if (changed) Talent.onTalentUpgraded(this, talent);
 	}
 
 	public int talentPointsSpent(int tier){
@@ -428,7 +733,7 @@ public class Hero extends Char {
 
 	public int talentPointsAvailable(int tier){
 		if (lvl < (Talent.tierLevelThresholds[tier] - 1)
-				|| (tier == 3 && subClass == HeroSubClass.NONE)
+				|| (tier == 3 && subClass == HeroSubClasses.NONE)
 				|| (tier == 4 && (armorAbility == null && !powerOfImp))) {
 			return 0;
 		} else if (lvl >= Talent.tierLevelThresholds[tier+1]){
@@ -442,19 +747,28 @@ public class Hero extends Char {
 		int powerget=0;
 		if (powerOfImp && tier ==4) powerget=2;
 		if (lvl < (Talent.tierLevelThresholds[tier]-1)
-				|| (tier == 3 && subClass == HeroSubClass.NONE)
+				|| (tier == 3 && subClass == HeroSubClasses.NONE)
 				|| (tier == 4 && (armorAbility == null && !powerOfImp))) {
 			return 0;
 		} else if (buff(PotionOfDivineInspiration.DivineInspirationTracker.class) != null
 				&& buff(PotionOfDivineInspiration.DivineInspirationTracker.class).isBoosted(tier)) {
-			return 2+powerget;
+			return 2+powerget+diceMageFreeSchoolUpgrades(tier);
 		} else {
-			return 0+powerget;
+			return powerget+diceMageFreeSchoolUpgrades(tier);
 		}
 	}
-	
+
+	// 骰子法师的免费学派升级计入 bonus，使 talentPointsAvailable(3) 的"消耗 vs 免费"结算正确
+	private int diceMageFreeSchoolUpgrades(int tier){
+		if (tier != 3 || subClass != HeroSubClasses.DICE_MAGE) return 0;
+		MagicPoint mp = buff(MagicPoint.class);
+		return mp == null ? 0 : mp.freeSchoolUpgrades();
+	}
+
 	public String className() {
-		return subClass == null || subClass == HeroSubClass.NONE ? heroClass.title() : subClass.title();
+		if (subClass != null && subClass != HeroSubClasses.NONE) return subClass.title();
+		// 皮肤变体拥有独立名称时使用之，否则回退到基础职业名
+		return heroClass.activeDefinition().heroName();
 	}
 
 	@Override
@@ -464,11 +778,13 @@ public class Hero extends Char {
 
 	@Override
 	public void hitSound(float pitch) {
-		if (!RingOfForce.fightingUnarmed(this)) {
-			belongings.attackingWeapon().hitSound(pitch);
+		if (belongings.thrownWeapon != null) {
+			belongings.thrownWeapon.hitSound(pitch);
 		} else if (RingOfForce.getBuffedBonus(this, RingOfForce.Force.class) > 0) {
 			//pitch deepens by 2.5% (additive) per point of strength, down to 75%
 			super.hitSound( pitch * GameMath.gate( 0.75f, 1.25f - 0.025f*STR(), 1f) );
+		} else if (belongings.weapon() != null) {
+			belongings.weapon().hitSound(pitch);
 		} else {
 			super.hitSound(pitch * 1.1f);
 		}
@@ -491,8 +807,11 @@ public class Hero extends Char {
 		if (hasTalent(Talent.SPELL_QUEUE)) Buff.affect(this, SpellQueue.imageListner.class);
 		Buff.affect( this, Regeneration.class );
 		Buff.affect( this, Hunger.class );
+
+
+
 	}
-	
+
 	public int tier() {
 		Armor armor = belongings.armor();
 		if (armor instanceof ClassArmor){
@@ -503,7 +822,7 @@ public class Hero extends Char {
 			return 0;
 		}
 	}
-	
+
 	public boolean shoot( Char enemy, MissileWeapon wep ) {
 
 		this.enemy = enemy;
@@ -517,27 +836,29 @@ public class Hero extends Char {
 		Invisibility.dispel();
 		belongings.thrownWeapon = null;
 
-		if (hit && subClass == HeroSubClass.GLADIATOR && wasEnemy){
-			Buff.affect( this, Combo.class ).hit( enemy );
-		}
-
-		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
-			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
+		Talent.HoldBreathTracker hb=buff(Talent.HoldBreathTracker.class);
+		if (hb!=null){
+			if (hit && enemy.alignment==Alignment.ENEMY){
+				hb.clear_cb();
+			}
+			hb.reduce();
 		}
 
 		return hit;
 	}
-	
+
 	@Override
 	public int attackSkill( Char target ) {
 		KindOfWeapon wep = belongings.attackingWeapon();
-		
+
 		float accuracy = 1;
 		accuracy *= RingOfAccuracy.accuracyMultiplier( this );
+		accuracy *= RingOfConcentration.accuracyMultiplier( this );
 
-
-		if(attackDelay() >1 && hasTalent(Talent.STRONGMAN)){
-			accuracy += accuracy * Math.max((attackDelay()-1f) * ( (0.5f / 3f) * pointsInTalent(Talent.STRONGMAN)),0.5f);
+		int killBoatSwordBonus = wep instanceof KillBoatSword ? 1 : 0;
+		float talentPointBonus = 0.5f * pointsInTalent(Talent.STRONGMAN);
+		if(attackDelay() > 1 && hasTalent(Talent.STRONGMAN)){
+			accuracy += accuracy * (attackDelay() + killBoatSwordBonus - 1) * talentPointBonus;
 		}
 
 //		if (wep instanceof MissileWeapon){
@@ -551,14 +872,27 @@ public class Hero extends Char {
 		if (buff(Scimitar.SwordDance.class) != null){
 			accuracy *= 1.50f;
 		}
-		
-		if (!RingOfForce.fightingUnarmed(this)) {
-			return (int)(attackSkill * accuracy * wep.accuracyFactor( this, target ));
-		} else {
-			return (int)(attackSkill * accuracy);
+
+		// 圆球皮肤：精准（命中）为 1.2 倍
+		if (isSphereSkin()){
+			accuracy *= 1.2f;
 		}
+		if (isGamblerSkin()){
+			accuracy *= 0.9f;
+		}
+
+		int spirit = LittleKnight.spiritAccuracy( this );
+		if (hero.buff(RingOfForce.Force.class) == null) {
+			if(wep != null)
+				return (int)(attackSkill * accuracy * wep.accuracyFactor( this, target )) + spirit;
+		} else {
+			return (int)(attackSkill * accuracy) + spirit;
+		}
+
+		return (int)(attackSkill * accuracy) + spirit;
+
 	}
-	
+
 	@Override
 	public int defenseSkill( Char enemy ) {
 
@@ -572,9 +906,9 @@ public class Hero extends Char {
 		if (buff(RoundShield.GuardTracker.class) != null){
 			return INFINITE_EVASION;
 		}
-		
+
 		float evasion = defenseSkill;
-		
+
 		evasion *= RingOfEvasion.evasionMultiplier( this );
 
 		if (buff(Talent.RestoredAgilityTracker.class) != null){
@@ -588,7 +922,7 @@ public class Hero extends Char {
 		if (buff(Quarterstaff.DefensiveStance.class) != null){
 			evasion *= 3;
 		}
-		
+
 		if (paralysed > 0) {
 			evasion /= 2;
 		}
@@ -597,18 +931,21 @@ public class Hero extends Char {
 			evasion = belongings.armor().evasionFactor(this, evasion);
 		}
 
-		return Math.round(evasion);
+		return Math.round(evasion)
+				+ LittleKnight.spiritEvasion( this );
+
 	}
 
 	@Override
 	public String defenseVerb() {
 		Combo.ParryTracker parry = buff(Combo.ParryTracker.class);
 		if (parry != null){
-			parry.parried = true;
-			if (buff(Combo.class).getComboCount() < 9 || pointsInTalent(Talent.ENHANCED_COMBO) < 2){
-				parry.detach();
-			}
+			parry.parry();
 			return Messages.get(Monk.class, "parried");
+		}
+
+		if (hero.belongings.weapon() instanceof FogSword) {
+			Buff.affect(hero, Invisibility.class,1f);
 		}
 
 		if (buff(RoundShield.GuardTracker.class) != null){
@@ -616,14 +953,6 @@ public class Hero extends Char {
 			BuffIndicator.refreshHero();
 			Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
 			return Messages.get(RoundShield.GuardTracker.class, "guarded");
-		}
-
-		if (buff(MonkEnergy.MonkAbility.Focus.FocusActivation.class) != null){
-			buff(MonkEnergy.MonkAbility.Focus.FocusActivation.class).detach();
-			if (sprite != null && sprite.visible) {
-				Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
-			}
-			return Messages.get(Monk.class, "parried");
 		}
 
 		return super.defenseVerb();
@@ -643,75 +972,188 @@ public class Hero extends Char {
 			}
 		}
 
-		if (belongings.armor() != null) {
+		if (hasTalent(Talent.MOVING_DEFENSE) && pointsInTalent(Talent.MOVING_DEFENSE)>3)
+			if (shielding()>0)
+				dr+=Random.NormalIntRange(2,8);
+
+		if(hero.belongings.weapon() instanceof CircleSword){
+			dr = 0;
+		} else if (belongings.armor() != null) {
 			int armDr = Char.combatRoll( belongings.armor().DRMin(), belongings.armor().DRMax());
-			if (STR() < belongings.armor().STRReq()){
-				armDr -= 2*(belongings.armor().STRReq() - STR());
+
+			RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
+			if(riverGlass != null){
+				int finalArmorDr = Integer.MAX_VALUE;
+				for (int i = 0; i < riverGlass.judgeTimes(); i++){
+					finalArmorDr = Math.min(finalArmorDr, Char.combatRoll(belongings.armor().DRMin(), belongings.armor().DRMax()));
+				}
+				if (STR() < belongings.armor().STRReq()){
+					finalArmorDr -= 2*(belongings.armor().STRReq() - STR());
+				}
+
+				armDr = finalArmorDr;
+            } else {
+				if (STR() < belongings.armor().STRReq()){
+					armDr -= 2*(belongings.armor().STRReq() - STR());
+				}
+            }
+            if (armDr > 0) dr += armDr;
+
+            // 共鸣刻印：同时装备共鸣附魔武器与共鸣刻印护甲时，护甲格挡提升50%
+            if (com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Resonance.isResonanceActive(this)) {
+                dr += Math.round(armDr * 0.5f);
+            }
+            dr += CloakOfShadows.darkArmorRoll(this);
+        }
+		com.shatteredpixel.shatteredpixeldungeon.items.armor.SecondaryArmor sa = belongings.secondaryArmor();
+		if (sa != null) {
+			if (STR() >= sa.STRReq()) {
+				dr += Char.combatRoll(sa.DRMin(), sa.DRMax());
+			} else {
+				// 文本承诺「相当于主要护甲 50% 的超力惩罚」：主护甲为 2*(差值)，这里取 1*(差值)。
+				dr -= Math.max(1, sa.STRReq() - STR());
 			}
-			if (armDr > 0) dr += armDr;
 		}
-		if (belongings.weapon() != null && !RingOfForce.fightingUnarmed(this))  {
+
+		dr += ShieldToyBuff.getDRBonus();
+
+		if (belongings.weapon() != null)  {
 			int wepDr = Char.combatRoll( 0 , belongings.weapon().defenseFactor( this ) );
 			if (STR() < ((Weapon)belongings.weapon()).STRReq()){
 				wepDr -= 2*(((Weapon)belongings.weapon()).STRReq() - STR());
 			}
 			if (wepDr > 0) dr += wepDr;
 		}
-		
-		return dr;
+
+		// DoggingDog on 20250914
+		if(belongings.ring() instanceof InversionBeta || belongings.misc() instanceof InversionBeta){
+			dr = InversionBeta.betaDR(this);
+		}
+
+		return dr + LittleKnight.spiritArmor( this );
 	}
-	
+
 	@Override
-	public int damageRoll() {
-		KindOfWeapon wep = belongings.attackingWeapon();
+	public int shielding() {
+		// 树肤玩具：不再能获得护盾
+		if (buff(BarkskinToyBuff.class) != null) {
+			return 0;
+		}
+		return super.shielding();
+	}
+
+	@Override
+	public int damageRoll() {  //TODO FIX
+		KindOfWeapon wep = isGamblerSkin() ? belongings.attackingWeapon() : belongings.weapon();
 		int dmg;
-
-		if (!RingOfForce.fightingUnarmed(this)) {
-			dmg = wep.damageRoll( this );
-
-			if (!(wep instanceof MissileWeapon)) dmg += RingOfForce.armedDamageBonus(this);
+		if (subClass == HeroSubClasses.ILLUSIONIST) {
+			// Illusionist weapons (and the Ring of Force) do not contribute to damage.
+			dmg = Random.NormalIntRange(1, Math.max(STR() - 8, 1));
+		} else if (wep!=null){
+			if (isGamblerSkin()) {
+				int roll = Random.Int(10);
+				int max = wep.max();
+				dmg = roll < 2 ? 1 : roll < 6 ? max / 2 : max;
+			} else {
+				dmg = wep.damageRoll( this );
+			}
+			if (!(wep instanceof MissileWeapon)) {
+				dmg += RingOfForce.armedDamageBonus(this);
+				if (hasTalent(Talent.DEVASTATE)){
+					if (buff(Combo.class)!=null){
+						int c=Math.min(buff(Combo.class).getComboCount(),10);
+						dmg+=Random.NormalIntRange(0,pointsInTalent(Talent.DEVASTATE)*c);
+					}
+				}
+			}
 		} else {
 			dmg = RingOfForce.damageRoll(this);
-			if (RingOfForce.unarmedGetsWeaponAugment(this)){
-				dmg = ((Weapon)belongings.attackingWeapon()).augment.damageFactor(dmg);
+		}
+		if (LittleKnight.shieldPoke( this )) {
+			dmg = LittleKnight.pokeDamage( this );
+		}
+		dmg += LittleKnight.spiritDamage( this );
+
+
+		if(hero.pointsInTalent(Talent.IRON_SUN)>=1){
+			int buffCnt = 0;
+			for(Object i: buffs(Buff.class).toArray()) {
+				if(!BuffIndicator.NONE.equals(((Buff) i).icon())){
+					buffCnt+=3;
+				}
+			}
+			dmg += buffCnt;
+		}
+
+
+		if( attackDelay() >1 && hasTalent(Talent.STRONGMAN)){
+			int killBoatSwordBonus = hero.belongings.attackingWeapon() instanceof KillBoatSword ? 1 : 0;
+			float pointBonus = 0.33f * pointsInTalent(Talent.STRONGMAN);
+			dmg += (int) (dmg * (attackDelay() + killBoatSwordBonus - 1) * pointBonus);
+		}
+
+		// Cross-class effects of Card Trickster talents.
+		if (heroClass != HeroClasses.CARDTRICKSTER) {
+			int empowerment = pointsInTalent(Talent.BLANK_EMPOWERMENT);
+			if (empowerment == 1) dmg += Random.NormalIntRange(0, 1);
+			else if (empowerment >= 2) dmg += Random.NormalIntRange(1, 2);
+			if (wep instanceof MissileWeapon) {
+				int wind = pointsInTalent(Talent.BORROW_WIND_CUT);
+				if (wind == 1) dmg += Random.NormalIntRange(1, 3);
+				else if (wind >= 2) dmg += Random.NormalIntRange(3, 3);
 			}
 		}
 
-		if( attackDelay() >1 && hasTalent(Talent.STRONGMAN) && !(wep instanceof SpiritBow)){
-			dmg += (int) (dmg * Math.max (attackDelay() - (1f / 3f * pointsInTalent(Talent.STRONGMAN)),0.75f));
-		}
 
-		PhysicalEmpower emp = buff(PhysicalEmpower.class);
-		if (emp != null){
-			dmg += emp.dmgBoost;
-			emp.left--;
-			if (emp.left <= 0) {
-				emp.detach();
-			}
-			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG, 0.75f, 1.2f);
-		}
-
-		if (heroClass != HeroClass.DUELIST
-				&& hasTalent(Talent.WEAPON_RECHARGING)
-				&& (buff(Recharging.class) != null || buff(ArtifactRecharge.class) != null)){
-			dmg = Math.round(dmg * 1.025f + (.025f*pointsInTalent(Talent.WEAPON_RECHARGING)));
-		}
+		dmg = Math.round(dmg
+				* IronHeartBuff.getDamageMultiplier()
+				* ClumsyShoesBuff.getDamageMultiplier()
+				* WhetstoneBuff.getDamageMultiplier());
 
 		if (dmg < 0) dmg = 0;
+
+		// 次要护甲的增减伤在怪物受伤入口统一结算（SecondaryArmor.procMobDamage），
+		// 这里再算一遍会让近战重复吃加成。
+
 		return dmg;
 	}
-	
+
 	@Override
 	public float speed() {
 
 		float speed = super.speed();
 
+		// 圆球皮肤：移动速度为 1.2 倍
+		if (isSphereSkin()) speed *= 1.2f;
+
 		speed *= RingOfHaste.speedMultiplier(this);
-		
+
+		for (ChampionHero buff : buffs(ChampionHero.class)){
+			speed *= buff.speedFactor();
+		}
+
+		//索命弯刀：范围内有敌人时移速翻倍
+		AshKing.FatalBladeForm fatalBlade = buff(AshKing.FatalBladeForm.class);
+		if (fatalBlade != null && fatalBlade.hasEnemyNearby) {
+			speed *= 2f;
+		}
+
+		if(Dungeon.hero.pointsInTalent(Talent.LAND_HEART)>=1) {
+			if (hero.buff(Talent.HIGHGRSS_SPEED.class) != null){
+				speed *= 1.5f;
+			}
+		}
+
+		if(Dungeon.level.map[pos] == Terrain.HOLY_LAND && Dungeon.hero.pointsInTalent(Talent.SKY_TOWER)>=2){
+			speed *= 1.25f;
+		}
+
 		if (belongings.armor() != null) {
 			speed = belongings.armor().speedFactor(this, speed);
 		}
-		
+
+		speed *= ClumsyShoesBuff.getSpeedMultiplier();
+
 		Momentum momentum = buff(Momentum.class);
 		if (momentum != null){
 			((HeroSprite)sprite).sprint( momentum.freerunning() ? 1.5f : 1f );
@@ -720,26 +1162,43 @@ public class Hero extends Char {
 			((HeroSprite)sprite).sprint( 1f );
 		}
 
+		if (hasTalent(Talent.BRISK_PACE)){
+			speed*=(1+0.025f*pointsInTalent(Talent.BRISK_PACE)*visibleEnemies());
+		}
+
 		NaturesPower.naturesPowerTracker natStrength = buff(NaturesPower.naturesPowerTracker.class);
 		if (natStrength != null){
 			speed *= (2f + 0.25f*pointsInTalent(Talent.GROWING_POWER));
 		}
 
 		speed = AscensionChallenge.modifyHeroSpeed(speed);
-		
+
+		//TS
+		if (buff(DarkCoat.myPace.class)!=null) speed=Math.max(1f,speed);
+
 		return speed;
-		
+
 	}
 
 	@Override
 	public boolean canSurpriseAttack(){
 		KindOfWeapon w = belongings.attackingWeapon();
 		if (!(w instanceof Weapon))             return true;
-		if (RingOfForce.fightingUnarmed(this))  return true;
+
 		if (STR() < ((Weapon)w).STRReq())       return false;
 		if (w instanceof Flail)                 return false;
 
 		return super.canSurpriseAttack();
+	}
+
+	// 怪物能否偷袭英雄：攻击者不在英雄当前视野内（如门后/黑暗中）即视为偷袭。
+	// 只影响命中判定与感叹号特效，不改变英雄的防御/DR。
+	public boolean surprisedBy( Char enemy ) {
+		return enemy instanceof Mob
+				&& Dungeon.level != null
+				&& fieldOfView != null
+				&& fieldOfView.length == Dungeon.level.length()
+				&& !fieldOfView[enemy.pos];
 	}
 
 	public boolean canAttack(Char enemy){
@@ -747,24 +1206,60 @@ public class Hero extends Char {
 			return false;
 		}
 
+		for (ChampionHero buff : buffs(ChampionHero.class)){
+			if (buff.canAttackWithExtraReach( enemy )){
+				return true;
+			}
+		}
+
+		//神佑长枪形态：攻击距离+1
+		AshKing.HolyLanceForm holyLance = buff(AshKing.HolyLanceForm.class);
+		if (holyLance != null && Dungeon.level.distance(pos, enemy.pos) <= 2) {
+			return true;
+		}
+
 		//can always attack adjacent enemies
 		if (Dungeon.level.adjacent(pos, enemy.pos)) {
+			return true;
+		}
+
+		int polearmReach = PolearmBuff.getReachBonus();
+		if (polearmReach > 0 && Dungeon.level.distance(pos, enemy.pos) <= 1 + polearmReach) {
+			return true;
+		}
+
+		int envelopeReach = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.reachBonus(this);
+		if (envelopeReach > 0
+				&& Dungeon.level.distance(pos, enemy.pos) <= 1 + envelopeReach
+				&& fieldOfView != null && fieldOfView.length == Dungeon.level.length()
+				&& fieldOfView[enemy.pos]) {
 			return true;
 		}
 
 		KindOfWeapon wep = Dungeon.hero.belongings.attackingWeapon();
 
 		if (wep != null){
+			// mod by DoggingDog on 2024-11-13, 4 Seeking enchantment
+			// 追寻附魔：只有当前武器就是施加标记的那把武器时，才能无视距离追击
+			Seeking.SeekingBuff seeking = enemy.buff(Seeking.SeekingBuff.class);
+			if(seeking != null && seeking.isBoundWeapon(wep)){
+				return true;
+			}
+			//
 			return wep.canReach(this, enemy.pos);
 		} else {
 			return false;
 		}
 	}
-	
+
 	public float attackDelay() {
 		if (buff(Talent.LethalMomentumTracker.class) != null){
 			buff(Talent.LethalMomentumTracker.class).detach();
 			return 0;
+		}
+
+		if (LittleKnight.pokeIsPlain( this )) {
+			return 1f;
 		}
 
 		float delay = 1f;
@@ -773,37 +1268,55 @@ public class Hero extends Char {
 			buff(Talent.LethalMomentumTracker.class).detach();
 			switch (pointsInTalent(Talent.LETHAL_MOMENTUM)){
 				case 1: default:
-                    break;
+					break;
 				case 2:	delay=1.5f;
 			}
 		}
 
-		if (!RingOfForce.fightingUnarmed(this)) {
-			
-			return delay * belongings.attackingWeapon().delayFactor( this );
-			
-		} else {
-			//Normally putting furor speed on unarmed attacks would be unnecessary
-			//But there's going to be that one guy who gets a furor+force ring combo
-			//This is for that one guy, you shall get your fists of fury!
-			float speed = RingOfFuror.attackSpeedMultiplier(this);
+        //Normally putting furor speed on unarmed attacks would be unnecessary
+        //But there's going to be that one guy who gets a furor+force ring combo
+        //This is for that one guy, you shall get your fists of fury!
+        float speed = RingOfFuror.attackSpeedMultiplier(this);
 
-			//ditto for furor + sword dance!
-			if (buff(Scimitar.SwordDance.class) != null){
-				speed += 0.6f;
-			}
+        if (hasTalent(Talent.BOW_DULES) && (buff(SnipersMark.class) != null
+                || Dungeon.level != null && Dungeon.level.mobs.stream().anyMatch(
+                        mob -> mob.isAlive() && mob.buff(SnipersMark.class) != null))) {
+            speed += 0.5f;
+        }
 
-			//and augments + brawler's stance! My goodness, so many options now compared to 2014!
-			if (RingOfForce.unarmedGetsWeaponAugment(this)){
-				delay = ((Weapon)belongings.weapon).augment.delayFactor(delay);
-			}
+        //ditto for furor + sword dance!
+        if (buff(Scimitar.SwordDance.class) != null){
+            speed += 0.6f;
+        }
 
-			return delay/speed;
+		// DoggingDog on 20250205
+		if(belongings.attackingWeapon() != null)
+			delay *= belongings.attackingWeapon().delayFactor( this );
+
+		// DoggingDog on 20250520
+		// 用 armor() 而不是字段：丢失背包期间没被保留的护甲不生效
+		if(belongings.armor() instanceof Showdarker){
+			delay /= (2f + 0.25f * ((Showdarker) belongings.armor()).buffedLvl());
 		}
-	}
+
+		if ( buff(Adrenaline.class) != null) delay /= 1.5f;
+
+		delay *= PolearmBuff.getAttackDelayMultiplier();
+		speed *= IronHeartBuff.getAttackSpeedMultiplier();
+
+		// rector skill : gods possession with talent avatar
+		// DoggingDog on 20260119
+		if(hero != null){
+			int t_lvl = hero.pointsInTalent(Talent.AVATAR);
+			t_lvl = Math.max(0,t_lvl-1);
+			speed *= (1f + ((float) t_lvl)/3);
+		}
+        return delay/speed;
+    }
 
 	@Override
 	public void spend( float time ) {
+		justMoved = false;
 		super.spend(time);
 	}
 
@@ -824,43 +1337,153 @@ public class Hero extends Char {
 		spend( time );
 		next();
 	}
-	
+
+	// 粘液倒计时用的时钟（上次扣到的绝对游戏时间）；不存档，读档 / 换层后重新对齐
+	private float slimeClock = -1f;
+
 	@Override
 	public boolean act() {
-		
+
+		// 发布英雄回合事件
+		EventManager.emit(new HeroActEvent(this));
+
+		Radish radish = hero.belongings.getItem(Radish.class);
+		Radish.GlobalCritChance globalCritChance = hero.buff(Radish.GlobalCritChance.class);
+		if(radish != null && globalCritChance == null){
+			Buff.affect(hero, Radish.GlobalCritChance.class);
+		}
 		//calls to dungeon.observe will also update hero's local FOV.
 		fieldOfView = Dungeon.level.heroFOV;
+
+		//粘液逻辑
+		// 说明写的是「还有 N 回合」：按经过的游戏时间扣，而不是按 act() 被调用的次数扣
+		// （一次攻击 / 每走一步都会多调一次 act()）。Statistics.duration + Actor.now() 不受存档时 Actor.fixTime() 影响。
+		float slimeNow = Statistics.duration + Actor.now();
+		if (slimeClock < 0 || slimeNow < slimeClock) slimeClock = slimeNow;
+		int slimeTicks = (int)(slimeNow - slimeClock);
+		slimeClock += slimeTicks;
+		ArrayList<Frog.PoulWater> poulWaters = hero.belongings.getAllItems(Frog.PoulWater.class);
+		if(poulWaters != null){
+			for (Frog.PoulWater w : poulWaters.toArray(new Frog.PoulWater[0])) {
+				if(w.cooldown >0){
+					w.cooldown -= slimeTicks;
+				}
+				if(w.cooldown <= 0){
+					w.detach(hero.belongings.backpack);
+					// 粘液干涸脱落：连带着把身上的护盾清空，并留下 1 点伤害。
+					// 只清数值、不强制 detach，护盾类 buff 各自的生命周期保持原样。
+					int shieldLost = 0;
+					for (ShieldBuff s : new ArrayList<>(hero.buffs(ShieldBuff.class))) {
+						shieldLost += s.shielding();
+						s.decShield(s.shielding());
+					}
+					if (shieldLost > 0) {
+						GLog.w(Messages.get(w, "fade"));
+					}
+					hero.damage(DamageInfo.physicalNoArmor(1, w));
+					// 这 1 点伤害能杀死只剩 1 血的英雄。伤害来源自己负责死亡结算（其它自伤来源都是这么做的），
+					// 以前这里没有：这一局不进排行榜，也没有任何死亡提示。结算后不再处理剩下的粘液，免得重复结算
+					if (!isAlive()) {
+						Dungeon.fail(w);
+						GLog.n(Messages.get(this, "slime_death"));
+						// 英雄死在自己的 act() 中途：到此为止，不再往下走到 ready()。
+						// 否则死掉的英雄又回到「可操作」状态（地图还能点、只看 ready 的按钮还能按）
+						ready = false;
+						return false;
+					}
+				}
+			}
+		}
+
+
+		SmallWoodenCross smallWoodenCross = hero.belongings.getItem(SmallWoodenCross.class);
+		if (smallWoodenCross != null && Dungeon.smwcLevel()) {
+			if(!Statistics.RectorGetHP){
+				Buff.affect(hero, VitaeBuff.class).addVitae(6);
+				Statistics.RectorGetHP = true;
+				GLog.p(Messages.get(smallWoodenCross, "bless"));
+			}
+		}
+
+		// 仙女座：视野内敌人从少于 3 个变成 3 个或以上时，预警一次
+		if (belongings.secondaryArmor() instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.secondary.Andromeda
+				&& STR() >= belongings.secondaryArmor().STRReq()) {
+			int androFoes = 0;
+			for (Mob am : Dungeon.level.mobs.toArray(new Mob[0])) {
+				if (am.alignment == Alignment.ENEMY && Dungeon.level.heroFOV[am.pos]) androFoes++;
+			}
+			if (androFoes >= 3 && andromedaSeenFoes < 3 && andromedaCd <= 0) {
+				GLog.w( Messages.get( com.shatteredpixel.shatteredpixeldungeon.items.armor.secondary.Andromeda.class, "warning" ) );
+				andromedaCd = 30;
+			}
+			andromedaSeenFoes = androFoes;
+		}
+		if (andromedaCd > 0) andromedaCd--;
+
+		int mobcount = 0;
+		if (hero.hasTalent(Talent.HIDE_IN_CROWD)){
+			for (Mob mob : Dungeon.level.mobs.toArray(new Mob[0])){
+				if(fieldOfView[mob.pos]){
+					mobcount++;
+				}
+			}
+			if(mobcount >= 6 - hero.pointsInTalent(Talent.HIDE_IN_CROWD)){
+				if(buff(Talent.HideInCrowdCooldown.class) == null){
+					Buff.affect(hero, Invisibility.class,7f);
+					Buff.affect(hero, Talent.HideInCrowdCooldown.class, 50f);
+				}
+			}
+		}
+
+		if (hero.hasTalent(Talent.GOD_BODY)){
+			for (Buff buff : hero.buffs()) {
+				if (buff.type == Buff.buffType.NEGATIVE && buff.isAboutToEnd(-1f) && buff instanceof Corrosion) { // 使用阈值检测方法
+					buff.detach();
+				} else if (buff.type == Buff.buffType.NEGATIVE && buff.isAboutToEnd(Dungeon.hero.pointsInTalent(Talent.GOD_BODY) == 2 ? 1f : 0f)) { // 使用阈值检测方法
+					buff.detach();
+				}
+			}
+		}
 
 		if (buff(Endure.EndureTracker.class) != null){
 			buff(Endure.EndureTracker.class).endEnduring();
 		}
-		
+
 		if (!ready) {
 			//do a full observe (including fog update) if not resting.
-			if (!resting || buff(MindVision.class) != null || buff(Awareness.class) != null) {
+			if (!resting || buff(MindVision.class) != null || buff(Awareness.class) != null || Dungeon.hero.hasTalent(Talent.SOUL_NOWIFI)) {
 				Dungeon.observe();
 			} else {
 				//otherwise just directly re-calculate FOV
 				Dungeon.level.updateFieldOfView(this, fieldOfView);
 			}
 		}
-		
+
 		checkVisibleMobs();
 		BuffIndicator.refreshHero();
-		BuffIndicator.refreshBoss();
-		
+		BuffIndicator.refreshAllBosses();
+
+		// 不消耗时间的阻塞动画播放中（如杂散变身）：真正阻塞英雄行动，让动画一口气播完，不被移动/攻击/ready 打断，也不消耗回合
+		if (animationBusy) {
+			return false;
+		}
+
 		if (paralysed > 0) {
-			
+
 			curAction = null;
-			
+
 			spendAndNext( TICK );
 			return false;
 		}
-		
+
 		boolean actResult;
 		if (curAction == null) {
-			
+
 			if (resting) {
+				// 圆球皮肤：等待时若角度不正确，用至多 1 回合的等待时间旋转回正确方向
+				if (isSphereSkin()){
+					sphereRotateWhileWaiting( Math.min( sphereRotationTime( 0f ), TIME_TO_REST ) );
+				}
 				spendConstant( TIME_TO_REST );
 				next();
 			} else {
@@ -875,62 +1498,95 @@ public class Hero extends Char {
 					buff(TalismanOfForesight.Foresight.class).checkAwareness();
 				}
 			}
-			
+
 			actResult = false;
-			
+
 		} else {
-			
+
 			resting = false;
-			
+
 			ready = false;
-			
+
 			if (curAction instanceof HeroAction.Move) {
 				actResult = actMove( (HeroAction.Move)curAction );
-				
+
 			} else if (curAction instanceof HeroAction.Interact) {
 				actResult = actInteract( (HeroAction.Interact)curAction );
-				
+
 			} else if (curAction instanceof HeroAction.Buy) {
 				actResult = actBuy( (HeroAction.Buy)curAction );
-				
+
 			}else if (curAction instanceof HeroAction.PickUp) {
 				actResult = actPickUp( (HeroAction.PickUp)curAction );
-				
+
 			} else if (curAction instanceof HeroAction.OpenChest) {
 				actResult = actOpenChest( (HeroAction.OpenChest)curAction );
-				
+
 			} else if (curAction instanceof HeroAction.Unlock) {
 				actResult = actUnlock((HeroAction.Unlock) curAction);
-				
+
 			} else if (curAction instanceof HeroAction.Mine) {
 				actResult = actMine( (HeroAction.Mine)curAction );
 
 			}else if (curAction instanceof HeroAction.LvlTransition) {
 				actResult = actTransition( (HeroAction.LvlTransition)curAction );
-				
+
+			} else if (curAction instanceof HeroAction.EnterDoor) {
+				actResult = actEnterDoor( (HeroAction.EnterDoor)curAction );
+
 			} else if (curAction instanceof HeroAction.Attack) {
 				actResult = actAttack( (HeroAction.Attack)curAction );
-				
+
 			} else if (curAction instanceof HeroAction.Alchemy) {
 				actResult = actAlchemy( (HeroAction.Alchemy)curAction );
-				
+
 			} else {
 				actResult = false;
 			}
 		}
-		
+
 		if(hasTalent(Talent.BARKSKIN) && Dungeon.level.map[pos] == Terrain.FURROWED_GRASS){
 			Barkskin.conditionallyAppend(this, (lvl*pointsInTalent(Talent.BARKSKIN))/2, 1 );
 		}
-		
+
 		return actResult;
 	}
-	
+
 	public void busy() {
 		ready = false;
 	}
-	
-	private void ready() {
+
+	/**
+	 * 开始一段"不消耗时间"的阻塞动画（如变身、特殊演出）。
+	 * <p>
+	 * 原理：置 {@link #animationBusy}=true，使 {@link #act()} 在动画播放期间被拦截
+	 * （不行动、不 spend、不推进回合）；调用 {@code startAnim.call()} 播放动画。
+	 * <p>
+	 * 动画播放完成后，必须在动画回调里调用 {@link #finishAnimationNoTime()} 恢复英雄行动。
+	 * 示例：
+	 * <pre>
+	 * hero.playAnimationNoTime( () -&gt; sprite.playXxx( () -&gt; hero.finishAnimationNoTime() ) );
+	 * </pre>
+	 *
+	 * @param startAnim 触发动画播放的动作（回调内调用 sprite.playXxx(...)，并在其完成回调里调用 {@link #finishAnimationNoTime()})
+	 */
+	public void playAnimationNoTime( Callback startAnim ) {
+		ready = false;
+		animationBusy = true;
+		if (startAnim != null) startAnim.call();
+	}
+
+	/**
+	 * 结束一段"不消耗时间"的阻塞动画，恢复英雄行动。
+	 * <p>
+	 * 通常在动画完成回调里调用；调用后英雄可在同一回合继续操作（未 spend，未消耗时间）。
+	 */
+	public void finishAnimationNoTime() {
+		animationBusy = false;
+		ready();
+	}
+
+	public void ready() {
 		if (sprite.looping()) sprite.idle();
 		curAction = null;
 		damageInterrupt = true;
@@ -939,21 +1595,63 @@ public class Hero extends Char {
 		canSelfTrample = true;
 
 		AttackIndicator.updateState();
-		
+
+		//多物品堆连续拾取：刚通过选择窗口拾取且堆中仍有物品时，英雄就绪后重新打开选择窗口
+		if (pickupWindowCell >= 0) {
+			int cell = pickupWindowCell;
+			pickupWindowCell = -1;
+			if (Dungeon.level != null) {
+				Heap heap = Dungeon.level.heaps.get( cell );
+				if (heap != null && !heap.isEmpty() && heap.type == Heap.Type.HEAP) {
+					//窗口会测量文字并加载物品贴图，必须在渲染线程创建
+					Game.runOnRenderThread(new Callback() {
+						@Override
+						public void call() {
+							GameScene.show( new WndHeapSelect( heap, cell ) );
+						}
+					});
+				}
+			}
+		}
+
 		GameScene.ready();
+
+		// 明灯附魔：未失明时至少拥有 3+等级 格视野；放下武器后恢复基础视野
+		if (Dungeon.level != null && buff( com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness.class ) == null) {
+			int baseView = buff( com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light.class ) != null
+					? Math.max( com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light.DISTANCE,
+							Dungeon.level.viewDistance )
+					: Dungeon.level.viewDistance;
+			com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon w = belongings.weapon();
+			if (w instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon
+					&& ((com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon) w).enchantment
+					instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lamp) {
+				baseView = baseView + 3 + Math.max( 0,
+						((com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon) w).buffedLvl() );
+			}
+			if (viewDistance != baseView) {
+				viewDistance = baseView;
+				Dungeon.observe();
+			}
+		}
+
+		// 推进附魔：待处理的突进询问
+		com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Propulsion.onHeroReady( this );
+		// 脉冲附魔：装备期间即开始计时
+		com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Pulse.onHeroReady( this );
 	}
-	
+
 	public void interrupt() {
 		if (isAlive() && curAction != null &&
-			((curAction instanceof HeroAction.Move && curAction.dst != pos) ||
-			(curAction instanceof HeroAction.LvlTransition))) {
+				((curAction instanceof HeroAction.Move && curAction.dst != pos) ||
+						(curAction instanceof HeroAction.LvlTransition))) {
 			lastAction = curAction;
 		}
 		curAction = null;
 		GameScene.resetKeyHold();
 		resting = false;
 	}
-	
+
 	public void resume() {
 		curAction = lastAction;
 		lastAction = null;
@@ -966,19 +1664,19 @@ public class Hero extends Char {
 		return canSelfTrample && !rooted && !flying &&
 				//standing in high grass
 				(Dungeon.level.map[pos] == Terrain.HIGH_GRASS ||
-				//standing in furrowed grass and not huntress
-				(heroClass != HeroClass.HUNTRESS && Dungeon.level.map[pos] == Terrain.FURROWED_GRASS) ||
-				//standing on a plant
-				Dungeon.level.plants.get(pos) != null);
+						//standing in furrowed grass and not huntress
+						(heroClass != HeroClasses.HUNTRESS && Dungeon.level.map[pos] == Terrain.FURROWED_GRASS) ||
+						//standing on a plant
+						Dungeon.level.plants.get(pos) != null);
 	}
-	
+
 	private boolean actMove( HeroAction.Move action ) {
 
 		if (getCloser( action.dst )) {
 			canSelfTrample = false;
 			return true;
 
-		//Hero moves in place if there is grass to trample
+			//Hero moves in place if there is grass to trample
 		} else if (pos == action.dst && canSelfTrample()){
 			canSelfTrample = false;
 			Dungeon.level.pressCell(pos);
@@ -989,19 +1687,19 @@ public class Hero extends Char {
 			return false;
 		}
 	}
-	
+
 	private boolean actInteract( HeroAction.Interact action ) {
-		
+
 		Char ch = action.ch;
 
 		if (ch.isAlive() && ch.canInteract(this)) {
-			
+
 			ready();
 			sprite.turnTo( pos, ch.pos );
 			return ch.interact(this);
-			
+
 		} else {
-			
+
 			if (fieldOfView[ch.pos] && getCloser( ch.pos )) {
 
 				return true;
@@ -1010,16 +1708,16 @@ public class Hero extends Char {
 				ready();
 				return false;
 			}
-			
+
 		}
 	}
-	
+
 	private boolean actBuy( HeroAction.Buy action ) {
 		int dst = action.dst;
 		if (pos == dst) {
 
 			ready();
-			
+
 			Heap heap = Dungeon.level.heaps.get( dst );
 			if (heap != null && heap.type == Type.FOR_SALE && heap.size() == 1) {
 				Game.runOnRenderThread(new Callback() {
@@ -1047,7 +1745,7 @@ public class Hero extends Char {
 		if (Dungeon.level.distance(dst, pos) <= 1) {
 
 			ready();
-			
+
 			AlchemistsToolkit.kitEnergy kit = buff(AlchemistsToolkit.kitEnergy.class);
 			if (kit != null && kit.isCursed()){
 				GLog.w( Messages.get(AlchemistsToolkit.class, "cursed"));
@@ -1072,15 +1770,59 @@ public class Hero extends Char {
 	// so that the hero spends a turn even if the fail to pick up an item
 	public boolean waitOrPickup = false;
 
+	//多物品堆拾取：弹出选择窗口后记录玩家选中的物品，抵达后拾取该物品
+	public Item pendingPickupItem = null;
+
+	//多物品堆连续拾取：本次选择窗口拾取后，若堆中仍有物品，记录格子以便下回合重新打开选择窗口（-1 表示无需重新打开）
+	public int pickupWindowCell = -1;
+
 	private boolean actPickUp( HeroAction.PickUp action ) {
 		int dst = action.dst;
 		if (pos == dst) {
-			
+
 			Heap heap = Dungeon.level.heaps.get( pos );
 			if (heap != null) {
-				Item item = heap.peek();
-				if (item.doPickUp( this )) {
-					heap.pickUp();
+				Item item = null;
+				boolean windowPick = false;
+				//商品堆最底下那件要花钱买，这里永远不捡它，只捡叠在它上面的东西
+				Item forSale = heap.forSaleItem();
+				if (pendingPickupItem != null) {
+					//从选择窗口记录中取出选中的物品（堆可能已变化，找不到则回退到堆顶）
+					if (pendingPickupItem != forSale && heap.items.contains(pendingPickupItem)) {
+						item = pendingPickupItem;
+						windowPick = true;
+					}
+					pendingPickupItem = null;
+				}
+				if (item == null && !heap.isEmpty()) {
+					//多物品堆自动拾取：弹出选择窗口，选择要自动拾取哪个物品
+					//商品堆不弹窗：窗口会把商品也列出来，改为从上往下一件件捡
+					if (heap.size() > 1 && forSale == null) {
+						pendingPickupItem = null;
+						pickupWindowCell = -1;
+						final Heap fHeap = heap;
+						Game.runOnRenderThread(new Callback() {
+							@Override
+							public void call() {
+								GameScene.show(new WndHeapSelect(fHeap, pos));
+							}
+						});
+						ready();
+						return false;
+					}
+					item = heap.peek();
+				}
+				if (heap.isEmpty() || item == forSale) {
+					ready();
+				} else if (item.doPickUp( this )) {
+					heap.pickUp(item);
+
+					//多物品堆连续拾取：本次来自选择窗口且堆中仍有物品时，记录格子，下回合英雄就绪后重新打开选择窗口
+					if (windowPick && !heap.isEmpty()) {
+						pickupWindowCell = pos;
+					} else {
+						pickupWindowCell = -1;
+					}
 
 					if (item instanceof Dewdrop
 							|| item instanceof TimekeepersHourglass.sandBag
@@ -1108,7 +1850,7 @@ public class Hero extends Char {
 							GLog.i( Messages.capitalize(Messages.get(this, "you_now_have", item.name())) );
 						}
 					}
-					
+
 					curAction = null;
 				} else {
 
@@ -1150,38 +1892,38 @@ public class Hero extends Char {
 			return false;
 		}
 	}
-	
+
 	private boolean actOpenChest( HeroAction.OpenChest action ) {
 		int dst = action.dst;
 		if (Dungeon.level.adjacent( pos, dst ) || pos == dst) {
 			path = null;
-			
+
 			Heap heap = Dungeon.level.heaps.get( dst );
 			if (heap != null && (heap.type != Type.HEAP && heap.type != Type.FOR_SALE)) {
-				
+
 				if ((heap.type == Type.LOCKED_CHEST && Notes.keyCount(new GoldenKey(Dungeon.depth)) < 1)
-					|| (heap.type == Type.CRYSTAL_CHEST && Notes.keyCount(new CrystalKey(Dungeon.depth)) < 1)){
+						|| (heap.type == Type.CRYSTAL_CHEST && Notes.keyCount(new CrystalKey(Dungeon.depth)) < 1)){
 
-						GLog.w( Messages.get(this, "locked_chest") );
-						ready();
-						return false;
+					GLog.w( Messages.get(this, "locked_chest") );
+					ready();
+					return false;
 
 				}
-				
+
 				switch (heap.type) {
-				case TOMB:
-					Sample.INSTANCE.play( Assets.Sounds.TOMB );
-					PixelScene.shake( 1, 0.5f );
-					break;
-				case SKELETON:
-				case REMAINS:
-					break;
-				default:
-					Sample.INSTANCE.play( Assets.Sounds.UNLOCK );
+					case TOMB:
+						Sample.INSTANCE.play( Assets.Sounds.TOMB );
+						PixelScene.shake( 1, 0.5f );
+						break;
+					case SKELETON:
+					case REMAINS:
+						break;
+					default:
+						Sample.INSTANCE.play( Assets.Sounds.UNLOCK );
 				}
-				
+
 				sprite.operate( dst );
-				
+
 			} else {
 				ready();
 			}
@@ -1197,20 +1939,20 @@ public class Hero extends Char {
 			return false;
 		}
 	}
-	
+
 	private boolean actUnlock( HeroAction.Unlock action ) {
 		int doorCell = action.dst;
 		if (Dungeon.level.adjacent( pos, doorCell )) {
 			path = null;
-			
+
 			boolean hasKey = false;
 			int door = Dungeon.level.map[doorCell];
-			
+
 			if (door == Terrain.LOCKED_DOOR
 					&& Notes.keyCount(new IronKey(Dungeon.depth)) > 0) {
-				
+
 				hasKey = true;
-				
+
 			} else if (door == Terrain.CRYSTAL_DOOR
 					&& Notes.keyCount(new CrystalKey(Dungeon.depth)) > 0) {
 
@@ -1220,15 +1962,15 @@ public class Hero extends Char {
 					&& Notes.keyCount(new SkeletonKey(Dungeon.depth)) > 0) {
 
 				hasKey = true;
-				
+
 			}
-			
+
 			if (hasKey) {
-				
+
 				sprite.operate( doorCell );
-				
+
 				Sample.INSTANCE.play( Assets.Sounds.UNLOCK );
-				
+
 			} else {
 				GLog.w( Messages.get(this, "locked_door") );
 				ready();
@@ -1253,7 +1995,7 @@ public class Hero extends Char {
 					|| Dungeon.level.map[action.dst] == Terrain.WALL_DECO
 					|| Dungeon.level.map[action.dst] == Terrain.MINE_CRYSTAL
 					|| Dungeon.level.map[action.dst] == Terrain.MINE_BOULDER)
-				&& Dungeon.level.insideMap(action.dst)){
+					&& Dungeon.level.insideMap(action.dst)){
 				sprite.attack(action.dst, new Callback() {
 					@Override
 					public void call() {
@@ -1290,7 +2032,7 @@ public class Hero extends Char {
 							//mining gold doesn't break crystals
 							crystalAdjacent = false;
 
-						//4 hunger spent total
+							//4 hunger spent total
 						} else if (Dungeon.level.map[action.dst] == Terrain.WALL){
 							buff(Hunger.class).affectHunger(-3);
 							PixelScene.shake(0.5f, 0.5f);
@@ -1298,13 +2040,13 @@ public class Hero extends Char {
 							Sample.INSTANCE.play( Assets.Sounds.MINE );
 							Level.set( action.dst, Terrain.EMPTY_DECO );
 
-						//1 hunger spent total
+							//1 hunger spent total
 						} else if (Dungeon.level.map[action.dst] == Terrain.MINE_CRYSTAL){
 							Splash.at(action.dst, 0xFFFFFF, 5);
 							Sample.INSTANCE.play( Assets.Sounds.SHATTER );
 							Level.set( action.dst, Terrain.EMPTY );
 
-						//1 hunger spent total
+							//1 hunger spent total
 						} else if (Dungeon.level.map[action.dst] == Terrain.MINE_BOULDER){
 							Splash.at(action.dst, 0x555555, 5);
 							Sample.INSTANCE.play( Assets.Sounds.MINE, 0.6f );
@@ -1362,10 +2104,60 @@ public class Hero extends Char {
 			return false;
 		}
 	}
-	
+
+	private boolean actEnterDoor( HeroAction.EnterDoor action ) {
+		int cell = action.dst;
+		com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialDoor door =
+				com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialDoors.get(Dungeon.level, cell);
+
+		if (rooted) {
+			PixelScene.shake(1, 1f);
+			ready();
+			return false;
+		}
+
+		if (door == null || !Dungeon.level.adjacent(pos, cell) || Actor.findChar(cell) != null
+				|| !com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialDoors.allowsOpen(
+						Dungeon.level, cell, pos)) {
+			String message = com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialDoors.blockMessage(door);
+			if (message != null) {
+				GLog.w(message);
+			}
+			ready();
+			return false;
+		}
+
+		com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialDoors.open(Dungeon.level, cell);
+		path = null;
+
+		float speed = speed();
+		sprite.move(pos, cell);
+		move(cell);
+		spend(1 / speed);
+		justMoved = true;
+		search(false);
+		return true;
+	}
+
 	private boolean actTransition(HeroAction.LvlTransition action ) {
 		int stairs = action.dst;
 		LevelTransition transition = Dungeon.level.getTransition(stairs);
+
+		com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialStair stair =
+				com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialStairs.of(Dungeon.level, transition);
+		com.shatteredpixel.shatteredpixeldungeon.events.TransitionUseAttemptEvent attempt =
+				new com.shatteredpixel.shatteredpixeldungeon.events.TransitionUseAttemptEvent(this, transition, stair);
+		com.shatteredpixel.shatteredpixeldungeon.events.EventManager.emit(attempt);
+		if (attempt.isCancelled()) {
+			String message = stair != null
+					? com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialStairs.blockMessage(stair)
+					: null;
+			if (message != null) {
+				GLog.w(message);
+			}
+			ready();
+			return false;
+		}
 
 		if (rooted) {
 			PixelScene.shake(1, 1f);
@@ -1391,29 +2183,64 @@ public class Hero extends Char {
 			return false;
 		}
 	}
-	
+
 	private boolean actAttack( HeroAction.Attack action ) {
 
 		enemy = action.target;
 
+		// 魅惑判定和原版一样放在最前面。以前它排在锁链分支后面的 else if 里，
+		// 拿着锁链时永远走不到：被魅惑也照样能攻击（或拉过来）魅惑自己的那只怪
 		if (isCharmedBy( enemy )){
 			GLog.w( Messages.get(Charm.class, "cant_attack"));
 			ready();
 			return false;
 		}
 
+		// 检查武器是否可以攻击（特殊武器如斩舰刀可能在此等待）
+		// 这个方法里都用 weapon() 而不是字段：丢失背包期间没被保留的武器不生效（空手不该还能等待蓄力、甩锁链）
+		if (belongings.weapon() != null && !belongings.weapon().actAttack(hero, enemy, action)) {
+			// 武器需要等待，已处理等待逻辑
+			return false;
+		}
+
+		if(belongings.weapon() instanceof LockChain) {
+			LockChain lk = (LockChain) belongings.weapon();
+			if(Dungeon.level.distance( enemy.pos, pos ) <= 1){
+				sprite.attack(enemy.pos);
+			} else if(Dungeon.level.distance( enemy.pos,pos ) <= lk.RCH
+					|| enemy.buff(Seeking.SeekingBuff.class) != null) {
+				if (!chain(enemy.pos)) {
+					ready();
+					GLog.w( Messages.get(LockChain.class, "cant_attack_2"));
+				}
+			} else {
+				ready();
+				GLog.w( Messages.get(LockChain.class, "cant_attack"));
+			}
+			return false;
+		} else if (fearBlocksMelee()){
+			// 恐惧期间双手发抖，无法使用近战攻击（远程、法杖、投掷仍可用）
+			GLog.w( Messages.get(Hero.class, "fear_no_melee"));
+			ready();
+			return false;
+		}
+
 		if (enemy.isAlive() && canAttack( enemy ) && enemy.invisible == 0) {
 
-			if (heroClass != HeroClass.DUELIST
-					&& hasTalent(Talent.AGGRESSIVE_BARRIER)
-					&& buff(Talent.AggressiveBarrierCooldown.class) == null
-					&& (HP / (float)HT) < 0.20f*(1+pointsInTalent(Talent.AGGRESSIVE_BARRIER))){
-				Buff.affect(this, Barrier.class).setShield(3);
-				sprite.showStatusWithIcon(CharSprite.POSITIVE, "3", FloatingText.SHIELDING);
-				Buff.affect(this, Talent.AggressiveBarrierCooldown.class, 50f);
-
+			// 圆球皮肤：需先旋转到正确角度（滚动动画第 0 帧）才能发起攻击
+			if (isSphereSkin() && sphereRotateTo( 0f )){
+				return false;
 			}
+
 			sprite.attack( enemy.pos );
+
+			// 攻击成功后，移除斩舰刀的等待 buff
+			if (belongings.weapon() instanceof KillBoatSword) {
+				Buff buff = buff(KillBoatSwordWaitBuff.class);
+				if (buff != null) {
+					buff.detach();
+				}
+			}
 
 			return false;
 
@@ -1434,15 +2261,54 @@ public class Hero extends Char {
 	public Char enemy(){
 		return enemy;
 	}
-	
-	public void rest( boolean fullRest ) {
+
+	//恐惧（Terror）期间只能远程/投掷/施法，贴身近战会被打断
+	private boolean fearBlocksMelee(){
+		if (buff(Terror.class) == null) return false;
+		if (enemy == null) return false;
+		if (!Dungeon.level.adjacent(pos, enemy.pos)) return false;
+		KindOfWeapon w = belongings.attackingWeapon();
+		//空手也算近战；法杖、锁链之外的近战武器一律禁
+		return w == null || w instanceof MeleeWeapon;
+	}
+
+ 	public void rest( boolean fullRest ) {
+
+		// 庇护：原地等待时获得（3+等级）点护盾（覆盖式，不叠加）
+		com.shatteredpixel.shatteredpixeldungeon.items.armor.SecondaryArmor shelterArmor = belongings.secondaryArmor();
+		if (shelterArmor instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.secondary.Shelter
+				&& STR() >= shelterArmor.STRReq()) {
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff.affect(
+					this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier.class)
+					.setShield(3 + shelterArmor.level());
+		}
+		// 圆球皮肤：等待时若角度不正确，用至多 1 回合的等待时间旋转回正确方向
+		if (isSphereSkin()){
+			sphereRotateWhileWaiting( Math.min( sphereRotationTime( 0f ), TIME_TO_REST ) );
+		}
 		spendAndNextConstant( TIME_TO_REST );
 		if (hasTalent(Talent.HOLD_FAST)){
 			Buff.affect(this, HoldFast.class);
 		}
+
+		// Talent : BraceYourSelf
+		// by DoggingDog on 2024-09-21
+		if(hasTalent(Talent.BRACE_YOURSELF) && buff(Preparation.class)!=null){
+			Buff.affect(this, BraceYourself.class);
+		}
+		// end
+
 		if (hasTalent(Talent.PATIENT_STRIKE)){
 			Buff.affect(Dungeon.hero, Talent.PatientStrikeTracker.class).pos = Dungeon.hero.pos;
 		}
+
+		if(hero.belongings.weapon() instanceof KillBoatSword && hero.buff(KillBoatSwordWaitBuff.class) == null) {
+			Buff.affect(this, KillBoatSwordWaitBuff.class);
+			hero.sprite.centerEmitter().burst(EnergyParticle.FACTORY, 15);
+			Sample.INSTANCE.play(Assets.Sounds.KILL_BOAT_SWORD_SWING);
+
+			hero.sprite.showStatus(CharSprite.WARNING, Messages.get(KillBoatSword.class, "ready"));
+		};
 		if (!fullRest) {
 			if (sprite != null) {
 				sprite.showStatus(CharSprite.DEFAULT, Messages.get(this, "wait"));
@@ -1450,71 +2316,284 @@ public class Hero extends Char {
 		}
 		resting = fullRest;
 	}
-	
+
+	public void WandOfCorrectNoTime(float chargesPerCast,Char mob){
+		if(Random.Float()<=chargesPerCast){
+			int fixedDamage = 12 + Dungeon.depth;
+			hero.sprite.parent.add(new Beam.DeathRay(hero.sprite.center(), DungeonTilemap.raisedTileCenterToWorld( mob.pos )));
+			if (mob.properties().contains(Property.DEMONIC) || mob.properties().contains(Property.UNDEAD)) {
+				fixedDamage = (int) (fixedDamage * 1.25f);
+			}
+			mob.damage(DamageInfo.of(fixedDamage, DamageType.MAGICAL, this, this));
+			mob.sprite.centerEmitter().burst(PurpleParticle.BURST, Random.IntRange(1, 2));
+			mob.sprite.flash();
+		}
+	}
+
+	private boolean comboAttacking = false;
+
 	@Override
 	public int attackProc( final Char enemy, int damage ) {
 		damage = super.attackProc( enemy, damage );
 
-		KindOfWeapon wep;
-		if (RingOfForce.fightingUnarmed(this) && !RingOfForce.unarmedGetsWeaponEnchantment(this)){
-			wep = null;
-		} else {
-			wep = belongings.attackingWeapon();
+		// 黑带：空手攻击使敌人虚弱（2+等级）回合，空手伤害 +（2+等级）
+		com.shatteredpixel.shatteredpixeldungeon.items.armor.SecondaryArmor blackBelt = belongings.secondaryArmor();
+		if (blackBelt instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.secondary.BlackBelt
+				&& STR() >= blackBelt.STRReq()
+				&& belongings.weapon() == null && enemy != null) {
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff.affect(
+					enemy, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple.class, 2 + blackBelt.level());
+			damage += 2 + blackBelt.level();
 		}
 
-		if (wep != null) damage = wep.proc( this, enemy, damage );
+		// 冠军腰带：对精英与 Boss 的伤害 +（10+5*等级）%
+		com.shatteredpixel.shatteredpixeldungeon.items.armor.SecondaryArmor champBelt = belongings.secondaryArmor();
+		if (champBelt instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.secondary.ChampionBelt
+				&& STR() >= champBelt.STRReq() && enemy != null
+				&& (enemy.properties.contains(Char.Property.BOSS)
+					|| enemy.properties.contains(Char.Property.MINIBOSS)
+					|| !enemy.buffs(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy.class).isEmpty())) {
+			damage = Math.round(damage * (1f + (10 + 5 * champBelt.level()) / 100f));
+		}
+
+
+		if (buff(Talent.SpiritBladesTracker.class) != null
+				&& Random.Int(10) < 3*pointsInTalent(Talent.SPIRIT_BLADES)){
+			SpiritBow bow = belongings.getItem(SpiritBow.class);
+			if (bow != null) damage = bow.proc( this, enemy, damage );
+			buff(Talent.SpiritBladesTracker.class).detach();
+		}
+
+//		KindOfWeapon wept = belongings.weapon();
+//		if (wept instanceof CelestialSphere) {
+//			int magicDamage;
+//			magicDamage = Random.NormalIntRange(wept.min(wept.level()),wept.max(wept.level()));
+//			enemy.damage(magicDamage, new DM100.LightningBolt());
+//			damage = wept.proc( this, enemy,0 );
+//		}
+
+		KindOfWeapon wep;
+		wep = belongings.attackingWeapon();
+
+		if (heroClass != HeroClasses.CARDTRICKSTER) {
+			int protection = pointsInTalent(Talent.BLANK_PROTECTION);
+			if (protection > 0 && wep instanceof MissileWeapon
+					&& buff(Talent.CardProtectionCooldown.class) == null) {
+				int shield = protection == 1 ? 2 : 4;
+				Barrier barrier = Buff.affect(this, Barrier.class);
+				barrier.setShield(barrier.shielding() + shield);
+				Buff.affect(this, Talent.CardProtectionCooldown.class, 20f);
+			}
+			int hormone = pointsInTalent(Talent.HORMONE_CARD);
+			if (hormone > 0 && Random.Float() < (hormone == 1 ? 0.1f : 0.2f)) {
+				Buff.affect(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline.class, 1f);
+			}
+		}
+
+		if (wep != null){
+			damage = wep.proc( this, enemy, damage );
+			if (wep instanceof JutteChampionWeapon) {
+				((JutteChampionWeapon) wep).onSuccessfulHit(this, enemy);
+			}
+		}
 
 		damage = Talent.onAttackProc( this, enemy, damage );
-		
-		switch (subClass) {
-		case SNIPER:
-			if (wep instanceof MissileWeapon && !(wep instanceof SpiritBow.SpiritArrow) && enemy != this) {
-				Actor.add(new Actor() {
-					
-					{
-						actPriority = VFX_PRIO;
-					}
-					
-					@Override
-					protected boolean act() {
-						if (enemy.isAlive()) {
-							int bonusTurns = hasTalent(Talent.SHARED_UPGRADES) ? wep.buffedLvl() : 0;
-							Buff.prolong(Hero.this, SnipersMark.class, SnipersMark.DURATION + bonusTurns).set(enemy.id(), bonusTurns);
+
+		// 子职业命中钩子：传入真实伤害（原先在 onAttackComplete 里传 0，导致附魔附加伤害/耐久等失效）
+		boolean subWasEnemy = enemy.alignment == Alignment.ENEMY
+				|| (enemy instanceof Mimic && enemy.alignment == Alignment.NEUTRAL);
+		subClass.onAttackProc( this, enemy, damage, true, subWasEnemy );
+
+		//Roll 2 次 投掷武器等相关惩罚
+		RiverCrystal riverGlass = hero.belongings.getItem(RiverCrystal.class);
+		if(riverGlass != null){
+			if(wep != null){
+				int dmgRoll = Integer.MAX_VALUE;
+				for (int i = 0; i < riverGlass.judgeTimes(); i++){
+					int roll = wep.damageRoll(this);
+					dmgRoll = Math.min(dmgRoll, roll);
+				}
+				int dmg = dmgRoll;
+
+				if (!(wep instanceof MissileWeapon)) {
+					dmg += RingOfForce.armedDamageBonus(this);
+					if (hasTalent(Talent.DEVASTATE)){
+						if (buff(Combo.class)!=null){
+							int c=Math.min(buff(Combo.class).getComboCount(),10);
+							dmg+=Random.NormalIntRange(0,pointsInTalent(Talent.DEVASTATE)*c);
 						}
-						Actor.remove(this);
-						return true;
 					}
-				});
+				}
+
+				damage = dmg;
 			}
-			break;
-		default:
 		}
-		
+
+
+
+
+		if (wep instanceof MeleeWeapon || wep == null) {
+			switch (hero.pointsInTalent(Talent.PHARCIS_BLESS)){
+				case 1:
+					WandOfCorrectNoTime(0.13f,enemy);
+					break;
+				case 2:
+					WandOfCorrectNoTime(0.26f,enemy);
+					break;
+				case 3:
+					WandOfCorrectNoTime(0.40f,enemy);
+					break;
+			}
+		}
+
+
+		if (subClass == HeroSubClasses.SNIPER) {
+
+			if (!(sniperSpecial) && wep instanceof MissileWeapon && !(wep instanceof SpiritBow.SpiritArrow ||wep instanceof SpiritBow.ALTSpiritArrow) && enemy != this) {
+
+					Actor.add(new Actor() {
+
+						{
+							actPriority = VFX_PRIO;
+						}
+
+						@Override
+						protected boolean act() {
+							if (enemy.isAlive()) {
+								int bonusTurns = hasTalent(Talent.SHARED_UPGRADES) ? wep.buffedLvl() : 0;
+								if( !hero.hasTalent(Talent.BOW_DULES) ){
+									Buff.prolong(Hero.this, SnipersMark.class, SnipersMark.DURATION + bonusTurns).set(enemy.id(), bonusTurns);
+								} else if(hero.buff(SnipersMark.class)!=null){
+									//hero.buff(SnipersMark.class).setSec(enemy.id(), bonusTurns);
+									Buff.prolong(Hero.this, SnipersMark.class, SnipersMark.DURATION + bonusTurns).setSec(enemy.id(), bonusTurns);
+								}else{
+									Buff.prolong(Hero.this, SnipersMark.class, SnipersMark.DURATION + bonusTurns).set(enemy.id(), bonusTurns);
+								}
+							}
+							Actor.remove(this);
+							return true;
+						}
+					});
+				}else if(!(sniperSpecial) && (wep instanceof SpiritBow.SpiritArrow ||wep instanceof SpiritBow.ALTSpiritArrow)  && enemy != this){
+					if(hasTalent(Talent.BOW_DULES) && pointsInTalent(Talent.BOW_DULES)>=2) {
+						boolean ranged = enemy instanceof Tengu || enemy instanceof YogDzewa || enemy instanceof Mayfly || enemy instanceof DM100 || enemy instanceof Shaman || enemy instanceof GnollZealot || enemy instanceof Warlock || enemy instanceof Elemental.FireElemental || enemy instanceof Elemental.ChaosElemental || enemy instanceof Elemental.FrostElemental || enemy instanceof Elemental.ShockElemental || enemy instanceof Artillerist || enemy instanceof Scorpio || enemy instanceof Eye;
+						//Mayfly, DM100, Shaman, GnollZealot, Warlock, Elemental.FireElemental , Elemental.NewbornFireElemental , Elemental.ChaosElemental, Elemental.FrostElemental, Elemental.ShockElemental, Artillerist, Acidic, Scorpio ,eye
+						//Tengu, YogDzewa
+
+                        if (enemy instanceof Mob && (((Mob) enemy).surprisedBy(this)) ||(pointsInTalent(Talent.BOW_DULES)>=3 && ranged)){
+
+							Actor.add(new Actor() {
+
+								{
+									actPriority = VFX_PRIO;
+								}
+
+								@Override
+								protected boolean act() {
+									if (enemy.isAlive()) {
+										int bonusTurns = hasTalent(Talent.SHARED_UPGRADES) ? wep.buffedLvl() : 0;
+										if (!hero.hasTalent(Talent.BOW_DULES)) {
+											Buff.prolong(Hero.this, SnipersMark.class, SnipersMark.DURATION + bonusTurns).set(enemy.id(), bonusTurns);
+										} else if (hero.buff(SnipersMark.class) != null) {
+											Buff.prolong(Hero.this, SnipersMark.class, SnipersMark.DURATION + bonusTurns).setSec(enemy.id(), bonusTurns);
+										}
+									}
+									Actor.remove(this);
+									return true;
+								}
+							});
+						}
+					}
+				}
+			}
+
+		damage = TieredToyEffects.attackProc(this, enemy, damage);
+
+		// 子职业命中钩子：必须传入真实伤害（魔武士附加魔法伤害、影舞者双重打击等）
+		if (subClass != null && enemy != null) {
+			subClass.onAttackProc(this, enemy, damage, true, enemy.alignment == Char.Alignment.ENEMY);
+		}
+
+		// 红包连击：每次连击都是一次独立攻击，但不额外消耗回合
+		if (!comboAttacking) {
+			comboAttacking = true;
+			int comboHits = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.comboHits(this);
+			for (int i = 0; i < comboHits && enemy != null && enemy.isAlive(); i++) {
+				attack(enemy, 1f, 0f, 1f);
+			}
+			comboAttacking = false;
+		}
+
 		return damage;
 	}
-	
+
+
+	public void SlowHealDamage(int damage){
+		if(hero.buff(Talent.SlowHealingDeadCooldown.class) == null){
+			Buff.affect(hero, Healing.class).setHeal(damage, 0.05f, 0);
+		}
+	}
+
 	@Override
 	public int defenseProc( Char enemy, int damage ) {
-		
-		if (damage > 0 && subClass == HeroSubClass.BERSERKER){
-			Berserk berserk = Buff.affect(this, Berserk.class);
-			berserk.damage(damage);
+
+		// 拉莱耶反弹已迁移至 Rlyeh 订阅 AttackEvent 处理
+
+		// 怪物偷袭英雄：视野外攻击弹感叹号（只特效，不改变伤害/防御）
+		if (surprisedBy(enemy)) {
+			Surprise.hit(this);
 		}
-		
+
 		if (belongings.armor() != null) {
 			damage = belongings.armor().proc( enemy, this, damage );
 		}
+
+		subClass.onDefenseProc(this, enemy, damage);
 
 		WandOfLivingEarth.RockArmor rockArmor = buff(WandOfLivingEarth.RockArmor.class);
 		if (rockArmor != null) {
 			damage = rockArmor.absorb(damage);
 		}
-		
+
+		// 战术投掷（老魔杖灌注灵壤法杖）给的是它自己的那个灵壤护甲 buff，以前这里没接上：
+		// 它的 absorb() 没有任何地方调用，既不挡伤害、护甲量也永远不减少
+		TacticalThrowTalen4Battlemage.RockArmor throwRockArmor = buff(TacticalThrowTalen4Battlemage.RockArmor.class);
+		if (throwRockArmor != null) {
+			damage = throwRockArmor.absorb(damage);
+		}
+
 		return super.defenseProc( enemy, damage );
 	}
-	
+
 	@Override
-	public void damage( int dmg, Object src ) {
+	public int wandLevel() {
+		int total = 0;
+		for (Wand w : belongings.getAllItems(Wand.class)) {
+			total += w.buffedLvl();
+		}
+		return total;
+	}
+
+	@Override
+	protected void collectDamageModifiers(List<IDamageModifier> out) {
+		super.collectDamageModifiers(out);
+		collectArmorGlyphs(out, belongings.armor(), this);
+		addDamageModifier(out, belongings.weapon());
+		addDamageModifier(out, belongings.artifact());
+		addDamageModifier(out, belongings.misc());
+		addDamageModifier(out, belongings.ring());
+		addDamageModifier(out, belongings.ring2());
+		for (com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring r : belongings.extraRings) addDamageModifier(out, r);
+		addDamageModifier(out, belongings.secondWep());
+		for (Item it : belongings) {
+			if (it instanceof Trinket) addDamageModifier(out, it);
+		}
+	}
+
+	@Override
+	public void damage( DamageInfo info ) {
+		int dmg = info.getDamage();
+		Object src = info.getSource();
 		if (buff(TimekeepersHourglass.timeStasis.class) != null)
 			return;
 
@@ -1529,17 +2608,53 @@ public class Hero extends Char {
 			}
 		}
 
+		if (dmg >= 10) {
+			switch (hero.pointsInTalent(Talent.BEN_WORK)) {
+				case 1:
+					SlowHealDamage((int) (dmg * 0.5f));
+					if (hero.buff(Talent.SlowHealingDeadCooldown.class) == null)
+						Buff.affect(hero, Talent.SlowHealingDeadCooldown.class, 50f);
+					break;
+				case 2:
+					SlowHealDamage((int) (dmg * 0.7f));
+					if (hero.buff(Talent.SlowHealingDeadCooldown.class) == null)
+						Buff.affect(hero, Talent.SlowHealingDeadCooldown.class, 40f);
+					break;
+				case 3:
+					SlowHealDamage((int) (dmg * 0.9f));
+					if (hero.buff(Talent.SlowHealingDeadCooldown.class) == null)
+						Buff.affect(hero, Talent.SlowHealingDeadCooldown.class, 30f);
+					break;
+			}
+		}
+
 		if (this.buff(Drowsy.class) != null){
 			Buff.detach(this, Drowsy.class);
 			GLog.w( Messages.get(this, "pain_resist") );
 		}
 
-		Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
-		if (!(src instanceof Char)){
-			//reduce damage here if it isn't coming from a character (if it is we already reduced it)
-			if (endure != null){
-				dmg = Math.round(endure.adjustDamageTaken(dmg));
+		// 次要护甲：护胫甲的物理伤害减免 / 纯洁者的无状态减伤（力量不足时效果失效）
+		com.shatteredpixel.shatteredpixeldungeon.items.armor.SecondaryArmor secArmor = belongings.secondaryArmor();
+		if (secArmor != null && STR() >= secArmor.STRReq()) {
+			if (secArmor instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.secondary.Greaves
+					&& info.getType() == com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.PHYSICAL) {
+				dmg = Math.max(0, Math.round(dmg * (1f - (10 + 2 * secArmor.level) / 100f)));
 			}
+			// 饥饿伤害每次只有 1 点，一并减掉的话没有状态时就永远饿不死，所以不减饥饿伤害
+			if (secArmor instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.secondary.ThePure
+					&& info.getType() != DamageType.HUNGER
+					&& buffs().stream().noneMatch(buff -> buff.type != com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff.buffType.NEUTRAL)) {
+				dmg = Math.max(0, dmg - Math.round(2 + 0.2f * secArmor.level));
+			}
+			if (secArmor instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.secondary.WebBelt
+					&& info.getType() == DamageType.PHYSICAL && dmg > 0
+					&& com.watabou.utils.Random.Int(5) == 0) {
+				GameScene.add(com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob.seed(pos, 20,
+						com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Web.class));
+			}
+		}
+
+		if (!(src instanceof Char)){
 			//the same also applies to challenge scroll damage reduction
 			if (buff(ScrollOfChallenge.ChallengeArena.class) != null){
 				dmg *= 0.67f;
@@ -1551,13 +2666,6 @@ public class Hero extends Char {
 			dmg = thorns.proc(dmg, (src instanceof Char ? (Char)src : null),  this);
 		}
 
-		dmg = (int)Math.ceil(dmg * RingOfTenacity.damageMultiplier( this ));
-		//TODO improve this when I have proper damage source logic
-		if (belongings.armor() != null && belongings.armor().hasGlyph(AntiMagic.class, this)
-				&& AntiMagic.RESISTS.contains(src.getClass())){
-			dmg -= AntiMagic.drRoll(this, belongings.armor().procLvl());
-		}
-
 		if (buff(Talent.WarriorFoodImmunity.class) != null){
 			if (pointsInTalent(Talent.IRON_STOMACH) == 1)       dmg = Math.round(dmg*0.25f);
 			else if (pointsInTalent(Talent.IRON_STOMACH) == 2)  dmg = Math.round(dmg*0.00f);
@@ -1567,118 +2675,31 @@ public class Hero extends Char {
 		}
 
 
-		if(hasTalent(Talent.PAIN_SCAR) && HP+ shielding() -dmg<=0){
-			int point = pointsInTalent(Talent.PAIN_SCAR);
-			float ber = 0;
-
-			if(buff(Berserk.class)!=null)
-				ber = buff(Berserk.class).getPower();
-
-			Ankh ankh = null;
-			for (Ankh i : belongings.getAllItems(Ankh.class)) {
-				if (ankh == null || i.isBlessed()) {
-					ankh = i;
-				}
-			}
-
-			boolean canResist = false;
-
-			switch (point){
-
-				case 1:
-					if(ber>=0.2f&&(originalHT-resistHealth)>20) {
-						canResist = true;
-					}
-					break;
-
-				case 2:
-
-					if(ber>=0.15f&&(originalHT-resistHealth)>15) {
-						canResist = true;
-					}
-					break;
-
-				case 3:
-
-					if(ber>=0.1f&&(originalHT-resistHealth)>10) {
-						canResist = true;
-					}
-					break;
-			}
-
-			int RH = resistHealth;
-
-			if(ankh != null && canResist){
-				GameScene.show(new WndOptions(new ItemSprite(ItemSpriteSheet.ANKH),
-						Messages.get(Talent.PAIN_SCAR,"title"),
-						Messages.get(Talent.PAIN_SCAR,"desc"),
-						Messages.get(Talent.PAIN_SCAR,"prompt"),
-						Messages.get(Talent.PAIN_SCAR,"cancel")){
-					@Override
-					protected void onSelect(int index){
-						super.onSelect(index);
-						if( index == 0 ){
-							switch(pointsInTalent(Talent.PAIN_SCAR)){
-								case 1:
-									HT -= 20;
-									buff(Berserk.class).reducePower(0.2f);
-									GLog.n(Messages.get(Talent.PAIN_SCAR,"resistDeath"));
-									resistHealth +=20;
-									return;
-								case 2:
-									HT -= 15;
-									buff(Berserk.class).reducePower(0.15f);
-									GLog.n(Messages.get(Talent.PAIN_SCAR,"resistDeath"));
-									resistHealth += 15;
-									return;
-								case 3:
-									HT -= 10;
-									buff(Berserk.class).reducePower(0.1f);
-									GLog.n(Messages.get(Talent.PAIN_SCAR,"resistDeath"));
-									resistHealth += 10;
-									return;
-							}
-						}else if(index == 1 ){
-							die(src);
-						}
-					}
-				});
-				return;
-			} else if (canResist) {
-				switch(pointsInTalent(Talent.PAIN_SCAR)){
-					case 1:
-						HT -= 20;
-						buff(Berserk.class).reducePower(0.2f);
-						GLog.n(Messages.get(Talent.PAIN_SCAR,"resistDeath"));
-						resistHealth +=20;
-						return;
-					case 2:
-						HT -= 15;
-						buff(Berserk.class).reducePower(0.15f);
-						GLog.n(Messages.get(Talent.PAIN_SCAR,"resistDeath"));
-						resistHealth += 15;
-						return;
-					case 3:
-						HT -= 10;
-						buff(Berserk.class).reducePower(0.1f);
-						GLog.n(Messages.get(Talent.PAIN_SCAR,"resistDeath"));
-						resistHealth += 10;
-						return;
-				}
-			}
-			if(RH < resistHealth) return;
-
-		}
-
-
-
 		int preHP = HP + shielding();
 		int preTrueHP = HP;
-		super.damage( dmg, src );
+
+		// DoggingDog
+		int minDmg = Dungeon.depth > 20 ? 15 :
+				Dungeon.depth > 15 ? 10 :
+						Dungeon.depth > 10 ? 6 :
+								Dungeon.depth > 5 ? 3 : 1;
+		dmg = (Dungeon.isChallenged(Challenges.BAD_POINT) && dmg <= minDmg && src instanceof Mob) ? minDmg : dmg;
+
+		if (TieredToyEffects.preventDeath(this, dmg)) {
+			dmg = Math.max(0, HP + shielding() - 1);
+		}
+		super.damage( DamageInfo.of( dmg, info.getType(), info.getAttacker(), src ) );
+		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.TieredToyBuff toyState = buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.TieredToyBuff.class);
+		if (dmg > 0 && isAlive() && TieredToyEffects.has(com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToy.Spinach.class)
+				&& toyState != null && !toyState.spinachUsed()) {
+			toyState.useSpinach();
+			TieredToyEffects.heal(this, 30);
+		}
 		int postHP = HP + shielding();
 		int effectiveDamage = preHP - postHP;
 		int trueDamage=preTrueHP-HP;
 		if (effectiveDamage <= 0) return;
+		if (trueDamage > 0) Talent.onLightEternityHit(this, info.getAttacker());
 		if (trueDamage>0){
 			if (this.hasTalent(Talent.EMERGENCY_PROTECTION) ){
 				Class<?> srcClass = src.getClass();
@@ -1708,10 +2729,15 @@ public class Hero extends Char {
 				} else {
 					Sample.INSTANCE.play(Assets.Sounds.HEALTH_WARN, 1/3f + flashIntensity * 4f);
 				}
+				//hero gets interrupted on taking serious damage, regardless of any other factor
+				// 原版的这两行在 2024-09 重写本方法后半段时丢了，这里补回：
+				// 点过「继续移动」后普通伤害不打断移动，但严重伤害必须打断，否则英雄会顶着重伤一路走到目的地
+				interrupt();
+				damageInterrupt = true;
 			}
 		}
 	}
-	
+
 	public void checkVisibleMobs() {
 		ArrayList<Mob> visible = new ArrayList<>();
 
@@ -1746,12 +2772,12 @@ public class Hero extends Char {
 
 		Char lastTarget = QuickSlotButton.lastTarget;
 		if (target != null && (lastTarget == null ||
-							!lastTarget.isAlive() || !lastTarget.isActive() ||
-							lastTarget.alignment == Alignment.ALLY ||
-							!fieldOfView[lastTarget.pos])){
+				!lastTarget.isAlive() || !lastTarget.isActive() ||
+				lastTarget.alignment == Alignment.ALLY ||
+				!fieldOfView[lastTarget.pos])){
 			QuickSlotButton.target(target);
 		}
-		
+
 		if (newMob) {
 			if (resting){
 				Dungeon.observe();
@@ -1761,11 +2787,11 @@ public class Hero extends Char {
 
 		visibleEnemies = visible;
 	}
-	
+
 	public int visibleEnemies() {
 		return visibleEnemies.size();
 	}
-	
+
 	public Mob visibleEnemy( int index ) {
 		return visibleEnemies.get(index % visibleEnemies.size());
 	}
@@ -1773,13 +2799,17 @@ public class Hero extends Char {
 	public ArrayList<Mob> getVisibleEnemies(){
 		return new ArrayList<>(visibleEnemies);
 	}
-	
+
 	private boolean walkingToVisibleTrapInFog = false;
 	
+	// 用于记录绕路确认状态
+	private boolean detourConfirmed = false;
+	private int detourTarget = -1;
+
 	//FIXME this is a fairly crude way to track this, really it would be nice to have a short
 	//history of hero actions
 	public boolean justMoved = false;
-	
+
 	private boolean getCloser( final int target ) {
 
 		if (target == pos)
@@ -1789,11 +2819,17 @@ public class Hero extends Char {
 			PixelScene.shake( 1, 1f );
 			return false;
 		}
-		
-		int step = -1;
-		
-		if (Dungeon.level.adjacent( pos, target )) {
 
+		// 发布移动前事件，允许订阅者取消移动
+		BeforeHeroMoveEvent beforeMoveEvent = new BeforeHeroMoveEvent(this, pos, target);
+		EventManager.emit(beforeMoveEvent);
+		if (beforeMoveEvent.isCancelled()) {
+			return false;
+		}
+
+		int step = -1;
+
+		if (Dungeon.level.adjacent( pos, target )) {
 			path = null;
 
 			if (Actor.findChar( target ) == null) {
@@ -1806,7 +2842,7 @@ public class Hero extends Char {
 					return false;
 				}
 			}
-			
+
 		} else {
 
 			boolean newPath = false;
@@ -1832,7 +2868,48 @@ public class Hero extends Char {
 				}
 
 				PathFinder.Path newpath = Dungeon.findPath(this, target, passable, fieldOfView, true);
-				if (newpath != null && path != null && newpath.size() > 2*path.size()){
+				
+				// 检测绕路穿过迷雾的情况
+				int directDist = Dungeon.level.distance(pos, target);
+				if (newpath != null && directDist <= 8 && newpath.size() > directDist * 3 && SPDSettings.detourPrompt()) {
+					// 存在绕远路，需要询问玩家
+					if (!detourConfirmed || detourTarget != target) {
+						final int finalTarget = target;
+						final PathFinder.Path finalNewpath = newpath;
+						Game.runOnRenderThread(new Callback() {
+							@Override
+							public void call() {
+								GameScene.show(new WndOptions(
+										Messages.get(Hero.class, "detour_title"),
+										Messages.get(Hero.class, "detor_desc"),
+										Messages.get(Hero.class, "detour_yes"),
+										Messages.get(Hero.class, "detour_no")) {
+									@Override
+									protected void onSelect(int index) {
+										if (index == 0) {
+											// 玩家选择绕远路
+											detourConfirmed = true;
+											detourTarget = finalTarget;
+											path = finalNewpath;
+											curAction = new HeroAction.Move(finalTarget);
+											lastAction = null;
+											ready = false;
+											Hero.this.next();
+										} else {
+											// 玩家取消，中断移动
+											detourConfirmed = false;
+											detourTarget = -1;
+											interrupt();
+										}
+									}
+								});
+							}
+						});
+						return false;
+					}
+					// 已确认绕路
+					path = newpath;
+				} else if (newpath != null && path != null && newpath.size() > 2*path.size()){
 					path = null;
 				} else {
 					path = newpath;
@@ -1856,22 +2933,41 @@ public class Hero extends Char {
 				} else {
 					flying = false;
 					remove(buff(Levitation.class)); //directly remove to prevent cell pressing
-					Chasm.heroFall(target);
+					if (!SpaceFragment.tryAbyssTeleport(this)) {
+						Chasm.heroFall(target);
+					}
 				}
 				canSelfTrample = false;
 				return false;
 			}
 
-			if (subClass == HeroSubClass.FREERUNNER){
-				Buff.affect(this, Momentum.class).gainStack();
+			// 和原版一样，只在确定要迈出这一步时记一次移动。以前「目标在隔壁」的分支开头还多调了一次，
+			// 而且两处都在判断能不能走之前：点隔壁的墙、点深渊弹出确认框（都不动也不花时间）也涨动量，走相邻格一步涨两层
+			subClass.onMove(this);
+
+			if (hasTalent(Talent.MOVING_DEFENSE)){
+				if (Random.Float()<0.33f*pointsInTalent(Talent.MOVING_DEFENSE)+0.01f){
+					if (buff(Barrier.class)==null || buff(Barrier.class).shielding()<lvl)
+						Buff.affect(this, Barrier.class).incShield(1);
+				}
 			}
-			
+			if (buff(Preparation.class)!=null){
+				buff(Preparation.class).stay=false;
+			}
+			float speed = speed();
+			float speedAdj=1f;
+			if (buff(CrabArmor.likeCrab.class)!=null){
+				if (pos/Dungeon.level.width()== step/Dungeon.level.width())	speedAdj=1.75f;
+				else speedAdj=5f/6f;
+			}
+			if (speedAdj*speed>4f && pointsInTalent(Talent.STORM_RUSH)>3 ) Buff.affect(this, Levitation.class,1f);
+
 			sprite.move(pos, step);
 			move(step);
 
-			spend( delay );
+			spend( 1 / (speed * speedAdj ));
 			justMoved = true;
-			
+
 			search(false);
 
 			return true;
@@ -1879,29 +2975,69 @@ public class Hero extends Char {
 		} else {
 
 			return false;
-			
+
 		}
 
 	}
-	
+
 	public boolean handle( int cell ) {
-		
+
 		if (cell == -1) {
 			return false;
+		}
+
+		// 特殊门：单向门需要手动开启，锁定/封死的门只提示不移动
+		com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialDoor specialDoor =
+				com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialDoors.get(Dungeon.level, cell);
+		if (specialDoor != null && Dungeon.level.map[cell] == Terrain.DOOR) {
+			boolean adjacent = Dungeon.level.adjacent(pos, cell);
+			if (specialDoor.oneWay) {
+				if (adjacent) {
+					if (com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialDoors
+							.allowsOpen(Dungeon.level, cell, pos)) {
+						curAction = new HeroAction.EnterDoor(cell);
+						return true;
+					}
+					GLog.w(com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialDoors
+							.blockMessage(specialDoor));
+					return false;
+				}
+				curAction = new HeroAction.Move(
+						com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialDoors
+								.approachCell(Dungeon.level, cell));
+				return true;
+			}
+
+			com.shatteredpixel.shatteredpixeldungeon.events.DoorEnterAttemptEvent attempt =
+					new com.shatteredpixel.shatteredpixeldungeon.events.DoorEnterAttemptEvent(
+							this, specialDoor, pos, cell);
+			com.shatteredpixel.shatteredpixeldungeon.events.EventManager.emit(attempt);
+			String blocked = attempt.isCancelled() && !attempt.getBlockedMessage().isEmpty()
+					? attempt.getBlockedMessage()
+					: com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialDoors
+							.blockMessage(specialDoor);
+			if (blocked != null) {
+				GLog.w(blocked);
+				return false;
+			}
 		}
 
 		if (fieldOfView == null || fieldOfView.length != Dungeon.level.length()){
 			fieldOfView = new boolean[Dungeon.level.length()];
 			Dungeon.level.updateFieldOfView( this, fieldOfView );
 		}
-		
+
 		Char ch = Actor.findChar( cell );
 		Heap heap = Dungeon.level.heaps.get( cell );
 
-		if (Dungeon.level.map[cell] == Terrain.ALCHEMY && cell != pos) {
-			
+		if (fieldOfView[cell] && ch instanceof WhitePlasticChair) {
+			GameScene.examineObject(ch);
+			return false;
+
+		} else if (Dungeon.level.map[cell] == Terrain.ALCHEMY && cell != pos) {
+
 			curAction = new HeroAction.Alchemy( cell );
-			
+
 		} else if (fieldOfView[cell] && ch instanceof Mob) {
 
 			if (((Mob) ch).heroShouldInteract()) {
@@ -1910,9 +3046,9 @@ public class Hero extends Char {
 				curAction = new HeroAction.Attack( ch );
 			}
 
-		//TODO perhaps only trigger this if hero is already adjacent? reducing mistaps
+			//TODO perhaps only trigger this if hero is already adjacent? reducing mistaps
 		} else if (Dungeon.level instanceof MiningLevel &&
-					belongings.getItem(Pickaxe.class) != null &&
+				belongings.getItem(Pickaxe.class) != null &&
 				(Dungeon.level.map[cell] == Terrain.WALL
 						|| Dungeon.level.map[cell] == Terrain.WALL_DECO
 						|| Dungeon.level.map[cell] == Terrain.MINE_CRYSTAL
@@ -1927,71 +3063,141 @@ public class Hero extends Char {
 				(heap.type != Type.HEAP && heap.type != Type.FOR_SALE))) {
 
 			switch (heap.type) {
-			case HEAP:
-				curAction = new HeroAction.PickUp( cell );
-				break;
-			case FOR_SALE:
-				curAction = heap.size() == 1 && heap.peek().value() > 0 ?
-					new HeroAction.Buy( cell ) :
-					new HeroAction.PickUp( cell );
-				break;
-			default:
-				curAction = new HeroAction.OpenChest( cell );
+				case HEAP:
+					pendingPickupItem = null;
+					pickupWindowCell = -1;
+					curAction = new HeroAction.PickUp( cell );
+					break;
+				case FOR_SALE:
+					// 只剩商品一件时才是购买；商品上面还叠着别的东西时先把它们捡走，
+					// 商品本身捡不走（见 actPickUp）
+					if (heap.size() == 1) {
+						curAction = new HeroAction.Buy( cell );
+					} else {
+						pendingPickupItem = null;
+						pickupWindowCell = -1;
+						curAction = new HeroAction.PickUp( cell );
+					}
+					break;
+				default:
+					curAction = new HeroAction.OpenChest( cell );
 			}
-			
-		} else if (Dungeon.level.map[cell] == Terrain.LOCKED_DOOR || Dungeon.level.map[cell] == Terrain.CRYSTAL_DOOR || Dungeon.level.map[cell] == Terrain.LOCKED_EXIT) {
-			
-			curAction = new HeroAction.Unlock( cell );
-			
-		} else if (Dungeon.level.getTransition(cell) != null
-				//moving to a transition doesn't automatically trigger it when enemies are near
-				&& (visibleEnemies.size() == 0 || cell == pos)
-				&& !Dungeon.level.locked
-				&& !Dungeon.level.plants.containsKey(cell)
-				&& (Dungeon.depth < 26 || Dungeon.level.getTransition(cell).type == LevelTransition.Type.REGULAR_ENTRANCE) ) {
 
-			curAction = new HeroAction.LvlTransition( cell );
-			
+		} else if (Dungeon.level.map[cell] == Terrain.LOCKED_DOOR || Dungeon.level.map[cell] == Terrain.CRYSTAL_DOOR || Dungeon.level.map[cell] == Terrain.LOCKED_EXIT) {
+
+			curAction = new HeroAction.Unlock( cell );
+
+		} else if (Dungeon.level.map[cell] == Terrain.DOOR && andromedaSeenFoes >= 3
+				&& belongings.secondaryArmor() instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.secondary.Andromeda
+				&& STR() >= belongings.secondaryArmor().STRReq()) {
+
+			final int doorCell = cell;
+			Game.runOnRenderThread(new Callback() {
+				@Override
+				public void call() {
+					GameScene.show(new WndOptions(
+							Messages.get(com.shatteredpixel.shatteredpixeldungeon.items.armor.secondary.Andromeda.class, "name"),
+							Messages.get(com.shatteredpixel.shatteredpixeldungeon.items.armor.secondary.Andromeda.class, "warning"),
+							Messages.get(Hero.class, "detour_yes"),
+							Messages.get(Hero.class, "detour_no")) {
+						@Override
+						protected void onSelect(int index) {
+							if (index == 0) {
+								curAction = new HeroAction.Move(doorCell);
+								lastAction = null;
+								ready = false;
+								next();
+							} else {
+								interrupt();
+							}
+						}
+					});
+				}
+			});
+
+		} else if (Dungeon.level.getTransition(cell) != null) {
+			LevelTransition transition = Dungeon.level.getTransition(cell);
+			com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialStair stair =
+					com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialStairs.of(Dungeon.level, transition);
+			com.shatteredpixel.shatteredpixeldungeon.events.TransitionUseAttemptEvent attempt =
+					new com.shatteredpixel.shatteredpixeldungeon.events.TransitionUseAttemptEvent(this, transition, stair);
+			com.shatteredpixel.shatteredpixeldungeon.events.EventManager.emit(attempt);
+			String blocked = attempt.isCancelled() && !attempt.getBlockedMessage().isEmpty()
+					? attempt.getBlockedMessage()
+					: com.shatteredpixel.shatteredpixeldungeon.levels.features.SpecialStairs.blockMessage(stair);
+			if (blocked != null) {
+				GLog.w(blocked);
+				return false;
+			}
+
+			//环境条件不满足时按普通移动处理，不再误报成门被挡
+			if ((visibleEnemies.size() == 0 || cell == pos)
+					&& !Dungeon.level.locked
+					&& !Dungeon.level.plants.containsKey(cell)
+					&& (Dungeon.depth < 26 || transition.type == LevelTransition.Type.REGULAR_ENTRANCE)) {
+				curAction = new HeroAction.LvlTransition( cell );
+			} else {
+				curAction = new HeroAction.Move( cell );
+			}
+
 		}  else {
-			
+
 			if (!Dungeon.level.visited[cell] && !Dungeon.level.mapped[cell]
 					&& Dungeon.level.traps.get(cell) != null && Dungeon.level.traps.get(cell).visible) {
 				walkingToVisibleTrapInFog = true;
 			} else {
 				walkingToVisibleTrapInFog = false;
 			}
-			
+
 			curAction = new HeroAction.Move( cell );
 			lastAction = null;
-			
+
 		}
 
 		return true;
 	}
-	
+
 	public void earnExp( int exp, Class source ) {
 
 		//xp granted by ascension challenge is only for on-exp gain effects
 		if (source != AscensionChallenge.class) {
 			this.exp += exp;
+			// 德鲁伊：击杀敌人收集自然能量
+			com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Druid.onKill(this);
 		}
+
+		EventManager.emit(new HeroGainExperienceEvent(this, exp, source));
+
+
+		// Superstition by DoggingDog on 20250817
+		// 天赋：星界沟通
+		if(superstitionCounter != null){
+			if(heroClass.activeDefinition() != null){
+				heroClass.activeDefinition().onExpGain(this, exp);
+			}
+		}
+
+
 		float percent = exp/(float)maxExp();
 
 		EtherealChains.chainsRecharge chains = buff(EtherealChains.chainsRecharge.class);
 		if (chains != null) chains.gainExp(percent);
 
+		CloakOfConcealment.conceal concealment = buff(CloakOfConcealment.conceal.class);
+		if (concealment!=null) concealment.gainExp(exp);
+
 		HornOfPlenty.hornRecharge horn = buff(HornOfPlenty.hornRecharge.class);
 		if (horn != null) horn.gainCharge(percent);
-		
+
 		AlchemistsToolkit.kitEnergy kit = buff(AlchemistsToolkit.kitEnergy.class);
 		if (kit != null) kit.gainCharge(percent);
 
 		MasterThievesArmband.Thievery armband = buff(MasterThievesArmband.Thievery.class);
 		if (armband != null) armband.gainCharge(percent);
-		
+
 		Berserk berserk = buff(Berserk.class);
 		if (berserk != null) berserk.recover(percent);
-		
+
 		if (source != PotionOfExperience.class) {
 			for (Item i : belongings) {
 				i.onHeroGainExp(percent, this);
@@ -2009,18 +3215,18 @@ public class Hero extends Char {
 				}
 			}
 		}
-		
+
 		boolean levelUp = false;
 		while (this.exp >= maxExp()) {
 			this.exp -= maxExp();
 			if (lvl < MAX_LEVEL) {
 				lvl++;
 				levelUp = true;
-				
+
 				if (buff(ElixirOfMight.HTBoost.class) != null){
 					buff(ElixirOfMight.HTBoost.class).onLevelUp();
 				}
-				
+
 				updateHT( true );
 				attackSkill++;
 				defenseSkill++;
@@ -2031,13 +3237,15 @@ public class Hero extends Char {
 
 				GLog.newLine();
 				GLog.p( Messages.get(this, "level_cap"));
+				// 这是为了防止30级点强壮肉体无法升级更新血上限的bug，但是真的会有这种情况吗...
+				updateHT(false);
 				Sample.INSTANCE.play( Assets.Sounds.LEVELUP );
 			}
-			
+
 		}
-		
+
 		if (levelUp) {
-			
+
 			if (sprite != null) {
 				GLog.newLine();
 				GLog.p( Messages.get(this, "new_level") );
@@ -2050,25 +3258,32 @@ public class Hero extends Char {
 					WndHero.lastIdx = 1;
 				}
 			}
-			
+
+			// 发布英雄升级事件
+			EventManager.emit(new HeroLevelUpEvent(this, lvl - 1, lvl));
+
 			Item.updateQuickslot();
-			
+
 			Badges.validateLevelReached();
+
+			if (WndDiceMageTalentChoice.canShow()) {
+				WndDiceMageTalentChoice.show();
+			}
 		}
 	}
-	
+
 	public int maxExp() {
 		return maxExp( lvl );
 	}
-	
+
 	public static int maxExp( int lvl ){
 		return 5 + lvl * 5;
 	}
-	
+
 	public boolean isStarving() {
 		return Buff.affect(this, Hunger.class).isStarving();
 	}
-	
+
 	@Override
 	public boolean add( Buff buff ) {
 
@@ -2089,12 +3304,12 @@ public class Hero extends Char {
 			}
 
 		}
-		
+
 		BuffIndicator.refreshHero();
 
 		return added;
 	}
-	
+
 	@Override
 	public boolean remove( Buff buff ) {
 		if (super.remove( buff )) {
@@ -2103,21 +3318,24 @@ public class Hero extends Char {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public float stealth() {
 		float stealth = super.stealth();
-		
+
 		if (belongings.armor() != null){
 			stealth = belongings.armor().stealthFactor(this, stealth);
 		}
-		
+
+		//匿踪斗篷方法
+		if (buff(CloakOfConcealment.Disposed.class)!=null)
+			stealth-=4f;
 		return stealth;
 	}
-	
+
 	@Override
 	public void die( Object cause ) {
-		
+
 		curAction = null;
 
 		Ankh ankh = null;
@@ -2179,37 +3397,47 @@ public class Hero extends Char {
 			}
 			return;
 		}
-		
+
 		Actor.fixTime();
 		super.die( cause );
+
+		// 死亡原因由最后受到的伤害类型推导；凶手优先取 Char 来源，
+		// 投射物类来源（LIGHTNING 弹等）丢失凶手身份时回退到 lastAttacker
+		Char killer = cause instanceof Char ? (Char) cause : lastAttacker;
+		HeroDeathEvent.DeathCause deathCause = HeroDeathEvent.DeathCause.fromDamageType( lastDamageType );
+		if (deathCause == null) {
+			deathCause = killer != null ? HeroDeathEvent.DeathCause.COMBAT : HeroDeathEvent.DeathCause.OTHER;
+		}
+		EventManager.emit( new HeroDeathEvent( this, killer, deathCause ) );
+
 		reallyDie( cause );
 	}
-	
+
 	public static void reallyDie( Object cause ) {
-		
+
 		int length = Dungeon.level.length();
 		int[] map = Dungeon.level.map;
 		boolean[] visited = Dungeon.level.visited;
 		boolean[] discoverable = Dungeon.level.discoverable;
-		
+
 		for (int i=0; i < length; i++) {
-			
+
 			int terr = map[i];
-			
+
 			if (discoverable[i]) {
-				
+
 				visited[i] = true;
 				if ((Terrain.flags[terr] & Terrain.SECRET) != 0) {
 					Dungeon.level.discover( i );
 				}
 			}
 		}
-		
+
 		Bones.leave();
-		
+
 		Dungeon.observe();
 		GameScene.updateFog();
-				
+
 		Dungeon.hero.belongings.identify();
 
 		int pos = Dungeon.hero.pos;
@@ -2262,7 +3490,7 @@ public class Hero extends Char {
 
 	@Override
 	public boolean isAlive() {
-		
+
 		if (HP <= 0){
 			if (berserk == null) berserk = buff(Berserk.class);
 			return berserk != null && berserk.berserking();
@@ -2274,10 +3502,21 @@ public class Hero extends Char {
 
 	@Override
 	public void move(int step, boolean travelling) {
+		int fromPos = pos; // 记录移动前的位置
 		boolean wasHighGrass = Dungeon.level.map[step] == Terrain.HIGH_GRASS;
 
 		super.move( step, travelling);
-		
+
+		// 被门或其它规则拦下时位置没有变化，不能算一次移动
+		if (fromPos != pos) {
+			EventManager.emit(new HeroMoveEvent(this, fromPos, pos));
+			// 烈焰人：走过的地格燃烧
+			if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFlamewalker(this)) {
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.burnWalkedCell(fromPos);
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.burnWalkedCell(pos);
+			}
+		}
+
 		if (!flying && travelling) {
 			if (Dungeon.level.water[pos]) {
 				Sample.INSTANCE.play( Assets.Sounds.WATER, 1, Random.Float( 0.8f, 1.25f ) );
@@ -2296,7 +3535,7 @@ public class Hero extends Char {
 			}
 		}
 	}
-	
+
 	@Override
 	public void onAttackComplete() {
 
@@ -2305,42 +3544,62 @@ public class Hero extends Char {
 			super.onAttackComplete();
 			return;
 		}
-		
+
 		AttackIndicator.target(enemy);
 		boolean wasEnemy = enemy.alignment == Alignment.ENEMY
 				|| (enemy instanceof Mimic && enemy.alignment == Alignment.NEUTRAL);
 
 		boolean hit = attack( enemy );
-		
+
 		Invisibility.dispel();
-		spend( attackDelay() );
 
-		if (hit && subClass == HeroSubClass.GLADIATOR && wasEnemy){
-			Buff.affect( this, Combo.class ).hit( enemy );
+		// CancelAttackBuff：攻击不消耗回合
+		CancelAttackBuff cancelBuff = buff(CancelAttackBuff.class);
+		if (cancelBuff != null) {
+			Buff.detach(this, CancelAttackBuff.class);
+		} else {
+			// 出其不意天赋：十手伏击减少回合消耗
+			boolean surpriseAttack = enemy instanceof Mob && ((Mob) enemy).surprisedBy(this);
+			float multiplier = subClass.attackDelayMultiplier(this, enemy, surpriseAttack);
+			float delay = attackDelay() * multiplier;
+			Talent.CardScrollConditioningTracker conditioning = buff(Talent.CardScrollConditioningTracker.class);
+			if (conditioning != null) {
+				delay *= 0.5f;
+				conditioning.charges--;
+				if (conditioning.charges <= 0) conditioning.detach();
+			}
+			spend(delay);
 		}
 
-		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
-			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
+		subClass.onAttackComplete(this, enemy, hit, wasEnemy);
+
+		// DoggingDog on 20250818
+		if(!enemy.isAlive() && hero.hasTalent(Talent.ADRENAL_COMBAT) && hero != null){
+			Buff.affect(hero, Adrenaline.class,2f+hero.pointsInTalent(Talent.ADRENAL_COMBAT));
 		}
+		if (!enemy.isAlive() && wasEnemy) {
+			TieredToyEffects.onKill(this);
+		}
+		//
 
 		curAction = null;
 
 		super.onAttackComplete();
 	}
-	
+
 	@Override
 	public void onMotionComplete() {
 		GameScene.checkKeyHold();
 	}
-	
+
 	@Override
 	public void onOperateComplete() {
-		
+
 		if (curAction instanceof HeroAction.Unlock) {
 
 			int doorCell = ((HeroAction.Unlock)curAction).dst;
 			int door = Dungeon.level.map[doorCell];
-			
+
 			if (Dungeon.level.distance(pos, doorCell) <= 1) {
 				boolean hasKey = true;
 				if (door == Terrain.LOCKED_DOOR) {
@@ -2357,18 +3616,18 @@ public class Hero extends Char {
 					hasKey = Notes.remove(new SkeletonKey(Dungeon.depth));
 					if (hasKey) Level.set(doorCell, Terrain.UNLOCKED_EXIT);
 				}
-				
+
 				if (hasKey) {
 					GameScene.updateKeyDisplay();
 					GameScene.updateMap(doorCell);
 					spend(Key.TIME_TO_UNLOCK);
 				}
 			}
-			
+
 		} else if (curAction instanceof HeroAction.OpenChest) {
-			
+
 			Heap heap = Dungeon.level.heaps.get( ((HeroAction.OpenChest)curAction).dst );
-			
+
 			if (Dungeon.level.distance(pos, heap.pos) <= 1){
 				boolean hasKey = true;
 				if (heap.type == Type.SKELETON || heap.type == Type.REMAINS) {
@@ -2378,14 +3637,14 @@ public class Hero extends Char {
 				} else if (heap.type == Type.CRYSTAL_CHEST){
 					hasKey = Notes.remove(new CrystalKey(Dungeon.depth));
 				}
-				
+
 				if (hasKey) {
 					GameScene.updateKeyDisplay();
 					heap.open(this);
 					spend(Key.TIME_TO_UNLOCK);
 				}
 			}
-			
+
 		}
 		curAction = null;
 
@@ -2396,11 +3655,21 @@ public class Hero extends Char {
 
 	@Override
 	public boolean isImmune(Class effect) {
+		// 烈焰人：免疫燃烧类效果
+		if (effect == com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning.class
+				&& com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFlamewalker(this)) {
+			return true;
+		}
 		if (effect == Burning.class
 				&& belongings.armor() != null
 				&& belongings.armor().hasGlyph(Brimstone.class, this)){
 			return true;
 		}
+
+		if (hasTalent(Talent.STORM_RUSH) && pointsInTalent(Talent.STORM_RUSH)>2){
+			if (effect == Cripple.class || effect == Chill.class || effect == Slow.class) return true;
+		}
+
 		return super.isImmune(effect);
 	}
 
@@ -2410,15 +3679,15 @@ public class Hero extends Char {
 	}
 
 	public boolean search( boolean intentional ) {
-		
+
 		if (!isAlive()) return false;
-		
+
 		boolean smthFound = false;
 
 		boolean circular = pointsInTalent(Talent.WIDE_SEARCH) == 1;
-		int distance = heroClass == HeroClass.ROGUE ? 2 : 1;
+		int distance = heroClass.activeDefinition() == null ? 1 : heroClass.activeDefinition().sneakRadius();
 		if (hasTalent(Talent.WIDE_SEARCH)) distance++;
-		
+
 		boolean foresight = buff(Foresight.class) != null;
 		boolean foresightScan = foresight && !Dungeon.level.mapped[pos];
 
@@ -2467,9 +3736,9 @@ public class Hero extends Char {
 					if (foresight){
 						Dungeon.level.mapped[curr] = true;
 					}
-					
+
 					if (Dungeon.level.secret[curr]){
-						
+
 						Trap trap = Dungeon.level.traps.get( curr );
 						float chance;
 
@@ -2477,23 +3746,23 @@ public class Hero extends Char {
 						if (foresight){
 							chance = 1f;
 
-						//otherwise if the trap isn't searchable, searching always fails
+							//otherwise if the trap isn't searchable, searching always fails
 						} else if (trap != null && !trap.canBeSearched){
 							chance = 0f;
 
-						//intentional searches always succeed against regular traps and doors
+							//intentional searches always succeed against regular traps and doors
 						} else if (intentional){
 							chance = 1f;
-						
-						//unintentional searches always fail with a cursed talisman
+
+							//unintentional searches always fail with a cursed talisman
 						} else if (cursed) {
 							chance = 0f;
-							
-						//unintentional trap detection scales from 40% at floor 0 to 30% at floor 25
+
+							//unintentional trap detection scales from 40% at floor 0 to 30% at floor 25
 						} else if (Dungeon.level.map[curr] == Terrain.SECRET_TRAP) {
 							chance = 0.4f - (Dungeon.depth / 250f);
-							
-						//unintentional door detection scales from 20% at floor 0 to 0% at floor 20
+
+							//unintentional door detection scales from 20% at floor 0 to 0% at floor 20
 						} else {
 							chance = 0.2f - (Dungeon.depth / 100f);
 						}
@@ -2502,19 +3771,19 @@ public class Hero extends Char {
 						if (SPDSettings.intro()){
 							chance = 0;
 						}
-						
+
 						if (Random.Float() < chance) {
-						
+
 							int oldValue = Dungeon.level.map[curr];
-							
+
 							GameScene.discoverTile( curr, oldValue );
-							
+
 							Dungeon.level.discover( curr );
-							
+
 							ScrollOfMagicMapping.discover( curr );
-							
+
 							if (fieldOfView[curr]) smthFound = true;
-	
+
 							if (talisman != null){
 								if (oldValue == Terrain.SECRET_TRAP){
 									talisman.charge(2);
@@ -2527,7 +3796,7 @@ public class Hero extends Char {
 				}
 			}
 		}
-		
+
 		if (intentional) {
 			sprite.showStatus( CharSprite.DEFAULT, Messages.get(this, "search") );
 			sprite.operate( pos );
@@ -2540,9 +3809,9 @@ public class Hero extends Char {
 				}
 			}
 			spendAndNext(TIME_TO_SEARCH);
-			
+
 		}
-		
+
 		if (smthFound) {
 			GLog.w( Messages.get(this, "noticed_smth") );
 			Sample.INSTANCE.play( Assets.Sounds.SECRET );
@@ -2556,10 +3825,10 @@ public class Hero extends Char {
 		if (talisman != null){
 			talisman.checkAwareness();
 		}
-		
+
 		return smthFound;
 	}
-	
+
 	public void resurrect() {
 		HP = HT;
 		live();
@@ -2567,6 +3836,15 @@ public class Hero extends Char {
 		MagicalHolster holster = belongings.getItem(MagicalHolster.class);
 
 		Buff.affect(this, LostInventory.class);
+
+		//重生后验证 拉莱耶 合理性
+		Weapon w2 = (Weapon) hero.belongings.weapon;
+		if(w2 instanceof Rlyeh){
+			if(w2.keptThoughLostInvent && hero.buff(LostInventory.class) != null){
+				Buff.affect(this, Rlyeh.StateProject.class);
+			}
+		}
+
 		Buff.affect(this, Invisibility.class, 3f);
 		//lost inventory is dropped in interlevelscene
 
@@ -2601,4 +3879,105 @@ public class Hero extends Char {
 	public static interface Doom {
 		public void onDeath();
 	}
+
+	public void MoveBoatSword(){
+		KillBoatSword w2 = (KillBoatSword) hero.belongings.weapon;
+		if(w2 !=null) w2.delayAttack = false;
+	}
+
+	public int tier_for_image(){
+		Armor armor = belongings.armor();
+		if (armor == null ){
+			return 0;
+		// 四件新护甲的外观在第 18~21 行：StatusPane 的左上角头像就是靠这个返回值取行的
+		} else if (ArmorOutfit.rowFor( armor ) >= 0 && ArmorOutfit.hasOutfit( heroClass )){
+			return ArmorOutfit.rowFor( armor );
+		} else if (armor instanceof ClassArmor){
+			return 6;
+		} else if (armor instanceof PrisonArmor){
+			return 7;
+		} else if (armor instanceof CrabArmor){
+			return 8;
+		} else if (armor instanceof DarkCoat){
+			return 9;
+		} else if (armor instanceof AfterGlow){
+			return 10;
+		} else if (armor instanceof CloakofGreyFeather){
+			return 11;
+		} else if (armor instanceof RatArmor){
+			return 12;
+		} else if (armor instanceof EnergyArmor){
+			return ((EnergyArmor) armor).Energy();
+		}
+		else return armor.tier;
+	}
+
+
+
+	private boolean chain(int target){
+		if (enemy.properties().contains(Property.IMMOVABLE))
+			return false;
+
+		Ballistica chain = new Ballistica(pos, target, Ballistica.PROJECTILE);
+
+		if (chain.collisionPos != enemy.pos
+				|| chain.path.size() < 2
+				|| Dungeon.level.pit[chain.path.get(1)])
+			return false;
+		else {
+			int newPos = -1;
+			for (int i : chain.subPath(1, chain.dist)){
+				if (!Dungeon.level.solid[i] && Actor.findChar(i) == null){
+					newPos = i;
+					break;
+				}
+			}
+
+			if (newPos == -1){
+				return false;
+			} else {
+				final int newPosFinal = newPos;
+
+				if (sprite.visible || enemy.sprite.visible) {
+					new Item().throwSound();
+					Sample.INSTANCE.play(Assets.Sounds.CHAINS);
+					sprite.parent.add(new Chains(sprite.center(),
+							enemy.sprite.destinationCenter(),
+							Effects.Type.CHAIN,
+							new Callback() {
+								public void call() {
+									Actor.add(new Pushing(enemy, enemy.pos, newPosFinal, new Callback() {
+										public void call() {
+											pullEnemy(enemy, newPosFinal);
+										}
+									}));
+									next();
+								}
+							}));
+				} else {
+					pullEnemy(enemy, newPos);
+				}
+			}
+		}
+		return true;
+	}
+
+	private void pullEnemy( Char enemy, int pullPos ){
+		enemy.pos = pullPos;
+		enemy.sprite.place(pullPos);
+		Dungeon.level.occupyCell(enemy);
+		Cripple.prolong(enemy, Cripple.class, 4f);
+		if (enemy == Dungeon.hero) {
+			Dungeon.hero.interrupt();
+			Dungeon.observe();
+			GameScene.updateFog();
+		}
+	}
+
+	@Override
+	public float talentProc(){
+		if (hasTalent(Talent.RUNIC_TRANSFERENCE) && (pointsInTalent(Talent.RUNIC_TRANSFERENCE)>1)) return 1.25f;
+		return super.talentProc();
+	}
+
 }

@@ -1,0 +1,1937 @@
+{
+  "schema": 2,
+  "locale": "zh",
+  "match_mode": "final",
+  "generated_at": "2026-07-16T06:58:28+00:00",
+  "generator": "tools/generate_poem_rhyme_table.py",
+  "source_files": {
+    "items": "core/src/main/assets/messages/items/items_zh.properties",
+    "actors": "core/src/main/assets/messages/actors/actors_zh.properties"
+  },
+  "rules": {
+    "chinese": "Use pypinyin Style.FINALS on the last Chinese character of each localized name.",
+    "other_locales": "Do not generate tables. Game code should read localized names through Messages.java and compare first letter/digit at runtime.",
+    "excluded_by_default": [
+      "weapon curses",
+      "weapon enchantments",
+      "armor curses",
+      "armor glyphs",
+      "actors.mobs.npcs.*",
+      "keys containing '$'"
+    ]
+  },
+  "counts": {
+    "equipment": 126,
+    "monsters": 87,
+    "groups": 26,
+    "unmatched_equipment": 0,
+    "unmatched_monsters": 7
+  },
+  "groups": [
+    {
+      "bucket": "a",
+      "final": "a",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.grimtooth.name",
+          "name": "凋零毒牙",
+          "last_chinese": "牙",
+          "final": "a",
+          "initial": "凋"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.crystalspire.name",
+          "name": "水晶尖塔",
+          "last_chinese": "塔",
+          "final": "a",
+          "initial": "水"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.frog.name",
+          "name": "青蛙",
+          "last_chinese": "蛙",
+          "final": "a",
+          "initial": "青"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.gnoll.name",
+          "name": "豺狼巡查",
+          "last_chinese": "查",
+          "final": "a",
+          "initial": "豺"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.pylon.name",
+          "name": "能量塔",
+          "last_chinese": "塔",
+          "final": "a",
+          "initial": "能"
+        }
+      ]
+    },
+    {
+      "bucket": "ai",
+      "final": "ai",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.armor.crabarmor.name",
+          "name": "螃蟹护铠",
+          "last_chinese": "铠",
+          "final": "ai",
+          "initial": "螃"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.armor.duelistarmor.name",
+          "name": "英雄胸铠",
+          "last_chinese": "铠",
+          "final": "ai",
+          "initial": "英"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.sai.name",
+          "name": "双钗",
+          "last_chinese": "钗",
+          "final": "ai",
+          "initial": "双"
+        }
+      ],
+      "monsters": []
+    },
+    {
+      "bucket": "an",
+      "final": "an",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.armor.bluewhitebowl.name",
+          "name": "蓝白碗",
+          "last_chinese": "碗",
+          "final": "an",
+          "initial": "蓝"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.eye.name",
+          "name": "邪恶之眼",
+          "last_chinese": "眼",
+          "final": "an",
+          "initial": "邪"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.prisoner.name",
+          "name": "囚犯",
+          "last_chinese": "犯",
+          "final": "an",
+          "initial": "囚"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.shaman.name",
+          "name": "豺狼萨满",
+          "last_chinese": "满",
+          "final": "an",
+          "initial": "豺"
+        }
+      ]
+    },
+    {
+      "bucket": "ang",
+      "final": "ang",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.magesstaff.name",
+          "name": "法师魔杖",
+          "last_chinese": "杖",
+          "final": "ang",
+          "initial": "法"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.dwarfking.name",
+          "name": "矮人国王",
+          "last_chinese": "王",
+          "final": "ang",
+          "initial": "矮"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.king.name",
+          "name": "矮人国王",
+          "last_chinese": "王",
+          "final": "ang",
+          "initial": "矮"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishboss.gnollking.name",
+          "name": "豺狼大酋长",
+          "last_chinese": "长",
+          "final": "ang",
+          "initial": "豺"
+        }
+      ]
+    },
+    {
+      "bucket": "ao",
+      "final": "ao",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.armor.magearmor.name",
+          "name": "英雄法袍",
+          "last_chinese": "袍",
+          "final": "ao",
+          "initial": "英"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.boneclaw.name",
+          "name": "骨爪",
+          "last_chinese": "爪",
+          "final": "ao",
+          "initial": "骨"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.cutterhead.name",
+          "name": "绞刀",
+          "last_chinese": "刀",
+          "final": "ao",
+          "initial": "绞"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.gauntlet.name",
+          "name": "魔岩拳套",
+          "last_chinese": "套",
+          "final": "ao",
+          "initial": "魔"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.glaive.name",
+          "name": "关刀",
+          "last_chinese": "刀",
+          "final": "ao",
+          "initial": "关"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.gloves.name",
+          "name": "镶钉手套",
+          "last_chinese": "套",
+          "final": "ao",
+          "initial": "镶"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.killboatsword.name",
+          "name": "斩舰刀",
+          "last_chinese": "刀",
+          "final": "ao",
+          "initial": "斩"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.pneumfistgloves.name",
+          "name": "气动拳套",
+          "last_chinese": "套",
+          "final": "ao",
+          "initial": "气"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.runeslade.name",
+          "name": "符文剃刀",
+          "last_chinese": "刀",
+          "final": "ao",
+          "initial": "符"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.scimitar.name",
+          "name": "弯刀",
+          "last_chinese": "刀",
+          "final": "ao",
+          "initial": "弯"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.snakespear.name",
+          "name": "灵蛇之矛",
+          "last_chinese": "矛",
+          "final": "ao",
+          "initial": "灵"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.spear.name",
+          "name": "长矛",
+          "last_chinese": "矛",
+          "final": "ao",
+          "initial": "长"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.taijutsu.name",
+          "name": "大太刀",
+          "last_chinese": "刀",
+          "final": "ao",
+          "initial": "大"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.fishingspear.name",
+          "name": "捕鱼矛",
+          "last_chinese": "矛",
+          "final": "ao",
+          "initial": "捕"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.throwingknife.name",
+          "name": "飞刀",
+          "last_chinese": "刀",
+          "final": "ao",
+          "initial": "飞"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.throwingspear.name",
+          "name": "投矛",
+          "last_chinese": "矛",
+          "final": "ao",
+          "initial": "投"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.bandit.name",
+          "name": "疯狂强盗",
+          "last_chinese": "盗",
+          "final": "ao",
+          "initial": "疯"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.demonspawner.name",
+          "name": "恶魔血巢",
+          "last_chinese": "巢",
+          "final": "ao",
+          "initial": "恶"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.gorgon.name",
+          "name": "蛇发女妖",
+          "last_chinese": "妖",
+          "final": "ao",
+          "initial": "蛇"
+        }
+      ]
+    },
+    {
+      "bucket": "e",
+      "final": "e",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.headcleaver.name",
+          "name": "斩首者",
+          "last_chinese": "者",
+          "final": "e",
+          "initial": "斩"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.perfidy.name",
+          "name": "背信弃义者",
+          "last_chinese": "者",
+          "final": "e",
+          "initial": "背"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishboss.bigsnake_zikk.name",
+          "name": "大蛇兹克",
+          "last_chinese": "克",
+          "final": "e",
+          "initial": "大"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.deminion.name",
+          "name": "印刻者",
+          "last_chinese": "者",
+          "final": "e",
+          "initial": "印"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.ripperdemon.name",
+          "name": "恶魔撕裂者",
+          "last_chinese": "者",
+          "final": "e",
+          "initial": "恶"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.snake.name",
+          "name": "下水道巨蛇",
+          "last_chinese": "蛇",
+          "final": "e",
+          "initial": "下"
+        }
+      ]
+    },
+    {
+      "bucket": "ei",
+      "final": "ei",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.endguard.name",
+          "name": "末日守卫",
+          "last_chinese": "卫",
+          "final": "ei",
+          "initial": "末"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.crystalguardian.name",
+          "name": "水晶守卫",
+          "last_chinese": "卫",
+          "final": "ei",
+          "initial": "水"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.gnollguard.name",
+          "name": "豺狼守卫",
+          "last_chinese": "卫",
+          "final": "ei",
+          "initial": "豺"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.guard.name",
+          "name": "监狱守卫",
+          "last_chinese": "卫",
+          "final": "ei",
+          "initial": "监"
+        }
+      ]
+    },
+    {
+      "bucket": "en",
+      "final": "en",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.assassinsblade.name",
+          "name": "暗杀之刃",
+          "last_chinese": "刃",
+          "final": "en",
+          "initial": "暗"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.bloodblade.name",
+          "name": "凝血刃",
+          "last_chinese": "刃",
+          "final": "en",
+          "initial": "凝"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.circlesword.name",
+          "name": "轮刃",
+          "last_chinese": "刃",
+          "final": "en",
+          "initial": "轮"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.darkshadowsword.name",
+          "name": "幻影之刃",
+          "last_chinese": "刃",
+          "final": "en",
+          "initial": "幻"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.rlyeh.name",
+          "name": "拉莱耶文本",
+          "last_chinese": "本",
+          "final": "en",
+          "initial": "拉"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.runicblade.name",
+          "name": "符文之刃",
+          "last_chinese": "刃",
+          "final": "en",
+          "initial": "符"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.silversting.name",
+          "name": "背刺银刃",
+          "last_chinese": "刃",
+          "final": "en",
+          "initial": "背"
+        }
+      ],
+      "monsters": []
+    },
+    {
+      "bucket": "eng",
+      "final": "eng",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.armor.cloakofgreyfeather.name",
+          "name": "灰羽披风",
+          "last_chinese": "风",
+          "final": "eng",
+          "initial": "灰"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.armor.huntressarmor.name",
+          "name": "英雄披风",
+          "last_chinese": "风",
+          "final": "eng",
+          "initial": "英"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.bee.name",
+          "name": "金色蜜蜂",
+          "last_chinese": "蜂",
+          "final": "eng",
+          "initial": "金"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.monk.name",
+          "name": "矮人武僧",
+          "last_chinese": "僧",
+          "final": "eng",
+          "initial": "矮"
+        }
+      ]
+    },
+    {
+      "bucket": "i",
+      "final": "i",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.armor.darkcoat.name",
+          "name": "漆暗风衣",
+          "last_chinese": "衣",
+          "final": "i",
+          "initial": "漆"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.armor.moonlightarmor.name",
+          "name": "月华专属比基尼衣",
+          "last_chinese": "衣",
+          "final": "i",
+          "initial": "月"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.armor.roguearmor.name",
+          "name": "英雄风衣",
+          "last_chinese": "衣",
+          "final": "i",
+          "initial": "英"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.celestialsphere.name",
+          "name": "天球仪",
+          "last_chinese": "仪",
+          "final": "i",
+          "initial": "天"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.enemyflag.name",
+          "name": "前线旗",
+          "last_chinese": "旗",
+          "final": "i",
+          "initial": "前"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.holyankh.name",
+          "name": "圣十字",
+          "last_chinese": "字",
+          "final": "i",
+          "initial": "圣"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.katar.name",
+          "name": "拳刺",
+          "last_chinese": "刺",
+          "final": "i",
+          "initial": "拳"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.forcecube.name",
+          "name": "震爆方石",
+          "last_chinese": "石",
+          "final": "i",
+          "initial": "震"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.throwingstone.name",
+          "name": "石子",
+          "last_chinese": "子",
+          "final": "i",
+          "initial": "石"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.trident.name",
+          "name": "三叉戟",
+          "last_chinese": "戟",
+          "final": "i",
+          "initial": "三"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.acidic.name",
+          "name": "酸液蝎子",
+          "last_chinese": "子",
+          "final": "i",
+          "initial": "酸"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.gnollgeomancer.name",
+          "name": "豺狼地卜师",
+          "last_chinese": "师",
+          "final": "i",
+          "initial": "豺"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.gnolltrickster.name",
+          "name": "豺狼诡术师",
+          "last_chinese": "师",
+          "final": "i",
+          "initial": "豺"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.necromancer.name",
+          "name": "死灵法师",
+          "last_chinese": "师",
+          "final": "i",
+          "initial": "死"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishboss.gnollshamanking.name",
+          "name": "豺狼大祭司",
+          "last_chinese": "司",
+          "final": "i",
+          "initial": "豺"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.shieldmage.name",
+          "name": "矮人护卫师",
+          "last_chinese": "师",
+          "final": "i",
+          "initial": "矮"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.scorpio.name",
+          "name": "巨型蝎子",
+          "last_chinese": "子",
+          "final": "i",
+          "initial": "巨"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.senior.name",
+          "name": "武僧大师",
+          "last_chinese": "师",
+          "final": "i",
+          "initial": "武"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.spectralnecromancer.name",
+          "name": "招魂法师",
+          "last_chinese": "师",
+          "final": "i",
+          "initial": "招"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.warlock.name",
+          "name": "矮人术士",
+          "last_chinese": "士",
+          "final": "i",
+          "initial": "矮"
+        }
+      ]
+    },
+    {
+      "bucket": "ia",
+      "final": "ia",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.armor.clotharmor.name",
+          "name": "布甲",
+          "last_chinese": "甲",
+          "final": "ia",
+          "initial": "布"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.armor.energyarmor.name",
+          "name": "能量胸甲",
+          "last_chinese": "甲",
+          "final": "ia",
+          "initial": "能"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.armor.leatherarmor.name",
+          "name": "皮甲",
+          "last_chinese": "甲",
+          "final": "ia",
+          "initial": "皮"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.armor.mailarmor.name",
+          "name": "链甲",
+          "last_chinese": "甲",
+          "final": "ia",
+          "initial": "链"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.armor.platearmor.name",
+          "name": "板甲",
+          "last_chinese": "甲",
+          "final": "ia",
+          "initial": "板"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.armor.ratarmor.name",
+          "name": "鼠甲",
+          "last_chinese": "甲",
+          "final": "ia",
+          "initial": "鼠"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.armor.scalearmor.name",
+          "name": "鳞甲",
+          "last_chinese": "甲",
+          "final": "ia",
+          "initial": "鳞"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.armor.silverscalearmor.name",
+          "name": "银鳞胸甲",
+          "last_chinese": "甲",
+          "final": "ia",
+          "initial": "银"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.armor.warriorarmor.name",
+          "name": "英雄铠甲",
+          "last_chinese": "甲",
+          "final": "ia",
+          "initial": "英"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.flail.name",
+          "name": "链枷",
+          "last_chinese": "枷",
+          "final": "ia",
+          "initial": "链"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.metalcross.name",
+          "name": "金属十字架",
+          "last_chinese": "架",
+          "final": "ia",
+          "initial": "金"
+        }
+      ],
+      "monsters": []
+    },
+    {
+      "bucket": "ian",
+      "final": "ian",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.darksword.name",
+          "name": "暗色长剑",
+          "last_chinese": "剑",
+          "final": "ian",
+          "initial": "暗"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.fogsword.name",
+          "name": "幻影雾剑",
+          "last_chinese": "剑",
+          "final": "ian",
+          "initial": "幻"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.glasssword.name",
+          "name": "玻璃剑",
+          "last_chinese": "剑",
+          "final": "ian",
+          "initial": "玻"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.greatsword.name",
+          "name": "巨剑",
+          "last_chinese": "剑",
+          "final": "ian",
+          "initial": "巨"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.lockchain.name",
+          "name": "锁镰",
+          "last_chinese": "镰",
+          "final": "ian",
+          "initial": "锁"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.longsword.name",
+          "name": "长剑",
+          "last_chinese": "剑",
+          "final": "ian",
+          "initial": "长"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.morello.name",
+          "name": "莫雷洛秘典",
+          "last_chinese": "典",
+          "final": "ian",
+          "initial": "莫"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.scythe.name",
+          "name": "巨镰",
+          "last_chinese": "镰",
+          "final": "ian",
+          "initial": "巨"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.shortsword.name",
+          "name": "短剑",
+          "last_chinese": "剑",
+          "final": "ian",
+          "initial": "短"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.sword.name",
+          "name": "单手剑",
+          "last_chinese": "剑",
+          "final": "ian",
+          "initial": "单"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.whip.name",
+          "name": "长鞭",
+          "last_chinese": "鞭",
+          "final": "ian",
+          "initial": "长"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.whitekinggodsword.name",
+          "name": "白帝圣剑",
+          "last_chinese": "剑",
+          "final": "ian",
+          "initial": "白"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.wingsword.name",
+          "name": "翼剑",
+          "last_chinese": "剑",
+          "final": "ian",
+          "initial": "翼"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.wornshortsword.name",
+          "name": "破损的短剑",
+          "last_chinese": "剑",
+          "final": "ian",
+          "initial": "破"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.shuriken.name",
+          "name": "手里剑",
+          "last_chinese": "剑",
+          "final": "ian",
+          "initial": "手"
+        }
+      ],
+      "monsters": []
+    },
+    {
+      "bucket": "iang",
+      "final": "iang",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.armor.afterimage.name",
+          "name": "残像",
+          "last_chinese": "像",
+          "final": "iang",
+          "initial": "残"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.rottenlance.name",
+          "name": "朽木长枪",
+          "last_chinese": "枪",
+          "final": "iang",
+          "initial": "朽"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.seekingspear.name",
+          "name": "寻觅长枪",
+          "last_chinese": "枪",
+          "final": "iang",
+          "initial": "寻"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.waterwheel.name",
+          "name": "桨",
+          "last_chinese": "桨",
+          "final": "iang",
+          "initial": "桨"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.javelin.name",
+          "name": "标枪",
+          "last_chinese": "枪",
+          "final": "iang",
+          "initial": "标"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.armoredstatue.name",
+          "name": "装甲石像",
+          "last_chinese": "像",
+          "final": "iang",
+          "initial": "装"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.golem.name",
+          "name": "魔像",
+          "last_chinese": "像",
+          "final": "iang",
+          "initial": "魔"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.statue.name",
+          "name": "活化石像",
+          "last_chinese": "像",
+          "final": "iang",
+          "initial": "活"
+        }
+      ]
+    },
+    {
+      "bucket": "iao",
+      "final": "iao",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.boomerang.name",
+          "name": "回旋镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "回"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.darts.adrenalinedart.name",
+          "name": "激素飞镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "激"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.darts.blindingdart.name",
+          "name": "致盲飞镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "致"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.darts.chillingdart.name",
+          "name": "寒霜飞镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "寒"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.darts.cleansingdart.name",
+          "name": "净化飞镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "净"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.darts.dart.name",
+          "name": "飞镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "飞"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.darts.displacingdart.name",
+          "name": "传送飞镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "传"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.darts.healingdart.name",
+          "name": "治疗飞镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "治"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.darts.holydart.name",
+          "name": "神圣飞镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "神"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.darts.incendiarydart.name",
+          "name": "燃烧飞镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "燃"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.darts.paralyticdart.name",
+          "name": "麻痹飞镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "麻"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.darts.poisondart.name",
+          "name": "毒液飞镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "毒"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.darts.rotdart.name",
+          "name": "腐莓飞镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "腐"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.darts.shockingdart.name",
+          "name": "电击飞镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "电"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.heavyboomerang.name",
+          "name": "重型回旋镖",
+          "last_chinese": "镖",
+          "final": "iao",
+          "initial": "重"
+        }
+      ],
+      "monsters": []
+    },
+    {
+      "bucket": "ie",
+      "final": "ie",
+      "equipment": [],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.crab.name",
+          "name": "下水道螃蟹",
+          "last_chinese": "蟹",
+          "final": "ie",
+          "initial": "下"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.greatcrab.name",
+          "name": "巨大螃蟹",
+          "last_chinese": "蟹",
+          "final": "ie",
+          "initial": "巨"
+        }
+      ]
+    },
+    {
+      "bucket": "in",
+      "final": "in",
+      "equipment": [],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.goblin.name",
+          "name": "哥布林",
+          "last_chinese": "林",
+          "final": "in",
+          "initial": "哥"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.rotheart.name",
+          "name": "腐烂之心",
+          "last_chinese": "心",
+          "final": "in",
+          "initial": "腐"
+        }
+      ]
+    },
+    {
+      "bucket": "ing",
+      "final": "ing",
+      "equipment": [],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.gnollsapper.name",
+          "name": "豺狼工兵",
+          "last_chinese": "兵",
+          "final": "ing",
+          "initial": "豺"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.grudge.name",
+          "name": "缠怨灵",
+          "last_chinese": "灵",
+          "final": "ing",
+          "initial": "缠"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.jailer.name",
+          "name": "巡警",
+          "last_chinese": "警",
+          "final": "ing",
+          "initial": "巡"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.royalguard.name",
+          "name": "国王卫兵",
+          "last_chinese": "兵",
+          "final": "ing",
+          "initial": "国"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.stonespirit.name",
+          "name": "土石灵",
+          "last_chinese": "灵",
+          "final": "ing",
+          "initial": "土"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.tormentedspirit.name",
+          "name": "咒缚灵",
+          "last_chinese": "灵",
+          "final": "ing",
+          "initial": "咒"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.wraith.name",
+          "name": "怨灵",
+          "last_chinese": "灵",
+          "final": "ing",
+          "initial": "怨"
+        }
+      ]
+    },
+    {
+      "bucket": "o",
+      "final": "o",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.beecomb.name",
+          "name": "蜂窝",
+          "last_chinese": "窝",
+          "final": "o",
+          "initial": "蜂"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.deviloon.name",
+          "name": "火印恶魔",
+          "last_chinese": "魔",
+          "final": "o",
+          "initial": "火"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.succubus.name",
+          "name": "魅魔",
+          "last_chinese": "魔",
+          "final": "o",
+          "initial": "魅"
+        }
+      ]
+    },
+    {
+      "bucket": "ong",
+      "final": "ong",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.weapon.spiritbow.name",
+          "name": "灵能短弓",
+          "last_chinese": "弓",
+          "final": "ong",
+          "initial": "灵"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.drake.name",
+          "name": "地底亚龙",
+          "last_chinese": "龙",
+          "final": "ong",
+          "initial": "地"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.giantworm.name",
+          "name": "巨型蠕虫",
+          "last_chinese": "虫",
+          "final": "ong",
+          "initial": "巨"
+        }
+      ]
+    },
+    {
+      "bucket": "ou",
+      "final": "ou",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.dagger.name",
+          "name": "匕首",
+          "last_chinese": "首",
+          "final": "ou",
+          "initial": "匕"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.dirk.name",
+          "name": "长匕首",
+          "last_chinese": "首",
+          "final": "ou",
+          "initial": "长"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.giantkiller.name",
+          "name": "巨人杀手",
+          "last_chinese": "手",
+          "final": "ou",
+          "initial": "巨"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.juttechampionweapon.name",
+          "name": "十手",
+          "last_chinese": "手",
+          "final": "ou",
+          "initial": "十"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.spanner.name",
+          "name": "扳手",
+          "last_chinese": "手",
+          "final": "ou",
+          "initial": "扳"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.sufferingdagger.name",
+          "name": "苦难匕首",
+          "last_chinese": "首",
+          "final": "ou",
+          "initial": "苦"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.thegreatdead.name",
+          "name": "万户侯",
+          "last_chinese": "侯",
+          "final": "ou",
+          "initial": "万"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.artillerist.name",
+          "name": "矮人炮手",
+          "last_chinese": "手",
+          "final": "ou",
+          "initial": "矮"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.clusteredskeleton.name",
+          "name": "聚合骷髅",
+          "last_chinese": "髅",
+          "final": "ou",
+          "initial": "聚"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.dog.name",
+          "name": "狗",
+          "last_chinese": "狗",
+          "final": "ou",
+          "initial": "狗"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.mayfly.name",
+          "name": "蜉蝣",
+          "last_chinese": "蝣",
+          "final": "ou",
+          "initial": "蜉"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.rotlasher.name",
+          "name": "腐烂触手",
+          "last_chinese": "手",
+          "final": "ou",
+          "initial": "腐"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.skeleton.name",
+          "name": "骷髅",
+          "last_chinese": "髅",
+          "final": "ou",
+          "initial": "骷"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.tengu.name",
+          "name": "天狗",
+          "last_chinese": "狗",
+          "final": "ou",
+          "initial": "天"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.thief.name",
+          "name": "疯狂小偷",
+          "last_chinese": "偷",
+          "final": "ou",
+          "initial": "疯"
+        }
+      ]
+    },
+    {
+      "bucket": "u",
+      "final": "u",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.armor.prisonarmor.name",
+          "name": "制式警服",
+          "last_chinese": "服",
+          "final": "u",
+          "initial": "制"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.axe_d.name",
+          "name": "斩斧",
+          "last_chinese": "斧",
+          "final": "u",
+          "initial": "斩"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.battleaxe.name",
+          "name": "战斧",
+          "last_chinese": "斧",
+          "final": "u",
+          "initial": "战"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.compositecrossbow.name",
+          "name": "复合弩",
+          "last_chinese": "弩",
+          "final": "u",
+          "initial": "复"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.crossbow.name",
+          "name": "十字弩",
+          "last_chinese": "弩",
+          "final": "u",
+          "initial": "十"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.greataxe.name",
+          "name": "巨斧",
+          "last_chinese": "斧",
+          "final": "u",
+          "initial": "巨"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.handaxe.name",
+          "name": "手斧",
+          "last_chinese": "斧",
+          "final": "u",
+          "initial": "手"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.knuckles.name",
+          "name": "指虎",
+          "last_chinese": "虎",
+          "final": "u",
+          "initial": "指"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.scorpioncrossbow.name",
+          "name": "蝎子巨弩",
+          "last_chinese": "弩",
+          "final": "u",
+          "initial": "蝎"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.shadowbooks.name",
+          "name": "幻影之书",
+          "last_chinese": "书",
+          "final": "u",
+          "initial": "幻"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.kunai.name",
+          "name": "苦无",
+          "last_chinese": "无",
+          "final": "u",
+          "initial": "苦"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.tomahawk.name",
+          "name": "飞斧",
+          "last_chinese": "斧",
+          "final": "u",
+          "initial": "飞"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.albino.name",
+          "name": "白化老鼠",
+          "last_chinese": "鼠",
+          "final": "u",
+          "initial": "白"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.armoredbrute.name",
+          "name": "重甲暴徒",
+          "last_chinese": "徒",
+          "final": "u",
+          "initial": "重"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.bat.name",
+          "name": "吸血蝙蝠",
+          "last_chinese": "蝠",
+          "final": "u",
+          "initial": "吸"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.brute.name",
+          "name": "豺狼暴徒",
+          "last_chinese": "徒",
+          "final": "u",
+          "initial": "豺"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.causticslime.name",
+          "name": "蚀化史莱姆",
+          "last_chinese": "姆",
+          "final": "u",
+          "initial": "蚀"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.crystalwisp.name",
+          "name": "水晶灵簇",
+          "last_chinese": "簇",
+          "final": "u",
+          "initial": "水"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.fetidrat.name",
+          "name": "腐臭老鼠",
+          "last_chinese": "鼠",
+          "final": "u",
+          "initial": "腐"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.goo.name",
+          "name": "粘咕",
+          "last_chinese": "咕",
+          "final": "u",
+          "initial": "粘"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.phantompiranha.name",
+          "name": "幻影食人鱼",
+          "last_chinese": "鱼",
+          "final": "u",
+          "initial": "幻"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.piranha.name",
+          "name": "巨型食人鱼",
+          "last_chinese": "鱼",
+          "final": "u",
+          "initial": "巨"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.demonlord.name",
+          "name": "恶魔领主",
+          "last_chinese": "主",
+          "final": "u",
+          "initial": "恶"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.gnollzealot.name",
+          "name": "豺狼狂信徒",
+          "last_chinese": "徒",
+          "final": "u",
+          "initial": "豺"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.rat.name",
+          "name": "啮齿小鼠",
+          "last_chinese": "鼠",
+          "final": "u",
+          "initial": "啮"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.slime.name",
+          "name": "史莱姆",
+          "last_chinese": "姆",
+          "final": "u",
+          "initial": "史"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.spinner.name",
+          "name": "矿洞蜘蛛",
+          "last_chinese": "蛛",
+          "final": "u",
+          "initial": "矿"
+        }
+      ]
+    },
+    {
+      "bucket": "uai",
+      "final": "uai",
+      "equipment": [],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.crystalmimic.name",
+          "name": "水晶宝箱怪",
+          "last_chinese": "怪",
+          "final": "uai",
+          "initial": "水"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.ebonymimic.name",
+          "name": "黑檀宝箱怪",
+          "last_chinese": "怪",
+          "final": "uai",
+          "initial": "黑"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.goldenmimic.name",
+          "name": "金色宝箱怪",
+          "last_chinese": "怪",
+          "final": "uai",
+          "initial": "金"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.mimic.name",
+          "name": "宝箱怪",
+          "last_chinese": "怪",
+          "final": "uai",
+          "initial": "宝"
+        }
+      ]
+    },
+    {
+      "bucket": "uan",
+      "final": "uan",
+      "equipment": [],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.radishenemy.torturer.name",
+          "name": "拷问官",
+          "last_chinese": "官",
+          "final": "uan",
+          "initial": "拷"
+        }
+      ]
+    },
+    {
+      "bucket": "ui",
+      "final": "ui",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.armor.afterglow.name",
+          "name": "余晖",
+          "last_chinese": "晖",
+          "final": "ui",
+          "initial": "余"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.echoplexhammer.name",
+          "name": "回音锤",
+          "last_chinese": "锤",
+          "final": "ui",
+          "initial": "回"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.mace.name",
+          "name": "硬头锤",
+          "last_chinese": "锤",
+          "final": "ui",
+          "initial": "硬"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.replacepoint.name",
+          "name": "改锥",
+          "last_chinese": "锥",
+          "final": "ui",
+          "initial": "改"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.warhammer.name",
+          "name": "战锤",
+          "last_chinese": "锤",
+          "final": "ui",
+          "initial": "战"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.bolas.name",
+          "name": "流星锤",
+          "last_chinese": "锤",
+          "final": "ui",
+          "initial": "流"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.throwingclub.name",
+          "name": "飞槌",
+          "last_chinese": "槌",
+          "final": "ui",
+          "initial": "飞"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.throwinghammer.name",
+          "name": "投掷锤",
+          "last_chinese": "锤",
+          "final": "ui",
+          "initial": "投"
+        }
+      ],
+      "monsters": []
+    },
+    {
+      "bucket": "un",
+      "final": "un",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.bladeshield.name",
+          "name": "刃盾",
+          "last_chinese": "盾",
+          "final": "un",
+          "initial": "刃"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.greatshield.name",
+          "name": "巨型方盾",
+          "last_chinese": "盾",
+          "final": "un",
+          "initial": "巨"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.longstick.name",
+          "name": "长棍",
+          "last_chinese": "棍",
+          "final": "un",
+          "initial": "长"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.quarterstaff.name",
+          "name": "铁头棍",
+          "last_chinese": "棍",
+          "final": "un",
+          "initial": "铁"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.roundshield.name",
+          "name": "圆盾",
+          "last_chinese": "盾",
+          "final": "un",
+          "initial": "圆"
+        },
+        {
+          "kind": "equipment",
+          "key": "items.weapon.melee.tonfa.name",
+          "name": "冲击东方棍",
+          "last_chinese": "棍",
+          "final": "un",
+          "initial": "冲"
+        }
+      ],
+      "monsters": [
+        {
+          "kind": "monster",
+          "key": "actors.mobs.ghoul.name",
+          "name": "矮人尸群",
+          "last_chinese": "群",
+          "final": "un",
+          "initial": "矮"
+        },
+        {
+          "kind": "monster",
+          "key": "actors.mobs.swarm.name",
+          "name": "蝇群",
+          "last_chinese": "群",
+          "final": "un",
+          "initial": "蝇"
+        }
+      ]
+    },
+    {
+      "bucket": "uo",
+      "final": "uo",
+      "equipment": [
+        {
+          "kind": "equipment",
+          "key": "items.weapon.missiles.makeshiftslingshot.name",
+          "name": "简易投石索",
+          "last_chinese": "索",
+          "final": "uo",
+          "initial": "简"
+        }
+      ],
+      "monsters": []
+    }
+  ],
+  "unmatched": {
+    "equipment": [],
+    "monsters": [
+      {
+        "kind": "monster",
+        "key": "actors.mobs.dm100.name",
+        "name": "DM-100",
+        "last_chinese": null,
+        "final": null,
+        "initial": "d"
+      },
+      {
+        "kind": "monster",
+        "key": "actors.mobs.dm200.name",
+        "name": "DM-200",
+        "last_chinese": null,
+        "final": null,
+        "initial": "d"
+      },
+      {
+        "kind": "monster",
+        "key": "actors.mobs.dm201.name",
+        "name": "DM-201",
+        "last_chinese": null,
+        "final": null,
+        "initial": "d"
+      },
+      {
+        "kind": "monster",
+        "key": "actors.mobs.dm300.name",
+        "name": "DM-300",
+        "last_chinese": null,
+        "final": null,
+        "initial": "d"
+      },
+      {
+        "kind": "monster",
+        "key": "actors.mobs.radishenemy.dm175.name",
+        "name": "DM-175",
+        "last_chinese": null,
+        "final": null,
+        "initial": "d"
+      },
+      {
+        "kind": "monster",
+        "key": "actors.mobs.yog.name",
+        "name": "Yog-Dzewa",
+        "last_chinese": null,
+        "final": null,
+        "initial": "y"
+      },
+      {
+        "kind": "monster",
+        "key": "actors.mobs.yogdzewa.name",
+        "name": "Yog-Dzewa",
+        "last_chinese": null,
+        "final": null,
+        "initial": "y"
+      }
+    ]
+  }
+}

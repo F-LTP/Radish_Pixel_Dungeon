@@ -58,6 +58,8 @@ public class Levitation extends FlavourBuff {
 		if (ShatteredPixelDungeon.scene() instanceof GameScene) {
 			Dungeon.level.occupyCell(target );
 		}
+		// 流星附魔：浮空落地同样视为从高处落下
+		com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Meteor.onLanding( target );
 	}
 
 	//used to determine if levitation is about to end
@@ -74,7 +76,7 @@ public class Levitation extends FlavourBuff {
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.LEVITATION;
 	}
 

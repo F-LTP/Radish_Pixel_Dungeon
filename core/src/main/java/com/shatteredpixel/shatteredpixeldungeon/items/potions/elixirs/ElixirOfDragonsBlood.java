@@ -40,7 +40,9 @@ public class ElixirOfDragonsBlood extends Elixir {
 	public void apply(Hero hero) {
 		Buff.affect(hero, FireImbue.class).set(FireImbue.DURATION);
 		Sample.INSTANCE.play( Assets.Sounds.BURNING );
-		hero.sprite.emitter().burst(FlameParticle.FACTORY, 10);
+		if (hero.sprite != null) {
+			hero.sprite.emitter().burst(FlameParticle.FACTORY, 10);
+		}
 	}
 	
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe.SimpleRecipe {

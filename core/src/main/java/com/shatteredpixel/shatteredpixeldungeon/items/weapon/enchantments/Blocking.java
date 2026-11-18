@@ -94,7 +94,7 @@ public class Blocking extends Weapon.Enchantment {
 		}
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.ARMOR;
 		}
 		

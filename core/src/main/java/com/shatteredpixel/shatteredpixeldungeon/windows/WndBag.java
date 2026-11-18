@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
+import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -36,19 +37,24 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.DiceMageUI;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.InventorySlot;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RightClickMenu;
+import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollPane;
+import com.shatteredpixel.shatteredpixeldungeon.ui.UITheme;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.input.GameAction;
 import com.watabou.input.KeyBindings;
 import com.watabou.input.KeyEvent;
 import com.watabou.input.PointerEvent;
+import com.watabou.noosa.PointerArea;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
+import com.watabou.noosa.ui.Component;
 import com.watabou.utils.PointF;
 
 public class WndBag extends WndTabbed {
@@ -56,17 +62,14 @@ public class WndBag extends WndTabbed {
 	//only one bag window can appear at a time
 	public static Window INSTANCE;
 
-	protected static final int COLS_P   = 5;
-	protected static final int COLS_L   = 5;
-	
+	protected static final int COLS_P   = 6;
+
 	protected static int SLOT_WIDTH_P   = 28;
-	protected static int SLOT_WIDTH_L   = 28;
 
 	protected static int SLOT_HEIGHT_P	= 28;
-	protected static int SLOT_HEIGHT_L	= 28;
 
 	protected static final int SLOT_MARGIN	= 1;
-	
+
 	protected static final int TITLE_HEIGHT	= 14;
 	
 	private ItemSelector selector;
@@ -80,6 +83,12 @@ public class WndBag extends WndTabbed {
 	protected int count;
 	protected int col;
 	protected int row;
+
+	/** 物品格的可滚动容器（容量超过窗口时上下滑动）。 */
+	private Component content;
+	private ScrollPane scroll;
+	private int scrollHeight;
+	private boolean scrollSized;
 	
 	private static Bag lastBag;
 
@@ -100,30 +109,53 @@ public class WndBag extends WndTabbed {
 		
 		lastBag = bag;
 
-		slotWidth = PixelScene.landscape() ? SLOT_WIDTH_L : SLOT_WIDTH_P;
-		slotHeight = PixelScene.landscape() ? SLOT_HEIGHT_L : SLOT_HEIGHT_P;
+		// 标准布局：7 列 × 6 行（第一行是 6 个装备位），横屏与竖屏统一，跟桌面版一个样子。
+		// 屏幕确实放不下时先缩小格子，缩到最小还不行才减列数。
+		// 破碎原版观感：6 列 × 7 行；第一行 6 个装备位正好占满一行
+		final int TARGET_COLS = 6;
+		final int TARGET_ROWS = 7;
 
-		nCols = PixelScene.landscape() ? COLS_L : COLS_P;
-		nRows = (int)Math.ceil(25/(float)nCols); //we expect to lay out 25 slots in all cases
+		int availW = (int)(PixelScene.uiCamera.width  * 0.94f - chrome.marginHor());
+		int availH = (int)(PixelScene.uiCamera.height * 0.82f - chrome.marginTop() - chrome.marginBottom() - TITLE_HEIGHT);
+
+		int slotByW = (availW - (TARGET_COLS - 1) * SLOT_MARGIN) / TARGET_COLS;
+		int slotByH = (availH - (TARGET_ROWS - 1) * SLOT_MARGIN) / TARGET_ROWS;
+		int slot = Math.min( Math.min( slotByW, slotByH ), 28 );
+		slot = Math.max( slot, 16 );
+
+		slotWidth = slotHeight = slot;
+
+		nCols = Math.min( TARGET_COLS,
+				Math.max( 4, (availW + SLOT_MARGIN) / (slot + SLOT_MARGIN) ) );
+
+		// 行数按「装备 6 格 + 背包 30 格」算：7 列时正好 6 行铺满
+		int capacityTotal = (bag != null ? bag.capacity() : 30) + 6;
+		nRows = (int)Math.ceil(capacityTotal/(float)nCols);
 
 		int windowWidth = slotWidth * nCols + SLOT_MARGIN * (nCols - 1);
-		int windowHeight = TITLE_HEIGHT + slotHeight * nRows + SLOT_MARGIN * (nRows - 1);
-
-		if (PixelScene.landscape()){
-			while (slotHeight >= 24 && (windowHeight + 20 + chrome.marginTop()) > PixelScene.uiCamera.height){
-				slotHeight--;
-				windowHeight -= nRows;
-			}
-		} else {
-			while (slotWidth >= 26 && (windowWidth + chrome.marginHor()) > PixelScene.uiCamera.width){
-				slotWidth--;
-				windowWidth -= nCols;
-			}
-		}
+		// 可见行数就是 6 行（放不下时按可用高度往下减），多出来的格子靠右侧滚动条看
+		int maxVisibleRows = Math.max(3,
+				Math.min(TARGET_ROWS, (availH + SLOT_MARGIN) / (slot + SLOT_MARGIN)));
+		int visibleRows = Math.min(nRows, maxVisibleRows);
+		int windowHeight = TITLE_HEIGHT + slotHeight * visibleRows + SLOT_MARGIN * (visibleRows - 1);
 
 		placeTitle( bag, windowWidth );
-		
+
+		content = new Component();
 		placeItems( bag );
+
+		// 可见区域只放得下 visibleRows 行，内容按容量铺满，超出部分靠右侧滚动条
+		int visibleHeight = slotHeight * visibleRows + SLOT_MARGIN * (visibleRows - 1);
+		// 内容高度按“真正铺了几行”算，而不是按背包容量算：
+		// 容量固定会让内容永远比视口高，缩略条就永远只有一小截、填不满。
+		int contentRows = Math.max(visibleRows, row + 1);
+		content.setSize(windowWidth, contentRows * (slotHeight + SLOT_MARGIN) - SLOT_MARGIN);
+		scroll = new ScrollPane(content);
+		scrollHeight = visibleHeight;
+		add(scroll);
+		// 立刻给视口设定尺寸，不等 update()（那时窗口可能还没挂到场景，camera() 为 null）
+		scroll.setRect(0, TITLE_HEIGHT, windowWidth, visibleHeight);
+		scrollSized = true;
 
 		resize( windowWidth, windowHeight );
 
@@ -222,8 +254,9 @@ public class WndBag extends WndTabbed {
 
 		String title = selector != null ? selector.textPrompt() : null;
 		RenderedTextBlock txtTitle = PixelScene.renderTextBlock(
-				title != null ? Messages.titleCase(title) : Messages.titleCase( bag.name() ), 8 );
-		txtTitle.hardlight( TITLE_COLOR );
+				UITheme.isDiceMage() ? "[DICE BAG] " + (title != null ? Messages.titleCase(title) : Messages.titleCase( bag.name() ))
+						: title != null ? Messages.titleCase(title) : Messages.titleCase( bag.name() ), 8 );
+		txtTitle.hardlight( UITheme.isDiceMage() ? DiceMageUI.GOLD : TITLE_COLOR );
 		txtTitle.maxWidth( (int)titleWidth - 2 );
 		txtTitle.setPos(
 				1,
@@ -233,17 +266,28 @@ public class WndBag extends WndTabbed {
 		add( txtTitle );
 	}
 	
+	@Override
+	public void update() {
+		super.update();
+		// 兜底：万一还没设过尺寸（例如构造时被跳过），这里补一次
+		if (!scrollSized && scroll != null) {
+			scroll.setRect(0, TITLE_HEIGHT, width, scrollHeight);
+			scrollSized = true;
+		}
+	}
+
 	protected void placeItems( Bag container ) {
 		
 		// Equipped items
 		Belongings stuff = Dungeon.hero.belongings;
 		placeItem( stuff.weapon != null ? stuff.weapon : new Placeholder( ItemSpriteSheet.WEAPON_HOLDER ) );
 		placeItem( stuff.armor != null ? stuff.armor : new Placeholder( ItemSpriteSheet.ARMOR_HOLDER ) );
+		placeItem( stuff.secondaryArmor() != null ? stuff.secondaryArmor() : new Placeholder( "secondary_slot" ) );
 		placeItem( stuff.artifact != null ? stuff.artifact : new Placeholder( ItemSpriteSheet.ARTIFACT_HOLDER ) );
 		placeItem( stuff.misc != null ? stuff.misc : new Placeholder( ItemSpriteSheet.SOMETHING ) );
 		placeItem( stuff.ring != null ? stuff.ring : new Placeholder( ItemSpriteSheet.RING_HOLDER ) );
 
-		int equipped = 5;
+		int equipped = 6;
 
 		//the container itself if it's not the root backpack
 		if (container != Dungeon.hero.belongings.backpack){
@@ -269,15 +313,22 @@ public class WndBag extends WndTabbed {
 			placeItem( null );
 		}
 	}
-	
+
 	protected void placeItem( final Item item ) {
 
 		count++;
-		
+
 		int x = col * (slotWidth + SLOT_MARGIN);
-		int y = TITLE_HEIGHT + row * (slotHeight + SLOT_MARGIN);
+		int y = row * (slotHeight + SLOT_MARGIN);
 
 		InventorySlot slot = new InventorySlot( item ){
+			{
+				// InventorySlot 的 PointerArea 默认 BLOCK_WHEN_ACTIVE，会吞掉 DOWN 事件，
+				// 手指按在格子上时 ScrollPane 收不到按下，整个列表就拖不动。
+				// 这里只解开“阻断”，点击/长按/右键都照旧。
+				hotArea.blockLevel = PointerArea.NEVER_BLOCK;
+			}
+
 			@Override
 			protected void onClick() {
 				if (lastBag != item && !lastBag.contains(item) && !item.isEquipped(Dungeon.hero)){
@@ -286,7 +337,9 @@ public class WndBag extends WndTabbed {
 
 				} else if (selector != null) {
 
-					hide();
+					if (selector.hideAfterSelecting()){
+						hide();
+					}
 					selector.onSelect( item );
 
 				} else {
@@ -304,7 +357,9 @@ public class WndBag extends WndTabbed {
 
 				} else if (selector != null) {
 
-					hide();
+					if (selector.hideAfterSelecting()){
+						hide();
+					}
 					selector.onSelect( item );
 
 				} else {
@@ -339,12 +394,12 @@ public class WndBag extends WndTabbed {
 			}
 		};
 		slot.setRect( x, y, slotWidth, slotHeight );
-		add(slot);
+		content.add(slot);
 
 		if (item == null || (selector != null && !selector.itemSelectable(item))){
 			slot.enable(false);
 		}
-		
+
 		if (++col >= nCols) {
 			col = 0;
 			row++;
@@ -423,7 +478,7 @@ public class WndBag extends WndTabbed {
 		@Override
 		public GameAction keyAction() {
 			switch (index){
-				case 1: default:
+				case 1:
 					return SPDAction.BAG_1;
 				case 2:
 					return SPDAction.BAG_2;
@@ -433,6 +488,15 @@ public class WndBag extends WndTabbed {
 					return SPDAction.BAG_4;
 				case 5:
 					return SPDAction.BAG_5;
+				case 6:
+					return SPDAction.BAG_6;
+				case 7:
+					return SPDAction.BAG_7;
+				case 8:
+					return SPDAction.BAG_8;
+				default:
+					// 超过 8 个的背包没有独立快捷键
+					return null;
 			}
 		}
 
@@ -444,7 +508,7 @@ public class WndBag extends WndTabbed {
 	
 	public static class Placeholder extends Item {
 
-		public Placeholder(int image ) {
+		public Placeholder(String image ) {
 			this.image = image;
 		}
 
@@ -471,5 +535,8 @@ public class WndBag extends WndTabbed {
 		}
 		public abstract boolean itemSelectable( Item item );
 		public abstract void onSelect( Item item );
+		public boolean hideAfterSelecting(){
+			return true; //defaults to hiding the window when an item is picked
+		}
 	}
 }

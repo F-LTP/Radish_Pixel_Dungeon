@@ -31,11 +31,20 @@ public class RottenLance extends MeleeWeapon{// idea is from relic pd
     @Override
     public int max(int lvl) {
         return  14 +
-                lvl*2+
-                (isRoot(Dungeon.hero)?11+2*lvl:0);
+                lvl*2;
     }
     public boolean isRoot(Hero hero){
-        return hero.buff(Root.class)!=null;
+        return Dungeon.hero != null && hero.buff(Root.class) != null;
+    }
+
+    @Override
+    public int damageRoll(Char owner) {
+        int damage = super.damageRoll(owner);
+        // 蓄根加成：按实际持有者是否处于 Root 状态结算（英雄/怪物统一）
+        if (owner != null && owner.buff(Root.class) != null) {
+            damage += augment.damageFactor(11 + 2 * buffedLvl());
+        }
+        return damage;
     }
     @Override public ArrayList<String> actions(Hero hero ) {
         ArrayList<String> actions = super.actions(hero);
@@ -111,6 +120,34 @@ public class RottenLance extends MeleeWeapon{// idea is from relic pd
             }
         }
     }
+
+    // 扎根形态的攻速和攻击距离要跟着「持有者此刻有没有扎根」走，每次用到时现同步。
+    // 只靠 modeSwitch() 不够：它在读档时被调用，可那一刻 Dungeon.hero 还是空的，什么都改不了；
+    // 扎根被别的途径解除（比如着火）时也没有人调它
+    private void syncMode(Char owner) {
+        boolean rooted = owner != null && owner.buff(Root.class) != null;
+        DLY = rooted ? 1.5f : 1f;
+        RCH = rooted ? 3 : 2;
+    }
+
+    @Override
+    public float delayFactor(Char owner) {
+        syncMode(owner);
+        return super.delayFactor(owner);
+    }
+
+    @Override
+    public int reachFactor(Char owner) {
+        syncMode(owner);
+        return super.reachFactor(owner);
+    }
+
+    @Override
+    public String info() {
+        // 说明里的「攻速慢／额外攻击距离」特性句读的也是这两个字段
+        syncMode(isEquipped(Dungeon.hero) ? Dungeon.hero : null);
+        return super.info();
+    }
     @Override
     public String statsInfo() {
         if(isIdentified()){
@@ -125,16 +162,20 @@ public class RottenLance extends MeleeWeapon{// idea is from relic pd
             announced = true;
         }
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.ARMOR;
         }
 
         @Override
         public boolean act() {
+            // 每回合都要检查。以前这里返回 super.act()，而 Buff.act() 会让 buff 停止行动，
+            // 于是只在扎根的那一刻检查一次，之后着火也烧不掉，人被钉在火里
             if (target.buff(Burning.class)!=null){
                 detach();
+            } else {
+                spend(TICK);
             }
-            return super.act();
+            return true;
         }@Override
         public boolean attachTo( Char target ) {
             if (super.attachTo( target )) {

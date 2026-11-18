@@ -136,7 +136,7 @@ public class CrystalMimic extends Mimic {
 				}
 			}
 
-			if (!candidates.isEmpty()){
+			if (!candidates.isEmpty() && !ScrollOfTeleportation.blocksExternalTeleport(enemy)){
 				ScrollOfTeleportation.appear(enemy, Random.element(candidates));
 			}
 

@@ -58,6 +58,7 @@ public abstract class Trap implements Bundlable {
 
 	public boolean visible;
 	public boolean active = true;
+	public boolean mcOnlyUpgrade = false;
 	public boolean disarmedByActivation = true;
 	
 	public boolean canBeHidden = true;
@@ -67,6 +68,15 @@ public abstract class Trap implements Bundlable {
 	public boolean onlyRepair = true;
 
 	public boolean avoidsHallways = false; //whether this trap should avoid being placed in hallways
+
+	//陷阱师打出的陷阱卡生成的陷阱，不存档
+	public boolean fromJokerCard = false;
+
+	//陷阱精通 +1：陷阱卡里会自己找目标的陷阱不选英雄
+	protected boolean cardSparesHero(com.shatteredpixel.shatteredpixeldungeon.actors.Char ch){
+		return fromJokerCard && ch != null && ch == Dungeon.hero
+				&& Dungeon.hero.pointsInTalent(com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent.TRAP_MASTERY) >= 1;
+	}
 
 	public Trap set(int pos){
 		this.pos = pos;
@@ -128,6 +138,8 @@ public abstract class Trap implements Bundlable {
 
 	private static final String ONLYREPAIR = "onlyRepair";
 
+	private static final String MC_ONLY = "mc";
+
 	@Override
 	public void restoreFromBundle( Bundle bundle ) {
 		pos = bundle.getInt( POS );
@@ -138,6 +150,9 @@ public abstract class Trap implements Bundlable {
 		if(bundle.contains(ONLYREPAIR)){
 			onlyRepair = bundle.getBoolean(ONLYREPAIR);
 		}
+		if (bundle.contains(MC_ONLY)) {
+			mcOnlyUpgrade = bundle.getBoolean(MC_ONLY);
+		}
 	}
 
 	@Override
@@ -146,5 +161,6 @@ public abstract class Trap implements Bundlable {
 		bundle.put( VISIBLE, visible );
 		bundle.put( ACTIVE, active );
 		bundle.put( ONLYREPAIR,onlyRepair);
+		bundle.put( MC_ONLY, mcOnlyUpgrade );
 	}
 }

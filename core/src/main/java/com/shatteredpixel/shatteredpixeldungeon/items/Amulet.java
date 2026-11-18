@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Challenges.TEST_MODE;
+
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -38,19 +40,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Amulet extends Item {
-	
+
 	private static final String AC_END = "END";
-	
+
 	{
 		image = ItemSpriteSheet.AMULET;
-		
+
 		unique = true;
+	}
+	@Override
+	public String image() {
+		return Dungeon.isChallenged(Challenges.SNAKE_BITE) ?
+				ItemSpriteSheet.SNAKE_BITED_YENDOR : image;
 	}
 	
 	@Override
 	public ArrayList<String> actions( Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
-		if (hero.buff(AscensionChallenge.class) != null){
+		if (hero.buff(AscensionChallenge.class) != null || Dungeon.isChallenged(TEST_MODE)){
 			actions.clear();
 		} else {
 			actions.add(AC_END);
@@ -133,8 +140,7 @@ public class Amulet extends Item {
 	@Override
 	public String desc() {
 		String desc = super.desc();
-
-		if (Dungeon.hero.buff(AscensionChallenge.class) == null){
+		if (Dungeon.hero == null || Dungeon.hero.buff(AscensionChallenge.class) == null){
 			desc += "\n\n" + Messages.get(this, "desc_origins");
 		} else {
 			desc += "\n\n" + Messages.get(this, "desc_ascent");

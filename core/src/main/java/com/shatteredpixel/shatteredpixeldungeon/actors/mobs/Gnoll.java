@@ -26,18 +26,20 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.GnollSprite;
 
 public class Gnoll extends Mob {
-	
+
 	{
 		spriteClass = GnollSprite.class;
-		
+
 		HP = HT = 12;
 		defenseSkill = 4;
-		
+
 		EXP = 2;
 		maxLvl = 8;
-		
+
 		loot = Gold.class;
 		lootChance = 0.5f;
+
+		properties.add(Property.GNOLL);
 	}
 	
 	@Override
@@ -54,4 +56,7 @@ public class Gnoll extends Mob {
 	public int drRoll() {
 		return super.drRoll() + Char.combatRoll(0, 2);
 	}
+
+
+
 }

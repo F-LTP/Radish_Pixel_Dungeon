@@ -136,7 +136,8 @@ public class SpellSprite extends Image {
 	
 	public static void show( Char ch, int index, float r, float g, float b ) {
 		
-		if (!ch.sprite.visible) {
+		//不在地牢画面里时（例如炼金界面里给英雄施加药效）角色没有贴图，没有地方可画
+		if (ch.sprite == null || !ch.sprite.visible) {
 			return;
 		}
 		

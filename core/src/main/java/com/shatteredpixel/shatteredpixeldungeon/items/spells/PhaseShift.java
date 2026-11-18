@@ -49,7 +49,8 @@ public class PhaseShift extends TargetedSpell {
 		final Char ch = Actor.findChar(bolt.collisionPos);
 		
 		if (ch != null) {
-			if (ScrollOfTeleportation.teleportChar(ch)){
+			//法术由玩家自己施放，目标是自己时属于主动传送
+			if (ScrollOfTeleportation.teleportChar(ch, false)){
 
 				if (ch instanceof Mob) {
 					if (((Mob) ch).state == ((Mob) ch).HUNTING) ((Mob) ch).state = ((Mob) ch).WANDERING;

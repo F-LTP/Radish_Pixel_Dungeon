@@ -185,7 +185,7 @@ public class Ratmogrify extends ArmorAbility {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return HeroIcon.RATMOGRIFY;
 	}
 

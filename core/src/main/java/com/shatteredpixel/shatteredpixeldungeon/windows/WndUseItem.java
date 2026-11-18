@@ -22,10 +22,17 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
+import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.InventoryPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import com.watabou.noosa.Image;
 
 import java.util.ArrayList;
 
@@ -40,21 +47,23 @@ public class WndUseItem extends WndInfoItem {
 		super(item);
 
 		float y = height;
-		
-		if (Dungeon.hero.isAlive() && Dungeon.hero.belongings.contains(item)) {
+
+		if (Dungeon.hero.isAlive() && (Dungeon.hero.belongings.contains(item) || item == Dungeon.hero.belongings.secondaryArmor)) {
 			y += GAP;
 			ArrayList<RedButton> buttons = new ArrayList<>();
+			boolean renameAdded = false;
 			for (final String action : item.actions( Dungeon.hero )) {
-				
+
 				RedButton btn = new RedButton( item.actionName(action, Dungeon.hero), 8 ) {
 					@Override
 					protected void onClick() {
 						hide();
 						if (owner != null && owner.parent != null) owner.hide();
-						if (Dungeon.hero.isAlive() && Dungeon.hero.belongings.contains(item)){
+						if (Dungeon.hero.isAlive() && (Dungeon.hero.belongings.contains(item) || item == Dungeon.hero.belongings.secondaryArmor)){
 							item.execute( Dungeon.hero, action );
 						}
 						Item.updateQuickslot();
+						//默认动作要问 defaultAction() 而不是读字段：有的物品的默认动作是按当前状态算出来的，字段里是空的
 						if (action.equals(item.defaultAction()) && item.usesTargeting && owner == null){
 							InventoryPane.useTargeting();
 						}
@@ -67,7 +76,57 @@ public class WndUseItem extends WndInfoItem {
 				if (action.equals(item.defaultAction())) {
 					btn.textColor( TITLE_COLOR );
 				}
-				
+
+				//这段在「每个动作一次」的循环里，重命名按钮只需要加一个：否则有几个动作就在同一个位置叠几个按钮
+				boolean itemname = (item instanceof EquipableItem || item instanceof Wand) && !renameAdded;
+				if (itemname){
+					renameAdded = true;
+					Image renamebutton = Icons.get(Icons.RENAME_OFF);
+					if (item instanceof EquipableItem) {
+						if (!((EquipableItem) item).customName.equals("")) {
+							renamebutton = Icons.get(Icons.RENAME_ON);
+						}
+					}
+					if (item instanceof Wand) {
+						if (!((Wand)item).customName.equals("")) {
+							//这里原先取了图标却没有赋值，改过名的法杖仍然显示「未改名」的图标
+							renamebutton = Icons.get(Icons.RENAME_ON);
+						}
+					}
+
+					IconButton Rename = new IconButton(renamebutton) {
+						public String hoverText() {
+							return Messages.titleCase(Messages.get(WndGame.class, "rename"));
+						}
+
+						public void onClick() {
+							GameScene.show(new WndTextInput(Messages.get(WndGame.class, "dialog"), Messages.get(WndGame.class, "dialog_title"), item.name(), 20, false, Messages.get(WndGame.class, "dialog_rename"), Messages.get(WndGame.class, "dialog_revert")) {
+								public void onSelect(boolean name, String str) {
+									if (name) {
+										if (item instanceof EquipableItem) {
+											((EquipableItem) item).customName = str;
+										} else {
+											((Wand) item).customName = str;
+										}
+									} else {
+										if (item instanceof EquipableItem) {
+											((EquipableItem) item).customName = "";
+										} else  {
+											((Wand) item).customName = "";
+										}
+									}
+
+									WndUseItem.this.hide();
+									GameScene.show(new WndUseItem(owner, item));
+								}
+							});
+							icon(Icons.get(!item.name().equals("") ? Icons.RENAME_OFF : Icons.RENAME_ON));
+						}
+					};
+					Rename.setRect((float)(super.width - 16), 0.0F, 16.0F, 16.0F);
+					this.add(Rename);
+				}
+
 			}
 			y = layoutButtons(buttons, width, y);
 		}

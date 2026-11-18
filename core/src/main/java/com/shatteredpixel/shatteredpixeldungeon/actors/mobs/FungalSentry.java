@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
@@ -91,8 +92,8 @@ public class FungalSentry extends Mob {
 	}
 
 	{
-		immunities.add( ToxicGas.class );
-		immunities.add( Poison.class );
+		typeImmunities.add(DamageType.TOXIC);
+		immunities.add(Poison.class); typeImmunities.add(DamageType.POISON);
 	}
 
 	private class Waiting extends Mob.Wandering{

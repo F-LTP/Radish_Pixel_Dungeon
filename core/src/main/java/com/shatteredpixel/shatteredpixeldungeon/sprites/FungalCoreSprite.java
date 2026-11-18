@@ -85,6 +85,18 @@ public class FungalCoreSprite extends MobSprite {
 	}
 
 	@Override
+	public void kill() {
+		super.kill();
+		// 着色器死亡动画不经过 die()：不在这里把墙体的「不画」标记撤掉，上方两格墙会一直缺着
+		if (ch != null && Dungeon.level != null){
+			DungeonWallsTilemap.skipCells.remove(ch.pos - 2*Dungeon.level.width());
+			DungeonWallsTilemap.skipCells.remove(ch.pos - Dungeon.level.width());
+			GameScene.updateMap(ch.pos-2*Dungeon.level.width());
+			GameScene.updateMap(ch.pos-Dungeon.level.width());
+		}
+	}
+
+	@Override
 	public void turnTo(int from, int to) {
 		//do nothing
 	}

@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
 
@@ -73,7 +74,12 @@ public class LockedFloor extends Buff {
 	}
 
 	@Override
-	public int icon() {
+	public String desc() {
+		return Messages.get(this,"desc",left);
+	}
+
+	@Override
+	public String icon() {
 		return BuffIndicator.LOCKED_FLOOR;
 	}
 }

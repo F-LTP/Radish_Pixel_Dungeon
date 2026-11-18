@@ -1,0 +1,73 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_11
+compileJava.options.encoding = 'UTF-8'
+
+sourceSets.main.java.srcDirs = ['src', 'scenarios']
+application.mainClass = 'rpdtest.SuiteRunner'
+
+dependencies {
+    implementation project(':desktop')
+    implementation project(':core')
+    implementation project(':event-annotations')
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+}
+
+def scenarioSources = fileTree('scenarios/rpdtest/scenarios') { include '*.java' }
+def manifestFile = layout.buildDirectory.file('generated/scenarios.properties')
+
+tasks.register('scenarioManifest') {
+    inputs.files(scenarioSources)
+    outputs.file(manifestFile)
+    doLast {
+        def properties = new Properties()
+        def names = []
+        scenarioSources.files.sort { it.name }.each { source ->
+            def text = source.getText('UTF-8')
+            if (text =~ /implements\s+Scenario\b/) {
+                def name = source.name - '.java'
+                names.add(name)
+                ['EXPECTED-VERDICT': 'expected', 'EXPECTED-REASON': 'reason', 'TIMEOUT-SECONDS': 'timeout'].each { marker, key ->
+                    def match = text =~ /${marker}:[ \t]*([^\r\n]+)/
+                    if (match.find()) properties.setProperty("${name}.${key}".toString(), match.group(1).trim())
+                }
+            }
+        }
+        properties.setProperty('scenarios', names.join(','))
+        def output = manifestFile.get().asFile
+        output.parentFile.mkdirs()
+        output.withOutputStream { properties.store(it, null) }
+    }
+}
+
+processResources {
+    dependsOn tasks.named('scenarioManifest')
+    from(manifestFile) { rename { 'scenarios.properties' } }
+}
+
+tasks.withType(JavaExec).configureEach {
+    workingDir rootProject.projectDir
+    systemProperty 'rpd.output', layout.buildDirectory.dir('rpd-selftest').get().asFile.absolutePath
+    systemProperty 'rpd.versionName', appVersionName
+    systemProperty 'rpd.versionCode', appVersionCode
+}
+
+tasks.register('e2eTest', JavaExec) {
+    group = 'verification'
+    description = '运行隔离进程中的真实游戏端到端测试。'
+    dependsOn tasks.named('classes')
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = application.mainClass
+    args providers.gradleProperty('scenario').getOrElse('all')
+}
+
+tasks.register('listScenarios', JavaExec) {
+    group = 'verification'
+    dependsOn tasks.named('classes')
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = application.mainClass
+    args 'list'
+}

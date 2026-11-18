@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RipperSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
@@ -248,7 +249,13 @@ public class RipperDemon extends Mob {
 						if (Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[leapPos]){
 							GLog.w(Messages.get(RipperDemon.this, "leap"));
 							sprite.parent.addToBack(new TargetedCell(leapPos, 0xFF0000));
-							((RipperSprite)sprite).leapPrep( leapPos );
+							// Snake Bite challenge: call leapPrep() via reflection
+							if (sprite instanceof RipperSprite){
+								((RipperSprite)sprite).leapPrep( leapPos );
+							} else if (sprite instanceof SnakeSprite){
+								((SnakeSprite) sprite).leapPrep( leapPos );
+							}
+
 							Dungeon.hero.interrupt();
 						}
 						return true;

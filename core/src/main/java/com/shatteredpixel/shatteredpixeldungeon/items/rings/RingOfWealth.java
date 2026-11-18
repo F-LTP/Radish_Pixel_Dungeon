@@ -75,6 +75,12 @@ public class RingOfWealth extends Ring {
 		}
 	}
 
+
+	public String upgradeStat1(int level){
+		if (cursed && cursedKnown) level = Math.min(-1, level-3);
+		return Messages.decimalFormat("#.##", 100f * (Math.pow(1.2f, level+1)-1f)) + "%";
+	}
+
 	private static final String TRIES_TO_DROP = "tries_to_drop";
 	private static final String DROPS_TO_RARE = "drops_to_rare";
 
@@ -226,7 +232,7 @@ public class RingOfWealth extends Ring {
 		}
 	}
 
-	private static Item genMidValueConsumable(){
+	public static Item genMidValueConsumable(){
 		switch (Random.Int(6)){
 			case 0: default:
 				Item i = genLowValueConsumable();

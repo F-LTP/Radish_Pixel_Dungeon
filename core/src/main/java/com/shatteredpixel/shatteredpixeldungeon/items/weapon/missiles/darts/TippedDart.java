@@ -111,6 +111,25 @@ public abstract class TippedDart extends Dart {
 	
 	//exact same damage as regular darts, despite being higher tier.
 
+	// 药水涂镖 +3/+4：涂药飞镖伤害 +50%/+100%，精准度 +100%/+150%
+	@Override
+	public int damageRoll(Char owner) {
+		int dmg = super.damageRoll(owner);
+		int pts = owner instanceof Hero ? ((Hero) owner).pointsInTalent(Talent.MORE_DARTS) : 0;
+		if (pts >= 4)      dmg = Math.round(dmg * 2f);
+		else if (pts >= 3) dmg = Math.round(dmg * 1.5f);
+		return dmg;
+	}
+
+	@Override
+	public float accuracyFactor(Char owner, Char target) {
+		float acc = super.accuracyFactor(owner, target);
+		int pts = owner instanceof Hero ? ((Hero) owner).pointsInTalent(Talent.MORE_DARTS) : 0;
+		if (pts >= 4)      acc *= 2.5f;
+		else if (pts >= 3) acc *= 2f;
+		return acc;
+	}
+
 	@Override
 	protected void rangedHit(Char enemy, int cell) {
 		targetPos = cell;
@@ -152,37 +171,39 @@ public abstract class TippedDart extends Dart {
 	@Override
 	public float durabilityPerUse() {
 		float use = super.durabilityPerUse(false);
-		
-		use /= (1 + Dungeon.hero.pointsInTalent(Talent.DURABLE_TIPS));
 
-		//checks both destination and source position
-		float lotusPreserve = 0f;
-		if (targetPos != -1){
-			for (Char ch : Actor.chars()){
-				if (ch instanceof WandOfRegrowth.Lotus){
+		if (Dungeon.hero != null) {
+			use /= (1 + Dungeon.hero.pointsInTalent(Talent.DURABLE_TIPS));
+
+			//checks both destination and source position
+			float lotusPreserve = 0f;
+			if (targetPos != -1) {
+				for (Char ch : Actor.chars()) {
+					if (ch instanceof WandOfRegrowth.Lotus) {
+						WandOfRegrowth.Lotus l = (WandOfRegrowth.Lotus) ch;
+						if (l.inRange(targetPos)) {
+							lotusPreserve = Math.max(lotusPreserve, l.seedPreservation());
+						}
+					}
+				}
+				targetPos = -1;
+			}
+			int p = curUser == null ? Dungeon.hero.pos : curUser.pos;
+			for (Char ch : Actor.chars()) {
+				if (ch instanceof WandOfRegrowth.Lotus) {
 					WandOfRegrowth.Lotus l = (WandOfRegrowth.Lotus) ch;
-					if (l.inRange(targetPos)){
+					if (l.inRange(p)) {
 						lotusPreserve = Math.max(lotusPreserve, l.seedPreservation());
 					}
 				}
 			}
-			targetPos = -1;
+			use *= (1f - lotusPreserve);
 		}
-		int p = curUser == null ? Dungeon.hero.pos : curUser.pos;
-		for (Char ch : Actor.chars()){
-			if (ch instanceof WandOfRegrowth.Lotus){
-				WandOfRegrowth.Lotus l = (WandOfRegrowth.Lotus) ch;
-				if (l.inRange(p)){
-					lotusPreserve = Math.max(lotusPreserve, l.seedPreservation());
-				}
-			}
-		}
-		use *= (1f - lotusPreserve);
 
 		float usages = Math.round(MAX_DURABILITY/use);
 
 		//grants 3+lvl extra uses with charged shot
-		if (bow != null && Dungeon.hero.buff(Crossbow.ChargedShot.class) != null){
+		if ((bow != null) && Dungeon.hero != null && (Dungeon.hero.buff(Crossbow.ChargedShot.class) != null)){
 			usages += 3 + bow.buffedLvl();
 		}
 
@@ -227,6 +248,14 @@ public abstract class TippedDart extends Dart {
 		
 		return getTipped(s, quantity );
 		
+	}
+
+	@Override
+	protected void decrementDurability(){
+		if( Dungeon.hero.pointsInTalent(Talent.MEDART_SPECIALIST) >= 3 && Math.random() <= 0.33d){
+			return;
+		}
+		super.decrementDurability();
 	}
 	
 }

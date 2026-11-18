@@ -55,6 +55,9 @@ public class Terrain {
 	public static final int BOOKSHELF		= 27;
 	public static final int ALCHEMY			= 28;
 
+
+	public static final int HOLY_LAND		= 39;
+
 	public static final int CUSTOM_DECO_EMPTY = 32; //regular empty tile that can't be overridden, used for custom visuals mainly
 	//solid environment decorations
 	public static final int CUSTOM_DECO	    = 23; //invisible decoration that will also be a custom visual, re-uses the old terrain ID for signs
@@ -98,7 +101,7 @@ public class Terrain {
 		flags[EMPTY_SP]		= flags[EMPTY];
 		flags[HIGH_GRASS]	= PASSABLE | LOS_BLOCKING | FLAMABLE;
 		flags[FURROWED_GRASS]= flags[HIGH_GRASS];
-
+		flags[HOLY_LAND]		= PASSABLE;
 		flags[SECRET_DOOR]  = flags[WALL]  | SECRET;
 		flags[SECRET_TRAP]  = flags[EMPTY] | SECRET;
 		flags[TRAP]         = AVOID;

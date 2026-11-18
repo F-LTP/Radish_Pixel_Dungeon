@@ -123,6 +123,7 @@ public class SummonElemental extends Spell {
 			if (Random.Float() < talentChance){
 				Talent.onScrollUsed(curUser, curUser.pos, talentFactor);
 			}
+			Spell.onSpellUsed( curUser, this );
 
 		} else {
 			GLog.w(Messages.get(SpiritHawk.class, "no_space"));

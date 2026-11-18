@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Imp;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -69,7 +70,9 @@ public class WndImp extends Window{
 		pos = tfTitle.bottom() + 2*MARGIN;
 
 
-		layoutBody(pos, Messages.get(WndImp.class, "message"), Messages.get(WndImp.class, "reward"),Messages.get(WndImp.class, "power"));
+		layoutBody(pos, Messages.get(WndImp.class, "message"),
+				canGainPotential() ? new String[]{ Messages.get(WndImp.class, "reward"), Messages.get(WndImp.class, "power") }
+						: new String[]{ Messages.get(WndImp.class, "reward") });
 
 
 	}
@@ -159,8 +162,24 @@ public class WndImp extends Window{
 	protected boolean enabled( int index ){
 		switch (index) {
 			case 0: default:	return true;
-			case 1:return Dungeon.hero.armorAbility==null;
+			// 只有已转职时才有“激发潜力”选项
+			case 1: return canGainPotential();
 		}
+	}
+
+	/** 是否已选择专精（未专精时无法激活四阶天赋）。 */
+	private static boolean heroHasSubClass() {
+		return Dungeon.hero != null && Dungeon.hero.subClass != HeroSubClasses.NONE;
+	}
+
+	/** 潜力和皇冠护甲技能互斥：已有护甲技能时不能再激发潜力。 */
+	private static boolean heroHasArmorAbility() {
+		return Dungeon.hero != null && Dungeon.hero.armorAbility != null;
+	}
+
+	/** 是否还能“激发潜力”：已专精，且尚未获得护甲技能。 */
+	private static boolean canGainPotential() {
+		return heroHasSubClass() && !heroHasArmorAbility();
 	}
 
 	protected void onSelect( int index ) {
@@ -204,10 +223,19 @@ public class WndImp extends Window{
 	}
 
 	private void gainTalent(Imp imp, DwarfToken tokens, Hero hero) {
-		if (hero.subClass== HeroSubClass.NONE){
+		if (!heroHasSubClass()) {
+			// 兜底：未专精时不应走到这里
 			GLog.n( Messages.get(this, "deny"));
+			hide();
+			return;
 		}
-		else {
+		if (hero.armorAbility != null) {
+			// 兜底：已通过皇冠获得护甲技能时不应走到这里（潜力与护甲技能互斥）
+			GLog.n( Messages.get(this, "deny_armor"));
+			hide();
+			return;
+		}
+		{
 			hero.powerOfImp=true;
 			Buff.affect(hero, powerGainTracker.class);
 			hero.spend(Actor.TICK);

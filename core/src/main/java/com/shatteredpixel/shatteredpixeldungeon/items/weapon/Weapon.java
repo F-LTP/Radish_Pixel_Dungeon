@@ -26,41 +26,92 @@ import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.ai.AIModifier;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.ai.WeaponAITag;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.ElementalStrike;
+import com.shatteredpixel.shatteredpixeldungeon.custom.testmode.CustomWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfKing;
+import com.shatteredpixel.shatteredpixeldungeon.items.curses.ITempLevelCurse;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ParchmentScrap;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Annoying;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Dazzling;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Displacing;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.DoubleEdged;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Explosive;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Friendly;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Heavy;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Polarized;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Sacrificial;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Slippery;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Stubbornness;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Temporal;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Ultralight;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Wayward;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.BlazingFury;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blooming;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Chilling;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Clash;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Combos;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Corrupting;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Crystal;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Distortion;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Elastic;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Eclipse;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Euphoria;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Flawless;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.FlowingLight;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Fluctuation;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.VoidRift;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Harmony;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Jealousy;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lamp;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lamprey;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Midas;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Meteor;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Insight;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Pulse;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Propulsion;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Overwrite;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Reaping;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Reversal;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Refined;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Rainstorm;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Resonance;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Seeking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Striking;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Survival;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Saturation;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.SoulRend;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Sweeping;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Unstable;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Vampiric;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.WetEnchantment;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CelestialSphere;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RunicBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scimitar;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -77,6 +128,18 @@ abstract public class Weapon extends KindOfWeapon {
 	public float    ACC = 1f;	// Accuracy modifier
 	public float	DLY	= 1f;	// Speed modifier
 	public int      RCH = 1;    // Reach modifier (only applies to melee hits)
+	public int fusionMin = 0, fusionMax = 0;
+
+	// 怪物持有时授予的 AI 标签（由各武器子类在初始化块中设定）
+	public WeaponAITag aiTag = WeaponAITag.NONE;
+	// 按 aiTag 惰性创建、缓存在本武器实例上的 AI 行为（每武器/每怪独立，不序列化）
+	public transient AIModifier ai;
+
+	/** 返回本武器授予怪物的 AI 行为，无则 null。 */
+	public AIModifier aiModifier() {
+		if (ai == null) ai = aiTag.create();
+		return ai;
+	}
 
 	public enum Augment {
 		SPEED   (0.7f, 2/3f),
@@ -105,6 +168,9 @@ abstract public class Weapon extends KindOfWeapon {
 	public Augment augment = Augment.NONE;
 	
 	private static final int USES_TO_ID = 20;
+
+	// 小骑士：无附魔武器使用的虚拟 Wet 附魔实例
+	private static final WetEnchantment WET_ENCHANT = new WetEnchantment();
 	private float usesLeftToID = USES_TO_ID;
 	private float availableUsesToID = USES_TO_ID/2f;
 	
@@ -112,28 +178,65 @@ abstract public class Weapon extends KindOfWeapon {
 	public boolean enchantHardened = false;
 	public boolean curseInfusionBonus = false;
 	public boolean masteryPotionBonus = false;
+
+	public boolean readyToIdentify(){
+		return !isIdentified() && usesLeftToID <= 0;
+	}
+
+	public void completeIdentificationProgress(){
+		usesLeftToID = 0;
+	}
 	
 	@Override
 	public int proc( Char attacker, Char defender, int damage ) {
-		
-		if (enchantment != null && attacker.buff(MagicImmune.class) == null) {
+
+		// 小骑士濡湿附魔天赋逻辑
+		if (attacker instanceof Hero && this instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon) {
+			Hero hero = (Hero) attacker;
+			if (hero.subClass == HeroSubClasses.LITTLE_KNIGHT && hero.buff(MagicImmune.class) == null) {
+				int wetTalent = hero.pointsInTalent(Talent.WET_ENCHANT);
+				
+				// +1天赋：无附魔武器视为拥有濡湿
+				// +2天赋：武器始终拥有濡湿（与原有附魔叠加）
+				if (wetTalent >= 1 && (enchantment == null || wetTalent >= 2)) {
+					damage = WET_ENCHANT.proc(this, attacker, defender, damage);
+				}
+			}
+		}
+
+		if (enchantment != null && attacker.buff(MagicImmune.class) == null
+				&& !com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.LittleKnight.pokeIsPlain( attacker )) {
 			damage = enchantment.proc( this, attacker, defender, damage );
 		}
-		
+		if (fusedItems != null) {
+			for (Item it : fusedItems) {
+				if (it instanceof Weapon) {
+					damage = ((Weapon) it).proc(attacker, defender, damage);
+				}
+			}
+		}
+
 		if (!levelKnown && attacker == Dungeon.hero) {
 			float uses = Math.min( availableUsesToID, Talent.itemIDSpeedFactor(Dungeon.hero, this) );
 			availableUsesToID -= uses;
 			usesLeftToID -= uses;
 			if (usesLeftToID <= 0) {
-				identify();
-				GLog.p( Messages.get(Weapon.class, "identify") );
-				Badges.validateItemLevelAquired( this );
+				if (ShardOfOblivion.passiveIDDisabled()){
+					if (usesLeftToID > -1){
+						GLog.p(Messages.get(ShardOfOblivion.class, "identify_ready"), name());
+					}
+					usesLeftToID = -1;
+				} else {
+					identify();
+					GLog.p(Messages.get(Weapon.class, "identify"));
+					Badges.validateItemLevelAquired(this);
+				}
 			}
 		}
 
 		return damage;
 	}
-	
+
 	public void onHeroGainExp( float levelPercent, Hero hero ){
 		levelPercent *= Talent.itemIDSpeedFactor(hero, this);
 		if (!levelKnown && isEquipped(hero) && availableUsesToID <= USES_TO_ID/2f) {
@@ -162,6 +265,8 @@ abstract public class Weapon extends KindOfWeapon {
 		bundle.put( AUGMENT, augment );
 
 		bundle.put("is_shining",isShining);
+		bundle.put("fusion_min", fusionMin);
+		bundle.put("fusion_max", fusionMax);
 	}
 	
 	@Override
@@ -179,6 +284,8 @@ abstract public class Weapon extends KindOfWeapon {
 		if (bundle.contains("is_shining")){
 			isShining=bundle.getBoolean("is_shining");
 		}
+		fusionMin = bundle.getInt("fusion_min");
+		fusionMax = bundle.getInt("fusion_max");
 
 	}
 	
@@ -204,12 +311,33 @@ abstract public class Weapon extends KindOfWeapon {
 			ACC /= 5;
 		}
 
+		//求生附魔：已损失生命值越多，命中越高
+		if (hasEnchant(Survival.class, owner)){
+			ACC *= Survival.accuracyMultiplier(owner, Math.max(0, buffedLvl()));
+		}
+
+		//脉冲附魔：强化期间命中提高
+		if (enchantment instanceof Pulse && owner.buff(Pulse.PulseBoost.class) != null){
+			ACC *= Pulse.ACCURACY_BONUS;
+		}
+
 		return encumbrance > 0 ? (float)(ACC / Math.pow( 1.5, encumbrance )) : ACC;
 	}
 	
 	@Override
 	public float delayFactor( Char owner ) {
-		return baseDelay(owner) * (1f/speedMultiplier(owner));
+		float delay = baseDelay(owner) * (1f/speedMultiplier(owner));
+
+		//时速诅咒：等级提高加快效果的触发概率（每级+2.5%，最高75%），
+		//时间倍率n受奥术戒指附魔强度影响，时间变为1/n（加快）或n（减慢）
+		if (hasEnchant(Temporal.class, owner)){
+			int level = Math.max(0, buffedLvl());
+			float fastChance = Math.min(0.75f, 0.5f + 0.025f * level);
+			float n = 2f * RingOfArcana.enchantPowerMultiplier(owner);
+			delay *= (Random.Float() < fastChance ? 1f/n : n);
+		}
+
+		return delay;
 	}
 
 	protected float baseDelay( Char owner ){
@@ -236,18 +364,28 @@ abstract public class Weapon extends KindOfWeapon {
 
 	@Override
 	public int reachFactor(Char owner) {
-		int reach = RCH;
-		if (owner instanceof Hero && RingOfForce.fightingUnarmed((Hero) owner)){
-			reach = 1; //brawlers stance benefits from enchantments, but not innate reach
-			if (!RingOfForce.unarmedGetsWeaponEnchantment((Hero) owner)){
-				return reach;
+		int reach;
+		if (hasEnchant(Projecting.class, owner)){
+			if (this instanceof CustomWeapon) {
+				reach = RCH + 1;
+			} else {
+				reach = RCH + Math.round(RingOfArcana.enchantPowerMultiplier(owner));
+			}
+		} else {
+			//天球仪-距离
+			if (this instanceof CelestialSphere) {
+				int wandTotalLevel = 0;
+				ArrayList<Wand> wands = hero.belongings.getAllItems(Wand.class);
+				for (Wand w : wands.toArray(new Wand[0])){
+					wandTotalLevel += w.quantity();
+				}
+				reach = RCH + wandTotalLevel/3;
+			} else {
+				reach = RCH;
 			}
 		}
-		if (hasEnchant(Projecting.class, owner)){
-			return reach + Math.round(enchantment.procChanceMultiplier(owner));
-		} else {
-			return reach;
-		}
+		reach += com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.reachBonus(owner);
+		return reach;
 	}
 
 	public int STRReq(){
@@ -256,11 +394,12 @@ abstract public class Weapon extends KindOfWeapon {
 		if(req2 != 0 ){
 			req = req2;
 		}
-		int multi = RingOfKing.updateMultiplier(hero);
-		if( RingOfKing.curItem != null && RingOfKing.curItem.cursed )
-			multi = 1;
+
 		// 暂时这样吧，先把问题修了
 		if(hero != null){
+			int multi = RingOfKing.updateMultiplier(hero);
+			if( RingOfKing.curItem != null && RingOfKing.curItem.cursed )
+				multi = 1;
 			RingOfKing ringOfKing = hero.belongings.getItem(RingOfKing.class);
 			if(ringOfKing != null){
 				if(hero.belongings.weapon == this && (hero.belongings.misc instanceof RingOfKing || hero.belongings.ring instanceof RingOfKing)) req = req + multi;
@@ -269,6 +408,8 @@ abstract public class Weapon extends KindOfWeapon {
 		if (masteryPotionBonus){
 			req -= 2;
 		}
+		//沉重/超轻诅咒：力量需求修正
+		req += curseStrReqMod();
 		return req;
 	}
 
@@ -288,52 +429,78 @@ abstract public class Weapon extends KindOfWeapon {
 		return level;
 	}
 
-	//overrides as other things can equip these
-	@Override
-	public int buffedLvl() {
-		if(hero.belongings.weapon == this ) {
-			return hero.belongings.weapon.level() + RingOfKing.updateMultiplier(Dungeon.hero);
-		}
-
-		if (isEquipped( hero ) || hero.belongings.contains( this )){
-			return super.buffedLvl();
+	public int buffedLvl(){
+		int lvl;
+		if (Dungeon.hero != null && Dungeon.hero.buff( Degrade.class ) != null
+				&& (isEquipped( Dungeon.hero ) || Dungeon.hero.belongings.contains( this ))) {
+			lvl = Degrade.reduceLevel(level());
 		} else {
-			return level();
+			lvl = level();
 		}
+		return lvl + curseTempLevel() + com.shatteredpixel.shatteredpixeldungeon.items.armor.SoulMix.bonusLevel( Dungeon.hero, this );
+	}
+
+	/** 沉重/超轻等诅咒提供的临时等级。 */
+	public int curseTempLevel(){
+		if (enchantment instanceof ITempLevelCurse){
+			return ((ITempLevelCurse) enchantment).tempLevel();
+		}
+		return 0;
+	}
+
+	/** 沉重/超轻等诅咒对力量需求的修正。 */
+	public int curseStrReqMod(){
+		if (enchantment instanceof ITempLevelCurse){
+			return ((ITempLevelCurse) enchantment).strReqMod();
+		}
+		return 0;
 	}
 	
 	@Override
-	public Item upgrade() {
-		return upgrade(false);
-	}
-	
-	public Item upgrade(boolean enchant ) {
-
-		if (enchant){
-			if (enchantment == null){
-				enchant(Enchantment.random());
-			}
-		} else if (enchantment != null) {
-			//chance to lose harden buff is 10/20/40/80/100% when upgrading from +6/7/8/9/10
-			if (enchantHardened){
-				if (level() >= 6 && Random.Float(10) < Math.pow(2, level()-6)){
-					enchantHardened = false;
-				}
-
-			//chance to remove curse is a static 33%
-			} else if (hasCurseEnchant()) {
-				if (Random.Int(3) == 0) enchant(null);
-
-			//otherwise chance to lose enchant is 10/20/40/80/100% when upgrading from +4/5/6/7/8
-			} else if (level() >= 4 && Random.Float(10) < Math.pow(2, level()-4)){
-				enchant(null);
-			}
+		public Item upgrade() {
+			return upgrade(false);
 		}
-		
-		cursed = false;
 
-		return super.upgrade();
-	}
+		public Item upgrade(boolean enchant ) {
+
+			// 精制附魔：性能更好，但无法再升级
+			if (enchantment instanceof Refined) {
+				return this;
+			}
+
+			if (enchant){
+				if (enchantment == null){
+					enchant(Enchantment.random());
+				}
+			} else if (enchantment != null) {
+				// 小骑士濡湿附魔+3天赋：升级不移除附魔
+				boolean wontLose = false;
+				if (Dungeon.hero != null && Dungeon.hero.subClass == HeroSubClasses.LITTLE_KNIGHT) {
+					wontLose = Dungeon.hero.pointsInTalent(Talent.WET_ENCHANT) >= 3;
+				}
+			
+				if (!wontLose) {
+					//chance to lose harden buff is 10/20/40/80/100% when upgrading from +6/7/8/9/10
+					if (enchantHardened){
+						if (level() >= 6 && Random.Float(10) < Math.pow(2, level()-6)){
+							enchantHardened = false;
+						}
+
+					//chance to remove curse is a static 33%
+					} else if (hasCurseEnchant()) {
+						if (Random.Int(3) == 0) enchant(null);
+
+					//otherwise chance to lose enchant is 10/20/40/80/100% when upgrading from +4/5/6/7/8
+					} else if (level() >= 4 && Random.Float(10) < Math.pow(2, level()-4)){
+						enchant(null);
+					}
+				}
+			}
+		
+			cursed = false;
+
+			return super.upgrade();
+		}
 	
 	@Override
 	public String name() {
@@ -368,22 +535,57 @@ abstract public class Weapon extends KindOfWeapon {
 	}
 	
 	public Weapon enchant( Enchantment ench ) {
+		//兜底：不合该武器的附魔（比如灵能弓上的近战专属附魔）在这里换掉
+		if (ench != null && !ench.canEnchant(this)){
+			Enchantment alt = Enchantment.random( this, ench.getClass() );
+			if (alt != null){
+				ench = alt;
+			}
+		}
 		if (ench == null || !ench.curse()) curseInfusionBonus = false;
 		enchantment = ench;
 		updateQuickslot();
+		if (ench != null && isIdentified() && Dungeon.hero != null
+				&& Dungeon.hero.isAlive() && Dungeon.hero.belongings.contains(this)){
+			Catalog.setSeen(ench.getClass());
+		}
 		return this;
 	}
 
 	public Weapon enchant() {
 
 		Class<? extends Enchantment> oldEnchantment = enchantment != null ? enchantment.getClass() : null;
-		Enchantment ench = Enchantment.random( oldEnchantment );
-
+		Enchantment ench = Enchantment.random( this, oldEnchantment );
+		//池子被过滤空时 pick() 会返回 null，此时保持原附魔，不要把附魔洗干净
+		if (ench == null){
+			return this;
+		}
 		return enchant( ench );
 	}
 
 	public boolean hasEnchant(Class<?extends Enchantment> type, Char owner) {
 		return enchantment != null && enchantment.getClass() == type && owner.buff(MagicImmune.class) == null;
+	}
+
+	/**
+	 * 普通攻击的 DamageInfo 构建完成后调用，允许武器改写本次伤害的来源与类型。
+	 * 例：天球仪把来源改写成魔法来源（{@link com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DM100.LightningBolt}）。
+	 */
+	public void modifyDamageInfo(Char attacker, Char defender, DamageInfo info) {
+		//与 proc() 一致：魔法免疫期间附魔不生效，否则精制、逆转这类改伤害数值的附魔会照常起作用
+		if (enchantment != null && attacker.buff(MagicImmune.class) == null) {
+			enchantment.modifyDamageInfo(this, attacker, defender, info);
+		}
+	}
+
+	/** 该武器的普通攻击是否无视防御掷骰（护甲 DR）——如天球仪。 */
+	public boolean ignoresDefenseRoll() {
+		return false;
+	}
+
+	/** 本武器是否会把已储存的恒动伤害释放到持有者的下一次普通攻击上。 */
+	public boolean releasesConservedDamage(Char owner) {
+		return enchantment != null && enchantment.releasesConservedDamage() && owner.buff(MagicImmune.class) == null;
 	}
 	
 	//these are not used to process specific enchant effects, so magic immune doesn't affect them
@@ -400,31 +602,86 @@ abstract public class Weapon extends KindOfWeapon {
 		return enchantment != null && (cursedKnown || !enchantment.curse()) ? enchantment.glowing() : null;
 	}
 
+	@Override
+	public boolean collect(Bag container) {
+		if(super.collect(container)){
+			if (Dungeon.hero != null && Dungeon.hero.isAlive() && isIdentified() && enchantment != null){
+				Catalog.setSeen(enchantment.getClass());
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public Item identify(boolean byHero) {
+		if (enchantment != null && byHero && Dungeon.hero != null && Dungeon.hero.isAlive()){
+			Catalog.setSeen(enchantment.getClass());
+		}
+		return super.identify(byHero);
+	}
+
 	public static abstract class Enchantment implements Bundlable {
 
 		public static final Class<?>[] common = new Class<?>[]{
-				Blazing.class, Chilling.class, Kinetic.class, Shocking.class};
+				Blazing.class, Chilling.class, Shocking.class, Lamprey.class,
+				FlowingLight.class, Midas.class, BlazingFury.class, Crystal.class,
+				Pulse.class, Seeking.class, Sweeping.class, Projecting.class};
 
 		public static final Class<?>[] uncommon = new Class<?>[]{
-				Blocking.class, Blooming.class, Elastic.class,
-				Lucky.class, Projecting.class, Unstable.class};
+				Combos.class, Insight.class, Clash.class, Distortion.class, Propulsion.class,
+				Lamp.class, Rainstorm.class, Flawless.class, Overwrite.class,
+				Fluctuation.class, Reaping.class, Eclipse.class};
 
 		public static final Class<?>[] rare = new Class<?>[]{
-				Corrupting.class, Grim.class, Vampiric.class};
+				Corrupting.class, Grim.class, Vampiric.class, Striking.class, Euphoria.class,
+				Survival.class, Jealousy.class, Refined.class, Reversal.class,
+				Saturation.class, Harmony.class, Meteor.class, SoulRend.class, VoidRift.class};
 
 		public static final float[] typeChances = new float[]{
-				50, //12.5% each
-				40, //6.67% each
-				10  //3.33% each
+				50, //权重 50
+				40, //权重 40
+				10  //权重 10
 		};
 		
-		private static final Class<?>[] curses = new Class<?>[]{
+		public static final Class<?>[] curses = new Class<?>[]{
 				Annoying.class, Displacing.class, Dazzling.class, Explosive.class,
-				Sacrificial.class, Wayward.class, Polarized.class, Friendly.class
+				Sacrificial.class, Wayward.class, Polarized.class, Friendly.class, Stubbornness.class,
+				Temporal.class, DoubleEdged.class, Heavy.class, Ultralight.class, Slippery.class
 		};
 		
 			
 		public abstract int proc( Weapon weapon, Char attacker, Char defender, int damage );
+
+		/**
+		 * 这个附魔能不能附着在指定武器上。
+		 * 近战专属附魔（横扫、招架之类）要覆盖成 {@code return !isRangedWeapon(weapon);}，
+		 * 这样灵能弓、投掷武器就不会刷到它们。
+		 */
+		public boolean canEnchant( Weapon weapon ){
+			return true;
+		}
+
+		/** 远距离武器：灵能弓与所有投掷/远程武器。 */
+		protected static boolean isRangedWeapon( Weapon weapon ){
+			return weapon instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon
+					|| weapon instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
+		}
+
+		/** 在伤害构建完成后修改最终伤害（精制、波动、协调等数值类附魔）。 */
+		public void modifyDamageInfo( Weapon weapon, Char attacker, Char defender, DamageInfo info ) { }
+
+		/** 面板显示用：该附魔对最小/最大伤害的乘率（不改实际掷骰）。 */
+		public float panelDamageMultiplier( Weapon weapon, Char owner, boolean max ) { return 1f; }
+
+		/** 面板显示用：该附魔提供的固定伤害加成。 */
+		public int panelFlatBonus( Weapon weapon, Char owner ) { return 0; }
+
+		/** 是否会在命中时释放持有者身上储存的恒动伤害（Kinetic / Unstable），由 Kinetic.ConservedDamage 读取。 */
+		public boolean releasesConservedDamage(){
+			return false;
+		}
 
 		protected float procChanceMultiplier( Char attacker ){
 			return genericProcChanceMultiplier( attacker );
@@ -447,11 +704,13 @@ abstract public class Weapon extends KindOfWeapon {
 				attacker.buff(ElementalStrike.DirectedPowerTracker.class).detach();
 			}
 
-			if (attacker.buff(Talent.SpiritBladesTracker.class) != null
+			if (attacker instanceof Hero
+					&& attacker.buff(Talent.SpiritBladesTracker.class) != null
 					&& ((Hero)attacker).pointsInTalent(Talent.SPIRIT_BLADES) == 4){
 				multi += 0.1f;
 			}
-			if (attacker.buff(Talent.StrikingWaveTracker.class) != null
+			if (attacker instanceof Hero
+					&& attacker.buff(Talent.StrikingWaveTracker.class) != null
 					&& ((Hero)attacker).pointsInTalent(Talent.STRIKING_WAVE) == 4){
 				multi += 0.2f;
 			}
@@ -490,47 +749,78 @@ abstract public class Weapon extends KindOfWeapon {
 		
 		@SuppressWarnings("unchecked")
 		public static Enchantment random( Class<? extends Enchantment> ... toIgnore ) {
+			return random( null, toIgnore );
+		}
+
+		/** 按武器挑选附魔：会跳过 {@link #canEnchant(Weapon)} 返回 false 的项。 */
+		@SuppressWarnings("unchecked")
+		public static Enchantment random( Weapon weapon, Class<? extends Enchantment> ... toIgnore ) {
 			switch(Random.chances(typeChances)){
 				case 0: default:
-					return randomCommon( toIgnore );
+					return pick( common, weapon, toIgnore );
 				case 1:
-					return randomUncommon( toIgnore );
+					return pick( uncommon, weapon, toIgnore );
 				case 2:
-					return randomRare( toIgnore );
+					return pick( rare, weapon, toIgnore );
 			}
 		}
-		
+
+		/**
+		 * 从池子里抽一个附魔。weapon 不为 null 时过滤掉不适用的附魔；
+		 * 过滤后为空则退回不过滤的池子，避免返回 null。
+		 */
+		@SuppressWarnings("unchecked")
+		private static Enchantment pick( Class<?>[] pool, Weapon weapon, Class<? extends Enchantment> ... toIgnore ) {
+			ArrayList<Class<?>> enchants = new ArrayList<>(Arrays.asList(pool));
+			enchants.removeAll(Arrays.asList(toIgnore));
+
+			if (weapon != null && !enchants.isEmpty()){
+				for (int i = enchants.size() - 1; i >= 0; i--){
+					Enchantment e = (Enchantment) Reflection.newInstance(enchants.get(i));
+					if (e == null || !e.canEnchant(weapon)){
+						enchants.remove(i);
+					}
+				}
+			}
+
+			if (enchants.isEmpty()){
+				enchants = new ArrayList<>(Arrays.asList(pool));
+				enchants.removeAll(Arrays.asList(toIgnore));
+			}
+			if (enchants.isEmpty()){
+				return null;
+			}
+			return (Enchantment) Reflection.newInstance(Random.element(enchants));
+		}
+
 		@SuppressWarnings("unchecked")
 		public static Enchantment randomCommon( Class<? extends Enchantment> ... toIgnore ) {
-			ArrayList<Class<?>> enchants = new ArrayList<>(Arrays.asList(common));
-			enchants.removeAll(Arrays.asList(toIgnore));
-			if (enchants.isEmpty()) {
-				return random();
-			} else {
-				return (Enchantment) Reflection.newInstance(Random.element(enchants));
-			}
+			return pick( common, null, toIgnore );
 		}
-		
+
+		@SuppressWarnings("unchecked")
+		public static Enchantment randomCommon( Weapon weapon, Class<? extends Enchantment> ... toIgnore ) {
+			return pick( common, weapon, toIgnore );
+		}
+
 		@SuppressWarnings("unchecked")
 		public static Enchantment randomUncommon( Class<? extends Enchantment> ... toIgnore ) {
-			ArrayList<Class<?>> enchants = new ArrayList<>(Arrays.asList(uncommon));
-			enchants.removeAll(Arrays.asList(toIgnore));
-			if (enchants.isEmpty()) {
-				return random();
-			} else {
-				return (Enchantment) Reflection.newInstance(Random.element(enchants));
-			}
+			return pick( uncommon, null, toIgnore );
 		}
-		
+
+		@SuppressWarnings("unchecked")
+		public static Enchantment randomUncommon( Weapon weapon, Class<? extends Enchantment> ... toIgnore ) {
+			return pick( uncommon, weapon, toIgnore );
+		}
+
 		@SuppressWarnings("unchecked")
 		public static Enchantment randomRare( Class<? extends Enchantment> ... toIgnore ) {
-			ArrayList<Class<?>> enchants = new ArrayList<>(Arrays.asList(rare));
-			enchants.removeAll(Arrays.asList(toIgnore));
-			if (enchants.isEmpty()) {
-				return random();
-			} else {
-				return (Enchantment) Reflection.newInstance(Random.element(enchants));
-			}
+			return pick( rare, null, toIgnore );
+		}
+
+		@SuppressWarnings("unchecked")
+		public static Enchantment randomRare( Weapon weapon, Class<? extends Enchantment> ... toIgnore ) {
+			return pick( rare, weapon, toIgnore );
 		}
 
 		@SuppressWarnings("unchecked")

@@ -109,6 +109,12 @@ public abstract class WellWater extends Blob {
 	}
 	
 	protected abstract boolean affectHero( Hero hero );
+
+	protected void consume( int pos ) {
+		cur[pos] = 0;
+		Level.set(pos, Terrain.EMPTY_WELL);
+		GameScene.updateMap(pos);
+	}
 	
 	protected abstract Item affectItem( Item item, int pos );
 	

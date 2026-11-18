@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.PotionBandolier;
@@ -61,6 +62,7 @@ public class InventoryPane extends Component {
 
 	private NinePatch bg;
 	private NinePatch bg2; //2 backgrounds to reduce transparency
+	private RoundedFrame themedBg;
 
 	//used to prevent clicks through the BG normally, or to cancel selectors if they're enabled
 	private PointerArea blocker;
@@ -71,6 +73,9 @@ public class InventoryPane extends Component {
 
 	private ArrayList<InventorySlot> equipped;
 	private ArrayList<InventorySlot> bagItems;
+	/** 背包物品的可滚动容器（带上下滚动条）。 */
+	private Component bagContent;
+	private ScrollPane bagScroll;
 
 	private Image gold;
 	private BitmapText goldTxt;
@@ -81,14 +86,17 @@ public class InventoryPane extends Component {
 	private ArrayList<BagButton> bags;
 
 	public static final int WIDTH = 187;
-	public static final int HEIGHT = 82;
+	public static final int HEIGHT = 107;
 
 	private static final int SLOT_WIDTH = 17;
 	private static final int SLOT_HEIGHT = 24;
+//	private static final int MIN_BAG_BUTTON_WIDTH = 12; // 背包按钮最小宽度
 
 	private WndBag.ItemSelector selector;
 
 	public static Bag lastBag;
+	/** 当前展示的背包，用于切换背包时把滚动条归位。 */
+	private Bag shownBag;
 
 	private boolean lastEnabled = true;
 
@@ -120,6 +128,10 @@ public class InventoryPane extends Component {
 		bg2 = Chrome.get(Chrome.Type.TOAST_TR);
 		add(bg2);
 
+		themedBg = UITheme.roundedFrame(DiceMageUI.BLACK, DiceMageUI.ORANGE);
+		themedBg.visible = false;
+		add(themedBg);
+
 		blocker = new PointerArea(0, 0, PixelScene.uiCamera.width, PixelScene.uiCamera.height){
 			@Override
 			protected void onClick(PointerEvent event) {
@@ -143,7 +155,10 @@ public class InventoryPane extends Component {
 						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_2
 						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_3
 						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_4
-						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_5){
+						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_5
+						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_6
+						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_7
+						&& KeyBindings.getActionForKey(keyEvent) != SPDAction.BAG_8){
 					//any windows opened as a consequence of this should be centered on the inventory
 					GameScene.centerNextWndOnInvPane();
 					selector.onSelect(null);
@@ -156,7 +171,7 @@ public class InventoryPane extends Component {
 		};
 
 		equipped = new ArrayList<>();
-		for (int i = 0; i < 5; i++){
+		for (int i = 0; i < 7; i++){
 			InventorySlot btn = new InventoryPaneSlot(null);
 			equipped.add(btn);
 			add(btn);
@@ -179,14 +194,21 @@ public class InventoryPane extends Component {
 		add(promptTxt);
 
 		bagItems = new ArrayList<>();
-		for (int i = 0; i < 20; i++){
+		bagContent = new Component();
+		bagScroll = new ScrollPane( bagContent );
+		add( bagScroll );
+		// 最大容量（测试背包 60）也放得下，超出的部分靠滚动查看
+		for (int i = 0; i < 60; i++){
 			InventorySlot btn = new InventoryPaneSlot(null);
 			bagItems.add(btn);
-			add(btn);
+			bagContent.add(btn);
 		}
 
 		bags = new ArrayList<>();
-		for (int i = 0; i < 5; i++){
+		// 创建 12 个背包按钮，支持挑战模式/测试模式下的多个背包
+		// 主背包 + ChallengeBag + TestBag×N + ScrollHolder + PotionBandolier + VelvetPouch + MagicalHolster = 最多 12 个
+		// 如果背包数量过多，按钮宽度会自动缩小以适应
+		for (int i = 0; i < 12; i++){
 			BagButton btn = new BagButton(null, i+1);
 			bags.add(btn);
 			add(btn);
@@ -206,19 +228,30 @@ public class InventoryPane extends Component {
 		height = HEIGHT;
 	}
 
+	/** 外部（GameScene）根据窗口大小给的可用上限，保证面板不会超出屏幕。 */
+	public int maxWidth = Integer.MAX_VALUE;
+	public int maxHeight = Integer.MAX_VALUE;
+
 	@Override
 	protected void layout() {
-		width = WIDTH;
-		height = HEIGHT;
+		width = Math.min( WIDTH, maxWidth );
+		height = Math.min( HEIGHT, maxHeight );
+
 
 		bg.x = bg2.x = x;
 		bg.y = bg2.y = y;
 		bg.size(width, height);
 		bg2.size(width, height);
+		boolean themed = UITheme.isDiceMage();
+		bg.visible = bg2.visible = !themed;
+		themedBg.visible = themed;
+		themedBg.setRect(x, y, width, height);
 
 		float left = x+4;
+		float slotW = Math.min(SLOT_WIDTH, (width - 8f) / Math.max(1, equipped.size()) - 1f);
+		slotW = Math.max(8f, slotW);
 		for (InventorySlot i : equipped){
-			i.setRect(left, y+4, SLOT_WIDTH, SLOT_HEIGHT);
+			i.setRect(left, y+4, slotW, SLOT_HEIGHT);
 			left = i.right()+1;
 		}
 
@@ -243,21 +276,61 @@ public class InventoryPane extends Component {
 		energy.x = energyTxt.x + energyTxt.width() + 1;
 		energy.y = energyTxt.y;
 
-		for (BagButton b : bags){
-			b.setRect(left, y + 14, SLOT_WIDTH, 14);
-			left = b.right()+1;
+		float bagRowStart = left;
+		float availableWidth = width - (bagRowStart - x);
+		
+		// 计算实际有背包的按钮数量（最多 12 个）
+		// 请注意，只在挑战模式/调试模式会出现这么多的背包
+		int bagsWithItems = 0;
+		for (BagButton b : bags) {
+			if (b.bag != null) bagsWithItems++;
 		}
 
-		left = x+4;
-		float top = y+4+SLOT_HEIGHT+1;
-		for (InventorySlot b : bagItems){
-			b.setRect(left, top, SLOT_WIDTH, SLOT_HEIGHT);
-			left = b.right()+1;
-			if (left - x > width - 17){
-				left = x+4;
-				top += SLOT_HEIGHT+1;
+		float bagButtonWidth = SLOT_WIDTH;
+		if (bagsWithItems > 0) {
+			float neededWidth = bagsWithItems * (SLOT_WIDTH + 1);
+			if (neededWidth > availableWidth) {
+				// 空间不足，缩小按钮宽度
+				bagButtonWidth = (availableWidth - bagsWithItems) / bagsWithItems;
 			}
 		}
+		
+		// 布局背包按钮
+		for (BagButton b : bags) {
+			if (b.bag != null) {
+				b.setRect(left, y + 14, bagButtonWidth, (float) Math.min(14,bagButtonWidth / 0.618));
+				left = b.right() + 1;
+			} else {
+				// 没有背包的按钮隐藏
+				b.setRect(0, 0, 0, 0);
+			}
+		}
+
+		// 背包物品：按可用宽度自动分列（最多 10 列）
+		// 列数必须由「滚动区实际看得见的宽度」反推，并且滚动区宽度要正好等于网格宽度：
+		// ScrollPane 只在高度不够时画滚动条、没有横向滚动，内容一旦比它宽就会被它的相机
+		// 直接裁掉（症状就是背包右边少一列、缺一块）。
+		// 口径（与上游 SPD 的原版 10 列布局对齐）：左右各留 4，且「最后一列后面不需要
+		// 1px 间隙」⇒ 能放下的列数 = floor((可用宽 + 1) / 步距)，网格宽 = 列数*SLOT_WIDTH
+		// + (列数-1)*间隙。187 宽 ⇒ 可用 179、列数 10、网格宽 179，正好铺满整行；
+		// 原先用 width-10 再按整步距算，187 只算出 9 列、网格仅 162 宽，右侧空出 18px，
+		// 看上去就是一整列缺失（截图里的「缺一块」）。
+		float availW = width - 8;
+		int cols = (int)((availW + 1) / (SLOT_WIDTH + 1));
+		cols = Math.max( 5, Math.min( cols, 10 ) );
+		float gridW = cols * SLOT_WIDTH + (cols - 1);
+
+		for (int i = 0; i < bagItems.size(); i++){
+			InventorySlot b = bagItems.get(i);
+			b.setRect((i % cols) * (SLOT_WIDTH + 1), (i / cols) * (SLOT_HEIGHT + 1),
+					SLOT_WIDTH, SLOT_HEIGHT);
+		}
+		int rows = (bagItems.size() + cols - 1) / cols;
+		bagContent.setSize(gridW, rows * (SLOT_HEIGHT + 1));
+
+		float bagTop = y + 14 + 14 + 1;
+		float viewportH = height - (bagTop - y) - 2;
+		bagScroll.setRect(x + 4, bagTop, gridW, Math.max(1, viewportH));
 
 		super.layout();
 	}
@@ -304,9 +377,30 @@ public class InventoryPane extends Component {
 
 		equipped.get(0).item(stuff.weapon == null ? new WndBag.Placeholder( ItemSpriteSheet.WEAPON_HOLDER ) : stuff.weapon);
 		equipped.get(1).item(stuff.armor == null ? new WndBag.Placeholder( ItemSpriteSheet.ARMOR_HOLDER ) : stuff.armor);
+		equipped.get(5).item(stuff.secondaryArmor() == null ? new WndBag.Placeholder( "secondary_slot" ) : stuff.secondaryArmor());
 		equipped.get(2).item(stuff.artifact == null ? new WndBag.Placeholder( ItemSpriteSheet.ARTIFACT_HOLDER ) : stuff.artifact);
 		equipped.get(3).item(stuff.misc == null ? new WndBag.Placeholder( ItemSpriteSheet.SOMETHING ) : stuff.misc);
 		equipped.get(4).item(stuff.ring == null ? new WndBag.Placeholder( ItemSpriteSheet.RING_HOLDER ) : stuff.ring);
+		for (int i = 0; i < stuff.extraRings.size(); i++) {
+			int slotIdx = 7 + i;
+			while (equipped.size() <= slotIdx) {
+				InventorySlot btn = new InventoryPaneSlot(null);
+				equipped.add(btn);
+				add(btn);
+			}
+			equipped.get(slotIdx).visible = true;
+			Ring r = stuff.extraRings.get(i);
+			equipped.get(slotIdx).item(r == null
+					? new WndBag.Placeholder( ItemSpriteSheet.RING_HOLDER ) : r);
+		}
+		if (equipped.size() > 6) {
+			equipped.get(6).visible = stuff.extraRingSlotCount() > 0;
+			equipped.get(6).item(stuff.ring2 == null
+					? new WndBag.Placeholder( ItemSpriteSheet.RING_HOLDER ) : stuff.ring2);
+		}
+		for (int i = 7 + stuff.extraRings.size(); i < equipped.size(); i++) {
+			equipped.get(i).visible = false;
+		}
 
 		ArrayList<Item> items = (ArrayList<Item>) lastBag.items.clone();
 
@@ -315,7 +409,7 @@ public class InventoryPane extends Component {
 		}
 
 		int j = 0;
-		for (int i = 0; i < 20; i++){
+		for (int i = 0; i < bagItems.size(); i++){
 			if (i == 0 && lastBag != stuff.backpack){
 				bagItems.get(i).item(lastBag);
 				continue;
@@ -382,7 +476,12 @@ public class InventoryPane extends Component {
 		energyTxt.alpha( lastEnabled ? 1f : 0.3f );
 		energy.alpha( lastEnabled ? 1f : 0.3f );
 
+		boolean resetScroll = lastBag != shownBag;
+		shownBag = lastBag;
 		layout();
+		if (resetScroll){
+			bagScroll.scrollTo(0, 0);
+		}
 	}
 
 	public void setSelector(WndBag.ItemSelector selector){
@@ -436,11 +535,9 @@ public class InventoryPane extends Component {
 	}
 
 	public static void cancelTargeting(){
-		if (targeting){
-			crossB.visible = false;
-			crossM.remove();
-			targeting = false;
-		}
+		if (crossB != null) crossB.visible = false;
+		if (crossM != null) crossM.remove();
+		targeting = false;
 	}
 
 	@Override
@@ -611,6 +708,7 @@ public class InventoryPane extends Component {
 
 		private ColorBlock bgTop;
 		private ColorBlock bgBottom;
+		private RoundedFrame themedBg;
 
 		private Bag bag;
 		private int index;
@@ -645,6 +743,10 @@ public class InventoryPane extends Component {
 
 			bgBottom = new ColorBlock(1, 1, ACTIVE);
 			add(bgBottom);
+
+			themedBg = UITheme.roundedFrame(DiceMageUI.BLACK, DiceMageUI.ORANGE);
+			themedBg.visible = false;
+			addToBack(themedBg);
 		}
 
 		@Override
@@ -658,11 +760,27 @@ public class InventoryPane extends Component {
 			bgBottom.size(width, height-1);
 			bgBottom.y = y+1;
 			bgBottom.x = x;
+
+			boolean themed = UITheme.isDiceMage();
+			bgTop.visible = bgBottom.visible = !themed;
+			themedBg.visible = themed;
+			themedBg.setFillColor(lastBag == bag ? DiceMageUI.PANEL_ALT : DiceMageUI.BLACK);
+			themedBg.setRect(x, y, width, height);
+			
+			// 缩放图标以适应按钮宽度
+			if (icon != null) {
+				float iconScale = Math.min(1f, (width - 4) / SLOT_WIDTH);
+				icon.scale.set(iconScale);
+				icon.x = x + (width - icon.width()) / 2;
+				icon.y = y + 1 + (13 - icon.height()) / 2;
+				PixelScene.align(icon);
+			}
 		}
 		
 		public void alpha( float value ){
 			bgTop.alpha(value);
 			bgBottom.alpha(value);
+			themedBg.alpha(value);
 			icon.alpha(value);
 		}
 
@@ -677,7 +795,7 @@ public class InventoryPane extends Component {
 		@Override
 		public GameAction keyAction() {
 			switch (index){
-				case 1: default:
+				case 1:
 					return SPDAction.BAG_1;
 				case 2:
 					return SPDAction.BAG_2;
@@ -687,6 +805,15 @@ public class InventoryPane extends Component {
 					return SPDAction.BAG_4;
 				case 5:
 					return SPDAction.BAG_5;
+				case 6:
+					return SPDAction.BAG_6;
+				case 7:
+					return SPDAction.BAG_7;
+				case 8:
+					return SPDAction.BAG_8;
+				default:
+					// 超过 8 个的背包没有独立快捷键
+					return null;
 			}
 		}
 

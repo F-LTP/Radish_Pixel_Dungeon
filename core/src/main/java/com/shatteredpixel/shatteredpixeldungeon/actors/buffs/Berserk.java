@@ -27,6 +27,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal.WarriorShield;
@@ -34,8 +36,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeadCleaver;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
-import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBerserk;
 import com.watabou.noosa.Image;
@@ -179,8 +181,22 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		return chance;
 	}
 
+	//无尽怒火：怒气上限 150/175/200%，伤害加成上限随之到 75/87.5/100%
+	private float maxPower(){
+		return target instanceof Hero && ((Hero)target).hasTalent(Talent.ENDLESS_RAGE)
+				? 1.25f + 0.25f*((Hero)target).pointsInTalent(Talent.ENDLESS_RAGE) : 1f;
+	}
+
 	public float damageFactor(float dmg){
-		return dmg * Math.min(1.5f, 1f + (power / 2f));
+		return dmg * (1f + Math.min(power, maxPower()) / 2f);
+	}
+
+	@Override
+	public void modifyOutgoingAttackDamage(Char attacker, Char defender, DamageInfo info) {
+		int before = info.getDamage();
+		if (before > 0) {
+			info.addDirectMultModifier(damageFactor(before) / before, "berserk", this);
+		}
 	}
 
 	public boolean berserking(){
@@ -223,8 +239,12 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		//Endless rage effect on shield and cooldown
 		if (power > 1f){
 			shieldMultiplier *= power;
-			levelRecovery *= 2f - power;
-			turnRecovery *= (int) (2f - power);
+			if (target.HP > 0) {
+				turnRecovery = Math.max(1, (int) (turnRecovery * (2f - power)));
+			} else {
+				levelRecovery = Math.max(0.04f, levelRecovery * (2f - power));
+			}
+			//原版写法：按 (2 - 怒气) 的比例缩短冷却。把这个比例先截成整数的话，怒气一过 100% 它就恒为 0，冷却直接归零
 		}
 
 		WarriorShield shield = target.buff(WarriorShield.class);
@@ -236,8 +256,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 
 	public void damage(int damage){
 		if (state != State.NORMAL) return;
-		float maxPower = Dungeon.hero.hasTalent(Talent.ENDLESS_RAGE) ?  1.25f + 0.25f*((Hero)target).pointsInTalent(Talent.ENDLESS_RAGE) : 1f ;
-		power = Math.min(maxPower, power + (damage/(float)target.HT)/3f );
+		power = Math.min(maxPower(), power + (damage/(float)target.HT)/3f );
 		BuffIndicator.refreshHero(); //show new power immediately
 		powerLossBuffer = 3; //2 turns until rage starts dropping
 		if (power >= 0.5f){
@@ -282,8 +301,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	}
 
 	@Override
-	public int actionIcon() {
-		return BuffIndicator.FURY;
+	public String actionIcon() {
+		return HeroIcon.ENDURE;
 	}
 
 	@Override
@@ -296,15 +315,13 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		WarriorShield shield = target.buff(WarriorShield.class);
 		if (shield != null) {
 			GameScene.show(new WndBerserk(this));
-			/*startBerserking();
-			ActionIndicator.clearAction(this);*/
 		} else {
 			GLog.w(Messages.get(this, "no_seal"));
 		}
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.BERSERK;
 	}
 
@@ -328,8 +345,8 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 	public float iconFadePercent() {
 		switch (state){
 			case NORMAL: default:
-				float maxPower = 1f + 0.1667f*((Hero)target).pointsInTalent(Talent.ENDLESS_RAGE);
-				return (maxPower - power)/maxPower;
+				float maxPower = maxPower();
+				return Math.max(0, (maxPower - power)/maxPower);
 			case BERSERK:
 				return 0f;
 			case RECOVERING:
@@ -402,7 +419,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 				if (p>1){
 					Buff.affect( mob, Blindness.class,5f);
 					if (p>3){
-						mob.damage(Dungeon.hero.damageRoll(),Dungeon.hero);
+						mob.damage(DamageInfo.of(Dungeon.hero.damageRoll(), DamageType.PHYSICAL, Dungeon.hero, this));
 					}
 				}
 			}
@@ -413,6 +430,7 @@ public class Berserk extends Buff implements ActionIndicator.Action {
 		power-=need[p];
 		BuffIndicator.refreshHero();
 		if (power<need[p]) ActionIndicator.clearAction(this);
-		if (p<2) Dungeon.hero.spend(1f);
+		//只 spend 不 next 的话英雄仍可行动，这一回合要欠到下一个动作才结算
+		if (p<2) Dungeon.hero.spendAndNext(1f);
 	}
 }

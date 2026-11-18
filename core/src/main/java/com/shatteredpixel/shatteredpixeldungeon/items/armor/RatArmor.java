@@ -1,14 +1,11 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
-import com.shatteredpixel.shatteredpixeldungeon.Challenges;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
@@ -28,18 +25,10 @@ public class RatArmor extends Armor{
     }
     @Override
     public int DRMax(int lvl){
-        if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
-            return 3 + lvl + augment.defenseFactor(lvl);
-        }
-
         return 2 * (3 + lvl) + augment.defenseFactor(lvl);
     }
     @Override
     public int DRMin(int lvl){
-        if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
-            return 1;
-        }
-
         return lvl + 1;
     }
     private static final String DEBUFF_COUNT       = "debuff_count";

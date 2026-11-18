@@ -93,6 +93,15 @@ public class RotHeartSprite extends MobSprite {
 	}
 
 	@Override
+	public void kill() {
+		super.kill();
+		// 着色器死亡动画不经过 die()，毒气云要在这里一并停掉，否则会留在原地一直冒
+		if (cloud != null) {
+			cloud.on = false;
+		}
+	}
+
+	@Override
 	public int blood() {
 		return 0xFF88CC44;
 	}

@@ -33,16 +33,25 @@ public class RingOfFuror extends Ring {
 	}
 
 	public String statsInfo() {
-		if (isIdentified()){
+		if (isIdentified()) {
+			// 每级增加20%
 			String info = Messages.get(this, "stats",
-					Messages.decimalFormat("#.##", 100f * (Math.pow(1.09051f, soloBuffedBonus()) - 1f)));
-			if (isEquipped(Dungeon.hero) && soloBuffedBonus() != combinedBuffedBonus(Dungeon.hero)){
+					Messages.decimalFormat("#.##", 20f * soloBuffedBonus()));
+			if (isEquipped(Dungeon.hero) && soloBuffedBonus() != combinedBuffedBonus(Dungeon.hero)) {
 				info += "\n\n" + Messages.get(this, "combined_stats",
-						Messages.decimalFormat("#.##", 100f * (Math.pow(1.09051f, combinedBuffedBonus(Dungeon.hero)) - 1f)));
+						Messages.decimalFormat("#.##", 20f * combinedBuffedBonus(Dungeon.hero)));
 			}
 			return info;
 		} else {
-			return Messages.get(this, "typical_stats", Messages.decimalFormat("#.##", 9.051f));
+			return Messages.get(this, "typical_stats", Messages.decimalFormat("#.##", 20f));
+		}
+	}
+
+	public String upgradeStat1(int level){
+		if (cursed && cursedKnown) {
+			return Messages.decimalFormat("#.##", 20f * Math.min(0, level - 2)) + "%";
+		} else {
+			return Messages.decimalFormat("#.##", 20f * (level + 1)) + "%";
 		}
 	}
 
@@ -52,7 +61,7 @@ public class RingOfFuror extends Ring {
 	}
 	
 	public static float attackSpeedMultiplier(Char target ){
-		return (float)Math.pow(1.09051, getBuffedBonus(target, Furor.class));
+		return 1f + 0.2f * getBuffedBonus(target, Furor.class);
 	}
 
 	public class Furor extends RingBuff {

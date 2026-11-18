@@ -23,6 +23,8 @@ package com.shatteredpixel.shatteredpixeldungeon.sprites;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.watabou.noosa.TextureFilm;
 import com.watabou.utils.PointF;
@@ -34,8 +36,7 @@ public class MirrorSprite extends MobSprite {
 	
 	public MirrorSprite() {
 		super();
-		
-		texture( Dungeon.hero.heroClass.spritesheet() );
+		texture( Dungeon.hero != null ? Dungeon.hero.heroClass.spritesheet() : HeroClasses.WARRIOR.spritesheet() );
 		updateArmor( 0 );
 		idle();
 	}
@@ -56,7 +57,8 @@ public class MirrorSprite extends MobSprite {
 	}
 	
 	public void updateArmor( int tier ) {
-		TextureFilm film = new TextureFilm( HeroSprite.tiers(), tier, FRAME_WIDTH, FRAME_HEIGHT );
+		String asset = Dungeon.hero != null ? Dungeon.hero.heroClass.spritesheet() : HeroClasses.WARRIOR.spritesheet();
+		TextureFilm film = new TextureFilm( HeroSprite.tiers(asset), tier, FRAME_WIDTH, FRAME_HEIGHT );
 		
 		idle = new Animation( 1, true );
 		idle.frames( film, 0, 0, 0, 1, 0, 0, 1, 1 );

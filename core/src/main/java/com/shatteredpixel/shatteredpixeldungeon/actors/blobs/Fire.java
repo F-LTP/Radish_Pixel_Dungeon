@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.blobs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -98,13 +99,14 @@ public class Fire extends Blob {
 	
 	public static void burn( int pos ) {
 		Char ch = Actor.findChar( pos );
-		if (ch != null && !ch.isImmune(Fire.class)) {
+		if (ch != null && !ch.isImmuneTo(DamageType.FIRE)) {
 			Buff.affect( ch, Burning.class ).reignite( ch );
 		}
 		
 		Heap heap = Dungeon.level.heaps.get( pos );
 		if (heap != null) {
-			heap.burn();
+			// 烈焰人：自己产生的火焰不烧卷轴
+			heap.burn(!com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFlamewalker(Dungeon.hero));
 		}
 
 		Plant plant = Dungeon.level.plants.get( pos );

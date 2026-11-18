@@ -6,6 +6,7 @@ import com.shatteredpixel.shatteredpixeldungeon.custom.utils.BallisticaReal;
 import com.shatteredpixel.shatteredpixeldungeon.custom.utils.GME;
 import com.shatteredpixel.shatteredpixeldungeon.custom.utils.timing.VirtualActor;
 import com.shatteredpixel.shatteredpixeldungeon.custom.visuals.effects.ScanningBeam;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Effects;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PurpleParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration;
@@ -44,7 +45,7 @@ public class WandOfScanningBeam extends WandOfDisintegration implements Scanning
             return 0;
         }
         wandProc(ch, chargesPerCast());
-        ch.damage( damageRoll(buffedLvl()), this );
+        ch.damage( DamageInfo.magical( damageRoll(buffedLvl()), this ) );
         ch.sprite.centerEmitter().burst( PurpleParticle.BURST, Random.IntRange( 1, 2 ) );
         ch.sprite.flash();
         return 1;

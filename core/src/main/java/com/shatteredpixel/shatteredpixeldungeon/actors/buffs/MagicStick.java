@@ -12,7 +12,7 @@ public class MagicStick extends FlavourBuff{
     }
 
     @Override
-    public int icon() {
+    public String icon() {
         return BuffIndicator.BLESS;
     }
 

@@ -16,3 +16,10 @@ include ':services'
     //news
     include ':services:news:debugNews'
     include ':services:news:shatteredNews'
+
+//event system modules
+include ':event-annotations'
+include ':event-processor'
+
+include ':e2e-tests'
+project(':e2e-tests').projectDir = file('tools/rpd-selftest')

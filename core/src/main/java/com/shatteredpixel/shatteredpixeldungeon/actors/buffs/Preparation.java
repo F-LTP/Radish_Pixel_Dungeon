@@ -22,9 +22,15 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
+import com.shatteredpixel.shatteredpixeldungeon.events.AttackHitEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroAction;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
@@ -52,7 +58,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Preparation extends Buff implements ActionIndicator.Action {
-	
+	public boolean stay = true;
 	{
 		//always acts after other buffs, so invisibility effects can process first
 		actPriority = BUFF_PRIO - 1;
@@ -82,6 +88,18 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 				{.20f, .27f, .33f, .40f},
 				{.50f, .67f, .83f, 1.0f}
 		};
+
+		// Talent: BraceYourSelf
+		// transfer by DoggingDog on 2024-09-21
+		private static final float[][] braceYourselfExtraDmgs=new float[][]{
+				{0,.15f,.20f,.25f,.30f},
+				{0,.30f,.40f,.50f,.60f},
+				{0,.45f,.60f,.75f,.90f},
+				{0,.60f,.80f,1.0f,1.2f}
+		};
+		public float  braceYourselfExtraDmg(){
+			return braceYourselfExtraDmgs[ordinal()][Dungeon.hero.pointsInTalent(Talent.BRACE_YOURSELF)];
+		}
 
 		public float KOThreshold(){
 			return KOThresholds[ordinal()][Dungeon.hero.pointsInTalent(Talent.ENHANCED_LETHALITY)];
@@ -114,7 +132,12 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 				int newDmg = attacker.damageRoll();
 				if (newDmg > dmg) dmg = newDmg;
 			}
-			return Math.round(dmg * (1f + baseDmgBonus));
+			// Talent : brace_yourself
+			// by DoggingDog on 2024-09-21
+			if(Dungeon.hero.buff(BraceYourself.class) != null)
+                return Math.round(dmg * (1f + baseDmgBonus + braceYourselfExtraDmg()));
+            else
+				return Math.round(dmg * (1f + baseDmgBonus));
 		}
 		
 		public static AttackLevel getLvl(int turnsInvis){
@@ -135,7 +158,7 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	public boolean act() {
 		if (target.invisible > 0){
 			turnsInvis++;
-			if (AttackLevel.getLvl(turnsInvis).blinkDistance() > 0 && target == Dungeon.hero){
+			if (!isShadowSurprise() && AttackLevel.getLvl(turnsInvis).blinkDistance() > 0 && target == Dungeon.hero){
 				ActionIndicator.setAction(this);
 			}
 			spend(TICK);
@@ -160,11 +183,41 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	}
 
 	public boolean canKO( Char defender ){
-		return !defender.isInvulnerable(target.getClass()) && AttackLevel.getLvl(turnsInvis).canKO(defender);
+		return !isShadowSurprise() && !defender.isInvulnerable(target.getClass())
+				&& AttackLevel.getLvl(turnsInvis).canKO(defender);
+	}
+
+	private boolean isShadowSurprise() {
+		return target instanceof Hero && ((Hero) target).subClass
+				== com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.SHADOW_DANCER;
+	}
+
+	/**
+	 * 暗杀：本次伤害来自潜行增益时，若目标血量低于处决阈值则直接击杀。
+	 * 由攻击命中事件驱动；持有潜行者可能是玩家，也可能是持有该增益的怪物。
+	 */
+	@SubscribeEvent(event = AttackHitEvent.class, priority = -400)
+	public static void onAttackHit(AttackHitEvent event) {
+		Char attacker = event.getAttacker();
+		Char defender = event.getDefender();
+		Preparation prep = event.getPreparation();
+		if (attacker == null || defender == null || prep == null) return;
+		if (!defender.isAlive() || defender.alignment == attacker.alignment) return;
+		if (!prep.canKO(defender)) return;
+
+		defender.HP = 0;
+		if (!defender.isAlive()) {
+			defender.die(attacker);
+		} else {
+			//helps with triggering any on-damage effects that need to activate
+			defender.damage(DamageInfo.of(-1, DamageType.TRUE, attacker, attacker));
+			DeathMark.processFearTheReaper(defender);
+		}
+		defender.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Preparation.class, "assassinated"));
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.PREPARATION;
 	}
 	
@@ -192,8 +245,13 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 		
 		AttackLevel lvl = AttackLevel.getLvl(turnsInvis);
 
+		//Talent : brace_yourself
+		float bdb=lvl.baseDmgBonus;
+		if(Dungeon.hero.buff(BraceYourself.class)!=null)
+			bdb=lvl.baseDmgBonus+ lvl.braceYourselfExtraDmg();
+
 		desc += "\n\n" + Messages.get(this, "desc_dmg",
-				(int)(lvl.baseDmgBonus*100),
+				(int)(bdb*100),
 				(int)(lvl.KOThreshold()*100),
 				(int)(lvl.KOThreshold()*20));
 		
@@ -214,20 +272,22 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 		
 		return desc;
 	}
-	
+
 	private static final String TURNS = "turnsInvis";
-	
+
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		turnsInvis = bundle.getInt(TURNS);
-		ActionIndicator.setAction(this);
+		stay=bundle.getBoolean("do_you_stay");
+		if (!isShadowSurprise()) ActionIndicator.setAction(this);
 	}
-	
+
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(TURNS, turnsInvis);
+		bundle.put("do_you_stay",stay);
 	}
 
 	@Override
@@ -236,7 +296,7 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	}
 	
 	@Override
-	public int actionIcon() {
+	public String actionIcon() {
 		return HeroIcon.PREPARATION;
 	}
 
@@ -263,6 +323,7 @@ public class Preparation extends Buff implements ActionIndicator.Action {
 	
 	@Override
 	public void doAction() {
+		if (isShadowSurprise()) return;
 		GameScene.selectCell(attack);
 	}
 	

@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SnDBGM;
 import com.shatteredpixel.shatteredpixeldungeon.Bones;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
@@ -88,6 +89,7 @@ public class CityBossLevel extends Level {
 
 	@Override
 	public void playLevelMusic() {
+        if (SnDBGM.playLevelMusic()) return;
 		if (locked){
 			if (BossHealthBar.isBleeding()){
 				Music.INSTANCE.play(Assets.Music.CITY_BOSS_FINALE, true);
@@ -104,12 +106,12 @@ public class CityBossLevel extends Level {
 
 	@Override
 	public String tilesTex() {
-		return Assets.Environment.TILES_CITY;
+		return Assets.Environment.TILES_WAR_CITY;
 	}
 
 	@Override
 	public String waterTex() {
-		return Assets.Environment.WATER_CITY;
+		return Assets.Environment.WATER_D;
 	}
 
 	private static final String IMP_SHOP = "imp_shop";
@@ -332,7 +334,9 @@ public class CityBossLevel extends Level {
 		Game.runOnRenderThread(new Callback() {
 			@Override
 			public void call() {
-				Music.INSTANCE.play(Assets.Music.CITY_BOSS, true);
+				if (!SnDBGM.playLevelMusic()) {
+					Music.INSTANCE.play(Assets.Music.CITY_BOSS, true);
+				}
 			}
 		});
 	}
@@ -366,7 +370,7 @@ public class CityBossLevel extends Level {
 	}
 
 	private void spawnShop(){
-		while (impShop.spacesNeeded() >= 7*(impShop.height()-2)){
+		while (impShop.itemCount() >= 7*(impShop.height()-2)){
 			impShop.bottom++;
 		}
 		impShop.spawnShop(this);

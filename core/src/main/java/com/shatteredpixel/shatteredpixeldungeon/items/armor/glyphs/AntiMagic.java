@@ -21,16 +21,17 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs;
 
-import static com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon.Enchantment.genericProcChanceMultiplier;
-
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicalSleep;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.ElementalStrike;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
+import com.shatteredpixel.shatteredpixeldungeon.damage.IDamageModifier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.ElementalBlast;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.WarpBeacon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CrystalWisp;
@@ -42,6 +43,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.YogFist;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.ArcaneBomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.HolyBomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRetribution;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfPsionicBlast;
@@ -63,10 +65,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Holy
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.DisintegrationTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.GrimTrap;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+import com.watabou.utils.Random;
 
 import java.util.HashSet;
 
-public class AntiMagic extends Armor.Glyph {
+public class AntiMagic extends Armor.Glyph implements IDamageModifier {
 
 	private static ItemSprite.Glowing TEAL = new ItemSprite.Glowing( 0x88EEFF );
 	
@@ -122,19 +125,28 @@ public class AntiMagic extends Armor.Glyph {
 	
 	@Override
 	public int proc(Armor armor, Char attacker, Char defender, int damage) {
-		//no proc effect, see:
-		// Hero.damage
-		// GhostHero.damage
-		// Shadowclone.damage
-		// ArmoredStatue.damage
-		// PrismaticImage.damage
+		// 减伤改由 IDamageModifier 在承伤管线原始相位结算，见 rawAddFlat
 		return damage;
 	}
-	
+
+	@Override
+	public float rawAddFlat(int dmg, DamageInfo info) {
+		Object src = info.getSource();
+		Armor a = this.armor;
+		if (src == null || a == null || a.wearer == null) return 0f;
+		if (a.wearer.buff(MagicImmune.class) != null) return 0f;
+		return isMagicSource(src) ? -drRoll(a.wearer, a.procLvl()) : 0f;
+	}
+
+	/** 该来源造成的伤害是否按“魔法来源”处理（减伤与跳字图标共用同一份名单）。 */
+	public static boolean isMagicSource(Object src) {
+		return src != null && RESISTS.contains(src.getClass());
+	}
+
 	public static int drRoll( Char ch, int level ){
-		return Char.combatRoll(
-				Math.round(level * genericProcChanceMultiplier(ch)),
-				Math.round((3 + (level*1.5f)) * genericProcChanceMultiplier(ch)));
+		return Random.NormalIntRange(
+				Math.round(level * RingOfArcana.enchantPowerMultiplier(ch)*ch.talentProc()),
+				Math.round((3 + (level*1.5f)) * RingOfArcana.enchantPowerMultiplier(ch)*ch.talentProc()));
 	}
 
 	@Override

@@ -26,12 +26,15 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MoveCount;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.watabou.utils.Random;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
@@ -92,7 +95,11 @@ public class CloakOfShadows extends Artifact {
 				else if (cursed)       GLog.i( Messages.get(this, "cursed") );
 				else if (charge <= 0)  GLog.i( Messages.get(this, "no_charge") );
 				else {
-					hero.spend( 1f );
+					//阴影之赐 +1：使用斗篷不消耗回合
+					if (!(hero.subClass == com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses.SHADOW_DANCER
+							&& hero.pointsInTalent(Talent.SHADOWS_GIFT) >= 1)) {
+						hero.spend( 1f );
+					}
 					hero.busy();
 					Sample.INSTANCE.play(Assets.Sounds.MELD);
 					activeBuff = activeBuff();
@@ -107,6 +114,7 @@ public class CloakOfShadows extends Artifact {
 					hero.buff(Preparation.class).detach();
 				}
 				hero.sprite.operate( hero.pos );
+				com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.ShadowDancer.onCloakBroken(hero);
 			}
 
 		}
@@ -196,6 +204,18 @@ public class CloakOfShadows extends Artifact {
 		charge = Math.min(charge+amount, chargeCap);
 		updateQuickslot();
 	}
+
+	/** 盗贼 4-2 暗幕盔甲：装备着斗篷时，每 1 点空充能提供的额外护甲防御。 */
+	public static int darkArmorRoll(Hero hero){
+		int points = hero.pointsInTalent(Talent.DARK_ARMOR);
+		CloakOfShadows cloak = hero.belongings.getItem(CloakOfShadows.class);
+		if (points <= 0 || cloak == null || !cloak.isEquipped(hero)) return 0;
+		int empty = Math.max(0, cloak.chargeCap - cloak.charge);
+		// +1: 0~1, +2: 0.5~1, +3: 0.5~1.5, +4: 1~2（每点空充能）
+		float min = points >= 4 ? 1f : points >= 2 ? 0.5f : 0f;
+		float max = points >= 4 ? 2f : points >= 3 ? 1.5f : 1f;
+		return Random.NormalIntRange(Math.round(empty * min), Math.round(empty * max));
+	}
 	
 	@Override
 	public Item upgrade() {
@@ -230,7 +250,8 @@ public class CloakOfShadows extends Artifact {
 		@Override
 		public boolean act() {
 			if (charge < chargeCap && !cursed && target.buff(MagicImmune.class) == null) {
-				if (activeBuff == null && Regeneration.regenOn()) {
+				LockedFloor lock = target.buff(LockedFloor.class);
+				if (activeBuff == null && (lock == null || lock.regenOn())) {
 					float missing = (chargeCap - charge);
 					if (level() > 7) missing += 5*(level() - 7)/3f;
 					float turnsToCharge = (45 - missing);
@@ -239,10 +260,12 @@ public class CloakOfShadows extends Artifact {
 					if (!isEquipped(Dungeon.hero)){
 						chargeToGain *= 0.75f*Dungeon.hero.pointsInTalent(Talent.LIGHT_CLOAK)/3f;
 					}
+					if (target.buff(MoveCount.class)!=null)
+						chargeToGain*=target.buff(MoveCount.class).chargeMultiplier(Dungeon.hero);
 					partialCharge += chargeToGain;
 				}
 
-				while (partialCharge >= 1) {
+				if (partialCharge >= 1) {
 					charge++;
 					partialCharge -= 1;
 					if (charge == chargeCap){
@@ -275,7 +298,7 @@ public class CloakOfShadows extends Artifact {
 		int turnsToCost = 0;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.INVISIBLE;
 		}
 
@@ -303,7 +326,7 @@ public class CloakOfShadows extends Artifact {
 		public boolean attachTo( Char target ) {
 			if (super.attachTo( target )) {
 				target.invisible++;
-				if (target instanceof Hero && ((Hero) target).subClass == HeroSubClass.ASSASSIN){
+				if (target instanceof Hero && ((Hero) target).subClass == HeroSubClasses.ASSASSIN){
 					Buff.affect(target, Preparation.class);
 				}
 				if (target instanceof Hero && ((Hero) target).hasTalent(Talent.PROTECTIVE_SHADOWS)){

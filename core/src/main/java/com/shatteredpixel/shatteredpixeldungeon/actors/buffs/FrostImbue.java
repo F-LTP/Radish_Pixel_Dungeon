@@ -20,9 +20,14 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SnowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.events.AttackHitEvent;
+import com.shatteredpixel.shatteredpixeldungeon.events.SubscribeEvent;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 
@@ -34,14 +39,21 @@ public class FrostImbue extends FlavourBuff {
 	}
 	
 	public static final float DURATION	= 50f;
-	
+
 	public void proc(Char enemy){
-		Buff.affect(enemy, Chill.class, 3f);
-		enemy.sprite.emitter().burst( SnowParticle.FACTORY, 3 );
+		float chill_time=2f;
+		if (target == Dungeon.hero){
+			Buff ben=Dungeon.hero.buff(RingOfBenediction.Benediction.class);
+			if (ben!=null){
+				chill_time*=RingOfBenediction.periodMultiplier(target);
+			}
+		}
+		Buff.affect(enemy, Chill.class, chill_time);
+		enemy.sprite.emitter().burst( SnowParticle.FACTORY, 2 );
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.IMBUE;
 	}
 
@@ -56,8 +68,8 @@ public class FrostImbue extends FlavourBuff {
 	}
 	
 	{
-		immunities.add( Frost.class );
-		immunities.add( Chill.class );
+		immunities.add(Frost.class); typeImmunities.add(DamageType.FROST);
+		immunities.add(Chill.class); typeImmunities.add(DamageType.CHILL);
 	}
 
 	@Override
@@ -68,6 +80,17 @@ public class FrostImbue extends FlavourBuff {
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	/** 命中后由攻击命中事件驱动：攻击者带冰霜赋能时，为目标附加冰寒。 */
+	@SubscribeEvent(event = AttackHitEvent.class, priority = -110)
+	public static void onAttackHit(AttackHitEvent event) {
+		Char attacker = event.getAttacker();
+		if (attacker == null) return;
+		FrostImbue imbue = attacker.buff(FrostImbue.class);
+		if (imbue != null) {
+			imbue.proc(event.getDefender());
 		}
 	}
 }

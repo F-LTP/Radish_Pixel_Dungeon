@@ -43,6 +43,7 @@ public class Door {
 	}
 
 	public static void leave( int pos ) {
+
 		int chars = 0;
 		
 		for (Char ch : Actor.chars()){
@@ -56,5 +57,8 @@ public class Door {
 			if (Dungeon.level.heroFOV[pos])
 				Dungeon.observe();
 		}
+
+		//关上的单向/锁定门要重新变成不可通行
+		SpecialDoors.applyLevelFlags(Dungeon.level);
 	}
 }

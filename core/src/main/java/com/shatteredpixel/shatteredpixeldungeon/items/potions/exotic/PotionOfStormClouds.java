@@ -24,18 +24,19 @@ package com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
-import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.StormCloud;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Tornado;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.audio.Sample;
-import com.watabou.utils.PathFinder;
 
+//Thrown flask that creates a tornado. For 25 turns it drags all enemies within
+//a 9x9 area one tile closer to the eye of the storm.
 public class PotionOfStormClouds extends ExoticPotion {
-	
+
 	{
 		icon = ItemSpriteSheet.Icons.POTION_STRMCLOUD;
 	}
-	
+
 	@Override
 	public void shatter(int cell) {
 
@@ -47,15 +48,6 @@ public class PotionOfStormClouds extends ExoticPotion {
 			Sample.INSTANCE.play( Assets.Sounds.GAS );
 		}
 
-		int centerVolume = 120;
-		for (int i : PathFinder.NEIGHBOURS8){
-			if (!Dungeon.level.solid[cell+i]){
-				GameScene.add( Blob.seed( cell+i, 120, StormCloud.class ) );
-			} else {
-				centerVolume += 120;
-			}
-		}
-		
-		GameScene.add( Blob.seed( cell, centerVolume, StormCloud.class ) );
+		GameScene.add( Blob.seed( cell, 25, Tornado.class ) );
 	}
 }

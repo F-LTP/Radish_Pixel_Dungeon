@@ -7,23 +7,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.Random;
 
 public class ShadowBooks extends MeleeWeapon {
 
-    public float chance;
-
-    //概率减半持续递归
-    public float AloneChance = 1;
-
-
-    public boolean aloneToChance(){
-        return Random.NormalFloat(0,1)<=chance;
-    }
-
-    public boolean aloneDoubleChance(){
-        return Random.NormalFloat(0,1)<=chance/2;
-    }
+    public int chance;
 
     {
         image = ItemSpriteSheet.SHADOW_BOOK;
@@ -32,33 +19,51 @@ public class ShadowBooks extends MeleeWeapon {
 
     @Override
     public boolean doEquip( Hero hero ) {
-        Buff.affect(hero, ShadowProject.class);
-        return super.doEquip(hero);
+        // 装备可能失败（手里是脱不下来的诅咒武器、村正狂热），确认装上了再挂 buff
+        if (super.doEquip(hero)) {
+            Buff.affect(hero, ShadowProject.class);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean doUnequip(Hero hero, boolean collect, boolean single) {
-        Buff.detach(hero, ShadowProject.class);
-        return super.doUnequip(hero, collect, single);
+        // 同理，卸不下来（诅咒）时 buff 要留着
+        if (super.doUnequip(hero, collect, single)) {
+            Buff.detach(hero, ShadowProject.class);
+            return true;
+        }
+        return false;
     }
 
     public static class ShadowProject extends Buff {
 
         {
-            type=buffType.POSITIVE;
+            type = buffType.POSITIVE;
         }
 
         @Override
         public boolean act() {
-            ShadowBooks w2 = (ShadowBooks) hero.belongings.weapon;
-            if(w2 != null){
-                w2.chance = (0.2f + 0.04f * w2.level())/w2.AloneChance;
+            // 主手不一定是幻影之书：旧存档里可能留着装备失败时挂上的 buff，直接强转会崩溃
+            ShadowBooks w2 = target instanceof Hero
+                    ? com.shatteredpixel.shatteredpixeldungeon.items.Fusion.fusedItem(
+                        ((Hero) target).belongings.weapon, ShadowBooks.class) : null;
+            if (w2 != null) {
+                w2.chance = w2.mirrorCasts();
+            } else {
+                detach();
+                return true;
             }
-            spend( TICK );
+            spend(TICK);
             return true;
         }
     }
 
+    // 每读一张卷轴施放几次镜像，与 Scroll 里实际使用的公式一致
+    private int mirrorCasts() {
+        return (int) (1 + 0.2*level());
+    }
 
     @Override
     public int STRReq(int lvl) {
@@ -68,15 +73,13 @@ public class ShadowBooks extends MeleeWeapon {
     @Override
     public void restoreFromBundle(Bundle bundle) {
         super.restoreFromBundle(bundle);
-        chance = bundle.getFloat("chance");
-        AloneChance = bundle.getFloat("lowchance");
+        chance = bundle.getInt("chance");
     }
 
     @Override
     public void storeInBundle(Bundle bundle) {
         super.storeInBundle(bundle);
         bundle.put("chance", chance);
-        bundle.put("lowchance",AloneChance);
     }
 
     @Override
@@ -94,9 +97,10 @@ public class ShadowBooks extends MeleeWeapon {
         String desc;
 
         if(isIdentified()){
-            desc = Messages.get(this, "desc", Math.round(Math.min(chance*100f,100)));
+            // 数字现算：从没装备过的书 chance 字段还是 0；每次施放实际生成 2 个镜像
+            desc = Messages.get(this, "desc", 2 * mirrorCasts());
         } else {
-            desc = Messages.get(this, "normal_desc",20);
+            desc = Messages.get(this, "normal_desc",1);
         }
 
         return desc;

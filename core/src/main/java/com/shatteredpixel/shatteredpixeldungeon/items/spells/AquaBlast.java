@@ -41,7 +41,9 @@ public class AquaBlast extends TargetedSpell {
 		GeyserTrap geyser = new GeyserTrap();
 		geyser.pos = cell;
 		geyser.source = getClass();
-		if (bolt.path.size() > bolt.dist+1) {
+		//落点就是自己脚下时不指定击退方向：起点终点相同的弹道会退化成一条指向左上的斜线，
+		//指定了方向还会跳过间歇泉「英雄只往安全方向冲」的保护，左上是深渊就直接掉下去
+		if (cell != hero.pos && bolt.path.size() > bolt.dist+1) {
 			geyser.centerKnockBackDirection = bolt.path.get(bolt.dist + 1);
 		}
 		geyser.activate();

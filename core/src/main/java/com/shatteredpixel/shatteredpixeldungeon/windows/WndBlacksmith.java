@@ -265,6 +265,17 @@ public class WndBlacksmith extends Window {
 						second = btnItem1.item();
 					}
 
+					// 精制附魔无法升级，不能消耗铁匠的锻造次数
+					if (first instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon
+							&& ((com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon) first).enchantment
+							instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Refined) {
+						com.shatteredpixel.shatteredpixeldungeon.utils.GLog.w(
+								com.shatteredpixel.shatteredpixeldungeon.messages.Messages.get(
+										com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Refined.class,
+										"cannot_upgrade" ) );
+						return;
+					}
+
 					Sample.INSTANCE.play( Assets.Sounds.EVOKE );
 					ScrollOfUpgrade.upgrade( Dungeon.hero );
 					Item.evoke( Dungeon.hero );
@@ -420,7 +431,11 @@ public class WndBlacksmith extends Window {
 			return item.isUpgradable()
 					&& item.isIdentified()
 					&& !item.cursed
-					&& item.level() < 2;
+					&& item.level() < 2
+					//精制附魔的武器升不了级（upgrade() 什么都不做），选它只会白扣好感、白占一次升级次数
+					&& !(item instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon
+						&& ((com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon) item).enchantment
+							instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Refined);
 		}
 
 		@Override

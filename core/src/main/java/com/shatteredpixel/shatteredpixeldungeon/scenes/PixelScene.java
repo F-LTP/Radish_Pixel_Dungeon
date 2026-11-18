@@ -24,7 +24,10 @@ package com.shatteredpixel.shatteredpixeldungeon.scenes;
 import com.badlogic.gdx.Input;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BadgeBanner;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -119,7 +122,7 @@ public class PixelScene extends Scene {
 			scaleFactor = 2.5f;
 		}
 
-		maxDefaultZoom = (int)Math.min(Game.width/minWidth, Game.height/minHeight);
+		maxDefaultZoom = Math.max( 2, (int)Math.min(Game.width/minWidth, Game.height/minHeight) );
 		maxScreenZoom = (int)Math.min(Game.dispWidth/minWidth, Game.dispHeight/minHeight);
 		defaultZoom = SPDSettings.scale();
 
@@ -136,8 +139,9 @@ public class PixelScene extends Scene {
 
 		Camera.reset( new PixelCamera( defaultZoom ) );
 
-		float uiZoom = defaultZoom;
-		uiCamera = Camera.createFullscreen( uiZoom );
+		//UI 缩放必须与 defaultZoom 一致：一旦单独降档，就会出现在设置里选 8X 反而比 6X 更小的
+		//怪现象（调回破碎地牢原版行为）
+		uiCamera = Camera.createFullscreen( defaultZoom );
 		Camera.add( uiCamera );
 
 		// 3x5 (6)
@@ -161,6 +165,9 @@ public class PixelScene extends Scene {
 				Messages.lang() == Languages.JAPANESE){
 			renderedTextPageSize *= 2;
 		}
+		Game.platform.setTannFontMode(inGameScene
+				&& Dungeon.hero != null
+				&& Dungeon.hero.subClass == HeroSubClasses.DICE_MAGE);
 		Game.platform.setupFontGenerators(renderedTextPageSize, SPDSettings.systemFont());
 
 		Tooltip.resetLastUsedTime();

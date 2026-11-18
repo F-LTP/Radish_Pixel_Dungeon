@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2024 Evan Debenham
+ * Copyright (C) 2014-2022 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,15 +27,16 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -45,13 +46,14 @@ import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 abstract public class ClassArmor extends Armor {
 
 	private static final String AC_ABILITY = "ABILITY";
 	private static final String AC_TRANSFER = "TRANSFER";
-	
+
 	{
 		levelKnown = true;
 		cursedKnown = true;
@@ -62,7 +64,7 @@ abstract public class ClassArmor extends Armor {
 
 	private Charger charger;
 	public float charge = 0;
-	
+
 	public ClassArmor() {
 		super( 5 );
 	}
@@ -75,17 +77,11 @@ abstract public class ClassArmor extends Armor {
 	}
 
 	@Override
-	public boolean doUnequip( Hero hero, boolean collect, boolean single ) {
-		if (super.doUnequip( hero, collect, single )) {
-			if (charger != null){
-				charger.detach();
-				charger = null;
-			}
-			return true;
-
-		} else {
-			return false;
-
+	public void removeFromWearer( Hero hero ) {
+		super.removeFromWearer( hero );
+		if (charger != null){
+			charger.detach();
+			charger = null;
 		}
 	}
 
@@ -95,47 +91,42 @@ abstract public class ClassArmor extends Armor {
 	}
 
 	public static ClassArmor upgrade (Hero owner, Armor armor ) {
-		
+
 		ClassArmor classArmor = null;
-		
-		switch (owner.heroClass) {
-			case WARRIOR:
-				classArmor = new WarriorArmor();
-				break;
-			case ROGUE:
-				classArmor = new RogueArmor();
-				break;
-			case MAGE:
-				classArmor = new MageArmor();
-				break;
-			case HUNTRESS:
-				classArmor = new HuntressArmor();
-				break;
-			case DUELIST:
-				classArmor = new DuelistArmor();
-				break;
+
+		if (owner.heroClass == HeroClasses.WARRIOR) {
+			classArmor = new WarriorArmor();
+			BrokenSeal seal = armor.checkSeal();
+			if (seal != null) {
+				classArmor.affixSeal(seal);
+			}
+		} else if (owner.heroClass == HeroClasses.ROGUE) {
+			classArmor = new RogueArmor();
+		} else if (owner.heroClass == HeroClasses.MAGE) {
+			classArmor = new MageArmor();
+		} else if (owner.heroClass == HeroClasses.HUNTRESS) {
+			classArmor = new HuntressArmor();
+		} else if (owner.heroClass == HeroClasses.RECTOR) {
+			classArmor = new DuelistArmor();
+		} else if (owner.heroClass == HeroClasses.MOONLIGHT) {
+			classArmor = new MoonlightArmor();
+		} else if (owner.heroClass == HeroClasses.CARDTRICKSTER) {
+			classArmor = new CardTricksterArmor();
+		} else if (owner.heroClass == HeroClasses.ENGINEER) {
+			classArmor = new EngineerArmor();
 		}
-		
+
 		classArmor.level(armor.trueLevel());
 		classArmor.tier = armor.tier;
 		classArmor.augment = armor.augment;
-		classArmor.inscribe(armor.glyph);
-		if (armor.seal != null) {
-			classArmor.seal = armor.seal;
-		}
-		classArmor.glyphHardened = armor.glyphHardened;
+		classArmor.inscribe( armor.glyph );
 		classArmor.cursed = armor.cursed;
 		classArmor.curseInfusionBonus = armor.curseInfusionBonus;
 		classArmor.masteryPotionBonus = armor.masteryPotionBonus;
-		if (armor.levelKnown && armor.cursedKnown) {
-			classArmor.identify();
-		} else {
-			classArmor.levelKnown = armor.levelKnown;
-			classArmor.cursedKnown = true;
-		}
+		classArmor.identify();
 
 		classArmor.charge = 50;
-		
+
 		return classArmor;
 	}
 
@@ -155,7 +146,7 @@ abstract public class ClassArmor extends Armor {
 		tier = bundle.getInt( ARMOR_TIER );
 		charge = bundle.getFloat(CHARGE);
 	}
-	
+
 	@Override
 	public ArrayList<String> actions( Hero hero ) {
 		ArrayList<String> actions = super.actions( hero );
@@ -169,7 +160,7 @@ abstract public class ClassArmor extends Armor {
 	@Override
 	public String actionName(String action, Hero hero) {
 		if (hero.armorAbility != null && action.equals(AC_ABILITY)){
-			return Messages.upperCase(hero.armorAbility.name());
+			return hero.armorAbility.name().toUpperCase();
 		} else {
 			return super.actionName(action, hero);
 		}
@@ -197,9 +188,12 @@ abstract public class ClassArmor extends Armor {
 				GLog.w( Messages.get(this, "low_charge") );
 			} else  {
 				usesTargeting = hero.armorAbility.useTargeting();
+				if (!(hero.armorAbility instanceof com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.ToyBackpack)) {
+					com.shatteredpixel.shatteredpixeldungeon.items.toys.TieredToyEffects.onAbilityUsed(hero);
+				}
 				hero.armorAbility.use(this, hero);
 			}
-			
+
 		} else if (action.equals(AC_TRANSFER)){
 
 			GameScene.show(new WndOptions(new ItemSprite(ItemSpriteSheet.CROWN),
@@ -228,54 +222,31 @@ abstract public class ClassArmor extends Armor {
 								Armor armor = (Armor)item;
 								armor.detach(hero.belongings.backpack);
 								if (hero.belongings.armor == armor){
-									hero.belongings.armor = null;
-									if (hero.sprite instanceof HeroSprite) {
-										((HeroSprite) hero.sprite).updateArmor();
-									}
+									//穿在身上的护甲被直接消耗掉，没有经过「脱下」：
+									//它自带的状态、玩具效果和外观要在这里摘掉
+									armor.removeFromWearer(hero);
 								}
 								level(armor.trueLevel());
 								tier = armor.tier;
 								augment = armor.augment;
+								inscribe( armor.glyph );
 								cursed = armor.cursed;
 								curseInfusionBonus = armor.curseInfusionBonus;
 								masteryPotionBonus = armor.masteryPotionBonus;
-								if (armor.checkSeal() != null) {
-									inscribe(armor.glyph);
-									seal = armor.checkSeal();
-									if (seal.level() > 0) {
-										int newLevel = trueLevel() + 1;
-										level(newLevel);
+								BrokenSeal seal = armor.checkSeal();
+								if (seal != null) {
+									affixSeal(seal);
+								} else {
+									//自己身上的纹章如果升过级，那一级是记在护甲等级里的。上面把等级整个换成了来源护甲的，
+									//要把这一级补回来，否则它就凭空没了，以后拆下纹章还要再扣一级
+									BrokenSeal own = checkSeal();
+									if (own != null && own.level() > 0) {
+										level(trueLevel() + 1);
 										Badges.validateItemLevelAquired(ClassArmor.this);
 									}
-								} else if (checkSeal() != null){
-									//automates the process of detaching the glyph manually
-									// and re-affixing it to the new armor
-									if (seal.level() > 0 && trueLevel() <= armor.trueLevel()){
-										int newLevel = trueLevel() + 1;
-										level(newLevel);
-										Badges.validateItemLevelAquired(ClassArmor.this);
-									}
-
-									//if both source and destination armor have glyphs
-									// we assume the player wants the glyph on the destination armor
-									// they can always manually detach first if they don't.
-									// otherwise we automate glyph transfer just like upgrades
-									if (armor.glyph == null && seal.canTransferGlyph()){
-										//do nothing, keep our glyph
-									} else {
-										inscribe(armor.glyph);
-										seal.setGlyph(null);
-									}
-								} else {
-									inscribe(armor.glyph);
 								}
 
-								if (armor.levelKnown && armor.cursedKnown) {
-									identify();
-								} else {
-									levelKnown = armor.levelKnown;
-									cursedKnown = true;
-								}
+								identify();
 
 								GLog.p( Messages.get(ClassArmor.class, "transfer_complete") );
 								hero.sprite.operate(hero.pos);
@@ -296,21 +267,28 @@ abstract public class ClassArmor extends Armor {
 	@Override
 	public String desc() {
 		String desc = super.desc();
-
-		if (Dungeon.hero.belongings.contains(this)) {
-			ArmorAbility ability = Dungeon.hero.armorAbility;
-			if (ability != null) {
-				desc += "\n\n" + ability.shortDesc();
-				float chargeUse = ability.chargeUse(Dungeon.hero);
-				desc += " " + Messages.get(this, "charge_use", Messages.decimalFormat("#.##", chargeUse));
-			} else {
-				desc += "\n\n" + "_" + Messages.get(this, "no_ability") + "_";
+		if(Dungeon.hero != null){
+			if (Dungeon.hero.belongings.contains(this)) {
+				ArmorAbility ability = Dungeon.hero.armorAbility;
+				if (ability != null) {
+					desc += "\n\n" + ability.shortDesc();
+					float chargeUse = ability.chargeUse(Dungeon.hero);
+					desc += " " + Messages.get(this, "charge_use", new DecimalFormat("#.##").format(chargeUse));
+				} else {
+					desc += "\n\n" + "_" + Messages.get(this, "no_ability") + "_";
+				}
 			}
+
 		}
 
 		return desc;
 	}
-	
+
+	@Override
+	public boolean isIdentified() {
+		return true;
+	}
+
 	@Override
 	public int value() {
 		return 0;
@@ -322,9 +300,7 @@ abstract public class ClassArmor extends Armor {
 		public boolean attachTo( Char target ) {
 			if (super.attachTo( target )) {
 				//if we're loading in and the hero has partially spent a turn, delay for 1 turn
-				if (target instanceof Hero && Dungeon.hero == null && cooldown() == 0 && target.cooldown() > 0) {
-					spend(TICK);
-				}
+				if (now() == 0 && cooldown() == 0 && target.cooldown() > 0) spend(TICK);
 				return true;
 			}
 			return false;
@@ -332,9 +308,12 @@ abstract public class ClassArmor extends Armor {
 
 		@Override
 		public boolean act() {
-			if (Regeneration.regenOn()) {
+			LockedFloor lock = target.buff(LockedFloor.class);
+			if (lock == null || lock.regenOn()) {
 				float chargeGain = 100 / 500f; //500 turns to full charge
-				chargeGain *= RingOfEnergy.armorChargeMultiplier(target);
+				// 能量戒加速护甲技能充能
+				chargeGain *= com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy
+						.armorChargeMultiplier(target);
 				charge += chargeGain;
 				updateQuickslot();
 				if (charge > 100) {

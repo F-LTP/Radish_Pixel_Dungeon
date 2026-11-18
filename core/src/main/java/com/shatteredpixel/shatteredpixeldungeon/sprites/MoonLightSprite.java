@@ -1,7 +1,9 @@
 package com.shatteredpixel.shatteredpixeldungeon.sprites;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ElmoParticle;
 import com.watabou.noosa.TextureFilm;
+import com.watabou.noosa.audio.Sample;
 
 public class MoonLightSprite extends MobSprite{
     public MoonLightSprite(){
@@ -20,4 +22,16 @@ public class MoonLightSprite extends MobSprite{
         die.frames( frames, 112,124,123 );
         play( idle );
     }
+
+    @Override
+    public void die() {
+        super.die();
+
+        emitter().start( ElmoParticle.FACTORY, 0.03f, 60 );
+
+        if (visible) {
+            Sample.INSTANCE.play( Assets.Sounds.BURNING );
+        }
+    }
+
 }

@@ -77,7 +77,13 @@ public class Spanner extends MeleeWeapon {
 
                 try {
                     QuickSlotButton.target(Actor.findChar(target));
-                    Trap t = Dungeon.level.traps.get(target).reveal();
+                    // 只认已经看得见的陷阱。以前这里顺手调了 reveal()，而且在距离判断之前：
+                    // 拿着扳手对着任意一格点一下，那里藏着的陷阱就现形了，等于一个不花回合的探雷器
+                    Trap t = Dungeon.level.traps.get(target);
+                    if (t == null || !t.visible) {
+                        GLog.w(Messages.get(this, "select_notrap"));
+                        return;
+                    }
 
                     Spanner ks =(Spanner) hero.belongings.weapon;
 
@@ -89,7 +95,7 @@ public class Spanner extends MeleeWeapon {
                         reach = 2;
                     }
 
-                    if(target == t.pos &&Dungeon.level.distance( t.pos, curUser.pos ) <= reach){
+                    if(target == t.pos && Dungeon.level.distance( t.pos, curUser.pos ) <= reach){
                         boolean isRepair = !t.active && t.onlyRepair;
                         if(isRepair){
                             t.active = true;

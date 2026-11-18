@@ -27,6 +27,8 @@ import com.watabou.glwrap.Quad;
 import com.watabou.glwrap.Vertexbuffer;
 import com.watabou.utils.RectF;
 
+import java.util.Arrays;
+
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
@@ -53,6 +55,8 @@ public class NinePatch extends Visual {
 	protected boolean flipVertical;
 
 	protected boolean dirty;
+	protected boolean centerVisible = true;
+	protected boolean topVisible = true;
 	
 	public NinePatch( Object tx, int margin ) {
 		this( tx, margin, margin, margin, margin );
@@ -107,21 +111,37 @@ public class NinePatch extends Visual {
 		float intop     = flipVertical ? innerF.bottom : innerF.top;
 		float inbottom  = flipVertical ? innerF.top : innerF.bottom;
 
-		Quad.fill( vertices,
-				0, marginLeft, 0, marginTop, outleft, inleft, outtop, intop );
+		if (topVisible) {
+			Quad.fill( vertices,
+					0, marginLeft, 0, marginTop, outleft, inleft, outtop, intop );
+		} else {
+			Arrays.fill( vertices, 0 );
+		}
 		quads.put( vertices );
-		Quad.fill( vertices,
-				marginLeft, right, 0, marginTop, inleft, inright, outtop, intop );
+		if (topVisible) {
+			Quad.fill( vertices,
+					marginLeft, right, 0, marginTop, inleft, inright, outtop, intop );
+		} else {
+			Arrays.fill( vertices, 0 );
+		}
 		quads.put( vertices );
-		Quad.fill( vertices,
-				right, width, 0, marginTop, inright, outright, outtop, intop );
+		if (topVisible) {
+			Quad.fill( vertices,
+					right, width, 0, marginTop, inright, outright, outtop, intop );
+		} else {
+			Arrays.fill( vertices, 0 );
+		}
 		quads.put( vertices );
 
 		Quad.fill( vertices,
 				0, marginLeft, marginTop, bottom, outleft, inleft, intop, inbottom );
 		quads.put( vertices );
-		Quad.fill( vertices,
-				marginLeft, right, marginTop, bottom, inleft, inright, intop, inbottom );
+		if (centerVisible) {
+			Quad.fill( vertices,
+					marginLeft, right, marginTop, bottom, inleft, inright, intop, inbottom );
+		} else {
+			Arrays.fill( vertices, 0 );
+		}
 		quads.put( vertices );
 		Quad.fill( vertices,
 				right, width, marginTop, bottom, inright, outright, intop, inbottom );
@@ -194,6 +214,20 @@ public class NinePatch extends Visual {
 		}
 	}
 	
+	public void setCenterVisible( boolean value ) {
+		if (centerVisible != value){
+			centerVisible = value;
+			updateVertices();
+		}
+	}
+
+	public void setTopVisible( boolean value ) {
+		if (topVisible != value){
+			topVisible = value;
+			updateVertices();
+		}
+	}
+
 	public void size( float width, float height ) {
 		this.width = width;
 		this.height = height;

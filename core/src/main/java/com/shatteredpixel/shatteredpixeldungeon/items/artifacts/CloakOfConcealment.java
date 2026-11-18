@@ -1,7 +1,5 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.artifacts;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
@@ -10,27 +8,12 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility_neutral;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MoveCount;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.plants.Earthroot;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
-import com.watabou.noosa.audio.Sample;
-import com.watabou.utils.Bundle;
-import com.watabou.utils.Random;
-
-import java.util.ArrayList;
 
 public class CloakOfConcealment extends Artifact{
     public static final String AC_NONE = "NONE";
@@ -42,11 +25,6 @@ public class CloakOfConcealment extends Artifact{
         defaultAction=AC_NONE;
     }
 
-    @Override
-    public void execute( Hero hero, String action ) {
-        super.execute(hero, action);
-        if (action.equals(AC_NONE)) return;
-    }
     @Override
     protected ArtifactBuff passiveBuff() {
         return new CloakOfConcealment.conceal();
@@ -108,7 +86,13 @@ public class CloakOfConcealment extends Artifact{
                     float toGain=RingOfEnergy.artifactChargeMultiplier(target);
                     if (target.buff(MoveCount.class)!=null)
                         toGain*=target.buff(MoveCount.class).chargeMultiplier(Dungeon.hero);
-                    charge += Math.round(toGain);
+                    // 小数部分攒起来而不是四舍五入：四舍五入时 1.5 倍以下的加成（+0、+1 的能量之戒、
+                    // 低层数的动能天赋）完全不起作用，到 1.5 倍又直接变成翻倍
+                    partialCharge += toGain;
+                    while (partialCharge >= 1f) {
+                        partialCharge--;
+                        charge++;
+                    }
                     if (charge >= chargeCap) {
                         giveInvisibility();
                     }
@@ -121,6 +105,9 @@ public class CloakOfConcealment extends Artifact{
         public void detach(){
             if (target.buff(Invisibility_neutral.class)!=null)
                 Buff.detach(target, Invisibility_neutral.class);
+            // 「暴露」只会在斗篷还穿着且诅咒已解除时被 act() 摘掉。斗篷带着诅咒离开身体
+            // （反魔法期间脱下、被嬗变成别的神器）之后再没有人管它，佩戴者会永久免疫隐形。
+            Buff.detach(target, Disposed.class);
             super.detach();
         }
     }

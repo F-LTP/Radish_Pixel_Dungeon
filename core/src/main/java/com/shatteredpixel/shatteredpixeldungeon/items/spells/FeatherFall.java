@@ -23,15 +23,13 @@ package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLevitation;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfFeatherFall;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 
 public class FeatherFall extends Spell {
@@ -42,7 +40,8 @@ public class FeatherFall extends Spell {
 	
 	@Override
 	protected void onCast(Hero hero) {
-		Buff.append(hero, FeatherBuff.class, FeatherBuff.DURATION);
+		//用羽落秘药的那个状态：跳深渊时 Chasm 只认它。这个类原来自带的 FeatherBuff 没有任何代码检查，施放了也照样摔伤
+		Buff.append(hero, ElixirOfFeatherFall.FeatherBuff.class, ElixirOfFeatherFall.FeatherBuff.DURATION);
 		hero.sprite.operate(hero.pos);
 		Sample.INSTANCE.play(Assets.Sounds.READ );
 		hero.sprite.emitter().burst( Speck.factory( Speck.JET ), 20);
@@ -51,31 +50,8 @@ public class FeatherFall extends Spell {
 		
 		detach( curUser.belongings.backpack );
 		updateQuickslot();
+		Spell.onSpellUsed( hero, this );
 		hero.spendAndNext( 1f );
-	}
-	
-	public static class FeatherBuff extends FlavourBuff {
-		//does nothing, just waits to be triggered by chasm falling
-		{
-			type = buffType.POSITIVE;
-		}
-
-		public static final float DURATION	= 30f;
-
-		@Override
-		public int icon() {
-			return BuffIndicator.LEVITATION;
-		}
-
-		@Override
-		public void tintIcon(Image icon) {
-			icon.hardlight(1f, 2f, 1.25f);
-		}
-
-		@Override
-		public float iconFadePercent() {
-			return Math.max(0, (DURATION - visualcooldown()) / DURATION);
-		}
 	}
 	
 	@Override

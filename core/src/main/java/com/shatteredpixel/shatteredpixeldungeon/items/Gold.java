@@ -59,6 +59,7 @@ public class Gold extends Item {
 	public boolean doPickUp(Hero hero, int pos) {
 		
 		Dungeon.gold += quantity;
+		com.shatteredpixel.shatteredpixeldungeon.items.armor.CountessDress.onGoldChanged();
 		Statistics.goldCollected += quantity;
 		Badges.validateGoldCollected();
 

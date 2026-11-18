@@ -1,5 +1,6 @@
 package com.shatteredpixel.shatteredpixeldungeon.custom.visuals;
 
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -41,7 +42,7 @@ public class MissileSpriteCustom extends ItemSprite implements Tweener.Listener 
     public void reset( PointF from, PointF to, Item item, float speedMod, float aSpeedMod, Callback listener) {
         revive();
 
-        if (item == null)   view(0, null);
+        if (item == null)   view(ItemSpriteSheet.SOMETHING, null);
         else                view( item );
 
         setup( from,

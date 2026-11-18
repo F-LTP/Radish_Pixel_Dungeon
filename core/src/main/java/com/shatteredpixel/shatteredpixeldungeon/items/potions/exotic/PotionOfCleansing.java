@@ -48,7 +48,8 @@ public class PotionOfCleansing extends ExoticPotion {
 		identify();
 		
 		cleanse( hero );
-		new Flare( 6, 32 ).color(0xFF4CD2, true).show( curUser.sprite, 2f );
+		//药效是加在 hero 身上的，光效也画在它身上；不在地牢画面里时（炼金界面的药剂蒸馏）没有贴图，不画
+		if (hero.sprite != null) new Flare( 6, 32 ).color(0xFF4CD2, true).show( hero.sprite, 2f );
 	}
 	
 	@Override
@@ -95,7 +96,7 @@ public class PotionOfCleansing extends ExoticPotion {
 		public static final float DURATION = 5f;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.IMMUNITY;
 		}
 

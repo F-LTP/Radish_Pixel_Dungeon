@@ -22,15 +22,25 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.effects.SnDBGM;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MoonLight;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Peddler;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PeddlerCatalog;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Ripple;
 import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
+import com.shatteredpixel.shatteredpixeldungeon.levels.branches.Branches;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.Painter;
 import com.shatteredpixel.shatteredpixeldungeon.levels.painters.SewerPainter;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.CombatRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.BlessScrollRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MossExitRoomInMain;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SmallGrassEnterRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.AlarmTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.ChillingTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.ConfusionTrap;
@@ -57,7 +67,36 @@ import com.watabou.utils.ColorMath;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
 
+import java.util.ArrayList;
+
 public class SewerLevel extends RegularLevel {
+
+	@Override
+	public void create() {
+		super.create();
+
+		//主线第 1 层：放一扇通往测试支线的楼梯
+		if (Dungeon.depth == 1 && Branches.MAIN.equals(Dungeon.branchId)
+				&& testPortalCell < 0) {
+			int chosen = -1;
+			for (int tries = 0; tries < 200; tries++) {
+				int c = com.watabou.utils.Random.Int(length());
+				if (map[c] == Terrain.EMPTY && c != entrance() && c != exit()
+						&& heaps.get(c) == null && traps.get(c) == null) {
+					chosen = c;
+					break;
+				}
+			}
+			if (chosen >= 0) {
+				map[chosen] = Terrain.EXIT;
+				testPortalCell = chosen;
+				com.shatteredpixel.shatteredpixeldungeon.levels.features.CycleStairVisual vis =
+						new com.shatteredpixel.shatteredpixeldungeon.levels.features.CycleStairVisual(-1);
+				vis.pos(chosen, this);
+				customTiles.add(vis);
+			}
+		}
+	}
 
 	{
 		color1 = 0x48763c;
@@ -70,6 +109,7 @@ public class SewerLevel extends RegularLevel {
 	public static final float[] SEWER_TRACK_CHANCES = new float[]{1f, 1f, 0.5f, 0.25f, 1f, 0.5f};
 
 	public void playLevelMusic(){
+        if (SnDBGM.playLevelMusic()) return;
 		if (Ghost.Quest.active() || Statistics.amuletObtained){
 			if (Statistics.amuletObtained && Dungeon.depth == 1){
 				Music.INSTANCE.play(Assets.Music.THEME_FINALE, true);
@@ -80,14 +120,34 @@ public class SewerLevel extends RegularLevel {
 			Music.INSTANCE.playTracks(SEWER_TRACK_LIST, SEWER_TRACK_CHANCES, false);
 		}
 	}
-	
+
+	@Override
+	protected ArrayList<Room> initRooms() {
+		ArrayList<Room> initRooms = super.initRooms();
+		if (Dungeon.depth == 1 && Dungeon.branchId.equals(Branches.MAIN)) {
+			initRooms.add(new CombatRoom());
+		}
+		if(Dungeon.depth == 2){
+			if(Dungeon.branchId.equals(Branches.MAIN)){
+				initRooms.add(new SmallGrassEnterRoom());
+			}
+			if(Dungeon.branchId.equals(Branches.MOSS)){
+				initRooms.add(new BlessScrollRoom());
+			}
+		}
+		if (Dungeon.depth == 3 && Dungeon.branchId.equals(Branches.MAIN)) {
+			initRooms.add(new MossExitRoomInMain());
+		}
+		return initRooms;
+	}
+
 	@Override
 	protected int standardRooms(boolean forceMax) {
 		if (forceMax) return 6;
 		//4 to 6, average 5
 		return 4+Random.chances(new float[]{1, 3, 1});
 	}
-	
+
 	@Override
 	protected int specialRooms(boolean forceMax) {
 		if (forceMax) return 2;
@@ -135,9 +195,145 @@ public class SewerLevel extends RegularLevel {
 
 	@Override
 	protected void createMobs() {
-		Ghost.Quest.spawn( this, roomExit );
+		if(Dungeon.branchId.equals(Branches.MAIN)){
+			Ghost.Quest.spawn( this, roomExit );
+		}
+		if(Dungeon.depth == 1 && Dungeon.branchId.equals(Branches.MAIN)){
+			MoonLight npc18 = new MoonLight();
+			npc18.pos = moonLightCell();
+			mobs.add(npc18);
+		}
+
+		//一楼游商（仿暗黑地牢 BarterMan）：名字/台词/货单全在 PeddlerCatalog 里
+		if(Dungeon.depth == 1 && Dungeon.branchId.equals(Branches.MAIN)){
+			spawnPeddlers();
+		}
+
 		super.createMobs();
 	}
+
+	/**
+	 * 月华站的格子：入口左边一格。那一格上已经有物品时换到入口旁边别的空格：
+	 * 给新玩家的冒险者指南是随机丢在入口房间里的，可能正好落在这一格，而月华不可移动，被她压住的东西永远捡不到。
+	 * 新手引导期间入口房间的门是隐藏的，捡起并读完指南才显形（引导期间也搜不出来），
+	 * 所以指南被压住的那一局英雄出不了入口房间。
+	 */
+	private int moonLightCell() {
+		int preferred = entrance() - 1;
+		if (heaps.get( preferred ) == null && findMob( preferred ) == null) {
+			return preferred;
+		}
+		//先上下左右，再斜向；不用随机数，免得改变这一层其它内容的生成
+		int[][] order = { com.watabou.utils.PathFinder.NEIGHBOURS4, com.watabou.utils.PathFinder.NEIGHBOURS8 };
+		for (int[] dirs : order) {
+			for (int dir : dirs) {
+				int cell = entrance() + dir;
+				if (passable[cell] && !pit[cell] && heaps.get( cell ) == null && findMob( cell ) == null
+						&& traps.get( cell ) == null && plants.get( cell ) == null) {
+					return cell;
+				}
+			}
+		}
+		return preferred;
+	}
+
+	/** 游商之间至少隔开的格数（按真实地图距离，不是格子编号差）。 */
+	private static final int PEDDLER_SPACING = 5;
+
+	/**
+	 * 把 7 位游商分散撒到一楼各处。
+	 *
+	 * 做法：先收集全图所有可以站人的空格（排除不可站立、坑洞、已有物品、已有单位、以及紧贴入口的格子），
+	 * 打乱顺序后按 {@link #PEDDLER_SPACING} 格的最小真实距离贪心抽取；
+	 * 一次没抽够就把最小距离放宽一格重来，直到放下足够人数。
+	 * 这样他们散布在整个楼层，而不是在入口排成一队；实在放不下就少放几位，绝不覆盖已有单位或物品。
+	 */
+	private void spawnPeddlers() {
+		int total = length();
+		int start = entrance();
+		ArrayList<Integer> candidates = new ArrayList<>();
+		for (int cell = 0; cell < total; cell++) {
+			if (!passable[cell] || pit[cell]) {
+				continue;
+			}
+			if (heaps.get(cell) != null) {
+				continue;
+			}
+			//「已有单位」不在这里排除，放到下面抽取的时候查（见那里的说明）
+			// 别刷在陷阱或植物上：游商是常驻 NPC，压住陷阱格会让人看不清那里有东西
+			if (traps.get(cell) != null || plants.get(cell) != null) {
+				continue;
+			}
+			// 别堵在入口格上
+			if (cell == start) {
+				continue;
+			}
+			// 只放在房间内部：room(cell) 为 null ⇒ 这格在走廊、门洞或通道上。
+			// Room.inside() 已经把紧贴墙的那一圈排除了，所以不会贴着门站。
+			if (room(cell) == null) {
+				continue;
+			}
+			// 还要求上下左右四格都能走：避免站在一格宽的窄道/门口，被玩家堵住过不去。
+			boolean open = true;
+			for (int dir : com.watabou.utils.PathFinder.NEIGHBOURS4) {
+				int n = cell + dir;
+				if (n < 0 || n >= total || !passable[n] || pit[n]) {
+					open = false;
+					break;
+				}
+			}
+			if (!open) {
+				continue;
+			}
+			candidates.add(cell);
+		}
+		if (candidates.isEmpty()) {
+			return;
+		}
+
+		ArrayList<Integer> chosen = new ArrayList<>();
+		// 从宽到窄逐步放宽间距，保证尽可能放下全部游商
+		for (int spacing = PEDDLER_SPACING; spacing >= 2 && chosen.size() < PeddlerCatalog.COUNT; spacing--) {
+			chosen.clear();
+			ArrayList<Integer> pool = new ArrayList<>(candidates);
+			// 用 SPD 自带随机源做 Fisher-Yates 洗牌，保证每次开局的散布位置都不同
+			for (int i = pool.size() - 1; i > 0; i--) {
+				int j = com.watabou.utils.Random.Int(i + 1);
+				int tmp = pool.get(i);
+				pool.set(i, pool.get(j));
+				pool.set(j, tmp);
+			}
+			for (int cell : pool) {
+				if (chosen.size() >= PeddlerCatalog.COUNT) {
+					break;
+				}
+				//已经站着别的单位（月华、房间里的食人鱼、水晶宝箱怪……）的格子不放。
+				//原来在收集候选格时用 Actor.findChar 查，但建关时角色表是空的，那个判断永远不成立，
+				//游商会和别的单位叠在同一格。要查这一层自己的怪物表；
+				//并且放在这里查而不是从候选格里剔掉：洗牌用掉的随机数个数不变，没有撞车的种子生成结果和以前一样。
+				if (findMob(cell) != null) {
+					continue;
+				}
+				boolean ok = true;
+				for (int other : chosen) {
+					if (distance(cell, other) < spacing) {
+						ok = false;
+						break;
+					}
+				}
+				if (ok) {
+					chosen.add(cell);
+				}
+			}
+		}
+
+		for (int i = 0; i < chosen.size() && i < PeddlerCatalog.COUNT; i++) {
+			Peddler p = new Peddler(i);
+			p.pos = chosen.get(i);
+			mobs.add(p);
+		}
+	}
+
 	
 	@Override
 	public boolean activateTransition(Hero hero, LevelTransition transition) {

@@ -1,6 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.custom.testmode.generator;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -8,6 +9,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfConcentration;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfBenediction;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfDestruction;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfElements;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEvasion;
@@ -26,11 +28,14 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfCorruption;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFireblast;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFrost;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfGnollKing;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLightning;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfMagicMissile;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfNewStar;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfPrismaticLight;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfRegrowth;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfShockBomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfTransfusion;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -63,6 +68,8 @@ public class TestRing extends TestGenerator {
     private int selected;
     private static final int RING_CAT = 0;
     private static final int WAND_CAT = 1;
+    // idToRing 里的戒指数。毁灭之戒是后来加进游戏的，这里以前没跟着加，生成器里选不到它
+    private static final int RING_COUNT = 15;
     private static final String AC_SETTING = "setting";
 
     @Override
@@ -137,8 +144,6 @@ public class TestRing extends TestGenerator {
 
     private Class<? extends Ring> idToRing(int id) {
         switch (id) {
-            case 0:
-                return RingOfConcentration.class;
             case 1:
                 return RingOfElements.class;
             case 2:
@@ -164,6 +169,9 @@ public class TestRing extends TestGenerator {
             case 12:
                 return RingOfKing.class;
             case 13:
+                return RingOfConcentration.class;
+            case 14:
+                return RingOfDestruction.class;
             default:
                 return RingOfBenediction.class;
         }
@@ -171,8 +179,6 @@ public class TestRing extends TestGenerator {
 
     private Class<? extends Wand> idToWand(int id) {
         switch (id) {
-            case 0:
-                return WandOfBlastWave.class;
             case 1:
                 return WandOfCorrosion.class;
             case 2:
@@ -196,8 +202,15 @@ public class TestRing extends TestGenerator {
             case 11:
                 return WandOfTransfusion.class;
             case 12:
-            default:
+                return WandOfGnollKing.class;
+            case 13:
+                return WandOfNewStar.class;
+            case 14:
                 return WandOfWarding.class;
+            case 15:
+                return WandOfShockBomb.class;
+            default:
+                return WandOfBlastWave.class;
         }
 
     }
@@ -207,21 +220,21 @@ public class TestRing extends TestGenerator {
 
     private void buildRingList() {
         if (!ringList.isEmpty()) return;
-        for (int i = 0; i < 13; ++i) {
+        for (int i = 0; i < RING_COUNT; ++i) {
             ringList.add(idToRing(i));
         }
     }
 
     private void buildWandList() {
         if (!wandList.isEmpty()) return;
-        for (int i = 0; i < 13; ++i) {
+        for (int i = 0; i < 16; ++i) {
             wandList.add(idToWand(i));
         }
     }
 
     private int total(int category){
-        if (category == RING_CAT) return 13;
-        if (category == WAND_CAT) return 13;
+        if (category == RING_CAT) return RING_COUNT;
+        if (category == WAND_CAT) return 16;
         return 0;
     }
 
@@ -332,13 +345,11 @@ public class TestRing extends TestGenerator {
                     }
                 };
                 if (category == RING_CAT) {
-                    Image im = new Image(Assets.Sprites.ITEM_ICONS);
-                    im.frame(ItemSpriteSheet.Icons.film.get(Objects.requireNonNull(Reflection.newInstance(ringList.get(i))).icon));
+					Image im = ItemSpriteSheet.Icons.image(Objects.requireNonNull(Reflection.newInstance(ringList.get(i))).icon);
                     im.scale.set(1.6f);
                     btn.icon(im);
                 } else if (category == WAND_CAT) {
-                    Image im = new Image(Assets.Sprites.ITEMS);
-                    im.frame(ItemSpriteSheet.film.get(Objects.requireNonNull(Reflection.newInstance(wandList.get(i))).image));
+                    Image im = new ItemSprite(Objects.requireNonNull(Reflection.newInstance(wandList.get(i))).image);
                     im.scale.set(0.9f);
                     btn.icon(im);
                 }

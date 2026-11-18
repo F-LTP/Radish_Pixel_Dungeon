@@ -99,7 +99,7 @@ public class Pushing extends Actor {
 
 	public class Effect extends Visual {
 
-		private static final float DELAY = 0.15f;
+		private static final float DELAY = 0.08f;
 		
 		private PointF end;
 		

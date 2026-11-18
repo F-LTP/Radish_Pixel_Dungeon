@@ -44,7 +44,9 @@ public class ElixirOfFeatherFall extends Elixir {
 	public void apply(Hero hero) {
 		Buff.append(hero, FeatherBuff.class, FeatherBuff.DURATION);
 
-		hero.sprite.emitter().burst(Speck.factory(Speck.JET), 20);
+		if (hero.sprite != null) {
+			hero.sprite.emitter().burst(Speck.factory(Speck.JET), 20);
+		}
 		GLog.p(Messages.get(this, "light"));
 	}
 
@@ -57,7 +59,7 @@ public class ElixirOfFeatherFall extends Elixir {
 		public static final float DURATION	= 50f;
 
 		@Override
-		public int icon() {
+		public String icon() {
 			return BuffIndicator.LEVITATION;
 		}
 

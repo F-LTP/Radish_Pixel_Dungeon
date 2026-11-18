@@ -87,8 +87,12 @@ public abstract class TargetedSpell extends Spell {
 				
 				curSpell.fx(shot, new Callback() {
 					public void call() {
+						int owned = curSpell.quantity();
 						curSpell.affectTarget(shot, curUser);
+						//回收陷阱在「存入陷阱 / 目标格没有陷阱」时会自己把数量加回去抵掉下面的 detach，那种情况不算用掉
+						boolean consumed = curSpell.quantity() == owned;
 						curSpell.detach( curUser.belongings.backpack );
+						if (consumed) Spell.onSpellUsed( curUser, curSpell );
 						Invisibility.dispel();
 						curSpell.updateQuickslot();
 						curUser.spendAndNext( 1f );

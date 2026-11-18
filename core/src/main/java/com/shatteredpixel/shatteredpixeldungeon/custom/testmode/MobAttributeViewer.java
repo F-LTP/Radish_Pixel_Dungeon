@@ -1,5 +1,6 @@
 package com.shatteredpixel.shatteredpixeldungeon.custom.testmode;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
@@ -162,8 +163,13 @@ public class MobAttributeViewer extends TestItem{
             health.level(ch);
             add(health);
 
-            buffs = new BuffIndicator(ch, false);
-            add(buffs);
+            // 英雄的状态图标条是全局登记的「唯一一条」（状态栏里那条）。这里再给英雄建一条会顶掉它的登记，
+            // 窗口一关登记被清空，之后英雄增减状态都不再通知状态栏，图标就停在原样不动了。
+            // 英雄的状态在状态栏上本来就看得到，所以查看英雄时不再重复显示
+            if (ch != Dungeon.hero) {
+                buffs = new BuffIndicator(ch, false);
+                add(buffs);
+            }
         }
 
         @Override
@@ -174,10 +180,12 @@ public class MobAttributeViewer extends TestItem{
 
             health.setRect( GAP, name.bottom() + GAP, width - GAP * 2, health.height());
 
-            buffs.setPos(
-                name.right() + GAP - 1,
-                name.bottom() - BuffIndicator.SIZE_SMALL - 2
-            );
+            if (buffs != null) {
+                buffs.setPos(
+                    name.right() + GAP - 1,
+                    name.bottom() - BuffIndicator.SIZE_SMALL - 2
+                );
+            }
 
             height = health.bottom();
         }

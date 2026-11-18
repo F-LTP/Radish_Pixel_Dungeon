@@ -1,4 +1,5 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs.RadishEnemy;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageType;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -7,19 +8,13 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionHero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FireImbue;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FrostImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Fury;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
@@ -29,14 +24,10 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArcaneResin;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.AfterImage;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.CloakofGreyFeather;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfTenacity;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfFireblast;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.FogSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scythe;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -46,6 +37,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RadishEnemySprite.DeviloonSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.SnakeSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
@@ -75,13 +67,11 @@ public class Deviloon extends Mob {
         properties.add(Property.DEMONIC);
         properties.add(Property.HEADLESS);
 
-        flying = true;
-
         loot = new ArcaneResin().quantity(Random.Int(1,2));
         lootChance = 0.20f;
     }
     {
-        resistances.add( WandOfFireblast.class );
+        typeResistances.put(DamageType.FIRE, 0.5f);
     }
 
     HashSet<BlastRune> blastRunes = new HashSet<>();
@@ -103,7 +93,8 @@ public class Deviloon extends Mob {
                 return true;
             } else
                 //if the beam is charged, it has to attack, will aim at previous location of target.
-                return blastCharged;
+                // 弹道不通时，相邻、挑战装备的武器距离、精英（索敌 / 巨型）的额外攻击距离仍由父类判定
+                return blastCharged || super.canAttack(enemy);
         } else
             return super.canAttack(enemy);
     }
@@ -115,6 +106,8 @@ public class Deviloon extends Mob {
         // yep the complexity is O(n^2) , i'll optimize it one day.
         // Date : 2024-08-10
         for(Object i:blastRunes.toArray()){
+            if(i==null) continue;
+            if (((BlastRune)i).fuse==null) continue;
             int item_cnt = 0;
             for (Heap heap : Dungeon.level.heaps.valueList()) {
                 if(heap.pos==((BlastRune)i).drop_pos){
@@ -125,6 +118,7 @@ public class Deviloon extends Mob {
                 Actor.addDelayed(((BlastRune)i).fuse = ((BlastRune)i).fuse.ignite((BlastRune) i), 0);
                 blastRunes.remove(i);
             }
+
         }
 
         if (blastCharged && state != HUNTING){
@@ -146,12 +140,31 @@ public class Deviloon extends Mob {
     }
 
     @Override
+    public void onAttackComplete() {
+        // 蛇咬挑战下 SnakeSprite.zap 播的是普通攻击动画，释放印记的回调会落到这里。
+        // 普通攻击只在没蓄力时发生，蓄力完成还进到这里就一定是在释放印记；
+        // 不接住的话 blastCharged 永远不复位，之后每次行动都是一次无视距离的普通攻击。
+        if (blastCharged) {
+            callOfRune();
+            next();
+        } else {
+            super.onAttackComplete();
+        }
+    }
+
+    @Override
     protected boolean doAttack( Char enemy ) {
 
-        if (blastCooldown > 0) {
+        // 没蓄力、弹道又被挡住还能进到这里，说明是靠父类的攻击距离够到的，和冷却中一样走普通攻击
+        if (blastCooldown > 0
+                || (!blastCharged && new Ballistica(pos, enemy.pos, Ballistica.PROJECTILE).collisionPos != enemy.pos)) {
             return super.doAttack(enemy);
         } else if (!blastCharged){
-            ((DeviloonSprite)sprite).charge( enemy.pos );
+            if (sprite instanceof DeviloonSprite) {
+                ((DeviloonSprite)sprite).charge( enemy.pos );
+            } else if (sprite instanceof SnakeSprite) {
+                ((SnakeSprite)sprite).charge( enemy.pos );
+            }
             spend( attackDelay() );
             blastCharged = true;
             return true;
@@ -207,7 +220,7 @@ public class Deviloon extends Mob {
                 }
                 for(int i:blast_pos_set){
                     int c =  ch.pos + i;
-                    if (c >= 0 && c < Dungeon.level.length() && !Dungeon.level.solid[c]) {
+                    if (c >= 0 && c < Dungeon.level.length() && !Dungeon.level.solid[c] && !Dungeon.level.pit[c]) {
                         BlastRune blastRune_tmp = new BlastRune().set_pos(c);
                         blastRunes.add(blastRune_tmp);
                         Dungeon.level.drop(blastRune_tmp,c);
@@ -286,185 +299,15 @@ public class Deviloon extends Mob {
     @Override
     public void die( Object cause ) {
         for(BlastRune i:blastRunes){
-            Actor.addDelayed(((BlastRune)i).fuse = ((BlastRune)i).fuse.ignite((BlastRune) i), 0);
+            if(i!=null)
+               if(((BlastRune)i).fuse != null)
+                    Actor.addDelayed(((BlastRune)i).fuse = ((BlastRune)i).fuse.ignite((BlastRune) i), 0);
         }
         super.die( cause );
     }
-    public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
-
-        if (enemy == null) return false;
-
-        boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos];
-
-        if (enemy.isInvulnerable(getClass())) {
-
-            if (visibleFight) {
-                enemy.sprite.showStatus( CharSprite.POSITIVE, Messages.get(this, "invulnerable") );
-
-                Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1f, Random.Float(0.96f, 1.05f));
-            }
-
-            return false;
-
-        } else if (hit( this, enemy, accMulti, false )) {
-            if (enemy.buff(AfterImage.Blur.class)!=null){
-                enemy.buff(AfterImage.Blur.class).gainDodge();
-            }
-            int dr = Math.round(enemy.drRoll() * AscensionChallenge.statModifier(enemy));
-
-            Barkskin bark = enemy.buff(Barkskin.class);
-            if (bark != null)   dr += Random.NormalIntRange( 0 , bark.level() );
-
-            //we use a float here briefly so that we don't have to constantly round while
-            // potentially applying various multiplier effects
-            float dmg;
-            Preparation prep = buff(Preparation.class);
-            if (prep != null){
-                dmg = prep.damageRoll(this);
-            } else {
-                dmg = damageRoll();
-            }
-            boolean crit=false;
-            boolean surprise =enemy instanceof Mob && ((Mob) enemy).surprisedBy(this);
-            float current_crit=critSkill(),current_critdamage=critDamage();
-
-            current_critdamage=Math.min(current_critdamage,critDamageCap);
-            if (this.buff(Scythe.scytheSac.class)!=null){
-                current_crit+=10f;
-                current_critdamage+=0.1f;
-            }
-
-            if (this.buff(RingOfTenacity.Tenacity.class)!=null) {current_crit=0;}
-            if (Random.Float()*100<current_crit || crit) {
-                dmg*=current_critdamage;
-                crit = true;
-            }
-
-            dmg = Math.round(dmg*dmgMulti);
-
-            Berserk berserk = buff(Berserk.class);
-            if (berserk != null) dmg = berserk.damageFactor(dmg);
-
-            if (buff( Fury.class ) != null) {
-                dmg *= 1.5f;
-            }
-            if (buff(RingOfTenacity.Tenacity.class)!=null){
-                dmg*=RingOfTenacity.attackMultiplier(this);
-            }
-            for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
-                dmg *= buff.meleeDamageFactor();
-            }
-            for (ChampionHero buff : buffs(ChampionHero.class)){
-                dmg *= buff.meleeDamageFactor();
-            }
-            dmg *= AscensionChallenge.statModifier(this);
-
-            //flat damage bonus is applied after positive multipliers, but before negative ones
-            dmg += dmgBonus;
-
-            //friendly endure
-            Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
-            if (endure != null) dmg = endure.damageFactor(dmg);
-
-            //enemy endure
-            endure = enemy.buff(Endure.EndureTracker.class);
-            if (endure != null){
-                dmg = endure.adjustDamageTaken(dmg);
-            }
-
-            if (enemy.buff(ScrollOfChallenge.ChallengeArena.class) != null){
-                dmg *= 0.67f;
-            }
-
-            if ( buff(Weakness.class) != null ){
-                dmg *= 0.67f;
-            }
-
-            int effectiveDamage = enemy.defenseProc( this, Math.round(dmg) );
-
-            // created by DoggingDog on 20240718
-            // for Torturer using
-            effectiveDamage = Math.max( effectiveDamage - dr, 0 );
-
-            if (enemy.buff(Viscosity.ViscosityTracker.class) != null){
-                effectiveDamage = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(effectiveDamage);
-                enemy.buff(Viscosity.ViscosityTracker.class).detach();
-            }
-
-            //vulnerable specifically applies after armor reductions
-            if ( enemy.buff( Vulnerable.class ) != null){
-                effectiveDamage *= 1.33f;
-            }
-
-            effectiveDamage = attackProc( enemy, effectiveDamage );
-
-            if (visibleFight) {
-                if (effectiveDamage > 0 || !enemy.blockSound(Random.Float(0.96f, 1.05f))) {
-                    hitSound(Random.Float(0.87f, 1.15f));
-                }
-            }
-
-            // If the enemy is already dead, interrupt the attack.
-            // This matters as defence procs can sometimes inflict self-damage, such as armor glyphs.
-            if (!enemy.isAlive()){
-                return true;
-            }
-
-            if(crit){
-                enemy.sprite.showStatus(CharSprite.NEGATIVE,Messages.get(this,"crit"));
-            }
-            enemy.damage( effectiveDamage, this );
-
-            if (buff(FireImbue.class) != null)  buff(FireImbue.class).proc(enemy);
-            if (buff(FrostImbue.class) != null) buff(FrostImbue.class).proc(enemy);
-
-            if (enemy.isAlive() && enemy.alignment != alignment && prep != null && prep.canKO(enemy)){
-                enemy.HP = 0;
-                if (!enemy.isAlive()) {
-                    enemy.die(this);
-                } else {
-                    //helps with triggering any on-damage effects that need to activate
-                    enemy.damage(-1, this);
-                    DeathMark.processFearTheReaper(enemy);
-                }
-                enemy.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Preparation.class, "assassinated"));
-            }
-
-            enemy.sprite.bloodBurstA( sprite.center(), effectiveDamage );
-            enemy.sprite.flash();
-
-            if (!enemy.isAlive() && visibleFight && Dungeon.hero != null) {
-                if (enemy == Dungeon.hero) {
-
-                    Dungeon.fail( getClass() );
-                    GLog.n( Messages.capitalize(Messages.get(Deviloon.class, "kill")) );
-
-                }
-            }
-            return true;
-        } else {
-            if (enemy.buff(CloakofGreyFeather.hexDodge.class)!=null){
-                for (Char ch : Actor.chars()) {
-                    if (ch.alignment != enemy.alignment && enemy.fieldOfView[ch.pos] && ch.alignment!= Alignment.NEUTRAL){
-                        Buff.affect(ch, Hex.class,2f+0.75f*enemy.buff(CloakofGreyFeather.hexDodge.class).buffedLvl());
-                    }
-                }
-            }
-            enemy.sprite.showStatus( CharSprite.NEUTRAL, enemy.defenseVerb() );
-
-            if(Dungeon.hero != null){
-                if (Dungeon.hero.belongings.weapon() instanceof FogSword) {
-                    Buff.affect(Dungeon.hero, Invisibility.class,1f);
-                }
-            }
-
-            if (visibleFight) {
-                Sample.INSTANCE.play(Assets.Sounds.MISS);
-            }
-
-            return false;
-
-        }
+    @Override
+    protected String heroKilledMessage() {
+        return Messages.capitalize(Messages.get(Deviloon.class, "kill"));
     }
 
 
@@ -527,7 +370,7 @@ public class Deviloon extends Mob {
             dropsDownHeap = true;
             unique = true;
             fuse = new Fuse();
-            image = ItemSpriteSheet.DARTS+16;
+            image = ItemSpriteSheet.DEVILOON_ITEM;
         }
 
         public BlastRune set_pos(int pos){
@@ -639,8 +482,9 @@ public class Deviloon extends Mob {
                         Heap heap = Dungeon.level.heaps.get(c);
                         if (heap != null){
                             heap.explode();
-                            for(Object i:heap.items){
-                                if(i instanceof BlastRune){
+                            for(Object i:heap.items.toArray()){
+                                // 引信已经失效的印记（被捡起后又丢下的）没有引信可点，直接解引用会空指针
+                                if(i instanceof BlastRune && ((BlastRune)i).fuse != null){
                                     Actor.addDelayed(((BlastRune)i).fuse = ((BlastRune)i).fuse.ignite((BlastRune) i), 0);
                                     blastRunes.remove(i);
                                 }
@@ -672,7 +516,12 @@ public class Deviloon extends Mob {
                         if(ch.buff(Deminion.Sigil.class)!=null){
                             dmg *= 1.3f;
                         }
-                        ch.damage(dmg, this);
+                        ch.damage(DamageInfo.of(dmg, DamageType.PHYSICAL, Deviloon.this, this));
+                    }
+                    // 被这次伤害打死的角色已经在 damage 里结算过死亡，再调一次 die 会让经验、掉落、击杀数都算两遍；
+                    // 只剩 1 点血的仍按原规则处死，并放到英雄死亡结算之前，否则这种死法不进排行榜
+                    if(ch.isAlive() && ch.HP <= 1){
+                        ch.die(BlastRune.class);
                     }
                     if (ch == Dungeon.hero && !ch.isAlive()) {
                         GLog.n(Messages.get(this, "ondeath"));

@@ -22,15 +22,22 @@
 package com.shatteredpixel.shatteredpixeldungeon.sprites;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.StormAttackArrow;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.GnollGeomancer;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.CompositeCrossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ScorpionCrossbow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WhiteKingGodSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.Bolas;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.FishingSpear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.HeavyBoomerang;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.Javelin;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.Kunai;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.Perfidy;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.Senbon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.Shuriken;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingKnife;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingSpear;
@@ -49,9 +56,9 @@ import java.util.HashMap;
 public class MissileSprite extends ItemSprite implements Tweener.Listener {
 
 	private static final float SPEED	= 240f;
-	
+
 	private Callback callback;
-	
+
 	public void reset( int from, int to, Item item, Callback listener ) {
 		reset(Dungeon.level.solid[from] ? DungeonTilemap.raisedTileCenterToWorld(from) : DungeonTilemap.raisedTileCenterToWorld(from),
 				Dungeon.level.solid[to] ? DungeonTilemap.raisedTileCenterToWorld(to) : DungeonTilemap.raisedTileCenterToWorld(to),
@@ -62,6 +69,39 @@ public class MissileSprite extends ItemSprite implements Tweener.Listener {
 		reset(from.center(),
 				Dungeon.level.solid[to] ? DungeonTilemap.raisedTileCenterToWorld(to) : DungeonTilemap.raisedTileCenterToWorld(to),
 				item, listener );
+	}
+
+	public void reset( Visual from, int to, Item item, Callback listener, float speedMultiplier ) {
+		reset(from.center(),
+				Dungeon.level.solid[to] ? DungeonTilemap.raisedTileCenterToWorld(to) : DungeonTilemap.raisedTileCenterToWorld(to),
+				item, listener, speedMultiplier);
+	}
+
+	// 新增方法：从怪物头上掉下来且瞬发执行的特效
+	public void resetFromAbove(Char ch, int targetPos, Item item, Callback listener) {
+		revive();
+
+		if (item == null)   view(ItemSpriteSheet.SOMETHING, null);
+		else                view(item);
+		PointF from = new PointF(0, 0);
+		// 目标位置保持不变
+		PointF to = DungeonTilemap.raisedTileCenterToWorld(targetPos);
+		from.x =  0;
+		from.y -= 0;
+		to.x -= ch.sprite.width-10;
+		to.y -= ch.sprite.height;
+
+		this.callback = listener;
+		point(from);
+
+		angle = 90;
+		flipHorizontal = false;
+		updateFrame();
+
+		angularSpeed = 0;
+		PosTweener tweener = new PosTweener(this, to, 1f);
+		tweener.listener = this;
+		parent.add(tweener);
 	}
 
 	public void reset( int from, Visual to, Item item, Callback listener ) {
@@ -75,15 +115,22 @@ public class MissileSprite extends ItemSprite implements Tweener.Listener {
 	}
 
 	public void reset( PointF from, PointF to, Item item, Callback listener) {
+		reset(from, to, item, listener, 1f);
+	}
+
+	private void reset( PointF from, PointF to, Item item, Callback listener, float speedMultiplier) {
 		revive();
 
-		if (item == null)   view(0, null);
-		else                view( item );
+		if (item == null)   view(ItemSpriteSheet.SOMETHING, null);
+		else {
+			view( item );
+			if (item instanceof Senbon) frame( ItemSpriteSheet.SENBON_PROJECTILE );
+		}
 
 		setup( from,
 				to,
 				item,
-				listener );
+				listener, speedMultiplier );
 	}
 	
 	private static final int DEFAULT_ANGULAR_SPEED = 720;
@@ -98,10 +145,16 @@ public class MissileSprite extends ItemSprite implements Tweener.Listener {
 		ANGULAR_SPEEDS.put(Kunai.class,         0);
 		ANGULAR_SPEEDS.put(Javelin.class,       0);
 		ANGULAR_SPEEDS.put(Trident.class,       0);
-		
+		ANGULAR_SPEEDS.put(SpiritBow.ALTSpiritArrow.class,       0);
+		ANGULAR_SPEEDS.put(Perfidy.class,       0);
 		ANGULAR_SPEEDS.put(SpiritBow.SpiritArrow.class,       0);
+		ANGULAR_SPEEDS.put(CompositeCrossbow.CrossbowArrow.class, 0);
 		ANGULAR_SPEEDS.put(ScorpioSprite.ScorpioShot.class,   0);
-		
+
+		// DoggingDog 20250121
+		ANGULAR_SPEEDS.put(StormAttackArrow.class,   0);
+		ANGULAR_SPEEDS.put(WhiteKingGodSword.class,   0);
+
 		//720 is default
 
 		ANGULAR_SPEEDS.put(GnollGeomancer.Boulder.class,   90);
@@ -110,11 +163,13 @@ public class MissileSprite extends ItemSprite implements Tweener.Listener {
 		ANGULAR_SPEEDS.put(Bolas.class,         1440);
 		
 		ANGULAR_SPEEDS.put(Shuriken.class,                  2160);
+		//千本不旋转
+		ANGULAR_SPEEDS.put(Senbon.class,                    0);
 		ANGULAR_SPEEDS.put(TenguSprite.TenguShuriken.class, 2160);
 	}
 
 	//TODO it might be nice to have a source and destination angle, to improve thrown weapon visuals
-	private void setup( PointF from, PointF to, Item item, Callback listener ){
+	private void setup( PointF from, PointF to, Item item, Callback listener, float speedMultiplier ){
 
 		originToCenter();
 
@@ -129,7 +184,7 @@ public class MissileSprite extends ItemSprite implements Tweener.Listener {
 		point( from );
 
 		PointF d = PointF.diff( to, from );
-		speed.set(d).normalize().scale(SPEED);
+		speed.set(d).normalize().scale(SPEED * speedMultiplier);
 		
 		angularSpeed = DEFAULT_ANGULAR_SPEED;
 		for (Class<?extends Item> cls : ANGULAR_SPEEDS.keySet()){
@@ -157,16 +212,27 @@ public class MissileSprite extends ItemSprite implements Tweener.Listener {
 			flipHorizontal = false;
 			updateFrame();
 		}
+
+		//千本贴图朝上，其他投掷物朝右上，差值 45 度；镜像贴图时方向相反
+		if (item instanceof Senbon){
+			angle += flipHorizontal ? -45 : 45;
+			updateFrame();
+		}
 		
-		float speed = SPEED;
-		if (item instanceof Dart
-				&& (Dungeon.hero.belongings.weapon() instanceof Crossbow
-				|| Dungeon.hero.belongings.secondWep() instanceof Crossbow)){
+		// 飞多久由下面的位置补间决定；倍率只乘在上面的 speed 向量上不起作用，位置每帧都被补间盖掉
+		float speed = SPEED * speedMultiplier;
+		if ((item instanceof Dart && Dungeon.hero.belongings.weapon() instanceof Crossbow)
+				||(Dungeon.hero.belongings.weapon() instanceof ScorpionCrossbow && (
+				item instanceof Javelin
+						||  item instanceof ThrowingSpear
+						||  item instanceof Trident
+		))){
 			speed *= 3f;
-			
+
 		} else if (item instanceof SpiritBow.SpiritArrow
 				|| item instanceof ScorpioSprite.ScorpioShot
-				|| item instanceof TenguSprite.TenguShuriken){
+				|| item instanceof TenguSprite.TenguShuriken
+				|| item instanceof CompositeCrossbow.CrossbowArrow){
 			speed *= 1.5f;
 		}
 		

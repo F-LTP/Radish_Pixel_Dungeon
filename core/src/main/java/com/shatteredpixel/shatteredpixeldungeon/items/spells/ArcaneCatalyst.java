@@ -80,6 +80,7 @@ public class ArcaneCatalyst extends Spell {
 		
 		detach( curUser.belongings.backpack );
 		updateQuickslot();
+		Spell.onSpellUsed( hero, this );
 
 		if (Dungeon.hero.pointsInTalent(Talent.MAGIC_REFINING) >= 3){
 			GameScene.show(new ScrollSelectionWindow());

@@ -20,6 +20,7 @@
  */
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.traps;
+import com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
@@ -49,12 +50,13 @@ public class DisintegrationTrap extends Trap {
 	@Override
 	public void activate() {
 		Char target = Actor.findChar(pos);
+		if (cardSparesHero(target)) target = null;
 		
 		//find the closest char that can be aimed at
 		if (target == null){
 			float closestDist = Float.MAX_VALUE;
 			for (Char ch : Actor.chars()){
-				if (!ch.isAlive()) continue;
+				if (!ch.isAlive() || cardSparesHero(ch)) continue;
 				float curDist = Dungeon.level.trueDistance(pos, ch.pos);
 				if (ch.invisible > 0) curDist += 1000;
 				Ballistica bolt = new Ballistica(pos, ch.pos, Ballistica.PROJECTILE);
@@ -73,7 +75,7 @@ public class DisintegrationTrap extends Trap {
 				Sample.INSTANCE.play(Assets.Sounds.RAY);
 				ShatteredPixelDungeon.scene().add(new Beam.DeathRay(DungeonTilemap.tileCenterToWorld(pos), target.sprite.center()));
 			}
-			target.damage( Char.combatRoll(30, 50) + scalingDepth(), this );
+			target.damage(DamageInfo.magical(Char.combatRoll(30, 50) + scalingDepth(), this));
 			if (target == Dungeon.hero){
 				Hero hero = (Hero)target;
 				if (!hero.isAlive()){

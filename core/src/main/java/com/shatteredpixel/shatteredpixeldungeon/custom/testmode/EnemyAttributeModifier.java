@@ -90,7 +90,8 @@ public class EnemyAttributeModifier extends TestItem{
                     if(index == 0){
                         locked = true;
                         execute(curUser, AC_APPLY);
-                        GLog.i(M.L(this, "lock_on"));
+                        // 这里的 this 是选项窗口，按它去找文本只会找到一串键名
+                        GLog.i(M.L(EnemyAttributeModifier.class, "lock_on"));
                     }
                     super.onSelect(index);
                 }

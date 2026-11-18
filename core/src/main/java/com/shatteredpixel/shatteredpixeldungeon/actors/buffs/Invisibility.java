@@ -25,7 +25,9 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfConcealment;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.CloakOfShadows;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
@@ -46,7 +48,7 @@ public class Invisibility extends FlavourBuff {
 	public boolean attachTo( Char target ) {
 		if (super.attachTo( target )) {
 			target.invisible++;
-			if (target instanceof Hero && ((Hero) target).subClass == HeroSubClass.ASSASSIN){
+			if (target instanceof Hero && ((Hero) target).subClass == HeroSubClasses.ASSASSIN){
 				Buff.affect(target, Preparation.class);
 			}
 			if (target instanceof Hero && ((Hero) target).hasTalent(Talent.PROTECTIVE_SHADOWS)){
@@ -66,7 +68,7 @@ public class Invisibility extends FlavourBuff {
 	}
 	
 	@Override
-	public int icon() {
+	public String icon() {
 		return BuffIndicator.INVISIBLE;
 	}
 
@@ -83,7 +85,8 @@ public class Invisibility extends FlavourBuff {
 
 	public static void dispel() {
 		if (Dungeon.hero == null) return;
-
+		if (Dungeon.hero.buff(ArtifactRecharge.class)!= null && Dungeon.hero.buff(CloakOfConcealment.conceal.class)!=null)
+			Buff.affect(Dungeon.hero, CloakOfConcealment.anti_nru_invisibility.class,1f);
 		dispel(Dungeon.hero);
 	}
 

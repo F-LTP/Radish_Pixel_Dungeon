@@ -21,34 +21,53 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bleeding;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClasses;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.moonlight.AshKing;
+import com.shatteredpixel.shatteredpixeldungeon.challenge.SnakeBiteChallengeManager;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
+import com.shatteredpixel.shatteredpixeldungeon.items.legacyItem.Muramasa;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemAnimations;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
+import com.watabou.utils.PathFinder;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
@@ -67,19 +86,22 @@ public class Item implements Bundlable {
 	public static final String AC_DROP		= "DROP";
 	public static final String AC_THROW		= "THROW";
 	
-	protected String defaultAction;
+	public String defaultAction;
 	public boolean usesTargeting;
 	public boolean curseInfusionBonus = false;
 
 	//TODO should these be private and accessed through methods?
-	public int image = 0;
-	public int icon = -1; //used as an identifier for items with randomized images
+	public String image = ItemSpriteSheet.SOMETHING;
+	public String icon;
+	public String sndImageName = null; // SND atlas 中的物品名称，如果设置则使用 SND 贴图
 	
 	public boolean stackable = false;
 	protected int quantity = 1;
+	/** 红包融合：挂在这件装备上的其他装备。 */
+	public java.util.ArrayList<Item> fusedItems = new java.util.ArrayList<>();
 	public boolean dropsDownHeap = false;
 	
-	private int level = 0;
+	public int level = 0;
 
 	public boolean levelKnown = false;
 	
@@ -119,6 +141,15 @@ public class Item implements Bundlable {
 	}
 
 	public boolean doPickUp(Hero hero, int pos) {
+
+		// func 4 Muramasa mania
+		// DoggingDog on 20250419
+		if(Dungeon.hero.buff(Muramasa.MuramasaMania.class)!=null && Dungeon.hero !=null){
+			GLog.n(Messages.get(Muramasa.MuramasaMania.class,"mania"));
+			return false;
+		}
+		//
+
 		if (collect( hero.belongings.backpack )) {
 			
 			GameScene.pickUp( this, pos );
@@ -126,6 +157,30 @@ public class Item implements Bundlable {
 			hero.spendAndNext( TIME_TO_PICK_UP );
 			return true;
 			
+		} else {
+			return false;
+		}
+	}
+
+
+	public final boolean doPickUpInstantly(Hero hero){return doPickUpInstantly(hero,hero.pos);}
+
+	public boolean doPickUpInstantly (Hero hero,int pos){
+
+		// func 4 Muramasa mania
+		// DoggingDog on 20250419
+		if(Dungeon.hero.buff(Muramasa.MuramasaMania.class)!=null && Dungeon.hero !=null){
+			GLog.n(Messages.get(Muramasa.MuramasaMania.class,"mania"));
+			return false;
+		}
+		//
+
+		if (collect( hero.belongings.backpack )) {
+
+			GameScene.pickUp( this, pos );
+			Sample.INSTANCE.play( Assets.Sounds.ITEM );
+			return true;
+
 		} else {
 			return false;
 		}
@@ -147,14 +202,45 @@ public class Item implements Bundlable {
 	}
 
 	public void doThrow( Hero hero ) {
+		QuickSlotButton.cancel();
 		GameScene.selectCell(thrower);
 	}
 	
 	public void execute( Hero hero, String action ) {
 
+		// func 4 Muramasa mania
+		// DoggingDog on 20250419
+		if(Dungeon.hero.buff(Muramasa.MuramasaMania.class)!=null && Dungeon.hero !=null){
+			GLog.n(Messages.get(Muramasa.MuramasaMania.class,"mania"));
+			return;
+		}
+		//
+
+		// 薪王化身触发检测
+		AshKing.IncarnationReady incarnationReady = hero.buff(AshKing.IncarnationReady.class);
+		// 投掷类武器（索命弯刀等）的正常用法就是投掷，所以 AC_THROW 对它也要放行，
+		// 否则这三个形态里只有靠神器/法杖的两个能触发。
+		if (incarnationReady != null && !action.equals(AC_DROP)
+				&& (!action.equals(AC_THROW) || this instanceof MissileWeapon)) {
+			String itemType = null;
+			if (this instanceof Artifact) itemType = "Artifact";
+			else if (this instanceof Wand) itemType = "Wand";
+			else if (this instanceof MissileWeapon) itemType = "MissileWeapon";
+			if (itemType != null && incarnationReady.tryIncarnate(hero, itemType)) {
+				// 成功触发化身，继续执行物品使用
+			}
+		}
+
 		GameScene.cancel();
 		curUser = hero;
 		curItem = this;
+
+		// 圆球皮肤：使用物品前需旋转到默认正前方（丢弃/投掷不在此列，此处仅拦截默认使用动作）
+		if (hero.isSphereSkin() && action != null && action.equals(defaultAction())) {
+			if (hero.sphereRotateTo( 0f )) {
+				return;
+			}
+		}
 		
 		if (action.equals( AC_DROP )) {
 			
@@ -228,9 +314,9 @@ public class Item implements Bundlable {
 				if (isSimilar( item )) {
 					item.merge( this );
 					item.updateQuickslot();
-					if (Dungeon.hero != null && Dungeon.hero.isAlive()) {
+					if (hero != null && hero.isAlive()) {
 						Badges.validateItemLevelAquired( this );
-						Talent.onItemCollected(Dungeon.hero, item);
+						Talent.onItemCollected(hero, item);
 						if (isIdentified()) Catalog.setSeen(getClass());
 					}
 					if (TippedDart.lostDarts > 0){
@@ -243,7 +329,7 @@ public class Item implements Bundlable {
 								{ actPriority = VFX_PRIO; }
 								@Override
 								protected boolean act() {
-									Dungeon.level.drop(d, Dungeon.hero.pos).sprite.drop();
+									Dungeon.level.drop(d, hero.pos).sprite.drop();
 									Actor.remove(this);
 									return true;
 								}
@@ -255,9 +341,9 @@ public class Item implements Bundlable {
 			}
 		}
 
-		if (Dungeon.hero != null && Dungeon.hero.isAlive()) {
+		if (hero != null && hero.isAlive()) {
 			Badges.validateItemLevelAquired( this );
-			Talent.onItemCollected( Dungeon.hero, this );
+			Talent.onItemCollected( hero, this );
 			if (isIdentified()) Catalog.setSeen(getClass());
 		}
 
@@ -270,7 +356,7 @@ public class Item implements Bundlable {
 	}
 	
 	public boolean collect() {
-		return collect( Dungeon.hero.belongings.backpack );
+		return collect( hero.belongings.backpack );
 	}
 	
 	//returns a new item if the split was sucessful and there are now 2 items, otherwise null
@@ -306,7 +392,7 @@ public class Item implements Bundlable {
 		return dupe;
 	}
 	
-	public final Item detach( Bag container ) {
+	public Item detach( Bag container ) {
 		
 		if (quantity <= 0) {
 			
@@ -369,13 +455,28 @@ public class Item implements Bundlable {
 	public int level(){
 		return level;
 	}
-	
+
 	//returns the level of the item, after it may have been modified by temporary boosts/reductions
 	//note that not all item properties should care about buffs/debuffs! (e.g. str requirement)
 	public int buffedLvl(){
+
+//		// DoggingDog on 20250818
+//		if (hero != null && hero.buff( Degrade.class ) != null
+//				&& (isEquipped( hero ) || hero.belongings.contains( this )) && hero.hasTalent(Talent.GIFT)) {
+//			if(hero.buff(Bless.class)!= null)
+//				return Math.max(hero.pointsInTalent(Talent.GIFT)+3,Degrade.reduceLevel(level()));
+//			return Math.max(hero.pointsInTalent(Talent.GIFT)+1,Degrade.reduceLevel(level()));
+//		}
+//		else if(hero.hasTalent(Talent.GIFT)){
+//			if(hero.buff(Bless.class)!= null)
+//				return Math.max(hero.pointsInTalent(Talent.GIFT)+3,Degrade.reduceLevel(level()));
+//			return Math.max(hero.pointsInTalent(Talent.GIFT)+1,level());
+//		}
+//		//
+
 		//only the hero can be affected by Degradation
-		if (Dungeon.hero.buff( Degrade.class ) != null
-			&& (isEquipped( Dungeon.hero ) || Dungeon.hero.belongings.contains( this ))) {
+		if (hero != null && hero.buff( Degrade.class ) != null
+				&& (isEquipped( hero ) || hero.belongings.contains( this ))) {
 			return Degrade.reduceLevel(level());
 		} else {
 			return level();
@@ -450,9 +551,9 @@ public class Item implements Bundlable {
 
 	public Item identify( boolean byHero ) {
 
-		if (byHero && Dungeon.hero != null && Dungeon.hero.isAlive()){
+		if (byHero && hero != null && hero.isAlive()){
 			Catalog.setSeen(getClass());
-			if (!isIdentified()) Talent.onItemIdentified(Dungeon.hero, this);
+			if (!isIdentified()) Talent.onItemIdentified(hero, this);
 		}
 
 		levelKnown = true;
@@ -488,24 +589,84 @@ public class Item implements Bundlable {
 		return trueName();
 	}
 	
-	public final String trueName() {
+	public String trueName() {
 		return Messages.get(this, "name");
 	}
 	
-	public int image() {
+	public String image() {
+		if (SnakeBiteChallengeManager.shouldReplaceItemSprite(this)) {
+			return com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet.SNAKE_BITE;
+		}
 		return image;
 	}
-	
+
+	/** 物品的动画集声明；返回null表示无动画，展示时走静态贴图 */
+	public ItemAnimations animations() {
+		return null;
+	}
+
 	public ItemSprite.Glowing glowing() {
 		return null;
 	}
 
+	// Snake Bite challenge: hide item type icon (right top corner)
+	// Skip if hero is dead (for rankings/death screen)
+	// Test mode items should always show their original icons
+	public String icon() {
+		if (SnakeBiteChallengeManager.shouldReplaceItemSprite(this)
+				&& !(this instanceof com.shatteredpixel.shatteredpixeldungeon.custom.testmode.TestItem)) {
+			return null;
+		}
+		return icon;
+	}
+
 	public Emitter emitter() { return null; }
-	
+
 	public String info() {
+
+		if (hero != null) {
+			Notes.CustomRecord note;
+			if (this instanceof EquipableItem) {
+				note = Notes.findCustomRecord(((EquipableItem) this).customNoteID);
+			} else {
+				note = Notes.findCustomRecord(getClass());
+			}
+			if (note != null){
+				return Messages.get(this, "custom_note", note.title()) + "\n\n" + desc();
+			}
+		}
+		String base = desc();
+		if (fusedItems != null && !fusedItems.isEmpty()) {
+			StringBuilder sb = new StringBuilder(base);
+			boolean hasWand = false;
+			for (Item it : fusedItems) if (it instanceof Wand) hasWand = true;
+			if (hasWand) {
+				sb.append("\n\n融合法杖：施法时会同时释放所有融合法杖的法术。");
+			}
+			sb.append("\n\n融合装备：");
+			for (Item it : fusedItems) {
+				sb.append("\n- ").append(it.name());
+				if (it instanceof Wand) sb.append("：").append(it.desc());
+			}
+			return sb.toString();
+		}
+		return base;
+	}
+
+	public final String displayInfo() {
+		if (SnakeBiteChallengeManager.shouldReplaceItemText(this)) {
+			return Messages.getSnakeBiteItemDescription();
+		}
+		return info();
+	}
+
+	public final String displayDesc() {
+		if (SnakeBiteChallengeManager.shouldReplaceItemText(this)) {
+			return Messages.getSnakeBiteItemDescription();
+		}
 		return desc();
 	}
-	
+
 	public String desc() {
 		return Messages.get(this, "desc");
 	}
@@ -569,6 +730,7 @@ public class Item implements Bundlable {
 			bundle.put( QUICKSLOT, Dungeon.quickslot.getSlot(this) );
 		}
 		bundle.put( KEPT_LOST, keptThoughLostInvent );
+		bundle.put("fused_items", fusedItems);
 	}
 	
 	@Override
@@ -587,13 +749,19 @@ public class Item implements Bundlable {
 		cursed	= bundle.getBoolean( CURSED );
 
 		//only want to populate slot on first load.
-		if (Dungeon.hero == null) {
+		if (hero == null) {
 			if (bundle.contains(QUICKSLOT)) {
 				Dungeon.quickslot.setSlot(bundle.getInt(QUICKSLOT), this);
 			}
 		}
 
 		keptThoughLostInvent = bundle.getBoolean( KEPT_LOST );
+		fusedItems = new java.util.ArrayList<>();
+		if (bundle.contains("fused_items")) {
+			for (Object o : bundle.getCollection("fused_items")) {
+				if (o instanceof Item) fusedItems.add((Item) o);
+			}
+		}
 	}
 
 	public int targetingPos( Hero user, int dst ){
@@ -604,6 +772,8 @@ public class Item implements Bundlable {
 		return new Ballistica( user.pos, dst, Ballistica.PROJECTILE ).collisionPos;
 	}
 
+
+
 	public void throwSound(){
 		Sample.INSTANCE.play(Assets.Sounds.MISS, 0.6f, 0.6f, 1.5f);
 	}
@@ -611,6 +781,10 @@ public class Item implements Bundlable {
 	public void cast( final Hero user, final int dst ) {
 		
 		final int cell = throwPos( user, dst );
+		if (throwReadyModification( user, cell )) {
+			return;
+		}
+
 		user.sprite.zap( cell );
 		user.busy();
 
@@ -618,10 +792,14 @@ public class Item implements Bundlable {
 
 		Char enemy = Actor.findChar( cell );
 		QuickSlotButton.target(enemy);
+		final MissileWeapon.SplitShot splitShot = this instanceof MissileWeapon
+				? ((MissileWeapon) this).launchSplitProjectiles(user, cell) : null;
 		
 		final float delay = castDelay(user, dst);
 
-		if (enemy != null) {
+		//目标必须是“看得见的敌人”才让飞弹追着它的精灵走；
+		//否则（没有精灵 / 精灵不可见）走按格子落点的分支，避免飞弹与卡回合
+		if (enemy != null && enemy.sprite != null && enemy.sprite.visible) {
 			((MissileSprite) user.sprite.parent.recycle(MissileSprite.class)).
 					reset(user.sprite,
 							enemy.sprite,
@@ -631,7 +809,9 @@ public class Item implements Bundlable {
 						public void call() {
 							curUser = user;
 							Item i = Item.this.detach(user.belongings.backpack);
+							if (i instanceof MissileWeapon) ((MissileWeapon) i).bindSplitShot(splitShot);
 							if (i != null) i.onThrow(cell);
+							if (i instanceof MissileWeapon) ((MissileWeapon) i).finishPendingSplitShot();
 							if (curUser.hasTalent(Talent.IMPROVISED_PROJECTILES)
 									&& !(Item.this instanceof MissileWeapon)
 									&& curUser.buff(Talent.ImprovisedProjectileCooldown.class) == null){
@@ -639,6 +819,30 @@ public class Item implements Bundlable {
 									Sample.INSTANCE.play(Assets.Sounds.HIT);
 									Buff.affect(enemy, Blindness.class, 1f + curUser.pointsInTalent(Talent.IMPROVISED_PROJECTILES));
 									Buff.affect(curUser, Talent.ImprovisedProjectileCooldown.class, 50f);
+								}
+							}
+							if (curUser.heroClass != HeroClasses.CARDTRICKSTER
+									&& curUser.hasTalent(Talent.RIGID_CARD)
+									&& !(Item.this instanceof MissileWeapon)
+									&& enemy != null && enemy.alignment != curUser.alignment
+									&& curUser.buff(Talent.CardRigidCooldown.class) == null){
+								int turns = curUser.pointsInTalent(Talent.RIGID_CARD) >= 2 ? 2 : 1;
+								Buff.affect(enemy, Paralysis.class, turns);
+								Buff.affect(curUser, Talent.CardRigidCooldown.class, 50f);
+							}
+							// 左弓连射天赋：投掷武器不消耗回合（如果目标有足够中矢层数）
+							if (user.heroClass == HeroClasses.MOONLIGHT
+									&& user.subClass == HeroSubClasses.LITTLE_KNIGHT
+									&& user.hasTalent(Talent.LEFT_BOW_RAPID)
+									&& enemy != null
+									&& Item.this instanceof MissileWeapon) {
+								PinCushion pc = enemy.buff(PinCushion.class);
+								if (pc != null) {
+									int requiredStacks = 4 - user.pointsInTalent(Talent.LEFT_BOW_RAPID);
+									if (pc.getStuckItems().size() >= requiredStacks) {
+										user.next();
+										return;
+									}
 								}
 							}
 							if (user.buff(Talent.LethalMomentumTracker.class) != null){
@@ -664,21 +868,85 @@ public class Item implements Bundlable {
 						public void call() {
 							curUser = user;
 							Item i = Item.this.detach(user.belongings.backpack);
+							if (i instanceof MissileWeapon) ((MissileWeapon) i).bindSplitShot(splitShot);
 							user.spend(delay);
 							if (i != null) i.onThrow(cell);
+							if (i instanceof MissileWeapon) ((MissileWeapon) i).finishPendingSplitShot();
 							user.next();
 						}
 					});
 		}
 	}
-	
+
+	protected boolean throwReadyModification( Hero user, int cell ) {
+		Char ally = Actor.findChar( cell );
+		if (!com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer
+				.canReadyModify( user, ally, this )) {
+			return false;
+		}
+		if (com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Artificer
+				.readyModify( user, ally, this )) {
+			user.sprite.zap( cell );
+			throwSound();
+			user.spendAndNext( castDelay( user, cell ) );
+		}
+		return true;
+	}
+
+	public void castOnlyEnemy( final Hero user, final int dst ) {
+
+		final int cell = thrownoEnemyPos( user, dst );
+		user.sprite.zap( cell );
+		user.busy();
+
+		throwSound();
+
+		final float delay = castDelay(user, dst);
+
+		((MissileSprite) user.sprite.parent.recycle(MissileSprite.class)).
+				reset(user.sprite,
+						cell,
+						this,
+						new Callback() {
+							@Override
+							public void call() {
+								curUser = user;
+								Item i = Item.this.detach(user.belongings.backpack);
+								if (i != null) i.onThrow(cell);
+								user.spendAndNext(delay);
+								addBleedingEffect(cell);
+							}
+						});
+		Char enemy = Actor.findChar( cell );
+		if (enemy != null) {
+			QuickSlotButton.target(enemy);
+		}
+	}
+
+	private void addBleedingEffect(int targetCell) {
+		for (int n : PathFinder.NEIGHBOURS9) {
+			Char enemy = Actor.findChar(targetCell + n);
+			if (enemy != null) {
+				if(enemy != hero){
+					if(enemy.alignment == Char.Alignment.ENEMY) {
+						Buff.affect(enemy, Bleeding.class).set(Dungeon.depth + 3);
+					}
+				}
+			}
+		}
+	}
+
+	public int thrownoEnemyPos( Hero user, int dst){
+		return new Ballistica( user.pos, dst, Ballistica.STOP_TARGET ).collisionPos;
+	}
+
 	public float castDelay( Char user, int dst ){
 		return TIME_TO_THROW;
 	}
 	
-	protected static Hero curUser = null;
-	protected static Item curItem = null;
-	protected static CellSelector.Listener thrower = new CellSelector.Listener() {
+	public static Hero curUser = null;
+	public static Item curItem = null;
+	public static CellSelector.Listener thrower = new CellSelector.Listener() {
 		@Override
 		public void onSelect( Integer target ) {
 			if (target != null) {

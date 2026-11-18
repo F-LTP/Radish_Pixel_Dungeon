@@ -92,7 +92,7 @@ public class WildMagic extends ArmorAbility {
 					seconds.remove(w);
 				}
 				if (totalCharge < 3*chargeUsePerShot
-					|| Random.Int(4) >= Dungeon.hero.pointsInTalent(Talent.FIRE_EVERYTHING)){
+						|| Random.Int(4) >= Dungeon.hero.pointsInTalent(Talent.FIRE_EVERYTHING)){
 					thirds.remove(w);
 				}
 			}
@@ -150,12 +150,14 @@ public class WildMagic extends ArmorAbility {
 								@Override
 								protected void onComplete() {
 									if (alsoCursedZap){
+										WondrousResin.forcePositive = true;
 										CursedWand.cursedZap(cur,
 												hero,
 												new Ballistica(hero.pos, cell, Ballistica.MAGIC_BOLT),
 												new Callback() {
 													@Override
 													public void call() {
+														WondrousResin.forcePositive = false;
 														afterZap(cur, wands, hero, cell);
 													}
 												});
@@ -166,12 +168,14 @@ public class WildMagic extends ArmorAbility {
 							});
 						} else {
 							if (alsoCursedZap){
+								WondrousResin.forcePositive = true;
 								CursedWand.cursedZap(cur,
 										hero,
 										new Ballistica(hero.pos, cell, Ballistica.MAGIC_BOLT),
 										new Callback() {
 											@Override
 											public void call() {
+												WondrousResin.forcePositive = false;
 												afterZap(cur, wands, hero, cell);
 											}
 										});
@@ -249,7 +253,7 @@ public class WildMagic extends ArmorAbility {
 	}
 
 	@Override
-	public int icon() {
+	public String icon() {
 		return HeroIcon.WILD_MAGIC;
 	}
 

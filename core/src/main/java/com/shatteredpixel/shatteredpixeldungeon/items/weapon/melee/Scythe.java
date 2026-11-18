@@ -101,7 +101,7 @@ public class Scythe extends MeleeWeapon{
         //TODO icon
 
         @Override
-        public int icon() {
+        public String icon() {
             return BuffIndicator.SCYTHE_S;
         }
 

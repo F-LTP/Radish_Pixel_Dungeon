@@ -21,13 +21,18 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.wands;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.WandEmpower;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClasses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.LightKing;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.RiverCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.watabou.noosa.audio.Sample;
 
@@ -47,21 +52,77 @@ public abstract class DamageWand extends Wand{
 
 	public abstract int max(int lvl);
 
+	// 骰子法师 4-2 鸡蛋篮子：最小伤害变为 1，最大伤害增加「最小值降低量 × 125% / 150% / 175% / 200%」
+	private static float eggBasketFactor(){
+		if (!(curUser instanceof Hero)) return 0f;
+		Hero caster = (Hero) curUser;
+		if (caster.subClass != HeroSubClasses.DICE_MAGE) return 0f;
+		int points = caster.pointsInTalent(Talent.EGG_BASKET);
+		return points > 0 ? 1f + 0.25f * points : 0f;
+	}
+
+	public int rollMin(int lvl){
+		int min = min(lvl);
+		return eggBasketFactor() > 0 && min > 1 ? 1 : min;
+	}
+
+	public int rollMax(int lvl){
+		int min = min(lvl), max = max(lvl);
+		float factor = eggBasketFactor();
+		return factor > 0 && min > 1 ? max + Math.round((min - 1) * factor) : max;
+	}
+
 	public int damageRoll(){
 		return damageRoll(buffedLvl());
 	}
 
-	public int damageRoll(int lvl){
-		int dmg = Char.combatRoll(min(lvl), max(lvl));
+	@SuppressWarnings("DefaultLocale")
+    public int damageRoll(int lvl){
+		int dmg = Char.combatRoll(rollMin(lvl), rollMax(lvl));
 
-		if(Dungeon.hero.hasTalent(Talent.FANATICISM_MAGIC)){
+		Hero caster = curUser instanceof Hero ? (Hero) curUser : null;
+		if (caster == null) {
+			return dmg;
+		}
+
+		if(caster.hasTalent(Talent.FANATICISM_MAGIC)){
 			if (dmg > 0){
-				Berserk berserk = Buff.affect(Dungeon.hero, Berserk.class);
+				Berserk berserk = Buff.affect(caster, Berserk.class);
 				berserk.damage(dmg/2);
 			}
 		}
 
-		WandEmpower emp = Dungeon.hero.buff(WandEmpower.class);
+		RiverCrystal riverGlass = caster.belongings.getItem(RiverCrystal.class);
+		if(riverGlass != null){
+			dmg = Integer.MAX_VALUE;
+			for (int i = 0; i < riverGlass.judgeTimes(); i++){
+				dmg = Math.min(dmg, Char.combatRoll(rollMin(lvl), rollMax(lvl)));
+			}
+		}
+
+
+		LightKing lightKing = caster.belongings.getItem(LightKing.class);
+		if (lightKing != null) {
+			int lkLvl = lightKing.buffedLvl();
+			float[] thresholds = {0.9f, 0.85f, 0.8f, 0.75f};
+			float[] damageModifiers = {1.25f, 1.33f, 1.41f, 1.50f};
+
+			float hpPercentage = (float) caster.HP / caster.HT;
+			int originalDamage = dmg;
+
+			if (hpPercentage >= thresholds[lkLvl]) {
+				float modifiedDamage = dmg * damageModifiers[lkLvl];
+				int bonusDamage = Math.round(modifiedDamage - dmg);
+				if (bonusDamage < 1) {
+					bonusDamage = 1;
+				}
+				dmg = dmg + bonusDamage;
+			} else {
+				dmg = Math.round(dmg / damageModifiers[lkLvl]);
+			}
+		}
+
+		WandEmpower emp = caster.buff(WandEmpower.class);
 		if (emp != null){
 			dmg += emp.dmgBoost;
 			emp.left--;
@@ -76,8 +137,13 @@ public abstract class DamageWand extends Wand{
 	@Override
 	public String statsDesc() {
 		if (levelKnown)
-			return Messages.get(this, "stats_desc", min(), max());
+			return Messages.get(this, "stats_desc", rollMin(buffedLvl()), rollMax(buffedLvl()));
 		else
-			return Messages.get(this, "stats_desc", min(0), max(0));
+			return Messages.get(this, "stats_desc", rollMin(0), rollMax(0));
+	}
+
+	@Override
+	public String upgradeStat1(int level) {
+		return rollMin(level) + "-" + rollMax(level);
 	}
 }

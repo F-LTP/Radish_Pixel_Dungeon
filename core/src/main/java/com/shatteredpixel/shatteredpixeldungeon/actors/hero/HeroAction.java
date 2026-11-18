@@ -70,6 +70,12 @@ public class HeroAction {
 		}
 	}
 
+	public static class EnterDoor extends HeroAction {
+		public EnterDoor( int door ) {
+			this.dst = door;
+		}
+	}
+
 	public static class Mine extends HeroAction {
 		public Mine( int wall ) {
 			this.dst = wall;

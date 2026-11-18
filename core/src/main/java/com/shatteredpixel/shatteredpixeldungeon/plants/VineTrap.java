@@ -7,9 +7,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
 
 public class VineTrap extends Plant{
@@ -40,7 +38,7 @@ public class VineTrap extends Plant{
         }
         @Override
         public void detach(){
-            if (pos!=-1)
+            if (pos!=-1 && pos < Dungeon.level.map.length)
                 Dungeon.plantVineTrap(pos);
             super.detach();
         }
@@ -51,7 +49,8 @@ public class VineTrap extends Plant{
         }
         @Override
         public void restoreFromBundle(Bundle bundle){
-            super.storeInBundle(bundle);
+            //这里原来调成了 super.storeInBundle：读档时不恢复计时，反而往正在读的存档里写数据
+            super.restoreFromBundle(bundle);
             if (bundle.contains("plant_buff_pos")) pos=bundle.getInt("plant_buff_pos");
         }
     }

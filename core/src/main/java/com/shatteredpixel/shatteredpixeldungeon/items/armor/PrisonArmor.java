@@ -1,7 +1,5 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.armor;
 
-import com.shatteredpixel.shatteredpixeldungeon.Challenges;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
 public class PrisonArmor extends Armor{
@@ -17,16 +15,10 @@ public class PrisonArmor extends Armor{
     }
     @Override
     public int DRMax(int lvl){
-        if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
-            return Math.max(3 + lvl + augment.defenseFactor(lvl),1+lvl/2);
-        }
         return 5 + 2 * lvl + augment.defenseFactor(lvl);
     }
     @Override
     public int DRMin(int lvl){
-        if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
-            return 1 + lvl / 2;
-        }
         return 2 + 3 * lvl / 2;
     }
     public class myMask extends ArmorBuff {

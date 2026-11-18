@@ -229,10 +229,20 @@ public class WandOfCorruption extends Wand {
 		if (!enemy.isImmune(Corruption.class)){
 			Corruption.corruptionHeal(enemy);
 
-			AllyBuff.affectAndLoot(enemy, curUser, Corruption.class);
+			AllyBuff.affectAndLoot(enemy, (com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero) curUser, Corruption.class);
 		} else {
 			Buff.affect(enemy, Doom.class);
 		}
+	}
+
+	@Override
+	public String upgradeStat1(int level) {
+		return Messages.decimalFormat("#.##", 3f + level/3f);
+	}
+
+	@Override
+	public String upgradeStat2(int level) {
+		return Integer.toString(6 + 3*level);
 	}
 
 	@Override

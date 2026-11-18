@@ -46,13 +46,21 @@ public class RingOfArcana extends Ring {
 		}
 	}
 
+	public String upgradeStat1(int level){
+		if (cursed) level = Math.min(-1, level-3);
+		return Messages.decimalFormat("#.##", 100f * (Math.pow(1.175f, level+1)-1f)) + "%";
+	}
+
 	@Override
 	protected RingBuff buff( ) {
 		return new Arcana();
 	}
 
 	public static float enchantPowerMultiplier(Char target ){
-		return (float)Math.pow(1.175f, getBuffedBonus(target, Arcana.class));
+		float base = (float)Math.pow(1.175f, getBuffedBonus(target, Arcana.class));
+		base *= com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.MagicWarrior.stormAssaultMultiplier(target);
+		base *= 1f + com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.enchantPower(target);
+		return base;
 	}
 
 	public class Arcana extends RingBuff {

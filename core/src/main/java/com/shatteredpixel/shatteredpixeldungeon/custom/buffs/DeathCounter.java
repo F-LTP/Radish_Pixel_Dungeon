@@ -12,7 +12,7 @@ public class DeathCounter extends CounterBuff {
     }
 
     @Override
-    public int icon() {
+    public String icon() {
         return BuffIndicator.TIME;
     }
 

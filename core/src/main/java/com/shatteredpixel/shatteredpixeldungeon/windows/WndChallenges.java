@@ -22,12 +22,9 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.custom.messages.M;
-import com.shatteredpixel.shatteredpixeldungeon.custom.utils.CustomGameSettings;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.text.TextChallenges;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CheckBox;
@@ -37,8 +34,6 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
-import com.shatteredpixel.shatteredpixeldungeon.utils.DungeonSeed;
-import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.ui.Component;
 
@@ -88,7 +83,6 @@ public class WndChallenges extends Window {
 		boxes = new ArrayList<>();
 		infos = new ArrayList<>();
 
-		boolean isCustom = false;
 		float pos = 0;
 
 		for (int i = 0; i < Challenges.NAME_IDS.length; i++) {
@@ -110,25 +104,28 @@ public class WndChallenges extends Window {
 				RenderedTextBlock block = PixelScene.renderTextBlock(10);
 				block.text(M.L(TextChallenges.class, "expansion"));
 				block.hardlight(0xFF00FF);
-				block.setPos((WIDTH - block.width()) / 2,
-						pos + GAP *4);
+				Image trophy = Icons.CHALLENGE_ON.get();
+				trophy.flipVertical = true;
+				float left = (WIDTH - trophy.width() - 3 - block.width()) / 2;
+				block.setPos(left + trophy.width() + 3, pos + GAP * 4);
+				trophy.setPos(left, block.top() + (block.height() - trophy.height()) / 2);
+				PixelScene.align(trophy);
 				PixelScene.align(block);
+				content.add(trophy);
 				content.add(block);
 				pos += block.height() + 8*GAP;
-				isCustom = true;
 			}
 
-			CanScrollCheckBox cb = new CanScrollCheckBox( M.TL(isCustom ? TextChallenges.class : Challenges.class, challenge));
+			final Class<?> textSource = textSource(i);
+			CanScrollCheckBox cb = new CanScrollCheckBox( M.TL(textSource, challenge));
 			cb.checked((checked & Challenges.MASKS[i]) != 0);
 			cb.active = editable;
-			/*
-			if(Challenges.NAME_IDS[i].equals("mimic_dungeon")){
+
+			if(Challenges.NAME_IDS[i].equals("bad_podyduiint")){
 				cb.active = false;
 				cb.checked(false);
 				cb.alpha(0.5f);
 			}
-
-			 */
 
 			if (i > 0) {
 				pos += GAP;
@@ -138,13 +135,12 @@ public class WndChallenges extends Window {
 			content.add(cb);
 			boxes.add(cb);
 
-			boolean finalIsCustom = isCustom;
 			CanScrollInfo info = new CanScrollInfo(Icons.get(Icons.INFO)) {
 				@Override
 				protected void onClick() {
 					super.onClick();
 					ShatteredPixelDungeon.scene().add(
-							new WndMessage(M.L(finalIsCustom ? TextChallenges.class : Challenges.class, challenge + "_desc"))
+							new WndMessage(M.L(textSource, challenge + "_desc"))
 					);
 				}
 			};
@@ -176,6 +172,12 @@ public class WndChallenges extends Window {
 		}
 
 		super.onBackPressed();
+	}
+
+	//追加挑战（掩码超出原版范围的那些）的名称和说明记在 TextChallenges 名下，原版挑战的记在 Challenges 名下。
+	//要显示挑战名的窗口都从这里取：追加挑战在 Challenges 名下不保证有文本（测试时间就没有）
+	public static Class<?> textSource( int index ) {
+		return Challenges.MASKS[index] > Challenges.SPD_CHALLENGE_MAX ? TextChallenges.class : Challenges.class;
 	}
 
 	public static class CanScrollCheckBox extends CheckBox{

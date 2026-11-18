@@ -21,7 +21,10 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.shatteredpixel.shatteredpixeldungeon.challenge.AlchemyApprenticeChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Blandfruit;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MeatPie;
@@ -59,6 +62,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.quest.MetalShard;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
@@ -68,10 +72,47 @@ public abstract class Recipe {
 	public abstract boolean testIngredients(ArrayList<Item> ingredients);
 	
 	public abstract int cost(ArrayList<Item> ingredients);
+
+	//配方最终要消耗的能量。炼金界面上显示的数字、能量够不够的判定、实际扣除的数量以及图鉴里的数字都必须从这里取，
+	//不要直接调 cost()：cost() 只是配方自己的基础消耗，「炼金学徒」挑战的加价统一叠加在这里
+	public final int energyCost(ArrayList<Item> ingredients){
+		return AlchemyApprenticeChallenge.recipeCost(cost(ingredients));
+	}
 	
 	public abstract Item brew(ArrayList<Item> ingredients);
 	
 	public abstract Item sampleOutput(ArrayList<Item> ingredients);
+
+	//一次炼制给出多种物品时的打包结果。brew() 只能返回一件 Item，产物不止一种的配方就返回它，
+	//炼金界面拿到后逐件发放、每种占一个产出格。它只存在于 brew() 与发放之间，不进背包也不进存档
+	public static class MultiOutput extends Item {
+
+		public final ArrayList<Item> items = new ArrayList<>();
+
+		public MultiOutput add( Item item ){
+			if (item == null || item.quantity() <= 0) return this;
+			//同种可堆叠物先并成一叠：炼金界面是按「各项互不相同」来逐格展示并回填数量的
+			for (Item existing : items){
+				if (existing.stackable && existing.isSimilar(item)){
+					existing.merge(item);
+					return this;
+				}
+			}
+			items.add(item);
+			return this;
+		}
+
+		//万一被当成普通物品直接收取，也只把里面的东西交出去，自己不占背包格子
+		@Override
+		public boolean collect( Bag container ){
+			for (Item item : items){
+				if (!item.collect(container)){
+					Dungeon.level.drop(item, Dungeon.hero.pos);
+				}
+			}
+			return true;
+		}
+	}
 	
 	//subclass for the common situation of a recipe with static inputs and outputs
 	public static abstract class SimpleRecipe extends Recipe {
@@ -168,10 +209,13 @@ public abstract class Recipe {
 	//*******
 
 	private static Recipe[] variableRecipes = new Recipe[]{
-			new LiquidMetal.Recipe()
+			new LiquidMetal.Recipe(),
+			new com.shatteredpixel.shatteredpixeldungeon.items.recipes.ArtificerRecipes.MissileCombine(),
+			new com.shatteredpixel.shatteredpixeldungeon.items.recipes.ArtificerRecipes.PotionCombine()
 	};
 	
 	private static Recipe[] oneIngredientRecipes = new Recipe[]{
+		new MetalToLiquidMetal(),
 		new Scroll.ScrollToStone(),
 		new ExoticPotion.PotionToExotic(),
 		new ExoticScroll.ScrollToExotic(),
@@ -195,6 +239,10 @@ public abstract class Recipe {
 		new TrinketCatalyst.Recipe(),
 		new Trinket.UpgradeTrinket()
 	};
+
+	private static class MetalToLiquidMetal extends SimpleRecipe {
+		{ inputs = new Class[]{MetalShard.class}; inQuantity = new int[]{1}; cost = 2; output = LiquidMetal.class; outQuantity = 80; }
+	}
 	
 	private static Recipe[] twoIngredientRecipes = new Recipe[]{
 		new Blandfruit.CookFruit(),
@@ -215,7 +263,9 @@ public abstract class Recipe {
 	private static Recipe[] threeIngredientRecipes = new Recipe[]{
 		new Potion.SeedToPotion(),
 		new StewedMeat.threeMeat(),
-		new MeatPie.Recipe()
+		new MeatPie.Recipe(),
+		new ArcaneResin.TalentRecipe(),
+		new com.shatteredpixel.shatteredpixeldungeon.items.potions.MagicPotion.Recipe()
 	};
 	
 	public static ArrayList<Recipe> findRecipes(ArrayList<Item> ingredients){
@@ -265,5 +315,4 @@ public abstract class Recipe {
 		}
 	}
 }
-
 
