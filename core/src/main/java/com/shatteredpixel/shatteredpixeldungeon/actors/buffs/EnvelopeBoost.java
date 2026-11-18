@@ -13,7 +13,7 @@ import com.watabou.utils.Random;
 public class EnvelopeBoost extends Buff {
 
 	public static final float WAND_FREE_PER_PICKUP = 0.05f;
-	public static final float WAND_FREE_CAP = 0.75f;
+	public static final float WAND_FREE_CAP = 1.0f;
 
 	private float wandFreeChance = 0f;
 
