@@ -97,6 +97,8 @@ public class Item implements Bundlable {
 	
 	public boolean stackable = false;
 	protected int quantity = 1;
+	/** 红包融合：挂在这件装备上的其他装备。 */
+	public java.util.ArrayList<Item> fusedItems = new java.util.ArrayList<>();
 	public boolean dropsDownHeap = false;
 	
 	public int level = 0;
@@ -713,6 +715,7 @@ public class Item implements Bundlable {
 			bundle.put( QUICKSLOT, Dungeon.quickslot.getSlot(this) );
 		}
 		bundle.put( KEPT_LOST, keptThoughLostInvent );
+		bundle.put("fused_items", fusedItems);
 	}
 	
 	@Override
@@ -738,6 +741,12 @@ public class Item implements Bundlable {
 		}
 
 		keptThoughLostInvent = bundle.getBoolean( KEPT_LOST );
+		fusedItems = new java.util.ArrayList<>();
+		if (bundle.contains("fused_items")) {
+			for (Object o : bundle.getCollection("fused_items")) {
+				if (o instanceof Item) fusedItems.add((Item) o);
+			}
+		}
 	}
 
 	public int targetingPos( Hero user, int dst ){

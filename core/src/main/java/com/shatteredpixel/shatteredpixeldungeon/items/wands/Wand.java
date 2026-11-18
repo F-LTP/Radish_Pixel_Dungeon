@@ -905,6 +905,11 @@ public abstract class Wand extends Item {
 						curWand.fx(shot, new Callback() {
 							public void call() {
 								curWand.onZap(shot);
+								if (curWand.fusedItems != null) {
+									for (Item it : curWand.fusedItems) {
+										if (it instanceof Wand) ((Wand) it).onZap(shot);
+									}
+								}
 								if (Random.Float() < WondrousResin.extraCurseEffectChance()){
 									WondrousResin.forcePositive = true;
 									CursedWand.cursedZap(curWand,

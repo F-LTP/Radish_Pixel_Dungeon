@@ -765,8 +765,10 @@ public class Hongbao {
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFreeScroll(hero);
 			} else if (roll == 10) {
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFreePotion(hero);
-			} else {
+			} else if (roll == 11) {
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFovDamage(hero);
+			} else {
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFusion(hero);
 			}
 		}
 	}

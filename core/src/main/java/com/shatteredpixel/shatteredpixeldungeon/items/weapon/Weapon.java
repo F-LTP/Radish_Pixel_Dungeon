@@ -207,6 +207,13 @@ abstract public class Weapon extends KindOfWeapon {
 				&& !com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.LittleKnight.pokeIsPlain( attacker )) {
 			damage = enchantment.proc( this, attacker, defender, damage );
 		}
+		if (fusedItems != null) {
+			for (Item it : fusedItems) {
+				if (it instanceof Weapon) {
+					damage = ((Weapon) it).proc(attacker, defender, damage);
+				}
+			}
+		}
 
 		if (!levelKnown && attacker == Dungeon.hero) {
 			float uses = Math.min( availableUsesToID, Talent.itemIDSpeedFactor(Dungeon.hero, this) );

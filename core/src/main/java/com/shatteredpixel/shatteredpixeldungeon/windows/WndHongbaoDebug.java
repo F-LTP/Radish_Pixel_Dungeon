@@ -25,6 +25,7 @@ public class WndHongbaoDebug extends WndOptions {
 				"随机卷轴免耗（可重复）",
 				"随机药水免耗（可重复）",
 				"视野内每回合真实伤害 +1",
+				"解锁装备融合",
 				"全部属性各提升一次");
 	}
 
@@ -74,6 +75,9 @@ public class WndHongbaoDebug extends WndOptions {
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFovDamage(Dungeon.hero);
 				break;
 			case 11:
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFusion(Dungeon.hero);
+				break;
+			case 12:
 				boost.addWandFreeChance(0.10f);
 				boost.addComboHits(1);
 				boost.addReachBonus(1);
@@ -81,6 +85,7 @@ public class WndHongbaoDebug extends WndOptions {
 				boost.addEnchantPower(0.10f);
 				boost.grantFlamewalker();
 				boost.grantKnockbackOnApproach();
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFusion(Dungeon.hero);
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantAlly(Dungeon.hero);
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFreeScroll(Dungeon.hero);
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.grantFreePotion(Dungeon.hero);

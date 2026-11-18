@@ -49,6 +49,7 @@ public class EnvelopeBoost extends Buff {
 	private final java.util.ArrayList<String> freePotions = new java.util.ArrayList<>();
 	private final java.util.HashMap<String,Float> freePotionCooldowns = new java.util.HashMap<>();
 	private int fovDamage = 0;
+	private boolean fusionUnlocked = false;
 
 	public void addWandFreeChance(float amount) {
 		wandFreeChance = Math.min(WAND_FREE_CAP, wandFreeChance + amount);
@@ -169,6 +170,20 @@ public class EnvelopeBoost extends Buff {
 
 	public int fovDamage() {
 		return fovDamage;
+	}
+
+	public void grantFusion() {
+		fusionUnlocked = true;
+	}
+
+	public static boolean hasFusion(Char ch) {
+		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
+		return b != null && b.fusionUnlocked;
+	}
+
+	public static void grantFusion(Hero hero) {
+		Buff.affect(hero, EnvelopeBoost.class).grantFusion();
+		GLog.p("红包开出：装备融合");
 	}
 
 	public static void grantFovDamage(Hero hero) {
@@ -416,7 +431,7 @@ public class EnvelopeBoost extends Buff {
 				Math.round(missileReturnChance * 100), Math.round(enchantPower * 100),
 				flamewalker ? "是" : "否", knockbackOnApproach ? "是" : "否",
 				allyClass != null ? "是" : "否", freeScrolls.isEmpty() ? "否" : "是",
-				freePotions.isEmpty() ? "否" : "是", fovDamage);
+				freePotions.isEmpty() ? "否" : "是", fovDamage, fusionUnlocked ? "是" : "否");
 	}
 
 	private static final String WAND_FREE = "wand_free_chance";
@@ -432,6 +447,7 @@ public class EnvelopeBoost extends Buff {
 	private static final String FREE_POTIONS = "free_potions";
 	private static final String FREE_POTION_COOLDOWNS = "free_potion_cooldowns";
 	private static final String FOV_DAMAGE = "fov_damage";
+	private static final String FUSION_UNLOCKED = "fusion_unlocked";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
@@ -457,6 +473,7 @@ public class EnvelopeBoost extends Buff {
 		}
 		bundle.put(FREE_POTION_COOLDOWNS, pcool);
 		bundle.put(FOV_DAMAGE, fovDamage);
+		bundle.put(FUSION_UNLOCKED, fusionUnlocked);
 	}
 
 	@Override
@@ -489,5 +506,6 @@ public class EnvelopeBoost extends Buff {
 			for (String k : cool.getKeys()) freePotionCooldowns.put(k, cool.getFloat(k));
 		}
 		fovDamage = bundle.getInt(FOV_DAMAGE);
+		fusionUnlocked = bundle.getBoolean(FUSION_UNLOCKED);
 	}
 }

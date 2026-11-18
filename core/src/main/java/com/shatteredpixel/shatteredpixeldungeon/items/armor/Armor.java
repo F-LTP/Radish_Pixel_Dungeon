@@ -975,6 +975,13 @@ public class Armor extends EquipableItem {
 		if (glyph != null && !magicImmune) {
 			damage = glyph.proc( this, attacker, defender, damage );
 		}
+		if (fusedItems != null && !magicImmune) {
+			for (Item it : fusedItems) {
+				if (it instanceof Armor && ((Armor) it).glyph != null) {
+					damage = ((Armor) it).glyph.proc(this, attacker, defender, damage);
+				}
+			}
+		}
 
 		// 符文传递：纹章刻印/诅咒与护甲刻印/诅咒共存，各自触发
 		// （若纹章刻印与护甲刻印相同则只触发一次，由 procLvl 提供 +1 等级加成）

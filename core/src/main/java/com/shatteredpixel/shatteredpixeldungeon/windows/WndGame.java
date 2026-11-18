@@ -76,6 +76,18 @@ public class WndGame extends Window {
 			curBtn.icon(Icons.get(Icons.CHALLENGE_ON));
 		}
 
+		if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFusion(Dungeon.hero)
+				|| Dungeon.isChallenged(com.shatteredpixel.shatteredpixeldungeon.Challenges.TEST_MODE)) {
+			addButton(curBtn = new RedButton("融合装备") {
+				@Override
+				protected void onClick() {
+					hide();
+					GameScene.show(new WndFusion());
+				}
+			});
+			curBtn.icon(Icons.get(Icons.CHALLENGE_ON));
+		}
+
 		// 红包属性测试入口
 		if (Dungeon.isChallenged(com.shatteredpixel.shatteredpixeldungeon.Challenges.TEST_MODE)) {
 			addButton(curBtn = new RedButton("红包属性测试") {
