@@ -77,7 +77,7 @@ public class WndGame extends Window {
 		}
 
 		// 红包属性测试入口
-		if (Dungeon.isChallenged(com.shatteredpixel.shatteredpixeldungeon.Challenges.HONGBAO)) {
+		if (Dungeon.isChallenged(com.shatteredpixel.shatteredpixeldungeon.Challenges.TEST_MODE)) {
 			addButton(curBtn = new RedButton("红包属性测试") {
 				@Override
 				protected void onClick() {
