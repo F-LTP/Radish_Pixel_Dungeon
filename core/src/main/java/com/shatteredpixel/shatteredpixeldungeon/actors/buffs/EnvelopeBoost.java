@@ -19,6 +19,7 @@ public class EnvelopeBoost extends Buff {
 	private int comboHits = 0;
 	private int reachBonus = 0;
 	private float missileReturnChance = 0f;
+	private float enchantPower = 0f;
 
 	public void addWandFreeChance(float amount) {
 		wandFreeChance = Math.min(WAND_FREE_CAP, wandFreeChance + amount);
@@ -67,6 +68,19 @@ public class EnvelopeBoost extends Buff {
 		return b != null && b.missileReturnChance > 0f && Random.Float() < b.missileReturnChance;
 	}
 
+	public void addEnchantPower(float amount) {
+		enchantPower += amount;
+	}
+
+	public float enchantPower() {
+		return enchantPower;
+	}
+
+	public static float enchantPower(Char ch) {
+		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
+		return b == null ? 0f : b.enchantPower;
+	}
+
 	public static float wandFreeChance(Char ch) {
 		EnvelopeBoost b = ch == null ? null : ch.buff(EnvelopeBoost.class);
 		return b == null ? 0f : b.wandFreeChance;
@@ -96,13 +110,14 @@ public class EnvelopeBoost extends Buff {
 	@Override
 	public String desc() {
 		return Messages.get(this, "desc", Math.round(wandFreeChance * 100), comboHits, reachBonus,
-				Math.round(missileReturnChance * 100));
+				Math.round(missileReturnChance * 100), Math.round(enchantPower * 100));
 	}
 
 	private static final String WAND_FREE = "wand_free_chance";
 	private static final String COMBO_HITS = "combo_hits";
 	private static final String REACH_BONUS = "reach_bonus";
 	private static final String MISSILE_RETURN = "missile_return_chance";
+	private static final String ENCHANT_POWER = "enchant_power";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
@@ -111,6 +126,7 @@ public class EnvelopeBoost extends Buff {
 		bundle.put(COMBO_HITS, comboHits);
 		bundle.put(REACH_BONUS, reachBonus);
 		bundle.put(MISSILE_RETURN, missileReturnChance);
+		bundle.put(ENCHANT_POWER, enchantPower);
 	}
 
 	@Override
@@ -120,5 +136,6 @@ public class EnvelopeBoost extends Buff {
 		comboHits = bundle.getInt(COMBO_HITS);
 		reachBonus = bundle.getInt(REACH_BONUS);
 		missileReturnChance = bundle.getFloat(MISSILE_RETURN);
+		enchantPower = bundle.getFloat(ENCHANT_POWER);
 	}
 }

@@ -695,7 +695,7 @@ public class Hongbao {
 			}
 			GLog.p("红包开出：" + item.name());
 		} else {
-			int roll = Random.Int(5);
+			int roll = Random.Int(6);
 			if (roll == 0) {
 				// 戒指栏位 +1：每次红包最多 +1，可以无限叠加
 				hero.belongings.growExtraRingSlots();
@@ -722,7 +722,7 @@ public class Hongbao {
 						Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
 				boost.addReachBonus(1);
 				GLog.p("红包开出：攻击距离 +1（当前 +" + boost.reachBonus() + "）");
-			} else {
+			} else if (roll == 4) {
 				// 投掷物返回概率：每次随机 +1%~10%
 				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
 						Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
@@ -730,6 +730,12 @@ public class Hongbao {
 				boost.addMissileReturnChance(Random.Float(0.01f, 0.10f));
 				GLog.p("红包开出：投掷物返回概率 " + Math.round(before * 100) + "% → "
 						+ Math.round(boost.missileReturnChance() * 100) + "%");
+			} else {
+				// 附魔触发概率与效果 +5%
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost boost =
+						Buff.affect(hero, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.class);
+				boost.addEnchantPower(0.05f);
+				GLog.p("红包开出：附魔触发与效果 +" + Math.round(boost.enchantPower() * 100) + "%");
 			}
 		}
 	}

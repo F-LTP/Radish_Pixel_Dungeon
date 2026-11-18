@@ -19,6 +19,7 @@ public class WndHongbaoDebug extends WndOptions {
 				"连击次数 +1",
 				"攻击距离 +1",
 				"投掷物返回概率 +10%",
+				"附魔触发与效果 +10%",
 				"全部属性各提升一次");
 	}
 
@@ -49,11 +50,16 @@ public class WndHongbaoDebug extends WndOptions {
 				GLog.p("测试：投掷物返回概率 " + Math.round(boost.missileReturnChance() * 100) + "%");
 				break;
 			case 5:
+				boost.addEnchantPower(0.10f);
+				GLog.p("测试：附魔触发与效果 +" + Math.round(boost.enchantPower() * 100) + "%");
+				break;
+			case 6:
 				Dungeon.hero.belongings.growExtraRingSlots();
 				boost.addWandFreeChance(0.10f);
 				boost.addComboHits(1);
 				boost.addReachBonus(1);
 				boost.addMissileReturnChance(0.10f);
+				boost.addEnchantPower(0.10f);
 				InventoryPane.refresh();
 				GLog.p("测试：全部红包属性各提升一次");
 				break;
