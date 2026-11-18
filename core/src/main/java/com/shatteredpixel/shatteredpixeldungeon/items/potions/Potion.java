@@ -299,15 +299,26 @@ public class Potion extends Item {
 						@Override
 						protected void onSelect(int index) {
 							if (index == 0) {
-								Potion.super.doThrow( hero );
+								if (prepareFreePotionThrow()) Potion.super.doThrow( hero );
 							}
 						}
 					}
 			);
 
 		} else {
-			super.doThrow( hero );
+			if (prepareFreePotionThrow()) super.doThrow( hero );
 		}
+	}
+
+	private boolean prepareFreePotionThrow() {
+		if (!com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.isFreePotion(this)) return true;
+		int cd = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.freePotionRemaining(this);
+		if (cd > 0) {
+			com.shatteredpixel.shatteredpixeldungeon.utils.GLog.w("药水免耗冷却中，剩余 " + cd + " 回合");
+			return false;
+		}
+		freePotionPending = true;
+		return true;
 	}
 
 	public boolean isThrowOnly() {
