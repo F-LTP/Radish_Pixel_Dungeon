@@ -641,6 +641,7 @@ public class Item implements Bundlable {
 			sb.append("\n\n融合装备：");
 			for (Item it : fusedItems) {
 				sb.append("\n- ").append(it.name());
+				if (it instanceof Wand) sb.append("：").append(it.desc());
 			}
 			return sb.toString();
 		}
