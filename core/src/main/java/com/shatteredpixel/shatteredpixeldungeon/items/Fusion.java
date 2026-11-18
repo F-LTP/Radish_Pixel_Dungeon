@@ -59,6 +59,9 @@ public class Fusion {
 			int add = Math.max(1, wb.min());
 			wa.fusionMin += add;
 			wa.fusionMax += add;
+			wa.RCH = Math.max(wa.RCH, wb.RCH);
+			wa.ACC = Math.max(wa.ACC, wb.ACC);
+			wa.DLY = Math.min(wa.DLY, wb.DLY);
 		} else if (a instanceof Armor && b instanceof Armor) {
 			Armor aa = (Armor) a, ab = (Armor) b;
 			int add = Math.max(1, ab.DRMin());
