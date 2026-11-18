@@ -56,12 +56,14 @@ public class Fusion {
 
 		if (a instanceof KindOfWeapon && b instanceof KindOfWeapon) {
 			KindOfWeapon wa = (KindOfWeapon) a, wb = (KindOfWeapon) b;
-			wa.fusionMin += Math.max(1, Math.min(wa.min(), wb.min()));
-			wa.fusionMax += Math.max(1, Math.min(wa.max(), wb.max()));
+			int add = Math.max(1, wb.min());
+			wa.fusionMin += add;
+			wa.fusionMax += add;
 		} else if (a instanceof Armor && b instanceof Armor) {
 			Armor aa = (Armor) a, ab = (Armor) b;
-			aa.fusionDRMin += Math.min(aa.DRMin(), ab.DRMin());
-			aa.fusionDRMax += Math.min(aa.DRMax(), ab.DRMax());
+			int add = Math.max(1, ab.DRMin());
+			aa.fusionDRMin += add;
+			aa.fusionDRMax += add;
 		}
 		// 效果由各装备的 proc/activate 读取 fusedItems 合并；
 		// 这里只把第二件挂到第一件上，外观保持第一件。
