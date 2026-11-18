@@ -567,6 +567,8 @@ public abstract class Wand extends Item {
 		AshKing.SoulStreamForm soulStream = hero.buff(AshKing.SoulStreamForm.class);
 		if (soulStream != null && soulStream.consumeFreeCast()) {
 			// 使用免费次数，不消耗充能
+		} else if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.rollFreeWandCast(hero)) {
+			// 红包祝福：本次施法不消耗充能
 		} else {
 			curCharges -= cursed ? 1 : chargesPerCast();
 			Talent.onWandChargesSpent(hero, cursed ? 1 : chargesPerCast());
