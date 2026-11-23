@@ -132,7 +132,7 @@ public class WaterOfHealth extends WellWater {
 		hero.sprite.emitter().start( Speck.factory( Speck.HEALING ), 0.4f, 4 );
 
 		// 掉落升级卷轴
-		Dungeon.level.drop(new ScrollOfUpgrade(), hero.pos).sprite.drop();
+		if (!com.shatteredpixel.shatteredpixeldungeon.challenges.FusionRules.active()) Dungeon.level.drop(new ScrollOfUpgrade(), hero.pos).sprite.drop();
 
 		// +2 时额外掉落驱邪卷轴
 		if (points >= 2) {

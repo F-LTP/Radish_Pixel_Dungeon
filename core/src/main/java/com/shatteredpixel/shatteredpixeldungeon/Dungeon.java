@@ -328,6 +328,11 @@ public class Dungeon {
 		Badges.reset();
 		
 		GamesInProgress.selectedClass.initHero( hero );
+
+		// 「智能怪物」挑战：开局给 1 次装备融合机会
+		if (isChallenged(Challenges.REAL_INTELLIGENCE)) {
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FusionCharges.grantCharge(hero, 1);
+		}
 	}
 
 	public static boolean isChallenged( int mask ) {
@@ -594,7 +599,7 @@ public class Dungeon {
 		Mob.restoreAllies( level, pos );
 
 		// 装备融合：每下一层给 1 次融合机会
-		if (levelJustGenerated && hero != null) {
+		if (levelJustGenerated && hero != null && !isChallenged(Challenges.REAL_INTELLIGENCE)) {
 			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FusionCharges.grantCharge(hero, 1);
 		}
 

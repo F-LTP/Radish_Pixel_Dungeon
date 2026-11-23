@@ -84,8 +84,8 @@ public class Moonlight extends HeroDefinition {
 		Dungeon.quickslot.setSlot(1, knives);
 		// 初始物品：力量药剂、升级卷轴、鉴定卷轴已鉴定
 		// 以及四种随机卷轴与药水
-		new PotionOfStrength().identify();
-		new ScrollOfUpgrade().identify();
+		if (!com.shatteredpixel.shatteredpixeldungeon.challenges.FusionRules.active()) new PotionOfStrength().identify();
+		if (!com.shatteredpixel.shatteredpixeldungeon.challenges.FusionRules.active()) new ScrollOfUpgrade().identify();
 		new ScrollOfIdentify().identify();
 
 		int scrollCount = Random.Int(5); // 0-4

@@ -126,7 +126,7 @@ public class WaterOfAwareness extends WellWater {
         emitter.parent.add(new Identification(hero.sprite.center()));
 
         // 掉落升级卷轴
-        Dungeon.level.drop(new ScrollOfUpgrade(), hero.pos).sprite.drop();
+        if (!com.shatteredpixel.shatteredpixeldungeon.challenges.FusionRules.active()) Dungeon.level.drop(new ScrollOfUpgrade(), hero.pos).sprite.drop();
 
         // +2 时额外掉落驱邪卷轴
         if (points >= 2) {

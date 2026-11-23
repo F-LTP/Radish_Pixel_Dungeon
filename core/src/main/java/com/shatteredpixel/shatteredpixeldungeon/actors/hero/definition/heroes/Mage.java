@@ -56,7 +56,7 @@ public class Mage extends HeroDefinition {
 
 		Dungeon.quickslot.setSlot(0, staff);
 
-		new ScrollOfUpgrade().identify();
+		if (!com.shatteredpixel.shatteredpixeldungeon.challenges.FusionRules.active()) new ScrollOfUpgrade().identify();
 		new PotionOfLiquidFlame().identify();
 	}
 }

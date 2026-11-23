@@ -252,7 +252,7 @@ public class GnollShamanKing extends Mob implements Callback {
             GameScene.bossSlain();
             Dungeon.level.unseal();
             Dungeon.level.drop( new Gold( 1500 ), pos ).sprite.drop();
-            Dungeon.level.drop( new ScrollOfUpgrade(), pos ).sprite.drop();
+            if (!com.shatteredpixel.shatteredpixeldungeon.challenges.FusionRules.active()) Dungeon.level.drop( new ScrollOfUpgrade(), pos ).sprite.drop();
             Statistics.bossScores[2] += 3000;
         }
 

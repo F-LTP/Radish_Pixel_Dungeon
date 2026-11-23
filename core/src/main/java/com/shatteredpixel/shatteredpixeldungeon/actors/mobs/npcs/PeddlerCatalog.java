@@ -143,7 +143,7 @@ public final class PeddlerCatalog {
 
 			case 2:
 				// 默：强化与充盈，最贵的一档
-				add( list, new ScrollOfUpgrade(), 2 );
+				if (!com.shatteredpixel.shatteredpixeldungeon.challenges.FusionRules.active()) add( list, new ScrollOfUpgrade(), 2 );
 				add( list, new ScrollOfRecharging(), 2 );
 				add( list, new ScrollOfIdentify(), 3 );
 				add( list, new PotionOfExperience(), 1 );
