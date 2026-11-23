@@ -86,9 +86,6 @@ import java.util.ArrayList;
 
 public abstract class Wand extends Item {
 
-	/** 法杖施法者：玩家时是 Hero，怪物时是 Mob。 */
-	public static Char curUser;
-
 	public static final String AC_ZAP	= "ZAP";
 	public String customName = "";
 
@@ -243,10 +240,6 @@ public abstract class Wand extends Item {
 
 	//TODO Consider externalizing char awareness buff
 	protected static void wandProc(Char target, int wandLevel, int chargesUsed){
-		// 怪物施法时不触发只属于玩家的天赋/背包效果
-		if (curUser != null && !(curUser instanceof Hero)) {
-			return;
-		}
 		if (hero.hasTalent(Talent.ARCANE_VISION)) {
 			int dur = 5 + 5* hero.pointsInTalent(Talent.ARCANE_VISION);
 			Buff.append(hero, TalismanOfForesight.CharAwareness.class, dur).charID = target.id();
@@ -567,8 +560,6 @@ public abstract class Wand extends Item {
 		AshKing.SoulStreamForm soulStream = hero.buff(AshKing.SoulStreamForm.class);
 		if (soulStream != null && soulStream.consumeFreeCast()) {
 			// 使用免费次数，不消耗充能
-		} else if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.rollFreeWandCast(hero)) {
-			// 红包祝福：本次施法不消耗充能
 		} else {
 			curCharges -= cursed ? 1 : chargesPerCast();
 			Talent.onWandChargesSpent(hero, cursed ? 1 : chargesPerCast());
@@ -667,17 +658,17 @@ public abstract class Wand extends Item {
 		}
 
 		if (hero.belongings.contains(this) && hero.hasTalent(Talent.MAGIC_TACTICS)) {
-			int talentLevel = hero.pointsInTalent(Talent.MAGIC_TACTICS);
+			int talentLevel = curUser.pointsInTalent(Talent.MAGIC_TACTICS);
 			int chance = 7 * talentLevel + (int) Math.floor(talentLevel / 2f);
 			if (Random.Int(100) <= chance)
 				timeToZap = -hero.cooldown();
 		}
 
 		if( !(hero.buff(MagicStick.class)!=null && isMagesStaff)) {
-			hero.spendAndNext(timeToZap);
+			curUser.spendAndNext(timeToZap);
 		}else{
 			hero.buff(MagicStick.class).detach();
-			hero.spendAndNext(0);
+			curUser.spendAndNext(0);
 		}
 
 		if (hero.hasTalent(Talent.DUEL_DANCE) && hero.cooldown() >= 0)
@@ -847,9 +838,9 @@ public abstract class Wand extends Item {
 				int cell = shot.collisionPos;
 
 				if (target == curUser.pos || cell == curUser.pos) {
-					if (target == curUser.pos && hero.hasTalent(Talent.SHIELD_BATTERY)){
+					if (target == curUser.pos && curUser.hasTalent(Talent.SHIELD_BATTERY)){
 						float shield = curUser.HT * (0.04f*curWand.curCharges);
-						if (hero.pointsInTalent(Talent.SHIELD_BATTERY) == 2) shield *= 1.5f;
+						if (curUser.pointsInTalent(Talent.SHIELD_BATTERY) == 2) shield *= 1.5f;
 
 						if(hero.belongings.weapon() instanceof EndGuard) {
 							EndGuard w2 = (EndGuard) hero.belongings.weapon;
@@ -869,7 +860,7 @@ public abstract class Wand extends Item {
 						Sample.INSTANCE.play(Assets.Sounds.CHARGEUP);
 						ScrollOfRecharging.charge(curUser);
 						updateQuickslot();
-						hero.spendAndNext(Actor.TICK);
+						curUser.spendAndNext(Actor.TICK);
 						return;
 					}
 					GLog.i( Messages.get(Wand.class, "self_target") );
@@ -884,16 +875,16 @@ public abstract class Wand extends Item {
 				else
 					QuickSlotButton.target(Actor.findChar(cell));
 
-				if (curWand.tryToZap(hero, target)) {
+				if (curWand.tryToZap(curUser, target)) {
 
-					hero.busy();
+					curUser.busy();
 
 					if (curWand.cursed){
 						if (!curWand.cursedKnown){
 							GLog.n(Messages.get(Wand.class, "curse_discover", curWand.name()));
 						}
 						CursedWand.cursedZap(curWand,
-								hero,
+								curUser,
 								new Ballistica(curUser.pos, target, Ballistica.MAGIC_BOLT),
 								new Callback() {
 									@Override
@@ -905,25 +896,10 @@ public abstract class Wand extends Item {
 						curWand.fx(shot, new Callback() {
 							public void call() {
 								curWand.onZap(shot);
-								if (curWand.fusedItems != null) {
-									Item prevItem = curItem;
-									for (Item it : curWand.fusedItems) {
-										if (it instanceof Wand) {
-											final Wand fused = (Wand) it;
-											curItem = fused;
-											fused.fx(shot, new Callback() {
-												public void call() {
-													fused.onZap(shot);
-												}
-											});
-										}
-									}
-									curItem = prevItem;
-								}
 								if (Random.Float() < WondrousResin.extraCurseEffectChance()){
 									WondrousResin.forcePositive = true;
 									CursedWand.cursedZap(curWand,
-											hero,
+											curUser,
 											new Ballistica(curUser.pos, target, Ballistica.MAGIC_BOLT), new Callback() {
 												@Override
 												public void call() {

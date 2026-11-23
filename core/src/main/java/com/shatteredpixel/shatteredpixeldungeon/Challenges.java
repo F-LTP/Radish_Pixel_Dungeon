@@ -42,9 +42,8 @@ public class Challenges {
 	public static final int SNAKE_BITE			= 1<<10;
 	public static final int REAL_INTELLIGENCE	= 1<<11;
 	public static final int ALCHEMY_APPRENTICE	= 1<<12;
-	public static final int HONGBAO				= 1<<13;
 
-	public static final int MAX_VALUE           = (1<<14)-1;
+	public static final int MAX_VALUE           = (1<<13)-1;
 
 	public static final String[] NAME_IDS = {
 			"champion_enemies",
@@ -59,13 +58,12 @@ public class Challenges {
 			"test_mode",
 			"snake_bite",
 			"real_intelligence",
-			"alchemy_apprentice",
-			"hongbao"
+			"alchemy_apprentice"
 	};
 
 	public static final int[] MASKS = {
 			CHAMPION_ENEMIES, STRONGER_BOSSES, NO_FOOD, BAD_POINT, DAMAGE_NO, NO_HERBALISM, SWARM_INTELLIGENCE, DARKNESS, NO_SCROLLS,
-			TEST_MODE, SNAKE_BITE, REAL_INTELLIGENCE, ALCHEMY_APPRENTICE, HONGBAO
+			TEST_MODE, SNAKE_BITE, REAL_INTELLIGENCE, ALCHEMY_APPRENTICE
 	};
 
 	public static int activeChallenges(){

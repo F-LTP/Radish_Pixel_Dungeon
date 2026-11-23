@@ -2,7 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FusionCharges;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
@@ -114,7 +114,7 @@ public class Fusion {
 		// 效果由各装备的 proc/activate 读取 fusedItems 合并；
 		// 这里只把第二件挂到第一件上，外观保持第一件。
 
-		if (!com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.consumeFusionCharge()) {
+		if (!com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FusionCharges.consumeFusionCharge()) {
 			GLog.w("没有融合机会");
 			a.fusedItems.remove(b);
 			return false;

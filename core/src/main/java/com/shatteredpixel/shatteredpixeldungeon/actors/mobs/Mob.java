@@ -202,11 +202,6 @@ public abstract class Mob extends Char {
 				HP = Math.min(HT, Math.round(HT * percent));
 			}
 			firstAdded = false;
-			// 红包盟友物种：同种怪物自动变成盟友
-			if (alignment == Alignment.ENEMY
-					&& com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.isAllyClass(getClass().getName())) {
-				Buff.affect(this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeAllyBuff.class);
-			}
 		}
 	}
 
@@ -219,8 +214,6 @@ public abstract class Mob extends Char {
 
 	private static final String ENEMY_ID	= "enemy_id";
 	private static final String ONLY_ACTDOWN = "only_actdown";
-	private static final String ENVELOPE_KNOCKBACK = "envelope_knockback";
-	public boolean envelopeKnockbackUsed = false;
 
 	public boolean onlyActDown = true;
 
@@ -259,7 +252,6 @@ public abstract class Mob extends Char {
 		}
 
 		bundle.put(ONLY_ACTDOWN,onlyActDown);
-		bundle.put(ENVELOPE_KNOCKBACK, envelopeKnockbackUsed);
 		mobEquipment.storeInBundle(bundle);
 
 	}
@@ -295,7 +287,6 @@ public abstract class Mob extends Char {
 		if(bundle.contains(ONLY_ACTDOWN)){
 			onlyActDown = bundle.getBoolean(ONLY_ACTDOWN);
 		}
-		envelopeKnockbackUsed = bundle.getBoolean(ENVELOPE_KNOCKBACK);
 
 
 		eyeAttack = bundle.getBoolean(EYEATTACK);
@@ -321,7 +312,6 @@ public abstract class Mob extends Char {
 	protected boolean act() {
 
 		super.act();
-		mobEquipment.tickWand();
 
 
 
@@ -387,18 +377,6 @@ public abstract class Mob extends Char {
 			enemyInFOV = false;
 		}
 
-		// 红包：怪物第一次贴近英雄时被击退 1 格（每个怪物一次）
-		if (!envelopeKnockbackUsed && enemyInFOV && enemy == Dungeon.hero
-				&& alignment == Alignment.ENEMY
-				&& com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasKnockbackOnApproach(Dungeon.hero)
-				&& Dungeon.level.distance(pos, enemy.pos) <= 1) {
-			envelopeKnockbackUsed = true;
-			if (knockbackAway(enemy)) {
-				spend(TICK);
-				return true;
-			}
-		}
-
 		//prevents action, but still updates enemy seen status
 		if (buff(Feint.AfterImage.FeintConfusion.class) != null){
 			enemySeen = enemyInFOV;
@@ -406,68 +384,11 @@ public abstract class Mob extends Char {
 			return true;
 		}
 
-		// 存着的有害药水：看到玩家就丢
-		if (mobEquipment.harmfulPotion != null && enemyInFOV && enemy != null
-				&& com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.throwStoredPotion(this)) {
-			spend(TICK);
-			return true;
-		}
-
-		//红包挑战：视野内的红包优先去拾取
-		if (com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.active()
-				&& alignment == Alignment.ENEMY) {
-			int envelope = com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.visibleEnvelope(this);
-			int enemyDist = enemy == null ? Integer.MAX_VALUE : Dungeon.level.distance(pos, enemy.pos);
-			if (envelope != -1 && Dungeon.level.distance(pos, envelope) <= enemyDist) {
-				// 看到红包时先醒来，不能保持睡眠状态直接走过去
-				if (state == SLEEPING) {
-					enemySeen = enemyInFOV;
-					notice();
-					state = enemyInFOV ? HUNTING : WANDERING;
-					alerted = true;
-					spend(TICK);
-					return true;
-				}
-				if (pos == envelope) {
-					com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.mobPickup(this, envelope);
-					spend(TICK);
-					return true;
-				}
-				int oldPos = pos;
-				if (getCloser(envelope)) {
-					spend(1 / speed());
-					return moveSprite(oldPos, pos);
-				}
-			}
-		}
-
 		return state.act( enemyInFOV, justAlerted );
 	}
 
 	//FIXME this is sort of a band-aid correction for allies needing more intelligent behaviour
 	protected boolean intelligentAlly = false;
-
-	public void makeIntelligentAlly() {
-		intelligentAlly = true;
-	}
-
-	private boolean knockbackAway(Char source) {
-		int w = Dungeon.level.width();
-		int dx = Integer.signum(pos % w - source.pos % w);
-		int dy = Integer.signum(pos / w - source.pos / w);
-		if (dx == 0 && dy == 0) {
-			dx = Random.Int(2) == 0 ? -1 : 1;
-		}
-		int next = pos + dx + dy * w;
-		if (!Dungeon.level.insideMap(next) || next == pos) return false;
-		com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica trajectory =
-				new com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica(pos, next,
-						com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica.MAGIC_BOLT);
-		// 无限距离：直到撞墙/撞到其他角色才停下，并结算撞击伤害
-		com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave.throwChar(
-				this, trajectory, Integer.MAX_VALUE, false, true, null);
-		return true;
-	}
 
 	protected Char chooseEnemy() {
 
@@ -664,11 +585,6 @@ public abstract class Mob extends Char {
 
 	protected boolean canAttack( Char enemy ) {
 		if (Dungeon.level.adjacent( pos, enemy.pos )){
-			return true;
-		}
-		// 有充能的法杖允许远程攻击
-		if (mobEquipment.wand != null && mobEquipment.wand.curCharges > 0
-				&& com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.canMobZap(this, enemy)) {
 			return true;
 		}
 		if (mobEquipment.weapon != null && mobEquipment.weapon.canReach(this, enemy.pos)) {
@@ -885,14 +801,6 @@ public abstract class Mob extends Char {
 	}
 
 	@Override
-	public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
-		if (enemy != null && mobEquipment.wand != null && mobEquipment.wand.curCharges > 0) {
-			return com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.mobWandAttack(this, enemy);
-		}
-		return super.attack( enemy, dmgMulti, dmgBonus, accMulti );
-	}
-
-	@Override
 	public void onAttackComplete() {
 		attack( enemy );
 		Invisibility.dispel(this);
@@ -983,13 +891,8 @@ public abstract class Mob extends Char {
 		public float speed() {
 			float speed = super.speed() * AscensionChallenge.enemySpeedModifier(this);
 			if (mobEquipment.armor != null) speed = mobEquipment.armor.speedFactor(this, speed);
-			speed *= RingOfHaste.speedMultiplier(this)
+			return speed * RingOfHaste.speedMultiplier(this)
 					* com.shatteredpixel.shatteredpixeldungeon.actors.hero.definition.subclasses.Warden.grassSpeedFactor(this);
-			int haste = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.stack(
-					this, com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.HASTE);
-			speed *= (float) Math.pow(1.2f, haste);
-			return speed;
-
 		}
 
 		public final boolean surprisedBy( Char enemy ){
@@ -1051,25 +954,10 @@ public abstract class Mob extends Char {
 
 	@Override
 	public int damageRoll() {
-		int base;
 		if (mobEquipment.weapon == null) {
-			base = RingOfForce.damageRoll(this);
-		} else {
-			base = super.damageRoll();
+			return RingOfForce.damageRoll(this);
 		}
-		return base;
-	}
-
-	@Override
-	public int drRoll() {
-		int dr = super.drRoll();
-		return dr;
-	}
-
-	@Override
-	public int attackSkill(Char target) {
-		int skill = super.attackSkill(target);
-		return skill;
+		return super.damageRoll();
 	}
 
 	/** 查找当前可影响 AI 的修改器：先看 Buff，再看攻击武器的 aiTag。 */
@@ -1099,34 +987,7 @@ public abstract class Mob extends Char {
 	}
 
 	@Override
-	public boolean isImmuneTo(com.shatteredpixel.shatteredpixeldungeon.damage.DamageType type) {
-		if (type == com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.FIRE
-				&& buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeAllyBuff.class) != null) {
-			return true;
-		}
-		return super.isImmuneTo(type);
-	}
-
 	public void damage( DamageInfo info ) {
-		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
-				buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.class);
-		if (env != null) {
-			int iron = env.stack(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.IRON);
-			if (iron > 0) info.addFinalMultModifier(1f - 0.1f * iron, "mob_iron");
-			int thorns = env.stack(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.THORNS);
-			if (thorns > 0 && info.getAttacker() != null
-					&& Dungeon.level.adjacent(pos, info.getAttacker().pos)) {
-				info.getAttacker().damage(new DamageInfo(Math.max(1, Math.round(
-						info.getBaseDamage() * Math.min(0.5f, 0.1f * thorns))),
-						DamageType.PHYSICAL, this, null, this));
-			}
-		}
-		// 红包盟友：免疫来自玩家的伤害，以及烈焰人的火焰
-		if (buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeAllyBuff.class) != null
-				&& (info.getAttacker() == Dungeon.hero
-					|| info.getType() == com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.FIRE)) {
-			return;
-		}
 		Object src = info.getSource();
 		if (!isInvulnerable(src.getClass())) {
 			if (state == SLEEPING) {
@@ -1219,20 +1080,6 @@ public abstract class Mob extends Char {
 
 	@Override
 	public void die( Object cause ) {
-		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
-				buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.class);
-		if (env != null) {
-			int explode = env.stack(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.EXPLODE);
-			if (explode > 0) {
-				for (int off : com.watabou.utils.PathFinder.NEIGHBOURS9) {
-					int c = pos + off;
-					Char ch = c >= 0 && c < Dungeon.level.length() ? Actor.findChar(c) : null;
-					if (ch != null && ch != this && ch.isAlive()) {
-						ch.damage(new DamageInfo(2 * explode + 1, DamageType.FIRE, this, null, this));
-					}
-				}
-			}
-		}
 
 		if (alignment == Alignment.ENEMY
 				&& hero.subClass == HeroSubClasses.DICE_MAGE
@@ -1347,10 +1194,6 @@ public abstract class Mob extends Char {
 		if (alignment == Alignment.ENEMY){
 			rollToDropLoot();
 			mobEquipment.dropAll();
-			if (properties.contains(Property.BOSS)
-					&& com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.active()) {
-				com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.dropBossEnvelopes(pos);
-			}
 
 			if (cause == Dungeon.hero || cause instanceof Weapon || cause instanceof Weapon.Enchantment){
 
@@ -1877,9 +1720,8 @@ public abstract class Mob extends Char {
 
 				//preserve intelligent allies if they are near the hero
 			} else if (mob.alignment == Alignment.ALLY
-					&& (mob.buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeAllyBuff.class) != null
-						|| (mob.intelligentAlly
-						&& Dungeon.level.distance(holdFromPos, mob.pos) <= 5))){
+					&& mob.intelligentAlly
+					&& Dungeon.level.distance(holdFromPos, mob.pos) <= 5){
 				level.mobs.remove( mob );
 				heldAllies.add(mob);
 			}
@@ -1964,18 +1806,6 @@ public abstract class Mob extends Char {
 		@Override
 		public int attackProc( final Char enemy, int damage ) {
 			damage = super.attackProc(enemy,damage);
-			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope env =
-					buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.class);
-			if (env != null) {
-				damage = Math.round(damage * (1f + 0.1f * env.stack(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.RAGE)));
-				int combo = env.stack(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.COMBO);
-				if (combo > 0 && enemy != null && enemy.isAlive()
-						&& com.watabou.utils.Random.Float() < 0.1f * combo) {
-					enemy.damage(new com.shatteredpixel.shatteredpixeldungeon.damage.DamageInfo(
-							Math.max(1, damage / 2), com.shatteredpixel.shatteredpixeldungeon.damage.DamageType.PHYSICAL,
-							this, attackingWeapon(), this));
-				}
-			}
 			if (mobEquipment.weapon instanceof Weapon) {
 				boolean wasAlive = enemy.isAlive();
 				damage = ((Weapon) mobEquipment.weapon).proc(this, enemy, damage);

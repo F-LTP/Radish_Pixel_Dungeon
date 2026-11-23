@@ -335,7 +335,7 @@ public class StatusPane extends Component {
 		super.update();
 
 		if (fusionButton != null) {
-			int charges = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.fusionCharges(Dungeon.hero);
+			int charges = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FusionCharges.fusionCharges(Dungeon.hero);
 			fusionButton.visible = charges > 0;
 			fusionText.visible = charges > 0;
 			if (charges > 0) fusionText.text(Integer.toString(charges));

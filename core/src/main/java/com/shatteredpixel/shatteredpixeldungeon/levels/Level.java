@@ -159,9 +159,6 @@ public abstract class Level implements Bundlable {
 
 	public boolean[] heroFOV;
 
-	/** 本层红包是否已经生成过。 */
-	public boolean hongbaoSpawned = false;
-
 	public boolean[] passable;
 	public boolean[] losBlocking;
 	public boolean[] flamable;
@@ -1538,7 +1535,6 @@ public abstract class Level implements Bundlable {
 				viewDist *= 1f + 0.25f*((Hero) c).pointsInTalent(Talent.FARSIGHT);
 				viewDist *= EyeOfNewt.visionRangeMultiplier();
 			}
-			viewDist = Math.max(1f, viewDist);
 
 			ShadowCaster.castShadow( cx, cy, width(), fieldOfView, blocking, Math.round(viewDist) );
 		} else {

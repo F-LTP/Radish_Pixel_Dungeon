@@ -462,12 +462,6 @@ abstract public class MissileWeapon extends Weapon {
 	}
 	
 	protected void rangedHit( Char enemy, int cell ){
-		// 红包：概率回到手中，且本次不消耗耐久
-		if (curUser instanceof Hero
-				&& com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.rollMissileReturn(curUser)) {
-			if (!collect()) Dungeon.level.drop(this, curUser.pos);
-			return;
-		}
 		decrementDurability();
 		if (durability > 0){
 			//attempt to stick the missile weapon to the enemy, just drop it if we can't.
@@ -484,11 +478,6 @@ abstract public class MissileWeapon extends Weapon {
 	
 	protected void rangedMiss( int cell ) {
 		parent = null;
-		if (curUser instanceof Hero
-				&& com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.rollMissileReturn(curUser)) {
-			if (!collect()) Dungeon.level.drop(this, curUser.pos);
-			return;
-		}
 		super.onThrow(cell);
 	}
 

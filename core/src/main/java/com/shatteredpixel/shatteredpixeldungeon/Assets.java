@@ -210,7 +210,6 @@ public class Assets {
 		public static final String CLICK    = "sounds/click.mp3";
 		public static final String BADGE    = "sounds/badge.mp3";
 		public static final String GOLD     = "sounds/gold.mp3";
-		public static final String FIREWORKS = "sounds/fireworks.wav";
 
 		public static final String OPEN     = "sounds/door_open.mp3";
 		public static final String UNLOCK   = "sounds/unlock.mp3";
@@ -290,7 +289,7 @@ public class Assets {
 		public static final String HOLY_DECREE_HIT = "sounds/holy_decree_hit.mp3";
 
 		public static final String[] all = new String[]{
-				CLICK, BADGE, GOLD, FIREWORKS,
+				CLICK, BADGE, GOLD,
 
 				OPEN, UNLOCK, ITEM, DEWDROP, STEP, WATER, GRASS, TRAMPLE, STURDY,
 

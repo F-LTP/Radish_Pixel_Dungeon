@@ -469,7 +469,6 @@ public class Hero extends Char {
 		if (buff(BarkskinToyBuff.class) != null) {
 			HT += BarkskinToyBuff.MAX_HP_BONUS;
 		}
-
 		float multiplier = RingOfMight.HTMultiplier(this);
 		HT = Math.round(multiplier * HT);
 
@@ -481,7 +480,6 @@ public class Hero extends Char {
 		if (buff(Sprouted_Potato.Potato_Poison.class) != null){
 			HT -= buff(Sprouted_Potato.Potato_Poison.class).level();
 		}
-		HT = Math.max(1, HT);
 
 		// DoggingDog on 20250914
 		// 用 misc() / ring() 而不是字段：丢失背包期间没被保留的装备不生效
@@ -890,7 +888,6 @@ public class Hero extends Char {
 		}
 
 		return (int)(attackSkill * accuracy) + spirit;
-
 	}
 
 	@Override
@@ -931,9 +928,7 @@ public class Hero extends Char {
 			evasion = belongings.armor().evasionFactor(this, evasion);
 		}
 
-		return Math.round(evasion)
-				+ LittleKnight.spiritEvasion( this );
-
+		return Math.round(evasion) + LittleKnight.spiritEvasion( this );
 	}
 
 	@Override
@@ -1228,14 +1223,6 @@ public class Hero extends Char {
 			return true;
 		}
 
-		int envelopeReach = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.reachBonus(this);
-		if (envelopeReach > 0
-				&& Dungeon.level.distance(pos, enemy.pos) <= 1 + envelopeReach
-				&& fieldOfView != null && fieldOfView.length == Dungeon.level.length()
-				&& fieldOfView[enemy.pos]) {
-			return true;
-		}
-
 		KindOfWeapon wep = Dungeon.hero.belongings.attackingWeapon();
 
 		if (wep != null){
@@ -1311,6 +1298,7 @@ public class Hero extends Char {
 			t_lvl = Math.max(0,t_lvl-1);
 			speed *= (1f + ((float) t_lvl)/3);
 		}
+
         return delay/speed;
     }
 
@@ -2330,8 +2318,6 @@ public class Hero extends Char {
 		}
 	}
 
-	private boolean comboAttacking = false;
-
 	@Override
 	public int attackProc( final Char enemy, int damage ) {
 		damage = super.attackProc( enemy, damage );
@@ -2355,7 +2341,6 @@ public class Hero extends Char {
 					|| !enemy.buffs(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy.class).isEmpty())) {
 			damage = Math.round(damage * (1f + (10 + 5 * champBelt.level()) / 100f));
 		}
-
 
 		if (buff(Talent.SpiritBladesTracker.class) != null
 				&& Random.Int(10) < 3*pointsInTalent(Talent.SPIRIT_BLADES)){
@@ -2514,16 +2499,6 @@ public class Hero extends Char {
 			subClass.onAttackProc(this, enemy, damage, true, enemy.alignment == Char.Alignment.ENEMY);
 		}
 
-		// 红包连击：每次连击都是一次独立攻击，但不额外消耗回合
-		if (!comboAttacking) {
-			comboAttacking = true;
-			int comboHits = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.comboHits(this);
-			for (int i = 0; i < comboHits && enemy != null && enemy.isAlive(); i++) {
-				attack(enemy, 1f, 0f, 1f);
-			}
-			comboAttacking = false;
-		}
-
 		return damage;
 	}
 
@@ -2582,8 +2557,6 @@ public class Hero extends Char {
 		addDamageModifier(out, belongings.artifact());
 		addDamageModifier(out, belongings.misc());
 		addDamageModifier(out, belongings.ring());
-		addDamageModifier(out, belongings.ring2());
-		for (com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring r : belongings.extraRings) addDamageModifier(out, r);
 		addDamageModifier(out, belongings.secondWep());
 		for (Item it : belongings) {
 			if (it instanceof Trinket) addDamageModifier(out, it);
@@ -3510,11 +3483,6 @@ public class Hero extends Char {
 		// 被门或其它规则拦下时位置没有变化，不能算一次移动
 		if (fromPos != pos) {
 			EventManager.emit(new HeroMoveEvent(this, fromPos, pos));
-			// 烈焰人：走过的地格燃烧
-			if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFlamewalker(this)) {
-				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.burnWalkedCell(fromPos);
-				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.burnWalkedCell(pos);
-			}
 		}
 
 		if (!flying && travelling) {
@@ -3655,11 +3623,6 @@ public class Hero extends Char {
 
 	@Override
 	public boolean isImmune(Class effect) {
-		// 烈焰人：免疫燃烧类效果
-		if (effect == com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning.class
-				&& com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.hasFlamewalker(this)) {
-			return true;
-		}
 		if (effect == Burning.class
 				&& belongings.armor() != null
 				&& belongings.armor().hasGlyph(Brimstone.class, this)){

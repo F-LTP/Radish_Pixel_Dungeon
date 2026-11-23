@@ -13,7 +13,7 @@ public class WndFusion extends WndBag {
 	public WndFusion() {
 		super(Dungeon.hero.belongings.backpack, new ItemSelector() {
 			{
-				if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.fusionCharges(Dungeon.hero) <= 0) {
+				if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FusionCharges.fusionCharges(Dungeon.hero) <= 0) {
 					com.shatteredpixel.shatteredpixeldungeon.utils.GLog.w("没有融合机会，请先获得红包融合属性");
 				}
 			}

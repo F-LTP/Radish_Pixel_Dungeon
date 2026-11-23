@@ -306,8 +306,6 @@ public class Dungeon {
 		gateChains.clear();
 		generatedLevels.clear();
 		levelJustGenerated = false;
-		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.clearCarriedAllies();
-		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.resetGlobal();
 
 		gold = 0;
 		energy = 0;
@@ -595,9 +593,9 @@ public class Dungeon {
 
 		Mob.restoreAllies( level, pos );
 
-		// 红包：每到一个新楼层，在英雄旁边生成一个盟友
-		if (levelJustGenerated) {
-			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.spawnFloorAlly(level, pos);
+		// 装备融合：每下一层给 1 次融合机会
+		if (levelJustGenerated && hero != null) {
+			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FusionCharges.grantCharge(hero, 1);
 		}
 
 		Actor.init();
@@ -616,12 +614,6 @@ public class Dungeon {
 			}
 		}
 		
-		if (levelJustGenerated && !level.hongbaoSpawned
-				&& com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.active()) {
-			level.hongbaoSpawned = true;
-			com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.spawnFloorEnvelopes();
-		}
-
 		Light light = hero.buff( Light.class );
 		hero.viewDistance = light == null ? level.viewDistance : Math.max( Light.DISTANCE, level.viewDistance );
 		
@@ -828,7 +820,6 @@ public class Dungeon {
 				SecretRoom.storeRoomsInBundle( bundle );
 			
 				Statistics.storeInBundle( bundle );
-				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.storeGlobal(bundle);
 				Notes.storeInBundle( bundle );
 				Generator.storeInBundle( bundle );
 
@@ -995,7 +986,6 @@ public class Dungeon {
 		energy = bundle.getInt( ENERGY );
 
 		Statistics.restoreFromBundle( bundle );
-		com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.restoreGlobal(bundle);
 		Generator.restoreFromBundle( bundle );
 
 		generatedLevels.clear();
@@ -1139,7 +1129,6 @@ public class Dungeon {
 		}
 		
 		level.updateFieldOfView(hero, level.heroFOV);
-		com.shatteredpixel.shatteredpixeldungeon.challenges.Hongbao.highlightEnvelopes();
 
 		int x = hero.pos % level.width();
 		int y = hero.pos / level.width();

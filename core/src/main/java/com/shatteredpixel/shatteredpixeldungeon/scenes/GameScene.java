@@ -1706,23 +1706,6 @@ public class GameScene extends PixelScene {
 	private static final CellSelector.Listener defaultCellListener = new CellSelector.Listener() {
 		@Override
 		public void onSelect( Integer cell ) {
-			// 红包盟友：点击换位
-			if (cell != null && cell >= 0 && cell < Dungeon.level.length() && cell != Dungeon.hero.pos) {
-				Char c = Actor.findChar(cell);
-				if (c instanceof Mob && c.alignment == Char.Alignment.ALLY
-						&& Dungeon.level.distance(Dungeon.hero.pos, cell) <= 1
-						&& c.buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeAllyBuff.class) != null) {
-					int heroPos = Dungeon.hero.pos;
-					Dungeon.hero.pos = cell;
-					c.pos = heroPos;
-					if (Dungeon.hero.sprite != null) Dungeon.hero.sprite.place(Dungeon.hero.pos);
-					if (c.sprite != null) c.sprite.place(c.pos);
-					Dungeon.observe();
-					GameScene.updateFog();
-					Dungeon.hero.spendAndNext(1f);
-					return;
-				}
-			}
 			if (Dungeon.hero.handle( cell )) {
 				Dungeon.hero.next();
 			}

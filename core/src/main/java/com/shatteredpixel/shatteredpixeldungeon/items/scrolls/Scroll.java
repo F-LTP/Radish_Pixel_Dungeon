@@ -79,18 +79,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 public abstract class Scroll extends Item {
-
-	private boolean freeScrollPending = false;
-
-	@Override
-	public Item detach(com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag bag) {
-		if (freeScrollPending && curUser != null && bag == curUser.belongings.backpack) {
-			freeScrollPending = false;
-			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.markFreeScrollUsed(this);
-			return this;
-		}
-		return super.detach(bag);
-	}
 	//affects how strongly on-scroll talents trigger from this scroll
 	protected float talentFactor = 1;
 	//the chance (0-1) of whether on-scroll talents trigger from this potion
@@ -259,15 +247,6 @@ public abstract class Scroll extends Item {
 					&& hero.buff(UnstableSpellbook.bookRecharge.class).isCursed()
 					&& !(this instanceof ScrollOfRemoveCurse || this instanceof ScrollOfAntiMagic)){
 				GLog.n( Messages.get(this, "cursed") );
-			} else if (com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.isFreeScroll(this)) {
-				int cd = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.freeScrollRemaining(this);
-				if (cd > 0) {
-					com.shatteredpixel.shatteredpixeldungeon.utils.GLog.w("卷轴免耗冷却中，剩余 " + cd + " 回合");
-					return;
-				}
-				curUser = hero;
-				freeScrollPending = true;
-				doRead();
 			} else {
 				curUser = hero;
 				doRead();

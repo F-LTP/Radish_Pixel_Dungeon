@@ -384,7 +384,6 @@ abstract public class Weapon extends KindOfWeapon {
 				reach = RCH;
 			}
 		}
-		reach += com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnvelopeBoost.reachBonus(owner);
 		return reach;
 	}
 

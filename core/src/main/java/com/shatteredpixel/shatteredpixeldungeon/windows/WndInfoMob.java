@@ -150,12 +150,7 @@ public class WndInfoMob extends Window {
 
 	private String info(Mob mob) {
 		String info = mob.info();
-		String mobEnvDesc = com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MobEnvelope.globalDesc();
-		if (!mobEnvDesc.isEmpty()) {
-			info += "\n\n红包突变: " + mobEnvDesc;
-		}
-		if (!Dungeon.isChallenged(Challenges.REAL_INTELLIGENCE)
-				&& !Dungeon.isChallenged(Challenges.HONGBAO)) return info;
+		if (!Dungeon.isChallenged(Challenges.REAL_INTELLIGENCE)) return info;
 
 		StringBuilder items = new StringBuilder();
 		String separator = Messages.get(WndInfoMob.class, "item_separator");
