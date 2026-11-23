@@ -8,6 +8,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
@@ -58,6 +60,12 @@ public class FusionCharges extends Buff {
 		if (b == null) b = Buff.affect(ch, FusionCharges.class);
 		b.unlocked = true;
 		b.charges += amount;
+		if (ch == Dungeon.hero) {
+			try {
+				GLog.p(Messages.get(FusionCharges.class, "gain", amount, b.charges));
+			} catch (Throwable ignored) {
+			}
+		}
 	}
 
 	public static boolean consumeFusionCharge() {

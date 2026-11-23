@@ -599,8 +599,15 @@ public class Dungeon {
 		Mob.restoreAllies( level, pos );
 
 		// 装备融合：每下一层给 1 次融合机会
-		if (levelJustGenerated && hero != null && !isChallenged(Challenges.REAL_INTELLIGENCE)) {
-			com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FusionCharges.grantCharge(hero, 1);
+		if (hero != null) {
+			if (isChallenged(Challenges.REAL_INTELLIGENCE)) {
+				// 该挑战：开局给 1 次（老存档/继续游戏也补上），之后靠升级获得
+				if (hero.buff(com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FusionCharges.class) == null) {
+					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FusionCharges.grantCharge(hero, 1);
+				}
+			} else if (levelJustGenerated) {
+				com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FusionCharges.grantCharge(hero, 1);
+			}
 		}
 
 		Actor.init();
