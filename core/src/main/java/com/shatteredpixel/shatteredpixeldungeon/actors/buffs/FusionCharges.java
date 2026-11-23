@@ -62,7 +62,7 @@ public class FusionCharges extends Buff {
 		b.charges += amount;
 		if (ch == Dungeon.hero) {
 			try {
-				GLog.p(Messages.get(FusionCharges.class, "gain", amount, b.charges));
+				GLog.p("装备融合机会 +" + amount + "（当前 " + b.charges + " 次）");
 			} catch (Throwable ignored) {
 			}
 		}

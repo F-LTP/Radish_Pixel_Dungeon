@@ -3206,7 +3206,7 @@ public class Hero extends Char {
 
 				// 「智能怪物」挑战：每升 2 级获得 1 次装备融合机会
 				if (Dungeon.isChallenged(com.shatteredpixel.shatteredpixeldungeon.Challenges.REAL_INTELLIGENCE)
-						&& lvl % 2 == 0) {
+						&& lvl > 1 && lvl % 2 == 1) {
 					com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FusionCharges.grantCharge(this, 1);
 				}
 
