@@ -636,21 +636,23 @@ public class Item implements Bundlable {
 			}
 		}
 		String base = desc();
-		if (fusedItems != null && !fusedItems.isEmpty()) {
-			StringBuilder sb = new StringBuilder(base);
-			boolean hasWand = false;
-			for (Item it : fusedItems) if (it instanceof Wand) hasWand = true;
-			if (hasWand) {
-				sb.append("\n\n融合法杖：施法时会同时释放所有融合法杖的法术。");
-			}
-			sb.append("\n\n融合装备：");
-			for (Item it : fusedItems) {
-				sb.append("\n- ").append(it.name());
-				if (it instanceof Wand) sb.append("：").append(it.desc());
-			}
-			return sb.toString();
-		}
 		return base;
+	}
+
+	private String withFusedInfo(String base) {
+		if (fusedItems == null || fusedItems.isEmpty()) return base;
+		StringBuilder sb = new StringBuilder(base == null ? "" : base);
+		sb.append("\n\n").append(com.shatteredpixel.shatteredpixeldungeon.messages.Messages.get(Item.class, "fused_list"));
+		java.util.ArrayList<String> shown = new java.util.ArrayList<>();
+		for (Item it : fusedItems) {
+			if (it == null) continue;
+			String n = it.name();
+			if (!shown.contains(n)) shown.add(n);
+		}
+		for (String n : shown) {
+			sb.append("\n- ").append(n);
+		}
+		return sb.toString();
 	}
 
 	public final String displayInfo() {

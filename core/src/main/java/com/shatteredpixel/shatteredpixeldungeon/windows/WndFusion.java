@@ -41,10 +41,7 @@ public class WndFusion extends WndBag {
 
 					@Override
 					public boolean itemSelectable(Item item) {
-						return item instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon
-								|| item instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor
-								|| item instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand
-								|| item instanceof com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
+						return com.shatteredpixel.shatteredpixeldungeon.items.Fusion.isEquipment(item);
 					}
 
 					@Override
@@ -57,10 +54,7 @@ public class WndFusion extends WndBag {
 
 			@Override
 			public boolean itemSelectable(Item item) {
-				return item instanceof com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon
-						|| item instanceof com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor
-						|| item instanceof com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand
-						|| item instanceof com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
+				return com.shatteredpixel.shatteredpixeldungeon.items.Fusion.isEquipment(item);
 			}
 
 			@Override
